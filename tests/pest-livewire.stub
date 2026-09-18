@@ -23,6 +23,6 @@ namespace Livewire\Features\SupportTesting;
 
 /**
  * @template TComponent of \Livewire\Component
- * @mixin \Illuminate\Testing\TestResponse
+ * @mixin \Illuminate\Testing\TestResponse<\Symfony\Component\HttpFoundation\Response>
  */
 class Testable {}
