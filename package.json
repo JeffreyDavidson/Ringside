@@ -8,33 +8,19 @@
         "dev": "vite",
         "build": "vite build",
         "build:analyze": "ANALYZE=true vite build",
-        "lint": "eslint resources/js/**/*.js",
-        "lint:fix": "eslint resources/js/**/*.js --fix",
+        "lint": "eslint resources/js/**/*.js vite.config.mjs eslint.config.js",
+        "lint:fix": "eslint resources/js/**/*.js vite.config.mjs eslint.config.js --fix",
         "format": "prettier --write \"resources/js/**/*.js\"",
         "format:check": "prettier --check \"resources/js/**/*.js\"",
         "prepare": "git config core.hooksPath .githooks"
     },
-    "lint-staged": {
-        "resources/js/**/*.js": [
-            "eslint --fix",
-            "prettier --write"
-        ],
-        "resources/views/**/*.blade.php": [
-            "vendor/bin/pint --blade"
-        ]
-    },
     "devDependencies": {
         "@eslint/js": "^9.32.0",
         "@tailwindcss/vite": "^4.3.3",
-        "@typescript-eslint/eslint-plugin": "^8.38.0",
-        "@typescript-eslint/parser": "^8.38.0",
         "axios": "^1.20.0",
         "concurrently": "^9.0.1",
         "eslint": "^9.32.0",
-        "eslint-config-prettier": "^10.1.8",
-        "eslint-plugin-prettier": "^5.5.3",
         "laravel-vite-plugin": "^2.0.0",
-        "lint-staged": "^16.1.2",
         "playwright": "^1.62.1",
         "prettier": "^3.9.6",
         "prettier-plugin-blade": "^3.2.2",

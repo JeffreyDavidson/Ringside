@@ -7,28 +7,34 @@ set -euo pipefail
 staged_files=$(git diff --cached --name-only --diff-filter=ACMR)
 staged_php_files=$(printf '%s\n' "$staged_files" | awk '/\.php$/')
 
-if [[ -z "$staged_php_files" ]]; then
-    exit 0
-fi
+if [[ -n "$staged_php_files" ]]; then
+    echo "Running fast pre-commit checks..."
 
-echo "Running fast pre-commit checks..."
+    while IFS= read -r file; do
+        [[ -z "$file" || ! -f "$file" ]] && continue
 
-while IFS= read -r file; do
-    [[ -z "$file" || ! -f "$file" ]] && continue
+        if ! output=$(php -l "$file" 2>&1); then
+            echo "PHP syntax error in $file:"
+            echo "$output"
+            exit 1
+        fi
+    done <<< "$staged_php_files"
 
-    if ! output=$(php -l "$file" 2>&1); then
-        echo "PHP syntax error in $file:"
-        echo "$output"
+    echo "PHP lint passed"
+
+    if [[ -x vendor/bin/pint ]] && ! vendor/bin/pint --dirty --blade --test --format=txt; then
+        echo "Commit blocked: Pint found formatting issues."
+        echo "Run 'composer lint' to fix them."
         exit 1
     fi
-done <<< "$staged_php_files"
 
-echo "PHP lint passed"
-
-if [[ -x vendor/bin/pint ]] && ! vendor/bin/pint --dirty --blade --test --format=txt; then
-    echo "Commit blocked: Pint found formatting issues."
-    echo "Run 'composer lint' to fix them."
-    exit 1
+    echo "Pint passed"
 fi
 
-echo "Pint passed"
+staged_js_files=$(printf '%s\n' "$staged_files" | awk '/\.(js|mjs)$/')
+
+if [[ -n "$staged_js_files" ]]; then
+    echo "Running JavaScript lint..."
+    printf '%s\n' "$staged_js_files" | xargs ./node_modules/.bin/eslint
+    printf '%s\n' "$staged_js_files" | xargs ./node_modules/.bin/prettier --check
+fi
