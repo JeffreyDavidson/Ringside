@@ -25,6 +25,7 @@ export default [
                 $el: 'readonly',
                 $refs: 'readonly',
                 $data: 'readonly',
+                process: 'readonly',
             },
         },
         rules: {
@@ -32,18 +33,18 @@ export default [
             'no-unused-vars': 'warn',
             'no-console': 'off', // Allow console for debugging
             'no-undef': 'error',
-            
+
             // Alpine.js specific rules
             'no-implicit-globals': 'error',
             'prefer-const': 'error',
             'no-var': 'error',
-            
+
             // Code quality
-            'eqeqeq': 'error',
-            'curly': 'error',
+            eqeqeq: 'error',
+            curly: 'error',
             'no-eval': 'error',
             'no-implied-eval': 'error',
-            
+
             // Style preferences
             'prefer-arrow-callback': 'error',
             'prefer-template': 'error',
