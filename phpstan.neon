@@ -14,9 +14,9 @@ parameters:
 
   # Type coverage configuration - be reasonable about expectations
   type_coverage:
-    param: 85  # Lower from 99% to 85% which is more realistic
-    return: 85
-    property: 85
+    param: 100
+    return: 100
+    property: 100
     
   # Treat PHPDoc types as certain to reduce false positives
   treatPhpDocTypesAsCertain: true
