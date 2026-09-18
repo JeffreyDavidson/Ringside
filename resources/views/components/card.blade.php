@@ -7,6 +7,11 @@
     $variant ??= 'default';
     $class ??= '';
 
+    $viewData = get_defined_vars();
+    $header = $viewData['header'] ?? null;
+    $body = $viewData['body'] ?? null;
+    $footer = $viewData['footer'] ?? null;
+
     $classes = collect([
         // Base card classes using Metronic design tokens
         'bg-card text-card-foreground border border-border overflow-hidden flex flex-col',
@@ -23,19 +28,19 @@
 
 <div {{ $attributes->merge(['class' => $classes . ' ' . $class]) }} data-card>
     {{-- Header Section --}}
-    @isset($header)
+    @if ($header instanceof \Illuminate\View\ComponentSlot)
         <header class="card-header border-border bg-muted border-b px-6 py-4">{{ $header }}</header>
-    @endisset
+    @endif
 
     {{-- Body Section --}}
-    @if (isset($body))
+    @if ($body instanceof \Illuminate\View\ComponentSlot)
         <div class="card-body p-6">{{ $body }}</div>
     @elseif ($slot->isNotEmpty())
         {{ $slot }}
     @endif
 
     {{-- Footer Section --}}
-    @isset($footer)
+    @if ($footer instanceof \Illuminate\View\ComponentSlot)
         <footer class="card-footer border-border bg-muted border-t px-6 py-4">{{ $footer }}</footer>
-    @endisset
+    @endif
 </div>

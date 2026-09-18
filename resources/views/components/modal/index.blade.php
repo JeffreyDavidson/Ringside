@@ -2,6 +2,11 @@
     'size' => null,
 ])
 
+@php
+    $viewData = get_defined_vars();
+    $footer = $viewData['footer'] ?? null;
+@endphp
+
 <div
     {{
         $attributes->class([
@@ -15,7 +20,7 @@
 >
     <x-modal.header />
     <x-modal.body> {{ $slot }} </x-modal.body>
-    @if ($footer->isNotEmpty())
+    @if ($footer instanceof \Illuminate\View\ComponentSlot && $footer->isNotEmpty())
         <x-modal.footer> {{ $footer }} </x-modal.footer>
     @endif
 </div>
