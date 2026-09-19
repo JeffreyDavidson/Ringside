@@ -20,3 +20,5 @@ parameters:
     param: 0
     return: 0
     property: 0
+
+  tmpDir: storage/framework/cache/phpstan-pest
