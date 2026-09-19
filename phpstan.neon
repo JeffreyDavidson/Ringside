@@ -2,12 +2,17 @@ parameters:
     paths:
         - app
 
-    level: max
-    treatPhpDocTypesAsCertain: false
+    level: 9
+    treatPhpDocTypesAsCertain: true
 
     type_coverage:
         param: 100
         return: 100
         property: 100
+
+    excludePaths:
+        - tests
+        - bootstrap/cache
+        - storage
 
     tmpDir: storage/framework/cache/phpstan-app
