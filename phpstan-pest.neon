@@ -5,8 +5,6 @@ parameters:
     - tests
 
   stubFiles:
-    - tests/pest-livewire.stub
-    - tests/pest-browser.stub
     - stubs/Illuminate/Http/Response.stub
     - stubs/Illuminate/Testing/TestResponse.stub
     - stubs/Symfony/Component/HttpFoundation/Response.stub
