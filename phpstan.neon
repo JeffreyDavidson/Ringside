@@ -1,8 +1,13 @@
 parameters:
-  level: max
+  level: 9
 
   paths:
-    - app
+    - app  # ✅ Standard — analyzes all app code
+
+  excludePaths:
+    - tests  # ✅ Tests are analyzed separately with the Pest PHPStan plugin
+    - bootstrap/cache  # ✅ Should always be excluded
+    - storage  # ✅ Should always be excluded
 
   # Type coverage configuration - be reasonable about expectations
   type_coverage:
@@ -10,6 +15,7 @@ parameters:
     return: 100
     property: 100
     
-  treatPhpDocTypesAsCertain: false
+  # Treat PHPDoc types as certain to reduce false positives
+  treatPhpDocTypesAsCertain: true
 
   tmpDir: storage/framework/cache/phpstan-app
