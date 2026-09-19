@@ -1,3 +1,16 @@
+*.log
+.DS_Store
+.env.*
+!.env.example
+.phpactor.json
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.worktrees/
+/.zed
+/auth.json
 /node_modules
 /public/hot
 /public/storage
@@ -17,21 +30,14 @@
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
-npm-debug.log
-yarn-error.log
-*.log
 storage/
 tests/coverage
-.DS_Store
-.idea/
-.phpunit.cache
 .php-cs-fixer.cache
 yarn.lock
-/.nova
 build
 
 # Laravel Dusk artifacts
-tests/Browser/screenshots/
+tests/Browser/Screenshots/
 tests/Browser/console/
 tests/Browser/source/
 .envrc
@@ -39,3 +45,12 @@ logs/
 .phpstorm.meta.php
 _ide_helper.php
 _ide_helper_models.php
+
+Thumbs.db
+notes/
+
+# Local design exploration and review artifacts; tracked references stay versioned.
+/.impeccable/critique/
+/.impeccable/mocks/decision/
+/.impeccable/questions/
+/.impeccable/review/
