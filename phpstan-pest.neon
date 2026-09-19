@@ -1,15 +1,26 @@
 parameters:
-    paths:
-        - tests
+  level: 9
 
-    level: max
-    treatPhpDocTypesAsCertain: false
+  paths:
+    - tests
 
-    stubFiles:
-        - tests/pest-livewire.stub
-        - tests/pest-browser.stub
-        - stubs/Illuminate/Http/Response.stub
-        - stubs/Illuminate/Testing/TestResponse.stub
-        - stubs/Symfony/Component/HttpFoundation/Response.stub
+  stubFiles:
+    - tests/pest-livewire.stub
+    - tests/pest-browser.stub
+    - stubs/Illuminate/Http/Response.stub
+    - stubs/Illuminate/Testing/TestResponse.stub
+    - stubs/Symfony/Component/HttpFoundation/Response.stub
 
-    tmpDir: storage/framework/cache/phpstan-pest
+  excludePaths:
+    - bootstrap/cache
+    - storage
+
+  ignoreErrors:
+    - identifier: pest.expectation.redundant
+
+  type_coverage:
+    param: 0
+    return: 0
+    property: 0
+
+  tmpDir: storage/framework/cache/phpstan-pest
