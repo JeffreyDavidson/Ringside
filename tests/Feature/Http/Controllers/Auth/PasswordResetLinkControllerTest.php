@@ -6,7 +6,6 @@ use App\Models\Users\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
 
 test('password reset link screen can be rendered', function () {
     // Arrange
@@ -50,36 +49,48 @@ test('password reset link can be requested', function () {
 
 test('password reset form can be rendered', function () {
     // Arrange
+    Notification::fake();
     $user = User::factory()->create();
-    $token = Password::broker()->createToken($user);
 
     // Act
-    $response = $this->get(route('password.reset', [
-        'token' => $token,
-        'email' => $user->email,
-    ]));
+    $this->post(route('password.email'), ['email' => $user->email]);
 
     // Assert
-    $response->assertSuccessful();
-    $response->assertViewIs('auth.passwords.reset');
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user): bool {
+        $response = $this->get(route('password.reset', [
+            'token' => $notification->token,
+            'email' => $user->email,
+        ]));
+
+        $response->assertSuccessful();
+        $response->assertViewIs('auth.passwords.reset');
+
+        return true;
+    });
 });
 
 test('password can be reset with a valid token', function () {
     // Arrange
+    Notification::fake();
     $user = User::factory()->create();
-    $token = Password::broker()->createToken($user);
-    $requestData = [
-        'token' => $token,
-        'email' => $user->email,
-        'password' => 'new-password',
-        'password_confirmation' => 'new-password',
-    ];
 
     // Act
-    $response = $this->post(route('password.update'), $requestData);
+    $this->post(route('password.email'), ['email' => $user->email]);
 
     // Assert
-    $response->assertRedirect(route('login'));
-    $response->assertSessionHasNoErrors();
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user): bool {
+        $response = $this->post(route('password.update'), [
+            'token' => $notification->token,
+            'email' => $user->email,
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasNoErrors();
+
+        return true;
+    });
+
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
