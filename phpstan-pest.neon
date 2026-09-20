@@ -16,6 +16,8 @@ parameters:
   ignoreErrors:
     - identifier: pest.expectation.redundant
 
+  # Type coverage is enforced against application code by Pest's dedicated command.
+  # Disable the PHPStan extension's default threshold while analyzing tests.
   type_coverage:
     param: 0
     return: 0
