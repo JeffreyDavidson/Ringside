@@ -5,7 +5,7 @@
     "cloud": false,
     "guidelines": true,
     "mcp": true,
-    "nightwatch": false,
+    "nightwatch": true,
     "packages": [
         "barryvdh/laravel-debugbar"
     ],
