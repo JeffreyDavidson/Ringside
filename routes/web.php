@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
+use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
@@ -26,6 +27,8 @@ use App\Models\Users\User;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
+
+Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

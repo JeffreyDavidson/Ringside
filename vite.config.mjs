@@ -8,7 +8,7 @@ export default defineConfig({
     plugins: [
         tailwindcss(),
         laravel({
-            input: ['resources/js/app.js', 'resources/js/auth.js'],
+            input: ['resources/js/app.js', 'resources/js/auth.js', 'resources/css/marketing.css'],
             refresh: true,
         }),
         // Bundle analyzer - only include in production builds with ANALYZE=true
