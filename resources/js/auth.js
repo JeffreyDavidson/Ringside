@@ -7,5 +7,3 @@ window.Alpine = Alpine;
 
 // Start Alpine directly without Livewire or any plugins
 Alpine.start();
-
-console.log('Minimal Alpine.js loaded for auth pages (without Livewire)');

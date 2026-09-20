@@ -9,6 +9,7 @@
             x-ref="button"
             type="button"
             x-popover:button
+            data-test="profile-menu"
             class="text-2xs relative inline-flex h-10 grow cursor-pointer items-center rounded-full border border-transparent px-4 leading-none font-medium outline-none"
         >
             <div class="border-success flex size-9 shrink-0 items-center justify-center rounded-full border-2 bg-gray-200">
