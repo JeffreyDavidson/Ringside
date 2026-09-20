@@ -3,8 +3,7 @@ vendor/
 public/build/
 bootstrap/cache/
 storage/
-*.min.js
-*.min.css
+*.min.*
 composer.lock
 package-lock.json
 resources/views/docs/

@@ -169,6 +169,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # Ringside Project Overrides
 
+- Path-specific architecture and coding conventions live in `.ai/rules/index.md`; read the matching scoped rules before editing files.
 - Treat the architecture documentation in `docs/architecture/` as the source of truth for wrestling business rules and update it when architecture or domain behavior changes.
 - Use plain conventional branch names in the `<type>/<short-description>` format, such as `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, or `chore/`; do not add a `codex/` prefix.
 - Use the Composer scripts defined by this repository for verification. Run `composer test:push` before pushing a completed change unless a narrower check is explicitly requested.
