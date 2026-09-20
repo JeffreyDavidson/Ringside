@@ -1,4 +1,5 @@
 @import 'tailwindcss' source(none);
+@import './tokens.css';
 
 @source '../views/marketing.blade.php';
 @source '../views/components/layouts/marketing.blade.php';
@@ -11,16 +12,8 @@
     src: url('../fonts/anton/anton-regular.ttf') format('truetype');
 }
 
-@theme {
-    --color-signal: #ff4b50;
-}
-
 :root {
     color-scheme: dark;
-    --surface: #101112;
-    --muted: #bfc0c3;
-    --line: #363638;
-    --red: #cb2028;
 }
 
 html {
@@ -30,15 +23,15 @@ html {
 
 body {
     margin: 0;
-    background: var(--surface);
-    color: #f7f7f5;
-    font-family: Arial, Helvetica, sans-serif;
+    background: var(--color-ringside-surface);
+    color: var(--color-ringside-ink);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-    color: white;
-    background: var(--red);
+    color: var(--color-ringside-white);
+    background: var(--color-ringside-red);
 }
 
 a,
@@ -47,7 +40,7 @@ summary {
 }
 
 :focus-visible {
-    outline: 3px solid #fff;
+    outline: 3px solid var(--color-ringside-white);
     outline-offset: 6px;
 }
 
@@ -58,7 +51,7 @@ summary {
 
 .display,
 .wordmark {
-    font-family: Anton, 'Arial Narrow', sans-serif;
+    font-family: var(--font-display);
     font-weight: 400;
     text-transform: uppercase;
 }
@@ -75,7 +68,7 @@ h2.display {
 
 .site-header {
     padding-block: 1.25rem;
-    background: #09090a;
+    background: var(--color-ringside-surface-header);
 }
 
 .wordmark {
@@ -86,7 +79,7 @@ h2.display {
 }
 
 .wordmark span {
-    color: var(--color-signal);
+    color: var(--color-ringside-signal);
 }
 
 .nav-link,
@@ -100,7 +93,7 @@ h2.display {
 
 .nav-link:hover,
 .footer-link:hover {
-    color: var(--color-signal);
+    color: var(--color-ringside-signal);
 }
 
 .button {
@@ -129,23 +122,23 @@ summary svg {
 }
 
 .button-primary {
-    color: white;
-    background: var(--red);
-    border: 1px solid var(--red);
+    color: var(--color-ringside-white);
+    background: var(--color-ringside-red);
+    border: 1px solid var(--color-ringside-red);
 }
 
 .button-primary:hover {
-    background: #a61920;
-    border-color: #a61920;
+    background: var(--color-ringside-red-dark);
+    border-color: var(--color-ringside-red-dark);
 }
 
 .button-outline {
-    border: 1px solid #b7b7b9;
+    border: 1px solid var(--color-ringside-outline);
 }
 
 .button-outline:hover {
-    background: #272729;
-    border-color: white;
+    background: var(--color-ringside-surface-faq);
+    border-color: var(--color-ringside-white);
 }
 
 .header-action {
@@ -156,7 +149,7 @@ summary svg {
 .hero {
     position: relative;
     isolation: isolate;
-    background: #060607;
+    background: var(--color-ringside-surface-deep);
 }
 
 .hero-image,
@@ -174,7 +167,7 @@ summary svg {
 }
 
 .hero-scrim {
-    background: linear-gradient(90deg, rgb(0 0 0 / 36%), transparent 75%);
+    background: linear-gradient(90deg, var(--color-ringside-black-overlay), transparent 75%);
 }
 
 .hero-content {
@@ -193,7 +186,7 @@ summary svg {
 .hero-description {
     max-width: 33rem;
     margin-block: 1.5rem 1.75rem;
-    color: #d5d5d7;
+    color: var(--color-ringside-muted-bright);
     font-size: clamp(1.1rem, 1.6vw, 1.35rem);
     line-height: 1.6;
     text-wrap: pretty;
@@ -204,9 +197,9 @@ summary svg {
     align-items: center;
     margin-bottom: 1.5rem;
     padding: 0.45rem 0.9rem;
-    border: 1px solid rgb(255 75 80 / 50%);
-    border-radius: 999px;
-    color: #ff8588;
+    border: 1px solid var(--color-ringside-signal-border);
+    border-radius: var(--radius-ringside-pill);
+    color: var(--color-ringside-signal-soft);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -221,13 +214,13 @@ summary svg {
 
 .hero-note {
     margin-top: 1.25rem;
-    color: #c6c6c8;
+    color: var(--color-ringside-muted-soft);
     font-size: 0.9rem;
 }
 
 .feature-index {
-    border-block: 1px solid var(--line);
-    background: #0b0c0d;
+    border-block: 1px solid var(--color-ringside-line);
+    background: var(--color-ringside-surface-index);
 }
 
 .feature-index a {
@@ -245,11 +238,11 @@ summary svg {
 }
 
 .feature-index a + a {
-    border-left: 1px solid var(--line);
+    border-left: 1px solid var(--color-ringside-line);
 }
 
 .feature-index a:hover {
-    background: #202022;
+    background: var(--color-ringside-surface-faq);
 }
 
 .feature-index svg {
@@ -272,7 +265,7 @@ summary svg {
 .roster-row p,
 .show-steps p,
 .closing-section p {
-    color: var(--muted);
+    color: var(--color-ringside-muted);
     font-size: 1.125rem;
     line-height: 1.75;
     text-wrap: pretty;
@@ -288,11 +281,11 @@ summary svg {
     gap: 2rem;
     align-items: center;
     padding-block: 2rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--color-ringside-line);
 }
 
 .roster-row:last-child {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--color-ringside-line);
 }
 
 .roster-row h3 {
@@ -304,12 +297,12 @@ summary svg {
 }
 
 .show-section {
-    background: var(--red);
-    color: white;
+    background: var(--color-ringside-red);
+    color: var(--color-ringside-white);
 }
 
 .show-section p {
-    color: #fff;
+    color: var(--color-ringside-white);
 }
 
 .show-steps {
@@ -317,7 +310,7 @@ summary svg {
 }
 
 .show-steps > div {
-    border-top: 1px solid rgb(255 255 255 / 50%);
+    border-top: 1px solid var(--color-ringside-white-half);
     padding-top: 2rem;
 }
 
@@ -344,12 +337,12 @@ summary svg {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-top: 5rem;
-    border-top: 1px solid rgb(255 255 255 / 50%);
+    border-top: 1px solid var(--color-ringside-white-half);
 }
 
 .workflow-step {
     padding: 1.5rem 1rem 0 0;
-    border-right: 1px solid rgb(255 255 255 / 35%);
+    border-right: 1px solid var(--color-ringside-white-third);
 }
 
 .workflow-step:last-child {
@@ -360,7 +353,7 @@ summary svg {
     display: block;
     margin-bottom: 1.25rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-ringside-white);
 }
 
 .workflow-step h3 {
@@ -374,7 +367,7 @@ summary svg {
 }
 
 .capabilities-section {
-    background: #171819;
+    background: var(--color-ringside-surface-panel);
 }
 
 .capabilities-grid {
@@ -386,7 +379,7 @@ summary svg {
 
 .capability-item {
     padding-block: 1.75rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--color-ringside-line);
 }
 
 .capability-item h3 {
@@ -395,7 +388,7 @@ summary svg {
 }
 
 .capability-item p {
-    color: var(--muted);
+    color: var(--color-ringside-muted);
     line-height: 1.65;
 }
 
@@ -424,18 +417,18 @@ summary svg {
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--color-ringside-line);
     padding-block: 1rem;
     line-height: 1.5;
 }
 
 .title-features svg {
-    color: var(--color-signal);
+    color: var(--color-ringside-signal);
 }
 
 .faq-section {
-    border-block: 1px solid var(--line);
-    background: #161719;
+    border-block: 1px solid var(--color-ringside-line);
+    background: var(--color-ringside-surface-faq);
 }
 
 .faq-layout {
@@ -445,11 +438,11 @@ summary svg {
 }
 
 .faq-list details {
-    border-bottom: 1px solid #49494c;
+    border-bottom: 1px solid var(--color-ringside-line-bright);
 }
 
 .faq-list details:first-child {
-    border-top: 1px solid #49494c;
+    border-top: 1px solid var(--color-ringside-line-bright);
 }
 
 .faq-list summary {
@@ -469,7 +462,7 @@ summary::-webkit-details-marker {
 }
 
 .faq-list summary:hover {
-    color: var(--color-signal);
+    color: var(--color-ringside-signal);
 }
 
 .faq-list details[open] summary svg {
@@ -479,7 +472,7 @@ summary::-webkit-details-marker {
 .faq-list details p {
     padding-bottom: 1.5rem;
     padding-right: 3rem;
-    color: var(--muted);
+    color: var(--color-ringside-muted);
     line-height: 1.75;
 }
 
@@ -496,7 +489,7 @@ summary::-webkit-details-marker {
 
 .site-footer {
     padding-block: 2rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--color-ringside-line);
 }
 
 .site-footer .wordmark {
@@ -505,7 +498,7 @@ summary::-webkit-details-marker {
 
 .site-footer p,
 .footer-link {
-    color: var(--muted);
+    color: var(--color-ringside-muted);
     font-size: 0.875rem;
 }
 
@@ -520,8 +513,8 @@ summary::-webkit-details-marker {
     left: 1rem;
     z-index: 10;
     padding: 1rem;
-    color: #111;
-    background: #fff;
+    color: var(--color-ringside-black);
+    background: var(--color-ringside-white);
     transform: translateY(-200%);
 }
 
@@ -612,7 +605,7 @@ summary::-webkit-details-marker {
     }
 
     .feature-index a:nth-child(n + 3) {
-        border-top: 1px solid var(--line);
+        border-top: 1px solid var(--color-ringside-line);
     }
 
     .feature-index svg {
@@ -660,7 +653,7 @@ summary::-webkit-details-marker {
 
     .workflow-step {
         border-right: 0;
-        border-bottom: 1px solid rgb(255 255 255 / 35%);
+        border-bottom: 1px solid var(--color-ringside-white-third);
         padding-block: 1.5rem;
     }
 

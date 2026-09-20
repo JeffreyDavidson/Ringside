@@ -1,0 +1,30 @@
+@theme {
+    --font-display: Anton, 'Arial Narrow', sans-serif;
+    --font-body: Arial, Helvetica, sans-serif;
+
+    --color-ringside-surface: #101112;
+    --color-ringside-surface-deep: #060607;
+    --color-ringside-surface-header: #09090a;
+    --color-ringside-surface-index: #0b0c0d;
+    --color-ringside-surface-panel: #171819;
+    --color-ringside-surface-faq: #161719;
+    --color-ringside-ink: #f7f7f5;
+    --color-ringside-muted: #bfc0c3;
+    --color-ringside-muted-bright: #d5d5d7;
+    --color-ringside-muted-soft: #c6c6c8;
+    --color-ringside-line: #363638;
+    --color-ringside-line-bright: #49494c;
+    --color-ringside-signal: #ff4b50;
+    --color-ringside-signal-soft: #ff8588;
+    --color-ringside-signal-border: rgb(255 75 80 / 50%);
+    --color-ringside-red: #cb2028;
+    --color-ringside-red-dark: #a61920;
+    --color-ringside-outline: #b7b7b9;
+    --color-ringside-white: #ffffff;
+    --color-ringside-white-half: rgb(255 255 255 / 50%);
+    --color-ringside-white-third: rgb(255 255 255 / 35%);
+    --color-ringside-black-overlay: rgb(0 0 0 / 36%);
+    --color-ringside-black: #111111;
+
+    --radius-ringside-pill: 999px;
+}

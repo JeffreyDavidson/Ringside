@@ -17,6 +17,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Models/{Concerns,Contracts}/** | .ai/rules/concerns-contracts.md |
 | config/mail.php | .ai/rules/config.md |
 | app/Http/Controllers/** | .ai/rules/controllers.md |
+| resources/css/** | .ai/rules/css.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |
 | app/{Actions/Venues,Exceptions/Events,Lifecycle}/** | .ai/rules/events-lifecycle.md |
