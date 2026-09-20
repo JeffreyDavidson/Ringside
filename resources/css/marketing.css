@@ -400,9 +400,9 @@ summary svg {
 }
 
 .championship-photo img {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
+    height: auto;
 }
 
 .section-copy {
@@ -659,10 +659,6 @@ summary::-webkit-details-marker {
 
     .workflow-step:last-child {
         border-bottom: 0;
-    }
-
-    .championship-photo img {
-        aspect-ratio: 4 / 3;
     }
 
     .faq-list summary {
