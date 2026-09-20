@@ -10,8 +10,8 @@
         "build:analyze": "ANALYZE=true vite build",
         "lint": "eslint resources/js/**/*.js vite.config.mjs eslint.config.js",
         "lint:fix": "eslint resources/js/**/*.js vite.config.mjs eslint.config.js --fix",
-        "format": "prettier --write \"resources/js/**/*.js\"",
-        "format:check": "prettier --check \"resources/js/**/*.js\"",
+        "format": "prettier --write \"resources/js/**/*.js\" vite.config.mjs eslint.config.js prettier.config.mjs",
+        "format:check": "prettier --check \"resources/js/**/*.js\" vite.config.mjs eslint.config.js prettier.config.mjs",
         "prepare": "git config core.hooksPath .githooks"
     },
     "devDependencies": {

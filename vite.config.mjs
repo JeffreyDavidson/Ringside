@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
-    base: './',
     plugins: [
         tailwindcss(),
         laravel({
@@ -12,7 +11,7 @@ export default defineConfig({
             refresh: true,
         }),
         // Bundle analyzer - only include in production builds with ANALYZE=true
-        process.env.ANALYZE &&
+        process.env.ANALYZE === 'true' &&
             visualizer({
                 filename: 'public/build/bundle-analysis.html',
                 open: false,

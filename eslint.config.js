@@ -23,8 +23,8 @@ export default [
             },
         },
         rules: {
-            'no-unused-vars': 'warn',
-            'no-console': 'off', // Allow console for debugging
+            'no-unused-vars': 'error',
+            'no-console': 'error',
             'no-undef': 'error',
 
             // Alpine.js specific rules
@@ -44,13 +44,6 @@ export default [
             'object-shorthand': 'error',
         },
         files: ['**/*.js', '**/*.mjs'],
-        ignores: [
-            'node_modules/**',
-            'vendor/**',
-            'public/build/**',
-            'bootstrap/cache/**',
-            'storage/**',
-            '*.min.js',
-        ],
+        ignores: ['node_modules/**', 'vendor/**', 'public/build/**', 'bootstrap/cache/**', 'storage/**', '*.min.js'],
     },
 ];
