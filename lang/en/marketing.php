@@ -12,8 +12,10 @@ return [
     'features' => 'Features',
     'workflow' => 'How it works',
     'sign_in' => 'Sign in',
+    'create_account' => 'Create your account',
     'dashboard' => 'Open dashboard',
     'explore' => 'Explore Ringside',
+    'hero_badge' => 'Built for independent wrestling promoters',
     'hero' => [
         'first' => 'Run the show.',
         'second' => 'Own the story.',
@@ -46,6 +48,24 @@ return [
         'matches_description' => 'Book wrestlers and tag teams, choose match types and assign officials. Record results when the match is done.',
         'matches_detail' => 'Competitors / Match types / Results',
     ],
+    'capabilities' => [
+        'title' => 'More than a spreadsheet.',
+        'description' => 'Real wrestling business logic for the work that happens before, during and after the show.',
+        'items' => [
+            ['title' => 'Roster management', 'description' => 'Track wrestlers, tag teams, stables, managers and referees in one connected roster.'],
+            ['title' => 'Event booking', 'description' => 'Plan shows at your venues, build match cards and keep each event’s details together.'],
+            ['title' => 'Title tracking', 'description' => 'Manage championships and preserve the title history behind every reign.'],
+            ['title' => 'Match results', 'description' => 'Record competitors, match types, officials and outcomes when the bell rings.'],
+            ['title' => 'Career history', 'description' => 'Keep the story of every wrestler’s contracts, matches and title moments connected.'],
+            ['title' => 'Venue records', 'description' => 'Maintain the places where your promotion works and the shows you have run there.'],
+        ],
+    ],
+    'steps' => [
+        ['title' => 'Create your promotion', 'description' => 'Create an account and open your Ringside workspace.'],
+        ['title' => 'Build your roster', 'description' => 'Add your wrestlers, teams, stables, managers and referees.'],
+        ['title' => 'Book your show', 'description' => 'Create an event, build the card and assign the people behind it.'],
+        ['title' => 'Run the business', 'description' => 'Record results and keep your promotion’s history moving forward.'],
+    ],
     'championships' => [
         'title' => 'The reign ends. The history stays.',
         'description' => 'A championship is more than its current holder. Keep title reigns and championship history connected to the people who earned them.',
@@ -64,7 +84,7 @@ return [
     ],
     'closing' => [
         'title' => 'Your promotion. Your next chapter.',
-        'description' => 'Already part of Ringside? Your roster and the next show are waiting.',
+        'description' => 'Start building the system behind your next show.',
     ],
     'footer' => 'Wrestling promotion management.',
     'back_to_top' => 'Back to top',

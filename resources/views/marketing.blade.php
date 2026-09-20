@@ -33,14 +33,20 @@
             />
             <div class="hero-scrim" aria-hidden="true"></div>
             <div class="page-width hero-content">
+                <p class="hero-badge">{{ __('marketing.hero_badge') }}</p>
                 <h1 id="hero-title" class="display hero-title">
                     <span>{{ __('marketing.hero.first') }}</span>
                     <span class="text-signal">{{ __('marketing.hero.second') }}</span>
                 </h1>
                 <p class="hero-description">{{ __('marketing.hero.description') }}</p>
-                <a class="button button-primary" href="#roster">
-                    {{ __('marketing.explore') }} <x-heroicon-o-arrow-down aria-hidden="true" />
-                </a>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="{{ route('register') }}">
+                        {{ __('marketing.create_account') }} <x-heroicon-o-arrow-up-right aria-hidden="true" />
+                    </a>
+                    <a class="button button-outline" href="#capabilities">
+                        {{ __('marketing.explore') }} <x-heroicon-o-arrow-down aria-hidden="true" />
+                    </a>
+                </div>
                 <p class="hero-note">{{ __('marketing.hero.note') }}</p>
             </div>
         </section>
@@ -90,6 +96,32 @@
                         <p>{{ __('marketing.show.matches_description') }}</p>
                         <p class="step-detail">{{ __('marketing.show.matches_detail') }}</p>
                     </div>
+                </div>
+                <div class="workflow-steps">
+                    @foreach (__('marketing.steps') as $step)
+                        <div class="workflow-step">
+                            <span class="workflow-number">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <h3 class="display">{{ $step['title'] }}</h3>
+                            <p>{{ $step['description'] }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section id="capabilities" class="capabilities-section section-pad" aria-labelledby="capabilities-title">
+            <div class="page-width">
+                <div class="section-heading">
+                    <h2 id="capabilities-title" class="display">{{ __('marketing.capabilities.title') }}</h2>
+                    <p>{{ __('marketing.capabilities.description') }}</p>
+                </div>
+                <div class="capabilities-grid">
+                    @foreach (__('marketing.capabilities.items') as $item)
+                        <article class="capability-item">
+                            <h3 class="display">{{ $item['title'] }}</h3>
+                            <p>{{ $item['description'] }}</p>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
@@ -146,8 +178,8 @@
                         {{ __('marketing.dashboard') }} <x-heroicon-o-arrow-up-right aria-hidden="true" />
                     </a>
                 @else
-                    <a class="button button-primary" href="{{ route('login') }}">
-                        {{ __('marketing.sign_in') }} <x-heroicon-o-arrow-up-right aria-hidden="true" />
+                    <a class="button button-primary" href="{{ route('register') }}">
+                        {{ __('marketing.create_account') }} <x-heroicon-o-arrow-up-right aria-hidden="true" />
                     </a>
                 @endauth
             </div>

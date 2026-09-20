@@ -19,7 +19,7 @@ test('visitors can explore the page, read answers and sign in', function (int $w
     $page->click(__('marketing.explore'));
 
     // Assert
-    $page->assertScript('window.location.hash === "#roster"');
+    $page->assertScript('window.location.hash === "#capabilities"');
 
     // Act
     $page->click('Does Ringside handle ticket sales?');
