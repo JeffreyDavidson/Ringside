@@ -133,6 +133,7 @@ test('user can logout successfully', function () {
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
         ->assertSee('Dashboard')
+        ->click('@profile-menu')
         ->press('Log out')
         ->assertScript('window.location.pathname === "/login"')
         ->assertSee('Sign in');
