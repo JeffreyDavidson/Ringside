@@ -25,11 +25,30 @@ final class EmploymentStatusResolver
             throw new LogicException('Employment status requires an employable, retirable model.');
         }
 
+        $state = LifecycleStateReader::readProjectedBooleans($model, [
+            'isRetired' => [
+                'attribute' => 'status_current_retirement_exists',
+                'fallback' => fn (): bool => $model->currentRetirement()->exists(),
+            ],
+            'isEmployed' => [
+                'attribute' => 'status_current_employment_exists',
+                'fallback' => fn (): bool => $model->currentEmployment()->exists(),
+            ],
+            'hasFutureEmployment' => [
+                'attribute' => 'status_future_employment_exists',
+                'fallback' => fn (): bool => $model->futureEmployment()->exists(),
+            ],
+            'hasEmploymentHistory' => [
+                'attribute' => 'status_employments_exists',
+                'fallback' => fn (): bool => $model->employments()->exists(),
+            ],
+        ]);
+
         return self::resolve(
-            isRetired: LifecycleStateReader::readProjectedBoolean($model, 'status_current_retirement_exists', fn (): bool => $model->currentRetirement()->exists()),
-            isEmployed: LifecycleStateReader::readProjectedBoolean($model, 'status_current_employment_exists', fn (): bool => $model->currentEmployment()->exists()),
-            hasFutureEmployment: LifecycleStateReader::readProjectedBoolean($model, 'status_future_employment_exists', fn (): bool => $model->futureEmployment()->exists()),
-            hasEmploymentHistory: LifecycleStateReader::readProjectedBoolean($model, 'status_employments_exists', fn (): bool => $model->employments()->exists()),
+            isRetired: $state['isRetired'],
+            isEmployed: $state['isEmployed'],
+            hasFutureEmployment: $state['hasFutureEmployment'],
+            hasEmploymentHistory: $state['hasEmploymentHistory'],
         );
     }
 

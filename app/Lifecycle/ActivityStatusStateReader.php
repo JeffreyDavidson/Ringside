@@ -25,11 +25,30 @@ final class ActivityStatusStateReader
             throw new LogicException('Activity status requires an active, retirable model.');
         }
 
+        $state = LifecycleStateReader::readProjectedBooleans($model, [
+            'isRetired' => [
+                'attribute' => 'status_current_retirement_exists',
+                'fallback' => fn (): bool => $model->currentRetirement()->exists(),
+            ],
+            'isCurrentlyActive' => [
+                'attribute' => 'status_current_activity_period_exists',
+                'fallback' => fn (): bool => $model->currentActivityPeriod()->exists(),
+            ],
+            'hasFutureActivity' => [
+                'attribute' => 'status_future_activity_period_exists',
+                'fallback' => fn (): bool => $model->futureActivityPeriod()->exists(),
+            ],
+            'hasActivityHistory' => [
+                'attribute' => 'status_activity_periods_exists',
+                'fallback' => fn (): bool => $model->activityPeriods()->exists(),
+            ],
+        ]);
+
         return [
-            'isRetired' => LifecycleStateReader::readProjectedBoolean($model, 'status_current_retirement_exists', fn (): bool => $model->currentRetirement()->exists()),
-            'isCurrentlyActive' => LifecycleStateReader::readProjectedBoolean($model, 'status_current_activity_period_exists', fn (): bool => $model->currentActivityPeriod()->exists()),
-            'hasFutureActivity' => LifecycleStateReader::readProjectedBoolean($model, 'status_future_activity_period_exists', fn (): bool => $model->futureActivityPeriod()->exists()),
-            'hasActivityHistory' => LifecycleStateReader::readProjectedBoolean($model, 'status_activity_periods_exists', fn (): bool => $model->activityPeriods()->exists()),
+            'isRetired' => $state['isRetired'],
+            'isCurrentlyActive' => $state['isCurrentlyActive'],
+            'hasFutureActivity' => $state['hasFutureActivity'],
+            'hasActivityHistory' => $state['hasActivityHistory'],
         ];
     }
 }
