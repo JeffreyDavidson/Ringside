@@ -6,6 +6,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Models\Users\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class RegisterUserRequest extends FormRequest
@@ -13,6 +14,15 @@ class RegisterUserRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower($email)]);
+        }
     }
 
     /**

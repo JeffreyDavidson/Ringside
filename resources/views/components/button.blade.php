@@ -11,6 +11,7 @@
         'sm' => 'h-8 px-3 text-xs gap-1.5',
         'md' => 'h-9 px-4 text-sm gap-1.5',
         'lg' => 'h-10 px-5 text-sm gap-2',
+        'xl' => 'min-h-14 px-6 py-3 text-base gap-2',
     ];
 
     $iconOnlySizes = [
@@ -21,6 +22,7 @@
     ];
 
     $variants = [
+        'ringside' => 'rounded-none bg-ringside-red text-ringside-white font-bold hover:bg-ringside-red-dark focus-visible:outline-2 focus-visible:outline-offset-6 focus-visible:outline-ringside-white disabled:cursor-not-allowed disabled:opacity-50',
         'primary' => 'btn-primary-default btn-primary-states',
         'success' => 'btn-success-default btn-success-states',
         'danger' => 'btn-danger-default btn-danger-states',
@@ -31,7 +33,12 @@
         'link' => 'text-gray-700 hover:text-primary bg-transparent',
     ];
 
-    $base = 'inline-flex items-center justify-center cursor-pointer font-medium rounded-md transition-all';
+    $base = 'inline-flex items-center justify-center cursor-pointer';
+    if ($variant !== 'ringside') {
+        $base .= ' font-medium rounded-md transition-all';
+    } else {
+        $base .= ' transition-colors';
+    }
     $sizeClass = $iconOnly
         ? $iconOnlySizes[$size] ?? $iconOnlySizes['md']
         : $sizes[$size] ?? $sizes['md'];

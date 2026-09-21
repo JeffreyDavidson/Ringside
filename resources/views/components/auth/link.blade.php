@@ -1,0 +1,1 @@
+<a {{ $attributes->class(['inline-flex min-h-11 items-center font-semibold text-ringside-signal-soft underline underline-offset-4 hover:text-ringside-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white']) }}>{{ $slot }}</a>

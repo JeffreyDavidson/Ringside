@@ -1,48 +1,78 @@
 @php
-    $oldEmail = old('email');
-    $status = session('status');
+    $recoveryEmail = session('recovery_email');
+    $linkRequested = is_string($recoveryEmail) && $recoveryEmail !== '';
+    $resendAt = session('recovery_resend_at');
+    $resendSeconds = is_int($resendAt) ? max(0, $resendAt - now()->timestamp) : 0;
 @endphp
 
-<x-layouts.auth>
-    <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('password.email') }}">
-        @csrf
-
-        <!-- Header -->
-        <div class="mb-2.5 text-center">
-            <h3 class="mb-2.5 text-lg leading-none font-medium text-gray-900">Forgot Password?</h3>
-            <div class="text-sm text-gray-600">Enter your email address and we'll send you a password reset link.</div>
+<x-layouts.auth :title="$linkRequested ? __('auth-forms.check_email') : __('auth-forms.forgot_password')">
+    @if ($linkRequested)
+        <div class="flex flex-col gap-6">
+            <header class="border-ringside-line border-b pb-6">
+                <h1 class="font-display text-4xl leading-tight tracking-tight uppercase sm:text-5xl">
+                    {{ __('auth-forms.check_email') }}
+                </h1>
+                <p role="status" class="text-ringside-muted mt-4 text-base leading-relaxed">
+                    {{ $errors->any() ? __('auth-forms.reset_requested_for') : __('auth-forms.reset_sent_to') }}
+                    <strong class="text-ringside-ink block wrap-anywhere">{{ $recoveryEmail }}</strong>
+                </p>
+            </header>
+            <p class="text-ringside-muted text-base leading-relaxed">{{ __('auth-forms.check_spam') }}</p>
+            @error('email')
+                <p
+                    role="alert"
+                    tabindex="-1"
+                    data-auth-error
+                    class="text-ringside-signal-soft focus-visible:outline-ringside-white focus-visible:outline-2 focus-visible:outline-offset-4"
+                >
+                    {{ $message }}
+                </p>
+            @enderror
+            <form method="post" action="{{ route('password.email') }}">
+                @csrf
+                <input type="hidden" name="email" value="{{ $recoveryEmail }}" />
+                <x-button
+                    type="submit"
+                    variant="ringside"
+                    size="xl"
+                    class="w-full"
+                    :data-submitting-label="__('auth-forms.sending_link')"
+                    :data-resend-seconds="$resendSeconds"
+                    aria-describedby="resend-status"
+                >{{ __('auth-forms.resend_link') }}</x-button>
+                <p
+                    id="resend-status"
+                    class="text-ringside-muted mt-3 text-sm leading-relaxed"
+                    data-wait-label="{{ __('auth-forms.resend_wait') }}"
+                    data-ready-label="{{ __('auth-forms.resend_ready') }}"
+                >
+                    {{ $resendSeconds > 0 ? __('auth-forms.resend_wait', ['seconds' => $resendSeconds]) : __('auth-forms.resend_ready') }}
+                </p>
+            </form>
+            <div class="flex flex-wrap justify-between gap-x-6 gap-y-2">
+                <x-auth.link :href="route('password.request')">{{ __('auth-forms.change_email') }}</x-auth.link>
+                <x-auth.link :href="route('login')">{{ __('auth-forms.back_to_login') }}</x-auth.link>
+            </div>
         </div>
-
-        <!-- Session Status -->
-        @if (is_string($status) && $status !== '')
-            <div class="text-sm font-medium text-green-600">{{ $status }}</div>
-        @endif
-
-        <!-- Email Field -->
-        <div class="flex flex-col gap-1">
-            <label class="text-2sm font-normal text-gray-900">Email</label>
-            <input
-                class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
-                placeholder="email@email.com"
-                type="email"
-                value="{{ is_string($oldEmail) ? $oldEmail : '' }}"
+    @else
+        <x-auth.form :title="__('auth-forms.forgot_password')" :action="route('password.email')">
+            <x-slot:intro>{{ __('auth-forms.recovery_intro') }}</x-slot:intro>
+            <x-auth.field
                 name="email"
-                id="email"
+                type="email"
+                :label="__('auth-forms.email')"
+                autocomplete="username"
+                :placeholder="__('auth-forms.email_placeholder')"
                 required
             />
-            @error('email')
-                <span class="text-xs leading-4 font-medium text-red-500"> {{ $message }} </span>
-            @enderror
-        </div>
-
-        <!-- Submit Button -->
-        <x-button variant="primary" class="flex grow justify-center"> Email Password Reset Link </x-button>
-
-        <!-- Back to Login -->
-        <div class="text-center">
-            <a class="text-primary hover:text-primary-active text-sm font-medium" href="{{ route('login') }}">
-                Back to Sign In
-            </a>
-        </div>
-    </form>
+            <x-button
+                type="submit"
+                variant="ringside"
+                size="xl"
+                class="w-full"
+                :data-submitting-label="__('auth-forms.sending_link')"
+            >{{ __('auth-forms.send_reset_link') }}</x-button>
+            <x-auth.link :href="route('login')" class="self-center">{{ __('auth-forms.back_to_login') }}</x-auth.link>
+        </x-auth.form>
+    @endif
 </x-layouts.auth>

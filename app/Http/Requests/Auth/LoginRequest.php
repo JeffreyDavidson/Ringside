@@ -21,6 +21,15 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower($email)]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

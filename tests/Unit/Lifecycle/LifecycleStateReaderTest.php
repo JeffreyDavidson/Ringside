@@ -26,3 +26,26 @@ test('falls back to the relationship check when a projection is absent', functio
         fn (): bool => true,
     ))->toBeTrue();
 });
+
+test('reads grouped projected lifecycle booleans', function () {
+    $stable = Stable::factory()->make([
+        'status_current_activity_period_exists' => 1,
+        'status_future_activity_period_exists' => 0,
+    ]);
+
+    $state = LifecycleStateReader::readProjectedBooleans($stable, [
+        'isCurrentlyActive' => [
+            'attribute' => 'status_current_activity_period_exists',
+            'fallback' => fn (): bool => false,
+        ],
+        'hasFutureActivity' => [
+            'attribute' => 'status_future_activity_period_exists',
+            'fallback' => fn (): bool => true,
+        ],
+    ]);
+
+    expect($state)->toBe([
+        'isCurrentlyActive' => true,
+        'hasFutureActivity' => false,
+    ]);
+});
