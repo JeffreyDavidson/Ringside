@@ -23,11 +23,11 @@ test('login screen can be rendered', function () {
     $response->assertSuccessful();
 });
 
-test('users can authenticate using the login screen', function () {
+test('users can authenticate using the login screen', function (string $email) {
     // Arrange
-    $user = User::factory()->create();
+    User::factory()->create(['email' => 'promoter@example.com']);
     $credentials = [
-        'email' => $user->email,
+        'email' => $email,
         'password' => 'secret',
     ];
 
@@ -37,7 +37,7 @@ test('users can authenticate using the login screen', function () {
     // Assert
     $response->assertRedirect(AppServiceProvider::HOME);
     assertAuthenticated();
-});
+})->with(['promoter@example.com', 'Promoter@Example.com']);
 
 test('users can not authenticate with invalid password', function () {
     // Arrange

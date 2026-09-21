@@ -36,6 +36,7 @@
             variant="ringside"
             size="xl"
             class="w-full"
+            :data-submitting-label="__('auth-forms.creating_account')"
         >{{ __('auth-forms.create_account') }}</x-button>
     </x-auth.form>
 </x-layouts.auth>

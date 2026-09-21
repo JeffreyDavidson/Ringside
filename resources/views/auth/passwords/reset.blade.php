@@ -30,6 +30,7 @@
             variant="ringside"
             size="xl"
             class="w-full"
+            :data-submitting-label="__('auth-forms.resetting_password')"
         >{{ __('auth-forms.reset_password') }}</x-button>
         <x-auth.link :href="route('login')" class="self-center">{{ __('auth-forms.back_to_login') }}</x-auth.link>
     </x-auth.form>

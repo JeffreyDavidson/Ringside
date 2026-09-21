@@ -1,6 +1,8 @@
 @php
     $recoveryEmail = session('recovery_email');
     $linkRequested = is_string($recoveryEmail) && $recoveryEmail !== '';
+    $resendAt = session('recovery_resend_at');
+    $resendSeconds = is_int($resendAt) ? max(0, $resendAt - now()->timestamp) : 0;
 @endphp
 
 <x-layouts.auth :title="$linkRequested ? __('auth-forms.check_email') : __('auth-forms.forgot_password')">
@@ -34,7 +36,18 @@
                     variant="ringside"
                     size="xl"
                     class="w-full"
+                    :data-submitting-label="__('auth-forms.sending_link')"
+                    :data-resend-seconds="$resendSeconds"
+                    aria-describedby="resend-status"
                 >{{ __('auth-forms.resend_link') }}</x-button>
+                <p
+                    id="resend-status"
+                    class="text-ringside-muted mt-3 text-sm leading-relaxed"
+                    data-wait-label="{{ __('auth-forms.resend_wait') }}"
+                    data-ready-label="{{ __('auth-forms.resend_ready') }}"
+                >
+                    {{ $resendSeconds > 0 ? __('auth-forms.resend_wait', ['seconds' => $resendSeconds]) : __('auth-forms.resend_ready') }}
+                </p>
             </form>
             <div class="flex flex-wrap justify-between gap-x-6 gap-y-2">
                 <x-auth.link :href="route('password.request')">{{ __('auth-forms.change_email') }}</x-auth.link>
@@ -57,6 +70,7 @@
                 variant="ringside"
                 size="xl"
                 class="w-full"
+                :data-submitting-label="__('auth-forms.sending_link')"
             >{{ __('auth-forms.send_reset_link') }}</x-button>
             <x-auth.link :href="route('login')" class="self-center">{{ __('auth-forms.back_to_login') }}</x-auth.link>
         </x-auth.form>

@@ -318,7 +318,7 @@ test('registration explains passwords and focuses rejected input', function (): 
         ->assertNoJavaScriptErrors();
 });
 
-test('recovery confirmation supports resend throttling and changing address', function (): void {
+test('recovery confirmation prevents resending until the cooldown ends', function (): void {
     // Arrange
     Notification::fake();
     $user = User::factory()->create();
@@ -331,18 +331,37 @@ test('recovery confirmation supports resend throttling and changing address', fu
     // Assert
     $page->assertSee('Check your email')
         ->assertSee($user->email)
-        ->assertSee('Check your inbox and spam folder');
+        ->assertSee('Check your inbox and spam folder')
+        ->assertSee('You can request another link in')
+        ->assertDisabled('button[type="submit"]');
     Notification::assertSentToTimes($user, ResetPassword::class, 1);
+
+    // Act
+    $page->script('window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }))');
+
+    // Assert
+    $page->assertDisabled('button[type="submit"]')
+        ->assertNoAccessibilityIssues();
+    Notification::assertSentToTimes($user, ResetPassword::class, 1);
+
+    // Arrange
+    $this->travel(61)->seconds();
+
+    // Act
+    $page->script('const actualNow = Date.now; Date.now = () => actualNow() + 61000; window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));');
+
+    // Assert
+    $page->assertEnabled('button[type="submit"]')
+        ->assertSee('You can request another link now.');
 
     // Act
     $page->press('Resend reset link');
 
     // Assert
-    $page->assertSee('Please wait before retrying')
+    $page->assertSee('Check your email')
         ->assertSee($user->email)
-        ->assertScript('document.activeElement.hasAttribute("data-auth-error")')
-        ->assertNoAccessibilityIssues();
-    Notification::assertSentToTimes($user, ResetPassword::class, 1);
+        ->assertDisabled('button[type="submit"]');
+    Notification::assertSentToTimes($user, ResetPassword::class, 2);
 
     // Act
     $page->click('Change email address');
@@ -352,4 +371,71 @@ test('recovery confirmation supports resend throttling and changing address', fu
         ->assertPresent('#email')
         ->assertDontSee('Check your email')
         ->assertNoJavaScriptErrors();
+});
+
+test('auth forms show submission progress and recover when restored', function (string $routeName, string $pendingLabel) {
+    // Arrange
+    $page = visit(route($routeName));
+    $page->type('email', 'promoter@example.com');
+
+    if ($routeName === 'register') {
+        $page->type('first_name', 'Taylor')
+            ->type('last_name', 'Promoter')
+            ->type('password', 'test-password')
+            ->type('password_confirmation', 'test-password');
+    }
+
+    if ($routeName === 'login') {
+        $page->type('password', 'test-password');
+    }
+
+    $page->script(<<<'JS'
+        window.acceptedSubmissions = 0;
+        window.originalSubmitLabel = document.querySelector('button[type="submit"]').textContent;
+        document.addEventListener('submit', (event) => {
+            if (!event.defaultPrevented) window.acceptedSubmissions++;
+            event.preventDefault();
+        });
+        JS);
+
+    // Act
+    $page->press('button[type="submit"]');
+
+    // Assert
+    $page->assertSee($pendingLabel)
+        ->assertDisabled('button[type="submit"]')
+        ->assertAttribute('form[method="post"]', 'aria-busy', 'true');
+
+    // Act
+    $page->script('document.querySelector("form").requestSubmit()');
+
+    // Assert
+    $page->assertScript('window.acceptedSubmissions === 1');
+
+    // Act
+    $page->script('window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }))');
+
+    // Assert
+    $page->assertEnabled('button[type="submit"]')
+        ->assertScript('document.querySelector("button[type=submit]").textContent === window.originalSubmitLabel')
+        ->assertScript('!document.querySelector("form").hasAttribute("aria-busy")')
+        ->assertNoJavaScriptErrors();
+})->with([
+    'login' => ['login', 'Signing in…'],
+    'register' => ['register', 'Creating account…'],
+    'recovery' => ['password.request', 'Sending link…'],
+]);
+
+test('native validation leaves the recovery submit button usable', function (): void {
+    // Arrange
+    $page = visit(route('password.request'));
+
+    // Act
+    $page->press('button[type="submit"]');
+
+    // Assert
+    $page->assertEnabled('button[type="submit"]')
+        ->assertSee('Email password reset link')
+        ->assertScript('document.activeElement.id === "email"')
+        ->assertScript('!document.querySelector("form").hasAttribute("aria-busy")');
 });

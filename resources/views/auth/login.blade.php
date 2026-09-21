@@ -46,6 +46,7 @@
             size="xl"
             class="w-full"
             data-test="sign-in"
+            :data-submitting-label="__('auth-forms.signing_in')"
         >{{ __('auth-forms.sign_in_action') }}</x-button>
     </x-auth.form>
 </x-layouts.auth>
