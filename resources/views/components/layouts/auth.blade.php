@@ -7,40 +7,48 @@
 
     <title>{{ \Illuminate\Support\Facades\Config::string('app.name', 'Ringside') }}</title>
 
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
-    />
-
     @vite('resources/js/auth.js')
 </head>
 <!-- end::Head -->
 
-<body class="bg-background text-foreground flex h-full text-base antialiased">
-    <!--begin::Root-->
-    <div class="grid grow lg:grid-cols-2">
-        <!-- Login Form Section -->
-        <div class="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
-            <x-card class="w-full max-w-[370px]"> {{ $slot }} </x-card>
-        </div>
+<body class="auth-shell">
+    <!--
+        THESIS: Ringside is the control room for a wrestling promotion.
+        OWN-WORLD: Dark arena surfaces, Anton display type, square controls, and one signal-red action.
+        STORY: The brand rail establishes the work; the form gets the promoter back to it.
+        FIRST VIEWPORT: A confident split composition with the Ringside wordmark, operating scope, and sign-in task visible together.
+        FORM: A short, direct sign-in path with registration, password recovery, remember-me, and readable validation states.
+        FINISH: Preserve the editorial rail on desktop, collapse to a focused sign-in screen on mobile, and keep keyboard focus unmistakable.
+    -->
+    <div class="auth-layout">
+        <section class="auth-brand" aria-labelledby="auth-brand-title">
+            <a class="auth-wordmark" href="{{ route('home') }}" aria-label="Ringside home"> RING<span>SIDE</span> </a>
 
-        <!-- Branded Background Section -->
-        <div class="lg:border-border xxl:bg-center order-1 bg-[url('/images/bg-10.png')] bg-top bg-no-repeat lg:order-2 lg:m-5 lg:rounded-xl lg:border xl:bg-cover">
-            <div class="flex flex-col gap-4 p-8 lg:p-16">
-                <a href="{{ route('dashboard') }}">
-                    <x-application-logo class="h-7 max-w-none" />
-                </a>
-                <div class="flex flex-col gap-3">
-                    <h3 class="text-foreground text-2xl font-semibold">Secure Access Portal</h3>
-                    <div class="text-muted-foreground text-base font-medium">
-                        A robust authentication gateway ensuring<br />
-                        secure <span class="text-foreground font-semibold">efficient user access</span> to the
-                        Ringside<br />
-                        Management interface.
-                    </div>
-                </div>
+            <div class="auth-brand-copy">
+                <h1 id="auth-brand-title">Run the show<br /><span>from ringside.</span></h1>
+                <p>Keep your roster, titles, events, and match cards moving together from one clear control room.</p>
             </div>
-        </div>
+
+            <div class="auth-brand-meta" aria-label="Ringside product details">
+                <span>ROSTER</span>
+                <span class="auth-brand-rule" aria-hidden="true"></span>
+                <span>EVENTS</span>
+                <span class="auth-brand-rule" aria-hidden="true"></span>
+                <span>CHAMPIONSHIPS</span>
+            </div>
+        </section>
+
+        <main class="auth-main">
+            <div class="auth-form-wrap">
+                <a class="auth-wordmark auth-wordmark-mobile" href="{{ route('home') }}" aria-label="Ringside home">
+                    RING<span>SIDE</span>
+                </a>
+                {{ $slot }}
+                <p class="auth-legal">
+                    By signing in, you agree to use Ringside responsibly for your promotion's operations.
+                </p>
+            </div>
+        </main>
     </div>
 </body>
 </html>

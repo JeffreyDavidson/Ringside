@@ -3,30 +3,19 @@
 @endphp
 
 <x-layouts.auth>
-    <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('login') }}">
+    <form class="auth-form" method="post" action="{{ route('login') }}">
         @csrf
 
-        <!-- Header -->
-        <div class="mb-2.5 text-center">
-            <h3 class="text-foreground mb-2.5 text-lg leading-none font-medium">Sign in</h3>
-            <div class="flex items-center justify-center font-medium">
-                <span class="text-secondary-foreground me-1.5 text-sm"> Need an account? </span>
-                <a class="text-sm font-medium" href="{{ route('register') }}"> Sign up </a>
+        <div class="auth-form-header">
+            <h2>Sign in</h2>
+            <div>
+                <span>New to Ringside?</span>
+                <a href="{{ route('register') }}">Create an account</a>
             </div>
         </div>
 
-        <!-- Social Login Buttons -->
-        <div class="grid grid-cols-2 gap-2.5">
-            <x-auth.social-login-button provider="google" />
-            <x-auth.social-login-button provider="apple" />
-        </div>
-
-        <!-- Divider -->
-        <x-auth.form-divider />
-
-        <!-- Email Field - Explicit structure for custom label classes -->
-        <div class="flex flex-col gap-1">
-            <x-form.label for="email" class="font-normal text-[var(--mono)]">Email</x-form.label>
+        <div class="auth-field">
+            <x-form.label for="email">Email address</x-form.label>
 
             <x-form.input
                 type="email"
@@ -40,16 +29,10 @@
             <x-form.error name="email" />
         </div>
 
-        <!-- Password Field - Simplified structure -->
-        <div class="flex flex-col gap-1">
-            <div class="flex items-center justify-between gap-1">
-                <x-form.label for="password" class="font-normal text-[var(--mono)]">Password</x-form.label>
-                <a
-                    class="text-primary hover:text-primary-active shrink-0 text-sm font-medium"
-                    href="{{ route('password.request') }}"
-                >
-                    Forgot Password?
-                </a>
+        <div class="auth-field">
+            <div class="auth-field-label">
+                <x-form.label for="password">Password</x-form.label>
+                <a href="{{ route('password.request') }}">Forgot password?</a>
             </div>
 
             <x-form.input
@@ -63,12 +46,10 @@
             <x-form.error name="password" />
         </div>
 
-        <!-- Remember Me -->
         <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm" data-test="remember" />
 
-        <!-- Submit Button -->
-        <x-button type="submit" variant="primary" class="flex w-full justify-center" data-test="sign-in">
-            Sign In
+        <x-button type="submit" variant="primary" class="auth-submit" data-test="sign-in">
+            Sign in to Ringside
         </x-button>
     </form>
 </x-layouts.auth>

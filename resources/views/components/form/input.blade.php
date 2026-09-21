@@ -55,7 +55,8 @@
                 />
                 <button
                     type="button"
-                    class="text-muted-foreground absolute inset-y-0 right-0 flex items-center justify-center pr-3 focus:outline-none"
+                    class="text-muted-foreground absolute inset-y-0 right-0 flex items-center justify-center pr-3 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ringside-white)]"
+                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
                     @click="showPassword = ! showPassword"
                 >
                     <span x-show="! showPassword">
@@ -93,7 +94,8 @@
             />
             <button
                 type="button"
-                class="text-muted-foreground absolute inset-y-0 right-0 flex items-center justify-center pr-3 focus:outline-none"
+                class="text-muted-foreground absolute inset-y-0 right-0 flex items-center justify-center pr-3 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ringside-white)]"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
                 @click="showPassword = ! showPassword"
             >
                 <span x-show="! showPassword">
