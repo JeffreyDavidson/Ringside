@@ -94,3 +94,36 @@ test('password can be reset with a valid token', function () {
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
+
+test('a reset link can be resent after the broker cooldown', function (): void {
+    // Arrange
+    Notification::fake();
+    $user = User::factory()->create();
+    $data = ['email' => $user->email];
+
+    // Act
+    $first = $this->from(route('password.request'))
+        ->post(route('password.email'), $data);
+
+    // Assert
+    $first->assertSessionHas('recovery_email', $user->email);
+
+    // Act
+    $throttled = $this->post(route('password.email'), $data);
+
+    // Assert
+    $throttled->assertSessionHasErrors('email')
+        ->assertSessionHas('recovery_email', $user->email);
+    Notification::assertSentToTimes($user, ResetPassword::class, 1);
+
+    // Arrange
+    $this->travel(61)->seconds();
+
+    // Act
+    $resent = $this->post(route('password.email'), $data);
+
+    // Assert
+    $resent->assertSessionHas('recovery_email', $user->email)
+        ->assertSessionHas('status', __('passwords.sent'));
+    Notification::assertSentToTimes($user, ResetPassword::class, 2);
+});

@@ -1,9 +1,20 @@
-import './bootstrap';
-import { Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import '../css/app.css';
 
-// Set up Alpine globally without any plugins
-window.Alpine = Alpine;
+for (const button of document.querySelectorAll('[data-password-toggle]')) {
+    const input = document.getElementById(button.getAttribute('aria-controls'));
 
-// Start Alpine directly without Livewire or any plugins
-Alpine.start();
+    if (!(input instanceof window.HTMLInputElement)) {
+        continue;
+    }
+
+    button.hidden = false;
+    button.addEventListener('click', () => {
+        const visible = input.type === 'password';
+        input.type = visible ? 'text' : 'password';
+        button.setAttribute('aria-label', visible ? button.dataset.hideLabel : button.dataset.showLabel);
+        button.querySelector('[data-password-show]').hidden = visible;
+        button.querySelector('[data-password-hide]').hidden = !visible;
+    });
+}
+
+document.querySelector('[data-auth-error], [aria-invalid="true"]')?.focus();

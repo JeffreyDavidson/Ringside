@@ -1,52 +1,51 @@
+@props(['title' => 'Ringside'])
+
 <!DOCTYPE html>
 <html class="h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-
-    <title>{{ \Illuminate\Support\Facades\Config::string('app.name', 'Ringside') }}</title>
-
+    <title>{{ $title }} · Ringside</title>
     @vite('resources/js/auth.js')
 </head>
-<!-- end::Head -->
-
-<body class="auth-shell">
-    <!--
-        THESIS: Ringside is the control room for a wrestling promotion.
-        OWN-WORLD: Dark arena surfaces, Anton display type, square controls, and one signal-red action.
-        STORY: The brand rail establishes the work; the form gets the promoter back to it.
-        FIRST VIEWPORT: A confident split composition with the Ringside wordmark, operating scope, and sign-in task visible together.
-        FORM: A short, direct sign-in path with registration, password recovery, remember-me, and readable validation states.
-        FINISH: Preserve the editorial rail on desktop, collapse to a focused sign-in screen on mobile, and keep keyboard focus unmistakable.
-    -->
-    <div class="auth-layout">
-        <section class="auth-brand" aria-labelledby="auth-brand-title">
-            <a class="auth-wordmark" href="{{ route('home') }}" aria-label="Ringside home"> RING<span>SIDE</span> </a>
-
-            <div class="auth-brand-copy">
-                <h1 id="auth-brand-title">Run the show<br /><span>from ringside.</span></h1>
-                <p>Keep your roster, titles, events, and match cards moving together from one clear control room.</p>
-            </div>
-
-            <div class="auth-brand-meta" aria-label="Ringside product details">
-                <span>ROSTER</span>
-                <span class="auth-brand-rule" aria-hidden="true"></span>
-                <span>EVENTS</span>
-                <span class="auth-brand-rule" aria-hidden="true"></span>
-                <span>CHAMPIONSHIPS</span>
-            </div>
-        </section>
-
-        <main class="auth-main">
-            <div class="auth-form-wrap">
-                <a class="auth-wordmark auth-wordmark-mobile" href="{{ route('home') }}" aria-label="Ringside home">
-                    RING<span>SIDE</span>
-                </a>
-                {{ $slot }}
-                <p class="auth-legal">
-                    By signing in, you agree to use Ringside responsibly for your promotion's operations.
+<body class="bg-ringside-surface-deep font-body text-ringside-ink selection:bg-ringside-red selection:text-ringside-white m-0 min-h-dvh antialiased">
+    <div class="grid min-h-dvh lg:grid-cols-2">
+        <aside
+            class="bg-ringside-surface relative hidden flex-col justify-between gap-16 overflow-hidden p-12 lg:flex xl:p-16"
+            aria-label="Ringside"
+        >
+            <a
+                class="font-display focus-visible:outline-ringside-white w-fit text-5xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6"
+                href="{{ route('home') }}"
+                aria-label="{{ __('auth-forms.home') }}"
+            >RING<span class="text-ringside-signal">SIDE</span></a>
+            <div class="max-w-lg">
+                <p class="font-display text-6xl leading-tight tracking-tight uppercase xl:text-7xl">
+                    {{ __('auth-forms.brand_title') }}<br /><span
+                        class="text-ringside-signal"
+                        >{{ __('auth-forms.brand_emphasis') }}</span>
                 </p>
+                <p class="text-ringside-muted mt-8 max-w-sm text-lg leading-relaxed">
+                    {{ __('auth-forms.brand_description') }}
+                </p>
+            </div>
+            <div class="text-ringside-muted-soft flex flex-wrap items-center gap-3 text-xs font-bold tracking-wider uppercase">
+                <span>{{ __('auth-forms.roster') }}</span>
+                <span class="bg-ringside-line-bright h-px w-6" aria-hidden="true"></span>
+                <span>{{ __('auth-forms.events') }}</span>
+                <span class="bg-ringside-line-bright h-px w-6" aria-hidden="true"></span>
+                <span>{{ __('auth-forms.championships') }}</span>
+            </div>
+        </aside>
+        <main class="flex min-h-dvh items-center justify-center px-5 py-10 sm:px-10 lg:p-12 xl:p-16">
+            <div class="w-full max-w-md">
+                <a
+                    class="font-display focus-visible:outline-ringside-white mb-10 inline-block text-4xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6 lg:hidden"
+                    href="{{ route('home') }}"
+                    aria-label="{{ __('auth-forms.home') }}"
+                >RING<span class="text-ringside-signal">SIDE</span></a>
+                {{ $slot }}
             </div>
         </main>
     </div>

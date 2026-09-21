@@ -1,55 +1,51 @@
-@php
-    $oldEmail = old('email');
-@endphp
-
-<x-layouts.auth>
-    <form class="auth-form" method="post" action="{{ route('login') }}">
-        @csrf
-
-        <div class="auth-form-header">
-            <h2>Sign in</h2>
-            <div>
-                <span>New to Ringside?</span>
-                <a href="{{ route('register') }}">Create an account</a>
-            </div>
-        </div>
-
-        <div class="auth-field">
-            <x-form.label for="email">Email address</x-form.label>
-
-            <x-form.input
-                type="email"
-                name="email"
-                id="email"
-                data-test="email"
-                placeholder="email@email.com"
-                value="{{ is_string($oldEmail) ? $oldEmail : '' }}"
+<x-layouts.auth :title="__('auth-forms.sign_in')">
+    <x-auth.form :title="__('auth-forms.sign_in')" :action="route('login')">
+        <x-slot:intro>
+            {{ __('auth-forms.new_account') }}
+            <x-auth.link :href="route('register')">{{ __('auth-forms.create_account') }}</x-auth.link>
+        </x-slot:intro>
+        <x-auth.field
+            name="email"
+            type="email"
+            :label="__('auth-forms.email')"
+            autocomplete="username"
+            :placeholder="__('auth-forms.email_placeholder')"
+            data-test="email"
+        />
+        <x-auth.field
+            name="password"
+            type="password"
+            :label="__('auth-forms.password')"
+            autocomplete="current-password"
+            :placeholder="__('auth-forms.password_placeholder')"
+            data-test="password"
+        >
+            <x-slot:action>
+                <x-auth.link :href="route('password.request')" class="shrink-0 text-sm whitespace-nowrap">
+                    {{ __('auth-forms.forgot_password') }}</x-auth.link>
+            </x-slot:action>
+        </x-auth.field>
+        <label
+            class="text-ringside-muted-bright flex min-h-11 w-fit cursor-pointer items-center gap-3 text-base"
+            for="remember"
+        >
+            <input
+                type="checkbox"
+                name="remember"
+                id="remember"
+                value="1"
+                data-test="remember"
+                @checked(old('remember'))
+                class="accent-ringside-red focus-visible:outline-ringside-white size-5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4"
             />
-
-            <x-form.error name="email" />
-        </div>
-
-        <div class="auth-field">
-            <div class="auth-field-label">
-                <x-form.label for="password">Password</x-form.label>
-                <a href="{{ route('password.request') }}">Forgot password?</a>
-            </div>
-
-            <x-form.input
-                type="password"
-                name="password"
-                id="password"
-                data-test="password"
-                placeholder="Enter Password"
-            />
-
-            <x-form.error name="password" />
-        </div>
-
-        <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm" data-test="remember" />
-
-        <x-button type="submit" variant="primary" class="auth-submit" data-test="sign-in">
-            Sign in to Ringside
-        </x-button>
-    </form>
+            {{ __('auth-forms.remember') }}
+        </label>
+        <x-button
+            type="submit"
+            variant="ringside"
+            size="xl"
+            class="w-full"
+            data-test="sign-in"
+        >{{ __('auth-forms.sign_in_action') }}</x-button>
+    </x-auth.form>
 </x-layouts.auth>
