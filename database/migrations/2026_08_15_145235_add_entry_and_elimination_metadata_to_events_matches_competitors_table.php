@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('eliminated_by_match_competitor_id')
                 ->nullable()
                 ->after('elimination_order')
-                ->constrained('events_matches_competitors')
+                ->constrained('events_matches_competitors', 'id', 'emc_eliminated_by_fk')
                 ->nullOnDelete();
 
             $table->unique(['match_id', 'entry_order']);
