@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Providers\AppServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -13,6 +14,28 @@ use Illuminate\Support\Facades\Validator;
  * @see AppServiceProvider
  */
 describe('AppServiceProvider', function () {
+    describe('URL generation', function () {
+        beforeEach(function () {
+            URL::forceScheme(null);
+        });
+
+        test('forces HTTPS when configured', function () {
+            config(['app.force_https' => true]);
+
+            new AppServiceProvider(app())->boot();
+
+            expect(URL::to('/dashboard'))->toStartWith('https://');
+        });
+
+        test('does not force HTTPS when disabled', function () {
+            config(['app.force_https' => false]);
+
+            new AppServiceProvider(app())->boot();
+
+            expect(URL::to('/dashboard'))->toStartWith('http://');
+        });
+    });
+
     describe('Laravel validation rules', function () {
         describe('ends_with rule', function () {
             test('uses Laravel validation messages', function ($arguments, $expectedMessage) {
