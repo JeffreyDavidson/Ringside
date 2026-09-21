@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
+use Illuminate\Database\Eloquent\Collection;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -23,15 +25,15 @@ test('it creates a wrestler with basic information', function () {
         employment_date: null
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Wrestler::class);
-    expect($result->name)->toBe('John Cena');
-    expect($result->height->feet)->toBe(6);
-    expect($result->height->inches)->toBe(1);
-    expect($result->hometown)->toBe('West Newbury, Massachusetts');
-    expect($result->weight)->toBe(251);
-    expect($result->signature_move)->toBe('Attitude Adjustment');
+    expect($result)->toBeInstanceOf(Wrestler::class)
+        ->and($result->name)->toBe('John Cena')
+        ->and($result->height->feet)->toBe(6)
+        ->and($result->height->inches)->toBe(1)
+        ->and($result->hometown)->toBe('West Newbury, Massachusetts')
+        ->and($result->weight->toPounds())->toBe(251)
+        ->and($result->signature_move)->toBe('Attitude Adjustment');
 
     $this->assertDatabaseHas('wrestlers', [
         'name' => 'John Cena',
@@ -41,8 +43,8 @@ test('it creates a wrestler with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -58,10 +60,10 @@ test('it creates a wrestler with employment when employment date is provided', f
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result->name)->toBe('The Rock');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->name)->toBe('The Rock')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers', [
         'name' => 'The Rock',
@@ -71,8 +73,8 @@ test('it creates a wrestler with employment when employment date is provided', f
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -90,15 +92,15 @@ test('it creates wrestler with all optional fields', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Wrestler::class);
-    expect($result->name)->toBe('Stone Cold Steve Austin');
-    expect($result->height->feet)->toBe(6);
-    expect($result->height->inches)->toBe(2);
-    expect($result->hometown)->toBe('Austin, Texas');
-    expect($result->weight)->toBe(252);
-    expect($result->signature_move)->toBe('Stone Cold Stunner');
+    expect($result)->toBeInstanceOf(Wrestler::class)
+        ->and($result->name)->toBe('Stone Cold Steve Austin')
+        ->and($result->height->feet)->toBe(6)
+        ->and($result->height->inches)->toBe(2)
+        ->and($result->hometown)->toBe('Austin, Texas')
+        ->and($result->weight->toPounds())->toBe(252)
+        ->and($result->signature_move)->toBe('Stone Cold Stunner');
 
     // Verify database state
     $this->assertDatabaseHas('wrestlers', [
@@ -109,8 +111,8 @@ test('it creates wrestler with all optional fields', function () {
         'signature_move' => 'Stone Cold Stunner',
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -126,10 +128,53 @@ test('it handles height conversion correctly', function () {
         employment_date: null
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result->height)->toBeInstanceOf(Height::class);
-    expect($result->height->feet)->toBe(5);
-    expect($result->height->inches)->toBe(11);
-    expect($result->height->toInches())->toBe(71); // 5'11" = 71 inches
+    expect($result->height)->toBeInstanceOf(Height::class)
+        ->and($result->height->feet)->toBe(5)
+        ->and($result->height->inches)->toBe(11)
+        ->and($result->height->toInches())->toBe(71); // 5'11" = 71 inches
+});
+
+test('it assigns managers without employing them when the wrestler is not employed', function () {
+    $managers = Manager::factory()->count(2)->create();
+
+    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
+        name: 'Managed Wrestler',
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: null,
+        managers: $managers,
+    ));
+
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())
+        ->toEqualCanonicalizing($managers->modelKeys())
+        ->and($managers->every(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists()))
+        ->toBeTrue();
+});
+
+test('it employs assigned managers through the wrestler employment cascade', function () {
+    $manager = Manager::factory()->create();
+    $employmentDate = now()->subDay();
+
+    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
+        name: 'Employed Managed Wrestler',
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: $employmentDate,
+        managers: new Collection([$manager]),
+    ));
+
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
+
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
+        'started_at' => $employmentDate->toDateTimeString(),
+        'ended_at' => null,
+    ]);
 });

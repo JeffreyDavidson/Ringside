@@ -1,7 +1,11 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\NavigationServiceProvider;
+use Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\NavigationServiceProvider::class,
-    Christophrumpel\MissingLivewireAssertions\MissingLivewireAssertionsServiceProvider::class,
+    AppServiceProvider::class,
+    NavigationServiceProvider::class,
+    MissingLivewireAssertionsServiceProvider::class,
 ];

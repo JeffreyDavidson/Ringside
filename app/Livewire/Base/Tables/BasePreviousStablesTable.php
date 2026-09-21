@@ -8,7 +8,13 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @template TModel of Model
+ *
+ * @extends DataTableComponent<TModel>
+ */
 abstract class BasePreviousStablesTable extends DataTableComponent
 {
     use ShowTableTrait;
@@ -17,11 +23,7 @@ abstract class BasePreviousStablesTable extends DataTableComponent
 
     protected string $databaseTableName;
 
-    public function configure(): void {}
-
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Data\TagTeams;
 
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 readonly class TagTeamData
 {
@@ -20,8 +20,8 @@ readonly class TagTeamData
         public string $name,
         public ?string $signature_move,
         public ?Carbon $employment_date,
-        public ?Wrestler $wrestlerA,
-        public ?Wrestler $wrestlerB,
+        public Wrestler $wrestlerA,
+        public Wrestler $wrestlerB,
         public ?Collection $managers = null,
     ) {}
 

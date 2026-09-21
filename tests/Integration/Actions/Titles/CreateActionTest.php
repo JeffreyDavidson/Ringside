@@ -16,23 +16,23 @@ beforeEach(function () {
 test('it creates a title', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Title::class);
-    expect($result->name)->toBe('Example Title');
-    expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activations)->toHaveCount(0);
+    expect($result)->toBeInstanceOf(Title::class)
+        ->and($result->name)->toBe('Example Title')
+        ->and($result->type)->toBe(TitleType::Singles)
+        ->and($result->activityPeriods)->toBeEmpty();
 });
 
 test('it activates a title if activation date is filled in request', function () {
     $datetime = now();
     $data = new TitleData('Example Title', TitleType::Singles, $datetime);
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Title::class);
-    expect($result->name)->toBe('Example Title');
-    expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activations)->toHaveCount(1);
-    expect($result->activations->first()->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($result)->toBeInstanceOf(Title::class)
+        ->and($result->name)->toBe('Example Title')
+        ->and($result->type)->toBe(TitleType::Singles)
+        ->and($result->activityPeriods)->toHaveCount(1)
+        ->and(requiredDate($result->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });

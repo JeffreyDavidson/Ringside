@@ -4,15 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Titles\CannotBeRetiredException;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
+    ) {}
 
     /**
      * Retire a title and permanently end its championship lineage.
@@ -27,40 +36,22 @@ class RetireAction
      *
      * @param  Title  $title  The title to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     * @throws CannotBeRetiredException When title cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire title immediately
-     * RetireAction::run($title);
-     *
-     * // Retire with specific date
-     * RetireAction::run($title, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        $title->ensureCanBeRetired();
+        $date = $retirementDate ?? now();
+        $operationalDate = $date->isFuture() ? now() : $date;
 
-        $retirementDate = $retirementDate ?? now();
+        DB::transaction(function () use ($title, $date, $operationalDate): void {
+            $lockedTitle = $title->refreshForUpdate();
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Retire);
 
-        DB::transaction(function () use ($title, $retirementDate): void {
-            // Handle title status - active titles need to be pulled before retirement
-            if ($title->hasActivityPeriods() && $title->isCurrentlyActive()) {
-                $currentActivityPeriod = $title->currentActivityPeriod()->first();
-                if ($currentActivityPeriod) {
-                    $currentActivityPeriod->update(['ended_at' => $retirementDate]);
-                }
+            if ($lockedTitle->activityPeriods()->exists() && $lockedTitle->currentActivityPeriod()->exists()) {
+                $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
             }
 
-            // End current championship if title has an active champion
-            $currentChampionship = $title->currentChampionship;
-            if ($currentChampionship) {
-                $currentChampionship->update(['lost_at' => $retirementDate]);
-            }
-
-            // Create the retirement record to permanently end the title's lineage
-            $title->retirements()->create(['started_at' => $retirementDate]);
+            $this->championshipReigns->endCurrentReign($lockedTitle, $date);
+            $this->retirementPeriods->start($lockedTitle, $date, LifecycleTransitionType::Retired);
         });
     }
 }

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Actions\Managers\ClearFromInjuryAction;
+use App\Actions\Managers\DeleteAction;
 use App\Actions\Managers\EmployAction;
-use App\Actions\Managers\HealAction;
 use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReinstateAction;
 use App\Actions\Managers\ReleaseAction;
@@ -14,35 +15,37 @@ use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Builders\Roster\ManagerBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Exceptions\Roster\CannotBeReleasedException;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Managers\Components\Actions;
+use App\Livewire\Concerns\ExecutesBusinessActions;
+use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Models\Managers\Manager;
-use Exception;
-use Illuminate\Contracts\Database\Query\Builder;
+use App\Models\Roster\Managers\Manager;
+use Closure;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Manager> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+    use ExecutesRosterActions;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'managers';
 
+    #[\Override]
     protected string $routeBasePath = 'managers';
 
+    #[\Override]
     protected string $resourceName = 'managers';
 
     /**
@@ -51,25 +54,24 @@ class Main extends BaseTable
     public function builder(): ManagerBuilder
     {
         return Manager::query()
-            ->with('firstEmployment')
+            ->withEmploymentStatusState()
+            ->withFirstEmployment()
             ->oldest('last_name');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', Manager::class);
+        Gate::authorize('viewAny', Manager::class);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(function (Builder $builder, string $searchTerm) {
+                ->searchable(function (ManagerBuilder $builder, string $searchTerm): void {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
@@ -80,208 +82,100 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+            SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'employed' => 'Employed',
-                    'future_employment' => 'Awaiting Employment',
-                    'released' => 'Released',
-                    'unemployed' => 'Unemployed',
-                    'retired' => 'Retired',
-                ])
-                ->filter(function (ManagerBuilder $builder, string $value) {
+                ->options(EmploymentStatus::filterOptions())
+                ->filter(function (ManagerBuilder $builder, string $value): void {
                     /** @var ManagerBuilder<Manager> $builder */
-                    match ($value) {
-                        'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
-                        'released' => $builder->released(),
-                        'unemployed' => $builder->unemployed(),
-                        'retired' => $builder->retired(),
-                        default => null,
-                    };
+                    $status = EmploymentStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereEmploymentStatus($status);
+                    }
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'managers_employments.started_at', 'managers_employments.ended_at'),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 
-    public function delete(Manager $manager): void
+    public function delete(Manager $manager, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($manager);
+        Gate::authorize('delete', $manager);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $manager): void {
+            $deleteAction->handle($manager);
+        }, __('managers.actions.deleted'));
     }
 
-    /**
-     * Clear an injured manager.
-     */
-    public function clearFromInjury(Manager $manager): void
+    public function clearFromInjury(Manager $manager, ClearFromInjuryAction $clearFromInjuryAction): void
     {
-        Gate::authorize('clearFromInjury', $manager);
+        $this->executeManagerAction(RosterLifecycleAction::ClearFromInjury, $manager->id, fn (Manager $manager) => $clearFromInjuryAction->handle($manager));
+    }
 
-        try {
-            resolve(HealAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeClearedFromInjuryException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
+    public function employ(Manager $manager, EmployAction $employAction): void
+    {
+        $this->executeManagerAction(RosterLifecycleAction::Employ, $manager->id, fn (Manager $manager) => $employAction->handle($manager));
+    }
+
+    public function injure(Manager $manager, InjureAction $injureAction): void
+    {
+        $this->executeManagerAction(RosterLifecycleAction::Injure, $manager->id, fn (Manager $manager) => $injureAction->handle($manager));
+    }
+
+    public function reinstate(Manager $manager, ReinstateAction $reinstateAction): void
+    {
+        $this->executeManagerAction(RosterLifecycleAction::Reinstate, $manager->id, fn (Manager $manager) => $reinstateAction->handle($manager));
+    }
+
+    public function release(Manager $manager, ReleaseAction $releaseAction): void
+    {
+        $this->executeManagerAction(RosterLifecycleAction::Release, $manager->id, fn (Manager $manager) => $releaseAction->handle($manager));
+    }
+
+    public function restore(int $managerId, RestoreAction $restoreAction): void
+    {
+        if ($this->executeManagerAction(RosterLifecycleAction::Restore, $managerId, fn (Manager $manager) => $restoreAction->handle($manager))) {
+            $this->redirectRoute('managers.index');
         }
     }
 
-    /**
-     * Employ a manager.
-     */
-    public function employ(Manager $manager): void
+    public function retire(Manager $manager, RetireAction $retireAction): void
     {
-        Gate::authorize('employ', $manager);
-
-        try {
-            resolve(EmployAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeEmployedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
+        $this->executeManagerAction(RosterLifecycleAction::Retire, $manager->id, fn (Manager $manager) => $retireAction->handle($manager));
     }
 
-    /**
-     * Injure a manager.
-     */
-    public function injure(Manager $manager): void
+    public function suspend(Manager $manager, SuspendAction $suspendAction): void
     {
-        Gate::authorize('injure', $manager);
-
-        try {
-            resolve(InjureAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeInjuredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
+        $this->executeManagerAction(RosterLifecycleAction::Suspend, $manager->id, fn (Manager $manager) => $suspendAction->handle($manager));
     }
 
-    /**
-     * Reinstate a suspended manager.
-     */
-    public function reinstate(Manager $manager): void
+    public function unretire(Manager $manager, UnretireAction $unretireAction): void
     {
-        Gate::authorize('reinstate', $manager);
-
-        try {
-            resolve(ReinstateAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeReinstatedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
+        $this->executeManagerAction(RosterLifecycleAction::Unretire, $manager->id, fn (Manager $manager) => $unretireAction->handle($manager));
     }
 
-    /**
-     * Release a manager.
-     */
-    public function release(Manager $manager): void
+    /** @param Closure(Manager): void $action */
+    private function executeManagerAction(RosterLifecycleAction $lifecycleAction, int $managerId, Closure $action): bool
     {
-        Gate::authorize('release', $manager);
+        $manager = $lifecycleAction->usesTrashedModel()
+            ? Manager::onlyTrashed()->findOrFail($managerId)
+            : Manager::findOrFail($managerId);
 
-        try {
-            resolve(ReleaseAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeReleasedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
-    }
-
-    /**
-     * Restore a deleted manager.
-     */
-    public function restore(int $managerId): void
-    {
-        $manager = Manager::onlyTrashed()->findOrFail($managerId);
-
-        Gate::authorize('restore', $manager);
-
-        try {
-            resolve(RestoreAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
-    }
-
-    /**
-     * Retire a manager.
-     */
-    public function retire(Manager $manager): void
-    {
-        Gate::authorize('retire', $manager);
-
-        try {
-            resolve(RetireAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
-    }
-
-    /**
-     * Suspend a manager.
-     */
-    public function suspend(Manager $manager): void
-    {
-        Gate::authorize('suspend', $manager);
-
-        try {
-            resolve(SuspendAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeSuspendedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
-    }
-
-    /**
-     * Unretire a retired manager.
-     */
-    public function unretire(Manager $manager): void
-    {
-        Gate::authorize('unretire', $manager);
-
-        try {
-            resolve(UnretireAction::class)->handle($manager);
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('managers.index'));
-        }
-    }
-
-    public function handleManagerAction(string $action, int $managerId): void
-    {
-        $manager = Manager::findOrFail($managerId);
-
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->manager = $manager;
-
-        match ($action) {
-            'employ' => $actionsComponent->employ(),
-            'release' => $actionsComponent->release(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'suspend' => $actionsComponent->suspend(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'injure' => $actionsComponent->injure(),
-            'heal' => $actionsComponent->healFromInjury(),
-            'restore' => $actionsComponent->restore(),
-            default => null,
+        return match ($lifecycleAction) {
+            RosterLifecycleAction::Employ,
+            RosterLifecycleAction::Release,
+            RosterLifecycleAction::Retire,
+            RosterLifecycleAction::Unretire,
+            RosterLifecycleAction::Suspend,
+            RosterLifecycleAction::Reinstate,
+            RosterLifecycleAction::Injure,
+            RosterLifecycleAction::ClearFromInjury,
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => $action($manager)),
         };
     }
 }

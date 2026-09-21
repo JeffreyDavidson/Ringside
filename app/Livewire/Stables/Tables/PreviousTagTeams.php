@@ -4,43 +4,47 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Builders\Roster\StableMembershipBuilder;
+use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Stables\StableTagTeam;
-use App\Models\TagTeams\TagTeam;
-use Carbon\Carbon;
-use Exception;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<StableTagTeam> */
 class PreviousTagTeams extends DataTableComponent
 {
+    use ShowTableTrait;
+
     protected string $resourceName = 'tag teams';
 
-    protected string $databaseTableName = 'tag_teams';
+    protected string $databaseTableName = 'stables_tag_teams';
 
-    public ?int $stableId;
+    #[Locked]
+    public ?int $stableId = null;
 
-    /**
-     * @return Builder<TagTeam>
-     */
-    public function builder(): Builder
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
     {
-        if (! isset($this->stableId)) {
-            throw new Exception("You didn't specify a stable");
-        }
+        $this->routeResolver = $routeResolver;
+    }
 
-        return TagTeam::query()
-            ->whereHas('stables', function (Builder $query) {
-                $query->where('stable_id', $this->stableId)
-                    ->whereNotNull('left_at');
-            })
-            ->with(['stables' => function (BelongsToMany $query) {
-                $query->where('stable_id', $this->stableId)
-                    ->whereNotNull('left_at')
-                    ->withPivot(['joined_at', 'left_at']);
-            }]);
+    /** @return StableMembershipBuilder<StableTagTeam> */
+    public function builder(): StableMembershipBuilder
+    {
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        return StableTagTeam::query()
+            ->with('tagTeam')
+            ->forStableId($stableId)
+            ->forHistory();
     }
 
     /**
@@ -50,55 +54,35 @@ class PreviousTagTeams extends DataTableComponent
     {
         return [
             LinkColumn::make(__('tag-teams.name'))
-                ->title(fn (TagTeam $row) => $row->name ?? 'Unknown')
-                ->location(fn (TagTeam $row) => route('tag-teams.show', $row)),
-            Column::make(__('stables.date_joined'))
-                ->label(function (TagTeam $row): string {
-                    $stable = $row->stables->first();
-                    if (! $stable || ! isset($stable->pivot)) {
-                        return '';
-                    }
-
-                    /** @var StableTagTeam $pivot */
-                    $pivot = $stable->pivot;
-                    $joinedAt = $pivot->getAttribute('joined_at');
-                    if (! $joinedAt) {
-                        return '';
-                    }
-
-                    return is_string($joinedAt) ?
-                        Carbon::parse($joinedAt)->format('Y-m-d') :
-                        $joinedAt->format('Y-m-d');
+                ->title(fn (StableTagTeam $row) => $row->tagTeam->name ?? 'Unknown')
+                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? $this->routeResolver->urlFor($row->tagTeam) : '#')
+                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
                 }),
-            Column::make(__('stables.date_left'))
-                ->label(function (TagTeam $row): string {
-                    $stable = $row->stables->first();
-                    if (! $stable || ! isset($stable->pivot)) {
-                        return '';
-                    }
-
-                    /** @var StableTagTeam $pivot */
-                    $pivot = $stable->pivot;
-                    $leftAt = $pivot->getAttribute('left_at');
-                    if (! $leftAt) {
-                        return '';
-                    }
-
-                    return is_string($leftAt) ?
-                        Carbon::parse($leftAt)->format('Y-m-d') :
-                        $leftAt->format('Y-m-d');
-                }),
+            DateColumn::make(__('stables.date_joined'), 'joined_at')
+                ->outputFormat('Y-m-d'),
+            DateColumn::make(__('stables.date_left'), 'left_at')
+                ->outputFormat('Y-m-d'),
         ];
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        $this->setPrimaryKey('id')
-            ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setPaginationEnabled()
-            ->setPerPageAccepted([5, 10, 25, 50, 100])
-            ->setLoadingPlaceholderContent('Loading')
-            ->setLoadingPlaceholderEnabled();
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        Gate::authorize('view', Stable::query()->findOrFail($stableId));
+
+        $this->addAdditionalSelects([
+            'stables_tag_teams.tag_team_id',
+            'stables_tag_teams.stable_id',
+            'stables_tag_teams.joined_at',
+            'stables_tag_teams.left_at',
+        ]);
     }
 }

@@ -4,59 +4,48 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
+    ) {}
 
     /**
      * Unretire a retired referee and return them to active officiating.
      *
      * This handles the complete referee unretirement workflow:
-     * - Uses StatusTransitionPipeline for consistent unretirement handling
      * - Validates the referee can be unretired (currently retired)
-     * - Ends the current retirement period with the specified date
-     * - Creates a new employment record starting from the unretirement date
+     * - Ends the current retirement period through RetirementPeriodManager
+     * - Starts a new employment period from the unretirement date
      * - Restores the referee to available status for match assignments
      * - Preserves all historical retirement and employment records
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other referee actions.
-     *
      * @param  Referee  $referee  The referee to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     *
      * @throws CannotBeUnretiredException When referee cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire referee immediately
-     * UnretireAction::run($referee);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($referee, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
-        $referee->ensureCanBeUnretired();
+        $effectiveDate = $unretiredDate ?? now();
 
-        $unretiredDate = DateHelper::resolveDate($unretiredDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        DB::transaction(function () use ($referee, $unretiredDate): void {
-            StatusTransitionPipeline::unretire($referee, $unretiredDate)->execute();
-
-            $referee->employments()->create([
-                'started_at' => $unretiredDate,
-                'ended_at' => null,
-            ]);
+            $this->eligibility->ensureCanUnretire($lockedReferee);
+            $this->retirementPeriods->end($lockedReferee, $effectiveDate, LifecycleTransitionType::Unretired);
+            $this->employmentPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Employed);
         });
     }
 }

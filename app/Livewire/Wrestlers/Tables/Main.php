@@ -4,40 +4,61 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Actions\Wrestlers\ClearFromInjuryAction;
+use App\Actions\Wrestlers\DeleteAction;
+use App\Actions\Wrestlers\EmployAction;
+use App\Actions\Wrestlers\InjureAction;
+use App\Actions\Wrestlers\ReinstateAction;
+use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RestoreAction;
+use App\Actions\Wrestlers\RetireAction;
+use App\Actions\Wrestlers\SuspendAction;
+use App\Actions\Wrestlers\UnretireAction;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
+use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Livewire\Wrestlers\Components\Actions;
-use App\Models\Wrestlers\Wrestler;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+    use ExecutesRosterActions;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'wrestlers';
 
+    #[\Override]
     protected string $routeBasePath = 'wrestlers';
 
+    #[\Override]
     protected string $resourceName = 'wrestlers';
 
     /** @return WrestlerBuilder<Wrestler> */
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->with('currentEmployment');
+            ->withEmploymentStatusState()
+            ->withFirstEmployment();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', Wrestler::class);
+        Gate::authorize('viewAny', Wrestler::class);
     }
 
     /**
@@ -61,50 +82,41 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      **/
+    #[\Override]
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+            SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'employed' => 'Employed',
-                    'future_employment' => 'Awaiting Employment',
-                    'released' => 'Released',
-                    'unemployed' => 'Unemployed',
-                    'retired' => 'Retired',
-                ])
-                ->filter(function (WrestlerBuilder $builder, string $value) {
-                    match ($value) {
-                        'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
-                        'released' => $builder->released(),
-                        'unemployed' => $builder->unemployed(),
-                        'retired' => $builder->retired(),
-                        default => null,
-                    };
+                ->options(EmploymentStatus::filterOptions())
+                ->filter(function (WrestlerBuilder $builder, string $value): void {
+                    $status = EmploymentStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereEmploymentStatus($status);
+                    }
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'wrestlers_employments.started_at', 'wrestlers_employments.ended_at'),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 
-    public function delete(Wrestler $wrestler): void
+    public function delete(Wrestler $wrestler, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($wrestler);
+        Gate::authorize('delete', $wrestler);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $wrestler): void {
+            $deleteAction->handle($wrestler);
+        }, __('wrestlers.actions.deleted'));
     }
 
     /**
      * Restore a deleted wrestler.
      */
-    public function restore(int $wrestlerId): RedirectResponse
+    public function restore(int $wrestlerId, RestoreAction $restoreAction): void
     {
-        $wrestler = Wrestler::onlyTrashed()->findOrFail($wrestlerId);
-
-        Gate::authorize('restore', $wrestler);
-
-        resolve(RestoreAction::class)->handle($wrestler);
-
-        return back();
+        if ($this->executeWrestlerAction(RosterLifecycleAction::Restore, $wrestlerId, fn (Wrestler $wrestler) => $restoreAction->handle($wrestler))) {
+            $this->redirectRoute('wrestlers.index');
+        }
     }
 
     /**
@@ -112,6 +124,7 @@ class Main extends BaseTable
      *
      * @var array<string, string>
      */
+    #[\Override]
     protected $listeners = ['wrestler-action' => 'handleWrestlerAction'];
 
     protected function getDefaultActionColumn(): Column
@@ -124,25 +137,55 @@ class Main extends BaseTable
             ->excludeFromColumnSelect();
     }
 
-    public function handleWrestlerAction(string $action, int $wrestlerId): void
+    public function handleWrestlerAction(
+        string $action,
+        int $wrestlerId,
+        ClearFromInjuryAction $clearFromInjuryAction,
+        EmployAction $employAction,
+        InjureAction $injureAction,
+        ReinstateAction $reinstateAction,
+        ReleaseAction $releaseAction,
+        RestoreAction $restoreAction,
+        RetireAction $retireAction,
+        SuspendAction $suspendAction,
+        UnretireAction $unretireAction,
+    ): void {
+        $lifecycleAction = RosterLifecycleAction::from($action);
+
+        $successful = $this->executeWrestlerAction($lifecycleAction, $wrestlerId, match ($lifecycleAction) {
+            RosterLifecycleAction::Employ => fn (Wrestler $wrestler) => $employAction->handle($wrestler),
+            RosterLifecycleAction::Release => fn (Wrestler $wrestler) => $releaseAction->handle($wrestler),
+            RosterLifecycleAction::Retire => fn (Wrestler $wrestler) => $retireAction->handle($wrestler),
+            RosterLifecycleAction::Unretire => fn (Wrestler $wrestler) => $unretireAction->handle($wrestler),
+            RosterLifecycleAction::Suspend => fn (Wrestler $wrestler) => $suspendAction->handle($wrestler),
+            RosterLifecycleAction::Reinstate => fn (Wrestler $wrestler) => $reinstateAction->handle($wrestler),
+            RosterLifecycleAction::Injure => fn (Wrestler $wrestler) => $injureAction->handle($wrestler),
+            RosterLifecycleAction::ClearFromInjury => fn (Wrestler $wrestler) => $clearFromInjuryAction->handle($wrestler),
+            RosterLifecycleAction::Restore => fn (Wrestler $wrestler) => $restoreAction->handle($wrestler),
+        });
+
+        if ($successful && $lifecycleAction === RosterLifecycleAction::Restore) {
+            $this->redirectRoute('wrestlers.index');
+        }
+    }
+
+    /** @param Closure(Wrestler): void $action */
+    private function executeWrestlerAction(RosterLifecycleAction $lifecycleAction, int $wrestlerId, Closure $action): bool
     {
-        $wrestler = Wrestler::findOrFail($wrestlerId);
+        $wrestler = $lifecycleAction->usesTrashedModel()
+            ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
+            : Wrestler::findOrFail($wrestlerId);
 
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->wrestler = $wrestler;
-
-        match ($action) {
-            'employ' => $actionsComponent->employ(),
-            'release' => $actionsComponent->release(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'suspend' => $actionsComponent->suspend(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'injure' => $actionsComponent->injure(),
-            'heal' => $actionsComponent->healFromInjury(),
-            'restore' => $actionsComponent->restore(),
-            default => null,
+        return match ($lifecycleAction) {
+            RosterLifecycleAction::Employ,
+            RosterLifecycleAction::Release,
+            RosterLifecycleAction::Retire,
+            RosterLifecycleAction::Unretire,
+            RosterLifecycleAction::Suspend,
+            RosterLifecycleAction::Reinstate,
+            RosterLifecycleAction::Injure,
+            RosterLifecycleAction::ClearFromInjury,
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => $action($wrestler)),
         };
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -16,15 +16,15 @@ beforeEach(function () {
 test('it employs an unemployed referee', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -34,13 +34,13 @@ test('it employs referee with specific employment date', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(30);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -49,63 +49,52 @@ test('it employs referee with specific employment date', function () {
 test('it prevents re-employing suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
 
-    expect($referee->isSuspended())->toBeTrue();
-    expect($referee->isEmployed())->toBeTrue();
-
-    expect(fn () => EmployAction::run($referee))
-        ->toThrow(CannotBeEmployedException::class);
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 });
 
 test('it prevents re-employing injured referee', function () {
     $referee = Referee::factory()->injured()->create();
 
-    expect($referee->isInjured())->toBeTrue();
-    expect($referee->isEmployed())->toBeTrue();
-
-    expect(fn () => EmployAction::run($referee))
-        ->toThrow(CannotBeEmployedException::class);
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 });
 
-test('it employs retired referee and ends retirement', function () {
+test('it rejects employing a retired referee without changing retirement', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
 
-    expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-
-    EmployAction::run($referee);
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     $retirement->refresh();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isRetired())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
 
-    // Retirement should be ended
-    $this->assertDatabaseHas('referees_retirements', [
-        'id' => $retirement->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $referee->id,
+        'ended_at' => null,
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(10);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
-    // DateHelper should have processed the employment date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    // The provided employment date should be persisted
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -113,42 +102,40 @@ test('it handles DateHelper date resolution', function () {
 
 test('it prevents re-employing suspended referee without changing records', function () {
     $referee = Referee::factory()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect(fn () => EmployAction::run($referee))
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
         ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 });
 
 test('it validates referee can be employed', function () {
     $referee = Referee::factory()->create();
 
     // Should succeed without throwing validation exception
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it prevents double employment', function () {
     $referee = Referee::factory()->employed()->create();
-    $originalEmployment = $referee->currentEmployment;
+    $originalEmployment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
-
-    expect(fn () => EmployAction::run($referee))
-        ->toThrow(CannotBeEmployedException::class);
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->employments()->count())->toBe(1);
-    expect($referee->currentEmployment->id)->toBe($originalEmployment->id);
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->employments()->count())->toBe(1)
+        ->and($referee->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
 });
 
 test('it updates referee status to employed', function () {
@@ -156,7 +143,7 @@ test('it updates referee status to employed', function () {
 
     expect($referee->status)->not->toBe(EmploymentStatus::Employed);
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->status)->toBe(EmploymentStatus::Employed);
@@ -166,12 +153,12 @@ test('it creates employment record with correct structure', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(7);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
-    $employment = $referee->fresh()->currentEmployment;
+    $employment = freshModel($referee)->currentEmployment()->firstOrFail();
 
-    expect($employment)->not->toBeNull();
-    expect($employment->referee_id)->toBe($referee->id);
-    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
-    expect($employment->ended_at)->toBeNull();
+    expect($employment)->not->toBeNull()
+        ->and($employment->employable_id)->toBe($referee->id)
+        ->and(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull();
 });

@@ -4,31 +4,37 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Modals;
 
+use App\Actions\Stables\CreateAction;
+use App\Actions\Stables\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Stables\Forms\CreateEditForm;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Stable>
+ *
+ * @property-read array<int|string,string|null> $getWrestlers
+ * @property-read array<int|string,string|null> $getTagTeams
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-    use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -36,30 +42,34 @@ class FormModal extends BaseFormModal
         return Stable::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.stables.modals.form-modal';
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->started_at = $this->generateOptionalStartDate();
     }
 
-    protected function getDummyDataFields(): array
-    {
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'start_date' => fn () => $this->generateOptionalStartDate(),
-        ];
-    }
-
+    #[\Override]
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit Stable';
         }
 
         return 'Create Stable';
     }
 
+    protected function updateForm(): void
+    {
+        $this->updateAction->handle($this->form->stable(), $this->form->toData());
+    }
+
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
+    }
+
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.stables.modals.form-modal');
+        return view('livewire.stables.modals.form-modal');
     }
 }

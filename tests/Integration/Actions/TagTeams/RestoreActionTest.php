@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\RestoreAction;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it restores a soft-deleted tag team', function () {
     $tagTeam = TagTeam::factory()->create();
@@ -12,13 +14,15 @@ test('it restores a soft-deleted tag team', function () {
 
     // First delete the tag team
     $tagTeam->delete();
-    expect($tagTeam->trashed())->toBeTrue();
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeFalse();
-    expect($tagTeam->name)->toBe($originalName);
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeFalse()
+        ->and($tagTeam->name)->toBe($originalName);
 
     // Verify restoration in database
     $this->assertDatabaseHas('tag_teams', [
@@ -36,23 +40,32 @@ test('it handles database transactions correctly', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify restoration was successful
     expect($tagTeam->trashed())->toBeFalse();
-    expect($tagTeam->id)->toBe($originalId);
-    expect($tagTeam->exists)->toBeTrue();
+    expect($tagTeam->id)->toBe($originalId)
+        ->and($tagTeam->exists)->toBeTrue();
 });
 
 test('it prevents restoring non-deleted tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->trashed())->toBeFalse();
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeFalse()
+        ->and(fn () => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(Exception::class);
+});
 
-    expect(fn () => RestoreAction::run($tagTeam))
-        ->toThrow(Exception::class);
+test('it prevents restoring a tag team whose name belongs to an employed team', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->delete();
+
+    TagTeam::factory()->employed()->create(['name' => $tagTeam->name]);
+
+    expect(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeFalse()
+        ->and(fn () => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(CannotBeRestoredException::class);
 });
 
 test('it restores tag team with historical data intact', function () {
@@ -69,14 +82,14 @@ test('it restores tag team with historical data intact', function () {
         'ended_at' => now()->subDays(10),
     ]);
 
-    expect($tagTeam->employments()->count())->toBe(1);
-    expect($tagTeam->retirements()->count())->toBe(1);
+    expect($tagTeam->employments()->count())->toBe(1)
+        ->and($tagTeam->retirements()->count())->toBe(1);
 
     // Delete the tag team
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -102,36 +115,38 @@ test('it restores tag team with partnership history', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
-    // Partnership history should be preserved
-    expect($tagTeam->wrestlers()->count())->toBe(1);
+    // Partnership history should be preserved without reuniting former members
+    expect($tagTeam->wrestlers)->toHaveCount(1)
+        ->and($tagTeam->previousWrestlers)->toHaveCount(1)
+        ->and($tagTeam->currentWrestlers)->toBeEmpty();
 });
 
 test('it restores tag team to unemployed state', function () {
     $tagTeam = TagTeam::factory()->create();
 
     // Ensure tag team starts unemployed
-    expect($tagTeam->isEmployed())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Delete the tag team
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
     // Should remain in unemployed state
-    expect($tagTeam->isEmployed())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 });
 
 test('it handles restoration with complex historical status', function () {
@@ -157,7 +172,7 @@ test('it handles restoration with complex historical status', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -167,8 +182,8 @@ test('it handles restoration with complex historical status', function () {
     expect($tagTeam->retirements()->count())->toBe(1);
 
     // Should be in unemployed state (no active records)
-    expect($tagTeam->isEmployed())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
 });
 
 test('it restores all tag team attributes correctly', function () {
@@ -183,7 +198,7 @@ test('it restores all tag team attributes correctly', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -201,12 +216,12 @@ test('it handles concurrent restoration attempts gracefully', function () {
     expect($tagTeam->trashed())->toBeTrue();
 
     // First restoration should succeed
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
     // Second restoration attempt should fail
-    expect(fn () => RestoreAction::run($tagTeam))
+    expect(fn () => resolve(RestoreAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -219,12 +234,12 @@ test('it maintains data integrity during restoration', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
     // Timestamps should be preserved (creation) but updated (modification)
-    expect($tagTeam->created_at->toDateTimeString())->toBe($originalCreatedAt->toDateTimeString());
+    expect(requiredDate($tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString());
     expect($tagTeam->deleted_at)->toBeNull();
 });

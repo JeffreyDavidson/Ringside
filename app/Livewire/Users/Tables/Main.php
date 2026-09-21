@@ -5,18 +5,27 @@ declare(strict_types=1);
 namespace App\Livewire\Users\Tables;
 
 use App\Builders\Users\UserBuilder;
+use App\Enums\Users\UserStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Users\User;
+use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<User> */
 class Main extends BaseTable
 {
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'users';
 
+    #[\Override]
     protected string $routeBasePath = 'users';
 
+    #[\Override]
     protected string $resourceName = 'users';
 
     /** @return UserBuilder<User> */
@@ -27,14 +36,17 @@ class Main extends BaseTable
             ->oldest('last_name');
     }
 
-    public function configure(): void {}
+    protected function configure(): void
+    {
+        Gate::authorize('viewAny', User::class);
+    }
 
     /** @return array<Column> */
     public function columns(): array
     {
         return [
             Column::make(__('users.name'), 'full_name')
-                ->searchable(function (Builder $builder, string $searchTerm) {
+                ->searchable(function (UserBuilder $builder, string $searchTerm): void {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('users.role'), 'role')
@@ -45,7 +57,24 @@ class Main extends BaseTable
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn (User $row, Column $column): string => $row->formatted_phone_number),
+                ->label(fn (User $row, Column $column): string => $row->phone_number?->formatted() ?? ''),
+        ];
+    }
+
+    /** @return array<int, Filter> */
+    #[\Override]
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make(__('core.status'))
+                ->options(UserStatus::filterOptions())
+                ->filter(function (UserBuilder $builder, string $value): void {
+                    $status = UserStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
+                }),
         ];
     }
 }

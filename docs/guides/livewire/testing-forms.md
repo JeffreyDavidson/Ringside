@@ -115,20 +115,20 @@ describe('CreateEditForm Validation', function () {
         
         expect($form->getErrorBag()->has('name'))->toBeTrue();
         expect($form->getErrorBag()->has('date'))->toBeFalse(); // nullable
-        expect($form->getErrorBag()->has('venue_id'))->toBeFalse(); // required_with:date
+        expect($form->getErrorBag()->has('venue_id'))->toBeFalse(); // venue is optional
     });
     
-    test('validates required fields with dependencies', function () {
+    test('allows a date without a venue', function () {
         $form = new CreateEditForm();
-        
+
         $form->name = 'Test Event';
         $form->date = '2024-01-01';
-        $form->venue_id = 0; // Required when date is provided
-        
+        $form->venue_id = null;
+
         $form->validate();
-        
+
         expect($form->getErrorBag()->has('name'))->toBeFalse();
-        expect($form->getErrorBag()->has('venue_id'))->toBeTrue();
+        expect($form->getErrorBag()->has('venue_id'))->toBeFalse();
     });
 });
 ```
@@ -484,14 +484,14 @@ test('handles database exceptions gracefully', function () {
 });
 ```
 
-## Testing with Traits
+## Testing Typed Form Data
 
 ### Employment Management
-Test forms that use employment-related traits:
+Test employment inputs before they are passed to domain Actions:
 
 ```php
-test('validates employment date with ManagesEmployment trait', function () {
-    $form = new CreateEditForm(); // Assumes form uses ManagesEmployment
+test('validates an employment date', function () {
+    $form = new CreateEditForm();
     $form->employment_date = '2024-01-01';
     
     $form->validate();

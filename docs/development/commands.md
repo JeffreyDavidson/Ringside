@@ -5,16 +5,52 @@ This document provides a comprehensive reference for all development and testing
 ## Testing & Quality Assurance
 
 ### Primary Test Commands
-- `composer test` - Run all tests and quality checks
-- `composer test:unit` - Run PHPUnit/Pest tests with coverage
-- `composer test:types` - Run PHPStan static analysis (level 6)
+- `composer test` - Run quality checks and the default Pest suites with coverage
+- `composer test:unit` - Run the default Pest suites with PCOV coverage (minimum 44%); despite its name, this is not limited to Unit tests
+- `composer test:application` - Run Feature, Unit, and Integration tests in parallel
+- `composer test:browser` - Run Browser tests in parallel
+- `composer test:tia` - Run tests selected by Test Impact Analysis
+- `composer test:push` - Run quality checks, application tests, and browser tests before pushing
+- `composer test:types` - Run PHPStan for the application and Pest tests (both level 9)
+- `composer test:types:pest` - Run PHPStan against the Pest test suite (level 9)
 - `composer test:type-coverage` - Check type coverage (min 100%)
-- `composer test:lint` - Test code formatting (Laravel Pint)
+- `composer test:lint` - Check PHP and Blade formatting with Laravel Pint
 - `composer test:rector` - Test code modernization (dry-run)
 
+### Shared Development Commands
+
+Ringside and KneadIt share explicit command names while retaining each application's
+Pint rules, Rector exclusions, PHPStan levels, and coverage requirements.
+
+- `composer check` - Run formatting, static analysis, Rector, type coverage, application tests, frontend lint, and the production asset build; browser tests remain a separate gate
+- `composer lint:dirty` - Fix formatting in changed PHP and Blade files
+- `composer lint:check` - Alias for `test:lint`
+- `composer rector:fix` - Apply application and Pest Rector transformations
+- `composer rector:pest:fix` - Apply only Pest Rector transformations
+- `composer test:coverage` - Alias for the existing `test:unit` coverage command, with its current suite scope and 44% minimum
+- `composer frontend:check` - Run frontend lint and the production asset build
+
+The shared test commands also include `test:application`, `test:browser`,
+`test:types`, `test:type-coverage`, `test:rector`, and `test:push`.
+Existing `test`, `test:push`, `lint`, and `rector` commands retain their behavior.
+In Ringside, `lint` formats all applicable files and `rector` applies fixes;
+use `lint:dirty`, `test:rector`, and `rector:fix` for explicit intent across apps.
+
+Pint owns PHP and Blade formatting, using the Laravel preset plus Ringside's
+existing additional rules. `npm run format` and `npm run format:check` cover
+JavaScript only, so Blade is not passed through a second formatter configuration.
+Playwright is a development dependency; browser testing requires a development
+dependency install. The ESLint configuration's `@eslint/js` import is declared
+directly in `package.json`.
+
 ### Code Quality Tools
-- `composer lint` - Fix code formatting with Laravel Pint
+- `composer lint` - Fix PHP and Blade formatting with Laravel Pint
 - `composer rector` - Apply code modernization with Rector
+
+### Test Utilities
+- Use `testLivewire()` for Livewire component tests so PHPStan retains the concrete component type.
+- Prefer native Pest expectations. Add a custom expectation only when it expresses reusable domain behavior that native expectations cannot represent clearly.
+- Use `JMac\Testing\Double` for focused interaction tests where its explicit expectations improve clarity. Mockery remains available for existing tests and cases that need dynamic methods.
 
 ## Development Server
 
@@ -30,68 +66,35 @@ This document provides a comprehensive reference for all development and testing
 
 ## Test Generation
 
-### Ringside Test Generator
-- `php artisan ringside:make:test --unit --model="ModelName"` - Generate standardized model unit tests
-
-### Command Examples
+Use Laravel's native Pest test generator. Test names mirror the applicable `app/` path.
 
 ```bash
-# Generate test for Wrestler model (auto-detected in Wrestlers/ directory)
-php artisan ringside:make:test --unit --model="Wrestler"
-# Creates: tests/Unit/Models/WrestlerTest.php
-
-# Generate test for User model with directory specification
-php artisan make:model-test User --directory=Users
-# Creates: tests/Unit/Models/UserTest.php
-# Resolves: App\Models\Users\User
-
-# Generate test for nested model
-php artisan ringside:make:test --unit --model="TitleChampionship"  
-# Creates: tests/Unit/Models/TitleChampionshipTest.php
-
-# Generate test with full namespace
-php artisan ringside:make:test --unit --model="App\Models\Events\Venue"
-# Creates: tests/Unit/Models/VenueTest.php
-```
-
-### Enhanced Command Integration
-
-**Multiple Discovery Paths**: The Ringside test generator provides several ways to access standardized test generation:
-
-```bash
-# Option 1: Direct alias command (Laravel-style)
-php artisan make:model-test Product
-
-# Option 2: Directory-specific model resolution
-php artisan make:model-test User --directory=Users
-
-# Option 3: Full Ringside command
-php artisan ringside:make:test --unit --model="Product"
-
-# Option 4: Full command with directory
-php artisan ringside:make:test --unit --model="User" --directory="Users"
-
-# Option 5: Interactive mode
-php artisan ringside:make:test
-# Prompts for test type, model selection, and optional directory
-
-# Option 6: Enhanced Laravel integration
-php artisan make:test ProductTest --unit
-# Detects model-like names and offers Ringside alternative
+php artisan make:test --pest --unit Models/Roster/Wrestlers/WrestlerTest
 ```
 
 ## Quality Assurance Protocol
 
 ### Before Committing
-1. Run `composer test` to ensure all tests pass
-2. Run `composer lint` to fix formatting issues
-3. Run `composer rector` for code modernization
-4. Verify type coverage with `composer test:type-coverage`
+1. Run `composer lint` when formatting changes are needed.
+2. Run the affected tests and relevant quality checks.
+3. Review the diff and include only the intended changes.
+
+### Before Pushing
+
+Run `composer test:push` when you want the complete local verification suite.
+The pre-commit hook intentionally runs only fast staged-file checks; CI remains
+the required gate for pushed branches.
+
+### Git Hooks
+
+Run `npm install` once after cloning to configure Git to use `.githooks`. The
+pre-commit hook checks staged PHP syntax and formatting without running tests or
+static analysis.
 
 ### Test Running Best Practices
-- **IMPORTANT**: Do not run tests automatically. The user will run tests manually when needed.
+- Run affected tests after changes.
 - Use specific test commands for targeted testing
-- Always verify PHPStan level 6 compliance
+- Always verify application and Pest PHPStan level 9 compliance
 - Maintain 100% type coverage requirement
 
 ## Git Integration
@@ -101,4 +104,4 @@ php artisan make:test ProductTest --unit
 - Use `composer lint` and `composer rector` for automatic fixes
 - Only commit when code is properly formatted and tested
 
-For more development workflow information, see [Development Workflow](workflow.md).
+For more development workflow information, see [Git Workflow](../workflows/git-workflow.md).

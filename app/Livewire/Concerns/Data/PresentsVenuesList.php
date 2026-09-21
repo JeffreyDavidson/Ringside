@@ -12,9 +12,15 @@ trait PresentsVenuesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'venues-list', seconds: 180)]
+    #[Computed]
     public function getVenues(): array
     {
-        return Venue::select('id', 'name')->pluck('name', 'id')->toArray();
+        return Venue::query()
+            ->alphabetical()
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

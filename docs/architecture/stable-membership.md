@@ -12,8 +12,17 @@ Stable membership defines how wrestlers and tag teams can belong to stables.
 - **Wrestler Membership**: Individual wrestlers can belong to stables
 - **Tag Team Membership**: Tag teams can belong to stables
 - **Manager Exclusion**: Managers do NOT belong to stables directly (they manage individual wrestlers/tag teams)
-- **Multiple Stables**: Wrestlers and tag teams can belong to multiple stables
+- **Derived Manager History**: A manager is historically associated with a stable only when their wrestler or tag-team assignment overlaps that member's stable-membership period; this reporting association does not create stable membership for the manager
+- **Single Current Stable**: Wrestlers and tag teams can belong to only one stable at a time
+- **Database Enforcement**: Membership history tables enforce one open membership per wrestler or tag team while allowing unlimited ended memberships
+- **Membership History**: Wrestlers and tag teams can belong to multiple stables across non-overlapping historical periods
 - **Stable Leadership**: Stables can have designated leaders
+- **Member Availability**: New memberships require employed members who are not suspended; injured wrestlers cannot join
+- **Employment Timing**: A member's employment must begin on or before the stable membership period
+- **Unformed Stables**: A stable may be created without members and assembled before establishment
+- **Minimum Size**: An active stable requires a headcount of at least three; an individual wrestler counts as one and a tag team counts as two
+- **Split Integrity**: A split moves only available current members, and both resulting active stables must meet the minimum size
+- **Merge Integrity**: A merge rejects unavailable secondary members, preserves their membership history, and ends the secondary stable's activity period before soft deletion
 
 ### Membership Management
 - **Add Members**: Add wrestlers or tag teams to stables

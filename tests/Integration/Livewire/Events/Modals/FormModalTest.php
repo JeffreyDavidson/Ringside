@@ -2,397 +2,268 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Events\Forms\CreateEditForm;
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
-use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
-});
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-describe('FormModal Configuration', function () {
-    it('returns correct form class', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getFormClass');
-        $method->setAccessible(true);
-
-        expect($method->invoke($modal))->toBe(CreateEditForm::class);
+describe('authorized event form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-    it('returns correct model class', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getModelClass');
-        $method->setAccessible(true);
+    it('renders the event form fields and venue choices', function () {
+        Venue::factory()->create(['name' => 'Madison Square Garden']);
 
-        expect($method->invoke($modal))->toBe(Event::class);
-    });
-});
+        $modal = livewire(FormModal::class);
 
-describe('FormModal Rendering', function () {
-    it('can render in create mode', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        $component->assertOk();
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.events.modals.form-modal');
+        $modal
+            ->assertPropertyWired('form.name')
+            ->assertPropertyWired('form.date')
+            ->assertPropertyWired('form.venue_id')
+            ->assertPropertyWired('form.preview')
+            ->assertSee('Madison Square Garden');
     });
 
-    it('can render in edit mode', function () {
-        $event = Event::factory()->create();
+    it('opens an empty form for creating an event', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id);
-
-        $component->assertOk();
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', '')
+            ->assertSet('form.date', '')
+            ->assertSet('form.venue_id', 0)
+            ->assertSet('form.preview', '')
+            ->assertSee('Create Event');
     });
 
-    it('displays correct title in create mode', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Create Event');
-    });
-
-    it('displays correct title in edit mode', function () {
-        $event = Event::factory()->create(['name' => 'Test Event']);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id);
-
-        $component->assertSee('Edit Event');
-    });
-
-    it('presents venues list for selection', function () {
-        $venue = Venue::factory()->create(['name' => 'Test Arena']);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Test Arena');
-    });
-});
-
-describe('FormModal Create Operations', function () {
-    it('can create a new event with valid data', function () {
+    it('loads an existing event for editing', function () {
         $venue = Venue::factory()->create();
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'WrestleMania 40')
-            ->set('form.date', '2024-04-06')
-            ->set('form.venue_id', $venue->id)
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-
-        $this->assertDatabaseHas('events', [
-            'name' => 'WrestleMania 40',
-            'date' => '2024-04-06 00:00:00',
-            'venue_id' => $venue->id,
-        ]);
-    });
-
-    it('validates required fields when creating', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->set('form.date', null)
-            ->set('form.venue_id', null)
-            ->call('save');
-
-        $component->assertHasErrors([
-            'form.name' => 'required',
+        $eventDate = now()->addWeek()->startOfSecond();
+        $event = Event::factory()->for($venue)->create([
+            'name' => 'Summer Showcase',
+            'date' => $eventDate,
+            'preview' => 'A championship showcase.',
         ]);
 
-        // Date and venue_id are nullable per business logic
-        $component->assertHasNoErrors(['form.date', 'form.venue_id']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $event->id);
+        $modal->set('form.name', 'Summer Showcase');
+
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', 'Summer Showcase')
+            ->assertSet('form.date', $eventDate->toDateTimeString())
+            ->assertSet('form.venue_id', $venue->id)
+            ->assertSet('form.preview', 'A championship showcase.')
+            ->assertSee('Edit Event');
     });
 
-    it('validates event name uniqueness', function () {
-        Event::factory()->create(['name' => 'Existing Event']);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Existing Event')
-            ->set('form.date', '2024-04-06')
-            ->call('save');
-
-        $component->assertHasErrors(['form.name']);
+    it('propagates a missing event failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
     });
 
-    // NOTE: Date format validation test disabled due to Carbon auto-casting issue
-    // The Carbon|string|null union type causes automatic parsing that throws
-    // InvalidFormatException before validation rules can be applied
-    // This test has been temporarily disabled - date validation works in practice
-    it('validates date format', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2023-13-32')
-            ->call('save');
-
-        $component->assertHasErrors(['form.date']);
-    });
-
-    it('validates venue exists', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-06')
-            ->set('form.venue_id', 999)
-            ->call('save');
-
-        $component->assertHasErrors(['form.venue_id']);
-    });
-
-    it('allows creating events with past dates for historical records', function () {
-        $yesterday = Carbon::yesterday()->toDateString();
+    it('creates a scheduled event and closes the modal', function () {
         $venue = Venue::factory()->create();
+        $eventDate = now()->addMonth()->startOfMinute();
+        $modal = livewire(FormModal::class);
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Historical Event')
-            ->set('form.date', $yesterday)
-            ->set('form.venue_id', $venue->id)
-            ->call('save');
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'WrestleMania 40',
+            'form.date' => $eventDate->toDateTimeString(),
+            'form.venue_id' => $venue->id,
+            'form.preview' => 'The biggest event of the year.',
+        ]);
+        $modal->call('save');
 
-        // Past dates are allowed for new events (historical record keeping)
-        $component->assertHasNoErrors();
+        $event = Event::query()->whereName('WrestleMania 40')->firstOrFail();
+        expect($event->date?->toDateTimeString())->toBe($eventDate->toDateTimeString())
+            ->and($event->venue_id)->toBe($venue->id)
+            ->and($event->preview)->toBe('The biggest event of the year.');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertDispatched('closeModal')
+            ->assertSet('isModalOpen', false);
     });
-});
 
-describe('FormModal Edit Operations', function () {
-    it('can edit an existing event', function () {
-        $venue1 = Venue::factory()->create();
-        $venue2 = Venue::factory()->create();
-        $event = Event::factory()->create([
+    it('creates an unscheduled event without a venue', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Future Announcement',
+            'form.date' => null,
+            'form.venue_id' => null,
+            'form.preview' => null,
+        ]);
+        $modal->call('save');
+
+        $event = Event::query()->whereName('Future Announcement')->firstOrFail();
+        expect($event->date)->toBeNull()
+            ->and($event->venue_id)->toBeNull()
+            ->and($event->preview)->toBeNull();
+        $modal->assertHasNoErrors();
+    });
+
+    it('allows creating historical event records', function () {
+        $eventDate = today()->subDay();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Historical Event',
+            'form.date' => $eventDate->toDateString(),
+            'form.venue_id' => null,
+        ]);
+        $modal->call('save');
+
+        $event = Event::query()->whereName('Historical Event')->firstOrFail();
+        expect($event->date?->toDateString())->toBe($eventDate->toDateString());
+        $modal->assertHasNoErrors();
+    });
+
+    it('updates an existing event', function () {
+        $originalVenue = Venue::factory()->create();
+        $updatedVenue = Venue::factory()->create();
+        $event = Event::factory()->for($originalVenue)->future()->create([
             'name' => 'Original Event',
-            'date' => '2024-04-06',
-            'venue_id' => $venue1->id,
+            'preview' => null,
         ]);
+        $updatedDate = now()->addMonths(2)->startOfMinute();
+        $modal = livewire(FormModal::class);
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id)
-            ->set('form.name', 'Updated Event')
-            ->set('form.date', '2024-04-07')
-            ->set('form.venue_id', $venue2->id)
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-
-        $this->assertDatabaseHas('events', [
-            'id' => $event->id,
-            'name' => 'Updated Event',
-            'date' => '2024-04-07 00:00:00',
-            'venue_id' => $venue2->id,
+        $modal->call('openModal', $event->id);
+        $modal->set([
+            'form.name' => 'Updated Event',
+            'form.date' => $updatedDate->toDateTimeString(),
+            'form.venue_id' => $updatedVenue->id,
+            'form.preview' => 'Updated preview.',
         ]);
+        $modal->call('save');
+
+        $event->refresh();
+        expect($event->name)->toBe('Updated Event')
+            ->and($event->date?->toDateTimeString())->toBe($updatedDate->toDateTimeString())
+            ->and($event->venue_id)->toBe($updatedVenue->id)
+            ->and($event->preview)->toBe('Updated preview.');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertSet('isModalOpen', false);
     });
 
-    it('loads existing event data in edit mode', function () {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create([
-            'name' => 'Test Event',
-            'date' => '2024-04-06',
-            'venue_id' => $venue->id,
-        ]);
+    it('requires an event name', function () {
+        $modal = livewire(FormModal::class);
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id);
+        $modal->call('openModal');
+        $modal->set('form.name', '');
+        $modal->call('save');
 
-        $component->assertSet('form.name', 'Test Event');
-        $component->assertSet('form.date', '2024-04-06 00:00:00');
-        $component->assertSet('form.venue_id', $venue->id);
+        $modal
+            ->assertHasErrors(['form.name' => 'required'])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true);
+        expect(Event::query()->count())->toBe(0);
     });
 
-    it('validates name uniqueness excluding current event when editing', function () {
-        $event1 = Event::factory()->create(['name' => 'Event One']);
-        $event2 = Event::factory()->create(['name' => 'Event Two']);
+    it('rejects invalid event field values', function (string $field, mixed $value, string $rule) {
+        $modal = livewire(FormModal::class);
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event2->id)
-            ->set('form.name', 'Event One')
-            ->call('save');
+        $modal->call('openModal');
+        $modal->set('form.name', 'Valid Event');
+        $modal->set($field, $value);
+        $modal->call('save');
 
-        $component->assertHasErrors(['form.name']);
+        $modal->assertHasErrors([$field => $rule]);
+        expect(Event::query()->count())->toBe(0);
+    })->with([
+        'long name' => ['form.name', str_repeat('a', 256), 'max'],
+        'invalid date' => ['form.date', '2023-13-32', 'date'],
+        'missing venue' => ['form.venue_id', PHP_INT_MAX, 'exists'],
+    ]);
+
+    it('rejects an event name already used by another event', function () {
+        Event::factory()->create(['name' => 'Existing Event']);
+        $event = Event::factory()->create(['name' => 'Editable Event']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $event->id);
+        $modal->set('form.name', 'Existing Event');
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.name' => 'unique']);
+        expect($event->refresh()->name)->toBe('Editable Event');
     });
 
-    it('allows keeping same name when editing', function () {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create([
-            'name' => 'Test Event',
-            'date' => '2024-04-06',
-            'venue_id' => $venue->id,
-        ]);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id)
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-07')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-    });
-
-    it('validates date change rules for existing events', function () {
-        $venue = Venue::factory()->create();
+    it('keeps the date of an occurred event immutable', function () {
         $event = Event::factory()->past()->create();
+        $originalDate = $event->date;
+        $modal = livewire(FormModal::class);
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id)
-            ->set('form.date', '2025-01-01')
-            ->set('form.venue_id', $venue->id)
-            ->call('save');
+        $modal->call('openModal', $event->id);
+        $modal->set('form.date', today()->addMonth()->toDateString());
+        $modal->call('save');
 
-        // Should use DateCanBeChanged rule and allow future date changes
-        $component->assertHasNoErrors();
+        $modal->assertHasErrors(['form.date']);
+        expect($event->refresh()->date?->toDateTimeString())
+            ->toBe($originalDate?->toDateTimeString());
+    });
+
+    it('resets existing event data when reopening in create mode', function () {
+        $event = Event::factory()->future()->withPreview()->withVenue()->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $event->id);
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('form.name', '')
+            ->assertSet('form.date', '')
+            ->assertSet('form.venue_id', 0)
+            ->assertSet('form.preview', '');
+    });
+
+    it('generates valid dummy data that can create an event', function () {
+        Venue::factory()->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+        $modal->call('save');
+
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('form-submitted')
+            ->assertSet('isModalOpen', false);
+        expect(Event::query()->count())->toBe(1);
     });
 });
 
-describe('FormModal Venue Integration', function () {
-    it('displays available venues in dropdown', function () {
-        $venue1 = Venue::factory()->create(['name' => 'Arena One']);
-        $venue2 = Venue::factory()->create(['name' => 'Arena Two']);
+it('forbids users without administrative access from opening the event form', function (string $actor, string $operation) {
+    $event = $operation === 'update' ? Event::factory()->create() : null;
 
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
 
-        $component->assertSee('Arena One');
-        $component->assertSee('Arena Two');
-    });
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal', $event?->id);
 
-    it('displays all venues in dropdown including inactive ones', function () {
-        $availableVenue = Venue::factory()->available()->create(['name' => 'Available Arena']);
-        $inactiveVenue = Venue::factory()->inactive()->create(['name' => 'Inactive Arena']);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        // Both available and inactive venues should be shown for flexibility
-        $component->assertSee('Available Arena');
-        $component->assertSee('Inactive Arena');
-    });
-
-    it('allows venue selection from dropdown', function () {
-        $venue = Venue::factory()->create([
-            'name' => 'Test Arena',
-            'city' => 'Test City',
-            'state' => 'Test State',
-        ]);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.venue_id', $venue->id);
-
-        // Venue name should appear in the dropdown options
-        $component->assertSee('Test Arena');
-        // Venue details display feature not implemented yet
-        $component->assertSet('form.venue_id', $venue->id);
-    });
-});
-
-describe('FormModal State Management', function () {
-    it('resets form when switching modes', function () {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create(['name' => 'Test Event']);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal', $event->id)
-            ->call('openModal');
-
-        $component->assertSet('form.name', null);
-        $component->assertSet('form.date', null);
-        $component->assertSet('form.venue_id', null);
-    });
-
-    it('closes modal after successful save', function () {
-        $venue = Venue::factory()->create();
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-06')
-            ->set('form.venue_id', $venue->id)
-            ->call('save');
-
-        $component->assertDispatched('closeModal');
-    });
-
-    it('keeps modal open when validation fails', function () {
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->call('save');
-
-        $component->assertNotDispatched('closeModal');
-    });
-});
-
-describe('FormModal Business Logic', function () {
-    it('handles event descriptions correctly', function () {
-        $venue = Venue::factory()->create();
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-06')
-            ->set('form.venue_id', $venue->id)
-            ->set('form.preview', 'Epic wrestling event')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $this->assertDatabaseHas('events', [
-            'name' => 'Test Event',
-            'preview' => 'Epic wrestling event',
-        ]);
-    });
-
-    it('handles promotional content fields', function () {
-        $venue = Venue::factory()->create();
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-06')
-            ->set('form.venue_id', $venue->id)
-            ->set('form.preview', 'Event preview text')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $this->assertDatabaseHas('events', [
-            'name' => 'Test Event',
-            'preview' => 'Event preview text',
-        ]);
-    });
-});
-
-describe('FormModal Authorization', function () {
-    it('requires authentication', function () {
-        auth()->logout();
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        $component->assertForbidden();
-    });
-
-    it('requires administrator privileges', function () {
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        $component = Livewire::test(FormModal::class)
-            ->call('openModal');
-
-        $component->assertForbidden();
-    });
-});
+    $modal->assertForbidden();
+})->with([
+    'guest creating' => ['guest', 'create'],
+    'basic user creating' => ['basic user', 'create'],
+    'guest updating' => ['guest', 'update'],
+    'basic user updating' => ['basic user', 'update'],
+]);

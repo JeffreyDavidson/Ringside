@@ -4,41 +4,47 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Tables;
 
+use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
+use App\Builders\Events\VenueBuilder;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'venues';
 
+    #[\Override]
     protected string $routeBasePath = 'venues';
 
+    #[\Override]
     protected string $resourceName = 'venues';
 
     /**
-     * @return Builder<Venue>
+     * @return VenueBuilder<Venue>
      */
-    public function builder(): Builder
+    public function builder(): VenueBuilder
     {
         return Venue::query()
-            ->orderBy('name');
+            ->alphabetical();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', Venue::class);
+        Gate::authorize('viewAny', Venue::class);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -56,22 +62,29 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Venue $Venue): void
+    public function delete(Venue $venue, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($Venue);
+        Gate::authorize('delete', $venue);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $venue): void {
+            $deleteAction->handle($venue);
+        }, __('venues.actions.deleted'));
     }
 
     /**
      * Restore a deleted venue.
      */
-    public function restore(int $venueId): RedirectResponse
+    public function restore(int $venueId, RestoreAction $restoreAction): void
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
         Gate::authorize('restore', $venue);
 
-        resolve(RestoreAction::class)->handle($venue);
+        if ($this->executeBusinessAction(function () use ($restoreAction, $venue): void {
+            $restoreAction->handle($venue);
+        }, __('venues.actions.restored'))) {
+            $this->redirectRoute('venues.index');
+        }
 
-        return back();
     }
 }

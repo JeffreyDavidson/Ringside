@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Table;
 
+use App\Livewire\Table\Filters\SelectFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+use LogicException;
 
+/**
+ * @template TModel of Model
+ */
 abstract class DataTableComponent extends Component
 {
     use WithPagination;
@@ -36,16 +43,12 @@ abstract class DataTableComponent extends Component
     /** @var array<string> */
     protected array $additionalSelects = [];
 
-    protected bool $paginationEnabled = true;
-
-    protected bool $filtersEnabled = true;
-
     protected ?string $beforeWrapperView = null;
 
     /**
      * Return the query builder for the table data.
      *
-     * @return Builder<Model>
+     * @return Builder<TModel>
      */
     abstract public function builder(): Builder;
 
@@ -59,7 +62,7 @@ abstract class DataTableComponent extends Component
     /**
      * Configure the table component. Called during mount.
      */
-    public function configure(): void {}
+    protected function configure(): void {}
 
     /**
      * Return filter definitions for the table.
@@ -71,10 +74,52 @@ abstract class DataTableComponent extends Component
         return [];
     }
 
+    /**
+     * @return array{total: int, statuses: list<array{value: string, label: string, count: int}>}
+     */
+    #[Computed]
+    public function metadata(): array
+    {
+        $statusFilter = collect($this->filters())
+            ->first(fn (Filter $filter): bool => $filter instanceof SelectFilter && $filter->getKey() === 'status');
+
+        $statuses = [];
+
+        if ($statusFilter instanceof SelectFilter) {
+            foreach ($statusFilter->getOptions() as $value => $label) {
+                if ($value === '') {
+                    continue;
+                }
+
+                $query = $this->builder();
+                $statusFilter->apply($query, $value);
+                $statuses[] = [
+                    'value' => (string) $value,
+                    'label' => $label,
+                    'count' => $query->count(),
+                ];
+            }
+        }
+
+        return [
+            'total' => $this->builder()->count(),
+            'statuses' => $statuses,
+        ];
+    }
+
     public function mount(): void
     {
         $this->configure();
         $this->initializeFilterValues();
+    }
+
+    protected function requireContextId(?int $id, string $resource): int
+    {
+        if ($id === null) {
+            throw new LogicException("A {$resource} was not provided.");
+        }
+
+        return $id;
     }
 
     public function updatedSearch(): void
@@ -89,11 +134,19 @@ abstract class DataTableComponent extends Component
 
     public function updatedPerPage(): void
     {
+        if (! in_array($this->perPage, $this->perPageAccepted, true)) {
+            $this->perPage = $this->perPageAccepted[0] ?? 10;
+        }
+
         $this->resetPage();
     }
 
     public function sort(string $field): void
     {
+        if (! $this->isSortableField($field)) {
+            return;
+        }
+
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
@@ -101,6 +154,9 @@ abstract class DataTableComponent extends Component
             $this->sortDirection = 'asc';
         }
     }
+
+    #[On('refreshDatatable')]
+    public function refreshDatatable(): void {}
 
     public function render(): View
     {
@@ -119,24 +175,35 @@ abstract class DataTableComponent extends Component
      */
     protected function getColumns(): array
     {
-        $columns = $this->columns();
-
-        if (method_exists($this, 'appendColumns')) {
-            $columns = array_merge($columns, $this->appendColumns());
-        }
-
-        return $columns;
+        return [
+            ...$this->columns(),
+            ...$this->additionalColumns(),
+        ];
     }
 
     /**
-     * @return LengthAwarePaginator<int, Model>
+     * @return array<int, Column>
+     */
+    protected function additionalColumns(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, TModel>
      */
     protected function getRows(): LengthAwarePaginator
     {
+        $this->normalizeTableState();
+
         $query = $this->builder();
 
         if ($this->additionalSelects) {
-            $query->select('*')->addSelect($this->additionalSelects);
+            if ($query->getQuery()->columns === null) {
+                $query->select('*');
+            }
+
+            $query->addSelect($this->additionalSelects);
         }
 
         $this->applySearch($query);
@@ -147,7 +214,7 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applySearch(Builder $query): void
     {
@@ -156,7 +223,7 @@ abstract class DataTableComponent extends Component
         }
 
         $searchTerm = $this->search;
-        $searchableColumns = collect($this->getColumns())->filter(fn (Column $col) => $col->isSearchable());
+        $searchableColumns = collect($this->getColumns())->filter(fn (Column $col): bool => $col->isSearchable());
 
         if ($searchableColumns->isEmpty()) {
             return;
@@ -164,13 +231,15 @@ abstract class DataTableComponent extends Component
 
         $query->where(function (Builder $q) use ($searchableColumns, $searchTerm): void {
             foreach ($searchableColumns as $column) {
-                $q->orWhere($column->getField(), 'like', "%{$searchTerm}%");
+                $q->orWhere(function (Builder $columnQuery) use ($column, $searchTerm): void {
+                    $column->applySearch($columnQuery, $searchTerm);
+                });
             }
         });
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applyFilters(Builder $query): void
     {
@@ -181,43 +250,40 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applySorting(Builder $query): void
     {
-        if ($this->sortField !== '') {
-            $query->orderBy($this->sortField, $this->sortDirection);
+        if ($this->sortField !== '' && $this->isSortableField($this->sortField)) {
+            $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+            $query->orderBy($this->sortField, $direction);
         }
     }
 
     protected function initializeFilterValues(): void
     {
         foreach ($this->filters() as $filter) {
-            if (! isset($this->filterValues[$filter->getKey()])) {
-                $this->filterValues[$filter->getKey()] = $filter->getDefaultValue();
-            }
+            $this->filterValues[$filter->getKey()] ??= $filter->getDefaultValue();
         }
     }
 
-    /* Configuration methods for compatibility with existing code */
-
-    protected function setPrimaryKey(string $key): static
+    private function normalizeTableState(): void
     {
-        $this->primaryKey = $key;
+        if (! in_array($this->perPage, $this->perPageAccepted, true)) {
+            $this->perPage = $this->perPageAccepted[0] ?? 10;
+        }
 
-        return $this;
+        if ($this->sortField !== '' && ! $this->isSortableField($this->sortField)) {
+            $this->sortField = '';
+            $this->sortDirection = 'asc';
+        }
     }
 
-    protected function setColumnSelectDisabled(): static
+    private function isSortableField(string $field): bool
     {
-        return $this;
-    }
-
-    protected function setPaginationEnabled(): static
-    {
-        $this->paginationEnabled = true;
-
-        return $this;
+        return collect($this->getColumns())
+            ->contains(fn (Column $column): bool => $column->isSortable() && $column->getField() === $field);
     }
 
     /**
@@ -240,40 +306,10 @@ abstract class DataTableComponent extends Component
         return $this;
     }
 
-    protected function setLoadingPlaceholderContent(string $content): static
-    {
-        return $this;
-    }
-
-    protected function setLoadingPlaceholderEnabled(): static
-    {
-        return $this;
-    }
-
-    protected function setFiltersStatus(bool $status): static
-    {
-        $this->filtersEnabled = $status;
-
-        return $this;
-    }
-
     protected function setSearchPlaceholder(string $placeholder): static
     {
         $this->searchPlaceholder = $placeholder;
 
-        return $this;
-    }
-
-    protected function setSearchIcon(string $icon): static
-    {
-        return $this;
-    }
-
-    /**
-     * @param  array<string, mixed>|callable  $attributes
-     */
-    protected function setSearchFieldAttributes(array|callable $attributes): static
-    {
         return $this;
     }
 
@@ -286,68 +322,6 @@ abstract class DataTableComponent extends Component
             $this->beforeWrapperView = $areas['before-wrapper'];
         }
 
-        return $this;
-    }
-
-    /* Styling no-ops — our Blade views handle styling directly */
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setPerPageFieldAttributes(array $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setTableWrapperAttributes(array $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setTableAttributes(array $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setTheadAttributes(array $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>|callable  $attributes */
-    protected function setThAttributes(array|callable $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>|callable  $attributes */
-    protected function setThSortButtonAttributes(array|callable $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setTbodyAttributes(array $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>|callable  $attributes */
-    protected function setTrAttributes(array|callable $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>|callable  $attributes */
-    protected function setTdAttributes(array|callable $attributes): static
-    {
-        return $this;
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    protected function setPaginationWrapperAttributes(array $attributes): static
-    {
         return $this;
     }
 }

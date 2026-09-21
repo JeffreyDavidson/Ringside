@@ -2,10 +2,11 @@
     'id' => null,
 ])
 
-<div 
-    {{ $attributes->merge([
+<div {{
+    $attributes->merge([
         'id' => $id,
-        'class' => 'text-xs text-muted-foreground'
-    ]) }}>
+        'class' => 'text-xs text-muted-foreground',
+    ])
+}}>
     {{ $slot }}
 </div>

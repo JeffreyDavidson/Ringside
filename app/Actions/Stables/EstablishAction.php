@@ -4,50 +4,60 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
-use App\Models\Stables\Stable;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EstablishAction
 {
-    use AsAction;
+    public function __construct(
+        protected StartActivityPeriodAction $startActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableActivityEligibility $eligibility,
+    ) {}
 
     /**
      * Establish a stable and make it active.
-     *
-     * This handles the complete stable establishment workflow:
-     * - Validates the stable can be established (currently unactivated)
-     * - Creates an establishment record with the specified date
-     * - Makes the stable available for storylines and championship opportunities
-     * - Activates the stable's debut period
-     *
-     * @param  Stable  $stable  The stable to establish
-     * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
-     * @throws CannotBeEstablishedException When stable cannot be established due to business rules
-     *
-     * @example
-     * ```php
-     * // Establish stable immediately
-     * $stable = Stable::where('name', 'The Shield')->first();
-     * EstablishAction::run($stable);
-     *
-     * // Establish with specific date
-     * EstablishAction::run($stable, Carbon::parse('2024-01-01'));
-     * ```
      */
-    public function handle(Stable $stable, ?Carbon $activationDate = null): void
-    {
-        $stable->ensureCanBeEstablished();
+    public function handle(
+        Stable $stable,
+        ?Carbon $activationDate = null,
+        ?Carbon $endDate = null,
+    ): ActivityPeriod {
+        $effectiveActivationDate = $activationDate ?? now();
 
-        $activationDate = $activationDate ?? now();
+        if ($endDate?->lt($effectiveActivationDate)) {
+            throw InvalidDateRangeException::endBeforeStart($effectiveActivationDate, $endDate, 'stable establishment');
+        }
 
-        DB::transaction(function () use ($stable, $activationDate): void {
-            $stable->activityPeriods()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $activationDate->toDateTimeString()]
+        return DB::transaction(function () use ($stable, $effectiveActivationDate, $endDate): ActivityPeriod {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
+
+            $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $effectiveActivationDate);
+
+            if ($endDate instanceof Carbon) {
+                $activityPeriod->update(['ended_at' => $endDate]);
+            }
+
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Established,
+                $effectiveActivationDate,
+                array_filter(['ended_at' => $endDate?->toDateTimeString()]),
             );
+
+            return $activityPeriod;
         });
     }
 }

@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RestoreAction;
-use App\Models\Wrestlers\Wrestler;
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -17,7 +18,7 @@ test('it restores a soft-deleted wrestler', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -30,6 +31,17 @@ test('it restores a soft-deleted wrestler', function () {
     ]);
 });
 
+test('it reloads a stale wrestler before restoring', function () {
+    $wrestler = Wrestler::factory()->create();
+    $staleWrestler = clone $wrestler;
+
+    $wrestler->delete();
+
+    resolve(RestoreAction::class)->handle($staleWrestler);
+
+    expect(Wrestler::query()->find($wrestler->getKey()))->not->toBeNull();
+});
+
 test('it restores wrestler with specific restore date', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete
@@ -37,7 +49,7 @@ test('it restores wrestler with specific restore date', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    RestoreAction::run($wrestler, $restoreDate);
+    resolve(RestoreAction::class)->handle($wrestler, $restoreDate);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -50,12 +62,12 @@ test('it restores wrestler with specific restore date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete
 
     // Test with null date (should use now())
-    RestoreAction::run($wrestler, null);
+    resolve(RestoreAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -80,13 +92,13 @@ test('it restores wrestler without automatically restoring relationships', funct
     $wrestler->delete(); // Soft delete
 
     expect($wrestler->trashed())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->trashed())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should remain unemployed
+    expect($wrestler->trashed())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // Verify wrestler is restored but relationships remain ended
     $this->assertDatabaseHas('wrestlers', [
@@ -95,8 +107,8 @@ test('it restores wrestler without automatically restoring relationships', funct
     ]);
 
     // Employment should still be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->subDays(5)->toDateTimeString(),
     ]);
 });
@@ -117,20 +129,20 @@ test('it maintains historical data integrity', function () {
 
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
 
     // All historical records should be preserved
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(100)->toDateTimeString(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(50)->toDateTimeString(),
         'ended_at' => now()->subDays(10)->toDateTimeString(),
     ]);
@@ -142,10 +154,8 @@ test('it maintains historical data integrity', function () {
 test('it prevents restoring non-deleted wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->trashed())->toBeFalse();
-
-    expect(fn () => RestoreAction::run($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->trashed())->toBeFalse()
+        ->and(fn () => resolve(RestoreAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it restores wrestler with complex status history', function () {
@@ -175,21 +185,21 @@ test('it restores wrestler with complex status history', function () {
 
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
 
     // All historical status records should be preserved
     expect($wrestler->employments()->count())->toBe(2);
-    expect($wrestler->retirements()->count())->toBe(1);
-    expect($wrestler->suspensions()->count())->toBe(1);
+    expect($wrestler->retirements()->count())->toBe(1)
+        ->and($wrestler->suspensions()->count())->toBe(1);
 
     // Wrestler should be in clean unemployed state
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isRetired())->toBeFalse();
-    expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse()
+        ->and($wrestler->currentInjury()->exists())->toBeFalse();
 });
 
 test('it allows wrestler to be re-employed after restoration', function () {
@@ -199,15 +209,15 @@ test('it allows wrestler to be re-employed after restoration', function () {
     $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()->subDays(5)]);
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->trashed())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->trashed())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // After restoration, wrestler can be employed again using EmployAction
     // This test verifies the wrestler is in a valid state for future employment
-    expect($wrestler->canBeEmployed())->toBeTrue();
+    expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($wrestler))->toBeTrue();
 });
 
 test('it preserves wrestler identity and metadata', function () {
@@ -224,16 +234,16 @@ test('it preserves wrestler identity and metadata', function () {
     $originalId = $wrestler->id;
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
 
     // All original data should be preserved
     expect($wrestler->id)->toBe($originalId);
-    expect($wrestler->name)->toBe($originalName);
-    expect($wrestler->hometown)->toBe($originalHometown);
-    expect($wrestler->weight)->toBe($originalWeight);
+    expect($wrestler->name)->toBe($originalName)
+        ->and($wrestler->hometown)->toBe($originalHometown)
+        ->and($wrestler->weight->toPounds())->toBe($originalWeight);
 });
 
 test('it handles wrestler with no relationships', function () {
@@ -241,10 +251,10 @@ test('it handles wrestler with no relationships', function () {
     $wrestler->delete(); // Soft delete
 
     expect($wrestler->trashed())->toBeTrue();
-    expect($wrestler->employments)->toBeEmpty();
-    expect($wrestler->managers)->toBeEmpty();
+    expect($wrestler->employments)->toBeEmpty()
+        ->and($wrestler->managers)->toBeEmpty();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();

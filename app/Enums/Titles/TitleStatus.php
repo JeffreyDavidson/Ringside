@@ -10,6 +10,7 @@ enum TitleStatus: string
     case PendingDebut = 'pending_debut';   // Scheduled to debut in the future
     case Active = 'active';                // Currently active and defendable
     case Inactive = 'inactive';            // Temporarily out of circulation
+    case Retired = 'retired';              // Currently retired from circulation
 
     public function color(): string
     {
@@ -18,6 +19,7 @@ enum TitleStatus: string
             self::PendingDebut => 'bg-blue-500 text-white',
             self::Active => 'bg-green-600 text-white',
             self::Inactive => 'bg-yellow-500 text-black',
+            self::Retired => 'bg-red-600 text-white',
         };
     }
 
@@ -28,6 +30,22 @@ enum TitleStatus: string
             self::PendingDebut => 'Schedule to Debut',
             self::Active => 'Active',
             self::Inactive => 'Inactive',
+            self::Retired => 'Retired',
         };
+    }
+
+    /** @return array<string, string> */
+    public static function filterOptions(): array
+    {
+        /** @var array<string, string> $statusOptions */
+        $statusOptions = array_combine(
+            array_map(static fn (self $status): string => $status->value, self::cases()),
+            array_map(static fn (self $status): string => $status->label(), self::cases()),
+        );
+
+        return [
+            '' => __('core.all'),
+            ...$statusOptions,
+        ];
     }
 }

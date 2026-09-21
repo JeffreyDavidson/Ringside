@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RetireAction;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,17 +14,18 @@ beforeEach(function () {
 test('it retires an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentRetirement()->exists())->toBeFalse();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed when retired
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse(); // Should no longer be employed when retired
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -34,49 +35,52 @@ test('it retires wrestler with specific retirement date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $retirementDate = now()->subDays(7);
 
-    RetireAction::run($wrestler, $retirementDate);
+    resolve(RetireAction::class)->handle($wrestler, $retirementDate);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
 
-test('it uses StatusTransitionPipeline for retirement', function () {
+test('it persists the retirement lifecycle', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentRetirement)->toBeNull();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
-    // Verify retirement created through pipeline
+    // Verify retirement period was created
     expect($wrestler->currentRetirement)->not()->toBeNull();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    RetireAction::run($wrestler, null);
+    resolve(RetireAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
     ]);
 });
@@ -96,24 +100,26 @@ test('it handles multiple retirement scenarios', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentRetirement()->exists())->toBeFalse();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     // New retirement should be created
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Old retirement should remain unchanged
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
@@ -123,59 +129,55 @@ test('it ends employment when retiring', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get the current employment
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
     // Employment should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->currentRetirement()->exists())->toBeTrue();
 });
 
 test('it prevents retiring already retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
-
-    expect(fn () => RetireAction::run($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and(fn () => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents retiring unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create(); // Unemployed by default
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isRetired())->toBeFalse();
-
-    expect(fn () => RetireAction::run($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse()
+        ->and(fn () => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it can retire suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Suspended wrestlers can be retired (career-ending situation)
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -189,18 +191,19 @@ test('it can retire injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeTrue();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Employment should end
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse(); // Employment should end
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);

@@ -14,7 +14,14 @@ class EventsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Event::factory()->scheduled()->count(5)->create();
-        Event::factory()->past()->count(100)->create();
+        $sequence = 0;
+        $uniqueName = function () use (&$sequence): array {
+            $sequence++;
+
+            return ['name' => "Seeded Event {$sequence}"];
+        };
+
+        Event::factory()->scheduled()->count(5)->state($uniqueName)->create();
+        Event::factory()->past()->count(100)->state($uniqueName)->create();
     }
 }

@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\TagTeams\TagTeamWrestler;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @extends DataTableComponent<TagTeamWrestler>
+ */
 abstract class BasePreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
@@ -19,7 +25,12 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
 
     protected string $databaseTableName;
 
-    public function configure(): void {}
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
+    {
+        $this->routeResolver = $routeResolver;
+    }
 
     /**
      * Get the partner wrestler name for the given tag team relationship.
@@ -32,23 +43,39 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     abstract protected function getPartnerRoute(TagTeamWrestler $row): string;
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
     {
         return [
             LinkColumn::make(__('tag-teams.name'))
-                ->title(fn (TagTeamWrestler $row) => $row->tagTeam->name)
-                ->location(fn (TagTeamWrestler $row) => route('tag-teams.show', $row->tagTeam)),
+                ->title(fn (TagTeamWrestler $row): string => $this->tagTeamName($row))
+                ->location(fn (TagTeamWrestler $row): ?string => $row->tagTeam === null
+                    ? null
+                    : $this->routeResolver->urlFor($row->tagTeam))
+                ->searchable(function (TagTeamMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             LinkColumn::make(__('tag-teams.partner'))
-                ->title(fn (TagTeamWrestler $row) => $this->getPartnerName($row))
-                ->location(fn (TagTeamWrestler $row) => $this->getPartnerRoute($row)),
+                ->title(fn (TagTeamWrestler $row): string => $this->getPartnerName($row))
+                ->location(fn (TagTeamWrestler $row): string => $this->getPartnerRoute($row)),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')
                 ->outputFormat('Y-m-d'),
         ];
+    }
+
+    private function tagTeamName(TagTeamWrestler $row): string
+    {
+        $tagTeam = $row->tagTeam;
+
+        return $tagTeam->name ?? 'N/A';
     }
 }

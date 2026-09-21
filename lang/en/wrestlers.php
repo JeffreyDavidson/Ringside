@@ -12,6 +12,7 @@ return [
     'inches' => 'Inches',
 
     'actions' => [
+        'deleted' => 'Wrestler successfully deleted.',
         'employed' => 'Wrestler has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Wrestler has been retired.',
@@ -19,7 +20,7 @@ return [
         'suspended' => 'Wrestler has been suspended.',
         'reinstated' => 'Wrestler has been reinstated.',
         'injured' => 'Injury has been recorded.',
-        'healed' => 'Wrestler has been cleared from injury.',
+        'cleared_from_injury' => 'Wrestler has been cleared from injury.',
         'restored' => 'Wrestler has been restored.',
     ],
 
@@ -38,10 +39,11 @@ return [
         'cannot_suspend' => 'Unable to suspend this wrestler.',
         'already_suspended' => 'This wrestler is already suspended.',
         'cannot_reinstate' => 'Unable to reinstate this wrestler.',
-        'not_suspended_or_injured' => 'This wrestler is not currently suspended or injured.',
+        'not_suspended' => 'This wrestler is not currently suspended.',
+        'cannot_reinstate_injured' => 'Injured wrestlers must be cleared from injury instead of reinstated.',
         'cannot_injure' => 'Unable to record injury for this wrestler.',
         'already_injured' => 'This wrestler is already injured.',
-        'cannot_heal' => 'Unable to clear this wrestler from injury.',
+        'cannot_clear_from_injury' => 'Unable to clear this wrestler from injury.',
         'not_injured' => 'This wrestler is not currently injured.',
         'cannot_restore' => 'Unable to restore this wrestler.',
         'not_deleted' => 'This wrestler has not been deleted.',

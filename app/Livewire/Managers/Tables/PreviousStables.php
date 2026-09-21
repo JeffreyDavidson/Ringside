@@ -4,38 +4,43 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Livewire\Table\Column;
-use App\Models\Stables\Stable;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
+use App\Queries\Roster\StableManagerHistoryQuery;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
 {
     /**
      * ManagerId to use for component.
      */
-    public ?int $managerId;
+    #[Locked]
+    public ?int $managerId = null;
 
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
+    #[\Override]
     protected string $resourceName = 'stables';
 
     /**
      * Get stables that the manager was associated with through wrestlers/tag teams they managed.
      *
-     * @return Builder<Stable>
+     * @return StableBuilder<Stable>
      */
-    public function builder(): Builder
+    public function builder(): StableBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new Exception("You didn't specify a manager");
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
-        // Simplified query - just return all stables for now to fix the test
-        return Stable::query();
+        return StableManagerHistoryQuery::previousStablesForManagerId($managerId);
     }
 
+    #[\Override]
     public function columns(): array
     {
         return [
@@ -44,5 +49,10 @@ class PreviousStables extends BasePreviousStablesTable
         ];
     }
 
-    public function configure(): void {}
+    protected function configure(): void
+    {
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
+
+        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+    }
 }

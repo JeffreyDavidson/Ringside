@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\Cascades\ManagerDeletionCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Models\Managers\Manager;
-use App\Support\DateHelper;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+    ) {}
 
     /**
      * Delete a manager.
@@ -27,13 +32,8 @@ class DeleteAction
      * - No impact on past management records or statistics
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves manager employment history for administrative records
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the manager record
@@ -42,29 +42,18 @@ class DeleteAction
      *
      * @param  Manager  $manager  The manager to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete manager immediately
-     * $manager = Manager::find(1);
-     * DeleteAction::run($manager);
-     *
-     * // Delete with specific date
-     * DeleteAction::run($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = DateHelper::resolveDate($deletionDate);
+        $effectiveDate = $deletionDate ?? now();
 
-        DB::transaction(function () use ($manager, $deletionDate): void {
-            // Handle manager status cleanup using StatusTransitionPipeline with cascade strategy
-            StatusTransitionPipeline::delete($manager, $deletionDate)
-                ->withCascade(ManagerDeletionCascadeStrategy::comprehensive())
-                ->execute();
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
 
-            // Soft delete the manager record
-            $manager->delete();
+            $this->eligibility->ensureCanDelete($lockedManager);
+            $this->periods->close($lockedManager, $effectiveDate);
+            $this->endCurrentRelationships->handle($lockedManager, $effectiveDate);
+            $this->deletionState->delete($lockedManager, $effectiveDate);
         });
     }
 }

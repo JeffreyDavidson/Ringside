@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Delete a referee.
@@ -21,18 +25,13 @@ class DeleteAction
      * This handles the complete deletion workflow with business impact:
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves referee employment history for administrative records
      *
      * MATCH OFFICIATING IMPACT:
      * - Removes referee from active match assignments
      * - Preserves historical match officiating records
      * - No impact on past match results or statistics
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other referee actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the referee record
@@ -41,27 +40,17 @@ class DeleteAction
      *
      * @param  Referee  $referee  The referee to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * $referee = Referee::find(1);
-     * DeleteAction::run($referee);
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        if (method_exists($referee, 'ensureCanBeDeleted')) {
-            $referee->ensureCanBeDeleted();
-        }
+        $effectiveDate = $deletionDate ?? now();
 
-        $deletionDate = DateHelper::resolveDate($deletionDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        DB::transaction(function () use ($referee, $deletionDate): void {
-            // Handle referee status cleanup using StatusTransitionPipeline
-            StatusTransitionPipeline::delete($referee, $deletionDate)->execute();
-
-            // Soft delete the referee record
-            $referee->delete();
+            $this->eligibility->ensureCanDelete($lockedReferee);
+            $this->periods->close($lockedReferee, $effectiveDate);
+            $this->deletionState->delete($lockedReferee, $effectiveDate);
         });
     }
 }

@@ -7,17 +7,14 @@ namespace App\Models\Users;
 use App\Builders\Users\UserBuilder;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
-use App\Models\Wrestlers\Wrestler;
+use App\ValueObjects\PhoneNumber;
 use Database\Factories\Users\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -31,21 +28,17 @@ use Illuminate\Support\Carbon;
  * @property string $last_name
  * @property string $full_name
  * @property string $email
- * @property string|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property UserStatus $status
  * @property string|null $avatar_path
- * @property string|null $phone_number
+ * @property PhoneNumber|null $phone_number
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Role $role
- * @property-read string $formatted_phone_number
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
- * @property-read Wrestler|null $wrestler
- * @property-read Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\Users\UserFactory factory($count = null, $state = [])
  * @method static UserBuilder<static>|User newModelQuery()
@@ -68,6 +61,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+    #[\Override]
     protected $attributes = [
         'status' => UserStatus::Unverified->value,
     ];
@@ -77,60 +71,15 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
             'role' => Role::class,
             'status' => UserStatus::class,
+            'phone_number' => PhoneNumber::class,
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Get the user's password.
-     *
-     * @return Attribute<mixed, mixed>
-     */
-    public function password(): Attribute
-    {
-        return new Attribute(
-            set: fn (string $value) => bcrypt($value),
-        );
-    }
-
-    /**
-     * Check to see if the user is an administrator.
-     */
-    public function isAdministrator(): bool
-    {
-        return $this->role === Role::Administrator;
-    }
-
-    public function getAvatar(): string
-    {
-        return $this->avatar_path ?? 'blank.png';
-    }
-
-    /**
-     * Get the formatted phone number attribute.
-     *
-     * @return Attribute<string, never>
-     */
-    public function formattedPhoneNumber(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->phone_number
-                ? sprintf('(%s) %s-%s', mb_substr($this->phone_number, 0, 3), mb_substr($this->phone_number, 3, 3), mb_substr($this->phone_number, 6, 4))
-                : '',
-        );
-    }
-
-    /**
-     * Get all wrestlers owned by this user.
-     *
-     * @return HasMany<Wrestler, $this>
-     */
-    public function wrestlers(): HasMany
-    {
-        return $this->hasMany(Wrestler::class, 'user_id');
     }
 }

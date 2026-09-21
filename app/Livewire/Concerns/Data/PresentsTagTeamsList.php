@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Data;
 
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Livewire\Attributes\Computed;
 
 trait PresentsTagTeamsList
@@ -12,9 +12,14 @@ trait PresentsTagTeamsList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'tag-teams-list', seconds: 180)]
+    #[Computed]
     public function getTagTeams(): array
     {
-        return TagTeam::select('id', 'name')->pluck('name', 'id')->toArray();
+        return TagTeam::query()
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

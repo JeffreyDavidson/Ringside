@@ -4,30 +4,38 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Modals;
 
+use App\Actions\TagTeams\CreateAction;
+use App\Actions\TagTeams\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, TagTeam>
+ *
+ * @property-read array<int|string,string|null> $getManagers
+ * @property-read array<int|string,string|null> $getWrestlers
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
     use PresentsManagersList;
     use PresentsWrestlersList;
 
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -35,28 +43,32 @@ class FormModal extends BaseFormModal
         return TagTeam::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.tag-teams.modals.form-modal';
+        $wrestlers = Wrestler::query()
+            ->inRandomOrder()
+            ->limit(2)
+            ->get(['id']);
+
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->signature_move = Str::of(fake()->optional(0.8)->sentence(3))->title()->value();
+        $this->form->employment_date = $this->generateOptionalEmploymentDate();
+        $this->form->wrestlerA = $wrestlers->get(0)?->id;
+        $this->form->wrestlerB = $wrestlers->get(1)?->id;
     }
 
-    protected function getDummyDataFields(): array
+    protected function updateForm(): void
     {
-        /** @var Wrestler $wrestlerA */
-        /** @var Wrestler $wrestlerB */
-        [$wrestlerA, $wrestlerB] = Wrestler::factory()->count(2)->create();
+        $this->updateAction->handle($this->form->tagTeam(), $this->form->toData());
+    }
 
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'start_date' => fn () => $this->generateOptionalStartDate(),
-            'wrestlerA' => fn () => $wrestlerA->id,
-            'wrestlerB' => fn () => $wrestlerB->id,
-        ];
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
     }
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.tag-teams.modals.form-modal');
+        return view('livewire.tag-teams.modals.form-modal');
     }
 }

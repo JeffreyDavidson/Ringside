@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\TagTeams\TagTeamWrestler;
-use Exception;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<TagTeamWrestler> */
 class PreviousWrestlers extends DataTableComponent
 {
     use ShowTableTrait;
@@ -21,22 +26,25 @@ class PreviousWrestlers extends DataTableComponent
 
     protected string $databaseTableName = 'tag_teams_wrestlers';
 
-    public ?int $tagTeamId;
+    #[Locked]
+    public ?int $tagTeamId = null;
 
-    /**
-     * @return Builder<TagTeamWrestler>
-     */
-    public function builder(): Builder
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
     {
-        if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
-        }
+        $this->routeResolver = $routeResolver;
+    }
+
+    /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
+    public function builder(): TagTeamMembershipBuilder
+    {
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TagTeamWrestler::query()
             ->with('wrestler')
-            ->where('tag_teams_wrestlers.tag_team_id', $this->tagTeamId)
-            ->whereNotNull('tag_teams_wrestlers.left_at')
-            ->orderByDesc('tag_teams_wrestlers.joined_at');
+            ->forTagTeamId($tagTeamId)
+            ->forHistory();
     }
 
     /**
@@ -47,7 +55,16 @@ class PreviousWrestlers extends DataTableComponent
         return [
             LinkColumn::make(__('wrestlers.name'))
                 ->title(fn (TagTeamWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (TagTeamWrestler $row) => $row->wrestler ? route('wrestlers.show', $row->wrestler) : '#'),
+                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
+                ->searchable(function (TagTeamMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('tag-teams.date_left'), 'left_at')
@@ -55,8 +72,12 @@ class PreviousWrestlers extends DataTableComponent
         ];
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.wrestler_id',
             'tag_teams_wrestlers.tag_team_id',

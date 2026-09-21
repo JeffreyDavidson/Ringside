@@ -4,55 +4,68 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Wrestlers\WrestlerManager;
-use Exception;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<WrestlerManager> */
 class PreviousWrestlers extends DataTableComponent
 {
     use ShowTableTrait;
 
-    public ?int $managerId;
+    #[Locked]
+    public ?int $managerId = null;
 
     protected string $databaseTableName = 'wrestlers_managers';
 
     protected string $resourceName = 'wrestlers';
 
-    /**
-     * @return Builder<WrestlerManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<WrestlerManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new Exception("You didn't specify a manager");
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return WrestlerManager::query()
-            ->where('manager_id', $this->managerId)
-            ->whereNotNull('fired_at')
-            ->orderByDesc('hired_at');
+            ->with('wrestler')
+            ->whereHas('wrestler')
+            ->forManagerId($managerId)
+            ->forHistory();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
+
+        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+
         $this->addAdditionalSelects([
             'wrestlers_managers.wrestler_id as wrestler_id',
         ]);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
     {
         return [
-            Column::make(__('wrestlers.name'), 'wrestler.name'),
+            Column::make(__('wrestlers.name'), 'wrestler.name')
+                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('wrestlers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('wrestlers.date_left'), 'fired_at')

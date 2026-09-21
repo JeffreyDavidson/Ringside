@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Referees\RestoreAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Data\CannotBeRestoredException;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -20,7 +20,7 @@ test('it restores a soft-deleted referee', function () {
 
     expect($referee->trashed())->toBeTrue();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
@@ -33,6 +33,17 @@ test('it restores a soft-deleted referee', function () {
     ]);
 });
 
+test('it reloads a stale referee before restoring', function () {
+    $referee = Referee::factory()->create();
+    $staleReferee = clone $referee;
+
+    $referee->delete();
+
+    resolve(RestoreAction::class)->handle($staleReferee);
+
+    expect(Referee::query()->find($referee->getKey()))->not->toBeNull();
+});
+
 test('it validates referee can be restored', function () {
     $referee = Referee::factory()->create();
     $referee->delete(); // Soft delete
@@ -40,7 +51,7 @@ test('it validates referee can be restored', function () {
     expect($referee->trashed())->toBeTrue();
 
     // Should succeed without throwing validation exception
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
@@ -51,7 +62,7 @@ test('it throws exception when referee cannot be restored', function () {
 
     expect($referee->trashed())->toBeFalse();
 
-    expect(fn () => RestoreAction::run($referee))
+    expect(fn () => resolve(RestoreAction::class)->handle($referee))
         ->toThrow(CannotBeRestoredException::class);
 });
 
@@ -59,7 +70,7 @@ test('it maintains transaction boundaries', function () {
     $referee = Referee::factory()->create();
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -78,38 +89,38 @@ test('it preserves referee data after restoration', function () {
 
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
     // All original data should be preserved
     expect($referee->id)->toBe($originalId);
-    expect($referee->first_name)->toBe('Earl');
-    expect($referee->last_name)->toBe('Hebner');
-    expect($referee->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
-    expect($referee->deleted_at)->toBeNull();
+    expect($referee->first_name)->toBe('Earl')
+        ->and($referee->last_name)->toBe('Hebner')
+        ->and(requiredDate($referee->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp)
+        ->and($referee->deleted_at)->toBeNull();
 });
 
 test('it does not automatically restore employment relationships', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     // End employment and soft delete referee
     $employment->update(['ended_at' => now()]);
     $referee->delete();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($employment->fresh()->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and(freshModel($employment)->ended_at)->not->toBeNull();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
     // Referee should be restored but employment should remain ended
     expect($referee->trashed())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($employment->ended_at)->not->toBeNull()
+        ->and($referee->currentEmployment()->exists())->toBeFalse();
 });
 
 test('it preserves historical relationships', function () {
@@ -128,7 +139,7 @@ test('it preserves historical relationships', function () {
 
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -136,28 +147,29 @@ test('it preserves historical relationships', function () {
     expect($referee->employments()->count())->toBe(1);
     expect($referee->injuries()->count())->toBe(1);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
     ]);
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
     ]);
 });
 
 test('it allows referee to be re-employed after restoration', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     // End employment and delete referee
     $employment->update(['ended_at' => now()]);
     $referee->delete();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->trashed())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->trashed())->toBeFalse()
+        ->and($referee->currentEmployment()->exists())->toBeFalse();
 
     // Should be able to employ the restored referee
     $referee->employments()->create([
@@ -167,5 +179,5 @@ test('it allows referee to be re-employed after restoration', function () {
     $referee->update(['status' => EmploymentStatus::Employed]);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 });

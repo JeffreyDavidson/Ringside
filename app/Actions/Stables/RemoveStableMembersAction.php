@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableMembershipData;
-use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Remove members from a stable.
@@ -20,26 +18,33 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class RemoveStableMembersAction
 {
-    use AsAction;
-
     /**
      * Remove members from a stable.
      *
      * @param  Stable  $stable  The stable to remove members from
      * @param  StableMembershipData  $members  The members to remove
      * @param  Carbon  $removalDate  The date they left
-     * @throws InvalidArgumentException When parameters are invalid
+     *
+     * @throws InvalidDateRangeException When the removal date is in the future
      */
     public function handle(Stable $stable, StableMembershipData $members, Carbon $removalDate): void
     {
-        // Validate parameters
         if ($removalDate->isFuture()) {
-            throw new InvalidArgumentException('Cannot remove members with future date.');
+            throw InvalidDateRangeException::futureNotAllowed($removalDate, 'Stable membership removal');
         }
 
         if ($members->isNotEmpty()) {
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->removeMembers($stable, $members, $removalDate);
+            foreach ($members->wrestlers ?? [] as $wrestler) {
+                $stable->wrestlers()->newPivotStatementForId($wrestler->getKey())
+                    ->whereNull('left_at')
+                    ->update(['left_at' => $removalDate]);
+            }
+
+            foreach ($members->tagTeams ?? [] as $tagTeam) {
+                $stable->tagTeams()->newPivotStatementForId($tagTeam->getKey())
+                    ->whereNull('left_at')
+                    ->update(['left_at' => $removalDate]);
+            }
         }
     }
 }

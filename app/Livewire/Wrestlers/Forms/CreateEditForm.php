@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Forms;
 
+use App\Data\Wrestlers\WrestlerData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesEmployment;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
@@ -28,10 +28,10 @@ use Illuminate\Validation\Rule;
  * - Wrestling persona data (signature moves, career information)
  * - Custom validation rules for wrestling industry requirements
  *
- * @extends BaseForm<CreateEditForm, Wrestler>
+ * @extends BaseForm<Wrestler>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesEmployment For employment tracking capabilities
+ * @see WrestlerData For typed Action input
  * @see Height For height value object operations
  * @see CanChangeEmploymentDate For custom validation rules
  *
@@ -45,15 +45,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-
-    /**
-     * The model instance being edited, or null for new wrestler creation.
-     *
-     * @var Wrestler|null Current wrestler model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Wrestler's ring name or legal name for identification.
      *
@@ -117,8 +108,7 @@ class CreateEditForm extends BaseForm
     /**
      * Employment start date for contract and career tracking.
      *
-     * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. Supports Carbon objects or
+     * Passed through WrestlerData to the create or update Action. Supports Carbon objects or
      * string dates for flexible input handling.
      *
      * @var Carbon|string|null Employment start date
@@ -141,21 +131,14 @@ class CreateEditForm extends BaseForm
      * - Uses Height value object for accurate calculations
      *
      *
-     * @see ManagesEmployment::$employment_date For employment date handling
+     * @see WrestlerData::$employment_date For employment date handling
      * @see Height::toInches() For height conversion calculations
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        // Early return if no model
-        if (! $this->formModel) {
-            return;
-        }
+        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
 
-        // Load employment start date from relationship
-        $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
-
-        // Convert Height value object to separate feet/inches fields
-        $height = $this->formModel->height;
+        $height = $model->height;
         $this->height_feet = (int) floor($height->toInches() / 12);
         $this->height_inches = $height->toInches() % 12;
     }
@@ -172,22 +155,24 @@ class CreateEditForm extends BaseForm
      * - Converts Height to total inches for database storage
      * - Passes through other fields with appropriate typing
      *
-     * @return array<string, mixed> Model data ready for persistence
-     *
      * @see Height::__construct() For height object creation
      * @see Height::toInches() For database storage format
      */
-    protected function getModelData(): array
+    public function toData(): WrestlerData
     {
-        $height = new Height($this->height_feet, $this->height_inches);
+        return new WrestlerData(
+            name: $this->name,
+            height: new Height($this->height_feet, $this->height_inches),
+            weight: $this->weight,
+            hometown: $this->hometown,
+            signature_move: $this->signature_move ?: null,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
+    }
 
-        return [
-            'name' => $this->name,
-            'hometown' => $this->hometown,
-            'height' => $height->toInches(),
-            'weight' => $this->weight,
-            'signature_move' => $this->signature_move,
-        ];
+    public function wrestler(): Wrestler
+    {
+        return Wrestler::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -198,11 +183,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Wrestler> The Wrestler model class
      */
-    protected function getModelClass(): string
-    {
-        return Wrestler::class;
-    }
-
     /**
      * Define validation rules for wrestler form fields.
      *
@@ -214,6 +194,8 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $wrestler = $this->isEditing() ? $this->wrestler() : null;
+
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->modelId)],
             'hometown' => ['required', 'string', 'max:255'],
@@ -221,7 +203,7 @@ class CreateEditForm extends BaseForm
             'height_inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->modelId)],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
+            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($wrestler)],
         ];
     }
 
@@ -233,11 +215,12 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, string> Custom validation attributes for this form
      */
+    #[\Override]
     protected function validationAttributes(): array
     {
         return [
-            'height_feet' => 'first name',
-            'height_inches' => 'last name',
+            'height_feet' => 'height in feet',
+            'height_inches' => 'height in inches',
             'signature_move' => 'signature move',
             'employment_date' => 'employment date',
         ];

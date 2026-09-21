@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
-use App\Models\Stables\Stable;
+use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableWrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -16,16 +19,16 @@ test('it retires an active stable at the current datetime by default', function 
     $stable = Stable::factory()->active()->create();
 
     // Verify stable is active before retirement
-    expect($stable->isCurrentlyActive())->toBeTrue();
-    expect($stable->isRetired())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
+    expect($stable->currentRetirement()->exists())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable);
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an active stable at a specific datetime', function () {
@@ -33,16 +36,16 @@ test('it retires an active stable at a specific datetime', function () {
     $datetime = now();
 
     // Verify stable is active before retirement
-    expect($stable->isCurrentlyActive())->toBeTrue();
-    expect($stable->isRetired())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
+    expect($stable->currentRetirement()->exists())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable, $datetime);
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it records a future retirement date while ending current operations now', function () {
@@ -53,16 +56,30 @@ test('it records a future retirement date while ending current operations now', 
 
     $stable->refresh();
 
-    expect($stable->isRetired())->toBeTrue();
-    expect($stable->currentRetirement->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
-    expect($stable->activityPeriods()->latest('id')->first()->ended_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and(requiredDate($stable->currentRetirement()->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString())
+        ->and(requiredDate($stable->activityPeriods()->latest('id')->firstOrFail()->ended_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 
     foreach ($stable->previousWrestlers as $wrestler) {
-        expect($wrestler->pivot->left_at->toDateTimeString())->toBe(now()->toDateTimeString());
+        $membership = StableWrestler::query()
+            ->whereBelongsTo($stable)
+            ->whereBelongsTo($wrestler)
+            ->latest('id')
+            ->firstOrFail();
+
+        expect(requiredDate($membership->left_at)->toDateTimeString())
+            ->toBe(now()->toDateTimeString());
     }
 
     foreach ($stable->previousTagTeams as $tagTeam) {
-        expect($tagTeam->pivot->left_at->toDateTimeString())->toBe(now()->toDateTimeString());
+        $membership = StableTagTeam::query()
+            ->whereBelongsTo($stable)
+            ->whereBelongsTo($tagTeam, 'tagTeam')
+            ->latest('id')
+            ->firstOrFail();
+
+        expect(requiredDate($membership->left_at)->toDateTimeString())
+            ->toBe(now()->toDateTimeString());
     }
 });
 
@@ -70,16 +87,16 @@ test('it retires an inactive stable at the current datetime by default', functio
     $stable = Stable::factory()->inactive()->create();
 
     // Verify stable is inactive before retirement
-    expect($stable->isCurrentlyActive())->toBeFalse();
-    expect($stable->isRetired())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable);
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an inactive stable at a specific datetime', function () {
@@ -87,16 +104,16 @@ test('it retires an inactive stable at a specific datetime', function () {
     $datetime = now();
 
     // Verify stable is inactive before retirement
-    expect($stable->isCurrentlyActive())->toBeFalse();
-    expect($stable->isRetired())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable, $datetime);
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires the current tag teams and current wrestlers of a stable', function () {
@@ -112,10 +129,10 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
 
     // Verify they are not retired before action
     foreach ($currentWrestlers as $wrestler) {
-        expect($wrestler->isRetired())->toBeFalse();
+        expect($wrestler->currentRetirement()->exists())->toBeFalse();
     }
     foreach ($currentTagTeams as $tagTeam) {
-        expect($tagTeam->isRetired())->toBeFalse();
+        expect($tagTeam->currentRetirement()->exists())->toBeFalse();
     }
 
     // Call the action
@@ -123,25 +140,36 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
 
     // Verify stable is retired
     $stable->refresh();
-    expect($stable->isRetired())->toBeTrue();
+    expect($stable->currentRetirement()->exists())->toBeTrue();
 
     // Verify current members were retired
     foreach ($currentWrestlers as $wrestler) {
         $wrestler->refresh();
-        expect($wrestler->isRetired())->toBeTrue();
+        expect($wrestler->currentRetirement()->exists())->toBeTrue();
     }
     foreach ($currentTagTeams as $tagTeam) {
         $tagTeam->refresh();
-        expect($tagTeam->isRetired())->toBeTrue();
+        expect($tagTeam->currentRetirement()->exists())->toBeTrue();
     }
 });
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    resolve(RetireAction::class)->handle($stable);
-})->throws(CannotBeRetiredException::class)->with([
+    expect(resolve(StableRetirementEligibility::class)->canRetire($stable))->toBeFalse()
+        ->and(fn () => resolve(RetireAction::class)->handle($stable))
+        ->toThrow(CannotBeRetiredException::class);
+})->with([
     'unactivated',
     'withFutureActivation',
     'retired',
 ]);
+
+test('it rejects a deleted stable', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $stable->delete();
+
+    expect(resolve(StableRetirementEligibility::class)->canRetire($stable))->toBeFalse()
+        ->and(fn () => resolve(RetireAction::class)->handle($stable))
+        ->toThrow(CannotBeRetiredException::class);
+});

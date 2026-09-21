@@ -1,23 +1,22 @@
-import {defineConfig} from "vite";
-import laravel from "laravel-vite-plugin";
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
-    base: './',
     plugins: [
+        tailwindcss(),
         laravel({
-            input: [
-                'resources/js/app.js',
-                'resources/js/auth.js',
-            ],
+            input: ['resources/js/app.js', 'resources/js/auth.js', 'resources/css/marketing.css'],
             refresh: true,
         }),
         // Bundle analyzer - only include in production builds with ANALYZE=true
-        process.env.ANALYZE && visualizer({
-            filename: 'public/build/bundle-analysis.html',
-            open: true,
-            gzipSize: true,
-            brotliSize: true,
-        }),
-    ].filter(Boolean)
+        process.env.ANALYZE === 'true' &&
+            visualizer({
+                filename: 'public/build/bundle-analysis.html',
+                open: false,
+                gzipSize: true,
+                brotliSize: true,
+            }),
+    ].filter(Boolean),
 });

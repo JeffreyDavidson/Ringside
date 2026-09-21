@@ -4,36 +4,38 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Tag Team to use for component.
      */
-    public ?int $tagTeamId;
+    #[Locked]
+    public ?int $tagTeamId = null;
 
-    /**
-     * @return Builder<TitleChampionship>
-     */
-    public function builder(): Builder
+    /** @return TitleChampionshipBuilder<TitleChampionship> */
+    public function builder(): TitleChampionshipBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
-        }
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TitleChampionship::query()
-            ->whereHasMorph(
-                'champion',
-                [TagTeam::class],
-                function (Builder $query): void {
-                    $query->whereIn('id', [$this->tagTeamId]);
-                }
-            )
-            ->whereNotNull('lost_at');
+            ->forTagTeamId($tagTeamId)
+            ->forPreviousHistory();
+    }
+
+    #[\Override]
+    protected function configure(): void
+    {
+        parent::configure();
+
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
     }
 }

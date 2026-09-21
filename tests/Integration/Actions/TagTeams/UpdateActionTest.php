@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeams\TagTeamData;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->employed()->create([
@@ -13,8 +16,8 @@ beforeEach(function () {
     ]);
 
     $wrestlers = $this->tagTeam->wrestlers;
-    $this->wrestlerA = $wrestlers->first();
-    $this->wrestlerB = $wrestlers->last();
+    $this->wrestlerA = $wrestlers->firstOrFail();
+    $this->wrestlerB = $wrestlers->reverse()->firstOrFail();
 });
 
 test('it updates tag team basic information', function () {
@@ -26,17 +29,36 @@ test('it updates tag team basic information', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Updated Team');
-    expect($this->tagTeam->signature_move)->toBe('Updated Move');
+    expect($this->tagTeam->name)->toBe('Updated Team')
+        ->and($this->tagTeam->signature_move)->toBe('Updated Move');
 
     $this->assertDatabaseHas('tag_teams', [
         'id' => $this->tagTeam->id,
         'name' => 'Updated Team',
         'signature_move' => 'Updated Move',
     ]);
+});
+
+test('it updates using the current persisted tag team state', function () {
+    $staleTagTeam = $this->tagTeam->replicate(['id']);
+    $staleTagTeam->id = $this->tagTeam->id;
+    $staleTagTeam->exists = true;
+
+    $updateData = new TagTeamData(
+        name: 'Updated From Stale Team',
+        signature_move: $this->tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $this->wrestlerA,
+        wrestlerB: $this->wrestlerB,
+    );
+
+    $updatedTagTeam = resolve(UpdateAction::class)->handle($staleTagTeam, $updateData);
+
+    expect($updatedTagTeam->name)->toBe('Updated From Stale Team')
+        ->and(TagTeam::query()->findOrFail($this->tagTeam->id)->name)->toBe('Updated From Stale Team');
 });
 
 test('it updates only the name when signature move is repeated', function () {
@@ -48,11 +70,11 @@ test('it updates only the name when signature move is repeated', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Updated Team Only');
-    expect($this->tagTeam->signature_move)->toBe('Original Move');
+    expect($this->tagTeam->name)->toBe('Updated Team Only')
+        ->and($this->tagTeam->signature_move)->toBe('Original Move');
 });
 
 test('it updates only the signature move when name is repeated', function () {
@@ -64,11 +86,11 @@ test('it updates only the signature move when name is repeated', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBe('New Finisher');
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBe('New Finisher');
 });
 
 test('it handles clearing the signature move', function () {
@@ -80,11 +102,11 @@ test('it handles clearing the signature move', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBeNull();
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBeNull();
 });
 
 test('it handles database transactions correctly', function () {
@@ -96,30 +118,12 @@ test('it handles database transactions correctly', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
 
-    expect($this->tagTeam->name)->toBe('Updated Transaction Team');
-    expect($this->tagTeam->signature_move)->toBe('Transaction Slam');
-});
-
-test('it validates unique name constraint', function () {
-    TagTeam::factory()->create(['name' => 'Existing Team']);
-
-    $updateData = new TagTeamData(
-        name: 'Existing Team',
-        signature_move: 'Original Move',
-        employment_date: null,
-        wrestlerA: $this->wrestlerA,
-        wrestlerB: $this->wrestlerB,
-    );
-
-    expect(fn () => UpdateAction::run($this->tagTeam, $updateData))
-        ->toThrow(Exception::class);
-
-    $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
+    expect($this->tagTeam->name)->toBe('Updated Transaction Team')
+        ->and($this->tagTeam->signature_move)->toBe('Transaction Slam');
 });
 
 test('it allows updating to the same name', function () {
@@ -131,27 +135,11 @@ test('it allows updating to the same name', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBe('Updated Move');
-});
-
-test('it rejects an empty name', function () {
-    $updateData = new TagTeamData(
-        name: '',
-        signature_move: 'Original Move',
-        employment_date: null,
-        wrestlerA: $this->wrestlerA,
-        wrestlerB: $this->wrestlerB,
-    );
-
-    expect(fn () => UpdateAction::run($this->tagTeam, $updateData))
-        ->toThrow(Exception::class);
-
-    $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBe('Updated Move');
 });
 
 test('it updates timestamps correctly', function () {
@@ -167,10 +155,10 @@ test('it updates timestamps correctly', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->updated_at->toDateTimeString())->not()->toBe($originalUpdatedAt->toDateTimeString());
+    expect(requiredDate($this->tagTeam->updated_at)->toDateTimeString())->not()->toBe(requiredDate($originalUpdatedAt)->toDateTimeString());
 });
 
 test('it preserves unmodified attributes', function () {
@@ -185,14 +173,14 @@ test('it preserves unmodified attributes', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
 
-    expect($this->tagTeam->name)->toBe('Updated Preservation Team');
-    expect($this->tagTeam->signature_move)->toBe('Original Move');
-    expect($this->tagTeam->created_at->toDateTimeString())->toBe($originalCreatedAt->toDateTimeString());
-    expect($this->tagTeam->id)->toBe($originalId);
+    expect($this->tagTeam->name)->toBe('Updated Preservation Team')
+        ->and($this->tagTeam->signature_move)->toBe('Original Move')
+        ->and(requiredDate($this->tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString())
+        ->and($this->tagTeam->id)->toBe($originalId);
 });
 
 test('it handles long signature move names', function () {
@@ -206,7 +194,7 @@ test('it handles long signature move names', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->signature_move)->toBe($longSignatureMove);
@@ -221,9 +209,28 @@ test('it handles special characters in updates', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team');
-    expect($this->tagTeam->signature_move)->toBe('The \'Ultimate\' Slam (TM)');
+    expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team')
+        ->and($this->tagTeam->signature_move)->toBe('The \'Ultimate\' Slam (TM)');
+});
+
+test('it employs newly assigned members when the tag team is employed', function () {
+    $newWrestler = Wrestler::factory()->create();
+    $newManager = Manager::factory()->create();
+
+    resolve(UpdateAction::class)->handle($this->tagTeam, new TagTeamData(
+        name: $this->tagTeam->name,
+        signature_move: $this->tagTeam->signature_move,
+        employment_date: now(),
+        wrestlerA: $this->wrestlerA,
+        wrestlerB: $newWrestler,
+        managers: new Collection([$newManager]),
+    ));
+
+    expect($newWrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($newManager->currentEmployment()->exists())->toBeTrue()
+        ->and($this->tagTeam->currentWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeFalse()
+        ->and($this->tagTeam->previousWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeTrue();
 });

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
-use App\Models\TagTeams\TagTeamWrestler;
-use App\Models\Wrestlers\Wrestler;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
 /**
  * Livewire table component for displaying a wrestler's previous tag team memberships.
@@ -19,20 +20,6 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * The table displays tag teams ordered by when the wrestler joined them,
  * showing only completed memberships (where left_at is not null).
- *
- * @example
- * ```php
- * // In a Blade template
- * <livewire:wrestlers.tables.previous-tag-teams-table :wrestler-id="$wrestler->id" />
- *
- * // In a Livewire component
- * public function render()
- * {
- *     return view('livewire.wrestler.show', [
- *         'wrestler' => $this->wrestler,
- *     ]);
- * }
- * ```
  */
 class PreviousTagTeams extends BasePreviousTagTeamsTable
 {
@@ -44,45 +31,26 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      *
      * @var int|null The wrestler's ID, or null if not set
      */
-    public ?int $wrestlerId;
+    #[Locked]
+    public ?int $wrestlerId = null;
 
     /**
      * The database table name for the main query.
      *
      * @var string The name of the tag_teams_wrestlers pivot table
      */
+    #[\Override]
     public string $databaseTableName = 'tag_teams_wrestlers';
 
-    /**
-     * Build the query for retrieving the wrestler's previous tag teams.
-     *
-     * Creates a query using the TagTeamWrestler pivot model to find all
-     * tag team memberships where the wrestler has left (left_at is not null).
-     * Results are ordered by join date in descending order to show the
-     * most recent previous memberships first.
-     *
-     *
-     * @throws Exception If wrestlerId is not set
-     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
-     *
-     * @example
-     * ```php
-     * // The query finds pivot records like:
-     * // - TagTeamWrestler(wrestler_id: 1, tag_team_id: 5, joined_at: '1997-01-01', left_at: '1999-03-01')
-     * // - TagTeamWrestler(wrestler_id: 1, tag_team_id: 8, joined_at: '1999-04-01', left_at: '2000-01-01')
-     * // But excludes current memberships where left_at is null
-     * ```
-     */
-    public function builder(): Builder
+    /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
+    public function builder(): TagTeamMembershipBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
-        }
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return TagTeamWrestler::query()
-            ->where('wrestler_id', $this->wrestlerId)
-            ->whereNotNull('left_at')
-            ->orderByDesc('joined_at');
+            ->forWrestlerId($wrestlerId)
+            ->with('tagTeam.wrestlerMemberships.wrestler')
+            ->forHistory();
     }
 
     /**
@@ -91,17 +59,13 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * Adds the tag team ID from the pivot table to the select statement
      * to ensure proper data retrieval for the table display. This allows
      * the table to access both the pivot data and related tag team information.
-     *
-     *
-     * @example
-     * ```php
-     * // Ensures the query selects:
-     * // SELECT *, tag_team_id FROM tag_teams_wrestlers WHERE...
-     * // This allows access to both pivot and tag team data in the table
-     * ```
      */
-    public function configure(): void
+    protected function configure(): void
     {
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+
+        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.tag_team_id',
         ]);
@@ -114,7 +78,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     {
         $partner = $this->getPartner($row);
 
-        return $partner ? $partner->name : 'Unknown';
+        return $partner instanceof Wrestler ? $partner->name : 'Unknown';
     }
 
     /**
@@ -124,7 +88,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     {
         $partner = $this->getPartner($row);
 
-        return $partner ? route('wrestlers.show', $partner) : '#';
+        return $partner instanceof Wrestler ? $this->routeResolver->urlFor($partner) : '#';
     }
 
     /**
@@ -132,17 +96,12 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      */
     private function getPartner(TagTeamWrestler $row): ?Wrestler
     {
-        // Find the other wrestler in this tag team during the same time period
-        $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)
-            ->where('wrestler_id', '!=', $row->wrestler_id)
-            ->where('joined_at', '<=', $row->left_at ?? now())
-            ->where(function (Builder $query) use ($row) {
-                $query->whereNull('left_at')
-                    ->orWhere('left_at', '>=', $row->joined_at);
-            })
-            ->with('wrestler')
-            ->first();
+        $partnerMembership = $row->tagTeam?->wrestlerMemberships->first(
+            fn (TagTeamWrestler $membership): bool => $membership->wrestler_id !== $row->wrestler_id
+                && $membership->joined_at->lte($row->left_at ?? now())
+                && ($membership->left_at === null || $membership->left_at->gte($row->joined_at)),
+        );
 
-        return $partnerRecord?->wrestler;
+        return $partnerMembership?->wrestler;
     }
 }

@@ -5,21 +5,17 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
-use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
-use App\Services\StableValidationService;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a new create action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected EstablishAction $establishAction,
+        protected AddStableMembersAction $addStableMembersAction,
     ) {}
 
     /**
@@ -34,54 +30,26 @@ class CreateAction
      *
      * @param  StableData  $stableData  The data transfer object containing stable information
      * @return Stable The newly created stable with all members
-     *
-     * @example
-     * ```php
-     * // Create stable with immediate debut
-     * $stableData = new StableData(
-     *     name: 'The Four Horsemen',
-     *     start_date: now(),
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$ricFlair, $arnAnderson, $tullyblanchard]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $stable = CreateAction::run($stableData);
-     *
-     * // Create stable without debut (must be debuted separately)
-     * $stableData = new StableData(
-     *     name: 'D-Generation X',
-     *     start_date: null,
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$shawnMichaels, $tripleH]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $stable = CreateAction::run($stableData);
-     * ```
      */
     public function handle(StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stableData): Stable {
-            // Validate business rules before creation
-            $validationService = app(StableValidationService::class);
-            $validationService->validateUniqueName($stableData->getTrimmedName());
-            $validationService->validateMembersAvailable($stableData->members);
-
-            $stable = Stable::create([
+            $stable = Stable::query()->create([
                 'name' => $stableData->getTrimmedName(),
             ]);
 
             // Use enhanced DTO methods
             $joinDate = $stableData->getJoinDate();
 
-            // Add members using service
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->addMembers($stable, $stableData->members, $joinDate);
+            $this->addStableMembersAction->handle($stable, $stableData->members, $joinDate);
 
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {
-                $this->establishAction->handle($stable, $stableData->start_date);
+                $this->establishAction->handle(
+                    $stable,
+                    $stableData->start_date,
+                    $stableData->end_date,
+                );
             }
 
             return $stable;

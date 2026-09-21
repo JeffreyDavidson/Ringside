@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Models\Referees\Referee;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Referees\Referee;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted referee.
@@ -23,22 +28,16 @@ class RestoreAction
      * - Requires separate employment action to make referee active again
      *
      * @param  Referee  $referee  The soft-deleted referee to restore
-     *
-     * @example
-     * ```php
-     * $deletedReferee = Referee::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedReferee);
-     * ```
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $restoreDate = null): void
     {
-        $referee->ensureCanBeRestored();
+        $effectiveDate = $restoreDate ?? now();
 
-        DB::transaction(function () use ($referee): void {
-            $referee->restore();
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-            // Note: No automatic relationship restoration to avoid conflicts.
-            // All employment relationships must be re-established explicitly using separate actions.
+            $this->eligibility->ensureCanRestore($lockedReferee);
+            $this->deletionState->restore($lockedReferee, $effectiveDate);
         });
     }
 }

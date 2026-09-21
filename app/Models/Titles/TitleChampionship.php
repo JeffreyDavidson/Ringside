@@ -6,8 +6,8 @@ namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -17,59 +17,69 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $title_id
- * @property int $event_match_id
  * @property int $champion_id
  * @property string $champion_type
  * @property int|null $won_match_id
  * @property int|null $lost_match_id
+ * @property int|null $previous_championship_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
- *
+ * @property Carbon|null $deleted_at
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title
+ * @property-read TitleChampionship|null $previousChampionship
  * @property-read Wrestler|TagTeam $champion
- *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @method static TitleChampionshipBuilder<static>|static current()
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static TitleChampionshipBuilder<static>|static latestLost()
- * @method static TitleChampionshipBuilder<static>|static latestWon()
- * @method static TitleChampionshipBuilder<static>|static newModelQuery()
- * @method static TitleChampionshipBuilder<static>|static newQuery()
- * @method static TitleChampionshipBuilder<static>|static previous()
- * @method static TitleChampionshipBuilder<static>|static query()
- * @method static TitleChampionshipBuilder<static>|static withReignLength()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship current()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship earliestWonFirst()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forPreviousHistory()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forChampion(Wrestler|TagTeam $champion)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forTagTeamId(int $tagTeamId)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forTitleId(int $titleId)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forWrestlerId(int $wrestlerId)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship mostRecentlyLostFirst()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship newModelQuery()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship newQuery()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship previous()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withoutTrashed()
  *
  * @mixin \Eloquent
  */
 #[Table('titles_championships')]
 #[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
-#[UseFactory(TitleChampionshipFactory::class)]
 #[UseEloquentBuilder(TitleChampionshipBuilder::class)]
+#[UseFactory(TitleChampionshipFactory::class)]
 class TitleChampionship extends Model
 {
     /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
             'won_at' => 'datetime',
             'lost_at' => 'datetime',
-            'last_held_reign' => 'datetime',
         ];
     }
 
@@ -113,18 +123,9 @@ class TitleChampionship extends Model
         return $this->belongsTo(EventMatch::class, 'lost_match_id');
     }
 
-    /**
-     * Retrieve the number of days for a title championship reign.
-     */
-    public function lengthInDays(): int
+    /** @return BelongsTo<TitleChampionship, $this> */
+    public function previousChampionship(): BelongsTo
     {
-        if ($this->won_at === null) {
-            return 0;
-        }
-
-        /** @var Carbon $datetime */
-        $datetime = $this->lost_at ?? now();
-
-        return (int) ($this->won_at->diffInDays($datetime));
+        return $this->belongsTo(self::class, 'previous_championship_id');
     }
 }

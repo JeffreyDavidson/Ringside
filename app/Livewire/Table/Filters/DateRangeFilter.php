@@ -6,8 +6,8 @@ namespace App\Livewire\Table\Filters;
 
 use App\Livewire\Table\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
+/** @phpstan-consistent-constructor */
 class DateRangeFilter extends Filter
 {
     /** @var array<string, mixed> */
@@ -65,8 +65,9 @@ class DateRangeFilter extends Filter
      * guard, the default empty-array value bypasses the parent class's
      * `!== ''/!== null` check and reaches callbacks that read those keys.
      *
-     * @param  Builder<Model>  $builder
+     * @param  Builder<*>  $builder
      */
+    #[\Override]
     public function apply(Builder $builder, mixed $value): void
     {
         if (! is_array($value)) {

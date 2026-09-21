@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddTagTeamsToMatchAction
 {
-    use AsAction;
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
+    ) {}
 
     /**
      * Add tag teams to an event match.
@@ -43,72 +48,59 @@ class AddTagTeamsToMatchAction
      * @param  EventMatch  $eventMatch  The match to add tag teams to
      * @param  Collection<int, TagTeam>  $tagTeams  The tag teams to add to the match
      * @param  int  $sideNumber  The side/team number for the tag teams (1, 2, 3, etc.)
-     *
-     * @example
-     * ```php
-     * // Tag team match - The Hardy Boyz vs Edge & Christian
-     * $tagTeams = collect([$hardyBoyz]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 1);
-     *
-     * $tagTeams = collect([$edgeAndChristian]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 2);
-     *
-     * // Triple threat tag match - Three teams competing
-     * $tagTeams = collect([$dudleyBoyz]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 3);
-     *
-     * // Elimination tag match - Multiple teams on one side
-     * $tagTeams = collect([$team1, $team2]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 1);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void
     {
-        // Pre-filter tag teams to ensure only eligible teams are processed
-        $eligibleTagTeams = $tagTeams->filter(
-            fn (TagTeam $tagTeam) => $this->isTagTeamEligibleForMatch($tagTeam, $eventMatch)
-        );
+        $requestedTagTeams = $tagTeams->unique('id')->values();
 
-        // Validate we have tag teams to add after filtering
-        if ($eligibleTagTeams->isEmpty()) {
-            throw new InvalidArgumentException('No eligible tag teams provided for match assignment');
+        if ($requestedTagTeams->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
         // Validate side number is reasonable for match structure
         if ($sideNumber < 1) {
-            throw new InvalidArgumentException('Side number must be positive');
+            throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleTagTeams, $sideNumber): void {
-            // Add each eligible tag team to the specified side
-            $eligibleTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $sideNumber) {
-                $eventMatch->competitors()->create([
-                    'tag_team_id' => $tagTeam->id,
-                    'side_number' => $sideNumber,
-                ]);
-            });
+        DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
+            $this->handleWithinTransaction($lockedMatch, $requestedTagTeams, $sideNumber);
         });
     }
 
     /**
-     * Check if a tag team is eligible to compete in the match.
+     * Assign tag teams while the caller owns the match transaction and lock.
      *
-     * @param  TagTeam  $tagTeam  The tag team to validate
-     * @param  EventMatch  $eventMatch  The match they would compete in
-     * @return bool True if the tag team can compete
+     * @param  Collection<int, TagTeam>  $tagTeams
      */
-    private function isTagTeamEligibleForMatch(TagTeam $tagTeam, EventMatch $eventMatch): bool
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber): void
     {
-        // Basic availability checks - tag team must be active and available
-        if (! $tagTeam->isBookable()) {
-            return false;
+        $requestedTagTeams = $tagTeams->unique('id')->values();
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedTagTeams = TagTeam::query()
+            ->whereKey($requestedTagTeams->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
+            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
-        // Check for conflicts with existing match assignments
-        // Note: More complex conflict checking would be implemented here
-        // such as checking for double-booking on the same event date
-        // Could validate against $eventMatch->event->date for scheduling conflicts
+        $this->conflictService->ensureTagTeamsCanBeAssigned(
+            $conflictingEventIds,
+            $lockedTagTeams,
+        );
+        $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
-        return true;
+        $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {
+            $lockedMatch->competitors()->create([
+                'competitor_id' => $tagTeam->id,
+                'competitor_type' => $tagTeam->getMorphClass(),
+                'match_side_id' => $side->id,
+            ]);
+        });
     }
 }

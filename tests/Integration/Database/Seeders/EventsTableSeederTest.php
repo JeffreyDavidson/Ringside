@@ -27,7 +27,6 @@ describe('EventsTableSeeder Integration Tests', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']))
                 ->not()->toThrow(Exception::class);
-            expect(true)->toBeTrue();
         });
 
         test('creates events in database', function () {
@@ -36,7 +35,6 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert - Should create multiple events
             expect(Event::count())->toBeGreaterThan(0);
-            expect(true)->toBeTrue();
         });
     });
 
@@ -50,16 +48,16 @@ describe('EventsTableSeeder Integration Tests', function () {
             $events = Event::take(10)->get();
 
             // Assert
+            expect($events)->not->toBeEmpty();
+
             foreach ($events as $event) {
-                expect($event->name)->toBeString();
-                expect($event->name)->not->toBeEmpty();
-                expect($event->date)->toBeInstanceOf(Carbon::class);
+                expect($event->name)->toBeString()->not->toBeEmpty()
+                    ->and($event->date)->toBeInstanceOf(Carbon::class);
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
                     expect($event->venue_id)->toBeInt();
                 }
             }
-            expect(true)->toBeTrue();
         });
 
         test('events have realistic names', function () {
@@ -67,11 +65,12 @@ describe('EventsTableSeeder Integration Tests', function () {
             $events = Event::take(5)->get();
 
             // Assert
+            expect($events)->not->toBeEmpty();
+
             foreach ($events as $event) {
-                expect(mb_strlen($event->name))->toBeGreaterThanOrEqual(3);
-                expect($event->name)->not->toContain('Test');
+                expect(mb_strlen($event->name))->toBeGreaterThanOrEqual(3)
+                    ->and($event->name)->not->toContain('Test');
             }
-            expect(true)->toBeTrue();
         });
 
         test('events have valid dates', function () {
@@ -79,12 +78,13 @@ describe('EventsTableSeeder Integration Tests', function () {
             $events = Event::take(10)->get();
 
             // Assert
+            expect($events)->not->toBeEmpty();
+
             foreach ($events as $event) {
                 expect($event->date)->toBeInstanceOf(Carbon::class);
                 // Events should be in the past or future (not null)
                 expect($event->date)->not()->toBeNull();
             }
-            expect(true)->toBeTrue();
         });
     });
 
@@ -93,19 +93,28 @@ describe('EventsTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']);
         });
 
+        test('all events have unique names', function () {
+            // Arrange
+            $events = Event::all();
+
+            // Assert
+            expect($events->pluck('name')->unique())->toHaveCount($events->count());
+        });
+
         test('events have valid venue associations', function () {
             // Arrange
             $events = Event::take(10)->get();
 
             // Assert
+            expect($events)->not->toBeEmpty();
+
             foreach ($events as $event) {
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
-                    expect($event->venue_id)->toBeInt();
-                    expect($event->venue_id)->toBeGreaterThan(0);
+                    expect($event->venue_id)->toBeInt()
+                        ->toBeGreaterThan(0);
                 }
             }
-            expect(true)->toBeTrue();
         });
 
         test('events can load venue relationships', function () {
@@ -114,13 +123,12 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             if ($event) {
-                expect($event->venue)->not()->toBeNull();
-                expect($event->venue->name)->toBeString();
+                expect($event->venue)
+                    ->not()->toBeNull()
+                    ->name->toBeString();
             } else {
-                // If no events have venues, that's also valid (all future events)
                 expect(Event::whereNotNull('venue_id')->count())->toBe(0);
             }
-            expect(true)->toBeTrue();
         });
 
         test('seeder creates consistent data', function () {
@@ -132,7 +140,6 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert - Should maintain or increase count
             expect(Event::count())->toBeGreaterThanOrEqual($initialCount);
-            expect(true)->toBeTrue();
         });
     });
 });

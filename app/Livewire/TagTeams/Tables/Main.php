@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
@@ -12,50 +13,55 @@ use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Builders\Roster\TagTeamBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Exceptions\Roster\CannotBeReleasedException;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
+use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Models\TagTeams\TagTeam;
-use Exception;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Roster\TagTeams\TagTeam;
+use Closure;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 
+/** @extends BaseTable<TagTeam> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+    use ExecutesRosterActions;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'tag_teams';
 
+    #[\Override]
     protected string $routeBasePath = 'tag-teams';
 
+    #[\Override]
     protected string $resourceName = 'tag teams';
 
     /** @return TagTeamBuilder<TagTeam> */
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()
-            ->with('currentEmployment')
+            ->withEmploymentStatusState()
+            ->withFirstEmployment()
             ->oldest('name');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', TagTeam::class);
+        Gate::authorize('viewAny', TagTeam::class);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -71,176 +77,89 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+            SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'employed' => 'Employed',
-                    'future_employment' => 'Awaiting Employment',
-                    'released' => 'Released',
-                    'unemployed' => 'Unemployed',
-                    'retired' => 'Retired',
-                ])
-                ->filter(function (TagTeamBuilder $builder, string $value) {
+                ->options(EmploymentStatus::filterOptions())
+                ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
-                    match ($value) {
-                        'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
-                        'released' => $builder->released(),
-                        'unemployed' => $builder->unemployed(),
-                        'retired' => $builder->retired(),
-                        default => null,
-                    };
+                    $status = EmploymentStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereEmploymentStatus($status);
+                    }
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'tag_teams_employments.started_at', 'tag_teams_employments.ended_at'),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 
-    public function delete(TagTeam $tagTeam): void
+    public function delete(TagTeam $tagTeam, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($tagTeam);
+        Gate::authorize('delete', $tagTeam);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $tagTeam): void {
+            $deleteAction->handle($tagTeam);
+        }, __('tag-teams.actions.deleted'));
     }
 
-    /**
-     * Employ a tag team.
-     */
-    public function employ(TagTeam $tagTeam): RedirectResponse
+    public function employ(TagTeam $tagTeam, EmployAction $employAction): void
     {
-        Gate::authorize('employ', $tagTeam);
-
-        try {
-            resolve(EmployAction::class)->handle($tagTeam);
-        } catch (CannotBeEmployedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Employ, $tagTeam->id, fn (TagTeam $tagTeam) => $employAction->handle($tagTeam));
     }
 
-    /**
-     * Reinstate a tag team.
-     */
-    public function reinstate(TagTeam $tagTeam): RedirectResponse
+    public function reinstate(TagTeam $tagTeam, ReinstateAction $reinstateAction): void
     {
-        Gate::authorize('reinstate', $tagTeam);
-
-        try {
-            resolve(ReinstateAction::class)->handle($tagTeam);
-        } catch (CannotBeReinstatedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Reinstate, $tagTeam->id, fn (TagTeam $tagTeam) => $reinstateAction->handle($tagTeam));
     }
 
-    /**
-     * Release a tag team.
-     */
-    public function release(TagTeam $tagTeam): RedirectResponse
+    public function release(TagTeam $tagTeam, ReleaseAction $releaseAction): void
     {
-        Gate::authorize('release', $tagTeam);
-
-        try {
-            resolve(ReleaseAction::class)->handle($tagTeam);
-        } catch (CannotBeReleasedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Release, $tagTeam->id, fn (TagTeam $tagTeam) => $releaseAction->handle($tagTeam));
     }
 
-    /**
-     * Restore a deleted tag team.
-     */
-    public function restore(int $tagTeamId): RedirectResponse
+    public function restore(int $tagTeamId, RestoreAction $restoreAction): void
     {
-        $tagTeam = TagTeam::onlyTrashed()->findOrFail($tagTeamId);
-
-        Gate::authorize('restore', $tagTeam);
-
-        try {
-            resolve(RestoreAction::class)->handle($tagTeam);
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+        if ($this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId, fn (TagTeam $tagTeam) => $restoreAction->handle($tagTeam))) {
+            $this->redirectRoute('tag-teams.index');
         }
-
-        return back();
     }
 
-    /**
-     * Retire a tag team.
-     */
-    public function retire(TagTeam $tagTeam): RedirectResponse
+    public function retire(TagTeam $tagTeam, RetireAction $retireAction): void
     {
-        Gate::authorize('retire', $tagTeam);
-
-        try {
-            resolve(RetireAction::class)->handle($tagTeam);
-        } catch (CannotBeRetiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Retire, $tagTeam->id, fn (TagTeam $tagTeam) => $retireAction->handle($tagTeam));
     }
 
-    /**
-     * Suspend a tag team.
-     */
-    public function suspend(TagTeam $tagTeam): RedirectResponse
+    public function suspend(TagTeam $tagTeam, SuspendAction $suspendAction): void
     {
-        Gate::authorize('suspend', $tagTeam);
-
-        try {
-            resolve(SuspendAction::class)->handle($tagTeam);
-        } catch (CannotBeSuspendedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Suspend, $tagTeam->id, fn (TagTeam $tagTeam) => $suspendAction->handle($tagTeam));
     }
 
-    /**
-     * Unretire a tag team.
-     */
-    public function unretire(TagTeam $tagTeam): RedirectResponse
+    public function unretire(TagTeam $tagTeam, UnretireAction $unretireAction): void
     {
-        Gate::authorize('unretire', $tagTeam);
-
-        try {
-            resolve(UnretireAction::class)->handle($tagTeam);
-        } catch (CannotBeUnretiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        $this->executeTagTeamAction(RosterLifecycleAction::Unretire, $tagTeam->id, fn (TagTeam $tagTeam) => $unretireAction->handle($tagTeam));
     }
 
-    /**
-     * Handle tag team actions through a unified interface.
-     */
-    public function handleTagTeamAction(string $action, int $tagTeamId): void
+    /** @param Closure(TagTeam): void $action */
+    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId, Closure $action): bool
     {
-        $tagTeam = TagTeam::findOrFail($tagTeamId);
+        $tagTeam = $lifecycleAction->usesTrashedModel()
+            ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
+            : TagTeam::query()->findOrFail($tagTeamId);
 
-        try {
-            match ($action) {
-                'employ' => resolve(EmployAction::class)->handle($tagTeam),
-                'release' => resolve(ReleaseAction::class)->handle($tagTeam),
-                'suspend' => resolve(SuspendAction::class)->handle($tagTeam),
-                'reinstate' => resolve(ReinstateAction::class)->handle($tagTeam),
-                'retire' => resolve(RetireAction::class)->handle($tagTeam),
-                'unretire' => resolve(UnretireAction::class)->handle($tagTeam),
-                default => null,
-            };
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        return match ($lifecycleAction) {
+            RosterLifecycleAction::Employ,
+            RosterLifecycleAction::Release,
+            RosterLifecycleAction::Suspend,
+            RosterLifecycleAction::Reinstate,
+            RosterLifecycleAction::Retire,
+            RosterLifecycleAction::Unretire,
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => $action($tagTeam)),
+            default => throw new InvalidArgumentException("{$lifecycleAction->value} is not a tag team lifecycle action."),
+        };
     }
 }

@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Suspend a referee.
@@ -25,23 +30,18 @@ class SuspendAction
      *
      * @param  Referee  $referee  The referee to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
+     *
      * @throws CannotBeSuspendedException When referee cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend referee immediately
-     * SuspendAction::run($referee);
-     *
-     * // Schedule suspension for future date
-     * SuspendAction::run($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {
-        $referee->ensureCanBeSuspended();
+        $effectiveDate = $suspensionDate ?? now();
 
-        $suspensionDate = DateHelper::resolveDate($suspensionDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        $referee->suspensions()->create(['started_at' => $suspensionDate]);
+            $this->eligibility->ensureCanSuspend($lockedReferee);
+            $this->suspensionPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Suspended);
+        });
     }
 }

@@ -4,40 +4,38 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
-use App\Models\Wrestlers\Wrestler;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
     /**
      * Wrestler to use for component.
      */
-    public ?int $wrestlerId;
+    #[Locked]
+    public ?int $wrestlerId = null;
 
-    public string $databaseTableName = 'events_matches_competitors';
-
-    /**
-     * @return Builder<EventMatch>
-     */
-    public function builder(): Builder
+    /** @return EventMatchBuilder<EventMatch> */
+    public function builder(): EventMatchBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
-        }
-
-        $wrestler = Wrestler::find($this->wrestlerId);
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return EventMatch::query()
-            ->with(['titles', 'result.winner', 'result.decision'])
-            ->withWhereHas('competitors', function (Builder $query) use ($wrestler): void {
-                $query->whereMorphedTo('competitor', $wrestler);
-            })
-            ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
-            })
-            ->orderByDesc('date');
+            ->forHistory()
+            ->forWrestlerId($wrestlerId);
+    }
+
+    #[\Override]
+    protected function configure(): void
+    {
+        parent::configure();
+
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+
+        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
     }
 }

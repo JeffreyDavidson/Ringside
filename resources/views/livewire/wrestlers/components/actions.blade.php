@@ -20,7 +20,7 @@
     @endcan
 
     @can('clearFromInjury', $wrestler)
-        <x-buttons.success wire:click="healFromInjury">{{ __('Heal') }}</x-buttons.success>
+        <x-buttons.success wire:click="clearFromInjury">{{ __('Clear from injury') }}</x-buttons.success>
     @endcan
 
     @can('retire', $wrestler)

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
+use App\Models\Matches\MatchStipulation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\MatchStipulation>
+ * @extends Factory<MatchStipulation>
  */
 class MatchStipulationFactory extends Factory
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Data;
 
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Livewire\Attributes\Computed;
 
 trait PresentsManagersList
@@ -12,9 +12,14 @@ trait PresentsManagersList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'managers-list', seconds: 180)]
+    #[Computed]
     public function getManagers(): array
     {
-        return Manager::select('id', 'full_name')->get()->pluck('full_name', 'id')->toArray();
+        return Manager::query()
+            ->pluck('full_name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

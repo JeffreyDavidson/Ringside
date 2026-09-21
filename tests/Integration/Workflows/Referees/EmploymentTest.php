@@ -5,152 +5,65 @@ declare(strict_types=1);
 use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\SuspendAction;
+use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Referees\Referee;
-use Illuminate\Support\Carbon;
+use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Models\Roster\Referees\Referee;
+use Illuminate\Support\Facades\Date;
 
-/**
- * Workflow tests for Referee Employment multi-action scenarios.
- *
- * WORKFLOW TEST SCOPE:
- * - Multi-action employment workflows
- * - Cross-action data consistency
- * - Transaction integrity across multiple actions
- * - Complex business process validation
- */
-describe('Referee Employment Workflows', function () {
+test('referee employment can cycle through release and re-employment', function () {
+    // Arrange
+    $referee = Referee::factory()->unemployed()->create();
+    $transitionedAt = Date::now();
 
-    beforeEach(function () {
-        $this->referee = Referee::factory()->released()->create();
-    });
+    // Act
+    resolve(EmployAction::class)
+        ->handle($referee, $transitionedAt);
+    $employed = freshModel($referee);
 
-    describe('multi-action employment workflows', function () {
-        test('employ then release workflow maintains data consistency', function () {
-            $referee = Referee::factory()->unemployed()->create();
+    resolve(ReleaseAction::class)
+        ->handle($employed, $transitionedAt);
+    $released = freshModel($referee);
+    $releasedStatus = $released->status;
+    $releasedIsBookable = resolve(RosterBookingEligibility::class)->allows($released);
 
-            // Initial state
-            expect($referee->status)->toBe(EmploymentStatus::Unemployed);
+    resolve(EmployAction::class)
+        ->handle($released, $transitionedAt);
+    $reEmployed = freshModel($referee);
 
-            // Employ referee
-            EmployAction::run($referee, Carbon::now());
-            $afterEmployment = $referee->fresh();
-            expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
-            expect($afterEmployment->isEmployed())->toBeTrue();
+    // Assert
+    expect($releasedIsBookable)->toBeFalse()
+        ->and($releasedStatus)->toBe(EmploymentStatus::Released)
+        ->and(resolve(RosterBookingEligibility::class)->allows($reEmployed))->toBeTrue()
+        ->and($reEmployed->status)->toBe(EmploymentStatus::Employed)
+        ->and($reEmployed->employments()->count())->toBe(2);
+});
 
-            // Release referee
-            ReleaseAction::run($afterEmployment, Carbon::now());
-            $afterRelease = $referee->fresh();
+test('releasing a suspended referee closes employment and suspension periods', function () {
+    // Arrange
+    $referee = Referee::factory()->retired()->create();
+    $transitionedAt = Date::now();
 
-            // Verify release status synchronization
-            expect($afterRelease->status)->toBe(EmploymentStatus::Released);
-            expect($afterRelease->isReleased())->toBeTrue();
-            expect($afterRelease->isEmployed())->toBeFalse();
-        });
+    // Act
+    resolve(UnretireAction::class)
+        ->handle($referee, $transitionedAt);
+    $employed = freshModel($referee);
 
-        test('employ then release then re-employ workflow maintains consistency', function () {
-            $referee = Referee::factory()->unemployed()->create();
+    resolve(SuspendAction::class)
+        ->handle($employed, $transitionedAt);
+    $suspended = freshModel($referee);
+    $suspendedHasEmployment = $suspended->currentEmployment()->exists();
+    $suspendedHasSuspension = $suspended->currentSuspension()->exists();
 
-            // Initial employ
-            EmployAction::run($referee, Carbon::now());
-            $employed = $referee->fresh();
-            expect($employed->isEmployed())->toBeTrue();
+    resolve(ReleaseAction::class)
+        ->handle($suspended, $transitionedAt);
+    $released = freshModel($referee);
 
-            // Release
-            ReleaseAction::run($employed, Carbon::now());
-            $released = $referee->fresh();
-            expect($released->isReleased())->toBeTrue();
-            expect($released->isEmployed())->toBeFalse();
-
-            // Re-employ
-            EmployAction::run($released, Carbon::now());
-            $reEmployed = $referee->fresh();
-            expect($reEmployed->isEmployed())->toBeTrue();
-            expect($reEmployed->isReleased())->toBeFalse();
-        });
-    });
-
-    describe('transaction integrity', function () {
-        test('multi-action workflow maintains transaction integrity', function () {
-            $referee = Referee::factory()->unemployed()->create();
-
-            // Execute multi-action workflow within transaction context
-            EmployAction::run($referee, Carbon::now());
-            $employed = $referee->fresh();
-
-            // Then suspend the referee
-            SuspendAction::run($employed, Carbon::now());
-            $suspended = $referee->fresh();
-
-            // Verify all state changes are consistent
-            expect($suspended->isEmployed())->toBeTrue(); // Still employed
-            expect($suspended->isSuspended())->toBeTrue(); // But suspended
-            expect($suspended->currentEmployment)->not()->toBeNull();
-            expect($suspended->currentSuspension)->not()->toBeNull();
-        });
-
-        test('action rollback maintains data consistency on failure', function () {
-            $referee = Referee::factory()->released()->create();
-
-            // This test would require mocking a failure scenario
-            // For now, just verify normal operation doesn't leave partial state
-            EmployAction::run($referee, Carbon::now());
-
-            $refreshedReferee = $referee->fresh();
-
-            // Verify all state is consistent - no orphaned records
-            if ($refreshedReferee->isEmployed()) {
-                expect($refreshedReferee->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedReferee->currentEmployment)->not()->toBeNull();
-            }
-        });
-    });
-
-    describe('business rule integration', function () {
-        test('employment respects business validation rules', function () {
-            $referee = Referee::factory()->unemployed()->create();
-
-            // Test that employment follows business rules
-            EmployAction::run($referee, Carbon::now());
-
-            $refreshedReferee = $referee->fresh();
-
-            // Verify business rule compliance
-            expect($refreshedReferee->isEmployed())->toBeTrue();
-            expect($refreshedReferee->canBeEmployed())->toBeFalse(); // Already employed
-            expect($refreshedReferee->isBookable())->toBeTrue(); // Can be booked when employed
-        });
-
-        test('employment enables officiating capability', function () {
-            $referee = Referee::factory()->released()->create();
-
-            // Released referee should not be bookable
-            expect($referee->isBookable())->toBeFalse();
-
-            EmployAction::run($referee, Carbon::now());
-
-            // Employed referee should be bookable
-            expect($referee->fresh()->isBookable())->toBeTrue();
-        });
-
-        test('complex multi-action employment workflows maintain data consistency', function () {
-            $referee = Referee::factory()->retired()->create();
-
-            // Retire -> Employ -> Suspend -> Release workflow
-            EmployAction::run($referee, Carbon::now());
-            $employed = $referee->fresh();
-            expect($employed->isEmployed())->toBeTrue();
-
-            SuspendAction::run($employed, Carbon::now());
-            $suspended = $referee->fresh();
-            expect($suspended->isEmployed())->toBeTrue();
-            expect($suspended->isSuspended())->toBeTrue();
-
-            ReleaseAction::run($suspended, Carbon::now());
-            $released = $referee->fresh();
-            expect($released->isReleased())->toBeTrue();
-            expect($released->isEmployed())->toBeFalse();
-            expect($released->isSuspended())->toBeFalse();
-        });
-    });
-
+    // Assert
+    expect($suspendedHasEmployment)->toBeTrue()
+        ->and($suspendedHasSuspension)->toBeTrue()
+        ->and($released->status)->toBe(EmploymentStatus::Released)
+        ->and($released->currentEmployment()->exists())->toBeFalse()
+        ->and($released->currentSuspension()->exists())->toBeFalse()
+        ->and(resolve(RosterBookingEligibility::class)->allows($released))->toBeFalse();
 });

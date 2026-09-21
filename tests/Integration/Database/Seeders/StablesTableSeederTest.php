@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Stables\StableStatus;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Database\Seeders\StablesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -49,9 +49,8 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect($stable->name)->toBeString();
-                expect($stable->name)->not->toBeEmpty();
-                expect($stable->status)->toBeInstanceOf(StableStatus::class);
+                expect($stable->name)->toBeString()->not->toBeEmpty()
+                    ->and($stable->status)->toBeInstanceOf(StableStatus::class);
             }
         });
 
@@ -61,8 +60,8 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect(mb_strlen($stable->name))->toBeGreaterThanOrEqual(5);
-                expect($stable->name)->not->toContain('Test');
+                expect(mb_strlen($stable->name))->toBeGreaterThanOrEqual(5)
+                    ->and($stable->name)->not->toContain('Test');
             }
         });
     });
@@ -90,15 +89,8 @@ describe('StablesTableSeeder Integration Tests', function () {
             }
         });
 
-        test('seeder creates consistent data', function () {
-            // Arrange
-            $initialCount = Stable::count();
-
-            // Act
-            Artisan::call('db:seed', ['--class' => 'StablesTableSeeder']);
-
-            // Assert - Should maintain or increase count
-            expect(Stable::count())->toBeGreaterThanOrEqual($initialCount);
+        test('seeder creates the expected number of stables', function () {
+            expect(Stable::count())->toBe(27);
         });
     });
 });

@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Models\Wrestlers\Wrestler;
-use App\Support\DateHelper;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted wrestler record.
@@ -29,16 +32,13 @@ class RestoreAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $restoreDate = null): void
     {
-        $wrestler->ensureCanBeRestored();
+        $effectiveDate = $restoreDate ?? now();
 
-        $restoreDate = DateHelper::resolveDate($restoreDate);
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
-        DB::transaction(function () use ($wrestler): void {
-            $wrestler->restore();
-
-            // Note: No automatic relationship restoration to avoid conflicts.
-            // All employment, tag team, stable, and manager relationships
-            // must be re-established explicitly using separate actions.
+            $this->eligibility->ensureCanRestore($lockedWrestler);
+            $this->deletionState->restore($lockedWrestler, $effectiveDate);
         });
     }
 }

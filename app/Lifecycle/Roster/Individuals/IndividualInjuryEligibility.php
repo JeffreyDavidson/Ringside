@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Lifecycle\Roster\Individuals;
+
+use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+
+final class IndividualInjuryEligibility
+{
+    public function canInjure(Wrestler|Manager|Referee $individual): bool
+    {
+        try {
+            $this->ensureCanInjure($individual);
+
+            return true;
+        } catch (CannotBeInjuredException) {
+            return false;
+        }
+    }
+
+    public function ensureCanInjure(Wrestler|Manager|Referee $individual): void
+    {
+        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
+            throw CannotBeInjuredException::unemployed($individual);
+        }
+
+        if ($individual->currentRetirement()->exists()) {
+            throw CannotBeInjuredException::retired($individual);
+        }
+
+        if ($individual->futureEmployment()->exists()) {
+            throw CannotBeInjuredException::hasFutureEmployment($individual);
+        }
+
+        if ($individual->currentSuspension()->exists()) {
+            throw CannotBeInjuredException::suspended($individual);
+        }
+
+        if ($individual->currentInjury()->exists()) {
+            throw CannotBeInjuredException::injured($individual);
+        }
+    }
+
+    public function canBeClearedFromInjury(Wrestler|Manager|Referee $individual): bool
+    {
+        try {
+            $this->ensureCanBeClearedFromInjury($individual);
+
+            return true;
+        } catch (CannotBeClearedFromInjuryException) {
+            return false;
+        }
+    }
+
+    public function ensureCanBeClearedFromInjury(Wrestler|Manager|Referee $individual): void
+    {
+        if (! $individual->currentInjury()->exists()) {
+            throw CannotBeClearedFromInjuryException::notInjured($individual);
+        }
+    }
+}

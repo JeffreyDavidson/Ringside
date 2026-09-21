@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Data;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Attributes\Computed;
 
 trait PresentsWrestlersList
@@ -12,9 +12,14 @@ trait PresentsWrestlersList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: false)]
+    #[Computed]
     public function getWrestlers(): array
     {
-        return Wrestler::select('id', 'name')->pluck('name', 'id')->toArray();
+        return Wrestler::query()
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

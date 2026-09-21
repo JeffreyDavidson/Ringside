@@ -9,6 +9,9 @@
 
 @php
     $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
+    if ($fieldName !== null && ! is_string($fieldName)) {
+        throw new \InvalidArgumentException('Form field names must be strings.');
+    }
     if ($fieldName && str_contains($fieldName, '=')) {
         $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
     }
@@ -29,26 +32,28 @@
     $textareaAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'rows']);
 @endphp
 
-@if($label || $description)
-    <x-form.with-field
-        :label="$label"
-        :description="$description"
-        :variant="$variant"
-        :name="$fieldName">
+@if ($label || $description)
+    <x-form.with-field :label="$label" :description="$description" :variant="$variant" :name="$fieldName">
         <textarea
-            {{ $textareaAttributes->merge([
+            {{
+                $textareaAttributes->merge([
+                    'name' => $fieldName,
+                    'id' => $inputId,
+                    'rows' => $rows,
+                    'class' => $textareaClasses,
+                ])
+            }}
+        >{{ $slot }}</textarea>
+    </x-form.with-field>
+@else
+    <textarea
+        {{
+            $textareaAttributes->merge([
                 'name' => $fieldName,
                 'id' => $inputId,
                 'rows' => $rows,
                 'class' => $textareaClasses,
-            ]) }}>{{ $slot }}</textarea>
-    </x-form.with-field>
-@else
-    <textarea
-        {{ $textareaAttributes->merge([
-            'name' => $fieldName,
-            'id' => $inputId,
-            'rows' => $rows,
-            'class' => $textareaClasses,
-        ]) }}>{{ $slot }}</textarea>
+            ])
+        }}
+    >{{ $slot }}</textarea>
 @endif

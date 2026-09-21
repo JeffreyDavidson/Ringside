@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Titles\TitleDeletionEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly TitleDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted title.
@@ -23,17 +27,14 @@ class RestoreAction
      * - Requires separate debut/reinstate action to make title active again
      *
      * @param  Title  $title  The soft-deleted title to restore
-     *
-     * @example
-     * ```php
-     * $deletedTitle = Title::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedTitle);
-     * ```
      */
     public function handle(Title $title): void
     {
         DB::transaction(function () use ($title): void {
-            $title->restore();
+            $lockedTitle = $title->refreshForUpdate();
+
+            $this->eligibility->ensureCanRestore($lockedTitle);
+            $this->deletionState->restore($lockedTitle, now());
         });
     }
 }

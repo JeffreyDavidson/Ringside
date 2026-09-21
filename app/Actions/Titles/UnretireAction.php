@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
+    ) {}
 
     /**
      * Unretire a retired title and make it available for future competition.
@@ -27,28 +32,16 @@ class UnretireAction
      *
      * @param  Title  $title  The title to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     * @throws CannotBeUnretiredException When title cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire title immediately
-     * UnretireAction::run($title);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($title, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {
-        $title->ensureCanBeUnretired();
+        $date = $unretiredDate ?? now();
 
-        $unretiredDate = $unretiredDate ?? now();
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
 
-        DB::transaction(function () use ($title, $unretiredDate): void {
-            $currentRetirement = $title->currentRetirement()->first();
-            if ($currentRetirement) {
-                $currentRetirement->update(['ended_at' => $unretiredDate]);
-            }
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
+            $this->retirementPeriods->end($lockedTitle, $date, LifecycleTransitionType::Unretired);
         });
     }
 }

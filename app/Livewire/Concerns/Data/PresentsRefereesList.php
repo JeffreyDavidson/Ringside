@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Data;
 
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Livewire\Attributes\Computed;
 
 trait PresentsRefereesList
@@ -12,12 +12,14 @@ trait PresentsRefereesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: false)]
+    #[Computed]
     public function getReferees(): array
     {
-        return Referee::select('id', 'full_name')
-            ->get()
+        return Referee::query()
             ->pluck('full_name', 'id')
-            ->toArray();
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

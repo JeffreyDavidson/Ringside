@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Enums\MatchType;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddWrestlersToMatchAction
 {
-    use AsAction;
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
+    ) {}
 
     /**
      * Add wrestlers to an event match.
@@ -41,70 +47,63 @@ class AddWrestlersToMatchAction
      * @param  EventMatch  $eventMatch  The match to add wrestlers to
      * @param  Collection<int, Wrestler>  $wrestlers  The wrestlers to add to the match
      * @param  int  $sideNumber  The side/team number for the wrestlers (1, 2, 3, etc.)
-     *
-     * @example
-     * ```php
-     * // Singles match - Add John Cena to side 1
-     * $wrestlers = collect([$johnCena]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 1);
-     *
-     * // Handicap match - Add multiple wrestlers to one side
-     * $wrestlers = collect([$wrestler1, $wrestler2]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 2);
-     *
-     * // Battle royal - Add multiple wrestlers to same side
-     * $wrestlers = collect([$wrestler1, $wrestler2, $wrestler3]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 1);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
     {
-        // Pre-filter wrestlers to ensure only eligible competitors are processed
-        $eligibleWrestlers = $wrestlers->filter(
-            fn (Wrestler $wrestler) => $this->isWrestlerEligibleForMatch($wrestler, $eventMatch)
-        );
+        $requestedWrestlers = $wrestlers->unique('id')->values();
 
-        // Validate we have wrestlers to add after filtering
-        if ($eligibleWrestlers->isEmpty()) {
-            throw new InvalidArgumentException('No eligible wrestlers provided for match assignment');
+        if ($requestedWrestlers->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
         // Validate side number is reasonable for match structure
         if ($sideNumber < 1) {
-            throw new InvalidArgumentException('Side number must be positive');
+            throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {
-            // Add each eligible wrestler to the specified side
-            $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $sideNumber) {
-                $eventMatch->competitors()->create([
-                    'competitor_id' => $wrestler->id,
-                    'competitor_type' => Wrestler::class,
-                    'side_number' => $sideNumber,
-                ]);
-            });
+        DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
+            $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
         });
     }
 
     /**
-     * Check if a wrestler is eligible to compete in the match.
+     * Assign wrestlers while the caller owns the match transaction and lock.
      *
-     * @param  Wrestler  $wrestler  The wrestler to validate
-     * @param  EventMatch  $eventMatch  The match they would compete in
-     * @return bool True if the wrestler can compete
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
-    private function isWrestlerEligibleForMatch(Wrestler $wrestler, EventMatch $eventMatch): bool
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber): void
     {
-        // Basic availability checks - wrestler must be active and available
-        if (! $wrestler->isBookable()) {
-            return false;
+        $requestedWrestlers = $wrestlers->unique('id')->values();
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedWrestlers = Wrestler::query()
+            ->whereKey($requestedWrestlers->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
+            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
-        // Check for conflicts with existing match assignments
-        // Note: More complex conflict checking would be implemented here
-        // such as checking for double-booking on the same event date
-        // Could validate against $eventMatch->event->date for scheduling conflicts
+        $this->conflictService->ensureWrestlersCanBeAssigned(
+            $conflictingEventIds,
+            $lockedWrestlers,
+        );
+        $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
-        return true;
+        $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {
+            $competitor = $lockedMatch->competitors()->create([
+                'competitor_id' => $wrestler->id,
+                'competitor_type' => $wrestler->getMorphClass(),
+                'match_side_id' => $side->id,
+            ]);
+
+            if ($lockedMatch->match_type === MatchType::RoyalRumble) {
+                $competitor->forceFill(['entry_order' => $side->position])->save();
+            }
+        });
     }
 }

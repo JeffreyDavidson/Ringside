@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Modals;
 
+use App\Actions\Events\CreateAction;
+use App\Actions\Events\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Event>
+ *
+ * @property-read array<int|string,string|null> $getVenues
  */
 class FormModal extends BaseFormModal
 {
@@ -22,9 +25,14 @@ class FormModal extends BaseFormModal
 
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -32,49 +40,40 @@ class FormModal extends BaseFormModal
         return Event::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.events.modals.form-modal';
-    }
-
-    protected function getDummyDataFields(): array
-    {
-        /** @var Venue|null $venue */
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s');
         $venue = Venue::query()->inRandomOrder()->first();
 
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'date' => fn () => fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s'),
-            'venue_id' => fn () => $venue?->id ?? Venue::factory()->create()->id, // @phpstan-ignore-line
-            'preview' => fn () => Str::of(fake()->text())->value(),
-        ];
+        if ($venue !== null) {
+            $this->form->venue_id = $venue->id;
+        }
+        $this->form->preview = Str::of(fake()->text())->value();
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit Event';
         }
 
         return 'Create Event';
     }
 
-    public function openModal(mixed $modelId = null): void
+    protected function updateForm(): void
     {
-        // Check authorization before opening modal
-        if ($modelId !== null) {
-            // Editing existing event - check update permission
-            Gate::authorize('update', Event::class);
-        } else {
-            // Creating new event - check create permission
-            Gate::authorize('create', Event::class);
-        }
+        $this->updateAction->handle($this->form->event(), $this->form->toData());
+    }
 
-        parent::openModal($modelId);
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
     }
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.events.modals.form-modal');
+        return view('livewire.events.modals.form-modal');
     }
 }

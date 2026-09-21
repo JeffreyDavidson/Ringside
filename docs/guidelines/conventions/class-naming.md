@@ -68,26 +68,31 @@ class WrestlerService {}                  // Wrong suffix
 ## Controllers
 
 ### Controller Naming Standards
-- **Invokable Pattern**: Use invokable controllers with single responsibility
 - **Domain Organization**: Group controllers by domain/entity
-- **Descriptive Names**: Use IndexController and ShowController for resource endpoints
+- **Resource Controllers**: Use a plural resource name for endpoints belonging to one resource
+- **Invokable Controllers**: Use an action-oriented name for standalone endpoints that do not fit a resource method
 
 ```php
 // ✅ CORRECT
 namespace App\Http\Controllers\Events;
-class IndexController { public function __invoke(): View {} }
-class ShowController { public function __invoke(Event $event): View {} }
-
-namespace App\Http\Controllers\Wrestlers;
-class IndexController { public function __invoke(): View {} }
-class ShowController { public function __invoke(Wrestler $wrestler): View {} }
-
-// ❌ INCORRECT
-class EventsController {                  // Resource controller pattern
+class EventsController {
     public function index(): View {}
     public function show(Event $event): View {}
 }
-class EventController {}                  // Singular controller name
+
+class EventMatchesController {
+    public function index(Event $event): View {}
+}
+
+class DashboardController {
+    public function __invoke(): View {}
+}
+
+// ❌ INCORRECT
+class IndexController {}                  // Resource operation split into its own controller
+class ShowController {}                   // Resource operation split into its own controller
+class EventController {}                  // Resource controller name is singular
+class ProcessController {}                // Standalone action name is vague
 class EventsIndexController {}            // Redundant domain prefix
 ```
 

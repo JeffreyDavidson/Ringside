@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories\Titles;
 
 use App\Enums\Titles\TitleType;
+use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Titles\Title;
-use App\Models\Titles\TitleActivityPeriod;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Titles\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -27,10 +27,8 @@ class TitleFactory extends Factory
         $titleType = fake()->randomElement(TitleType::cases());
 
         return [
-            'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
+            'name' => $this->generateTitleName($titleType),
             'type' => $titleType,
-            'current_champion_id' => null,
-            'previous_champion_id' => null,
         ];
     }
 
@@ -39,7 +37,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($activationDate), 'activations');
+            ->has(ActivityPeriod::factory()->started($activationDate), 'activityPeriods');
     }
 
     public function inactive(): static
@@ -49,13 +47,13 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations');
+            ->has(ActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods');
     }
 
     public function withFutureActivation(): static
     {
         return $this
-            ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activations');
+            ->has(ActivityPeriod::factory()->started(Carbon::tomorrow()), 'activityPeriods');
     }
 
     public function retired(): static
@@ -65,8 +63,8 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations')
-            ->has(TitleRetirement::factory()->started($end), 'retirements');
+            ->has(ActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
+            ->has(Retirement::factory()->started($end), 'retirements');
     }
 
     public function unactivated(): static
@@ -84,12 +82,18 @@ class TitleFactory extends Factory
 
     public function singles(): static
     {
-        return $this->state(fn () => ['type' => TitleType::Singles]);
+        return $this->state(fn () => [
+            'name' => $this->generateTitleName(TitleType::Singles),
+            'type' => TitleType::Singles,
+        ]);
     }
 
     public function tagTeam(): static
     {
-        return $this->state(fn () => ['type' => TitleType::TagTeam]);
+        return $this->state(fn () => [
+            'name' => $this->generateTitleName(TitleType::TagTeam),
+            'type' => TitleType::TagTeam,
+        ]);
     }
 
     public function undebuted(): static
@@ -113,10 +117,18 @@ class TitleFactory extends Factory
 
         if ($endDate) {
             return $this
-                ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activations');
+                ->has(ActivityPeriod::factory()->started($startDate)->ended($endDate), 'activityPeriods');
         }
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($startDate), 'activations');
+            ->has(ActivityPeriod::factory()->started($startDate), 'activityPeriods');
+    }
+
+    private function generateTitleName(TitleType $titleType): string
+    {
+        return str(fake()->unique()->words(2, true))
+            ->title()
+            ->append($titleType === TitleType::Singles ? ' Title' : ' Titles')
+            ->toString();
     }
 }

@@ -39,10 +39,10 @@ The factory integrates with several key models:
 
 - **EventMatch**: Core match entity
 - **MatchCompetitor**: Links competitors to matches
-- **MatchResult**: Stores match outcomes
-- **MatchWinner/MatchLoser**: Tracks individual winners and losers
+- **EventMatch**: Stores the current finish and winning side
+- **MatchSide**: Groups the competitors who compete and win together
 - **MatchType**: Defines match rules and competitor requirements
-- **MatchDecision**: Specifies how matches end
+- **MatchFinish**: Specifies how matches end and whether a winning side is required
 
 ## Architecture Patterns
 
@@ -73,7 +73,7 @@ The `generateFullMatch()` method uses a resolution pattern to convert configurat
 
 1. **Match Type Resolution**: String slugs → MatchType models
 2. **Competitor Resolution**: Mixed types → Competitor models
-3. **Decision Resolution**: String types → MatchDecision models
+3. **Finish Resolution**: String values → MatchFinish enum cases
 4. **Strategy Resolution**: Winner strategies → Competitor collections
 
 ### Callback Architecture

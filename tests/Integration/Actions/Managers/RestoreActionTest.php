@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\RestoreAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamManager;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -25,13 +27,23 @@ test('it restores a soft-deleted manager', function () {
     expect(Manager::withTrashed()->find($managerId))->not()->toBeNull();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager)->not()->toBeNull();
+    $restoredManager = Manager::findOrFail($managerId);
     expect($restoredManager->deleted_at)->toBeNull();
+});
+
+test('it reloads a stale manager before restoring', function () {
+    $manager = Manager::factory()->create();
+    $staleManager = clone $manager;
+
+    $manager->delete();
+
+    resolve(RestoreAction::class)->handle($staleManager);
+
+    expect(Manager::query()->find($manager->getKey()))->not->toBeNull();
 });
 
 test('it handles database transactions correctly', function () {
@@ -43,12 +55,11 @@ test('it handles database transactions correctly', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify transaction was successful
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager)->not()->toBeNull();
+    $restoredManager = Manager::findOrFail($managerId);
     expect($restoredManager->deleted_at)->toBeNull();
 
     // Verify historical records are preserved
@@ -71,14 +82,14 @@ test('it preserves all historical records during restoration', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all historical records are preserved
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager->employments()->count())->toBe($originalEmploymentCount);
-    expect($restoredManager->suspensions()->count())->toBe($originalSuspensionCount);
-    expect($restoredManager->injuries()->count())->toBe($originalInjuryCount);
+    $restoredManager = Manager::findOrFail($managerId);
+    expect($restoredManager->employments()->count())->toBe($originalEmploymentCount)
+        ->and($restoredManager->suspensions()->count())->toBe($originalSuspensionCount)
+        ->and($restoredManager->injuries()->count())->toBe($originalInjuryCount);
 });
 
 test('it does not automatically restore employment relationships', function () {
@@ -86,22 +97,21 @@ test('it does not automatically restore employment relationships', function () {
     $managerId = $manager->id;
 
     // Verify manager was employed before deletion
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     // Soft delete the manager
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored but not automatically employed
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager)->not()->toBeNull();
+    $restoredManager = Manager::findOrFail($managerId);
 
     // Manager should not be automatically employed - requires separate action
     // This tests the business rule that restoration doesn't auto-employ
-    expect($restoredManager->isEmployed())->toBeFalse();
+    expect($restoredManager->currentEmployment()->exists())->toBeFalse();
 
     // Historical employment records should be preserved
     expect($restoredManager->employments()->count())->toBeGreaterThan(0);
@@ -122,16 +132,15 @@ test('it does not automatically restore management relationships', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager)->not()->toBeNull();
+    $restoredManager = Manager::findOrFail($managerId);
 
     // Management relationships should be preserved but not automatically reactivated
     expect($restoredManager->wrestlers()->count())->toBe(1); // Historical preserved
-    expect($restoredManager->currentWrestlers)->toHaveCount(0); // Not auto-reactivated
+    expect($restoredManager->currentWrestlers)->toBeEmpty(); // Not auto-reactivated
 
     // This ensures restoration doesn't create conflicts with current assignments
 });
@@ -155,13 +164,13 @@ test('it handles managers with complex deletion history', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all complex history is preserved
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager->employments()->count())->toBe($originalRecordCounts['employments']);
-    expect($restoredManager->retirements()->count())->toBe($originalRecordCounts['retirements']);
+    $restoredManager = Manager::findOrFail($managerId);
+    expect($restoredManager->employments()->count())->toBe($originalRecordCounts['employments'])
+        ->and($restoredManager->retirements()->count())->toBe($originalRecordCounts['retirements']);
 });
 
 test('it prevents restoring non-deleted managers', function () {
@@ -171,7 +180,7 @@ test('it prevents restoring non-deleted managers', function () {
     expect($manager->deleted_at)->toBeNull();
 
     // Should not be able to restore a non-deleted manager
-    expect(fn () => RestoreAction::run($manager))
+    expect(fn () => resolve(RestoreAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -190,24 +199,32 @@ test('it maintains referential integrity during restoration', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify referential integrity is maintained
-    $restoredManager = Manager::find($managerId);
+    $restoredManager = Manager::findOrFail($managerId);
 
     // All pivot relationships should be preserved
     expect($restoredManager->wrestlers()->count())->toBe(1);
     expect($restoredManager->tagTeams()->count())->toBe(1);
 
     // Verify pivot data integrity
-    $wrestlerPivot = $restoredManager->wrestlers()->first()->pivot;
-    expect($wrestlerPivot->hired_at)->not()->toBeNull();
-    expect($wrestlerPivot->fired_at)->not()->toBeNull();
+    $wrestlerManagement = WrestlerManager::query()
+        ->whereBelongsTo($restoredManager, 'manager')
+        ->whereBelongsTo($wrestler)
+        ->firstOrFail();
+    expect($wrestlerManagement->hired_at->toDateTimeString())->toBe(now()->subDays(5)->toDateTimeString())
+        ->and($wrestlerManagement->fired_at)->not()
+        ->toBeNull();
 
-    $tagTeamPivot = $restoredManager->tagTeams()->first()->pivot;
-    expect($tagTeamPivot->hired_at)->not()->toBeNull();
-    expect($tagTeamPivot->fired_at)->not()->toBeNull();
+    $tagTeamManagement = TagTeamManager::query()
+        ->whereBelongsTo($restoredManager, 'manager')
+        ->whereBelongsTo($tagTeam, 'tagTeam')
+        ->firstOrFail();
+    expect($tagTeamManagement->hired_at->toDateTimeString())->toBe(now()->subDays(4)->toDateTimeString())
+        ->and($tagTeamManagement->fired_at)->not()
+        ->toBeNull();
 });
 
 test('it allows separate employment after restoration', function () {
@@ -218,18 +235,18 @@ test('it allows separate employment after restoration', function () {
     $manager->delete();
 
     // Restore the manager
-    $deletedManager = Manager::onlyTrashed()->find($managerId);
-    RestoreAction::run($deletedManager);
+    $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager can be employed separately after restoration
-    $restoredManager = Manager::find($managerId);
-    expect($restoredManager->isEmployed())->toBeFalse();
+    $restoredManager = Manager::findOrFail($managerId);
+    expect($restoredManager->currentEmployment()->exists())->toBeFalse();
 
     // This would require a separate EmployAction call
-    // expect(() => EmployAction::run($restoredManager))->not()->toThrow();
+    // expect(() => resolve(EmployAction::class)->handle($restoredManager))->not()->toThrow();
     // Testing the capability without actually running EmployAction
 
     // Manager should be in a state where employment is possible
-    expect($restoredManager->isRetired())->toBeFalse();
+    expect($restoredManager->currentRetirement()->exists())->toBeFalse();
     expect($restoredManager->deleted_at)->toBeNull();
 });

@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Actions\Concerns\WrestlerDeletionCascadeStrategy;
-use App\Models\Wrestlers\Wrestler;
-use App\Support\DateHelper;
-use Exception;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+    ) {}
 
     /**
      * Delete a wrestler.
@@ -23,21 +26,15 @@ class DeleteAction
      * This handles the complete deletion workflow with business impact:
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves wrestler employment history for administrative records
      *
      * RELATIONSHIP IMPACT:
-     * - Uses WrestlerDeletionCascadeStrategy to end all professional relationships
+     * - Ends all current professional relationships through a typed domain action
      * - Removes wrestler from current tag teams (teams may need new members)
      * - Ends stable memberships (stables continue with remaining members)
      * - Terminates management contracts (managers may manage other talent)
      * - Vacates any held championships (titles become available)
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling and cascade
-     * strategies for relationship cleanup, following the same pattern as other
-     * wrestler actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the wrestler record
@@ -45,24 +42,15 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        if ($wrestler->trashed()) {
-            throw new Exception("Wrestler '{$wrestler->name}' is already deleted.");
-        }
+        $effectiveDate = $deletionDate ?? now();
 
-        if (method_exists($wrestler, 'ensureCanBeDeleted')) {
-            $wrestler->ensureCanBeDeleted();
-        }
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
-        $deletionDate = DateHelper::resolveDate($deletionDate);
-
-        DB::transaction(function () use ($wrestler, $deletionDate): void {
-            // Handle wrestler status and relationship cleanup using StatusTransitionPipeline
-            StatusTransitionPipeline::delete($wrestler, $deletionDate)
-                ->withCascade(WrestlerDeletionCascadeStrategy::endAllRelationships())
-                ->execute();
-
-            // Soft delete the wrestler record
-            $wrestler->delete();
+            $this->eligibility->ensureCanDelete($lockedWrestler);
+            $this->periods->close($lockedWrestler, $effectiveDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
+            $this->deletionState->delete($lockedWrestler, $effectiveDate);
         });
     }
 }

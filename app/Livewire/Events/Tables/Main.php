@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Tables;
 
+use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
+use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Concerns\Data\PresentsVenuesList;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -14,20 +18,29 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
-use App\Models\Events\Venue;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * @property-read array<int|string, string|null> $getVenues
+ *
+ * @extends BaseTable<Event>
+ */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+    use PresentsVenuesList;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'events';
 
+    #[\Override]
     protected string $routeBasePath = 'events';
 
+    #[\Override]
     protected string $resourceName = 'events';
 
     /**
@@ -36,13 +49,13 @@ class Main extends BaseTable
     public function builder(): EventBuilder
     {
         return Event::query()
-            ->with(['venue'])
-            ->orderBy(DB::raw('date IS NOT NULL, date'), 'desc');
+            ->latestDatedFirst()
+            ->with(['venue']);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', Event::class);
+        Gate::authorize('viewAny', Event::class);
 
         $this->addAdditionalSelects([
             'events.venue_id',
@@ -66,7 +79,7 @@ class Main extends BaseTable
                 ->emptyValue('No Date Set'),
             LinkColumn::make(__('events.venue'))
                 ->title(fn (Event $row) => $row->venue ? $row->venue->name : 'No Venue')
-                ->location(fn (Event $row) => $row->venue ? route('venues.show', $row->venue) : ''),
+                ->location(fn (Event $row): string => $row->venue ? route('venues.show', $row->venue) : ''),
 
         ];
     }
@@ -74,36 +87,19 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = [
-            'scheduled' => 'Scheduled',
-            'unscheduled' => 'Unscheduled',
-            'past' => 'Past',
-            'future' => 'Future',
-        ];
-
-        /** @var array<int, Venue> $venues */
-        $venues = Venue::query()->orderBy('name')->pluck('name', 'id')->toArray();
-
         return [
-            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+            SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'schedule' => 'Scheduled',
-                    'past' => 'Past',
-                    'unscheduled' => 'Unscheduled',
-                ])
-                ->filter(function (EventBuilder $builder, string $value) {
-                    /** @var EventBuilder<Event> $builder */
-                    match ($value) {
-                        'scheduled' => $builder->scheduled(),
-                        'past' => $builder->past(),
-                        'unscheduled' => $builder->unscheduled(),
-                        default => null,
-                    };
+                ->options(EventStatus::filterOptions())
+                ->filter(function (EventBuilder $builder, string $value): void {
+                    $status = EventStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
             DateRangeFilter::make('Event Dates')
                 ->config([
@@ -115,38 +111,56 @@ class Main extends BaseTable
                     'locale' => 'en',
                 ])
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
-                ->filter(function (Builder $builder, array $dateRange): void { // Expects an array.
-                    $builder
-                        ->whereBetween('date', [$dateRange['minDate'], $dateRange['maxDate']]);
+                ->filter(function (EventBuilder $builder, array $dateRange): void {
+                    /** @var array{minDate: string, maxDate: string} $dateRange */
+                    $startDate = Date::createFromFormat('Y-m-d', $dateRange['minDate']);
+                    $endDate = Date::createFromFormat('Y-m-d', $dateRange['maxDate']);
+
+                    if ($startDate === null || $endDate === null) {
+                        return;
+                    }
+
+                    $builder->whereBetween('date', [
+                        $startDate->startOfDay(),
+                        $endDate->endOfDay(),
+                    ]);
                 }),
             SelectFilter::make('Venue')
                 ->options([
                     '' => 'All',
-                    ...$venues,
-                ]),
+                    ...array_map(
+                        static fn (?string $name): string => $name ?? '',
+                        $this->getVenues,
+                    ),
+                ])
+                ->filter(function (EventBuilder $builder, string $value): void {
+                    $builder->forVenueId((int) $value);
+                }),
         ];
     }
 
-    public function delete(Event $event): void
+    public function delete(Event $event, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($event);
+        Gate::authorize('delete', $event);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $event): void {
+            $deleteAction->handle($event);
+        }, __('events.actions.deleted'));
     }
 
     /**
      * Restore a deleted scheduled event.
      */
-    public function restore(int $eventId): void
+    public function restore(int $eventId, RestoreAction $restoreAction): void
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
         Gate::authorize('restore', $event);
 
-        try {
-            resolve(RestoreAction::class)->handle($event);
-            session()->flash('status', 'Event successfully restored.');
-            $this->redirect(route('events.index'));
-        } catch (Exception $e) {
-            session()->flash('status', $e->getMessage());
+        if ($this->executeBusinessAction(function () use ($event, $restoreAction): void {
+            $restoreAction->handle($event);
+        }, __('events.actions.restored'))) {
+            $this->redirectRoute('events.index');
         }
     }
 }

@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\ReleaseAction;
-use App\Models\TagTeams\TagTeam;
+use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,16 +15,18 @@ beforeEach(function () {
 test('it releases an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeFalse();
 
     // Verify employment record was ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -32,14 +35,14 @@ test('it releases tag team with specific release date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $releaseDate = now()->subDays(3);
 
-    ReleaseAction::run($tagTeam, $releaseDate);
+    resolve(ReleaseAction::class)->handle($tagTeam, $releaseDate);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment ended with specific date
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -47,46 +50,46 @@ test('it releases tag team with specific release date', function () {
 test('it releases suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Verify employment ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify suspension ended
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it uses StatusTransitionPipeline for release', function () {
+test('it persists the release lifecycle', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
-    // Verify employment ended through pipeline
+    // Verify employment period was ended
     expect($tagTeam->currentEmployment)->toBeNull();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -94,27 +97,25 @@ test('it uses StatusTransitionPipeline for release', function () {
 test('it prevents releasing unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->isEmployed())->toBeFalse();
-
-    expect(fn () => ReleaseAction::run($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReleaseAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $originalEmploymentId = $tagTeam->currentEmployment->id;
+    $originalEmploymentId = $tagTeam->currentEmployment()->firstOrFail()->id;
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify the transaction was successful
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify original employment record was properly ended
-    $this->assertDatabaseHas('tag_teams_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $originalEmploymentId,
-        'tag_team_id' => $tagTeam->id,
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -123,29 +124,29 @@ test('it ends current employment period', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Should not create new employment records, just end current one
     expect($tagTeam->employments()->count())->toBe($originalEmploymentCount);
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // All employment records should have end dates
     expect($tagTeam->employments()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
-    ReleaseAction::run($tagTeam, $customReleaseDate);
+    resolve(ReleaseAction::class)->handle($tagTeam, $customReleaseDate);
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    // Verify the provided date was persisted
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 });
@@ -154,7 +155,7 @@ test('it preserves employment history during release', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -177,15 +178,15 @@ test('it handles tag team with complex employment history', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(10), 'ended_at' => null]); // Current
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeTrue();
-    expect($tagTeam->employments()->count())->toBe(3);
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->employments()->count())->toBe(3);
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Should now be unemployed
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Should have preserved all historical records
     expect($tagTeam->employments()->count())->toBe(3);
@@ -198,37 +199,35 @@ test('it handles release with cascade to partners and managers', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify cascade effects
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify tag team is released
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment record ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
-
-    // Note: Cascade effects on partners/managers would be tested in cascade strategy tests
 });
 
-test('it uses ReleaseCascadeStrategy for comprehensive cleanup', function () {
+test('it ends all current relationships', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
-    // Verify the action used StatusTransitionPipeline with cascade
-    expect($tagTeam->isEmployed())->toBeFalse();
+    // Verify the action applied the relationship cascade
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Employment should be ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

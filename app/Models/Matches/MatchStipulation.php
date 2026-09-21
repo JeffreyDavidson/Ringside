@@ -22,7 +22,6 @@ use Illuminate\Support\Carbon;
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read Collection<int, EventMatch> $eventMatches
  *
  * @method static \Database\Factories\Matches\MatchStipulationFactory factory($count = null, $state = [])
@@ -45,6 +44,7 @@ class MatchStipulation extends Model
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -57,6 +57,7 @@ class MatchStipulation extends Model
      *
      * @var array<string, mixed>
      */
+    #[\Override]
     protected $attributes = [
         'is_active' => true,
     ];
@@ -69,75 +70,5 @@ class MatchStipulation extends Model
     public function eventMatches(): HasMany
     {
         return $this->hasMany(EventMatch::class, 'match_stipulation_id');
-    }
-
-    /**
-     * Check if this is a standard wrestling match (no special stipulation).
-     */
-    public function isStandardMatch(): bool
-    {
-        return $this->slug === 'standard';
-    }
-
-    /**
-     * Check if this stipulation requires special rules or equipment.
-     */
-    public function requiresSpecialSetup(): bool
-    {
-        $specialStipulations = [
-            'steel_cage',
-            'ladder_match',
-            'tlc_match',
-            'hell_in_a_cell',
-            'elimination_chamber',
-        ];
-
-        return in_array($this->slug, $specialStipulations, true);
-    }
-
-    /**
-     * Check if this stipulation typically involves weapons or hardcore elements.
-     */
-    public function isHardcoreStipulation(): bool
-    {
-        $hardcoreStipulations = [
-            'no_dq',
-            'hardcore_match',
-            'tlc_match',
-            'extreme_rules',
-            'street_fight',
-            'falls_count_anywhere',
-        ];
-
-        return in_array($this->slug, $hardcoreStipulations, true);
-    }
-
-    /**
-     * Check if this stipulation has special elimination rules.
-     */
-    public function hasEliminationRules(): bool
-    {
-        $eliminationStipulations = [
-            'elimination_chamber',
-            'survivor_series',
-        ];
-
-        return in_array($this->slug, $eliminationStipulations, true);
-    }
-
-    /**
-     * Get the formatted display name for the stipulation.
-     */
-    public function getDisplayName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the match preview text for this stipulation.
-     */
-    public function getMatchPreview(): string
-    {
-        return $this->name.' Match';
     }
 }

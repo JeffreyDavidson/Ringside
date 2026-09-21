@@ -290,31 +290,31 @@ private function processStipulation(EventMatch $eventMatch, string $stipulation,
 }
 ```
 
-### Decision Type Modifications
+### Finish Modifications
 
-Stipulations can override normal decision type restrictions:
+Stipulations can override normal finish restrictions:
 
 ```php
-private function resolveDecisionWithStipulations(array $config): MatchDecision
+private function resolveFinishWithStipulations(array $config): MatchFinish
 {
     $stipulations = $config['stipulations'] ?? [];
     
     // Certain stipulations force specific decision types
     if (in_array('submission_only', $stipulations)) {
-        return $this->resolveMatchDecision('submission');
+        return MatchFinish::Submission;
     }
     
     if (in_array('last_man_standing', $stipulations)) {
-        return $this->resolveMatchDecision('last_man_standing');
+        return MatchFinish::Stipulation;
     }
     
     // Filter available decision types based on stipulations
-    $availableDecisions = $this->getAvailableDecisions($stipulations);
-    $requestedDecision = $config['decision_type'] ?? 'pinfall';
+    $availableFinishes = $this->getAvailableFinishes($stipulations);
+    $requestedFinish = $config['finish'] ?? MatchFinish::Pinfall;
     
-    return in_array($requestedDecision, $availableDecisions)
-        ? $this->resolveMatchDecision($requestedDecision)
-        : $this->resolveMatchDecision($availableDecisions[0]);
+    return in_array($requestedFinish, $availableFinishes, true)
+        ? $requestedFinish
+        : $availableFinishes[0];
 }
 ```
 
@@ -423,7 +423,7 @@ test('no disqualification stipulation prevents DQ finish', function () {
         'decision_type' => 'disqualification' // Should be overridden
     ])->create();
     
-    expect($match->result->decision->slug)->not->toBe('disqualification');
+    expect($match->match_finish)->not->toBe(MatchFinish::Disqualification);
 });
 
 test('title changes on any finish allows DQ title change', function () {
@@ -459,8 +459,8 @@ test('multiple stipulations work together', function () {
         ]
     ])->create();
     
-    $allowedDecisions = ['pinfall', 'submission', 'draw', 'nodecision'];
-    expect($match->result->decision->slug)->toBeIn($allowedDecisions);
+    $allowedFinishes = [MatchFinish::Pinfall, MatchFinish::Submission, MatchFinish::TimeLimitDraw, MatchFinish::NoDecision];
+    expect($match->match_finish)->toBeIn($allowedFinishes);
 });
 ```
 

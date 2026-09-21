@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\DeleteAction;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,10 +15,10 @@ beforeEach(function () {
 test('it soft deletes an unemployed referee', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->trashed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->trashed())->toBeFalse();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -30,136 +31,159 @@ test('it soft deletes an unemployed referee', function () {
     ]);
 });
 
+test('it deletes using the current persisted referee state', function () {
+    $referee = Referee::factory()->create();
+    $staleReferee = $referee->replicate(['id']);
+    $staleReferee->id = $referee->id;
+    $staleReferee->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleReferee);
+
+    expect(Referee::find($referee->id))->toBeNull()
+        ->and(Referee::withTrashed()->findOrFail($referee->id)->trashed())->toBeTrue();
+});
+
+test('it rejects deleting an already deleted referee', function () {
+    $referee = Referee::factory()->create();
+    $referee->delete();
+
+    expect(fn () => resolve(DeleteAction::class)->handle($referee))
+        ->toThrow(CannotBeDeletedException::class);
+});
+
 test('it soft deletes referee with specific deletion date', function () {
     $referee = Referee::factory()->create();
     $deletionDate = now()->subDays(2);
 
-    DeleteAction::run($referee, $deletionDate);
+    resolve(DeleteAction::class)->handle($referee, $deletionDate);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
 
     // Note: Laravel soft deletes use current timestamp, so we can't directly test custom dates
-    // The custom date would be used for ending relationships via StatusTransitionPipeline
+    // The custom date is used to close active lifecycle periods
     $this->assertSoftDeleted('referees', [
         'id' => $referee->id,
     ]);
 });
 
-test('it ends employment before deletion using StatusTransitionPipeline', function () {
+test('it ends employment before deletion', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($employment->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($employment->ended_at)->not->toBeNull();
 
     // Verify employment was ended
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
+        'employable_id' => $referee->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
 test('it ends suspension before deletion', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $referee = Referee::factory()->suspended()->create();
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($suspension->ended_at)->not->toBeNull();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('referees_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
-        'referee_id' => $referee->id,
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
 test('it ends injury before deletion', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $referee = Referee::factory()->injured()->create();
+    $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->isInjured())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($injury->ended_at)->not->toBeNull();
 
     // Verify injury was ended
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
-        'referee_id' => $referee->id,
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
 test('it ends retirement before deletion', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
 
-    expect($referee->isRetired())->toBeTrue();
-    expect($retirement->ended_at)->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $retirement->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($retirement->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($retirement->ended_at)->not->toBeNull();
 
     // Verify retirement was ended
-    $this->assertDatabaseHas('referees_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $retirement->id,
-        'referee_id' => $referee->id,
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it handles DateHelper date resolution for deletion', function () {
+test('it uses the provided deletion date', function () {
     $referee = Referee::factory()->employed()->create();
     $deletionDate = now()->subDays(5);
 
-    DeleteAction::run($referee, $deletionDate);
+    resolve(DeleteAction::class)->handle($referee, $deletionDate);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
 
-    // DateHelper should have processed the deletion date for ending relationships
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    // The provided deletion date should end related records
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
 });
 
 test('it maintains transaction boundaries', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
-    $employment = $referee->currentEmployment;
-    $suspension = $referee->currentSuspension;
+    $referee = Referee::factory()->suspended()->create();
+    $employment = $referee->currentEmployment()->firstOrFail();
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -167,15 +191,15 @@ test('it maintains transaction boundaries', function () {
 
     // All changes should be atomic - referee deleted and relationships ended
     expect($referee->trashed())->toBeTrue();
-    expect($employment->ended_at)->not->toBeNull();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($employment->ended_at)->not->toBeNull()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it validates referee can be deleted', function () {
     $referee = Referee::factory()->create();
 
     // Should succeed without throwing validation exception
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -183,18 +207,18 @@ test('it validates referee can be deleted', function () {
 
 test('it preserves historical data after deletion', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
     // Historical employment record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
-        'started_at' => $employment->started_at->toDateTimeString(),
+        'employable_id' => $referee->id,
+        'started_at' => requiredDate($employment->started_at)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -204,22 +228,4 @@ test('it preserves historical data after deletion', function () {
         'first_name' => $referee->first_name,
         'last_name' => $referee->last_name,
     ]);
-});
-
-test('it uses StatusTransitionPipeline for consistent status handling', function () {
-    $referee = Referee::factory()->employed()->suspended()->injured()->create();
-
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeTrue();
-    expect($referee->isInjured())->toBeTrue();
-
-    DeleteAction::run($referee);
-
-    $referee->refresh();
-
-    // StatusTransitionPipeline should have handled all status endings consistently
-    expect($referee->trashed())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
-    expect($referee->isInjured())->toBeFalse();
 });

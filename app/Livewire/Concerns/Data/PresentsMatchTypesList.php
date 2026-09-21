@@ -12,7 +12,7 @@ trait PresentsMatchTypesList
     /**
      * @return array<string,string>
      */
-    #[Computed(cache: true, key: 'match-types-list', seconds: 180)]
+    #[Computed]
     public function getMatchTypes(): array
     {
         return MatchType::options();

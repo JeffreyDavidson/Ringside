@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
+    ) {}
 
     /**
      * Retire a referee and end their officiating career.
@@ -29,48 +38,29 @@ class RetireAction
      *
      * @param  Referee  $referee  The referee to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     *
      * @throws CannotBeRetiredException When referee cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire referee immediately
-     * RetireAction::run($referee);
-     *
-     * // Retire with specific date
-     * RetireAction::run($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        $referee->ensureCanBeRetired();
+        $effectiveDate = $retirementDate ?? now();
 
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        DB::transaction(function () use ($referee, $retirementDate): void {
-            // Handle referee status - only employed referees can have suspension/injury to end
-            if ($referee->isEmployed()) {
-                // End suspension or injury if active (employed referee cannot be both)
-                if ($referee->isSuspended()) {
-                    $currentSuspension = $referee->currentSuspension()->first();
-                    if ($currentSuspension) {
-                        $currentSuspension->update(['ended_at' => $retirementDate]);
-                    }
-                } elseif ($referee->isInjured()) {
-                    $currentInjury = $referee->currentInjury()->first();
-                    if ($currentInjury) {
-                        $currentInjury->update(['ended_at' => $retirementDate->toDateTimeString()]);
-                    }
-                }
+            $this->eligibility->ensureCanRetire($lockedReferee);
 
-                // End employment
-                $currentEmployment = $referee->currentEmployment()->first();
-                if ($currentEmployment) {
-                    $currentEmployment->update(['ended_at' => $retirementDate]);
-                    $referee->update(['status' => EmploymentStatus::Retired]);
-                }
+            if ($lockedReferee->currentEmployment()->exists()) {
+                $this->employmentPeriods->end($lockedReferee, $effectiveDate);
             }
 
-            $referee->retirements()->create(['started_at' => $retirementDate]);
+            if ($lockedReferee->currentSuspension()->exists()) {
+                $this->suspensionPeriods->end($lockedReferee, $effectiveDate);
+            } elseif ($lockedReferee->currentInjury()->exists()) {
+                $this->injuryPeriods->end($lockedReferee, $effectiveDate);
+            }
+
+            $this->retirementPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Retired);
         });
     }
 }

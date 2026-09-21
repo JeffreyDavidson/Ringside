@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\ReinstateAction;
-use App\Models\Managers\Manager;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Models\Roster\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -12,58 +13,75 @@ beforeEach(function () {
 });
 
 test('it reinstates a suspended manager', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue(); // Should remain employed after reinstatement
+    expect($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed after reinstatement
 
     // Verify suspension record was ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it reinstates manager with specific reinstatement date', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
-    $reinstatementDate = now()->subDays(2);
+test('it prevents reinstating an injured manager', function () {
+    $manager = Manager::factory()->injured()->create();
+    $injuryId = $manager->currentInjury()->firstOrFail()->id;
 
-    ReinstateAction::run($manager, $reinstatementDate);
+    expect(fn () => resolve(ReinstateAction::class)->handle($manager))
+        ->toThrow(CannotBeReinstatedException::class);
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeTrue();
+    $this->assertDatabaseHas('injuries', [
+        'id' => $injuryId,
+        'ended_at' => null,
+    ]);
+});
+
+test('it reinstates manager with specific reinstatement date', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $reinstatementDate = now()->subDays(2);
+
+    resolve(ReinstateAction::class)->handle($manager, $reinstatementDate);
+
+    $manager->refresh();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension was ended with specific date
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
 });
 
-test('it uses StatusTransitionPipeline for reinstatement', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+test('it persists the reinstatement lifecycle', function () {
+    $manager = Manager::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $manager->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $manager->currentSuspension()->firstOrFail();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
-    // Verify suspension ended through pipeline
+    // Verify suspension period was ended
     expect($manager->currentSuspension)->toBeNull();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension record shows proper end date
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -71,27 +89,26 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
 test('it prevents reinstating non-suspended manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isSuspended())->toBeFalse();
-
-    expect(fn () => ReinstateAction::run($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentSuspension()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReinstateAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
-    $originalSuspensionId = $manager->currentSuspension->id;
+    $manager = Manager::factory()->suspended()->create();
+    $originalSuspensionId = $manager->currentSuspension()->firstOrFail()->id;
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Verify the transaction was successful
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify original suspension record was properly ended
-    $this->assertDatabaseHas('managers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $originalSuspensionId,
-        'manager_id' => $manager->id,
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -100,38 +117,38 @@ test('it handles database transactions correctly', function () {
 });
 
 test('it maintains employment status during reinstatement', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
-    $employmentId = $manager->currentEmployment->id;
+    $manager = Manager::factory()->suspended()->create();
+    $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
-    expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeTrue();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should maintain employment while ending suspension
-    expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Employment record should remain unchanged
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->id)->toBe($employmentId);
-    expect($employment->ended_at)->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
+    expect($employment->id)->toBe($employmentId)
+        ->and($employment->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+test('it uses the provided date', function () {
+    $manager = Manager::factory()->suspended()->create();
     $customReinstatementDate = now()->subDays(1)->startOfDay();
 
-    ReinstateAction::run($manager, $customReinstatementDate);
+    resolve(ReinstateAction::class)->handle($manager, $customReinstatementDate);
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    // Verify the provided date was persisted
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $customReinstatementDate->toDateTimeString(),
     ]);
 });
@@ -144,45 +161,15 @@ test('it handles multiple suspensions correctly', function () {
     $manager->suspensions()->create(['started_at' => now()->subDays(5), 'ended_at' => null]); // Current suspension
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->suspensions()->count())->toBe(2);
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->suspensions()->count())->toBe(2);
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should only end the current suspension, leaving historical ones intact
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->suspensions()->count())->toBe(2);
-    expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
-});
-
-test('it reinstates injured suspended manager', function () {
-    // This would be an invalid state, but test the business rule
-    $manager = Manager::factory()->employed()->suspended()->create();
-
-    // Manually create injury (this shouldn't be possible in normal flow)
-    $manager->injuries()->create(['started_at' => now()->subDay(), 'ended_at' => null]);
-    $manager->refresh();
-
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isInjured())->toBeTrue();
-    $suspensionId = $manager->currentSuspension->id;
-    $injuryId = $manager->currentInjury->id;
-
-    ReinstateAction::run($manager);
-
-    $manager->refresh();
-
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isInjured())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
-    $this->assertDatabaseMissing('managers_suspensions', [
-        'id' => $suspensionId,
-        'ended_at' => null,
-    ]);
-    $this->assertDatabaseMissing('managers_injuries', [
-        'id' => $injuryId,
-        'ended_at' => null,
-    ]);
+    expect($manager->currentSuspension()->exists())->toBeFalse();
+    expect($manager->suspensions()->count())->toBe(2)
+        ->and($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });

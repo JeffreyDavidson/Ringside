@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Data\Stables\StableMembershipData;
+use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class MergeStablesAction
 {
-    use AsAction;
-
     /**
      * Create a new merge stables action instance.
      */
     public function __construct(
-        protected StableMembershipService $membershipService
+        protected RemoveStableMembersAction $removeStableMembersAction,
+        protected AddStableMembersAction $addStableMembersAction,
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected StableRestructuringEligibility $eligibility,
     ) {}
 
     /**
@@ -37,17 +39,33 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
-            // Validate merge compatibility using model validation
-            $primaryStable->ensureCanBeMergedWith($secondaryStable);
+            [$firstStable, $secondStable] = $primaryStable->getKey() < $secondaryStable->getKey()
+                ? [$primaryStable, $secondaryStable]
+                : [$secondaryStable, $primaryStable];
 
-            // Use injected service to transfer all members from secondary to primary stable
-            $this->membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
+            $firstLockedStable = $firstStable->refreshForUpdate();
+            $secondLockedStable = $secondStable->refreshForUpdate();
 
-            // Note: Managers are not direct stable members and are automatically
-            // transferred through their wrestlers/tag teams associations
+            $lockedPrimaryStable = $firstLockedStable->is($primaryStable)
+                ? $firstLockedStable
+                : $secondLockedStable;
+            $lockedSecondaryStable = $firstLockedStable->is($secondaryStable)
+                ? $firstLockedStable
+                : $secondLockedStable;
 
-            // Delete the secondary stable after successful transfers
-            $secondaryStable->delete();
+            $this->eligibility->ensureCanMerge($lockedPrimaryStable, $lockedSecondaryStable);
+
+            $members = new StableMembershipData(
+                wrestlers: $lockedSecondaryStable->currentWrestlers,
+                tagTeams: $lockedSecondaryStable->currentTagTeams,
+            );
+
+            $this->eligibility->ensureMergeMembersAvailable($members);
+
+            $this->removeStableMembersAction->handle($lockedSecondaryStable, $members, $date);
+            $this->addStableMembersAction->handle($lockedPrimaryStable, $members, $date);
+            $this->endActivityPeriodAction->handle($lockedSecondaryStable, $date);
+            $lockedSecondaryStable->delete();
         });
     }
 }

@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Components\Tables\Filters\RelatedPeriodDateRangeFilter;
+use App\Models\Lifecycle\Employment;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Date;
+
+describe('related period date range filtering', function (): void {
+    test('multiple histories require one overlapping period and return each wrestler once', function (): void {
+        // Arrange
+        $matching = Wrestler::factory()
+            ->has(Employment::factory()->count(2)->sequence(
+                ['started_at' => '2024-06-01', 'ended_at' => '2024-06-10'],
+                ['started_at' => '2024-06-20', 'ended_at' => '2024-06-30'],
+            ), 'employments')
+            ->create();
+        Wrestler::factory()
+            ->has(Employment::factory()->count(2)->sequence(
+                ['started_at' => '2024-05-01', 'ended_at' => '2024-05-31'],
+                ['started_at' => '2024-07-01', 'ended_at' => null],
+            ), 'employments')
+            ->create();
+        $filter = FirstEmploymentFilter::make('Employment Period')
+            ->setFields('employments', 'employments.started_at', 'employments.ended_at');
+        $query = Wrestler::query();
+
+        // Act
+        $filter->apply($query, ['minDate' => '2024-06-01', 'maxDate' => '2024-06-30']);
+        $wrestlers = $query->get();
+
+        // Assert
+        expect($wrestlers->modelKeys())->toBe([$matching->id]);
+    });
+
+    test('related period filter factories preserve their requested types', function (RelatedPeriodDateRangeFilter $filter, string $filterClass, string $key): void {
+        // Act
+        $configuredFilter = $filter->setFields('periods', 'periods.started_at', 'periods.ended_at');
+
+        // Assert
+        expect($filter)
+            ->toBeInstanceOf(RelatedPeriodDateRangeFilter::class)
+            ->and($filter::class)->toBe($filterClass)
+            ->and($filter->getKey())->toBe($key)
+            ->and($configuredFilter)->toBe($filter);
+    })->with([
+        'activity periods' => [FirstActivityPeriodFilter::make('Activity Period'), FirstActivityPeriodFilter::class, 'activity_period'],
+        'employment periods' => [FirstEmploymentFilter::make('Employment Period'), FirstEmploymentFilter::class, 'employment_period'],
+    ]);
+
+    test('related period filters include every period overlapping the selected range without loading history collections', function (): void {
+        // Arrange
+        $startsWithinRange = Wrestler::factory()
+            ->has(Employment::factory()->started(Date::parse('2024-06-15')), 'employments')
+            ->create();
+        $endsWithinRange = Wrestler::factory()
+            ->has(
+                Employment::factory()
+                    ->started(Date::parse('2024-05-15'))
+                    ->ended(Date::parse('2024-06-15')),
+                'employments',
+            )
+            ->create();
+        $spansRange = Wrestler::factory()
+            ->has(
+                Employment::factory()
+                    ->started(Date::parse('2024-05-15'))
+                    ->ended(Date::parse('2024-07-15')),
+                'employments',
+            )
+            ->create();
+        $continuesThroughRange = Wrestler::factory()
+            ->has(Employment::factory()->started(Date::parse('2024-05-15'))->current(), 'employments')
+            ->create();
+        $endsBeforeRange = Wrestler::factory()
+            ->has(
+                Employment::factory()
+                    ->started(Date::parse('2024-05-01'))
+                    ->ended(Date::parse('2024-05-31 23:59:59')),
+                'employments',
+            )
+            ->create();
+        $startsAfterRange = Wrestler::factory()
+            ->has(Employment::factory()->started(Date::parse('2024-07-01'))->current(), 'employments')
+            ->create();
+        $endsAtRangeStart = Wrestler::factory()
+            ->has(
+                Employment::factory()
+                    ->started(Date::parse('2024-05-01'))
+                    ->ended(Date::parse('2024-06-01 00:00:00')),
+                'employments',
+            )
+            ->create();
+        $startsAtRangeEnd = Wrestler::factory()
+            ->has(Employment::factory()->started(Date::parse('2024-06-30 23:59:59'))->current(), 'employments')
+            ->create();
+        $withoutEmployment = Wrestler::factory()->create();
+
+        $filter = FirstEmploymentFilter::make('Employment Period')
+            ->setFields('employments', 'employments.started_at', 'employments.ended_at');
+        $query = Wrestler::query();
+
+        // Act
+        $filter->apply($query, [
+            'minDate' => '2024-06-01',
+            'maxDate' => '2024-06-30',
+        ]);
+
+        $wrestlers = $query
+            ->orderBy('id')
+            ->get();
+
+        // Assert
+        expect($wrestlers->modelKeys())->toBe([
+            $startsWithinRange->id,
+            $endsWithinRange->id,
+            $spansRange->id,
+            $continuesThroughRange->id,
+            $endsAtRangeStart->id,
+            $startsAtRangeEnd->id,
+        ])->not->toContain($endsBeforeRange->id, $startsAfterRange->id, $withoutEmployment->id)
+            ->and($wrestlers->every(fn (Wrestler $wrestler): bool => ! $wrestler->relationLoaded('employments')))->toBeTrue();
+    });
+});

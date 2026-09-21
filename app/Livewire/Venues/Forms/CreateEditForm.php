@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Forms;
 
+use App\Data\Events\VenueData;
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Model;
+use App\ValueObjects\Address;
 use Illuminate\Validation\Rule;
 
 /**
@@ -21,29 +23,22 @@ use Illuminate\Validation\Rule;
  * Key Responsibilities:
  * - Venue identification and naming with uniqueness enforcement
  * - Complete address management with comprehensive validation
- * - State verification against valid state records in database
+ * - State verification against the supported United States values
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
- * @extends BaseForm<CreateEditForm, Venue>
+ * @extends BaseForm<Venue>
  *
  * @see BaseForm For base form functionality and patterns
  *
  * @property string $name Venue's official name for events and promotion
  * @property string $street_address Complete street address for location
  * @property string $city City where venue is located
- * @property string $state State name (validated against State model)
+ * @property string $state State name
  * @property int|string $zipcode 5-digit ZIP code for postal addressing
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new venue creation.
-     *
-     * @var Venue|null Current venue model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Venue's official name for events and promotional materials.
      *
@@ -80,11 +75,11 @@ class CreateEditForm extends BaseForm
     /**
      * State where the venue is located.
      *
-     * Validated against existing State model records to ensure data accuracy
+     * Validated against supported United States values to ensure data accuracy
      * and prevent entry errors. Used for regional event planning, tax compliance,
      * regulatory requirements, and state-specific operational procedures.
      *
-     * @var string State name (must exist in states table)
+     * @var string State name
      */
     public string $state = '';
 
@@ -100,36 +95,26 @@ class CreateEditForm extends BaseForm
     public int|string|null $zipcode = '';
 
     /**
-     * Load additional data when editing existing venue records.
-     *
-     * Handles data loading for venue-specific fields when editing
-     * existing venues. Called automatically during form initialization
-     * for edit operations. No special data transformation needed for venues.
-     */
-    public function loadExtraData(): void
-    {
-        // No additional data loading required for venues
-        // All venue data is loaded via standard form fill mechanism
-    }
-
-    /**
      * Prepare venue data for model storage.
      *
      * Transforms form fields into model-compatible data structure ready
      * for database persistence. All venue fields are passed through directly
      * as they represent simple scalar values without complex transformations.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
+    public function toData(): VenueData
     {
-        return [
-            'name' => $this->name,
-            'street_address' => $this->street_address,
-            'city' => $this->city,
-            'state' => $this->state,
-            'zipcode' => $this->zipcode,
-        ];
+        return new VenueData(
+            name: $this->name,
+            street_address: $this->street_address,
+            city: $this->city,
+            state: $this->state,
+            zipcode: (string) $this->zipcode,
+        );
+    }
+
+    public function venue(): Venue
+    {
+        return Venue::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -140,11 +125,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Venue> The Venue model class
      */
-    protected function getModelClass(): string
-    {
-        return Venue::class;
-    }
-
     /**
      * Define validation rules for venue form fields.
      *
@@ -160,7 +140,7 @@ class CreateEditForm extends BaseForm
             'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->modelId)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', Rule::exists('states', 'name')],
+            'state' => ['required', 'string', Rule::enum(UnitedStatesState::class)],
             'zipcode' => ['required', 'digits:5'],
         ];
     }
@@ -173,6 +153,7 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, string> Custom validation attributes for this form
      */
+    #[\Override]
     protected function validationAttributes(): array
     {
         return [

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Forms;
 
+use App\Data\Users\UserData;
+use App\Enums\Users\Role;
 use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 /**
@@ -25,7 +26,7 @@ use Illuminate\Validation\Rule;
  * - User identification and contact information
  * - Role-based access control preparation
  *
- * @extends BaseForm<CreateEditForm, User>
+ * @extends BaseForm<User>
  *
  * @see BaseForm For base form functionality and patterns
  *
@@ -101,14 +102,10 @@ class CreateEditForm extends BaseForm
      * - Password fields are never populated during edit operations
      * - Sensitive data loading follows security best practices
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        // Clear password fields for security when editing existing users
         $this->password = '';
         $this->password_confirmation = '';
-
-        // Additional user data can be loaded here as needed:
-        // $this->roles = $this->formModel?->roles->pluck('name')->toArray() ?? [];
     }
 
     /**
@@ -123,26 +120,22 @@ class CreateEditForm extends BaseForm
      * - Password is only included when provided (allows updates without password change)
      * - Uses bcrypt hashing for maximum security
      *
-     * @return array<string, mixed> Model data ready for persistence
-     *
      * @see Hash::make() For secure password hashing
      */
-    protected function getModelData(): array
+    public function toData(): UserData
     {
-        $data = [
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'role' => $this->role,
-        ];
+        return new UserData(
+            firstName: $this->first_name,
+            lastName: $this->last_name,
+            email: $this->email,
+            role: Role::from($this->role),
+            password: $this->password !== '' ? $this->password : null,
+        );
+    }
 
-        // Only include password if provided (allows profile updates without password change)
-        if (! empty($this->password)) {
-            // Model handles password hashing via Attribute cast
-            $data['password'] = $this->password;
-        }
-
-        return $data;
+    public function user(): User
+    {
+        return User::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -153,11 +146,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<User> The User model class
      */
-    protected function getModelClass(): string
-    {
-        return User::class;
-    }
-
     /**
      * Define validation rules for user form fields.
      *
@@ -189,12 +177,10 @@ class CreateEditForm extends BaseForm
             'role' => ['required', 'string', 'in:administrator,basic'],
         ];
 
-        // Password rules - required for creation, optional for updates
         if ($this->isCreating()) {
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         } elseif (! empty($this->password)) {
-            // Only validate password during updates if user is actually trying to change it
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         }
@@ -209,6 +195,7 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, string> Custom validation attributes for this form
      */
+    #[\Override]
     protected function validationAttributes(): array
     {
         return [

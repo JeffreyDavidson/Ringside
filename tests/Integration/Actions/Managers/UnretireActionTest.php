@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\UnretireAction;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,24 +14,25 @@ beforeEach(function () {
 test('it unretires a retired manager', function () {
     $manager = Manager::factory()->retired()->create();
 
-    expect($manager->isRetired())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentRetirement()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement record was ended
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify employment record was created
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -41,51 +42,52 @@ test('it unretires manager with specific unretirement date', function () {
     $manager = Manager::factory()->retired()->create();
     $unretirementDate = now()->subDays(3);
 
-    UnretireAction::run($manager, $unretirementDate);
+    resolve(UnretireAction::class)->handle($manager, $unretirementDate);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement ended and employment started with specific date
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $unretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
 
-test('it uses StatusTransitionPipeline for unretirement', function () {
+test('it persists the unretirement lifecycle', function () {
     $manager = Manager::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $manager->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $manager->currentRetirement()->firstOrFail();
     expect($manager->currentEmployment)->toBeNull();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
-    // Verify retirement ended and employment created through pipeline
+    // Verify retirement ended and employment was created
     expect($manager->currentRetirement)->toBeNull();
-    expect($manager->currentEmployment)->not()->toBeNull();
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment)->not()->toBeNull()
+        ->and($manager->currentRetirement()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -94,73 +96,71 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
 test('it prevents unretiring non-retired manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isRetired())->toBeFalse();
-
-    expect(fn () => UnretireAction::run($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentRetirement()->exists())->toBeFalse()
+        ->and(fn () => resolve(UnretireAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->retired()->create();
-    $originalRetirementId = $manager->currentRetirement->id;
+    $originalRetirementId = $manager->currentRetirement()->firstOrFail()->id;
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Verify the transaction was successful
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     // Verify original retirement record was properly ended
-    $this->assertDatabaseHas('managers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $originalRetirementId,
-        'manager_id' => $manager->id,
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify new employment record was created
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($employment->ended_at)->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it creates new employment period during unretirement', function () {
     $manager = Manager::factory()->retired()->create();
     $originalEmploymentCount = $manager->employments()->count();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should create a new employment record
     expect($manager->employments()->count())->toBe($originalEmploymentCount + 1);
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     // New employment should be current and active
-    $currentEmployment = $manager->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($currentEmployment->ended_at)->toBeNull();
+    $currentEmployment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($currentEmployment->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $manager = Manager::factory()->retired()->create();
     $customUnretirementDate = now()->subDays(2)->startOfDay();
 
-    UnretireAction::run($manager, $customUnretirementDate);
+    resolve(UnretireAction::class)->handle($manager, $customUnretirementDate);
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    // Verify the provided date was used across all operations
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => $customUnretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $customUnretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -174,27 +174,27 @@ test('it handles multiple retirement history correctly', function () {
     $manager->retirements()->create(['started_at' => now()->subDays(10), 'ended_at' => null]); // Current retirement
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
-    expect($manager->retirements()->count())->toBe(2);
+    expect($manager->currentRetirement()->exists())->toBeTrue()
+        ->and($manager->retirements()->count())->toBe(2);
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should only end the current retirement, leaving historical ones intact
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->retirements()->count())->toBe(2);
-    expect($manager->retirements()->whereNull('ended_at')->count())->toBe(0);
+    expect($manager->currentRetirement()->exists())->toBeFalse();
+    expect($manager->retirements()->count())->toBe(2)
+        ->and($manager->retirements()->whereNull('ended_at')->count())->toBe(0);
 
     // Should be employed now
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it preserves retirement history during unretirement', function () {
     $manager = Manager::factory()->retired()->create();
     $originalRetirementCount = $manager->retirements()->count();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -218,23 +218,22 @@ test('it handles manager with complex status history', function () {
     $manager->retirements()->create(['started_at' => now()->subDays(15), 'ended_at' => null]); // Current
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentRetirement()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should now be employed, not retired
-    expect($manager->isRetired())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     // Should have preserved all historical records
     expect($manager->employments()->count())->toBe(3); // 2 historical + 1 new
     expect($manager->retirements()->count())->toBe(2); // Both historical now
 
     // New employment should be current
-    $currentEmployment = $manager->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });

@@ -26,6 +26,6 @@
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.date label="{{ __('employments.started_at') }}" wire:model="form.start_date" />
+        <x-form.inputs.date label="{{ __('employments.started_at') }}" wire:model="form.employment_date" />
     </x-form-modal.modal-input>
 </x-form-modal>

@@ -4,39 +4,43 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\Wrestlers\WrestlerManager;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends BasePreviousManagersTable<WrestlerManager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
     /**
      * Wrestler to use for component.
      */
-    public ?int $wrestlerId;
+    #[Locked]
+    public ?int $wrestlerId = null;
 
+    #[\Override]
     public string $databaseTableName = 'wrestlers_managers';
 
-    /**
-     * @return Builder<WrestlerManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<WrestlerManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
-        }
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return WrestlerManager::query()
             ->with('manager')
-            ->whereHas('manager') // Only include records where manager exists (not soft deleted)
-            ->where('wrestler_id', $this->wrestlerId)
-            ->whereNotNull('fired_at')
-            ->orderByDesc('hired_at');
+            ->whereHas('manager')
+            ->forWrestlerId($wrestlerId)
+            ->forHistory();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+
+        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+
         $this->addAdditionalSelects([
             'wrestlers_managers.manager_id',
         ]);

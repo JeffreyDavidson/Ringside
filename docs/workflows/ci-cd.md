@@ -2,14 +2,14 @@
 
 ## Current Workflow Configuration
 
-The project uses a streamlined CI/CD approach with 3 automated workflows:
+The project uses four automated workflows:
 
 ### 1. **CI Pipeline** (`.github/workflows/ci.yml`)
-**Trigger**: All branches except `master`  
+**Trigger**: Pushes and pull requests targeting `develop` or `main`
 **Purpose**: Comprehensive testing and static analysis
 
 **What it does:**
-- Runs on PHP 8.4 with Laravel 13.* on Ubuntu 24.04
+- Runs on PHP 8.5 with Laravel 13.* on Ubuntu 24.04
 - Executes all test suites in parallel (Feature, Integration, Unit)
 - Runs PHPStan static analysis (`composer test:types`)
 - Uses optimized `.env.testing` configuration
@@ -21,48 +21,36 @@ The project uses a streamlined CI/CD approach with 3 automated workflows:
 - **Dependency Caching**: Composer and PHP extension caching
 - **Problem Matchers**: Enhanced error reporting in GitHub UI
 
-### 2. **Code Styling** (`.github/workflows/pint.yml`)
-**Trigger**: Feature branches only (excludes `master` and `development`)  
-**Purpose**: Automatic Laravel Pint code formatting
+### 2. **Security Scan** (`.github/workflows/security-scan.yml`)
+**Trigger**: Pushes and pull requests
+**Purpose**: Dependency and security checks
 
-**What it does:**
-- Runs Laravel Pint 1.18.3 on PHP file changes
-- Automatically commits styling fixes with "Fix styling" message
-- **Branch Protection**: Excluded from protected branches to prevent direct commits
-- Uses `contents: write` permission for auto-commits
+### 3. **TIA Baseline** (`.github/workflows/tia-baseline.yml`)
+**Trigger**: Changes to the test-impact baseline configuration
+**Purpose**: Validate the Pest Test Impact Analysis baseline
 
-**Important**: This workflow will NOT run on `development` or `master` branches due to branch protection rules.
-
-### 3. **Coverage Testing** (`.github/workflows/run-tests-pcov-pull.yml`)
-**Trigger**: Pushes and PRs to `development` and `master` branches  
-**Purpose**: Test coverage reporting for protected branches
-
-**What it does:**
-- Runs comprehensive test suite with PCOV coverage
-- Generates coverage reports (clover format)
-- Uploads coverage data to Codecov
-- Enforces strict coverage requirements
-- **Critical for Protected Branches**: Required status check for PR merges
+### 4. **Coverage Testing** (`.github/workflows/coverage.yml`)
+**Trigger**: Manual dispatch
+**Purpose**: Generate PCOV coverage reports when a coverage run is requested
 
 ## Branch Protection Integration
 
 **GitHub Branch Protection Rules Applied:**
-- `development` and `master` branches require PRs
+- `develop` and `main` branches require PRs
 - CI workflow must pass before merge (`ci` status check)
-- Coverage workflow must pass for protected branches
-- Signed commits required
-- Direct pushes blocked for all users
+- Required CI checks must pass before merge
+- Direct pushes to protected branches are blocked
 
 **Workflow Behavior with Branch Protection:**
 ```bash
-# ✅ Feature branch - all workflows run
-git push origin feature/new-feature
+# ✅ Conventional branch - CI runs on push
+git push origin chore/update-documentation
 
-# ✅ PR to development - coverage workflow runs
-gh pr create --base development
+# ✅ PR to develop - required CI checks run
+gh pr create --base develop
 
-# ❌ Direct push to development - blocked by GitHub
-git push origin development  # Will fail
+# ❌ Direct push to develop - blocked by GitHub
+git push origin develop  # Will fail
 ```
 
 ## Troubleshooting Common Issues
@@ -97,18 +85,10 @@ composer test:types
 
 ### **Code Styling Issues**
 
-**Styling Workflow Not Running:**
-- Verify you're on a feature branch (not `development`/`master`)
-- Check that PHP files were modified
-- Ensure branch is pushed to GitHub
-
-**Manual Styling Fixes:**
+Run the repository's Composer lint script locally:
 ```bash
-# Run Pint locally
-./vendor/bin/pint
-
-# Check what Pint would change
-./vendor/bin/pint --test
+composer lint
+composer test:lint
 ```
 
 ### **Coverage Workflow Issues**
@@ -116,10 +96,10 @@ composer test:types
 **Coverage Not Generating:**
 ```bash
 # Run coverage locally
-./vendor/bin/pest --coverage --min=80
+composer test:unit
 
-# Check coverage with same settings as CI
-./vendor/bin/pest --parallel --coverage-clover=coverage.xml
+# Generate a local coverage report with the project minimum
+./vendor/bin/pest --coverage --min=44 --coverage-clover=coverage.xml
 ```
 
 **Codecov Upload Failures:**
@@ -150,15 +130,15 @@ APP_KEY=base64:yBIJTxbDrdZCu2t7A7fAfdThy+LL6GEOArWwLJIfncQ=
 ## Workflow Best Practices
 
 ### **For Feature Development:**
-1. **Create feature branch** - styling workflow will run automatically
+1. **Create a conventional branch** - for example `feat/new-feature` or `chore/update-documentation`
 2. **Push early and often** - get CI feedback quickly  
-3. **Let Pint auto-fix** - don't manually fix styling issues
-4. **Check CI status** - ensure all checks pass before PR
+3. **Run the local checks** - use `composer lint` and the affected test commands
+4. **Check CI status** - ensure all required checks pass before PR
 
 ### **For Protected Branch Merges:**
-1. **Create PR** - triggers coverage workflow
-2. **Ensure CI passes** - required for merge
-3. **Review coverage** - check Codecov reports
+1. **Create PR** - target `develop` for normal work
+2. **Ensure required CI checks pass** - required for merge
+3. **Run coverage when needed** - dispatch `coverage.yml` for a PCOV report
 4. **Merge when green** - all status checks must pass
 
 ### **Local Development Tips:**
@@ -167,11 +147,11 @@ APP_KEY=base64:yBIJTxbDrdZCu2t7A7fAfdThy+LL6GEOArWwLJIfncQ=
 cp .env.testing .env && php artisan key:generate
 
 # Run tests like CI does
-./vendor/bin/pest --parallel --testsuite=Feature,Integration,Unit
+composer test:push
 
 # Check types like CI does  
 composer test:types
 
 # Verify styling before push
-./vendor/bin/pint --test
+composer test:lint
 ```

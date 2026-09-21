@@ -55,7 +55,7 @@ docs: update conventional commits guidelines
 
 refactor(managers): remove relationship-specific actions for consistency
 
-test(tag-teams): add comprehensive StatusTransitionPipeline testing
+test(tag-teams): add comprehensive lifecycle transition coverage
 
 style: fix code formatting issues in Actions components
 
@@ -185,7 +185,7 @@ git commit -m "feat(tag-teams): add new partnership management system"
 ### Required For
 - ✅ **All commit messages** in feature branches
 - ✅ **All Pull Request titles**
-- ✅ **All merge commits** to development/master
+- ✅ **All merge commits** to develop/main
 
 ### Validation Points
 - **Pre-commit hooks** validate message format

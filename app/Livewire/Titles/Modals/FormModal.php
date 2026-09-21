@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Modals;
 
+use App\Actions\Titles\CreateAction;
+use App\Actions\Titles\UpdateAction;
+use App\Enums\Titles\TitleType;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Title>
+ *
+ * @property-read array<string, string> $getTitleTypes
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -31,45 +38,44 @@ class FormModal extends BaseFormModal
         return Title::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.titles.modals.form-modal';
+        $this->form->name = Str::of(fake()->word().' '.fake()->word())->title()->append(' Title')->value();
+        $this->form->type = fake()->boolean()
+            ? TitleType::Singles->value
+            : TitleType::TagTeam->value;
+        $this->form->start_date = $this->generateOptionalStartDate('Y-m-d', 0.6, '-1 year', 'now');
     }
 
-    protected function getDummyDataFields(): array
-    {
-        return [
-            'name' => fn () => Str::of(fake()->words(2, true))->title()->append(' Title')->value(),
-            'type' => fn () => fake()->randomElement(['singles', 'tag-team']),
-            'introduction' => fn () => fake()->optional(0.8)->paragraphs(2, true),
-            'active_at' => fn () => $this->generateOptionalStartDate('Y-m-d H:i:s', 0.6, '-1 year', 'now'),
-        ];
-    }
-
+    #[\Override]
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit Title';
         }
 
         return 'Create Title';
     }
 
-    public function openModal(mixed $modelId = null): void
+    /** @return array<string, string> */
+    #[Computed]
+    public function getTitleTypes(): array
     {
-        // Authorization check - only administrators can access title management
-        if ($modelId) {
-            $title = Title::findOrFail($modelId);
-            Gate::authorize('update', $title);
-        } else {
-            Gate::authorize('create', Title::class);
-        }
+        return TitleType::options();
+    }
 
-        parent::openModal($modelId);
+    protected function updateForm(): void
+    {
+        $this->updateAction->handle($this->form->title(), $this->form->toData());
+    }
+
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
     }
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.titles.modals.form-modal');
+        return view('livewire.titles.modals.form-modal');
     }
 }

@@ -12,9 +12,14 @@ trait PresentsTitlesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'titles-list', seconds: 180)]
+    #[Computed]
     public function getTitles(): array
     {
-        return Title::select('id', 'name')->pluck('name', 'id')->toArray();
+        return Title::query()
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
+            ->all();
     }
 }

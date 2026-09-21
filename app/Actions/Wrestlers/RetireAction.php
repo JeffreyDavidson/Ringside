@@ -4,55 +4,65 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Actions\Concerns\WrestlerRetirementCascadeStrategy;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Wrestlers\Wrestler;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+    ) {}
 
     /**
      * Retire a wrestler and end their career.
      *
-     * This handles the complete wrestler retirement workflow using StatusTransitionPipeline:
-     * - Validates the wrestler can be retired through pipeline validation
-     * - Uses StatusTransitionPipeline to properly handle retirement status transition
-     * - Automatically ends employment, suspension, and injury through pipeline
-     * - Cascades to end all professional relationships (partnerships, memberships, etc.)
-     * - Creates retirement record and updates status through pipeline
+     * This handles the complete wrestler retirement workflow:
+     * - Validates the wrestler can be retired
+     * - Ends employment, suspension, and injury through lifecycle period managers
+     * - Ends all current professional relationships through a typed domain action
+     * - Starts a retirement period
      * - Makes the wrestler permanently unavailable for competition
-     * - Maintains transaction boundaries and error handling through pipeline
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with WrestlerRetirementCascadeStrategy for consistency
-     * with other entity retirement operations and comprehensive relationship management.
+     * - Preserves the operation's transaction boundary
      *
      * @param  Wrestler  $wrestler  The wrestler to retire
      * @param  Carbon|null  $retirementDate  The retirement start date (defaults to now)
+     *
      * @throws CannotBeRetiredException When wrestler cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire wrestler immediately
-     * RetireAction::run($wrestler);
-     *
-     * // Retire with specific start date
-     * RetireAction::run($wrestler, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {
-        $wrestler->ensureCanBeRetired();
+        $effectiveDate = $retirementDate ?? now();
 
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
-        StatusTransitionPipeline::retire($wrestler, $retirementDate)
-            ->withCascade(WrestlerRetirementCascadeStrategy::endAllRelationships())
-            ->execute();
+            $this->eligibility->ensureCanRetire($lockedWrestler);
+
+            if ($lockedWrestler->currentEmployment()->exists()) {
+                $this->employmentPeriods->end($lockedWrestler, $effectiveDate);
+            }
+
+            if ($lockedWrestler->currentSuspension()->exists()) {
+                $this->suspensionPeriods->end($lockedWrestler, $effectiveDate);
+            } elseif ($lockedWrestler->currentInjury()->exists()) {
+                $this->injuryPeriods->end($lockedWrestler, $effectiveDate);
+            }
+
+            $this->retirementPeriods->start($lockedWrestler, $effectiveDate, LifecycleTransitionType::Retired);
+            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
+        });
     }
 }

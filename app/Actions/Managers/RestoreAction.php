@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Models\Managers\Manager;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Models\Roster\Managers\Manager;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EndManagerAssignmentsForManagerAction $endManagerAssignmentsAction,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted manager.
@@ -23,25 +29,19 @@ class RestoreAction
      * - Requires separate employment action to make manager active again
      *
      * @param  Manager  $manager  The soft-deleted manager to restore
-     *
-     * @example
-     * ```php
-     * $deletedManager = Manager::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedManager);
-     * ```
      */
-    public function handle(Manager $manager): void
+    public function handle(Manager $manager, ?Carbon $restoreDate = null): void
     {
-        $manager->ensureCanBeRestored();
+        $effectiveDate = $restoreDate ?? now();
 
-        DB::transaction(function () use ($manager): void {
-            $manager->restore();
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
 
-            $restorationDate = now();
+            $this->eligibility->ensureCanRestore($lockedManager);
+            $this->deletionState->restore($lockedManager, $effectiveDate);
 
-            $manager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
-            $manager->removeFromCurrentWrestlers($restorationDate);
-            $manager->removeFromCurrentTagTeams($restorationDate);
+            $lockedManager->employments()->whereNull('ended_at')->update(['ended_at' => $effectiveDate]);
+            $this->endManagerAssignmentsAction->handle($lockedManager, $effectiveDate);
         });
     }
 }

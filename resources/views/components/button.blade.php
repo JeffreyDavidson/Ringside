@@ -38,10 +38,14 @@
     $variantClass = $variants[$variant] ?? $variants['primary'];
 @endphp
 
-<{{ $tag }} {{ $attributes->merge(['type' => $tag === 'button' ? 'button' : null])->class([
-    $base,
-    $sizeClass,
-    $variantClass,
-]) }}>
+<{{ $tag }}
+    {{
+        $attributes->merge(['type' => $tag === 'button' ? 'button' : null])->class([
+            $base,
+            $sizeClass,
+            $variantClass,
+        ])
+    }}
+>
     {{ $slot }}
 </{{ $tag }}>

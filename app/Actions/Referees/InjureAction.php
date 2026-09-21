@@ -4,44 +4,44 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class InjureAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Record a referee injury.
      *
      * This handles the complete referee injury workflow:
      * - Validates the referee can be injured (currently employed, not already injured)
-     * - Creates an injury record with the specified start date
+     * - Creates the injury period through the shared lifecycle component
      * - Removes the referee from active match officiating duties
      * - Maintains employment status while marking as unavailable due to injury
      *
      * @param  Referee  $referee  The referee to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
+     *
      * @throws CannotBeInjuredException When referee cannot be injured due to business rules
-     *
-     * @example
-     * ```php
-     * // Mark referee as injured immediately
-     * InjureAction::run($referee);
-     *
-     * // Record injury with specific date
-     * InjureAction::run($referee, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {
-        $referee->ensureCanBeInjured();
+        $effectiveDate = $injureDate ?? now();
 
-        $injureDate = DateHelper::resolveDate($injureDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        $referee->injuries()->create(['started_at' => $injureDate]);
+            $this->eligibility->ensureCanInjure($lockedReferee);
+            $this->injuryPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Injured);
+        });
     }
 }

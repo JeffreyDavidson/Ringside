@@ -4,50 +4,45 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\Roster\Stables\CannotBeReunitedException;
-use App\Models\Stables\Stable;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class ReuniteAction
 {
-    use AsAction;
-
     /**
      * Create a new reunite action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected StartActivityPeriodAction $startActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableActivityEligibility $eligibility,
     ) {}
 
     /**
      * Reunite an inactive stable and make it active again.
-     *
-     * This handles the complete stable reunite workflow:
-     * - Validates the stable can be reunited (currently inactive, not retired)
-     * - Creates a new activity record to make the stable active
-     * - Makes the stable available for new members and storylines
-     * - Different from establishment - this is for comeback storylines
-     *
-     * @param  Stable  $stable  The stable to reunite
-     * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
-     * @throws CannotBeReunitedException When stable cannot be reunited due to business rules
-     *
-     * @example
-     * ```php
-     * // Reunite stable immediately
-     * ReuniteAction::run($stable);
-     *
-     * // Reunite with specific date
-     * ReuniteAction::run($stable, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {
-        $stable->ensureCanBeReunited();
+        $effectiveDate = $reuniteDate ?? now();
 
-        $reuniteDate ??= now();
+        DB::transaction(function () use ($stable, $effectiveDate): void {
+            $lockedStable = $stable->refreshForUpdate();
 
-        $this->establishAction->handle($stable, $reuniteDate);
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Reunite);
+            $this->startActivityPeriodAction->handle($lockedStable, $effectiveDate);
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Reunited,
+                $effectiveDate,
+            );
+        });
     }
 }

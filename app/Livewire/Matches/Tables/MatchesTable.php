@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\ArrayColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Titles\Title;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<EventMatch> */
 class MatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
+
+    protected MatchTableFormatter $matchTableFormatter;
 
     protected string $databaseTableName = 'events_matches';
 
@@ -27,25 +31,31 @@ class MatchesTable extends DataTableComponent
     /**
      * Event to use for component.
      */
+    #[Locked]
     public ?int $eventId = null;
 
-    /**
-     * @return Builder<EventMatch>
-     */
-    public function builder(): Builder
+    public function boot(MatchTableFormatter $matchTableFormatter): void
     {
-        if ($this->eventId === null) {
-            throw new Exception("You didn't specify a event");
-        }
-
-        return EventMatch::query()
-            ->with(['event', 'titles', 'competitors', 'result.winner'])
-            ->where('event_id', $this->eventId);
+        $this->matchTableFormatter = $matchTableFormatter;
     }
 
-    public function configure(): void
+    /**
+     * @return EventMatchBuilder<EventMatch>
+     */
+    public function builder(): EventMatchBuilder
     {
-        Gate::authorize('viewList', EventMatch::class);
+        $eventId = $this->requireContextId($this->eventId, 'event');
+
+        return EventMatch::query()
+            ->forEventId($eventId)
+            ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
+    }
+
+    protected function configure(): void
+    {
+        $eventId = $this->requireContextId($this->eventId, 'event');
+
+        Gate::authorize('view', Event::query()->findOrFail($eventId));
 
         $this->addAdditionalSelects([
             'events_matches.event_id',
@@ -53,8 +63,6 @@ class MatchesTable extends DataTableComponent
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -63,43 +71,31 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
-            ArrayColumn::make(__('matches.competitors'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function (int $index, MatchCompetitor $value): string {
-                    $competitor = $value->getCompetitor();
-                    $type = str($competitor->getMorphClass())->kebab()->plural();
-
-                    return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
-                })
-                ->separator(' vs '),
+            Column::make(__('matches.competitors'))
+                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->competitorLinks($row))
+                ->html(),
             ArrayColumn::make(__('matches.referees'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
-                ->outputFormat(function (int $index, Referee $value): string {
-                    return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
-                })
+                ->data(fn (EventMatch $row) => $row->referees)
+                ->link(
+                    title: fn (Referee $value): string => $value->full_name,
+                    location: fn (Referee $value): string => route('referees.show', $value->id),
+                )
                 ->separator(', ')
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('matches.titles'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
-                ->outputFormat(function (int $index, Title $value): string {
-                    return '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>';
-                })
+                ->data(fn (EventMatch $row) => $row->titles)
+                ->link(
+                    title: fn (Title $value): string => $value->name,
+                    location: fn (Title $value): string => route('titles.show', $value->id),
+                )
                 ->separator(', ')
                 ->emptyValue('N/A'),
             Column::make(__('matches.result'))
-                ->label(
-                    function (EventMatch $row, Column $column): string {
-                        $winner = $row->result?->winner;
-
-                        if ($winner) {
-                            $type = str($winner->getMorphClass())->kebab()->plural();
-
-                            return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->match_decision->label();
-                        }
-
-                        return 'N/A';
-                    }
-                )->html(),
+                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->result($row))
+                ->html(),
+            Column::make(__('core.actions'))
+                ->view('components.matches.table-result-action')
+                ->html(),
         ];
     }
 }

@@ -1,0 +1,57 @@
+name: Setup PHP and Composer
+description: Configure the repository PHP runtime and install Composer dependencies.
+
+inputs:
+    github-token:
+        description: GitHub token used by Composer for API authentication.
+        required: true
+    php-version:
+        description: PHP version to use.
+        required: false
+        default: '8.5'
+    coverage:
+        description: Coverage driver to install. Leave empty for routine jobs.
+        required: false
+        default: none
+    extensions:
+        description: PHP extensions required by the application.
+        required: false
+        default: bcmath, curl, dom, fileinfo, intl, mbstring, pdo_sqlite, xml, zip
+
+runs:
+    using: composite
+    steps:
+        - name: Setup PHP and Composer
+          uses: shivammathur/setup-php@v2
+          with:
+              php-version: ${{ inputs.php-version }}
+              extensions: ${{ inputs.extensions }}
+              coverage: ${{ inputs.coverage }}
+              tools: composer:2
+              ini-values: memory_limit=4G
+              github-token: ${{ inputs.github-token }}
+
+        - name: Verify PHP and Composer
+          shell: bash
+          run: |
+              php --version
+              composer --version
+
+        - name: Resolve Composer cache directory
+          id: composer-cache
+          shell: bash
+          run: echo "directory=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+        - name: Restore Composer download cache
+          uses: actions/cache@v6
+          with:
+              path: ${{ steps.composer-cache.outputs.directory }}
+              key: composer-${{ runner.os }}-php-${{ inputs.php-version }}-composer-2-${{ hashFiles('composer.lock') }}
+              restore-keys: |
+                  composer-${{ runner.os }}-php-${{ inputs.php-version }}-composer-2-
+
+        - name: Install Composer dependencies
+          shell: bash
+          env:
+              COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ inputs.github-token }}"}}'
+          run: composer install --prefer-dist --no-interaction --no-progress

@@ -1,205 +1,69 @@
 # Builder Architecture
 
-## Overview
+Ringside uses typed custom Eloquent builders for reusable persisted-state queries. Models bind their builders with `#[UseEloquentBuilder]`; local model scopes and repository wrappers are not used.
 
-Ringside uses a comprehensive builder pattern for constructing complex Eloquent queries with wrestling-specific business logic. All builders are organized by domain in `app/Builders/{Domain}/` and extend Laravel's base query builder functionality.
+## Organization
 
-## Builder Organization
-
-### Domain Structure
-```
+```text
 app/Builders/
-├── Concerns/           # Shared builder traits and contracts
-├── Contracts/          # Builder interfaces
-├── Events/            # Event and venue builders
-├── Roster/            # Wrestling roster member builders  
-├── Titles/            # Title and championship builders
-└── Users/             # User builders
+├── Concerns/
+├── Events/
+├── Matches/
+├── Roster/
+├── Titles/
+└── Users/
 ```
 
-### Builder Hierarchy
+Builders are grouped by technical layer first and wrestling entity second. A concrete builder belongs to the model it queries. A concern is appropriate only when multiple builders share the same query semantics.
 
-**Base Builders:**
-- `SingleRosterMemberBuilder` - Base for individual roster members (wrestlers, managers, referees)
-- `BaseRepository` - Foundation for repository pattern implementation
+`ManagerAssignmentBuilder` owns the shared manager filter, lifecycle-state constraints, and most-recent-hire ordering for wrestler and tag-team manager assignment records.
 
-**Domain-Specific Builders:**
-- `WrestlerBuilder` - Wrestler-specific query logic
-- `ManagerBuilder` - Manager-specific query logic  
-- `RefereeBuilder` - Referee-specific query logic
-- `TagTeamBuilder` - Tag team query logic
-- `StableBuilder` - Stable query logic
-- `TitleBuilder` - Title query logic
-- `EventBuilder` - Event query logic
-- `VenueBuilder` - Venue query logic
-- `UserBuilder` - User query logic
+`MembershipPeriodBuilder` owns the shared `current()`, `ended()`, and most-recent-join ordering queries for tag-team and stable membership records.
 
-## Builder Capabilities
+`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters and historical period-overlap constraints specific to `TagTeamWrestler` records.
 
-### Employment Status Scopes
+`StableMembershipBuilder` extends the shared membership-period queries with stable filtering for both `StableWrestler` and `StableTagTeam` records. Stable membership-history tables query these typed records directly so membership dates remain first-class persisted data rather than manually extracted pivot attributes.
+
+`StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
+
+`EventBuilder` owns event scheduling-state filters and the canonical event-list ordering: dated events newest first, followed by unscheduled events.
+
+## Shared Concerns
+
+- `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.
+- `FiltersByRetirementStatus` provides the shared `retired()` filter for individual roster members and tag teams.
+- `HasNameSearch` provides first-name and last-name matching for models that store those columns.
+
+`EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and deterministic ordering by event date, card, and match number. Competitor and referee history relationships reuse its persisted past-event constraint rather than defining their own date comparisons. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
+
+`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
+
+`MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
+
+`MatchSideBuilder` owns canonical match-side ordering by persisted position. `EventMatch::sides()` applies the same ordering so side collections remain deterministic regardless of insertion order.
+
+## Boundaries
+
+Builders express database queries over relationships and stored lifecycle periods. They may:
+
+- filter current, previous, or future lifecycle relationships;
+- compose reusable relationship-existence constraints;
+- define stable ordering used by multiple callers;
+- return the concrete typed builder for fluent composition.
+
+Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`.
+
+## Usage
+
 ```php
-// Available in roster member builders
-$wrestlers = Wrestler::query()
-    ->employed()           // Currently employed
-    ->available()          // Available for booking
-    ->unemployed()         // Not currently employed
+$futureWrestlers = Wrestler::query()
+    ->futureEmployed()
+    ->oldest('name')
     ->get();
 ```
 
-### Availability Scopes
-```php
-// Booking availability logic
-$availableWrestlers = Wrestler::query()
-    ->bookable()           // Can be booked for matches
-    ->notInjured()         // Not currently injured
-    ->notSuspended()       // Not currently suspended
-    ->get();
-```
+Callers should use an existing builder method instead of repeating its relationship constraints or querying a computed model attribute as though it were a database column.
 
-### Activity Period Scopes
-```php
-// Historical data queries
-$activeStables = Stable::query()
-    ->currentlyActive()    // Active right now
-    ->activeDuring($start, $end)  // Active during period
-    ->debutedAfter($date)  // Debuted after date
-    ->get();
-```
+## Testing
 
-### Retirement Scopes
-```php
-// Retirement status queries
-$activeWrestlers = Wrestler::query()
-    ->notRetired()         // Currently active
-    ->retiredAfter($date)  // Retired after specific date
-    ->get();
-```
-
-## Builder Traits and Concerns
-
-### HasAvailabilityScopes
-Provides booking availability logic for entities that can be scheduled for matches.
-
-**Methods:**
-- `available()` - Available for booking
-- `unavailable()` - Not available for booking
-- `bookable()` - Can be booked (employed + available + not injured/suspended)
-
-### HasRetirementScopes  
-Provides retirement status filtering for entities that can be retired.
-
-**Methods:**
-- `retired()` - Currently retired
-- `notRetired()` - Not retired (active)
-- `retiredBetween($start, $end)` - Retired within date range
-
-## Builder Contracts
-
-### HasAvailability
-Defines availability-related query methods for bookable entities.
-
-### HasEmployment
-Defines employment status query methods for employable entities.
-
-### HasRetirement
-Defines retirement status query methods for retirable entities.
-
-## Usage Examples
-
-### Complex Wrestler Queries
-```php
-// Find wrestlers available for a championship match
-$championshipContenders = Wrestler::query()
-    ->employed()
-    ->bookable()
-    ->notCurrentChampion($titleId)
-    ->hasMinimumExperience(6) // months
-    ->orderByExperience('desc')
-    ->limit(5)
-    ->get();
-```
-
-### Stable Membership Queries
-```php
-// Find stables with available members for events
-$availableStables = Stable::query()
-    ->currentlyActive()
-    ->hasAvailableMembers()
-    ->whereHas('wrestlers', function ($query) {
-        $query->bookable()->count('>=', 2);
-    })
-    ->get();
-```
-
-### Historical Analysis
-```php
-// Championship analysis
-$titleReigns = Title::query()
-    ->activeDuring($year)
-    ->with(['championships' => function ($query) use ($year) {
-        $query->activeDuring($year)
-              ->with('champion')
-              ->orderBy('started_at');
-    }])
-    ->get();
-```
-
-## Builder Best Practices
-
-### 1. Domain Organization
-- Keep builders in appropriate domain directories
-- Use descriptive names that match the model's purpose
-- Extend appropriate base builders for shared functionality
-
-### 2. Scope Naming
-- Use clear, business-focused method names
-- Prefix with context when needed (`currently`, `not`, `has`)
-- Group related scopes in traits for reusability
-
-### 3. Query Optimization
-- Use eager loading for related models
-- Implement database indexes for commonly queried fields
-- Consider query caching for expensive operations
-
-### 4. Business Logic Integration
-- Encode wrestling business rules in builder methods
-- Use scopes to ensure data consistency
-- Validate business constraints in builder logic
-
-## Testing Builders
-
-### Unit Testing
-```php
-test('wrestler builder filters by employment status', function () {
-    $employedWrestler = Wrestler::factory()->employed()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    
-    $employed = Wrestler::query()->employed()->get();
-    
-    expect($employed)->toContain($employedWrestler)
-                     ->not->toContain($unemployedWrestler);
-});
-```
-
-### Integration Testing
-```php
-test('complex availability queries work correctly', function () {
-    $availableWrestler = Wrestler::factory()
-        ->employed()
-        ->notInjured()
-        ->notSuspended()
-        ->create();
-        
-    $bookableWrestlers = Wrestler::query()->bookable()->get();
-    
-    expect($bookableWrestlers)->toContain($availableWrestler);
-});
-```
-
-## Architecture Benefits
-
-1. **Separation of Concerns**: Business logic stays in builders, not controllers
-2. **Reusability**: Common query patterns shared across the application  
-3. **Testability**: Complex queries can be unit tested in isolation
-4. **Maintainability**: Wrestling business rules centralized in builders
-5. **Performance**: Optimized queries with proper eager loading and indexes
+Builder behavior that depends on persisted relationships is tested in `tests/Integration/Builders`. A production integration such as a Livewire filter also receives focused coverage proving that it composes the intended builder method.

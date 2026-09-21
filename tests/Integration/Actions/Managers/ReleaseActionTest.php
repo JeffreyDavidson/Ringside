@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\ReleaseAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Enums\Shared\EmploymentStatus;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -16,18 +18,18 @@ beforeEach(function () {
 test('it releases an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isReleased())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->status)->not->toBe(EmploymentStatus::Released);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->status)->toBe(EmploymentStatus::Released)
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -36,71 +38,73 @@ test('it releases manager with specific release date', function () {
     $manager = Manager::factory()->employed()->create();
     $releaseDate = now()->subDays(4);
 
-    ReleaseAction::run($manager, $releaseDate);
+    resolve(ReleaseAction::class)->handle($manager, $releaseDate);
 
     $manager->refresh();
-    expect($manager->isReleased())->toBeTrue();
+    expect($manager->status)->toBe(EmploymentStatus::Released);
 
     // Verify employment ended with specific date
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
 
 test('it releases suspended manager and ends suspension', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->status)->toBe(EmploymentStatus::Released)
+        ->and($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
 test('it releases injured manager and ends injury', function () {
-    $manager = Manager::factory()->employed()->injured()->create();
+    $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->status)->toBe(EmploymentStatus::Released)
+        ->and($manager->currentInjury()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify injury was ended
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it ends management relationships with cascade strategy', function () {
+test('it ends current management relationships', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $tagTeam = TagTeam::factory()->create();
@@ -109,16 +113,15 @@ test('it ends management relationships with cascade strategy', function () {
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDays(30)]);
     $manager->tagTeams()->attach($tagTeam->id, ['hired_at' => now()->subDays(20)]);
 
-    expect($manager->currentWrestlers)->toHaveCount(1);
-    expect($manager->currentTagTeams)->toHaveCount(1);
+    expect($manager->currentWrestlers)->toHaveCount(1)
+        ->and($manager->currentTagTeams)->toHaveCount(1);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
-    // Management relationships should be ended by cascade strategy
-    expect($manager->currentWrestlers)->toHaveCount(0);
-    expect($manager->currentTagTeams)->toHaveCount(0);
+    expect($manager->currentWrestlers)->toBeEmpty()
+        ->and($manager->currentTagTeams)->toBeEmpty();
 
     // Verify relationships were ended with release date
     $this->assertDatabaseHas('wrestlers_managers', [
@@ -134,89 +137,85 @@ test('it ends management relationships with cascade strategy', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline with cascade strategy', function () {
+test('it persists release and ends current relationships', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Set up management relationship
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    expect($manager->isReleased())->toBeFalse();
-    expect($manager->currentWrestlers)->toHaveCount(1);
+    expect($manager->status)->not->toBe(EmploymentStatus::Released)
+        ->and($manager->currentWrestlers)->toHaveCount(1);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
-    // Verify release status through pipeline
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
-
-    // Verify cascade strategy ended relationships
-    expect($manager->currentWrestlers)->toHaveCount(0);
+    // Verify the release lifecycle state
+    expect($manager->status)->toBe(EmploymentStatus::Released);
+    expect($manager->currentEmployment()->exists())->toBeFalse()
+        ->and($manager->currentWrestlers)->toBeEmpty();
 });
 
 test('it prevents releasing already released manager', function () {
     $manager = Manager::factory()->released()->create();
 
-    expect($manager->isReleased())->toBeTrue();
-
-    expect(fn () => ReleaseAction::run($manager))
-        ->toThrow(Exception::class);
+    expect($manager->status)->toBe(EmploymentStatus::Released)
+        ->and(fn () => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents releasing unemployed manager', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->isEmployed())->toBeFalse();
-
-    expect(fn () => ReleaseAction::run($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Verify transaction was successful - all operations completed
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->currentWrestlers)->toHaveCount(0);
+    expect($manager->status)->toBe(EmploymentStatus::Released);
+    expect($manager->currentEmployment()->exists())->toBeFalse()
+        ->and($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentWrestlers)->toBeEmpty();
 
     // Verify all database changes are consistent
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it uses DateHelper for consistent date handling', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+test('it uses the provided date', function () {
+    $manager = Manager::factory()->suspended()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
-    ReleaseAction::run($manager, $customReleaseDate);
+    resolve(ReleaseAction::class)->handle($manager, $customReleaseDate);
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    // Verify the provided date was used across all operations
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 });
@@ -237,38 +236,39 @@ test('it preserves management history during release', function () {
     expect($manager->wrestlers()->count())->toBe(2); // Total relationships
     expect($manager->currentWrestlers)->toHaveCount(1); // Current relationships
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should preserve all historical relationships while ending current ones
     expect($manager->wrestlers()->count())->toBe(2); // Historical preserved
-    expect($manager->currentWrestlers)->toHaveCount(0); // Current ended
+    expect($manager->currentWrestlers)->toBeEmpty(); // Current ended
 
     // Verify the current relationship was ended with release date
-    $currentRelationship = $manager->wrestlers()
-        ->wherePivot('hired_at', now()->subDays(10)->toDateTimeString())
-        ->first();
+    $currentRelationship = WrestlerManager::query()
+        ->whereBelongsTo($manager)
+        ->where('hired_at', now()->subDays(10))
+        ->firstOrFail();
 
-    expect($currentRelationship->pivot->fired_at)->toBe(now()->toDateTimeString());
+    expect(requiredDate($currentRelationship->fired_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it handles manager with no management relationships', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentWrestlers)->toHaveCount(0);
-    expect($manager->currentTagTeams)->toHaveCount(0);
+    expect($manager->currentWrestlers)->toBeEmpty()
+        ->and($manager->currentTagTeams)->toBeEmpty();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should release successfully even without relationships
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->status)->toBe(EmploymentStatus::Released);
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -281,17 +281,17 @@ test('it handles complex status combinations', function () {
     $manager->suspensions()->create(['started_at' => now()->subDays(2), 'ended_at' => null]); // Current
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
     // Should handle complex status properly
-    expect($manager->isReleased())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->status)->toBe(EmploymentStatus::Released);
+    expect($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
     // Should end only the current suspension
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);

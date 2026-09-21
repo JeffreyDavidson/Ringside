@@ -127,14 +127,13 @@ Example with image uploads and complex validation:
 namespace App\Livewire\Wrestlers\Forms;
 
 use App\Livewire\Forms\BaseForm;
-use App\Models\Wrestlers\Wrestler;
-use App\Traits\ManagesEmployment;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\WithFileUploads;
 
 class CreateEditForm extends BaseForm
 {
-    use WithFileUploads, ManagesEmployment;
+    use WithFileUploads;
     
     public string $name = '';
     public string $slug = '';
@@ -145,7 +144,7 @@ class CreateEditForm extends BaseForm
     public $photo;
     public bool $active = true;
     
-    // Employment fields from trait
+    // Employment fields are converted to typed Action data by the form.
     public ?string $employed_from = null;
     public ?string $employed_until = null;
     
@@ -312,7 +311,7 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Livewire\Modals\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 class FormModal extends BaseFormModal
 {
@@ -521,7 +520,7 @@ Table with image display and complex status management:
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Tables\BaseTable;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 class Main extends BaseTable
@@ -653,7 +652,6 @@ Actions component with conditional visibility and confirmation:
 
 namespace App\Livewire\Events\Components;
 
-use App\Livewire\Components\BaseActions;
 use App\Models\Events\Event;
 use Livewire\Component;
 
@@ -781,7 +779,7 @@ Actions with employment status management:
 
 namespace App\Livewire\Wrestlers\Components;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Component;
 
 class Actions extends Component

@@ -7,23 +7,24 @@ namespace App\Casts;
 use App\ValueObjects\Height;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
- * @implements CastsAttributes<Height, int>
+ * @implements CastsAttributes<Height, Height|int>
  */
 class HeightCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): Height
     {
-        /** @var int $value */
-        $feet = (int) floor($value / 12);
-        $inches = $value % 12;
-
-        return new Height($feet, $inches);
+        return Height::fromInches(Arr::integer(['value' => $value], 'value'));
     }
 
-    public function set(Model $model, string $key, mixed $value, array $attributes): mixed
+    public function set(Model $model, string $key, mixed $value, array $attributes): int
     {
-        return $value;
+        if ($value instanceof Height) {
+            return $value->toInches();
+        }
+
+        return Height::fromInches(Arr::integer(['value' => $value], 'value'))->toInches();
     }
 }

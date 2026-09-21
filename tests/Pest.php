@@ -3,10 +3,21 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use Illuminate\Translation\Translator;
+
+use function Pest\Laravel\withoutVite;
+
+pest()->tia()->baselined();
+
+pest()->tia()->watch([
+    'phpunit.xml' => 'tests',
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -19,17 +30,26 @@ use Illuminate\Support\Collection;
 |
 */
 
-uses(
-    TestCase::class,
-    DatabaseMigrations::class,
-)->in('Browser');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Browser');
 
-uses(TestCase::class, RefreshDatabase::class)
-    ->in('Feature', 'Integration', 'Unit');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration');
 
 pest()
-    ->in('Feature')
-    ->beforeEach(fn () => $this->withoutVite());
+    ->beforeEach(function () {
+        Relation::requireMorphMap(false);
+    })
+    ->afterEach(function () {
+        Relation::requireMorphMap();
+    })
+    ->in('Integration/Models/Concerns');
+
+pest()
+    ->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        withoutVite();
+    })
+    ->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -42,58 +62,7 @@ pest()
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
-
-expect()->extend('collectionHas', function ($entity) {
-    if (is_array($entity) || $entity instanceof Collection) {
-        foreach ($entity as $test) {
-            $this->value->assertContains($this, $test);
-        }
-
-        return $this;
-    }
-
-    expect($this->value)->contains($entity)->toBeTrue();
-
-    return $this;
-});
-
-expect()->extend('collectionDoesntHave', function ($entity) {
-    if (is_array($entity) || $entity instanceof Collection) {
-        foreach ($entity as $test) {
-            $this->value->assertNotContains($this, $test);
-        }
-
-        return $this;
-    }
-
-    expect($this->value)->contains($entity)->toBeFalse();
-
-    return $this;
-});
-
-expect()->extend('usesTrait', function ($trait) {
-    expect(class_uses($this->value))->toContain($trait);
-
-    return $this;
-});
-
-/*
-|--------------------------------------------------------------------------
-| Custom Expectations
-|--------------------------------------------------------------------------
-|
-| Load custom expectations for domain-specific testing. These expectations
-| provide more expressive and maintainable assertions for wrestling business
-| logic, database operations, and model structure validation.
-|
-*/
-
-require_once __DIR__.'/Expectations/WrestlingExpectations.php';
-require_once __DIR__.'/Expectations/DatabaseExpectations.php';
-require_once __DIR__.'/Expectations/ModelExpectations.php';
+expect()->extend('toBeOne', fn () => $this->toBe(1));
 
 /*
 |--------------------------------------------------------------------------
@@ -106,14 +75,77 @@ require_once __DIR__.'/Expectations/ModelExpectations.php';
 |
 */
 
-function administrator()
+function administrator(): User
 {
     return User::factory()->administrator()->create();
 }
 
-function basicUser()
+function basicUser(): User
 {
     return User::factory()->basicUser()->create();
+}
+
+/**
+ * Adapt a test observer to Laravel's validation failure callback contract.
+ */
+function validationFailureCallback(Closure $observer): Closure
+{
+    return function (string $message) use ($observer): PotentiallyTranslatedString {
+        $observer($message);
+
+        return new PotentiallyTranslatedString($message, app(Translator::class));
+    };
+}
+
+/**
+ * Return a date that must exist for the tested state.
+ */
+function requiredDate(?Carbon $date): Carbon
+{
+    return $date ?? throw new RuntimeException('Expected the model date to be present.');
+}
+
+/**
+ * Return a model that must exist for the tested state.
+ *
+ * @template TModel of Model
+ *
+ * @param  TModel|null  $model
+ * @return TModel
+ */
+function requiredModel(?Model $model): Model
+{
+    return $model ?? throw new RuntimeException('Expected the model relationship to be present.');
+}
+
+/**
+ * Reload a separate model instance that must still exist.
+ *
+ * @template TModel of Model
+ *
+ * @param  TModel|null  $model
+ * @return TModel
+ */
+function freshModel(?Model $model): Model
+{
+    if ($model === null) {
+        throw new RuntimeException('Expected the model to be present before reloading it.');
+    }
+
+    $freshModel = $model->fresh();
+    if ($freshModel === null) {
+        throw new RuntimeException('Expected the model to exist when reloading it.');
+    }
+
+    return $freshModel;
+}
+
+/**
+ * Return a reflection type that must exist for the tested declaration.
+ */
+function requiredReflectionType(?ReflectionType $type): ReflectionType
+{
+    return $type ?? throw new RuntimeException('Expected the reflected declaration to have a type.');
 }
 
 /*
@@ -128,3 +160,4 @@ function basicUser()
 */
 
 require_once __DIR__.'/Helpers/TestHelpers.php';
+require_once __DIR__.'/Helpers/ReflectionHelpers.php';

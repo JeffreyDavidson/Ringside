@@ -4,37 +4,43 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\TagTeams\TagTeamManager;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamManager;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends BasePreviousManagersTable<TagTeamManager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
+    #[\Override]
     protected string $databaseTableName = 'tag_teams_managers';
 
     /**
      * Tag Team to use for component.
      */
-    public ?int $tagTeamId;
+    #[Locked]
+    public ?int $tagTeamId = null;
 
-    /**
-     * @return Builder<TagTeamManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<TagTeamManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
-        }
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TagTeamManager::query()
-            ->where('tag_team_id', $this->tagTeamId)
-            ->whereNotNull('fired_at')
-            ->orderByDesc('hired_at');
+            ->with('manager')
+            ->whereHas('manager')
+            ->forTagTeamId($tagTeamId)
+            ->forHistory();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+
         $this->addAdditionalSelects([
             'tag_teams_managers.manager_id',
         ]);

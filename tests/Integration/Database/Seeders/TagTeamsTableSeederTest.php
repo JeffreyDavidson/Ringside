@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Database\Seeders\TagTeamsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -49,9 +49,8 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->name)->toBeString();
-                expect($tagTeam->name)->not->toBeEmpty();
-                expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($tagTeam->name)->toBeString()->not->toBeEmpty()
+                    ->and($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -61,8 +60,8 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect(mb_strlen($tagTeam->name))->toBeGreaterThan(5);
-                expect($tagTeam->name)->not->toContain('Test');
+                expect(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2)
+                    ->and($tagTeam->name)->not->toContain('Test');
             }
         });
     });
@@ -72,16 +71,12 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
         });
 
-        test('tag teams have mostly unique names with realistic duplicates', function () {
+        test('all tag teams have unique names', function () {
             // Arrange
             $tagTeams = TagTeam::all();
-            $totalCount = $tagTeams->count();
-            $uniqueCount = $tagTeams->pluck('name')->unique()->count();
-            $duplicatePercentage = (($totalCount - $uniqueCount) / $totalCount) * 100;
 
-            // Assert - Allow up to 5% duplicates (realistic for faker-generated data)
-            expect($duplicatePercentage)->toBeLessThan(5);
-            expect($uniqueCount)->toBeGreaterThan($totalCount * 0.95); // At least 95% unique
+            // Assert
+            expect($tagTeams->pluck('name')->unique())->toHaveCount($tagTeams->count());
         });
 
         test('tag teams have valid employment status', function () {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Forms;
 
+use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
 use Illuminate\Database\Eloquent\Model;
@@ -28,10 +28,10 @@ use Illuminate\Validation\Rule;
  * - Wrestling-specific validation (titles must end with "Title" or "Titles")
  * - Integration with title activation relationship system
  *
- * @extends BaseForm<CreateEditForm, Title>
+ * @extends BaseForm<Title>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesActivityPeriods For activation period tracking
+ * @see TitleData For typed Action input
  * @see CanChangeDebutDate For custom activation validation
  *
  * @property string $name Championship title name (must end with Title/Titles)
@@ -40,15 +40,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesActivityPeriods;
-
-    /**
-     * The model instance being edited, or null for new title creation.
-     *
-     * @var Title|null Current title model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Championship title's official name following wrestling conventions.
      *
@@ -76,8 +67,7 @@ class CreateEditForm extends BaseForm
      * Title activation start date for championship history tracking.
      *
      * Tracks when a championship title becomes active and available for
-     * competition. Managed through ManagesActivityPeriods trait for
-     * consistent activation tracking across the title system.
+     * competition. Passed through TitleData to the create or update Action.
      *
      * @var string|null Title activation start date (string to prevent auto-casting)
      */
@@ -96,50 +86,16 @@ class CreateEditForm extends BaseForm
      * - Converts Carbon dates to string format for form display
      *
      *
-     * @see ManagesActivityPeriods For activation period management
+     * @see TitleData::$debut_date For activity period input
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        // Only process if we have a title model
-        if (! $this->formModel instanceof Title) {
-            return;
-        }
-
-        // Load activation start date from first activity period relationship
-        $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+        $this->start_date = $model->firstActivityPeriod?->started_at?->toDateString();
     }
 
     /**
      * Store the title data with activity period handling.
      */
-    public function store(): bool
-    {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result && $wasCreating) {
-            $this->handlePostCreationTasks();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Handle additional tasks after title creation.
-     *
-     * Creates activation record for new titles with start dates.
-     * Called automatically by the store pattern trait.
-     */
-    protected function handlePostCreationTasks(): void
-    {
-        // Create activation record for new titles with start dates
-        if ($this->start_date) {
-            $this->handleActivityPeriodCreation();
-        }
-    }
-
     /**
      * Prepare title data for model storage.
      *
@@ -147,17 +103,19 @@ class CreateEditForm extends BaseForm
      * Only includes the title name as activation dates are managed
      * separately through the title's activation relationship system
      * to maintain proper separation of concerns.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
+    public function toData(): TitleData
     {
-        return [
-            'name' => $this->name,
-            'type' => $this->type,
-        ];
-        // Note: start_date is NOT included here because activation dates
-        // are managed separately through the title's activation relationship system
+        return new TitleData(
+            name: $this->name,
+            type: TitleType::from((string) $this->type),
+            debut_date: $this->start_date ? Carbon::parse($this->start_date) : null,
+        );
+    }
+
+    public function title(): Title
+    {
+        return Title::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -168,11 +126,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Title> The Title model class
      */
-    protected function getModelClass(): string
-    {
-        return Title::class;
-    }
-
     /**
      * Define validation rules for championship title fields.
      *
@@ -192,10 +145,12 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $title = $this->isEditing() ? $this->title() : null;
+
         return [
             'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->modelId)],
             'type' => ['required', Rule::enum(TitleType::class)],
-            'start_date' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
+            'start_date' => ['nullable', 'date', new CanChangeDebutDate($title)],
         ];
     }
 

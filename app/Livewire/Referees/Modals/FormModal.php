@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Modals;
 
+use App\Actions\Referees\CreateAction;
+use App\Actions\Referees\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Referees\Forms\CreateEditForm;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\View\View;
 
 /**
@@ -15,20 +16,19 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-
-    /**
-     * Store original model data for resetting purposes
-     *
-     * @var array<string, mixed>|null
-     */
-    public ?array $originalModelData = null;
+    #[\Override]
+    protected string $modelTitleField = 'full_name';
 
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -36,66 +36,25 @@ class FormModal extends BaseFormModal
         return Referee::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.referees.modals.form-modal';
+        $this->form->first_name = fake()->firstName();
+        $this->form->last_name = fake()->lastName();
+        $this->form->employment_date = $this->generateOptionalEmploymentDate();
     }
 
-    protected function getDummyDataFields(): array
+    protected function updateForm(): void
     {
-        return [
-            'first_name' => fn () => fake()->firstName(),
-            'last_name' => fn () => fake()->lastName(),
-            'employment_date' => fn () => $this->generateOptionalStartDate(),
-        ];
+        $this->updateAction->handle($this->form->referee(), $this->form->toData());
     }
 
-    public function mount(mixed $modelId = null): void
+    protected function createForm(): void
     {
-        parent::mount($modelId);
-
-        // Set the title field to use full_name instead of name
-        $this->modelTitleField = 'full_name';
-        $this->titleField = 'full_name';
-    }
-
-    public function openModal(mixed $modelId = null): void
-    {
-        parent::openModal($modelId);
-
-        // Store original model data if editing
-        if (isset($this->model)) {
-            $this->originalModelData = [
-                'first_name' => $this->model->first_name,
-                'last_name' => $this->model->last_name,
-                'employment_date' => $this->model->firstEmployment?->started_at?->toDateString() ?? '',
-            ];
-        } else {
-            $this->originalModelData = null;
-        }
-    }
-
-    public function clear(): void
-    {
-        if ($this->originalModelData) {
-            // Reset to original model data when editing
-            $this->form->first_name = $this->originalModelData['first_name'];
-            $this->form->last_name = $this->originalModelData['last_name'];
-            $this->form->employment_date = $this->originalModelData['employment_date'];
-            $this->form->resetErrorBag();
-            $this->form->resetValidation();
-        } else {
-            // Reset to empty state when creating - explicitly set defaults
-            $this->form->first_name = '';
-            $this->form->last_name = '';
-            $this->form->employment_date = '';
-            $this->form->resetErrorBag();
-            $this->form->resetValidation();
-        }
+        $this->createAction->handle($this->form->toData());
     }
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.referees.modals.form-modal');
+        return view('livewire.referees.modals.form-modal');
     }
 }

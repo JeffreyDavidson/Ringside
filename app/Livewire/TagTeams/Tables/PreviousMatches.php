@@ -4,42 +4,38 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
     /**
      * Tag Team to use for component.
      */
-    public ?int $tagTeamId;
+    #[Locked]
+    public ?int $tagTeamId = null;
 
-    protected string $databaseTableName = 'event_matches';
-
-    protected string $resourceName = 'matches';
-
-    /**
-     * @return Builder<EventMatch>
-     */
-    public function builder(): Builder
+    /** @return EventMatchBuilder<EventMatch> */
+    public function builder(): EventMatchBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
-        }
-
-        $tagTeam = TagTeam::find($this->tagTeamId);
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return EventMatch::query()
-            ->with(['titles', 'result.winner', 'result.decision'])
-            ->withWhereHas('competitors', function (Builder $query) use ($tagTeam): void {
-                $query->whereMorphedTo('competitor', $tagTeam);
-            })
-            ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
-            })
-            ->orderByDesc('date');
+            ->forHistory()
+            ->forTagTeamId($tagTeamId);
+    }
+
+    #[\Override]
+    protected function configure(): void
+    {
+        parent::configure();
+
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
     }
 }

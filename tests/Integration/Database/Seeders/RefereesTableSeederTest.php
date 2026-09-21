@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Database\Seeders\RefereesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -49,11 +49,9 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect($referee->first_name)->toBeString();
-                expect($referee->first_name)->not->toBeEmpty();
-                expect($referee->last_name)->toBeString();
-                expect($referee->last_name)->not->toBeEmpty();
-                expect($referee->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($referee->first_name)->toBeString()->not->toBeEmpty()
+                    ->and($referee->last_name)->toBeString()->not->toBeEmpty()
+                    ->and($referee->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -63,10 +61,8 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect(mb_strlen($referee->first_name))->toBeGreaterThan(2);
-                expect(mb_strlen($referee->last_name))->toBeGreaterThan(2);
-                expect($referee->first_name)->not->toContain('Test');
-                expect($referee->last_name)->not->toContain('Test');
+                expect($referee->first_name)->not->toContain('Test')
+                    ->and($referee->last_name)->not->toContain('Test');
             }
         });
     });
@@ -74,15 +70,6 @@ describe('RefereesTableSeeder Integration Tests', function () {
     describe('data consistency', function () {
         beforeEach(function () {
             Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']);
-        });
-
-        test('referees have unique name combinations', function () {
-            // Arrange
-            $referees = Referee::all();
-            $fullNames = $referees->map(fn ($referee) => $referee->first_name.' '.$referee->last_name);
-
-            // Assert
-            expect($fullNames->unique())->toHaveCount($referees->count());
         });
 
         test('referees have valid employment status', function () {

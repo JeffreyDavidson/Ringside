@@ -55,12 +55,13 @@ app/Livewire/{Domain}/
 
 ### Avoid redundant names:
 - ❌ `IsBookableReferee` (redundant if only used by Referee model)
-- ✅ `OfficiatesMatches` (descriptive and potentially reusable)
+- ✅ Define referee-only persistence relationships directly on `Referee`
 
 ### Use descriptive verbs:
-- `OfficiatesMatches` - for entities that officiate matches
-- `IsBookableCompetitor` - for entities that compete in matches
-- `ManagesEntities` - for entities that manage other entities
+- `HasMatchParticipations` - for entities with persisted competitor-match relationships
+- Define manager and stable membership relationships directly on Wrestler and Tag Team so their distinct pivot mappings remain explicit
+
+Manager defines its inverse Wrestler and Tag Team relationships directly because no other model owns that exact relationship set.
 
 ## Interface Implementation Strategy
 
@@ -76,4 +77,4 @@ app/Livewire/{Domain}/
 - Implementation is model-specific
 - Trait would be overly specific
 
-**Example:** `EventMatchPolicy` is implemented directly since only EventMatch needs it, while `IsBookableCompetitor` is a trait since multiple competitor types use it.
+**Example:** `EventMatchPolicy` is implemented directly since only EventMatch needs it, while `HasMatchParticipations` is a trait since multiple competitor types expose match participation relationships.

@@ -2,14 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\CreateAction;
+use App\Actions\Stables\RemoveStableMembersAction;
 use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
+use JMac\Testing\Double;
 
 /**
  * Integration tests for SplitStableAction.
@@ -26,7 +33,7 @@ describe('SplitStableAction Integration Tests', function () {
 
         // Make it active by adding activation period manually
         $activationDate = Carbon::yesterday();
-        $this->originalStable->activations()->create([
+        $this->originalStable->activityPeriods()->create([
             'started_at' => $activationDate,
         ]);
 
@@ -64,7 +71,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialTagTeamCount = $this->originalStable->currentTagTeams()->count();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -73,17 +80,17 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable was created
             expect($newStable)->toBeInstanceOf(Stable::class);
-            expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->isCurrentlyActive())->toBeTrue();
+            expect($newStable->name)->toBe($this->newStableName)
+                ->and($newStable->currentActivityPeriod()->exists())->toBeTrue();
 
             // Verify new stable has transferred members
             expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
             expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
 
             // Verify original stable has remaining members
-            $refreshedOriginal = $this->originalStable->fresh();
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($initialWrestlerCount - $this->transferWrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($initialTagTeamCount - $this->transferTagTeams->count());
+            $refreshedOriginal = freshModel($this->originalStable);
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($initialWrestlerCount - $this->transferWrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($initialTagTeamCount - $this->transferTagTeams->count());
         });
 
         test('split transfers specified members correctly', function () {
@@ -94,7 +101,7 @@ describe('SplitStableAction Integration Tests', function () {
             $transferTagTeamIds = $this->transferTagTeams->pluck('id');
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -105,11 +112,11 @@ describe('SplitStableAction Integration Tests', function () {
             $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
             $newStableTagTeamIds = $newStable->currentTagTeams()->pluck('tag_teams.id');
 
-            expect($newStableWrestlerIds->sort()->values())->toEqual($transferWrestlerIds->sort()->values());
-            expect($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
+            expect($newStableWrestlerIds->sort()->values())->toEqual($transferWrestlerIds->sort()->values())
+                ->and($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
 
             // Verify members are no longer in original stable
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             foreach ($transferWrestlerIds as $wrestlerId) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestlerId)->exists())->toBeFalse();
             }
@@ -123,7 +130,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -133,20 +140,29 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify new stable memberships have correct join dates
             $newStableWrestlers = $newStable->wrestlers()->get();
             $newStableTagTeams = $newStable->tagTeams()->get();
+            $membershipCutoff = $splitDate->copy()->subSecond();
 
             foreach ($newStableWrestlers as $wrestler) {
-                expect($wrestler->pivot->joined_at)->not()->toBeNull();
-                expect(Carbon::parse($wrestler->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
+                $membership = StableWrestler::query()
+                    ->whereBelongsTo($newStable)
+                    ->whereBelongsTo($wrestler)
+                    ->firstOrFail();
+
+                expect($membership->joined_at->gte($membershipCutoff))->toBeTrue();
             }
 
             foreach ($newStableTagTeams as $tagTeam) {
-                expect($tagTeam->pivot->joined_at)->not()->toBeNull();
-                expect(Carbon::parse($tagTeam->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
+                $membership = StableTagTeam::query()
+                    ->whereBelongsTo($newStable)
+                    ->whereBelongsTo($tagTeam, 'tagTeam')
+                    ->firstOrFail();
+
+                expect($membership->joined_at->gte($membershipCutoff))->toBeTrue();
             }
 
             // Verify original stable memberships were ended properly
             // Check that transferred wrestlers are no longer current members
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             foreach ($this->transferWrestlers as $wrestler) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestler->id)->exists())->toBeFalse();
             }
@@ -160,7 +176,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialTagTeamCount = $this->originalStable->currentTagTeams()->count();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -168,12 +184,12 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify all members are preserved across both stables
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             $totalWrestlers = $newStable->currentWrestlers()->count() + $refreshedOriginal->currentWrestlers()->count();
             $totalTagTeams = $newStable->currentTagTeams()->count() + $refreshedOriginal->currentTagTeams()->count();
 
-            expect($totalWrestlers)->toBe($initialWrestlerCount);
-            expect($totalTagTeams)->toBe($initialTagTeamCount);
+            expect($totalWrestlers)->toBe($initialWrestlerCount)
+                ->and($totalTagTeams)->toBe($initialTagTeamCount);
         });
     });
 
@@ -183,10 +199,10 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Split with only wrestlers
             $membersForSplit = new StableMembershipData(
-                wrestlers: $this->transferWrestlers,
+                wrestlers: $this->wrestlers->take(3),
             );
 
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -194,11 +210,11 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify new stable has only wrestlers
-            expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
+            expect($newStable->currentWrestlers()->count())->toBe(3);
             expect($newStable->currentTagTeams()->count())->toBe(0);
 
             // Verify original stable retains all tag teams
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
@@ -207,10 +223,10 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Split with only tag teams
             $membersForSplit = new StableMembershipData(
-                tagTeams: $this->transferTagTeams,
+                tagTeams: $this->tagTeams,
             );
 
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -219,10 +235,10 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable has only tag teams
             expect($newStable->currentWrestlers()->count())->toBe(0);
-            expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
+            expect($newStable->currentTagTeams()->count())->toBe(2);
 
             // Verify original stable retains all wrestlers
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
         });
 
@@ -230,7 +246,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Split with mixed member types
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -242,9 +258,9 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
 
             // Verify original stable has remaining members
-            $refreshedOriginal = $this->originalStable->fresh();
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count() - $this->transferTagTeams->count());
+            $refreshedOriginal = freshModel($this->originalStable);
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count() - $this->transferTagTeams->count());
         });
     });
 
@@ -252,9 +268,9 @@ describe('SplitStableAction Integration Tests', function () {
         test('split rejects empty transfer collections', function () {
             $splitDate = Carbon::now();
 
-            $membersForSplit = new StableMembershipData();
+            $membersForSplit = new StableMembershipData;
 
-            expect(fn () => SplitStableAction::run(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -262,9 +278,9 @@ describe('SplitStableAction Integration Tests', function () {
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable unchanged
-            $refreshedOriginal = $this->originalStable->fresh();
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
+            $refreshedOriginal = freshModel($this->originalStable);
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
         test('split rejects transferring all members', function () {
@@ -275,7 +291,7 @@ describe('SplitStableAction Integration Tests', function () {
                 tagTeams: $this->tagTeams,
             );
 
-            expect(fn () => SplitStableAction::run(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -283,36 +299,71 @@ describe('SplitStableAction Integration Tests', function () {
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable still has all members (transaction rolled back)
-            $refreshedOriginal = $this->originalStable->fresh();
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
+            $refreshedOriginal = freshModel($this->originalStable);
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
-        test('split validates member availability before transfer', function () {
-            // Create unemployed wrestler
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-
-            $splitDate = Carbon::now();
-
-            // Try to split with unemployed wrestler
-            $transferWrestlers = $this->transferWrestlers->push($unemployedWrestler);
-
-            // Execute split - should handle unemployed members appropriately
+        test('split rejects selected members outside the original stable', function () {
+            $outsider = Wrestler::factory()->bookable()->create();
             $membersForSplit = new StableMembershipData(
-                wrestlers: $transferWrestlers,
+                wrestlers: $this->transferWrestlers->push($outsider),
                 tagTeams: $this->transferTagTeams,
             );
 
-            $newStable = SplitStableAction::run(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class)
+                ->and(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
+        });
+
+        test('split rejects a new stable below the canonical minimum headcount', function () {
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->wrestlers->take(2),
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class);
+        });
+
+        test('split rejects an original stable below the canonical minimum headcount', function () {
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->wrestlers,
+                tagTeams: $this->tagTeams->take(1),
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class);
+        });
+
+        test('split rejects unavailable members instead of silently dropping them', function () {
+            $splitDate = Carbon::now();
+            $unavailableWrestler = $this->transferWrestlers->firstOrFail();
+            $unavailableWrestler->currentEmployment()->update(['ended_at' => $splitDate]);
+
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->transferWrestlers,
+                tagTeams: $this->transferTagTeams,
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
                 $splitDate
-            );
-
-            // Verify unemployed wrestler was not transferred (or handled per business rules)
-            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
-            expect($newStableWrestlerIds->contains($unemployedWrestler->id))->toBeFalse();
+            ))->toThrow(CannotBeSplitException::class)
+                ->and(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
         });
 
         test('split validates stable status before execution', function () {
@@ -322,7 +373,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Expect validation exception
-            expect(fn () => SplitStableAction::run(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $retiredStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -336,7 +387,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -345,13 +396,13 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable has correct properties
             expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->isCurrentlyActive())->toBeTrue();
-            expect($newStable->activityPeriods()->count())->toBe(1);
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue()
+                ->and($newStable->activityPeriods()->count())->toBe(1);
 
             // Verify activity period has correct start date
-            $activityPeriod = $newStable->currentActivityPeriod;
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at)->toBeNull();
+            $activityPeriod = $newStable->currentActivityPeriod()->firstOrFail();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'))
+                ->and($activityPeriod->ended_at)->toBeNull();
         });
 
         test('split validates new stable name uniqueness', function () {
@@ -361,7 +412,7 @@ describe('SplitStableAction Integration Tests', function () {
             Stable::factory()->create(['name' => $this->newStableName]);
 
             // Try to split with duplicate name
-            expect(fn () => SplitStableAction::run(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -378,7 +429,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialStableCount = Stable::count();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -390,31 +441,46 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify both stables exist and have members
             expect($newStable->currentWrestlers()->count())->toBeGreaterThan(0);
-            expect($this->originalStable->fresh()->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
+            expect(freshModel($this->originalStable)->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
         });
 
-        test('split handles transaction rollback on constraint violation', function () {
+        test('split rolls back membership changes when stable creation fails', function () {
             $splitDate = Carbon::now();
-
-            // Get initial counts
             $initialStableCount = Stable::count();
+            $originalMembershipIds = StableWrestler::query()
+                ->whereBelongsTo($this->originalStable)
+                ->whereNull('left_at')
+                ->pluck('id');
+            $originalTagTeamMembershipIds = StableTagTeam::query()
+                ->whereBelongsTo($this->originalStable)
+                ->whereNull('left_at')
+                ->pluck('id');
+            $createAction = Double::for(CreateAction::class);
+            $createAction->expects('handle')
+                ->throws(new LogicException('Stable creation failed.'));
+            $action = new SplitStableAction(
+                $createAction,
+                resolve(StableMembershipService::class),
+                resolve(RemoveStableMembersAction::class),
+                resolve(StableRestructuringEligibility::class),
+            );
 
-            // For now, verify that normal split doesn't affect counts negatively
-            try {
-                $newStable = SplitStableAction::run(
-                    $this->originalStable,
-                    $this->newStableName,
-                    $this->membersForNewStable,
-                    $splitDate
-                );
+            expect(fn () => $action->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                $splitDate
+            ))
+                ->toThrow(LogicException::class, 'Stable creation failed.')
+                ->and(Stable::count())->toBe($initialStableCount)
+                ->and(StableWrestler::query()
+                    ->whereKey($originalMembershipIds)
+                    ->whereNull('left_at')->count())->toBe($originalMembershipIds->count())
+                ->and(StableTagTeam::query()
+                    ->whereKey($originalTagTeamMembershipIds)
+                    ->whereNull('left_at')->count())->toBe($originalTagTeamMembershipIds->count());
 
-                // Verify operation completed successfully
-                expect(Stable::count())->toBe($initialStableCount + 1);
-
-            } catch (Exception $e) {
-                // If transaction fails, verify no partial changes occurred
-                expect(Stable::count())->toBe($initialStableCount);
-            }
+            $createAction->verify();
         });
     });
 
@@ -423,7 +489,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -431,21 +497,20 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify both stables meet minimum requirements
-            $newStableMemberCount = $newStable->currentWrestlers()->count() + $newStable->currentTagTeams()->count();
+            $newStableMemberCount = resolve(StableMembershipService::class)->currentMembers($newStable)->getTotalMemberCount();
 
-            $refreshedOriginal = $this->originalStable->fresh();
-            $originalMemberCount = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
+            $refreshedOriginal = freshModel($this->originalStable);
+            $originalMemberCount = resolve(StableMembershipService::class)->currentMembers($refreshedOriginal)->getTotalMemberCount();
 
-            // Assume minimum of 1 member required (adjust based on business rules)
-            expect($newStableMemberCount)->toBeGreaterThanOrEqual(1);
-            expect($originalMemberCount)->toBeGreaterThanOrEqual(0); // Original can be empty after split
+            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT)
+                ->and($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
         });
 
         test('split validates member employment status', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -475,7 +540,7 @@ describe('SplitStableAction Integration Tests', function () {
             $originalTagTeamIds = $this->transferTagTeams->pluck('id');
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -496,7 +561,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::run(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -504,19 +569,16 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify new stable is active
-            expect($newStable->isCurrentlyActive())->toBeTrue();
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
 
             // Verify original stable status is appropriate
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
 
-            // If original has members, should remain active; if empty, may become inactive
+            // An original stable with remaining members should remain active.
             $totalRemainingMembers = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
 
             if ($totalRemainingMembers > 0) {
-                expect($refreshedOriginal->isCurrentlyActive())->toBeTrue();
-            } else {
-                // Empty stable may become inactive (depends on business rules)
-                expect($refreshedOriginal->isCurrentlyActive() || $refreshedOriginal->isInactive())->toBeTrue();
+                expect($refreshedOriginal->currentActivityPeriod()->exists())->toBeTrue();
             }
         });
     });

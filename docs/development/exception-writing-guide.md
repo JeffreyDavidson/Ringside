@@ -25,6 +25,7 @@ All business exceptions in this application should:
 4. **Include comprehensive documentation** - Provide business context and scenarios
 5. **Use model-aware parameters** - Accept model objects for type safety
 6. **Generate actionable error messages** - Tell users what went wrong and what to do
+7. **Identify presentation-sensitive failures with a stable reason** - Use `BusinessRuleReason` when the UI distinguishes the failure from the operation's general error
 
 ## Exception Structure
 
@@ -171,6 +172,24 @@ public static function specificCondition(ModelClass $entity, ?string $additional
 ```
 
 ## Static Factory Methods
+
+Factory methods whose failures have specific user-facing translations must call `self::forReason()`. Exception messages remain useful technical context, but application behavior must never parse those messages.
+
+```php
+use App\Enums\BusinessRuleReason;
+
+public static function employed(Employable $entity): static
+{
+    $context = self::formatModelContext($entity);
+
+    return self::forReason(
+        BusinessRuleReason::AlreadyEmployed,
+        "{$context} is already employed.",
+    );
+}
+```
+
+Use a new string-backed enum case only when callers need to distinguish that reason. General failures should retain the default `BusinessRuleReason::General` reason.
 
 ### Method Patterns
 

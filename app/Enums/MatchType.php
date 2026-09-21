@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Enums\Lifecycle\LifecycleOwnerType;
+
 enum MatchType: string
 {
     case Singles = 'singles';
@@ -68,10 +70,46 @@ enum MatchType: string
     {
         return match ($this) {
             self::TagTeam, self::TornadoTagTeam, self::SixManTagTeam,
-            self::EightManTagTeam, self::TenManTagTeam => ['wrestler', 'tag_team'],
-            self::TripleThreat, self::Fatal4Way, self::BattleRoyal, self::RoyalRumble => ['wrestler', 'tag_team'],
-            default => ['wrestler'], // Singles and other types default to wrestler-only
+            self::EightManTagTeam, self::TenManTagTeam, self::TripleThreat,
+            self::Fatal4Way, self::TwoOnOneHandicap, self::ThreeOnTwoHandicap,
+            self::Gauntlet => [LifecycleOwnerType::Wrestler->value, LifecycleOwnerType::TagTeam->value],
+            default => [LifecycleOwnerType::Wrestler->value],
         };
+    }
+
+    /** @return list<int>|null */
+    public function requiredRosterMembersPerSide(): ?array
+    {
+        return match ($this) {
+            self::TagTeam, self::TornadoTagTeam => [2, 2],
+            self::SixManTagTeam => [3, 3],
+            self::EightManTagTeam => [4, 4],
+            self::TenManTagTeam => [5, 5],
+            self::TwoOnOneHandicap => [1, 2],
+            self::ThreeOnTwoHandicap => [2, 3],
+            default => null,
+        };
+    }
+
+    /** @return list<int>|null */
+    public function requiredCompetitorEntriesPerSide(): ?array
+    {
+        return match ($this) {
+            self::Singles => [1, 1],
+            self::TripleThreat, self::Triangle => [1, 1, 1],
+            self::Fatal4Way => [1, 1, 1, 1],
+            default => null,
+        };
+    }
+
+    public function usesIndividualCompetitorSides(): bool
+    {
+        return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
+    }
+
+    public function recordsIndividualEliminations(): bool
+    {
+        return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
     }
 
     /**
@@ -79,7 +117,7 @@ enum MatchType: string
      */
     public function allowsWrestlers(): bool
     {
-        return in_array('wrestler', $this->getAllowedCompetitorTypes(), true);
+        return in_array(LifecycleOwnerType::Wrestler->value, $this->getAllowedCompetitorTypes(), true);
     }
 
     /**
@@ -87,7 +125,7 @@ enum MatchType: string
      */
     public function allowsTagTeams(): bool
     {
-        return in_array('tag_team', $this->getAllowedCompetitorTypes(), true);
+        return in_array(LifecycleOwnerType::TagTeam->value, $this->getAllowedCompetitorTypes(), true);
     }
 
     /**
@@ -103,16 +141,23 @@ enum MatchType: string
      */
     public function getMinimumCompetitors(): int
     {
-        return $this->numberOfSides() ?? 2;
+        return match ($this) {
+            self::BattleRoyal => 3,
+            self::RoyalRumble => 10,
+            default => $this->numberOfSides() ?? 2,
+        };
     }
 
     /**
      * Get the maximum number of competitors allowed for this match type.
      */
-    public function getMaximumCompetitors(): int
+    public function getMaximumCompetitors(): ?int
     {
-        // For now, assume same as minimum unless specified otherwise
-        return $this->getMinimumCompetitors();
+        return match ($this) {
+            self::BattleRoyal => null,
+            self::RoyalRumble => 30,
+            default => $this->getMinimumCompetitors(),
+        };
     }
 
     /**

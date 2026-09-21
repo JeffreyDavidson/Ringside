@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Modals;
 
+use App\Actions\Venues\CreateAction;
+use App\Actions\Venues\UpdateAction;
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -15,11 +19,25 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
+    protected ?string $createdEventName = 'venueCreated';
+
+    #[\Override]
+    protected ?string $updatedEventName = 'venueUpdated';
+
+    #[\Override]
+    protected bool $resetFormAfterSubmission = true;
+
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -27,32 +45,19 @@ class FormModal extends BaseFormModal
         return Venue::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.venues.modals.form-modal';
+        $this->form->name = Str::of(fake()->sentence(2))->title()->append(' Arena')->value();
+        $this->form->street_address = fake()->streetAddress();
+        $this->form->city = fake()->city();
+        $this->form->state = Collection::make(UnitedStatesState::cases())->random()->value;
+        $this->form->zipcode = fake('en_US')->numerify('#####');
     }
 
-    protected function getDummyDataFields(): array
-    {
-        /**
-         * @var string $state
-         *
-         * @phpstan-ignore-next-line
-         */
-        $state = fake('en_US')->state();
-
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->append(' Arena')->value(),
-            'street_address' => fn () => fake()->streetAddress(),
-            'city' => fn () => fake()->city(),
-            'state' => fn () => $state,
-            'zipcode' => fn () => fake('en_US')->numerify('#####'),
-        ];
-    }
-
+    #[\Override]
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit Venue';
         }
 
@@ -61,35 +66,23 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');
+        return view('livewire.venues.modals.form-modal');
     }
 
-    public function submitForm(): bool
+    protected function updateForm(): void
     {
-        // Store whether we're creating or updating before the form submission
-        $isCreating = $this->form->isCreating();
-
-        $result = parent::submitForm();
-
-        if ($result) {
-            // Dispatch the appropriate event based on whether we created or updated
-            if ($isCreating) {
-                $this->dispatch('venueCreated');
-            } else {
-                $this->dispatch('venueUpdated');
-            }
-
-            // Reset the form after successful submission
-            $this->form->reset();
-        }
-
-        return $result;
+        $this->updateAction->handle($this->form->venue(), $this->form->toData());
     }
 
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
+    }
+
+    #[\Override]
     public function closeModal(): void
     {
         parent::closeModal();
-        // Reset the form when modal is closed
         $this->form->reset();
     }
 }

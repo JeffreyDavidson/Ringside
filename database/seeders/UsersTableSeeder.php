@@ -26,7 +26,7 @@ class UsersTableSeeder extends Seeder
             'password' => 'password',
             'status' => UserStatus::Active,
             'avatar_path' => '300-3.png',
-            'phone_number' => fake()->unique()->numberBetween(0000000000, 9999999999),
+            'phone_number' => fake()->unique()->numerify('##########'),
         ]
         )->create();
 
@@ -37,7 +37,7 @@ class UsersTableSeeder extends Seeder
             'password' => 'password',
             'status' => UserStatus::Active,
             'avatar_path' => '300-3.png',
-            'phone_number' => fake()->unique()->numberBetween(0000000000, 9999999999),
+            'phone_number' => fake()->unique()->numerify('##########'),
         ]
         )->create();
     }

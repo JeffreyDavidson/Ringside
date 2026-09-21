@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enums\Stables;
 
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
@@ -16,12 +16,6 @@ use InvalidArgumentException;
  * Defines the valid types of members that can belong to a stable and their
  * corresponding relationship names. Provides type-safe member type handling
  * and automatic model type detection.
- *
- * @example
- * ```php
- * $type = StableMemberType::fromModel($wrestler);
- * $relationshipName = $type->getRelationshipName(); // 'wrestlers'
- * ```
  */
 enum StableMemberType: string
 {
@@ -36,17 +30,18 @@ enum StableMemberType: string
      * and returns the appropriate enum value.
      *
      * @param  Model  $model  The model to detect type for
-     * @throws InvalidArgumentException If the model type is not supported
      * @return self The corresponding enum value
+     *
+     * @throws InvalidArgumentException If the model type is not supported
      */
     public static function fromModel(Model $model): self
     {
-        return match (get_class($model)) {
+        return match ($model::class) {
             Wrestler::class => self::WRESTLER,
             TagTeam::class => self::TAG_TEAM,
             Manager::class => self::MANAGER,
             default => throw new InvalidArgumentException(
-                'Unsupported member type: '.get_class($model)
+                'Unsupported member type: '.$model::class
             )
         };
     }

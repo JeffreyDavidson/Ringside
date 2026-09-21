@@ -6,12 +6,19 @@ namespace App\Livewire\Table;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use LogicException;
+use Stringable;
 
+/** @phpstan-consistent-constructor */
 class Column
 {
     protected string $field;
 
     protected bool $searchable = false;
+
+    protected ?Closure $searchCallback = null;
 
     protected bool $sortable = false;
 
@@ -21,6 +28,7 @@ class Column
 
     protected ?Closure $labelCallback = null;
 
+    /** @var view-string|null */
     protected ?string $viewPath = null;
 
     public function __construct(
@@ -35,11 +43,26 @@ class Column
         return new static($title, $from);
     }
 
-    public function searchable(): static
+    public function searchable(?Closure $callback = null): static
     {
         $this->searchable = true;
+        $this->searchCallback = $callback;
 
         return $this;
+    }
+
+    /**
+     * @param  Builder<*>  $query
+     */
+    public function applySearch(Builder $query, string $searchTerm): void
+    {
+        if ($this->searchCallback instanceof Closure) {
+            ($this->searchCallback)($query, $searchTerm);
+
+            return;
+        }
+
+        $query->where($this->field, 'like', "%{$searchTerm}%");
     }
 
     public function sortable(): static
@@ -63,6 +86,7 @@ class Column
         return $this;
     }
 
+    /** @param view-string $viewPath */
     public function view(string $viewPath): static
     {
         $this->viewPath = $viewPath;
@@ -102,23 +126,43 @@ class Column
         return $this->isHtml;
     }
 
+    protected static function linkHtml(string $title, string $location): string
+    {
+        return '<a href="'.e($location).'">'.e($title).'</a>';
+    }
+
     /**
      * Resolve the display value for a given row.
      */
     public function resolveValue(mixed $row): string
     {
         if ($this->viewPath) {
-            $view = view($this->viewPath, ['row' => $row]);
-
-            return $view instanceof View ? $view->render() : (string) $view;
+            return view($this->viewPath, ['row' => $row])->render();
         }
 
-        if ($this->labelCallback) {
+        if ($this->labelCallback instanceof Closure) {
             $result = ($this->labelCallback)($row, $this);
 
-            return $result instanceof View ? $result->render() : (string) $result;
+            return $result instanceof View ? $result->render() : $this->resolveStringValue($result);
         }
 
-        return (string) data_get($row, $this->field, '');
+        return $this->resolveStringValue(data_get($row, $this->field, ''));
+    }
+
+    private function resolveStringValue(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return Str::of($value)->toString();
+        }
+
+        if (is_int($value) || is_float($value) || is_bool($value) || $value instanceof Stringable) {
+            return Str::of((string) $value)->toString();
+        }
+
+        throw new LogicException('Table column values must be stringable.');
     }
 }

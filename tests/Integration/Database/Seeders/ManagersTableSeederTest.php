@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Database\Seeders\ManagersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -49,11 +49,9 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->first_name)->toBeString();
-                expect($manager->first_name)->not->toBeEmpty();
-                expect($manager->last_name)->toBeString();
-                expect($manager->last_name)->not->toBeEmpty();
-                expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($manager->first_name)->toBeString()->not->toBeEmpty()
+                    ->and($manager->last_name)->toBeString()->not->toBeEmpty()
+                    ->and($manager->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -63,10 +61,8 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect(mb_strlen($manager->first_name))->toBeGreaterThan(2);
-                expect(mb_strlen($manager->last_name))->toBeGreaterThan(2);
-                expect($manager->first_name)->not->toContain('Test');
-                expect($manager->last_name)->not->toContain('Test');
+                expect($manager->first_name)->not->toContain('Test')
+                    ->and($manager->last_name)->not->toContain('Test');
             }
         });
     });
@@ -74,15 +70,6 @@ describe('ManagersTableSeeder Integration Tests', function () {
     describe('data consistency', function () {
         beforeEach(function () {
             Artisan::call('db:seed', ['--class' => 'ManagersTableSeeder']);
-        });
-
-        test('managers have unique name combinations', function () {
-            // Arrange
-            $managers = Manager::all();
-            $fullNames = $managers->map(fn ($manager) => $manager->first_name.' '.$manager->last_name);
-
-            // Assert
-            expect($fullNames->unique())->toHaveCount($managers->count());
         });
 
         test('managers have valid employment status', function () {

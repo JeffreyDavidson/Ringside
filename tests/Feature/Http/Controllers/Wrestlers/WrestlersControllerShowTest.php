@@ -1,0 +1,81 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Livewire\Wrestlers\Tables\PreviousManagers;
+use App\Livewire\Wrestlers\Tables\PreviousMatches;
+use App\Livewire\Wrestlers\Tables\PreviousStables;
+use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
+use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
+use App\Models\Roster\Wrestlers\Wrestler;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
+/**
+ * Feature tests for Wrestlers Controller.
+ *
+ * @see WrestlersController
+ */
+describe('Wrestlers Controller', function () {
+    beforeEach(function () {
+        $this->wrestler = Wrestler::factory()->create();
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('show returns a view', function () {
+        actingAs(administrator())
+            ->get(route('wrestlers.show', $this->wrestler))
+            ->assertOk()
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $this->wrestler)
+            ->assertSeeLivewire(PreviousTitleChampionships::class)
+            ->assertSeeLivewire(PreviousMatches::class)
+            ->assertSeeLivewire(PreviousTagTeams::class)
+            ->assertSeeLivewire(PreviousManagers::class)
+            ->assertSeeLivewire(PreviousStables::class);
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('show loads only the relationships rendered by the wrestler summary', function () {
+        actingAs(administrator())
+            ->get(route('wrestlers.show', $this->wrestler))
+            ->assertOk()
+            ->assertViewHas('wrestler', fn (Wrestler $wrestler): bool => count($wrestler->getRelations()) === 4
+                && $wrestler->relationLoaded('currentManagers')
+                && $wrestler->relationLoaded('currentStable')
+                && $wrestler->relationLoaded('currentTagTeam')
+                && $wrestler->relationLoaded('firstEmployment'));
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('a basic user cannot view wrestler profiles', function () {
+        actingAs(basicUser())
+            ->get(route('wrestlers.show', $this->wrestler))
+            ->assertForbidden();
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('a guest cannot view a wrestler profile', function () {
+        get(route('wrestlers.show', $this->wrestler))
+            ->assertRedirect(route('login'));
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('returns 404 when wrestler does not exist', function () {
+        actingAs(administrator())
+            ->get(route('wrestlers.show', 999999))
+            ->assertNotFound();
+    });
+});

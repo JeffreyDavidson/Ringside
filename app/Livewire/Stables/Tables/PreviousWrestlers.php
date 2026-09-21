@@ -4,42 +4,47 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Builders\Roster\StableMembershipBuilder;
+use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Stables\StableWrestler;
-use App\Models\Wrestlers\Wrestler;
-use Carbon\Carbon;
-use Exception;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<StableWrestler> */
 class PreviousWrestlers extends DataTableComponent
 {
+    use ShowTableTrait;
+
     protected string $resourceName = 'wrestlers';
 
-    protected string $databaseTableName = 'wrestlers';
+    protected string $databaseTableName = 'stables_wrestlers';
 
-    public ?int $stableId;
+    #[Locked]
+    public ?int $stableId = null;
 
-    /**
-     * @return Builder<Wrestler>
-     */
-    public function builder(): Builder
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
     {
-        if (! isset($this->stableId)) {
-            throw new Exception("You didn't specify a stable");
-        }
+        $this->routeResolver = $routeResolver;
+    }
 
-        return Wrestler::query()
-            ->whereHas('stables', function (Builder $query) {
-                $query->where('stable_id', $this->stableId)
-                    ->whereNotNull('left_at');
-            })
-            ->with(['stables' => function (Relation $query) {
-                $query->where('stable_id', $this->stableId)
-                    ->whereNotNull('left_at');
-            }]);
+    /** @return StableMembershipBuilder<StableWrestler> */
+    public function builder(): StableMembershipBuilder
+    {
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        return StableWrestler::query()
+            ->with('wrestler')
+            ->forStableId($stableId)
+            ->forHistory();
     }
 
     /**
@@ -49,55 +54,35 @@ class PreviousWrestlers extends DataTableComponent
     {
         return [
             LinkColumn::make(__('wrestlers.name'))
-                ->title(fn (Wrestler $row) => $row->name ?? 'Unknown')
-                ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
-            Column::make(__('stables.date_joined'))
-                ->label(function (Wrestler $row): string {
-                    $stable = $row->stables->first();
-                    if (! $stable || ! isset($stable->pivot)) {
-                        return '';
-                    }
-
-                    /** @var StableWrestler $pivot */
-                    $pivot = $stable->pivot;
-                    $joinedAt = $pivot->getAttribute('joined_at');
-                    if (! $joinedAt) {
-                        return '';
-                    }
-
-                    return is_string($joinedAt) ?
-                        Carbon::parse($joinedAt)->format('Y-m-d') :
-                        $joinedAt->format('Y-m-d');
+                ->title(fn (StableWrestler $row) => $row->wrestler->name ?? 'Unknown')
+                ->location(fn (StableWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
+                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
                 }),
-            Column::make(__('stables.date_left'))
-                ->label(function (Wrestler $row): string {
-                    $stable = $row->stables->first();
-                    if (! $stable || ! isset($stable->pivot)) {
-                        return '';
-                    }
-
-                    /** @var StableWrestler $pivot */
-                    $pivot = $stable->pivot;
-                    $leftAt = $pivot->getAttribute('left_at');
-                    if (! $leftAt) {
-                        return '';
-                    }
-
-                    return is_string($leftAt) ?
-                        Carbon::parse($leftAt)->format('Y-m-d') :
-                        $leftAt->format('Y-m-d');
-                }),
+            DateColumn::make(__('stables.date_joined'), 'joined_at')
+                ->outputFormat('Y-m-d'),
+            DateColumn::make(__('stables.date_left'), 'left_at')
+                ->outputFormat('Y-m-d'),
         ];
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        $this->setPrimaryKey('id')
-            ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setPaginationEnabled()
-            ->setPerPageAccepted([5, 10, 25, 50, 100])
-            ->setLoadingPlaceholderContent('Loading')
-            ->setLoadingPlaceholderEnabled();
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        Gate::authorize('view', Stable::query()->findOrFail($stableId));
+
+        $this->addAdditionalSelects([
+            'stables_wrestlers.wrestler_id',
+            'stables_wrestlers.stable_id',
+            'stables_wrestlers.joined_at',
+            'stables_wrestlers.left_at',
+        ]);
     }
 }

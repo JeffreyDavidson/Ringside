@@ -12,6 +12,9 @@
 
 @php
     $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
+    if ($fieldName !== null && ! is_string($fieldName)) {
+        throw new \InvalidArgumentException('Form field names must be strings.');
+    }
     if ($fieldName && str_contains($fieldName, '=')) {
         $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
     }
@@ -33,39 +36,37 @@
     $selectedValues = is_array($selected) ? $selected : ($selected !== null ? [$selected] : []);
 @endphp
 
-@if($label || $description)
-    <x-form.with-field
-        :label="$label"
-        :description="$description"
-        :variant="$variant"
-        :name="$fieldName">
-        <select
-            {{ $selectAttributes->merge([
+@if ($label || $description)
+    <x-form.with-field :label="$label" :description="$description" :variant="$variant" :name="$fieldName">
+        <select {{
+            $selectAttributes->merge([
                 'name' => $multiple ? "{$fieldName}[]" : $fieldName,
                 'id' => $inputId,
                 'class' => $selectClasses,
                 'multiple' => $multiple ?: null,
-            ]) }}>
-            @if($placeholder && !$multiple)
+            ])
+        }}>
+            @if ($placeholder && ! $multiple)
                 <option value="">{{ $placeholder }}</option>
             @endif
-            @foreach($options as $value => $optionLabel)
+            @foreach ($options as $value => $optionLabel)
                 <option value="{{ $value }}" @selected(in_array($value, $selectedValues))>{{ $optionLabel }}</option>
             @endforeach
         </select>
     </x-form.with-field>
 @else
-    <select
-        {{ $selectAttributes->merge([
+    <select {{
+        $selectAttributes->merge([
             'name' => $multiple ? "{$fieldName}[]" : $fieldName,
             'id' => $inputId,
             'class' => $selectClasses,
             'multiple' => $multiple ?: null,
-        ]) }}>
-        @if($placeholder && !$multiple)
+        ])
+    }}>
+        @if ($placeholder && ! $multiple)
             <option value="">{{ $placeholder }}</option>
         @endif
-        @foreach($options as $value => $optionLabel)
+        @foreach ($options as $value => $optionLabel)
             <option value="{{ $value }}" @selected(in_array($value, $selectedValues))>{{ $optionLabel }}</option>
         @endforeach
     </select>

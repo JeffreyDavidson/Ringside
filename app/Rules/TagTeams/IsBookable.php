@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Rules\TagTeams;
 
-use App\Models\TagTeams\TagTeam;
+use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,7 +15,7 @@ class IsBookable implements ValidationRule
     {
         $tagTeam = TagTeam::find($value);
 
-        if (! $tagTeam instanceof TagTeam || ! $tagTeam->isBookable()) {
+        if (! $tagTeam instanceof TagTeam || ! resolve(RosterBookingEligibility::class)->allows($tagTeam)) {
             $fail('This tag team is not available for booking.');
         }
     }

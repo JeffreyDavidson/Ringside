@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Data\Managers\ManagerData;
-use App\Models\Managers\Manager;
-use App\Support\DateHelper;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     public function __construct(
-        private EmployAction $employAction
+        private readonly EmployAction $employAction
     ) {}
 
     /**
@@ -33,40 +29,23 @@ class UpdateAction
      * @param  Manager  $manager  The manager to update
      * @param  ManagerData  $managerData  The updated manager information
      * @return Manager The updated manager instance
-     *
-     * @example
-     * ```php
-     * // Update manager information only
-     * $managerData = new ManagerData([
-     *     'name' => 'Updated Name',
-     *     'hometown' => 'New Hometown'
-     * ]);
-     * $updatedManager = UpdateAction::run($manager, $managerData);
-     *
-     * // Update and employ an unemployed manager
-     * $managerData = new ManagerData([
-     *     'name' => 'Triple H',
-     *     'employment_date' => Carbon::parse('2024-01-01')
-     * ]);
-     * $updatedManager = UpdateAction::run($unemployedManager, $managerData);
-     * ```
      */
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {
         return DB::transaction(function () use ($manager, $managerData): Manager {
-            // Update the manager's basic information
-            $manager->update([
+            $lockedManager = $manager->refreshForUpdate();
+
+            $lockedManager->update([
                 'first_name' => $managerData->first_name,
                 'last_name' => $managerData->last_name,
             ]);
 
             // Handle employment using EmployAction for consistency
-            if (! is_null($managerData->employment_date) && ! $manager->isEmployed()) {
-                $employmentDate = DateHelper::resolveDate($managerData->employment_date);
-                $this->employAction->handle($manager, $employmentDate);
+            if (! is_null($managerData->employment_date) && ! $lockedManager->currentEmployment()->exists()) {
+                $this->employAction->handle($lockedManager, $managerData->employment_date);
             }
 
-            return $manager;
+            return $lockedManager;
         });
     }
 }

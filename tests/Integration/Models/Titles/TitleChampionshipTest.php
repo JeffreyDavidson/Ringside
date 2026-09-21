@@ -6,10 +6,12 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
-use App\Models\TagTeams\TagTeam;
+use App\Enums\Shared\EmploymentStatus;
+use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
@@ -73,11 +75,10 @@ describe('TitleChampionship Model', function () {
                     'lost_at' => null,
                 ]);
 
-            expect($championship)->not()->toBeNull();
-            expect($championship->title_id)->toBe($this->title->id);
-            expect($championship->champion_id)->toBe($this->wrestler->id);
-            expect($championship->champion_type)->toBe('wrestler');
-            expect($championship->lost_at)->toBeNull();
+            expect($championship->title_id)->toBe($this->title->id)
+                ->and($championship->champion_id)->toBe($this->wrestler->id)
+                ->and($championship->champion_type)->toBe('wrestler')
+                ->and($championship->lost_at)->toBeNull();
         });
 
         test('supports polymorphic champion relationships', function () {
@@ -95,12 +96,12 @@ describe('TitleChampionship Model', function () {
                     'lost_at' => null,
                 ]);
 
-            expect($wrestlerChampionship->champion)->toBeInstanceOf(Wrestler::class);
-            expect($tagTeamChampionship->champion)->toBeInstanceOf(TagTeam::class);
-            expect($wrestlerChampionship->champion_type)->toBe('wrestler');
-            expect($tagTeamChampionship->champion_type)->toBe('tagTeam');
-            expect($wrestlerChampionship->champion->id)->toBe($this->wrestler->id);
-            expect($tagTeamChampionship->champion->id)->toBe($this->tagTeam->id);
+            expect($wrestlerChampionship->champion)->toBeInstanceOf(Wrestler::class)
+                ->and($tagTeamChampionship->champion)->toBeInstanceOf(TagTeam::class)
+                ->and($wrestlerChampionship->champion_type)->toBe('wrestler')
+                ->and($tagTeamChampionship->champion_type)->toBe('tag_team')
+                ->and($wrestlerChampionship->champion()->firstOrFail()->getKey())->toBe($this->wrestler->id)
+                ->and($tagTeamChampionship->champion()->firstOrFail()->getKey())->toBe($this->tagTeam->id);
         });
     });
 
@@ -130,9 +131,9 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Verify succession
-            expect($this->title->fresh()->currentChampionship->champion->id)->toBe($toChampion->id);
-            expect($fromChampion->fresh()->isChampion())->toBeFalse();
-            expect($toChampion->fresh()->isChampion())->toBeTrue();
+            expect(freshModel($this->title)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($toChampion->id);
+            expect($fromChampion->refresh()->currentChampionships()->exists())->toBeFalse()
+                ->and($toChampion->refresh()->currentChampionships()->exists())->toBeTrue();
         })->with([
             'wrestler to tag team' => [Wrestler::class, TagTeam::class, 'John Champion', 'Tag Team Champions'],
             'tag team to wrestler' => [TagTeam::class, Wrestler::class, 'Team Champions', 'Jane Challenger'],
@@ -187,11 +188,10 @@ describe('TitleChampionship Model', function () {
         });
 
         test('current championship query returns only active championship', function () {
-            $currentChampionship = $this->title->currentChampionship;
+            $currentChampionship = $this->title->currentChampionship()->firstOrFail();
 
-            expect($currentChampionship)->not()->toBeNull();
-            expect($currentChampionship->champion->id)->toBe($this->secondWrestler->id);
-            expect($currentChampionship->lost_at)->toBeNull();
+            expect($currentChampionship->champion()->firstOrFail()->getKey())->toBe($this->secondWrestler->id)
+                ->and($currentChampionship->lost_at)->toBeNull();
         });
 
         test('championship history includes all reigns', function () {
@@ -200,8 +200,8 @@ describe('TitleChampionship Model', function () {
             expect($allChampionships)->toHaveCount(2);
 
             $championIds = $allChampionships->pluck('champion_id')->toArray();
-            expect($championIds)->toContain($this->wrestler->id);
-            expect($championIds)->toContain($this->secondWrestler->id);
+            expect($championIds)->toContain($this->wrestler->id)
+                ->toContain($this->secondWrestler->id);
         });
 
         test('championships are properly ordered by won_at', function () {
@@ -209,8 +209,8 @@ describe('TitleChampionship Model', function () {
                 ->orderBy('won_at', 'asc')
                 ->get();
 
-            expect($championshipsChronological->first()->champion->id)->toBe($this->wrestler->id);
-            expect($championshipsChronological->last()->champion->id)->toBe($this->secondWrestler->id);
+            expect($championshipsChronological->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($this->wrestler->id)
+                ->and($championshipsChronological->reverse()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($this->secondWrestler->id);
         });
     });
 
@@ -246,10 +246,10 @@ describe('TitleChampionship Model', function () {
 
             expect($championshipsWithRelations)->toHaveCount(1);
 
-            $championship = $championshipsWithRelations->first();
-            expect($championship->relationLoaded('title'))->toBeTrue();
-            expect($championship->relationLoaded('champion'))->toBeTrue();
-            expect($championship->title->name)->toBe('World Championship');
+            $championship = $championshipsWithRelations->firstOrFail();
+            expect($championship->relationLoaded('title'))->toBeTrue()
+                ->and($championship->relationLoaded('champion'))->toBeTrue()
+                ->and(requiredModel($championship->title)->name)->toBe('World Championship');
         });
 
         test('complex filtering scenarios work correctly', function () {
@@ -271,8 +271,8 @@ describe('TitleChampionship Model', function () {
 
             // Filter current championships
             $currentChampionships = TitleChampionship::whereNull('lost_at')->get();
-            expect($currentChampionships)->toHaveCount(1);
-            expect($currentChampionships->first()->champion_type)->toBe('tagTeam');
+            expect($currentChampionships)->toHaveCount(1)
+                ->and($currentChampionships->firstOrFail()->champion_type)->toBe('tag_team');
 
             // Filter by champion type
             $wrestlerChampionships = TitleChampionship::where('champion_type', 'wrestler')->get();
@@ -323,7 +323,7 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Data is stored as-is; validation should happen in business logic
-            expect($championship->won_at->greaterThan($championship->lost_at))->toBeTrue();
+            expect($championship->won_at->greaterThan(requiredDate($championship->lost_at)))->toBeTrue();
         });
     });
 
@@ -349,7 +349,7 @@ describe('TitleChampionship Model', function () {
             expect($this->title->championships()->count())->toBe(3);
 
             // Verify current champion is the wrestler (who regained the title)
-            $currentChampion = $this->title->currentChampionship->champion;
+            $currentChampion = $this->title->currentChampionship()->firstOrFail()->champion;
             expect($currentChampion->id)->toBe($this->wrestler->id);
 
             // Verify championship history includes both wrestlers
@@ -379,16 +379,16 @@ describe('TitleChampionship Model', function () {
             $completedChampionships = $this->title->championships()->whereNotNull('lost_at')->get();
             $currentChampionships = $this->title->championships()->whereNull('lost_at')->get();
 
-            expect($completedChampionships)->toHaveCount(1);
-            expect($currentChampionships)->toHaveCount(1);
+            expect($completedChampionships)->toHaveCount(1)
+                ->and($currentChampionships)->toHaveCount(1);
 
             // Calculate duration of completed championship
-            $completedChampionship = $completedChampionships->first();
+            $completedChampionship = $completedChampionships->firstOrFail();
             $duration = $completedChampionship->won_at->diffInDays($completedChampionship->lost_at);
             expect($duration)->toBeGreaterThan(150); // Approximately 6 months
 
             // Calculate current championship duration
-            $currentChampionship = $currentChampionships->first();
+            $currentChampionship = $currentChampionships->firstOrFail();
             $currentDuration = $currentChampionship->won_at->diffInDays(Carbon::now());
             expect($currentDuration)->toBeGreaterThan(80); // Approximately 3 months
         });
@@ -410,8 +410,8 @@ describe('TitleChampionship Model', function () {
 
             // Count without loading
             expect(TitleChampionship::count())->toBe(2);
-            expect($this->title->championships()->count())->toBe(1);
-            expect($this->wrestler->titleChampionships()->count())->toBe(1);
+            expect($this->title->championships()->count())->toBe(1)
+                ->and($this->wrestler->titleChampionships()->count())->toBe(1);
 
             // Verify relationships are not loaded
             expect($this->title->relationLoaded('championships'))->toBeFalse();
@@ -434,9 +434,9 @@ describe('TitleChampionship Model', function () {
             // Load championships with polymorphic relations
             $championships = TitleChampionship::with('champion')->get();
 
-            expect($championships)->toHaveCount(2);
-            expect($championships->first()->champion)->toBeInstanceOf(Wrestler::class);
-            expect($championships->last()->champion)->toBeInstanceOf(TagTeam::class);
+            expect($championships)->toHaveCount(2)
+                ->and($championships->firstOrFail()->champion)->toBeInstanceOf(Wrestler::class)
+                ->and($championships->reverse()->firstOrFail()->champion)->toBeInstanceOf(TagTeam::class);
         });
     });
 
@@ -451,17 +451,17 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Verify wrestler is champion
-            expect($this->wrestler->fresh()->titleChampionships)->toHaveCount(1);
-            expect($this->title->fresh()->currentChampionship)->not()->toBeNull();
+            expect(freshModel($this->wrestler)->titleChampionships)->toHaveCount(1);
+            expect(freshModel($this->title)->currentChampionship)->not()->toBeNull();
 
             // Retire wrestler
-            WrestlerRetireAction::run($this->wrestler, Carbon::now());
+            resolve(WrestlerRetireAction::class)->handle($this->wrestler, Carbon::now());
 
             // Business rule: Champion retirement should vacate title
-            $refreshedWrestler = $this->wrestler->fresh();
-            $refreshedTitle = $this->title->fresh();
+            $refreshedWrestler = freshModel($this->wrestler);
+            $refreshedTitle = freshModel($this->title);
 
-            expect($refreshedWrestler->isRetired())->toBeTrue();
+            expect($refreshedWrestler->currentRetirement()->exists())->toBeTrue();
 
             // Championship should be ended when wrestler retires
             $championship->refresh();
@@ -481,12 +481,12 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Injure wrestler
-            InjureAction::run($this->wrestler, Carbon::now());
+            resolve(InjureAction::class)->handle($this->wrestler, Carbon::now());
 
-            $refreshedWrestler = $this->wrestler->fresh();
+            $refreshedWrestler = freshModel($this->wrestler);
 
-            expect($refreshedWrestler->isInjured())->toBeTrue();
-            expect($refreshedWrestler->isBookable())->toBeFalse();
+            expect($refreshedWrestler->currentInjury()->exists())->toBeTrue()
+                ->and(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Injured champion may keep title or be stripped depending on promotion rules
             // For this test, assume they keep the title but can't defend it
@@ -503,12 +503,12 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Release wrestler from employment
-            ReleaseAction::run($this->wrestler, Carbon::now());
+            resolve(ReleaseAction::class)->handle($this->wrestler, Carbon::now());
 
-            $refreshedWrestler = $this->wrestler->fresh();
+            $refreshedWrestler = freshModel($this->wrestler);
 
-            expect($refreshedWrestler->isReleased())->toBeTrue();
-            expect($refreshedWrestler->isBookable())->toBeFalse();
+            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Released)
+                ->and(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Released wrestler should be stripped of championship
             $championship->refresh();
@@ -525,18 +525,18 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Retire title
-            RetireAction::run($this->title, Carbon::now());
+            resolve(RetireAction::class)->handle($this->title, Carbon::now());
 
-            $refreshedTitle = $this->title->fresh();
+            $refreshedTitle = freshModel($this->title);
 
-            expect($refreshedTitle->isRetired())->toBeTrue();
+            expect($refreshedTitle->currentRetirement()->exists())->toBeTrue();
 
             // Championship should end when title is retired
             $championship->refresh();
             expect($championship->lost_at)->not()->toBeNull();
 
             // Wrestler should no longer have current championships for this title
-            $refreshedWrestler = $this->wrestler->fresh();
+            $refreshedWrestler = freshModel($this->wrestler);
             expect($refreshedWrestler->titleChampionships()->where('title_id', $this->title->id)->whereNull('lost_at')->count())->toBe(0);
         });
 
@@ -566,7 +566,7 @@ describe('TitleChampionship Model', function () {
             $unificationDate = Carbon::now();
 
             // End champion2's reign
-            $title2->currentChampionship->update(['lost_at' => $unificationDate]);
+            $title2->currentChampionship()->firstOrFail()->update(['lost_at' => $unificationDate]);
 
             // Champion1 wins the second title
             TitleChampionship::factory()
@@ -578,8 +578,8 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Verify unification
-            expect($champion1->fresh()->titleChampionships()->whereNull('lost_at')->count())->toBe(2);
-            expect($title2->fresh()->currentChampionship->champion->id)->toBe($champion1->id);
+            expect(freshModel($champion1)->titleChampionships()->whereNull('lost_at')->count())->toBe(2);
+            expect(freshModel($title2)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($champion1->id);
         });
     });
 
@@ -588,18 +588,18 @@ describe('TitleChampionship Model', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Never Champion']);
 
             // Verify proper handling of wrestler with no championships
-            expect($wrestler->titleChampionships)->toHaveCount(0);
-            expect($wrestler->titleChampionships()->whereNull('lost_at')->count())->toBe(0);
-            expect($wrestler->titleChampionships()->count())->toBe(0);
+            expect($wrestler->titleChampionships)->toBeEmpty();
+            expect($wrestler->titleChampionships()->whereNull('lost_at')->count())->toBe(0)
+                ->and($wrestler->titleChampionships()->count())->toBe(0);
         });
 
         test('handles title with no championship history', function () {
             $title = Title::factory()->active()->create(['name' => 'Never Held Title']);
 
             // Verify proper handling of title with no championships
-            expect($title->championships)->toHaveCount(0);
-            expect($title->currentChampionship)->toBeNull();
-            expect($title->championships()->count())->toBe(0);
+            expect($title->championships)->toBeEmpty();
+            expect($title->currentChampionship)->toBeNull()
+                ->and($title->championships()->count())->toBe(0);
         });
 
         test('handles championship reign ending in the past without replacement', function () {
@@ -616,11 +616,11 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Title should be vacant
-            expect($title->fresh()->currentChampionship)->toBeNull();
+            expect(freshModel($title)->currentChampionship)->toBeNull();
 
             // Verify championship history exists
             expect($title->championships)->toHaveCount(1);
-            expect($title->championships->first()->lost_at)->not()->toBeNull();
+            expect($title->championships->firstOrFail()->lost_at)->not()->toBeNull();
         });
 
         test('handles championship on exact same timestamp', function () {
@@ -648,8 +648,8 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Verify proper handling of exact timestamps
-            expect($title->fresh()->currentChampionship->champion->id)->toBe($wrestler2->id);
-            expect($championship1->fresh()->lost_at->eq($championship2->fresh()->won_at))->toBeTrue();
+            expect(freshModel($title)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($wrestler2->id);
+            expect(requiredDate(freshModel($championship1)->lost_at)->eq(freshModel($championship2)->won_at))->toBeTrue();
         });
 
         test('handles extremely long championship reigns', function () {
@@ -670,8 +670,8 @@ describe('TitleChampionship Model', function () {
             expect($reignLength)->toBeGreaterThan(3650); // More than 10 years
 
             // Verify current championship is still valid
-            expect($title->fresh()->currentChampionship)->not()->toBeNull();
-            expect($title->currentChampionship->champion->id)->toBe($wrestler->id);
+            expect(freshModel($title)->currentChampionship)->not()->toBeNull();
+            expect($title->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($wrestler->id);
         });
     });
 });

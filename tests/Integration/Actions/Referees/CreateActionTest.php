@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\CreateAction;
 use App\Data\Referees\RefereeData;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -19,11 +19,11 @@ test('it creates a referee with basic information', function () {
         employment_date: null
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Referee::class);
-    expect($result->first_name)->toBe('Earl');
-    expect($result->last_name)->toBe('Hebner');
+    expect($result)->toBeInstanceOf(Referee::class)
+        ->and($result->first_name)->toBe('Earl')
+        ->and($result->last_name)->toBe('Hebner');
 
     $this->assertDatabaseHas('referees', [
         'first_name' => 'Earl',
@@ -31,8 +31,8 @@ test('it creates a referee with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -45,11 +45,11 @@ test('it creates a referee with employment when employment date is provided', fu
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result->first_name)->toBe('Mike');
-    expect($result->last_name)->toBe('Chioda');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->first_name)->toBe('Mike')
+        ->and($result->last_name)->toBe('Chioda')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('referees', [
         'first_name' => 'Mike',
@@ -57,8 +57,8 @@ test('it creates a referee with employment when employment date is provided', fu
     ]);
 
     // Should create employment record using EmployAction
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -73,11 +73,11 @@ test('it creates referee with proper database transactions', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Referee::class);
-    expect($result->first_name)->toBe('Charles');
-    expect($result->last_name)->toBe('Robinson');
+    expect($result)->toBeInstanceOf(Referee::class)
+        ->and($result->first_name)->toBe('Charles')
+        ->and($result->last_name)->toBe('Robinson');
 
     // Verify database state is consistent
     $this->assertDatabaseHas('referees', [
@@ -86,8 +86,8 @@ test('it creates referee with proper database transactions', function () {
         'last_name' => 'Robinson',
     ]);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -102,13 +102,13 @@ test('it handles employment creation through EmployAction dependency injection',
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     // Verify the referee was created and employed using the correct architectural pattern
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
     expect($result->currentEmployment()->exists())->toBeTrue();
 
-    $employment = $result->currentEmployment()->first();
-    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
-    expect($employment->ended_at)->toBeNull();
+    $employment = $result->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull();
 });

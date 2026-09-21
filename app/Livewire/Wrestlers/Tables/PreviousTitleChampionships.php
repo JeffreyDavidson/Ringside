@@ -4,49 +4,44 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Wrestler to use for component.
      */
-    public ?int $wrestlerId;
+    #[Locked]
+    public ?int $wrestlerId = null;
 
+    #[\Override]
     public string $databaseTableName = 'titles_championships';
 
+    #[\Override]
     protected string $resourceName = 'title championships';
 
-    /**
-     * @return Builder<TitleChampionship>
-     */
-    public function builder(): Builder
+    /** @return TitleChampionshipBuilder<TitleChampionship> */
+    public function builder(): TitleChampionshipBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
-        }
-
-        // dd(TitleChampionship::query()
-        //     ->whereHasMorph(
-        //         'previousChampion',
-        //         [Wrestler::class],
-        //         function (Builder $query) {
-        //             $query->whereIn('id', [$this->wrestlerId]);
-        //         }
-        //     )->get());
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return TitleChampionship::query()
-            ->whereHasMorph(
-                'champion',
-                [Wrestler::class],
-                function (Builder $query): void {
-                    $query->whereIn('id', [$this->wrestlerId]);
-                }
-            )
-            ->whereNotNull('lost_at');
+            ->forWrestlerId($wrestlerId)
+            ->forPreviousHistory();
+    }
+
+    #[\Override]
+    protected function configure(): void
+    {
+        parent::configure();
+
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+
+        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
     }
 }

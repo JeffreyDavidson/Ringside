@@ -4,59 +4,51 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Models\Managers\Manager;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
+    ) {}
 
     /**
      * Unretire a retired manager and return them to active talent management.
      *
      * This handles the complete manager unretirement workflow:
-     * - Uses StatusTransitionPipeline for consistent unretirement handling
      * - Validates the manager can be unretired (currently retired)
-     * - Ends the current retirement period with the specified date
-     * - Creates a new employment record starting from the unretirement date
-     * - Restores the manager to available status for wrestler and tag team assignments
+     * - Ends the current retirement period through RetirementPeriodManager
+     * - Optionally starts a new employment period from the unretirement date
      * - Preserves all historical retirement and employment records
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     * @param  bool  $employImmediately  Whether to employ the manager immediately
+     *
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire manager immediately
-     * UnretireAction::run($manager);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
-    public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
+    public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void
     {
-        $manager->ensureCanBeUnretired();
+        $effectiveDate = $unretiredDate ?? now();
 
-        $unretiredDate = DateHelper::resolveDate($unretiredDate);
+        DB::transaction(function () use ($manager, $effectiveDate, $employImmediately): void {
+            $lockedManager = $manager->refreshForUpdate();
 
-        // Use StatusTransitionPipeline for consistent unretirement handling
-        StatusTransitionPipeline::unretire($manager, $unretiredDate)->execute();
+            $this->eligibility->ensureCanUnretire($lockedManager);
+            $this->retirementPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::Unretired);
 
-        // Restart employment from the unretirement date so the manager is
-        // available for wrestler/tag team assignments again.
-        $manager->employments()->create([
-            'started_at' => $unretiredDate,
-            'ended_at' => null,
-        ]);
+            if ($employImmediately) {
+                $this->employmentPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Employed);
+            }
+        });
     }
 }

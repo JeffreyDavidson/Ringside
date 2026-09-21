@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\CreateAction;
 use App\Data\Managers\ManagerData;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -15,11 +15,11 @@ beforeEach(function () {
 test('it creates a manager with basic information', function () {
     $data = new ManagerData('Taylor', 'Otwell', null);
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('Taylor');
-    expect($result->last_name)->toBe('Otwell');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('Taylor')
+        ->and($result->last_name)->toBe('Otwell');
 
     $this->assertDatabaseHas('managers', [
         'first_name' => 'Taylor',
@@ -27,8 +27,8 @@ test('it creates a manager with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -36,11 +36,11 @@ test('it creates a manager with employment when employment date is provided', fu
     $employmentDate = now();
     $data = new ManagerData('Jeffrey', 'Davidson', $employmentDate);
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('Jeffrey');
-    expect($result->last_name)->toBe('Davidson');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('Jeffrey')
+        ->and($result->last_name)->toBe('Davidson');
 
     $this->assertDatabaseHas('managers', [
         'first_name' => 'Jeffrey',
@@ -48,14 +48,14 @@ test('it creates a manager with employment when employment date is provided', fu
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Manager should be marked as employed
-    expect($result->fresh()->isEmployed())->toBeTrue();
+    expect($result->refresh()->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it creates manager with all optional fields', function () {
@@ -66,11 +66,11 @@ test('it creates manager with all optional fields', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::run($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('John');
-    expect($result->last_name)->toBe('Doe');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('John')
+        ->and($result->last_name)->toBe('Doe');
 
     // Verify database state
     $this->assertDatabaseHas('managers', [
@@ -79,8 +79,8 @@ test('it creates manager with all optional fields', function () {
         'last_name' => 'Doe',
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

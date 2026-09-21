@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\InjureAction;
-use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -15,16 +15,17 @@ beforeEach(function () {
 test('it injures an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isInjured())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeFalse();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -34,29 +35,31 @@ test('it injures referee with specific injury date', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(3);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
     $referee->refresh();
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(7);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
     $referee->refresh();
 
-    // DateHelper should have processed the injury date
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    // The provided injury date should be persisted
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -66,33 +69,47 @@ test('it validates referee can be injured', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be injured', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
-    expect(fn () => InjureAction::run($referee))
+    expect(fn () => resolve(InjureAction::class)->handle($referee))
         ->toThrow(CannotBeInjuredException::class);
+});
+
+test('it prevents injuring a suspended referee', function () {
+    $referee = Referee::factory()->suspended()->create();
+
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(InjureAction::class)->handle($referee))->toThrow(CannotBeInjuredException::class);
+
+    $referee->refresh();
+
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeFalse()
+        ->and($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it maintains transaction boundaries', function () {
     $referee = Referee::factory()->employed()->create();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
 
     // Injury creation should be atomic
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -100,31 +117,32 @@ test('it maintains transaction boundaries', function () {
 
 test('it maintains referee employment after injury', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
     // Should remain employed after injury
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isInjured())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it creates injury record with correct structure', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(2);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
-    $injury = $referee->fresh()->currentInjury;
+    $injury = freshModel($referee)->currentInjury()->firstOrFail();
 
-    expect($injury)->not->toBeNull();
-    expect($injury->referee_id)->toBe($referee->id);
-    expect($injury->started_at->toDateTimeString())->toBe($injuryDate->toDateTimeString());
-    expect($injury->ended_at)->toBeNull();
+    expect($injury)->not->toBeNull()
+        ->and($injury->injurable_id)->toBe($referee->id)
+        ->and($injury->injurable_type)->toBe($referee->getMorphClass())
+        ->and(requiredDate($injury->started_at)->toDateTimeString())->toBe($injuryDate->toDateTimeString())
+        ->and($injury->ended_at)->toBeNull();
 });

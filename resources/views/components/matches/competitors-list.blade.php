@@ -7,10 +7,7 @@
             $resource = str($competitor->getTable())->replace('_', '-')->value();
         @endphp
 
-        <x-route-link
-            :route="route($resource.'.show', $competitor)"
-            label="{{ $competitor->name }}"
-        />
+        <x-route-link :route="route($resource.'.show', $competitor)" label="{{ $competitor->name }}" />
 
         @if (! $loop->last)
             @php echo " & " @endphp

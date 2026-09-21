@@ -4,63 +4,52 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Actions\Concerns\WrestlerUnretirementCascadeStrategy;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Models\Wrestlers\Wrestler;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
+        private readonly EmployAction $employ,
+    ) {}
 
     /**
      * Unretire a wrestler and return them to active competition.
      *
      * This handles the complete wrestler comeback workflow with flexible employment options:
      * - Validates the wrestler can come out of retirement (business rule compliance)
-     * - Uses StatusTransitionPipeline to end the current retirement period
-     * - Updates status to unemployed (no longer retired, but not employed)
+     * - Ends the current retirement period through RetirementPeriodManager
      * - Optionally employs the wrestler immediately or leaves unemployed for manual employment
      * - Restores the wrestler to available status for match bookings
      * - Makes the wrestler available for new career opportunities
      * - Preserves all historical retirement records
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status transition handling and
-     * EmployAction for employment when requested.
-     *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
      * @param  bool  $employImmediately  Whether to employ the wrestler immediately (default: true)
+     *
      * @throws CannotBeUnretiredException When wrestler cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire wrestler and employ immediately
-     * UnretireAction::run($wrestler);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($wrestler, Carbon::parse('2024-01-15'));
-     *
-     * // Unretire without employing immediately (manual employment later)
-     * UnretireAction::run($wrestler, employImmediately: false);
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
     {
-        $wrestler->ensureCanBeUnretired();
+        $effectiveDate = $unretirementDate ?? now();
 
-        $unretirementDate = DateHelper::resolveDate($unretirementDate);
+        DB::transaction(function () use ($wrestler, $effectiveDate, $employImmediately): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
-        $cascade = $employImmediately
-            ? WrestlerUnretirementCascadeStrategy::withEmployment()
-            : WrestlerUnretirementCascadeStrategy::withoutEmployment();
+            $this->eligibility->ensureCanUnretire($lockedWrestler);
+            $this->retirementPeriods->end($lockedWrestler, $effectiveDate, LifecycleTransitionType::Unretired);
 
-        StatusTransitionPipeline::unretire($wrestler, $unretirementDate)
-            ->withCascade($cascade)
-            ->execute();
+            if ($employImmediately) {
+                $this->employ->handle($lockedWrestler, $effectiveDate);
+            }
+        });
     }
 }

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Roster\CannotBeReinstatedException;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Reinstate a suspended referee.
@@ -26,25 +30,18 @@ class ReinstateAction
      *
      * @param  Referee  $referee  The referee to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     *
      * @throws CannotBeReinstatedException When referee cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate referee immediately
-     * ReinstateAction::run($referee);
-     *
-     * // Reinstate with specific date
-     * ReinstateAction::run($referee, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
-        $referee->ensureCanBeReinstated();
+        $effectiveDate = $reinstatementDate ?? now();
 
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
 
-        DB::transaction(function () use ($referee, $reinstatementDate): void {
-            $referee->currentSuspension()->first()?->update(['ended_at' => $reinstatementDate]);
+            $this->eligibility->ensureCanReinstate($lockedReferee);
+            $this->suspensionPeriods->end($lockedReferee, $effectiveDate, LifecycleTransitionType::Reinstated);
         });
     }
 }

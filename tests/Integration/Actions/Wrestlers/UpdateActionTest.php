@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -32,14 +32,14 @@ test('it updates wrestler basic information', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
-    expect($result)->toBeInstanceOf(Wrestler::class);
-    expect($result->name)->toBe('Updated Name');
-    expect($result->height->toInches())->toBe(75);
-    expect($result->weight)->toBe(250);
-    expect($result->hometown)->toBe('Updated Town');
-    expect($result->signature_move)->toBe('Updated Move');
+    expect($result)->toBeInstanceOf(Wrestler::class)
+        ->and($result->name)->toBe('Updated Name')
+        ->and($result->height->toInches())->toBe(75)
+        ->and($result->weight->toPounds())->toBe(250)
+        ->and($result->hometown)->toBe('Updated Town')
+        ->and($result->signature_move)->toBe('Updated Move');
 
     $this->assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
@@ -51,11 +51,41 @@ test('it updates wrestler basic information', function () {
     ]);
 });
 
+test('it updates using the current persisted wrestler state', function () {
+    $wrestler = Wrestler::factory()->create([
+        'name' => 'Original Name',
+        'height' => 70,
+        'weight' => 200,
+    ]);
+    $staleWrestler = $wrestler->replicate(['id']);
+    $staleWrestler->id = $wrestler->id;
+    $staleWrestler->exists = true;
+
+    $updatedWrestler = resolve(UpdateAction::class)->handle(
+        $staleWrestler,
+        new WrestlerData(
+            name: 'Updated From Stale State',
+            height: 75,
+            weight: 250,
+            hometown: $wrestler->hometown,
+            signature_move: $wrestler->signature_move,
+            employment_date: null,
+            managers: null,
+        ),
+    );
+    $persistedWrestler = Wrestler::query()
+        ->whereKey($wrestler->getKey())
+        ->firstOrFail();
+
+    expect($updatedWrestler->getKey())->toBe($wrestler->getKey())
+        ->and($persistedWrestler->name)->toBe('Updated From Stale State');
+});
+
 test('it updates wrestler and employs them when employment date provided', function () {
     $wrestler = Wrestler::factory()->create();
     $employmentDate = now();
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new WrestlerData(
         name: 'John Cena',
@@ -67,15 +97,15 @@ test('it updates wrestler and employs them when employment date provided', funct
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
-    expect($result->name)->toBe('John Cena');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->name)->toBe('John Cena')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created via EmployAction
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -84,7 +114,7 @@ test('it updates wrestler and employs them when employment date provided', funct
 test('it updates wrestler without employing when no employment date', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new WrestlerData(
         name: 'The Rock',
@@ -96,23 +126,23 @@ test('it updates wrestler without employing when no employment date', function (
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
-    expect($result->name)->toBe('The Rock');
-    expect($result->isEmployed())->toBeFalse();
+    expect($result->name)->toBe('The Rock')
+        ->and($result->currentEmployment()->exists())->toBeFalse();
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $wrestler->id,
     ]);
 });
 
 test('it does not re-employ already employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    $originalEmployment = $wrestler->currentEmployment;
+    $originalEmployment = $wrestler->currentEmployment()->firstOrFail();
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $updateData = new WrestlerData(
         name: 'Updated Name',
@@ -124,15 +154,15 @@ test('it does not re-employ already employed wrestler', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
-    expect($result->name)->toBe('Updated Name');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->name)->toBe('Updated Name')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     // Should still have only the original employment record
     expect($result->employments()->count())->toBe(1);
-    expect($result->currentEmployment->id)->toBe($originalEmployment->id);
+    expect($result->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
 });
 
 test('it employs managers when wrestler gets employed', function () {
@@ -144,9 +174,9 @@ test('it employs managers when wrestler gets employed', function () {
     $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(5)]);
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(3)]);
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($manager1->isEmployed())->toBeFalse();
-    expect($manager2->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($manager1->currentEmployment()->exists())->toBeFalse()
+        ->and($manager2->currentEmployment()->exists())->toBeTrue();
 
     $employmentDate = now();
     $updateData = new WrestlerData(
@@ -159,31 +189,31 @@ test('it employs managers when wrestler gets employed', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     $manager1->refresh();
     $manager2->refresh();
 
-    expect($result->isEmployed())->toBeTrue();
-    expect($manager1->isEmployed())->toBeTrue(); // Should now be employed via cascade
-    expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
+    expect($result->currentEmployment()->exists())->toBeTrue()
+        ->and($manager1->currentEmployment()->exists())->toBeTrue(); // Should now be employed via cascade
+    expect($manager2->currentEmployment()->exists())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager1->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager1->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
 
-test('it handles DateHelper date resolution for employment', function () {
+test('it uses the provided employment date', function () {
     $wrestler = Wrestler::factory()->create();
 
     $updateData = new WrestlerData(
@@ -196,14 +226,14 @@ test('it handles DateHelper date resolution for employment', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
-    // DateHelper should have processed the employment date
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    // The provided employment date should be persisted
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -223,7 +253,7 @@ test('it maintains transaction boundaries', function () {
     );
 
     // Simulate transaction - all changes should be atomic
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
 
@@ -233,8 +263,8 @@ test('it maintains transaction boundaries', function () {
         'name' => 'Transaction Test',
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 });
@@ -252,13 +282,13 @@ test('it returns updated wrestler instance', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
-    expect($result)->toBeInstanceOf(Wrestler::class);
-    expect($result->id)->toBe($wrestler->id);
-    expect($result->name)->toBe('Return Test');
-    expect($result->height->toInches())->toBe(76);
-    expect($result->weight)->toBe(240);
+    expect($result)->toBeInstanceOf(Wrestler::class)
+        ->and($result->id)->toBe($wrestler->id)
+        ->and($result->name)->toBe('Return Test')
+        ->and($result->height->toInches())->toBe(76)
+        ->and($result->weight->toPounds())->toBe(240);
 });
 
 test('it handles height conversion correctly', function () {
@@ -274,11 +304,11 @@ test('it handles height conversion correctly', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
-    expect($result->height->feet)->toBe(5);
-    expect($result->height->inches)->toBe(11);
-    expect($result->height->toInches())->toBe(71);
+    expect($result->height->feet)->toBe(5)
+        ->and($result->height->inches)->toBe(11)
+        ->and($result->height->toInches())->toBe(71);
 });
 
 test('it preserves wrestler id and timestamps', function () {
@@ -296,11 +326,11 @@ test('it preserves wrestler id and timestamps', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
-    expect($result->id)->toBe($originalId);
-    expect($result->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
-    expect($result->updated_at->timestamp)->toBeGreaterThanOrEqual($originalCreatedAt->timestamp);
+    expect($result->id)->toBe($originalId)
+        ->and(requiredDate($result->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp)
+        ->and(requiredDate($result->updated_at)->timestamp)->toBeGreaterThanOrEqual(requiredDate($originalCreatedAt)->timestamp);
 });
 
 test('it handles null signature move', function () {
@@ -316,7 +346,7 @@ test('it handles null signature move', function () {
         managers: null
     );
 
-    $result = UpdateAction::run($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result->signature_move)->toBeNull();
 

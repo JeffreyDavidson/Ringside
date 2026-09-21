@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-
-uses(DatabaseMigrations::class);
 
 test('login screen displays correctly', function () {
     $page = visit(route('login'));
@@ -83,7 +80,7 @@ test('login form keyboard navigation works', function () {
         ->assertScript('document.activeElement.getAttribute("data-test") === "password"');
 });
 
-test('remember me functionality works if present', function () {
+test('remember me can be selected during login', function (): void {
     // Create administrator user for testing
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
@@ -93,16 +90,11 @@ test('remember me functionality works if present', function () {
     $page = visit(route('login'));
 
     $page->type('@email', $admin->email)
-        ->type('@password', 'password');
-
-    // Check if remember me checkbox exists and check it
-    try {
-        $page->check('@remember');
-    } catch (Exception $e) {
-        // Checkbox might not be present, skip
-    }
-
-    $page->press('@sign-in')
+        ->type('@password', 'password')
+        ->assertPresent('@remember')
+        ->check('@remember')
+        ->assertChecked('@remember')
+        ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
         ->assertSee('Dashboard');
 });
@@ -141,7 +133,9 @@ test('user can logout successfully', function () {
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
         ->assertSee('Dashboard')
+        ->click('@profile-menu')
         ->press('Log out')
+        ->assertScript('window.location.pathname === "/login"')
         ->assertSee('Sign in');
 
     // Verify we can't access protected pages

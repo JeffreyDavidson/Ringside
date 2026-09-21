@@ -3,265 +3,230 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousManagers;
-use App\Models\Managers\Manager;
-use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerManager;
-use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
-beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-    $this->wrestler = Wrestler::factory()->create([
-        'name' => 'Test Wrestler',
-    ]);
-
-    $this->manager = Manager::factory()->create([
-        'first_name' => 'Test',
-        'last_name' => 'Manager',
-    ]);
+beforeEach(function (): void {
+    actingAs(administrator());
 });
 
-describe('Previous Managers Table Component', function () {
-    it('can mount with wrestler ID', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+describe('wrestler previous managers table', function (): void {
+    it('requires a wrestler', function (): void {
+        expect(fn () => (new PreviousManagers)->builder())
+            ->toThrow(LogicException::class, 'A wrestler was not provided.');
+    });
 
-        $table->assertOk();
-        $table->assertSet('wrestlerId', $this->wrestler->id);
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'rendering');
-
-    it('throws exception when wrestler ID not specified', function () {
-        expect(function () {
-            Livewire::test(PreviousManagers::class);
-        })->toThrow(Exception::class, "You didn't specify a wrestler");
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
-
-    it('displays only previous managers with fired dates', function () {
-        // Create current manager relationship (no fired_at)
+    it('returns only ended manager assignments for the requested wrestler in newest-first order', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $otherWrestler = Wrestler::factory()->create();
+        $recentManager = Manager::factory()->create();
+        $olderManager = Manager::factory()->create();
         $currentManager = Manager::factory()->create();
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
+        $otherManager = Manager::factory()->create();
+
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $olderManager->id,
+            'hired_at' => Date::now()->subMonths(3),
+            'fired_at' => Date::now()->subMonths(2),
+        ]);
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $recentManager->id,
+            'hired_at' => Date::now()->subMonth(),
+            'fired_at' => Date::now()->subWeek(),
+        ]);
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
             'manager_id' => $currentManager->id,
-            'hired_at' => Carbon::now()->subDays(10),
+            'hired_at' => Date::now()->subDays(3),
+            'fired_at' => null,
+        ]);
+        WrestlerManager::query()->create([
+            'wrestler_id' => $otherWrestler->id,
+            'manager_id' => $otherManager->id,
+            'hired_at' => Date::now()->subDays(2),
+            'fired_at' => Date::now()->subDay(),
+        ]);
+
+        $table = new PreviousManagers;
+        $table->wrestlerId = $wrestler->id;
+
+        // Act
+        $assignments = $table->builder()->get();
+
+        // Assert
+        expect($assignments->pluck('manager_id')->all())->toBe([
+            $recentManager->id,
+            $olderManager->id,
+        ])->and($assignments->every->relationLoaded('manager'))->toBeTrue();
+    });
+
+    it('renders previous manager names and assignment dates', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $previousManager = Manager::factory()->create([
+            'first_name' => 'Previous',
+            'last_name' => 'Manager',
+        ]);
+        $currentManager = Manager::factory()->create([
+            'first_name' => 'Current',
+            'last_name' => 'Manager',
+        ]);
+        $hiredAt = Date::now()->subMonth();
+        $firedAt = Date::now()->subWeek();
+
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $previousManager->id,
+            'hired_at' => $hiredAt,
+            'fired_at' => $firedAt,
+        ]);
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $currentManager->id,
+            'hired_at' => Date::now()->subDay(),
             'fired_at' => null,
         ]);
 
-        // Create previous manager relationship (with fired_at)
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(30),
-            'fired_at' => Carbon::now()->subDays(5),
+        // Act
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('Previous Manager')
+            ->assertSee($hiredAt->format('Y-m-d'))
+            ->assertSee($firedAt->format('Y-m-d'))
+            ->assertDontSee('Current Manager');
+    });
+
+    it('searches previous managers by name', function (string $search, string $visibleManager, string $hiddenManager): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $historicManager = Manager::factory()->create([
+            'first_name' => 'Historic',
+            'last_name' => 'Manager',
+        ]);
+        $formerManager = Manager::factory()->create([
+            'first_name' => 'Former',
+            'last_name' => 'Advisor',
+        ]);
+        foreach ([$historicManager, $formerManager] as $offset => $manager) {
+            WrestlerManager::query()->create([
+                'wrestler_id' => $wrestler->id,
+                'manager_id' => $manager->id,
+                'hired_at' => Date::now()->subMonths($offset + 3),
+                'fired_at' => Date::now()->subMonths($offset + 1),
+            ]);
+        }
+
+        // Act
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id]);
+        $component->set('search', $search);
+
+        // Assert
+        $component
+            ->assertSee($visibleManager)
+            ->assertDontSee($hiddenManager);
+    })->with([
+        'first name' => ['Historic', 'Historic Manager', 'Former Advisor'],
+        'last name' => ['Advisor', 'Former Advisor', 'Historic Manager'],
+        'full name' => ['Historic Manager', 'Historic Manager', 'Former Advisor'],
+    ]);
+
+    it('keeps separate historical assignments for a returning manager', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $manager = Manager::factory()->create();
+
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $manager->id,
+            'hired_at' => Date::now()->subMonths(4),
+            'fired_at' => Date::now()->subMonths(3),
+        ]);
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $manager->id,
+            'hired_at' => Date::now()->subMonths(2),
+            'fired_at' => Date::now()->subMonth(),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = new PreviousManagers;
+        $table->wrestlerId = $wrestler->id;
 
-        $table->assertSee($this->manager->full_name); // Should see the fired manager
-        $table->assertDontSee($currentManager->full_name); // Should not see the current manager
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'status');
+        // Act
+        $assignments = $table->builder()->get();
 
-    it('orders previous managers by hired date descending', function () {
-        $manager1 = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'One']);
-        $manager2 = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'Two']);
-        $manager3 = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'Three']);
+        // Assert
+        expect($assignments)->toHaveCount(2)
+            ->and($assignments->pluck('manager_id')->all())->toBe([
+                $manager->id,
+                $manager->id,
+            ]);
+    });
 
-        // Create manager relationships in non-chronological order
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $manager1->id,
-            'hired_at' => Carbon::now()->subDays(10),
-            'fired_at' => Carbon::now()->subDays(5),
+    it('omits deleted managers', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $manager = Manager::factory()->create();
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $manager->id,
+            'hired_at' => Date::now()->subMonth(),
+            'fired_at' => Date::now()->subWeek(),
         ]);
+        $manager->delete();
 
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $manager3->id,
-            'hired_at' => Carbon::now()->subDays(30),
-            'fired_at' => Carbon::now()->subDays(25),
-        ]);
+        $table = new PreviousManagers;
+        $table->wrestlerId = $wrestler->id;
 
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $manager2->id,
-            'hired_at' => Carbon::now()->subDays(20),
-            'fired_at' => Carbon::now()->subDays(15),
-        ]);
+        // Act
+        $assignments = $table->builder()->get();
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        // Assert
+        expect($assignments)->toBeEmpty();
+    });
 
-        // Should be ordered by hired_at descending (most recent first)
-        $table->assertSee($manager1->full_name) // hired 10 days ago
-            ->assertSee($manager2->full_name) // hired 20 days ago
-            ->assertSee($manager3->full_name); // hired 30 days ago
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'status', 'ordering');
+    it('defines the manager history table configuration', function (): void {
+        // Arrange
+        $table = new PreviousManagers;
 
-    it('shows only managers for specified wrestler', function () {
-        $otherWrestler = Wrestler::factory()->create();
-        $otherManager = Manager::factory()->create();
+        // Act
+        $fields = collect($table->columns())
+            ->map->getField()
+            ->all();
 
-        // Create manager relationship for other wrestler
-        WrestlerManager::create([
-            'wrestler_id' => $otherWrestler->id,
-            'manager_id' => $otherManager->id,
-            'hired_at' => Carbon::now()->subDays(10),
-            'fired_at' => Carbon::now()->subDays(5),
-        ]);
+        // Assert
+        expect($table->databaseTableName)->toBe('wrestlers_managers')
+            ->and($fields)->toBe([
+                'manager.full_name',
+                'hired_at',
+                'fired_at',
+            ]);
+    });
 
-        // Create manager relationship for our wrestler
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(15),
-            'fired_at' => Carbon::now()->subDays(8),
-        ]);
+    it('forbids users without access to the wrestler', function (string $actor): void {
+        $wrestler = Wrestler::factory()->create();
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
 
-        $table->assertSee($this->manager->full_name);
-        $table->assertDontSee($otherManager->full_name);
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'relationships');
-
-    it('handles empty previous managers list', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        $table->assertOk();
-        $table->assertSee('No records found.');
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'rendering');
-});
-
-describe('Previous Managers Table Configuration', function () {
-    it('configures additional selects correctly', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        $table->assertOk();
-        // The table should be configured with additional selects for manager_id
-        expect($table->instance()->databaseTableName)->toBe('wrestlers_managers');
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
-
-    it('uses correct database table name', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        expect($table->instance()->databaseTableName)->toBe('wrestlers_managers');
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
-});
-
-describe('Previous Managers Table Filtering', function () {
-    it('filters managers by employment period', function () {
-        $recentManager = Manager::factory()->create(['first_name' => 'Recent', 'last_name' => 'Manager']);
-        $oldManager = Manager::factory()->create(['first_name' => 'Old', 'last_name' => 'Manager']);
-
-        // Recent manager relationship
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $recentManager->id,
-            'hired_at' => Carbon::now()->subDays(5),
-            'fired_at' => Carbon::now()->subDays(1),
-        ]);
-
-        // Old manager relationship
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $oldManager->id,
-            'hired_at' => Carbon::now()->subDays(100),
-            'fired_at' => Carbon::now()->subDays(90),
-        ]);
-
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        $table->assertSee($recentManager->full_name)
-            ->assertSee($oldManager->full_name);
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'filters', 'status');
-
-    it('shows manager hire and fire dates', function () {
-        $hiredDate = Carbon::now()->subDays(20);
-        $firedDate = Carbon::now()->subDays(5);
-
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => $hiredDate,
-            'fired_at' => $firedDate,
-        ]);
-
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        $table->assertSee($this->manager->full_name);
-        // The table should show the employment period dates
-        $table->assertSee($hiredDate->format('Y-m-d'));
-        $table->assertSee($firedDate->format('Y-m-d'));
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'status', 'periods');
-});
-
-describe('Previous Managers Table Business Logic', function () {
-    it('handles multiple employment periods for same manager', function () {
-        // First employment period
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(50),
-            'fired_at' => Carbon::now()->subDays(40),
-        ]);
-
-        // Second employment period
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(20),
-            'fired_at' => Carbon::now()->subDays(10),
-        ]);
-
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Should show both employment periods
-        $table->assertSee($this->manager->full_name);
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'business', 'periods');
-
-    it('validates wrestler manager relationship integrity', function () {
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(30),
-            'fired_at' => Carbon::now()->subDays(5),
-        ]);
-
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        $table->assertSee($this->manager->full_name);
-
-        // Just verify the component loads and displays data correctly
-        $table->assertOk();
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'business', 'relationships');
-
-    it('handles manager deletion gracefully', function () {
-        WrestlerManager::create([
-            'wrestler_id' => $this->wrestler->id,
-            'manager_id' => $this->manager->id,
-            'hired_at' => Carbon::now()->subDays(30),
-            'fired_at' => Carbon::now()->subDays(5),
-        ]);
-
-        // Delete the manager
-        $this->manager->delete();
-
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Should still work but not show the deleted manager
-        $table->assertOk();
-        $table->assertSee('No records found.');
-        expect(true)->toBeTrue();
-    })->group('wrestlers', 'integration', 'livewire', 'tables', 'business', 'deletion');
+        livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id])
+            ->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });

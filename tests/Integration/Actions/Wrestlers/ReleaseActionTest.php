@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReleaseAction;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,16 +14,16 @@ beforeEach(function () {
 test('it releases an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment record was ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -32,53 +32,52 @@ test('it releases wrestler with specific release date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $releaseDate = now()->subDays(2);
 
-    ReleaseAction::run($wrestler, $releaseDate);
+    resolve(ReleaseAction::class)->handle($wrestler, $releaseDate);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment was ended with specific date
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
 
-test('it uses StatusTransitionPipeline for release', function () {
+test('it persists the release lifecycle', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
-    // Verify employment ended through pipeline
+    // Verify employment period was ended
     expect($wrestler->currentEmployment)->toBeNull();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // Verify the specific employment record was updated
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    ReleaseAction::run($wrestler, null);
+    resolve(ReleaseAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -97,24 +96,24 @@ test('it handles multiple employment records correctly', function () {
         'ended_at' => null, // Current employment
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // Only the current employment should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(20)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old employment should remain unchanged
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
@@ -123,36 +122,34 @@ test('it handles multiple employment records correctly', function () {
 test('it prevents releasing non-employed wrestler', function () {
     $wrestler = Wrestler::factory()->create(); // Unemployed by default
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($wrestler))
+    expect(fn () => resolve(ReleaseAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
 test('it prevents releasing retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
-
-    expect(fn () => ReleaseAction::run($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReleaseAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it can release suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -165,17 +162,17 @@ test('it can release injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should no longer be employed
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -194,20 +191,20 @@ test('it maintains employment history integrity', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // All employment records should be preserved
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $firstEmployment->id,
         'ended_at' => now()->subDays(50)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

@@ -6,15 +6,10 @@ namespace App\Livewire\Concerns;
 
 trait ShowTableTrait
 {
-    public function configuringShowTableTrait(): void
+    public function mountShowTableTrait(): void
     {
-        $this->setPrimaryKey('id')
-            ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setPaginationEnabled()
+        $this->setSearchPlaceholder('Search '.$this->resourceName)
             ->addAdditionalSelects([$this->databaseTableName.'.id as id'])
-            ->setPerPageAccepted([5, 10, 25, 50, 100])
-            ->setLoadingPlaceholderContent('Loading')
-            ->setLoadingPlaceholderEnabled();
+            ->setPerPageAccepted([5, 10, 25, 50, 100]);
     }
 }

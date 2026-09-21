@@ -4,51 +4,44 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\CannotBeReinstatedException;
-use App\Models\Managers\Manager;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
-final class ReinstateAction
+final readonly class ReinstateAction
 {
-    use AsAction;
+    public function __construct(
+        private SuspensionPeriodManager $suspensionPeriods,
+        private IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Reinstate a suspended manager.
      *
      * This handles the complete manager reinstatement workflow:
-     * - Uses StatusTransitionPipeline for consistent reinstatement handling
      * - Validates the manager can be reinstated (currently suspended)
-     * - Ends the current suspension period with the specified date
+     * - Ends the current suspension period through the shared lifecycle component
      * - Restores the manager to active management duties
      * - Makes the manager available for wrestler/tag team assignments
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
-     *
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     *
      * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate manager immediately
-     * ReinstateAction::run($manager);
-     *
-     * // Reinstate with specific date
-     * ReinstateAction::run($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        $manager->ensureCanBeReinstated();
+        $effectiveDate = $reinstatementDate ?? now();
 
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
 
-        // Use StatusTransitionPipeline for consistent reinstatement handling
-        StatusTransitionPipeline::reinstate($manager, $reinstatementDate)->execute();
+            $this->eligibility->ensureCanReinstate($lockedManager);
+            $this->suspensionPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::Reinstated);
+        });
     }
 }

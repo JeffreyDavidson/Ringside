@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Data\Matches;
 
 use App\Enums\MatchType;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Matches\MatchStipulation;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
@@ -19,13 +20,14 @@ readonly class EventMatchData
      *
      * @param  EloquentCollection<int, Referee>  $referees
      * @param  EloquentCollection<int, Title>  $titles
-     * @param  Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>  $competitors
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $sides
      */
     public function __construct(
         public MatchType $matchType,
         public EloquentCollection $referees,
         public EloquentCollection $titles,
-        public Collection $competitors,
-        public ?string $preview
+        public Collection $sides,
+        public ?string $preview,
+        public ?MatchStipulation $matchStipulation = null,
     ) {}
 }

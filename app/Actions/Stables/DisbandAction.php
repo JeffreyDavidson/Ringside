@@ -4,57 +4,57 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
-use App\Models\Stables\Stable;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Models\Roster\Stables\Stable;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DisbandAction
 {
-    use AsAction;
-
     /**
      * Create a new disband action instance.
      */
     public function __construct(
+        protected RemoveStableMembersAction $removeStableMembersAction,
+        protected StableActivityEligibility $eligibility,
         protected EndActivityPeriodAction $endActivityPeriodAction,
-        protected RemoveStableMembersAction $removeStableMembersAction
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableMembershipService $membershipService,
     ) {}
 
     /**
-     * Disband a stable.
-     *
-     * This handles the complete stable disbandment workflow:
-     * - Validates the stable can be disbanded (currently active)
-     * - Ends the stable's activity period to mark it as disbanded
-     * - Removes all current members from the stable
-     * - Preserves historical membership records
-     * - Members remain available for other opportunities
-     *
-     * @param  Stable  $stable  The stable to disband
-     * @param  Carbon|null  $disbandDate  The disbandment date (defaults to now)
-     * @throws CannotBeDisbandedException If the stable cannot be disbanded
-     *
-     * @example
-     * ```php
-     * $stable = Stable::find(1);
-     * DisbandAction::run($stable, now());
-     * ```
+     * Disband a stable and remove its current members.
      */
     public function handle(Stable $stable, ?Carbon $disbandDate = null): void
     {
-        $stable->ensureCanBeDisbanded();
+        $effectiveDate = $disbandDate ?? now();
 
-        $disbandDate = $disbandDate ?? now();
+        DB::transaction(function () use ($stable, $effectiveDate): void {
+            $lockedStable = $stable->refreshForUpdate();
 
-        DB::transaction(function () use ($stable, $disbandDate): void {
-            // End current activity period using injected action
-            $this->endActivityPeriodAction->handle($stable, $disbandDate);
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Disband);
+            $this->endActivityPeriodAction->handle($lockedStable, $effectiveDate);
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Disbanded,
+                $effectiveDate,
+            );
 
-            // End all current member tenures using enhanced model method and injected action
-            if ($stable->hasCurrentMembers()) {
-                $this->removeStableMembersAction->handle($stable, $stable->getCurrentMembersData(), $disbandDate);
+            $currentMembers = $this->membershipService->currentMembers($lockedStable);
+
+            if ($currentMembers->isNotEmpty()) {
+                $this->removeStableMembersAction->handle(
+                    $lockedStable,
+                    $currentMembers,
+                    $effectiveDate,
+                );
             }
         });
     }

@@ -4,53 +4,57 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Actions\Stables\DeleteAction;
 use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
-use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
-use App\Exceptions\Roster\Stables\CannotBeRetiredException;
-use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Models\Stables\Stable;
-use Exception;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
+    #[\Override]
     protected string $routeBasePath = 'stables';
 
+    #[\Override]
     protected string $resourceName = 'stables';
 
     /** @return StableBuilder<Stable> */
     public function builder(): StableBuilder
     {
         return Stable::query()
-            ->with('currentActivityPeriod')
+            ->withActivityStatusState()
+            ->withFirstActivityPeriod()
             ->oldest('name');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', Stable::class);
+        Gate::authorize('viewAny', Stable::class);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -66,139 +70,111 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [
             SelectFilter::make('Status', 'status')
                 ->options([
                     '' => 'All',
-                    'unestablished' => 'Unestablished',
-                    'established' => 'Established',
-                    'disbanded' => 'Disbanded',
-                    'with_future_establishment' => 'Pending Establishment',
+                    StableStatus::Unformed->value => StableStatus::Unformed->label(),
+                    StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
+                    StableStatus::Active->value => StableStatus::Active->label(),
+                    StableStatus::Inactive->value => StableStatus::Inactive->label(),
+                    StableStatus::Retired->value => StableStatus::Retired->label(),
                 ])
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var StableBuilder<Stable> $builder */
-                    match ($value) {
-                        'unestablished' => $builder->unestablished(),
-                        'established' => $builder->established(),
-                        'disbanded' => $builder->disbanded(),
-                        'with_future_establishment' => $builder->withFutureEstablishment(),
-                        default => null,
-                    };
+                    $status = StableStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
-            FirstActivityPeriodFilter::make('Activation Date')->setFields('activations', 'stables_activations.started_at', 'stables_activations.ended_at'),
+            FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
     }
 
-    public function delete(Stable $stable): void
+    public function delete(Stable $stable, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($stable);
+        Gate::authorize('delete', $stable);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $stable): void {
+            $deleteAction->handle($stable);
+        }, __('stables.actions.deleted'));
     }
 
     /**
      * Establish a stable.
      */
-    public function establish(Stable $stable): void
+    public function establish(Stable $stable, EstablishAction $establishAction): void
     {
         Gate::authorize('establish', $stable);
 
-        try {
-            resolve(EstablishAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeEstablishedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        if ($this->executeBusinessAction(function () use ($establishAction, $stable): void {
+            $establishAction->handle($stable);
+        })) {
+            $this->redirectRoute('stables.index');
         }
     }
 
     /**
      * Disband a stable.
      */
-    public function disband(Stable $stable): void
+    public function disband(Stable $stable, DisbandAction $disbandAction): void
     {
         Gate::authorize('disband', $stable);
 
-        try {
-            resolve(DisbandAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeDisbandedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        if ($this->executeBusinessAction(function () use ($disbandAction, $stable): void {
+            $disbandAction->handle($stable);
+        })) {
+            $this->redirectRoute('stables.index');
         }
     }
 
     /**
      * Restore a stable.
      */
-    public function restore(int $stableId): void
+    public function restore(int $stableId, RestoreAction $restoreAction): void
     {
         $stable = Stable::onlyTrashed()->findOrFail($stableId);
 
         Gate::authorize('restore', $stable);
 
-        try {
-            resolve(RestoreAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        if ($this->executeBusinessAction(function () use ($restoreAction, $stable): void {
+            $restoreAction->handle($stable);
+        })) {
+            $this->redirectRoute('stables.index');
         }
     }
 
     /**
      * Retire a stable.
      */
-    public function retire(Stable $stable): void
+    public function retire(Stable $stable, RetireAction $retireAction): void
     {
         Gate::authorize('retire', $stable);
 
-        try {
-            resolve(RetireAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        if ($this->executeBusinessAction(function () use ($retireAction, $stable): void {
+            $retireAction->handle($stable);
+        })) {
+            $this->redirectRoute('stables.index');
         }
     }
 
     /**
      * Unretire a stable.
      */
-    public function unretire(Stable $stable): void
+    public function unretire(Stable $stable, UnretireAction $unretireAction): void
     {
         Gate::authorize('unretire', $stable);
 
-        try {
-            resolve(UnretireAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        }
-    }
-
-    /**
-     * Handle stable actions through a unified interface.
-     */
-    public function handleStableAction(string $action, int $stableId): void
-    {
-        $stable = Stable::findOrFail($stableId);
-
-        try {
-            match ($action) {
-                'establish' => resolve(EstablishAction::class)->handle($stable),
-                'disband' => resolve(DisbandAction::class)->handle($stable),
-                'retire' => resolve(RetireAction::class)->handle($stable),
-                'unretire' => resolve(UnretireAction::class)->handle($stable),
-                default => null,
-            };
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
+        if ($this->executeBusinessAction(function () use ($unretireAction, $stable): void {
+            $unretireAction->handle($stable);
+        })) {
+            $this->redirectRoute('stables.index');
         }
     }
 }

@@ -2,12 +2,21 @@
 
 This directory contains comprehensive project documentation and development tools.
 
+## Product Planning
+
+The [product roadmap](product-roadmap.md) preserves product positioning and
+future feature ideas, with focused plans for [promotion management](guides/promotion-management-plan.md)
+and the [admin interface](guides/admin-interface-direction.md). These are planning
+inputs; current behavior is documented in `/architecture/`, and executable work
+is tracked in the Ringside Hermes Kanban board.
+
 ## Directory Structure
 
 ### `/architecture/`
 System architecture documentation, patterns, and design decisions including:
 - Core patterns and relationships
 - Domain-driven design guidelines  
+- Lifecycle operation boundaries
 - Livewire component standards
 - Business rules and enum usage
 
@@ -46,29 +55,19 @@ Development process documentation:
 - CI/CD pipeline configuration
 - Branch protection enforcement
 
-### `/frontend/`
-Frontend development documentation and tools, including:
-- **Metronic Integration Documentation**: Component usage, maintenance checklists, and quality assurance tools
-- **Visual Comparison Tools**: HTML-based checklists for design accuracy validation  
-- **Color Validation Scripts**: JavaScript tools for ensuring Metronic color scheme compliance
+### `/examples/`
+Livewire component examples.
 
-These tools were created during the frontend modernization process to maintain design accuracy while converting from Metronic template code to custom Alpine.js + Tailwind CSS implementation.
+### `/releases/`
+Release notes and feature summaries.
 
-## Claude Code Integration
+## Codex Integration
 
-This Laravel project is configured with Claude Code and MCP servers for enhanced development:
+This Laravel project uses Laravel Boost's Codex integration:
 
-### Available MCP Servers
-**Global Servers** (shared across all projects):
-- **GitHub** - Repository access and management
-- **Memory** - Shared knowledge base across projects
-- **Context7** - Latest documentation access
-- **Web Fetch** - External API and resource access
-
-**Project-Specific Servers**:
-- **Filesystem** - Access to this project's files
-- **Database** - Direct database access for this project
-- **Laravel DebugBar** (if installed) - Debug information
+- `AGENTS.md` provides current, package-aware Laravel guidance.
+- `.agents/skills/` contains the installed project development skills.
+- `.codex/config.toml` registers the project-scoped Laravel Boost MCP server.
 
 ### Environment
 - Laravel Framework 13 with Livewire 4
@@ -77,4 +76,5 @@ This Laravel project is configured with Claude Code and MCP servers for enhanced
 - Laravel Breeze for authentication
 
 ### Getting Started
-Run `source .claude/shortcuts.sh` to load helpful development aliases.
+
+Open the repository as a trusted Codex project, restart Codex after configuration changes, and use `/mcp` to confirm that `laravel-boost` is enabled.

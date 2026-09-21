@@ -59,7 +59,7 @@ class WrestlersController extends Controller
 
     public function index(): View
     {
-        $this->authorize('viewList', Wrestler::class);
+        $this->authorize('viewAny', Wrestler::class);
 
         return view('wrestlers.index');
     }

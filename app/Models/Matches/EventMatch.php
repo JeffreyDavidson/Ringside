@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Collections\MatchCompetitorsCollection;
+use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Concerns\TracksActivity;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Events\Event;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,9 +27,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
@@ -32,46 +37,69 @@ use Illuminate\Support\Carbon;
  * @property int $match_number
  * @property MatchType $match_type
  * @property int|null $match_stipulation_id
+ * @property MatchFinish|null $match_finish
+ * @property int|null $winning_side_id
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
+ * @property Carbon|null $deleted_at
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchStipulation|null $matchStipulation
- * @property-read MatchResult|null $result
+ * @property-read MatchSide|null $winningSide
+ * @property-read Collection<int, MatchSide> $sides
  * @property-read Collection<int, Referee> $referees
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, Title> $titles
- * @property-read Collection<int, MatchWinner> $winners
- * @property-read Collection<int, MatchLoser> $losers
  * @property-read Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ * @method static EventMatchBuilder<static>|EventMatch forPastEvents()
+ * @method static EventMatchBuilder<static>|EventMatch forHistory()
+ * @method static EventMatchBuilder<static>|EventMatch forCompetitor(Wrestler|TagTeam $competitor)
+ * @method static EventMatchBuilder<static>|EventMatch forEventId(int $eventId)
+ * @method static EventMatchBuilder<static>|EventMatch forEventIds(\Illuminate\Support\Collection<int, int> $eventIds)
+ * @method static EventMatchBuilder<static>|EventMatch forTagTeamId(int $tagTeamId)
+ * @method static EventMatchBuilder<static>|EventMatch forReferee(Referee $referee)
+ * @method static EventMatchBuilder<static>|EventMatch forRefereeId(int $refereeId)
+ * @method static EventMatchBuilder<static>|EventMatch forWrestlerId(int $wrestlerId)
+ * @method static EventMatchBuilder<static>|EventMatch latestEventFirst()
+ * @method static EventMatchBuilder<static>|EventMatch newModelQuery()
+ * @method static EventMatchBuilder<static>|EventMatch newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch onlyTrashed()
+ * @method static EventMatchBuilder<static>|EventMatch query()
+ * @method static EventMatchBuilder<static>|EventMatch withAnyRefereeIds(\Illuminate\Support\Collection<int, int> $refereeIds)
+ * @method static EventMatchBuilder<static>|EventMatch withAnyTitleIds(\Illuminate\Support\Collection<int, int> $titleIds)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withoutTrashed()
  *
  * @mixin \Eloquent
  */
 #[Table('events_matches')]
-#[Fillable('event_id', 'match_number', 'match_type', 'match_stipulation_id', 'preview')]
+#[Fillable('event_id', 'match_number', 'match_type', 'match_stipulation_id', 'preview', 'match_finish', 'winning_side_id')]
+#[UseEloquentBuilder(EventMatchBuilder::class)]
 #[UseFactory(MatchFactory::class)]
-class EventMatch extends Model
+class EventMatch extends Model implements SoftDeletable
 {
     /** @use HasFactory<MatchFactory> */
     use HasFactory;
+
+    use HasLifecycleTransitions;
+    use SoftDeletes;
+    use TracksActivity;
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
             'match_type' => MatchType::class,
+            'match_finish' => MatchFinish::class,
         ];
     }
 
@@ -132,9 +160,9 @@ class EventMatch extends Model
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors', 'match_id')
+        return $this->morphedByMany(Wrestler::class, 'competitor', (new MatchCompetitor)->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
-            ->withPivot('side_number');
+            ->withPivot('match_side_id');
     }
 
     /**
@@ -144,38 +172,20 @@ class EventMatch extends Model
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors', 'match_id')
+        return $this->morphedByMany(TagTeam::class, 'competitor', (new MatchCompetitor)->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
-            ->withPivot('side_number');
+            ->withPivot('match_side_id');
     }
 
-    /**
-     * Get the result of the match.
-     *
-     * @return HasOne<MatchResult, $this>
-     */
-    public function result(): HasOne
+    /** @return HasMany<MatchSide, $this> */
+    public function sides(): HasMany
     {
-        return $this->hasOne(MatchResult::class, 'match_id');
+        return $this->hasMany(MatchSide::class, 'match_id')->orderedByPosition();
     }
 
-    /**
-     * Get all winners of the match through the result.
-     *
-     * @return HasManyThrough<MatchWinner, MatchResult, $this>
-     */
-    public function winners(): HasManyThrough
+    /** @return BelongsTo<MatchSide, $this> */
+    public function winningSide(): BelongsTo
     {
-        return $this->hasManyThrough(MatchWinner::class, MatchResult::class);
-    }
-
-    /**
-     * Get all losers of the match through the result.
-     *
-     * @return HasManyThrough<MatchLoser, MatchResult, $this>
-     */
-    public function losers(): HasManyThrough
-    {
-        return $this->hasManyThrough(MatchLoser::class, MatchResult::class);
+        return $this->belongsTo(MatchSide::class, 'winning_side_id');
     }
 }

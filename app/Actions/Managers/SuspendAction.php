@@ -4,51 +4,44 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Models\Managers\Manager;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Suspend a manager.
      *
      * This handles the complete manager suspension workflow:
-     * - Uses StatusTransitionPipeline for consistent suspension handling
      * - Validates the manager can be suspended (currently employed, not already suspended)
-     * - Creates a suspension record with the specified start date
+     * - Creates a suspension record through the shared lifecycle component
      * - Temporarily removes the manager from active wrestler/tag team management duties
      * - Maintains employment status while restricting availability
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
-     *
      * @param  Manager  $manager  The manager to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
+     *
      * @throws CannotBeSuspendedException When manager cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend manager immediately
-     * SuspendAction::run($manager);
-     *
-     * // Schedule suspension for future date
-     * SuspendAction::run($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {
-        $manager->ensureCanBeSuspended();
+        $effectiveDate = $suspensionDate ?? now();
 
-        $suspensionDate = DateHelper::resolveDate($suspensionDate);
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
 
-        // Use StatusTransitionPipeline for consistent suspension handling
-        StatusTransitionPipeline::suspend($manager, $suspensionDate)->execute();
+            $this->eligibility->ensureCanSuspend($lockedManager);
+            $this->suspensionPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Suspended);
+        });
     }
 }

@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Activate action for titles.
@@ -16,12 +23,11 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class ActivateAction
 {
-    use AsAction;
-
     public function __construct(
-        private DebutAction $debutAction,
-        private ReinstateAction $reinstateAction,
-        private UnretireAction $unretireAction
+        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly StartActivityPeriodAction $startActivityPeriod,
+        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
+        private readonly RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -32,20 +38,35 @@ class ActivateAction
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void
     {
-        $activationDate = $activationDate ?? now();
+        $date = $activationDate ?? now();
 
-        // If the title is retired, first unretire it
-        if ($title->isRetired()) {
-            $this->unretireAction->handle($title, $activationDate);
-        }
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
 
-        // Determine if this is a debut or reinstatement
-        if ($title->hasActivityPeriods()) {
-            // Title has been debuted before, so reinstate it
-            $this->reinstateAction->handle($title, $activationDate);
-        } else {
-            // Title has never been debuted, so debut it
-            $this->debutAction->handle($title, $activationDate);
-        }
+            if ($lockedTitle->currentRetirement()->exists()) {
+                $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
+                $this->retirementPeriods->end($lockedTitle, $date, LifecycleTransitionType::Unretired);
+            }
+
+            $transition = $lockedTitle->activityPeriods()->exists()
+                ? TitleLifecycleTransition::Reinstate
+                : TitleLifecycleTransition::Debut;
+            $lifecycleTransition = $transition === TitleLifecycleTransition::Reinstate
+                ? LifecycleTransitionType::Reinstated
+                : LifecycleTransitionType::Debuted;
+
+            $this->eligibility->ensureAllowed($lockedTitle, $transition);
+            $this->startActivityPeriod->handle(
+                $lockedTitle,
+                $date,
+                rescheduleFuturePeriod: $transition === TitleLifecycleTransition::Reinstate,
+            );
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                $lifecycleTransition,
+                $date,
+            );
+        });
     }
 }

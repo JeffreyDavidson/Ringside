@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data\Stables;
 
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Collection;
 
 /**
  * Data object for stable membership information.
@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Collection;
  */
 readonly class StableMembershipData
 {
+    public const int MINIMUM_MEMBER_COUNT = 3;
+
     /**
      * Create a new stable membership data instance.
      *
@@ -32,8 +34,8 @@ readonly class StableMembershipData
      */
     public function isEmpty(): bool
     {
-        return ($this->wrestlers === null || $this->wrestlers->isEmpty()) &&
-               ($this->tagTeams === null || $this->tagTeams->isEmpty());
+        return (! $this->wrestlers instanceof Collection || $this->wrestlers->isEmpty()) &&
+               (! $this->tagTeams instanceof Collection || $this->tagTeams->isEmpty());
     }
 
     /**
@@ -45,75 +47,18 @@ readonly class StableMembershipData
     }
 
     /**
-     * Filter members to only include employed/available ones.
-     */
-    public function filterEmployedMembers(): self
-    {
-        $employedWrestlers = $this->wrestlers?->filter(fn (Wrestler $wrestler) => $wrestler->isEmployed());
-        $employedTagTeams = $this->tagTeams?->filter(fn (TagTeam $tagTeam) => $tagTeam->isEmployed());
-
-        return new self(
-            wrestlers: $employedWrestlers?->isNotEmpty() ? $employedWrestlers : null,
-            tagTeams: $employedTagTeams?->isNotEmpty() ? $employedTagTeams : null
-        );
-    }
-
-    /**
-     * Get wrestlers that need to be retired (not already retired).
-     */
-    public function getWrestlersToRetire(): ?Collection
-    {
-        return $this->wrestlers?->filter(fn (Wrestler $wrestler) => ! $wrestler->isRetired());
-    }
-
-    /**
-     * Get tag teams that need to be retired (not already retired).
-     */
-    public function getTagTeamsToRetire(): ?Collection
-    {
-        return $this->tagTeams?->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isRetired());
-    }
-
-    /**
-     * Get wrestlers that can be unretired (currently retired).
-     */
-    public function getWrestlersToUnretire(): ?Collection
-    {
-        return $this->wrestlers?->filter(fn (Wrestler $wrestler) => $wrestler->isRetired());
-    }
-
-    /**
-     * Get tag teams that can be unretired (currently retired).
-     */
-    public function getTagTeamsToUnretire(): ?Collection
-    {
-        return $this->tagTeams?->filter(fn (TagTeam $tagTeam) => $tagTeam->isRetired());
-    }
-
-    /**
-     * Get total count of all members.
+     * Get the stable headcount, counting wrestlers as one and tag teams as two.
      */
     public function getTotalMemberCount(): int
     {
         $wrestlerCount = $this->wrestlers?->count() ?? 0;
         $tagTeamCount = $this->tagTeams?->count() ?? 0;
 
-        return $wrestlerCount + $tagTeamCount;
+        return $wrestlerCount + ($tagTeamCount * 2);
     }
 
-    /**
-     * Check if membership contains any wrestlers.
-     */
-    public function hasWrestlers(): bool
+    public function hasMinimumMembers(): bool
     {
-        return $this->wrestlers !== null && $this->wrestlers->isNotEmpty();
-    }
-
-    /**
-     * Check if membership contains any tag teams.
-     */
-    public function hasTagTeams(): bool
-    {
-        return $this->tagTeams !== null && $this->tagTeams->isNotEmpty();
+        return $this->getTotalMemberCount() >= self::MINIMUM_MEMBER_COUNT;
     }
 }

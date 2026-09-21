@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Roster\Referees\Referee;
+use App\Services\Matches\MatchAssignmentConflictService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddRefereesToMatchAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
+    ) {}
 
     /**
      * Add referees to an event match.
@@ -42,65 +46,49 @@ class AddRefereesToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add referees to
      * @param  Collection<int, Referee>  $referees  The referees to assign for officiating
-     *
-     * @example
-     * ```php
-     * // Standard match with one referee
-     * $referees = collect([$mikeChaota]);
-     * AddRefereesToMatchAction::run($match, $referees);
-     *
-     * // High-profile match with senior referee
-     * $referees = collect([$earlHebner]);
-     * AddRefereesToMatchAction::run($match, $referees);
-     *
-     * // Special stipulation match with multiple officials
-     * $referees = collect([$referee1, $referee2]);
-     * AddRefereesToMatchAction::run($match, $referees);
-     *
-     * // Championship match with experienced official
-     * $referees = collect([$charlesRobinson]);
-     * AddRefereesToMatchAction::run($match, $referees);
-     * ```
      */
-    public function handle(EventMatch $eventMatch, \Illuminate\Support\Collection $referees): void
+    public function handle(EventMatch $eventMatch, Collection $referees): void
     {
-        // Pre-filter referees to ensure only eligible officials are processed
-        $eligibleReferees = $referees->filter(
-            fn (Referee $referee) => $this->isRefereeEligibleForMatch($referee, $eventMatch)
-        );
+        $requestedReferees = $referees->unique('id')->values();
 
-        // Validate we have referees to add after filtering
-        if ($eligibleReferees->isEmpty()) {
-            throw new InvalidArgumentException('No eligible referees provided for match assignment');
+        if ($requestedReferees->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleReferees): void {
-            // Add each eligible referee to officiate the match
-            $eligibleReferees->each(function (Referee $referee) use ($eventMatch) {
-                $eventMatch->referees()->attach($referee->id);
-            });
+        DB::transaction(function () use ($eventMatch, $requestedReferees): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
+            $this->handleWithinTransaction($lockedMatch, $requestedReferees);
         });
     }
 
     /**
-     * Check if a referee is eligible to officiate the match.
+     * Assign referees while the caller owns the match transaction and lock.
      *
-     * @param  Referee  $referee  The referee to validate
-     * @param  EventMatch  $eventMatch  The match they would officiate
-     * @return bool True if the referee can officiate
+     * @param  Collection<int, Referee>  $referees
      */
-    private function isRefereeEligibleForMatch(Referee $referee, EventMatch $eventMatch): bool
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $referees): void
     {
-        // Basic availability checks - referee must be active and available
-        if (! $referee->isBookable()) {
-            return false;
+        $requestedReferees = $referees->unique('id')->values();
+
+        if ($requestedReferees->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
-        // Check for conflicts with existing assignments
-        // Note: More complex conflict checking would be implemented here
-        // such as checking for double-booking on the same event date or conflicts of interest
-        // Could validate against $eventMatch->event->date for scheduling conflicts
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedReferees = Referee::query()
+            ->whereKey($requestedReferees->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
 
-        return true;
+        if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
+            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('referees');
+        }
+
+        $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
+
+        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->pluck('id'));
     }
 }

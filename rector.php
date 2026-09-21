@@ -3,26 +3,15 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Transform\Rector\String_\StringToClassConstantRector;
-use RectorLaravel\Set\LaravelLevelSetList;
+use Rector\Set\ValueObject\SetList;
 
 return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/app',
     ])
+    ->withPhpSets()
     ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_120,
+        SetList::CODE_QUALITY,
+        SetList::TYPE_DECLARATION,
     ])
-    ->withSkip([
-        StringToClassConstantRector::class,
-    ])
-    ->withPreparedSets(
-        deadCode: false,
-        codeQuality: true,
-        typeDeclarations: true,
-        privatization: true,
-        earlyReturn: true,
-        strictBooleans: true,
-    );
-// uncomment to reach your current PHP version
-// ->withPhpSets()
+    ->withComposerBased(laravel: true);

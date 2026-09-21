@@ -4,59 +4,50 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\RetirementCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
-use App\Models\TagTeams\TagTeam;
-use App\Support\DateHelper;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly TagTeamRetirementEligibility $eligibility,
+        private readonly RetireCurrentMembersAction $retireCurrentMembers,
+    ) {}
 
     /**
-     * Retire a tag team and end their partnership.
-     *
-     * This handles the complete tag team retirement workflow using StatusTransitionPipeline:
-     * - Validates the tag team can be retired (business rule compliance)
-     * - Uses StatusTransitionPipeline to properly handle retirement status transition
-     * - Automatically ends employment and suspension through pipeline
-     * - Optionally cascades retirement to available partners and managers
-     * - Creates retirement record and updates status through pipeline
-     * - Makes the tag team permanently unavailable for competition
-     * - Preserves all historical records and championship lineage
-     * - Individual members may continue their careers independently
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with RetirementCascadeStrategy for consistency
-     * with other entity status transitions and flexible cascade behavior.
-     *
-     * @param  TagTeam  $tagTeam  The tag team to retire
-     * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     * @param  bool  $retirePartners  Whether to retire available partners (default: true)
-     * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire tag team immediately with member retirement
-     * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
-     * RetireAction::run($tagTeam);
-     *
-     * // Retire with specific date
-     * RetireAction::run($tagTeam, Carbon::parse('2024-12-31'));
-     *
-     * // Retire without retiring partners (partners continue independently)
-     * RetireAction::run($tagTeam, retirePartners: false);
-     * ```
+     * Retire a tag team and optionally its current members.
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
+    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retireMembers = true): void
     {
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        $effectiveDate = $retirementDate ?? now();
 
-        StatusTransitionPipeline::retire($tagTeam, $retirementDate)
-            ->withCascade(RetirementCascadeStrategy::conditionalMembers($retirePartners))
-            ->execute();
+        DB::transaction(function () use ($tagTeam, $effectiveDate, $retireMembers): void {
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
+
+            $this->eligibility->ensureCanRetire($lockedTagTeam);
+
+            if ($lockedTagTeam->currentEmployment()->exists()) {
+                $this->employmentPeriods->end($lockedTagTeam, $effectiveDate);
+            }
+
+            if ($lockedTagTeam->currentSuspension()->exists()) {
+                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate);
+            }
+
+            $this->retirementPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Retired);
+
+            if ($retireMembers) {
+                $this->retireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
+            }
+        });
     }
 }

@@ -124,9 +124,9 @@ EventMatch ←────────────── Title (many-to-many)
   ↓
 MatchCompetitor ←──── Wrestler/TagTeam (polymorphic)
   ↓
-MatchResult
-  ↓
-MatchWinner/MatchLoser ←──── MatchCompetitor (foreign key)
+EventMatch (match_finish, winning_side_id)
+    ↓
+MatchSide ←──── MatchCompetitor
 ```
 
 ## Key Features
@@ -198,8 +198,8 @@ $match = MatchFactory::new()
     ->generateFullMatch($config)
     ->create();
 
-// 3. Access results
-$winner = $match->result->winners->first();
+// 3. Access the winning side
+$winningSide = $match->winningSide;
 $champion = $match->titles->first()->currentChampion();
 ```
 
@@ -241,6 +241,19 @@ Matches integrate seamlessly with event scheduling:
 - Match numbering and ordering
 - Event-specific configurations
 - Cross-match relationships
+
+An event's nullable `date` remains the authoritative scheduling value. `EventStatus::fromDate()` translates that persisted value into `Unscheduled`, `Scheduled`, or `Past`; the `Event` model exposes the result through its computed `status` attribute instead of carrying separate scheduling predicates.
+
+Events may have a date without a venue while planning or preserving historical records. A venue is optional event metadata; when one is selected for a dated event, it is reserved exclusively at that date and time.
+
+Event dates become immutable once the event has occurred. `EventSchedulingEligibility` owns that rule, while both Livewire validation and `Events\UpdateAction` enforce it so non-UI callers cannot bypass the invariant. Other event details may still be corrected without changing the historical date.
+
+A venue may host only one event at a given date and time. Event creation and updates lock the selected venue row before `VenueSchedulingEligibility` checks its event relationship, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue time.
+
+Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot.
+
+Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
+Restoring a soft-deleted title locks the title row and verifies that no active title has claimed its name. Restoration preserves the title's historical state without bypassing active-name uniqueness.
 
 ### Roster Management
 

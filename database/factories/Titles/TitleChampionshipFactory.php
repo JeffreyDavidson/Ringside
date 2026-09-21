@@ -6,13 +6,13 @@ namespace Database\Factories\Titles;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
-use InvalidArgumentException;
+use LogicException;
 
 /**
  * @extends Factory<TitleChampionship>
@@ -26,17 +26,13 @@ class TitleChampionshipFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement(['wrestler', 'tagTeam']);
-
-        $champion = match ($type) {
-            'wrestler' => Wrestler::factory()->create(),
-            'tagTeam' => TagTeam::factory()->create(),
-            default => throw new InvalidArgumentException("Unknown champion type: {$type}"),
-        };
+        $champion = fake()->boolean()
+            ? Wrestler::factory()->create()
+            : TagTeam::factory()->create();
 
         return [
             'title_id' => Title::factory(),
-            'champion_type' => $type, // Use morph map key instead of full class name
+            'champion_type' => $champion->getMorphClass(),
             'champion_id' => $champion->id,
             'won_match_id' => null,
             'lost_match_id' => null,
@@ -46,18 +42,15 @@ class TitleChampionshipFactory extends Factory
     }
 
     /**
-     * Configure the factory for a tag team champion.
+     * Configure the factory for a wrestler champion.
      */
     public function forWrestler(?Wrestler $wrestler = null): static
     {
-        $wrestler = $wrestler ?? Wrestler::factory()->create();
+        if ($wrestler === null) {
+            return $this->for(Wrestler::factory(), 'champion');
+        }
 
-        return $this->state(function () use ($wrestler) {
-            return [
-                'champion_type' => 'wrestler',
-                'champion_id' => $wrestler->id,
-            ];
-        });
+        return $this->for($wrestler, 'champion');
     }
 
     /**
@@ -65,14 +58,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function forTagTeam(?TagTeam $tagTeam = null): static
     {
-        $tagTeam = $tagTeam ?? TagTeam::factory()->create();
+        if ($tagTeam === null) {
+            return $this->for(TagTeam::factory(), 'champion');
+        }
 
-        return $this->state(function () use ($tagTeam) {
-            return [
-                'champion_type' => 'tagTeam',
-                'champion_id' => $tagTeam->id,
-            ];
-        });
+        return $this->for($tagTeam, 'champion');
     }
 
     /**
@@ -97,21 +87,40 @@ class TitleChampionshipFactory extends Factory
 
     public function wonAtEventMatch(?EventMatch $eventMatch = null): static
     {
+        $eventMatch ??= EventMatch::factory()
+            ->for(Event::factory()->past())
+            ->create();
+
         return $this->state([
             'won_match_id' => $eventMatch->id,
-            'won_at' => $eventMatch->event->date,
+            'won_at' => $this->eventDate($eventMatch),
         ]);
     }
 
     public function lostAtEventMatch(?EventMatch $lostEventMatch = null, ?EventMatch $wonEventMatch = null): static
     {
-        $lostEventMatch ?? EventMatch::factory()->for(Event::factory())->create();
-        $wonEventMatch ?? EventMatch::factory()->for(Event::factory()->state(['date' => $lostEventMatch->event->date->subMonth(1)]))->create();
+        $lostEventMatch ??= EventMatch::factory()
+            ->for(Event::factory()->past())
+            ->create();
+
+        $lostAt = $this->eventDate($lostEventMatch);
+
+        $wonEventMatch ??= EventMatch::factory()
+            ->for(Event::factory()->state(['date' => $lostAt->copy()->subMonth()]))
+            ->create();
 
         return $this->state([
+            'won_match_id' => $wonEventMatch->id,
+            'won_at' => $this->eventDate($wonEventMatch),
             'lost_match_id' => $lostEventMatch->id,
-            'lost_at' => $lostEventMatch->event->date,
+            'lost_at' => $lostAt,
         ]);
+    }
+
+    private function eventDate(EventMatch $eventMatch): Carbon
+    {
+        return $eventMatch->event->date
+            ?? throw new LogicException('A championship event match must belong to a scheduled event.');
     }
 
     /**
@@ -120,6 +129,7 @@ class TitleChampionshipFactory extends Factory
     public function current(): static
     {
         return $this->state([
+            'lost_match_id' => null,
             'lost_at' => null,
         ]);
     }

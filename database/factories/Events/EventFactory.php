@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories\Events;
 
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
+ * @extends Factory<Event>
  */
 class EventFactory extends Factory
 {
@@ -100,6 +101,6 @@ class EventFactory extends Factory
      */
     public function withVenue(): static
     {
-        return $this->state(['venue_id' => Venue::inRandomOrder()->first()]);
+        return $this->for(Venue::factory(), 'venue');
     }
 }

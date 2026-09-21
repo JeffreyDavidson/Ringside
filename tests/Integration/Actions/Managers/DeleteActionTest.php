@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\DeleteAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -16,9 +17,9 @@ beforeEach(function () {
 test('it soft deletes an unemployed manager', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
-    DeleteAction::run($manager);
+    resolve(DeleteAction::class)->handle($manager);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -27,25 +28,45 @@ test('it soft deletes an unemployed manager', function () {
     expect(Manager::find($manager->id))->toBeNull();
 
     // Can still find with trashed
-    $trashedManager = Manager::withTrashed()->find($manager->id);
-    expect($trashedManager)->not->toBeNull();
-    expect($trashedManager->deleted_at)->not->toBeNull();
+    $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
+    expect($trashedManager)->not->toBeNull()
+        ->and($trashedManager->deleted_at)->not->toBeNull();
+});
+
+test('it deletes using the current persisted manager state', function () {
+    $manager = Manager::factory()->create();
+    $staleManager = $manager->replicate(['id']);
+    $staleManager->id = $manager->id;
+    $staleManager->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleManager);
+
+    expect(Manager::find($manager->id))->toBeNull()
+        ->and(Manager::withTrashed()->findOrFail($manager->id)->trashed())->toBeTrue();
+});
+
+test('it rejects deleting an already deleted manager', function () {
+    $manager = Manager::factory()->create();
+    $manager->delete();
+
+    expect(fn () => resolve(DeleteAction::class)->handle($manager))
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it soft deletes an employed manager and ends employment', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Employment should be ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
 });
@@ -69,7 +90,7 @@ test('it ends manager relationships with wrestlers when deleted', function () {
     ]);
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -102,7 +123,7 @@ test('it ends manager relationships with tag teams when deleted', function () {
     ]);
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -120,14 +141,14 @@ test('it handles deletion with specific date', function () {
     $manager = Manager::factory()->employed()->create();
     $customDeletionDate = now()->subDay();
 
-    DeleteAction::run($manager, $customDeletionDate);
+    resolve(DeleteAction::class)->handle($manager, $customDeletionDate);
 
-    $trashedManager = Manager::withTrashed()->find($manager->id);
+    $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
     expect($trashedManager->deleted_at)->not->toBeNull();
 
     // Employment should end on the custom date
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $customDeletionDate->toDateTimeString(),
     ]);
 });

@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Titles\CannotBeDebutedException;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DebutAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly StartActivityPeriodAction $startActivityPeriod,
+        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
+    ) {}
 
     /**
      * Debut a title and make it available for championship competition.
@@ -27,27 +35,21 @@ class DebutAction
      * @param  Title  $title  The title to debut
      * @param  Carbon|null  $debutDate  The debut date (defaults to now)
      * @param  string|null  $notes  Optional notes about the debut
-     * @throws CannotBeDebutedException When title cannot be debuted due to business rules
-     *
-     * @example
-     * ```php
-     * // Debut title immediately
-     * DebutAction::run($title, null, 'Brand new championship');
-     *
-     * // Debut with specific date
-     * DebutAction::run($title, Carbon::parse('2024-01-01'), 'New era begins');
-     * ```
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {
-        $title->ensureCanBeDebuted();
+        $date = $debutDate ?? now();
 
-        $debutDate = $debutDate ?? now();
-
-        DB::transaction(function () use ($title, $debutDate): void {
-            $title->activityPeriods()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $debutDate->toDateTimeString()]
+        DB::transaction(function () use ($title, $date, $notes): void {
+            $lockedTitle = $title->refreshForUpdate();
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Debut);
+            $this->startActivityPeriod->handle($lockedTitle, $date);
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Debuted,
+                $date,
+                array_filter(['notes' => $notes]),
             );
         });
     }

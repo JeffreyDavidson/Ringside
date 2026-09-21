@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Console\Commands\EnhancedTestMakeCommand;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Database\Query\Expression;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,12 +34,28 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
+    #[\Override]
     public function register(): void
     {
-        // Replace Laravel's default make:test command with our enhanced version
-        $this->app->singleton('command.test.make', function (Application $app) {
-            return new EnhancedTestMakeCommand($app['files']);
-        });
+        $this->registerLegacyRosterModelAliases();
+
+    }
+
+    private function registerLegacyRosterModelAliases(): void
+    {
+        $aliases = [
+            'App\\Models\\Managers\\Manager' => Manager::class,
+            'App\\Models\\Referees\\Referee' => Referee::class,
+            'App\\Models\\Stables\\Stable' => Stable::class,
+            'App\\Models\\TagTeams\\TagTeam' => TagTeam::class,
+            'App\\Models\\Wrestlers\\Wrestler' => Wrestler::class,
+        ];
+
+        foreach ($aliases as $legacyClass => $rosterClass) {
+            if (! class_exists($legacyClass, false)) {
+                class_alias($rosterClass, $legacyClass);
+            }
+        }
     }
 
     /**
@@ -50,59 +63,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
-            /** @var Builder $this */
-            $builder = $this;
-            $column = $builder->getGrammar()->wrap($column);
-            $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
-
-            return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
-        });
-
-        /** @param array<string> $parameters */
-        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
-            /** @var string $values */
-            $values = array_pop($parameters);
-
-            if (count($parameters) !== 0) {
-                $values = implode(', ', $parameters).' or '.$values;
-            }
-
-            return str_replace(':values', $values, $message);
-        });
-
-        Relation::morphMap([
+        Gate::before(
+            fn (User $user): ?bool => $user->role->isAdministrator() ? true : null,
+        );
+        Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
+            'match' => EventMatch::class,
             'title' => Title::class,
-            'tagTeam' => TagTeam::class,
+            'tag_team' => TagTeam::class,
             'referee' => Referee::class,
             'stable' => Stable::class,
+            'event' => Event::class,
+            'venue' => Venue::class,
+            'user' => User::class,
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
-
-        // Add macro to BelongsToMany for terminating active pivot relationships
-        BelongsToMany::macro('terminateActive', function (Carbon $terminationDate, string $terminationColumn = 'fired_at') {
-            /** @var BelongsToMany $this */
-            $relation = $this;
-
-            // Determine the primary key column name from the pivot table
-            $relatedPivotKey = $relation->getRelatedPivotKeyName();
-
-            // Get current active relationship IDs
-            $currentIds = $relation
-                ->wherePivotNull($terminationColumn)
-                ->pluck($relatedPivotKey)
-                ->toArray();
-
-            // Terminate relationships if any exist
-            if (! empty($currentIds)) {
-                $relation->updateExistingPivot($currentIds, [
-                    $terminationColumn => $terminationDate,
-                ]);
-            }
-        });
 
         $this->bootRoute();
     }

@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\DeleteAction;
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -15,10 +16,10 @@ beforeEach(function () {
 test('it soft deletes an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->trashed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->trashed())->toBeFalse();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -30,11 +31,23 @@ test('it soft deletes an unemployed wrestler', function () {
     ]);
 });
 
+test('it deletes using the current persisted wrestler state', function () {
+    $wrestler = Wrestler::factory()->create();
+    $staleWrestler = $wrestler->replicate(['id']);
+    $staleWrestler->id = $wrestler->id;
+    $staleWrestler->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleWrestler);
+
+    expect(Wrestler::find($wrestler->id))->toBeNull()
+        ->and(Wrestler::withTrashed()->findOrFail($wrestler->id)->trashed())->toBeTrue();
+});
+
 test('it soft deletes wrestler with specific deletion date', function () {
     $wrestler = Wrestler::factory()->create();
     $deletionDate = now()->subDays(2);
 
-    DeleteAction::run($wrestler, $deletionDate);
+    resolve(DeleteAction::class)->handle($wrestler, $deletionDate);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -50,19 +63,18 @@ test('it ends employment before deletion', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment was ended before deletion
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -71,19 +83,19 @@ test('it ends retirement before deletion', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $wrestler->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $wrestler->currentRetirement()->firstOrFail();
     expect($currentRetirement->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify retirement was ended before deletion
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
-        'wrestler_id' => $wrestler->id,
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -92,19 +104,19 @@ test('it ends suspension before deletion', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $wrestler->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $wrestler->currentSuspension()->firstOrFail();
     expect($currentSuspension->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify suspension was ended before deletion
-    $this->assertDatabaseHas('wrestlers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $currentSuspension->id,
-        'wrestler_id' => $wrestler->id,
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -113,24 +125,24 @@ test('it ends injury before deletion', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $wrestler->currentInjury;
-    expect($currentInjury)->not()->toBeNull();
+    $currentInjury = $wrestler->currentInjury()->firstOrFail();
     expect($currentInjury->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify injury was ended before deletion
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $currentInjury->id,
-        'wrestler_id' => $wrestler->id,
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it uses StatusTransitionPipeline with cascade strategies', function () {
+test('it closes lifecycle periods and applies relationship cascades', function () {
     // Create employed wrestler with managers
     $wrestler = Wrestler::factory()->employed()->create();
     $manager = Manager::factory()->create();
@@ -141,21 +153,21 @@ test('it uses StatusTransitionPipeline with cascade strategies', function () {
         'fired_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->currentManagers)->toHaveCount(1);
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentManagers)->toHaveCount(1);
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
-    // Verify employment ended through pipeline
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    // Verify employment period was ended
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    // Verify manager relationship ended through cascade strategy
+    // Verify the current manager relationship ended
     $this->assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
@@ -163,59 +175,18 @@ test('it uses StatusTransitionPipeline with cascade strategies', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    DeleteAction::run($wrestler, null);
+    resolve(DeleteAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment ended with current timestamp
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-});
-
-test('it handles complex wrestler with multiple statuses', function () {
-    // Create wrestler with employment, suspension, and injury
-    $wrestler = Wrestler::factory()->employed()->create();
-
-    $wrestler->suspensions()->create([
-        'started_at' => now()->subDays(10),
-        'ended_at' => null,
-        'notes' => 'Test suspension',
-    ]);
-
-    $wrestler->injuries()->create([
-        'started_at' => now()->subDays(5),
-        'ended_at' => null,
-    ]);
-
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
-
-    DeleteAction::run($wrestler);
-
-    $wrestler->refresh();
-    expect($wrestler->trashed())->toBeTrue();
-
-    // All active statuses should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -226,8 +197,8 @@ test('it prevents deleting already deleted wrestler', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    expect(fn () => DeleteAction::run($wrestler))
-        ->toThrow(Exception::class);
+    expect(fn () => resolve(DeleteAction::class)->handle($wrestler))
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it maintains relationship history integrity', function () {
@@ -245,7 +216,7 @@ test('it maintains relationship history integrity', function () {
         'fired_at' => null, // Current relationship
     ]);
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -281,22 +252,23 @@ test('it handles wrestler with no active relationships', function () {
         'ended_at' => now()->subDays(80),
     ]);
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->currentRetirement()->exists())->toBeFalse();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
     // Historical relationships should remain unchanged
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
 });

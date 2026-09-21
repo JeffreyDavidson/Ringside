@@ -4,145 +4,105 @@ declare(strict_types=1);
 
 namespace App\Builders\Titles;
 
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 /**
- * Custom query builder for the TitleChampionship model.
- *
- * Provides specialized query methods for working with title championships,
- * including filtering by current/previous status and ordering by dates.
- *
  * @template TModel of TitleChampionship
  *
  * @extends Builder<TModel>
- *
- * @example
- * ```php
- * // Get current championships
- * $currentChampionships = TitleChampionship::query()->current()->get();
- *
- * // Get championship history with reign lengths
- * $history = TitleChampionship::query()
- *     ->previous()
- *     ->withReignLength()
- *     ->latestLost()
- *     ->get();
- * ```
  */
 class TitleChampionshipBuilder extends Builder
 {
-    /**
-     * Filter championships that are currently held (i.e., not yet lost).
-     *
-     * Returns championships where the 'lost_at' field is null, indicating
-     * that the title is still actively held by the champion.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $currentChamps = TitleChampionship::query()->current()->get();
-     * ```
-     */
+    public function forTitleId(int $titleId): static
+    {
+        $this->where('title_id', $titleId);
+
+        return $this;
+    }
+
     public function current(): static
     {
-        /** @var static */
-        return $this->whereNull('lost_at');
+        $this->whereNull('lost_at');
+
+        return $this;
     }
 
-    /**
-     * Filter championships that have been lost.
-     *
-     * Returns championships where the 'lost_at' field is not null, indicating
-     * that the title reign has ended.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $formerChamps = TitleChampionship::query()->previous()->get();
-     * ```
-     */
     public function previous(): static
     {
-        /** @var static */
-        return $this->whereNotNull('lost_at');
+        $this->whereNotNull('lost_at');
+
+        return $this;
+    }
+
+    public function forChampion(Wrestler|TagTeam $champion): static
+    {
+        return $this->whereMorphedTo('champion', $champion);
+    }
+
+    public function forWrestlerId(int $wrestlerId): static
+    {
+        return $this->forChampionId($wrestlerId, Wrestler::class);
+    }
+
+    public function forTagTeamId(int $tagTeamId): static
+    {
+        return $this->forChampionId($tagTeamId, TagTeam::class);
     }
 
     /**
-     * Order championships by the most recent win date (descending).
-     *
-     * Orders results by 'won_at' in descending order, showing the most
-     * recently won championships first.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $recentWins = TitleChampionship::query()->latestWon()->get();
-     * ```
+     * @param  class-string<TagTeam|Wrestler>  $championType
      */
-    public function latestWon(): static
+    private function forChampionId(int $championId, string $championType): static
     {
-        /** @var static */
-        return $this->latest('won_at');
+        $this->whereHasMorph(
+            'champion',
+            $championType,
+            function (Builder $query) use ($championId): void {
+                $query->whereKey($championId);
+            },
+        );
+
+        return $this;
     }
 
-    /**
-     * Order championships by the most recent loss date (descending).
-     *
-     * Orders results by 'lost_at' in descending order, showing the most
-     * recently lost championships first.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $recentLosses = TitleChampionship::query()->previous()->latestLost()->get();
-     * ```
-     */
-    public function latestLost(): static
+    public function forPreviousHistory(): static
     {
-        /** @var static */
-        return $this->latest('lost_at');
+        return $this
+            ->previous()
+            ->mostRecentlyLostFirst()
+            ->withPreviousChampionshipId()
+            ->with(['title', 'previousChampionship.champion']);
     }
 
-    /**
-     * Select all columns and calculate reign length in days as `reign_length`.
-     *
-     * Adds a calculated column that shows the length of the championship reign
-     * in days. For current championships, calculates from won_at to now.
-     * For previous championships, calculates from won_at to lost_at.
-     *
-     * Uses database-agnostic date calculations to support both MySQL and SQLite.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $championshipsWithLength = TitleChampionship::query()
-     *     ->withReignLength()
-     *     ->get();
-     *
-     * foreach ($championshipsWithLength as $championship) {
-     *     echo "Reign length: " . $championship->reign_length . " days";
-     * }
-     * ```
-     */
-    public function withReignLength(): static
+    public function earliestWonFirst(): static
     {
-        // Use database-agnostic date calculation
-        $driverName = DB::connection()->getDriverName();
+        $this->orderBy('won_at');
 
-        $reignLengthSql = match ($driverName) {
-            'mysql' => 'DATEDIFF(COALESCE(lost_at, NOW()), won_at) as reign_length',
-            'sqlite' => 'CAST((julianday(COALESCE(lost_at, datetime("now"))) - julianday(won_at)) AS INTEGER) as reign_length',
-            default => 'DATEDIFF(COALESCE(lost_at, NOW()), won_at) as reign_length' // Default to MySQL syntax
-        };
+        return $this;
+    }
 
-        /** @var static */
-        return $this->selectRaw("*, {$reignLengthSql}");
+    public function mostRecentlyLostFirst(): static
+    {
+        $this->orderByDesc('lost_at');
+
+        return $this;
+    }
+
+    public function withPreviousChampionshipId(): static
+    {
+        $this->addSelect([
+            'previous_championship_id' => TitleChampionship::query()
+                ->from('titles_championships as previous_championships')
+                ->select('previous_championships.id')
+                ->whereColumn('previous_championships.title_id', 'titles_championships.title_id')
+                ->whereColumn('previous_championships.won_at', '<', 'titles_championships.won_at')
+                ->orderByDesc('previous_championships.won_at')
+                ->limit(1),
+        ]);
+
+        return $this;
     }
 }

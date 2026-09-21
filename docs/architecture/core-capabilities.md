@@ -37,6 +37,13 @@ Core capabilities define what each entity type can do within the wrestling promo
 - **Not Eligible**: Titles, Stables
 - **Rationale**: Employment represents a working relationship
 
+Employment periods remain the authoritative persisted state. Employable models expose
+relationship-backed state facts, while `EmploymentStatusResolver` reads those facts (or
+the equivalent builder projection) and maps them to the computed `EmploymentStatus`
+presented through each model's `status` attribute. Status classification remains outside
+the model's persistence relationships, and shared lifecycle readers reuse builder
+projections when status is rendered from list queries.
+
 ## Pull Capability
 
 ### Pull Rules
@@ -60,6 +67,18 @@ Core capabilities define what each entity type can do within the wrestling promo
 - **Eligible**: Wrestlers, TagTeams
 - **Not Eligible**: Managers, Referees, Titles, Stables
 - **Rationale**: Booking is for match competition, not management or officiating
+
+## Tag Team Membership Capability
+
+Wrestlers explicitly define current and historical tag team membership through the `currentTagTeam`, `previousTagTeam`, and `tagTeams` Eloquent relationships. Because Wrestler is the only tag team member type, these persistence mappings belong directly on that model instead of behind a generic contract or concern. Whether a wrestler currently belongs to a tag team is determined by querying `currentTagTeam`; eligibility to join remains outside the model in validation rules and lifecycle collaborators.
+
+Single current/previous tag team and current Stable lookups use Laravel's native `HasOneThrough` relationships through the persisted membership models. Wrestler and Tag Team define their own current and historical Stable relationships explicitly because their pivot models, tables, and foreign keys differ. Stable-joining eligibility remains in validation rules and lifecycle collaborators. Collection relationships remain `BelongsToMany` so callers can inspect complete history and membership pivot dates. Do not reintroduce the abandoned `ankurk91/laravel-eloquent-relationships` package.
+
+Wrestler and Tag Team define their current and historical manager relationships directly so each model visibly owns its persistence mapping. The `Manageable` contract remains the type boundary for application code that operates on either model.
+
+## User and Roster Separation
+
+Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

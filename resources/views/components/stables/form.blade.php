@@ -3,7 +3,11 @@
 </div>
 
 <div class="mb-10">
-    <x-form.inputs.date label="Start Date:" name="start_date" :value="old('start_date', $stable->activatedAt?->format('m-d-Y'))" />
+    <x-form.inputs.date
+        label="Start Date:"
+        name="start_date"
+        :value="old('start_date', $stable->activatedAt?->format('m-d-Y'))"
+    />
 </div>
 
 <div class="mb-10">

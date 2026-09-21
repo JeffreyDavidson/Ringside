@@ -4,50 +4,54 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Builders\Roster\ManagerBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
-use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
+use App\Queries\Roster\StableManagerHistoryQuery;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends BasePreviousManagersTable<Manager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
+    #[\Override]
     public string $databaseTableName = 'managers';
 
-    public ?int $stableId;
+    #[Locked]
+    public ?int $stableId = null;
 
     /**
-     * @return Builder<Manager>
+     * @return ManagerBuilder<Manager>
      */
-    public function builder(): Builder
+    public function builder(): ManagerBuilder
     {
-        if (! isset($this->stableId)) {
-            throw new Exception("You didn't specify a stable");
-        }
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
-        // Note: Stables do not directly have managers.
-        // Managers are associated with individual wrestlers and tag teams.
-        // This table would show managers who previously managed members of this stable.
-        // For now, return empty query since this is not a valid business relationship.
-        return Manager::query()->whereRaw('1 = 0'); // Empty result set
-    }
-
-    public function configure(): void
-    {
-        // No additional selects needed for direct manager query
+        return StableManagerHistoryQuery::previousManagersForStableId($stableId);
     }
 
     /**
      * @return array<int, Column>
      */
+    #[\Override]
     public function columns(): array
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(),
+                ->searchable(function (ManagerBuilder $builder, string $searchTerm): void {
+                    $builder->whereNameMatches($searchTerm);
+                }),
             Column::make(__('managers.status'), 'status')
-                ->searchable(),
+                ->label(fn (Manager $manager) => $manager->status->label()),
         ];
+    }
+
+    protected function configure(): void
+    {
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        Gate::authorize('view', Stable::query()->findOrFail($stableId));
     }
 }

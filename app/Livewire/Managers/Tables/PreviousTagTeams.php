@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\TagTeams\TagTeamManager;
-use Exception;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends DataTableComponent<TagTeamManager> */
 class PreviousTagTeams extends DataTableComponent
 {
     use ShowTableTrait;
@@ -19,43 +23,52 @@ class PreviousTagTeams extends DataTableComponent
     /**
      * ManagerId to use for component.
      */
-    public ?int $managerId;
+    #[Locked]
+    public ?int $managerId = null;
 
     protected string $databaseTableName = 'tag_teams_managers';
 
     protected string $resourceName = 'tag teams';
 
-    /**
-     * @return Builder<TagTeamManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<TagTeamManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new Exception("You didn't specify a manager");
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return TagTeamManager::query()
-            ->where('manager_id', $this->managerId)
-            ->whereNotNull('fired_at')
-            ->orderByDesc('hired_at');
+            ->with('tagTeam')
+            ->whereHas('tagTeam')
+            ->forManagerId($managerId)
+            ->forHistory();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
+
+        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+
         $this->addAdditionalSelects([
             'tag_teams_managers.tag_team_id as tag_team_id',
         ]);
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
     {
         return [
-            Column::make(__('tag-teams.name'), 'tagTeam.name'),
+            Column::make(__('tag-teams.name'), 'tagTeam.name')
+                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('managers.date_fired'), 'fired_at')

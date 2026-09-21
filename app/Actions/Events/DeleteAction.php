@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    use AsAction;
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
 
     /**
      * Delete an event.
@@ -35,19 +36,13 @@ class DeleteAction
      *
      * @param  Event  $event  The event to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete event immediately
-     * $event = Event::find(1);
-     * DeleteAction::run($event);
-     *
-     * // Delete with specific date
-     * DeleteAction::run($event, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {
-        $event->delete();
+        DB::transaction(function () use ($event, $deletionDate): void {
+            $lockedEvent = $event->refreshForUpdate();
+
+            $this->deletionState->delete($lockedEvent, $deletionDate ?? now());
+        });
     }
 }

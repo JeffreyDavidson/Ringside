@@ -10,11 +10,7 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
-use App\Exceptions\Titles\CannotBeDebutedException;
-use App\Exceptions\Titles\CannotBePulledException;
-use App\Exceptions\Titles\CannotBeReinstatedException;
-use App\Exceptions\Titles\CannotBeRetiredException;
-use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Titles\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +27,8 @@ use Livewire\Component;
  */
 class Actions extends Component
 {
+    use ExecutesBusinessActions;
+
     public Title $title;
 
     public function mount(Title $title): void
@@ -41,93 +39,103 @@ class Actions extends Component
     /**
      * Employ a title.
      */
-    public function debut(): void
+    public function debut(DebutAction $debutAction): void
     {
         Gate::authorize('debut', $this->title);
 
-        try {
-            resolve(DebutAction::class)->handle($this->title);
+        if ($this->executeBusinessAction(
+            function () use ($debutAction): void {
+                $debutAction->handle($this->title);
+            },
+            __('titles.actions.debuted'),
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully debuted.');
-        } catch (CannotBeDebutedException $e) {
-            session()->flash('error', $e->getMessage());
         }
     }
 
     /**
      * Retire a title.
      */
-    public function retire(): void
+    public function retire(RetireAction $retireAction): void
     {
         Gate::authorize('retire', $this->title);
 
-        try {
-            resolve(RetireAction::class)->handle($this->title);
+        if ($this->executeBusinessAction(
+            function () use ($retireAction): void {
+                $retireAction->handle($this->title);
+            },
+            __('titles.actions.retired'),
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully retired.');
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
         }
     }
 
     /**
      * Unretire a title.
      */
-    public function unretire(): void
+    public function unretire(UnretireAction $unretireAction): void
     {
         Gate::authorize('unretire', $this->title);
 
-        try {
-            resolve(UnretireAction::class)->handle($this->title);
+        if ($this->executeBusinessAction(
+            function () use ($unretireAction): void {
+                $unretireAction->handle($this->title);
+            },
+            __('titles.actions.unretired'),
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully unretired.');
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
         }
     }
 
     /**
      * Pull a title.
      */
-    public function deactivate(): void
+    public function deactivate(PullAction $pullAction): void
     {
         Gate::authorize('pull', $this->title);
 
-        try {
-            resolve(PullAction::class)->handle($this->title);
+        if ($this->executeBusinessAction(
+            function () use ($pullAction): void {
+                $pullAction->handle($this->title);
+            },
+            __('titles.actions.pulled'),
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully pulled.');
-        } catch (CannotBePulledException $e) {
-            session()->flash('error', $e->getMessage());
         }
     }
 
     /**
      * Reinstate a title.
      */
-    public function reinstate(): void
+    public function reinstate(ReinstateAction $reinstateAction): void
     {
         Gate::authorize('reinstate', $this->title);
 
-        try {
-            resolve(ReinstateAction::class)->handle($this->title);
+        if ($this->executeBusinessAction(
+            function () use ($reinstateAction): void {
+                $reinstateAction->handle($this->title);
+            },
+            __('titles.actions.reinstated'),
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully reinstated.');
-        } catch (CannotBeReinstatedException $e) {
-            session()->flash('error', $e->getMessage());
         }
     }
 
     /**
      * Restore a deleted title.
      */
-    public function restore(): void
+    public function restore(RestoreAction $restoreAction): void
     {
         Gate::authorize('restore', $this->title);
 
-        resolve(RestoreAction::class)->handle($this->title);
-        $this->dispatch('title-updated');
-        session()->flash('status', 'Title successfully restored.');
+        if ($this->executeBusinessAction(
+            function () use ($restoreAction): void {
+                $restoreAction->handle($this->title);
+            },
+            __('titles.actions.restored'),
+        )) {
+            $this->dispatch('title-updated');
+        }
     }
 
     public function render(): View

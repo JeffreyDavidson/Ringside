@@ -3,18 +3,22 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\DeleteAction;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it soft deletes a tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->trashed())->toBeFalse();
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeTrue();
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeTrue();
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse();
 
     // Verify soft delete in database
     $this->assertSoftDeleted('tag_teams', [
@@ -25,9 +29,9 @@ test('it soft deletes a tag team', function () {
 test('it deletes unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeTrue();
@@ -36,35 +40,30 @@ test('it deletes unemployed tag team', function () {
 test('it prevents deleting employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
-
-    expect(fn () => DeleteAction::run($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->isRetired())->toBeTrue();
-
-    expect(fn () => DeleteAction::run($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse()
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->isSuspended())->toBeTrue();
-
-    expect(fn () => DeleteAction::run($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue()
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->create();
     $originalId = $tagTeam->id;
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     // Verify deletion was successful
     expect($tagTeam->trashed())->toBeTrue();
@@ -94,13 +93,10 @@ test('it handles cascade deletion of relationships', function () {
 
     expect($tagTeam->wrestlers()->count())->toBe(2);
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeTrue();
-
-    // Note: Cascade behavior would be tested in cascade strategy tests
-    // This tests that the action completes successfully with relationships
 });
 
 test('it preserves historical data during deletion', function () {
@@ -113,11 +109,11 @@ test('it preserves historical data during deletion', function () {
         'ended_at' => now()->subDays(15),
     ]);
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeTrue();
-    expect($tagTeam->name)->toBe($originalName);
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and($tagTeam->name)->toBe($originalName);
 
     // Historical data should remain
     expect($tagTeam->employments()->count())->toBe(1);
@@ -127,23 +123,23 @@ test('it prevents deleting already deleted tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
     // Delete the tag team first
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
     expect($tagTeam->trashed())->toBeTrue();
 
     // Attempting to delete again should fail
-    expect(fn () => DeleteAction::run($tagTeam))
-        ->toThrow(Exception::class);
+    expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it uses appropriate business rules for deletion', function () {
     $tagTeam = TagTeam::factory()->create();
 
     // Tag team should be in a state that allows deletion
-    expect($tagTeam->isEmployed())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     expect($tagTeam->trashed())->toBeTrue();
 });
@@ -154,7 +150,7 @@ test('it handles tag team with no active relationships', function () {
     // Ensure no active relationships
     expect($tagTeam->wrestlers()->count())->toBe(0);
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     expect($tagTeam->trashed())->toBeTrue();
 });
@@ -169,7 +165,7 @@ test('it handles tag team with ended relationships', function () {
         'left_at' => now()->subDays(5),
     ]);
 
-    DeleteAction::run($tagTeam);
+    resolve(DeleteAction::class)->handle($tagTeam);
 
     expect($tagTeam->trashed())->toBeTrue();
 

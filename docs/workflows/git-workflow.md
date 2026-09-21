@@ -1,12 +1,12 @@
 # Git Workflow Requirements
 
 ## **CRITICAL: Always Use Feature Branches**
-- **NEVER commit directly to development branch**
+- **NEVER commit directly to develop branch**
 - **ALL code changes must be on properly named feature branches**
 - **ALL changes require PR approval before merging**
 
 ## **Branch Protection Enforcement**
-**GitHub branch protection rules are enabled for `development` and `master` branches:**
+**GitHub branch protection rules are enabled for `develop` and `main` branches:**
 
 - ✅ **PR Required**: Direct pushes are blocked - all changes must go through pull requests
 - ✅ **Status Checks Required**: CI workflow must pass before merge is allowed
@@ -16,12 +16,12 @@
 **What this means in practice:**
 ```bash
 # ❌ This will FAIL - GitHub blocks direct pushes
-git push origin development
+git push origin develop
 
-# ✅ This is the ONLY way to get changes into development/master
+# ✅ This is the normal way to get changes into develop/main
 git checkout -b feature/my-changes
 git push origin feature/my-changes
-gh pr create --base development
+gh pr create --base develop
 ```
 
 **Protection Benefits:**
@@ -33,15 +33,15 @@ gh pr create --base development
 ## Branch Naming Convention
 - `feat/feature-name` - New features
 - `fix/bug-description` - Bug fixes  
-- `tests/fix-description` - Test-related fixes
-- `tests/add-description` - Adding new tests
+- `test/fix-description` - Test-related fixes
+- `test/add-description` - Adding new tests
 - `refactor/code-improvement` - Code refactoring
 - `docs/documentation-update` - Documentation changes
 - `chore/task-description` - Maintenance tasks
 
 **Examples:**
-- `tests/fix-test-failures` - Fixing failing tests
-- `tests/add-policy-coverage` - Adding new test coverage
+- `test/fix-test-failures` - Fixing failing tests
+- `test/add-policy-coverage` - Adding new test coverage
 - `refactor/organize-model-tests` - Restructuring test organization
 
 ## Git Commit Message Format
@@ -109,12 +109,12 @@ git checkout -b refactor/stables-actions-phase1-cleanup
 # Complete all Phase 1 tasks, commit, create PR, merge
 
 # Phase 2: Integration and orchestration  
-git checkout development  # Start from latest
+git checkout develop  # Start from latest
 git checkout -b refactor/stables-actions-phase2-integration
 # Complete all Phase 2 tasks, commit, create PR, merge
 
 # Phase 3: Standardization
-git checkout development  # Start from latest
+git checkout develop  # Start from latest
 git checkout -b refactor/stables-actions-phase3-standards
 # Complete all Phase 3 tasks, commit, create PR, merge
 ```
@@ -127,19 +127,8 @@ git checkout -b refactor/stables-actions-phase3-standards
 
 ## Pull Request Creation Requirements
 
-**MANDATORY: Always ask for explicit approval before creating PRs**
-
-Before creating any pull request:
-1. **Ask the user**: "Is it okay for me to create a PR for these changes?"
-2. **Wait for explicit "Yes"** - Do not proceed without clear approval
-3. **Only create PR after receiving approval** - Never assume permission
-
-**Example:**
-```
-The work is complete. Is it okay for me to create a PR for these changes?
-```
-
-**Wait for user response before using `gh pr create` command.**
+Create a pull request after the change is complete, verified, and ready for
+review. Confirm the target branch and merge method before merging.
 
 **Example Decision Points:**
 - Just finished Rules organization → Next todo is Builders restructure = **COMMIT & PR**

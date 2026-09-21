@@ -12,24 +12,17 @@ use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
-use App\Livewire\Concerns\ExecutesActionsWithContext;
-use App\Models\TagTeams\TagTeam;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
+use App\Livewire\Concerns\ExecutesRosterActions;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
-/**
- * Tag Team Actions Component
- *
- * Handles all business actions that can be performed on a tag team including
- * employment management, lifecycle operations, and partnership management.
- * This component is designed to be reusable across different contexts (tables,
- * detail pages, cards, etc.) while maintaining consistent authorization and
- * error handling patterns.
- */
 class Actions extends Component
 {
-    use ExecutesActionsWithContext;
+    use ExecutesRosterActions;
 
     public TagTeam $tagTeam;
 
@@ -38,161 +31,45 @@ class Actions extends Component
         $this->tagTeam = $tagTeam;
     }
 
-    /**
-     * Employ a tag team.
-     */
-    public function employ(): void
+    public function employ(EmployAction $employAction): void
     {
-        Gate::authorize('employ', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'employed',
-            EmployAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_employed' => $this->tagTeam->isEmployed(),
-                'tag_team_is_suspended' => $this->tagTeam->isSuspended(),
-                'tag_team_is_retired' => $this->tagTeam->isRetired(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Employ, RosterEntityType::TagTeam, $this->tagTeam, fn () => $employAction->handle($this->tagTeam));
     }
 
-    /**
-     * Release a tag team.
-     */
-    public function release(): void
+    public function release(ReleaseAction $releaseAction): void
     {
-        Gate::authorize('release', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'released',
-            ReleaseAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_employed' => $this->tagTeam->isEmployed(),
-                'tag_team_is_suspended' => $this->tagTeam->isSuspended(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Release, RosterEntityType::TagTeam, $this->tagTeam, fn () => $releaseAction->handle($this->tagTeam));
     }
 
-    /**
-     * Retire a tag team.
-     */
-    public function retire(): void
+    public function retire(RetireAction $retireAction): void
     {
-        Gate::authorize('retire', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'retired',
-            RetireAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_employed' => $this->tagTeam->isEmployed(),
-                'tag_team_is_suspended' => $this->tagTeam->isSuspended(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Retire, RosterEntityType::TagTeam, $this->tagTeam, fn () => $retireAction->handle($this->tagTeam));
     }
 
-    /**
-     * Unretire a tag team.
-     */
-    public function unretire(): void
+    public function unretire(UnretireAction $unretireAction): void
     {
-        Gate::authorize('unretire', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'unretired',
-            UnretireAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_retired' => $this->tagTeam->isRetired(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Unretire, RosterEntityType::TagTeam, $this->tagTeam, fn () => $unretireAction->handle($this->tagTeam));
     }
 
-    /**
-     * Suspend a tag team.
-     */
-    public function suspend(): void
+    public function suspend(SuspendAction $suspendAction): void
     {
-        Gate::authorize('suspend', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'suspended',
-            SuspendAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_employed' => $this->tagTeam->isEmployed(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Suspend, RosterEntityType::TagTeam, $this->tagTeam, fn () => $suspendAction->handle($this->tagTeam));
     }
 
-    /**
-     * Reinstate a tag team.
-     */
-    public function reinstate(): void
+    public function reinstate(ReinstateAction $reinstateAction): void
     {
-        Gate::authorize('reinstate', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'reinstated',
-            ReinstateAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_suspended' => $this->tagTeam->isSuspended(),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::TagTeam, $this->tagTeam, fn () => $reinstateAction->handle($this->tagTeam));
     }
 
-    /**
-     * Delete a tag team.
-     */
-    public function delete(): void
+    public function delete(DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'deleted',
-            DeleteAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_current_status' => $this->tagTeam->status,
-                'tag_team_is_employed' => $this->tagTeam->isEmployed(),
-                'tag_team_is_retired' => $this->tagTeam->isRetired(),
-                'tag_team_is_suspended' => $this->tagTeam->isSuspended(),
-            ]
-        );
+        $this->executeRosterAction('deleted', RosterEntityType::TagTeam, fn () => $deleteAction->handle($this->tagTeam));
     }
 
-    /**
-     * Restore a soft-deleted tag team.
-     */
-    public function restore(): void
+    public function restore(RestoreAction $restoreAction): void
     {
-        Gate::authorize('restore', $this->tagTeam);
-
-        $this->executeActionWithContext(
-            'restored',
-            RestoreAction::class,
-            $this->tagTeam,
-            'tag-team',
-            fn () => [
-                'tag_team_is_deleted' => ! is_null($this->tagTeam->deleted_at),
-            ]
-        );
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::TagTeam, $this->tagTeam, fn () => $restoreAction->handle($this->tagTeam));
     }
 
     public function render(): View

@@ -9,10 +9,13 @@ Ringside uses a domain-organized enum structure to maintain type safety and cons
 ### Domain Structure
 ```
 app/Enums/
+├── Lifecycle/              # Lifecycle audit enums
+│   ├── LifecycleDimension.php
+│   ├── LifecycleOwnerType.php
+│   └── LifecycleTransitionType.php
 ├── Shared/                 # Cross-domain enums
 │   ├── ActivationStatus.php
-│   ├── EmploymentStatus.php
-│   └── RosterMemberType.php
+│   └── EmploymentStatus.php
 ├── Events/                 # Event-specific enums
 ├── Stables/               # Stable-specific enums
 │   ├── StableMemberType.php
@@ -114,8 +117,15 @@ enum Role: string
 {
     case Administrator = 'administrator';    // Full system access
     case Basic = 'basic';                   // Limited access
+
+    public function isAdministrator(): bool
+    {
+        return $this === self::Administrator;
+    }
 }
 ```
+
+Authorization policies inspect role behavior through the cast `Role` value. The `User` model stores and casts the role but does not define role-specific predicates.
 
 #### User Status (Users/UserStatus.php)
 User account states.

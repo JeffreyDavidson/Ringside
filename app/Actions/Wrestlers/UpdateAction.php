@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Data\Wrestlers\WrestlerData;
-use App\Models\Wrestlers\Wrestler;
-use App\Support\DateHelper;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Action for updating wrestler information and managing employment status.
@@ -20,14 +18,11 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
  * - Uses EmployAction for consistent employment handling when employment_date is provided
- * - Automatically employs managers through EmployAction cascade strategies
- * - Uses DateHelper for consistent date handling
+ * - Automatically employs managers through EmployAction's typed collaborator
  * - Maintains employment history through proper action coordination
  */
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
@@ -39,30 +34,30 @@ class UpdateAction
      * Update a wrestler's information and handle employment status.
      *
      * This handles the complete update workflow:
-     * - Updates wrestler's basic information using DateHelper for consistent date handling
+     * - Updates wrestler's basic information
      * - Uses EmployAction for consistent employment creation when employment_date provided
-     * - Automatically employs managers through EmployAction cascade strategies
+     * - Automatically employs managers through EmployAction's typed collaborator
      * - Maintains transaction boundaries for data consistency
      */
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {
         return DB::transaction(function () use ($wrestler, $wrestlerData): Wrestler {
-            // Update the wrestler's basic information
-            $wrestler->update([
+            $lockedWrestler = $wrestler->refreshForUpdate();
+
+            $lockedWrestler->update([
                 'name' => $wrestlerData->name,
-                'height' => $wrestlerData->height,
-                'weight' => $wrestlerData->weight,
+                'height' => $wrestlerData->height->toInches(),
+                'weight' => $wrestlerData->weight->toPounds(),
                 'hometown' => $wrestlerData->hometown,
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
             // Employ wrestler if employment_date is provided and they're not already employed
-            if (! is_null($wrestlerData->employment_date) && ! $wrestler->isEmployed()) {
-                $employmentDate = DateHelper::resolveDate($wrestlerData->employment_date);
-                $this->employAction->handle($wrestler, $employmentDate);
+            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->currentEmployment()->exists()) {
+                $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }
 
-            return $wrestler;
+            return $lockedWrestler;
         });
     }
 }

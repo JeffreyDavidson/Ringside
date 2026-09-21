@@ -4,37 +4,49 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Tables;
 
+use App\Actions\Matches\DeleteAction;
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<EventMatch> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
+
+    #[\Override]
     protected bool $showActionColumn = false;
 
+    #[\Override]
     protected string $databaseTableName = 'events_matches';
 
+    #[\Override]
     protected string $routeBasePath = 'matches';
 
+    #[\Override]
     protected string $resourceName = 'matches';
 
     /**
-     * @return Builder<EventMatch>
+     * @return EventMatchBuilder<EventMatch>
      */
-    public function builder(): Builder
+    public function builder(): EventMatchBuilder
     {
         return EventMatch::query()
-            ->with(['event', 'competitors', 'result.winner'])
-            ->orderBy('events_matches.created_at', 'desc');
+            ->latestEventFirst()
+            ->with(['event', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        Gate::authorize('viewList', EventMatch::class);
+        Gate::authorize('viewAny', EventMatch::class);
 
         $this->addAdditionalSelects([
             'events_matches.event_id',
@@ -50,29 +62,44 @@ class Main extends BaseTable
         return [
             LinkColumn::make(__('event-matches.event'))
                 ->title(fn (EventMatch $row) => $row->event->name)
-                ->location(fn (EventMatch $row) => route('events.show', $row->event)),
+                ->location(fn (EventMatch $row): string => route('events.show', $row->event)),
             Column::make(__('event-matches.match_number'), 'match_number')
                 ->searchable(),
             Column::make(__('event-matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('event-matches.competitors'))
-                ->label(fn (EventMatch $row) => $row->competitors->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
+                ->label(fn (EventMatch $row): string => $row->competitors
+                    ->competitorModelsBySidePosition()
+                    ->map(fn (Collection $side): string => $side
+                        ->map(fn (Wrestler|TagTeam $competitor): string => $competitor->name)
+                        ->join(' & '))
+                    ->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
-                    $winner = $row->result?->winner;
-
-                    if ($winner) {
-                        return $winner->name.' by '.$row->result?->match_decision->label();
+                    if ($row->match_finish === null) {
+                        return 'N/A';
                     }
 
-                    return 'N/A';
+                    if ($row->winningSide) {
+                        $winners = $row->winningSide->competitors
+                            ->map(fn (MatchCompetitor $competitor): string => $competitor->competitor->name)
+                            ->join(' & ');
+
+                        return $winners.' by '.$row->match_finish->label();
+                    }
+
+                    return $row->match_finish->label();
                 }),
         ];
     }
 
-    public function delete(EventMatch $eventMatch): void
+    public function delete(EventMatch $eventMatch, DeleteAction $deleteAction): void
     {
-        $this->deleteModel($eventMatch);
+        Gate::authorize('delete', $eventMatch);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $eventMatch): void {
+            $deleteAction->handle($eventMatch);
+        }, __('matches.actions.deleted'));
     }
 }

@@ -2,427 +2,101 @@
 
 declare(strict_types=1);
 
+use App\Actions\Wrestlers\ClearFromInjuryAction;
+use App\Actions\Wrestlers\EmployAction;
+use App\Actions\Wrestlers\InjureAction;
+use App\Actions\Wrestlers\ReinstateAction;
+use App\Actions\Wrestlers\ReleaseAction;
+use App\Actions\Wrestlers\RestoreAction;
+use App\Actions\Wrestlers\RetireAction;
+use App\Actions\Wrestlers\SuspendAction;
+use App\Actions\Wrestlers\UnretireAction;
 use App\Livewire\Wrestlers\Components\Actions;
-use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
+use App\Models\Roster\Wrestlers\Wrestler;
+use JMac\Testing\Double;
+use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
-use function Spatie\PestPluginTestTime\testTime;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-/**
- * Wrestler Actions Component Integration Tests
- *
- * Tests the complete business action workflow for wrestlers including:
- * - Employment lifecycle (employ, release)
- * - Injury management (injure, heal)
- * - Suspension workflow (suspend, reinstate)
- * - Retirement lifecycle (retire, unretire)
- * - Status transitions and validation
- * - Authorization integration
- * - Event dispatching and state management
- */
-describe('WrestlersActions Integration Tests', function () {
-    beforeEach(function () {
-        testTime()->freeze();
-        $this->admin = User::factory()->administrator()->create();
-        $this->wrestler = Wrestler::factory()->employed()->create(['name' => 'Test Wrestler']);
+describe('wrestler actions component', function (): void {
+    test('it renders with the wrestler mounted', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+
+        // Assert
+        $component->assertOk();
+        expect($component->get('wrestler'))->toEqual($wrestler);
     });
 
-    describe('component initialization', function () {
-        test('component loads with wrestler properly bound', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            expect($component->get('wrestler')->id)->toBe($this->wrestler->id);
-            expect($component->get('wrestler')->name)->toBe('Test Wrestler');
-            expect(true)->toBeTrue();
-        });
-
-        test('component renders without errors', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler])
-                ->assertOk();
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('employment actions', function () {
-        test('employ action works for unemployed wrestler', function () {
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create(['name' => 'Unemployed Wrestler']);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
-
-            $component->call('employ')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($unemployedWrestler->fresh()->isEmployed())->toBeTrue();
-            // expect(session('status'))->toBe('Wrestler successfully employed.');
-            expect(true)->toBeTrue();
-        });
-
-        test('employ action fails for already employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('employ');
-
-            // expect(session('error'))->toMatch('/cannot be employed/');
-            expect(true)->toBeTrue();
-        });
-
-        test('release action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('release')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($this->wrestler->fresh()->isReleased())->toBeTrue();
-            // expect(session('status'))->toBe('Wrestler successfully released.');
-            expect(true)->toBeTrue();
-        });
-
-        test('release action fails for unemployed wrestler', function () {
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
-
-            $component->call('release');
-
-            // expect(session('error'))->toMatch('/cannot be released/');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('injury and healing actions', function () {
-        test('injure action works for healthy employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('injure')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($this->wrestler->fresh()->isInjured())->toBeTrue();
-            // expect(session('status'))->toBe('Wrestler injury recorded.');
-            expect(true)->toBeTrue();
-        });
-
-        test('injure action fails for already injured wrestler', function () {
-            $injuredWrestler = Wrestler::factory()->injured()->create();
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
-
-            $component->call('injure');
-
-            // expect(session('error'))->toMatch('/cannot be injured/');
-            expect(true)->toBeTrue();
-        });
-
-        test('heal action works for injured wrestler', function () {
-            $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
-
-            $component->call('healFromInjury')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($injuredWrestler->fresh()->isInjured())->toBeFalse();
-            // expect(session('status'))->toBe('Wrestler cleared from injury.');
-            expect(true)->toBeTrue();
-        });
-
-        test('heal action fails for healthy wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('healFromInjury');
-
-            // expect(session('error'))->toMatch('/cannot be cleared from injury/');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('suspension and reinstatement actions', function () {
-        test('suspend action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('suspend')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($this->wrestler->fresh()->isSuspended())->toBeTrue();
-            // expect(session('status'))->toBe('Wrestler successfully suspended.');
-            expect(true)->toBeTrue();
-        });
-
-        test('suspend action fails for unemployed wrestler', function () {
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
-
-            $component->call('suspend');
-
-            // expect(session('error'))->toMatch('/cannot be suspended/');
-            expect(true)->toBeTrue();
-        });
-
-        test('reinstate action works for suspended wrestler', function () {
-            $suspendedWrestler = Wrestler::factory()->suspended()->create(['name' => 'Suspended Wrestler']);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $suspendedWrestler]);
-
-            $component->call('reinstate')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($suspendedWrestler->fresh()->isSuspended())->toBeFalse();
-            // expect(session('status'))->toBe('Wrestler successfully reinstated.');
-            expect(true)->toBeTrue();
-        });
-
-        test('reinstate action fails for non-suspended wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('reinstate');
-
-            // expect(session('error'))->toMatch('/cannot be reinstated/');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('retirement lifecycle actions', function () {
-        test('retire action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('retire')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($this->wrestler->fresh()->isRetired())->toBeTrue();
-            // expect(session('status'))->toBe('Wrestler successfully retired.');
-            expect(true)->toBeTrue();
-        });
-
-        test('retire action fails for unemployed wrestler', function () {
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
-
-            $component->call('retire');
-
-            // expect(session('error'))->toMatch('/cannot be retired/');
-            expect(true)->toBeTrue();
-        });
-
-        test('unretire action works for retired wrestler', function () {
-            $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $retiredWrestler]);
-
-            $component->call('unretire')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect($retiredWrestler->fresh()->isRetired())->toBeFalse();
-            // expect(session('status'))->toBe('Wrestler successfully unretired.');
-            expect(true)->toBeTrue();
-        });
-
-        test('unretire action fails for active wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('unretire');
-
-            // expect(session('error'))->toMatch('/cannot be unretired/');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('restore action', function () {
-        test('restore action works for soft deleted wrestler', function () {
-            $this->wrestler->delete();
-            expect($this->wrestler->trashed())->toBeTrue();
-
-            $trashedWrestler = Wrestler::onlyTrashed()->find($this->wrestler->id);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $trashedWrestler]);
-
-            $component->call('restore')
-                ->assertHasNoErrors()
-                ->assertDispatched('wrestler-updated');
-
-            expect(Wrestler::find($this->wrestler->id))->not()->toBeNull();
-            // expect(session('status'))->toBe('Wrestler successfully restored.');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('complex status transition scenarios', function () {
-        test('wrestler can transition through complete career lifecycle', function () {
-            // Start unemployed
-            $wrestler = Wrestler::factory()->unemployed()->create(['name' => 'Career Wrestler']);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $wrestler]);
-
-            // Employ
-            $component->call('employ');
-            expect($wrestler->fresh()->isEmployed())->toBeTrue();
-
-            // Injure
-            $component->call('injure');
-            expect($wrestler->fresh()->isInjured())->toBeTrue();
-
-            // Heal
-            $component->call('healFromInjury');
-            expect($wrestler->fresh()->isInjured())->toBeFalse();
-
-            // Suspend
-            $component->call('suspend');
-            expect($wrestler->fresh()->isSuspended())->toBeTrue();
-
-            // Reinstate
-            $component->call('reinstate');
-            expect($wrestler->fresh()->isSuspended())->toBeFalse();
-
-            // Retire
-            $component->call('retire');
-            expect($wrestler->fresh()->isRetired())->toBeTrue();
-
-            // Comeback
-            $component->call('unretire');
-            expect($wrestler->fresh()->isRetired())->toBeFalse();
-            expect(true)->toBeTrue();
-        });
-
-        test('action availability changes based on current status', function () {
-            $injuredWrestler = Wrestler::factory()->injured()->create();
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
-
-            // Cannot employ injured wrestler
-            $component->call('employ');
-            // expect(session('error'))->toMatch('/cannot be employed/');
-            expect(true)->toBeTrue();
-
-            // Cannot injure already injured wrestler
-            $component->call('injure');
-            // expect(session('error'))->toMatch('/cannot be injured/');
-            expect(true)->toBeTrue();
-
-            // Can heal injured wrestler
-            $component->call('healFromInjury');
-            expect($injuredWrestler->fresh()->isInjured())->toBeFalse();
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('authorization integration', function () {
-        test('unauthorized user cannot perform actions', function () {
-            $guest = User::factory()->create(); // Non-admin user
-
-            $component = Livewire::actingAs($guest)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('employ')
-                ->assertForbidden();
-            expect(true)->toBeTrue();
-        });
-
-        test('admin can perform all actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            // All action calls should succeed (though business rules may prevent them)
-            $component->call('release')
-                ->assertOk();
-
-            // expect(session('status'))->toBe('Wrestler successfully released.');
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('event dispatching and state management', function () {
-        test('all successful actions dispatch wrestler-updated event', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('release')
-                ->assertDispatched('wrestler-updated');
-
-            $component->call('employ')
-                ->assertDispatched('wrestler-updated');
-
-            $component->call('injure')
-                ->assertDispatched('wrestler-updated');
-            expect(true)->toBeTrue();
-        });
-
-        test('failed actions do not dispatch events', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            // Try to employ already employed wrestler
-            $component->call('employ')
-                ->assertNotDispatched('wrestler-updated');
-            expect(true)->toBeTrue();
-        });
-
-        test('component state remains consistent after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            expect($component->get('wrestler')->id)->toBe($this->wrestler->id);
-
-            $component->call('release');
-
-            // Component wrestler reference should still be valid
-            expect($component->get('wrestler')->id)->toBe($this->wrestler->id);
-            expect(true)->toBeTrue();
-        });
-    });
-
-    describe('error handling and edge cases', function () {
-        test('component handles wrestler model refresh after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            // Perform action
-            $component->call('release');
-
-            // Wrestler status should reflect in fresh model
-            expect($this->wrestler->fresh()->isReleased())->toBeTrue();
-            expect(true)->toBeTrue();
-        });
-
-        test('component maintains wrestler data integrity', function () {
-            $originalName = $this->wrestler->name;
-            $originalId = $this->wrestler->id;
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
-
-            $component->call('injure');
-
-            expect($component->get('wrestler')->name)->toBe($originalName);
-            expect($component->get('wrestler')->id)->toBe($originalId);
-            expect(true)->toBeTrue();
-        });
-    });
+    test('it delegates lifecycle actions and dispatches wrestler feedback', function (
+        string $method,
+        string $actionClass,
+        DoubleInterface $action,
+        string $message,
+    ): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Wrestler && $actual->is($wrestler)),
+        );
+        app()->instance($actionClass, $action);
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+
+        // Act
+        $component->call($method);
+
+        // Assert
+        $component
+            ->assertDispatched('wrestler-updated')
+            ->assertDispatched('flash-message', type: 'status', message: $message);
+        $action->verify();
+    })->with([
+        'employ' => ['employ', EmployAction::class, Double::for(EmployAction::class), 'Wrestler has been hired.'],
+        'release' => ['release', ReleaseAction::class, Double::for(ReleaseAction::class), 'Contract has been terminated.'],
+        'retire' => ['retire', RetireAction::class, Double::for(RetireAction::class), 'Wrestler has been retired.'],
+        'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Wrestler has been brought out of retirement.'],
+        'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Wrestler has been suspended.'],
+        'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Wrestler has been reinstated.'],
+        'injure' => ['injure', InjureAction::class, Double::for(InjureAction::class), 'Injury has been recorded.'],
+        'clear from injury' => ['clearFromInjury', ClearFromInjuryAction::class, Double::for(ClearFromInjuryAction::class), 'Wrestler has been cleared from injury.'],
+        'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Wrestler has been restored.'],
+    ]);
+
+    test('it forbids lifecycle actions for unauthorized users without success feedback', function (string $method): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->unemployed()->create();
+
+        actingAs(basicUser());
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+
+        // Act
+        $component->call($method);
+
+        // Assert
+        $component->assertForbidden();
+        $component
+            ->assertNotDispatched('wrestler-updated')
+            ->assertNotDispatched('flash-message');
+        expect(session()->has('status'))->toBeFalse()
+            ->and($wrestler->currentEmployment()->exists())->toBeFalse();
+    })->with([
+        'employ',
+        'release',
+        'retire',
+        'unretire',
+        'suspend',
+        'reinstate',
+        'injure',
+        'clearFromInjury',
+        'restore',
+    ]);
 });

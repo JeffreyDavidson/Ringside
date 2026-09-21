@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
+use App\Models\Contracts\Employable;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -14,26 +17,42 @@ use Illuminate\Support\Carbon;
  */
 class CanChangeEmploymentDate implements ValidationRule
 {
-    public function __construct(private ?Model $model) {}
+    /**
+     * @param  (Model&Employable<*>)|null  $model
+     */
+    public function __construct(private readonly (Model&Employable)|null $model) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! $this->model || ! method_exists($this->model, 'isEmployed')) {
+        if ($this->model === null) {
+            return;
+        }
+
+        if (! $value instanceof DateTimeInterface && ! is_float($value) && ! is_int($value) && ! is_string($value)) {
+            $fail('The employment date must be a valid date.');
+
             return;
         }
 
         $targetDate = Carbon::parse($value);
 
-        if ($this->model->isEmployed()) {
-            if (method_exists($this->model, 'employedOn') && ! $this->model->employedOn($targetDate)) {
-                $modelName = $this->getModelName();
-                $fail("The employment date cannot be changed while {$modelName} is currently employed.");
-            }
+        if (! $this->model->currentEmployment()->exists()) {
+            return;
+        }
+
+        $query = $this->model->employments()->getQuery();
+        LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
+
+        if (! $query->exists()) {
+            $modelName = $this->getModelName($this->model);
+            $fail("The employment date cannot be changed while {$modelName} is currently employed.");
         }
     }
 
-    private function getModelName(): string
+    private function getModelName(Model $model): string
     {
-        return $this->model->getAttribute('name') ?? class_basename($this->model);
+        $name = $model->getAttribute('name');
+
+        return is_string($name) ? $name : class_basename($model);
     }
 }

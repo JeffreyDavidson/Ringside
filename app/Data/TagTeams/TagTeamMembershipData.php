@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data\TagTeams;
 
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -29,31 +29,35 @@ readonly class TagTeamMembershipData
 
     /**
      * Create membership data from individual wrestler properties.
+     *
+     * @param  Collection<int, Manager>|null  $managers
      */
-    public static function fromWrestlers(?Wrestler $wrestlerA, ?Wrestler $wrestlerB, ?Collection $managers = null): self
+    public static function fromWrestlers(Wrestler $wrestlerA, Wrestler $wrestlerB, ?Collection $managers = null): self
     {
-        $wrestlers = new Collection(array_filter([$wrestlerA, $wrestlerB]));
-
         return new self(
-            wrestlers: $wrestlers->isNotEmpty() ? $wrestlers : null,
+            wrestlers: new Collection([$wrestlerA, $wrestlerB]),
             managers: $managers
         );
     }
 
     /**
      * Get the wrestlers collection, defaulting to empty Eloquent collection.
+     *
+     * @return Collection<int, Wrestler>
      */
     public function getWrestlers(): Collection
     {
-        return $this->wrestlers ?? new Collection();
+        return $this->wrestlers ?? new Collection;
     }
 
     /**
      * Get the managers collection, defaulting to empty Eloquent collection.
+     *
+     * @return Collection<int, Manager>
      */
     public function getManagers(): Collection
     {
-        return $this->managers ?? new Collection();
+        return $this->managers ?? new Collection;
     }
 
     /**
@@ -61,7 +65,7 @@ readonly class TagTeamMembershipData
      */
     public function hasWrestlers(): bool
     {
-        return $this->wrestlers !== null && $this->wrestlers->isNotEmpty();
+        return $this->wrestlers instanceof Collection && $this->wrestlers->isNotEmpty();
     }
 
     /**
@@ -69,6 +73,13 @@ readonly class TagTeamMembershipData
      */
     public function hasManagers(): bool
     {
-        return $this->managers !== null && $this->managers->isNotEmpty();
+        return $this->managers instanceof Collection && $this->managers->isNotEmpty();
+    }
+
+    public function combinedWeightInPounds(): int
+    {
+        return (int) $this->getWrestlers()->sum(
+            fn (Wrestler $wrestler): int => $wrestler->weight->toPounds()
+        );
     }
 }

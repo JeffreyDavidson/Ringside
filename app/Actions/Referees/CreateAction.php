@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
-use App\Models\Referees\Referee;
-use App\Support\DateHelper;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     public function __construct(
-        private EmployAction $employAction
+        private readonly EmployAction $employAction
     ) {}
 
     /**
@@ -32,16 +28,6 @@ class CreateAction
      *
      * @param  RefereeData  $refereeData  The data transfer object containing referee information
      * @return Referee The newly created referee instance
-     *
-     * @example
-     * ```php
-     * $refereeData = new RefereeData([
-     *     'name' => 'Earl Hebner',
-     *     'hometown' => 'Richmond, VA',
-     *     'employment_date' => now()
-     * ]);
-     * $referee = CreateAction::run($refereeData);
-     * ```
      */
     public function handle(RefereeData $refereeData): Referee
     {
@@ -55,8 +41,7 @@ class CreateAction
 
             // Handle employment using EmployAction for consistency
             if (! is_null($refereeData->employment_date)) {
-                $employmentDate = DateHelper::resolveDate($refereeData->employment_date);
-                $this->employAction->handle($referee, $employmentDate);
+                $this->employAction->handle($referee, $refereeData->employment_date);
             }
 
             return $referee;

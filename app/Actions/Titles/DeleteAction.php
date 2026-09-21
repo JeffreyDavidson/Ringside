@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly DeletionStateManager $deletionState,
+    ) {}
 
     /**
      * Delete a title.
@@ -35,35 +39,22 @@ class DeleteAction
      *
      * @param  Title  $title  The title to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete a title immediately
-     * $title = Title::find(1);
-     * DeleteAction::run($title);
-     *
-     * // Delete with specific date
-     * $title = Title::find(1);
-     * DeleteAction::run($title, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $date = $deletionDate ?? now();
 
-        DB::transaction(function () use ($title, $deletionDate): void {
-            // Handle title status cleanup based on current state
-            if ($title->hasDebuted() && $title->isCurrentlyActive()) {
-                // End active status (pull the title from active competition)
-                $title->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
-            } elseif ($title->isRetired()) {
-                // End retirement period (retired titles are not active)
-                $title->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
+
+            if ($lockedTitle->currentActivityPeriod()->exists()) {
+                $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $date]);
+            } elseif ($lockedTitle->currentRetirement()->exists()) {
+                $lockedTitle->retirements()->whereNull('ended_at')->update(['ended_at' => $date]);
             }
-            // Note: Inactive (pulled) titles that have debuted require no status cleanup
 
-            // Soft delete the title record
-            $title->delete();
+            $this->championshipReigns->endCurrentReign($lockedTitle, $date);
+            $this->deletionState->delete($lockedTitle, $date);
         });
     }
 }

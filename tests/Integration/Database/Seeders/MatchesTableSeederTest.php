@@ -27,7 +27,6 @@ describe('MatchesTableSeeder Integration Tests', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']))
                 ->not()->toThrow(Exception::class);
-            expect(true)->toBeTrue();
         });
 
         test('creates event matches in database', function () {
@@ -36,7 +35,6 @@ describe('MatchesTableSeeder Integration Tests', function () {
 
             // Assert - Should create multiple event matches
             expect(EventMatch::count())->toBeGreaterThan(0);
-            expect(true)->toBeTrue();
         });
     });
 
@@ -50,13 +48,14 @@ describe('MatchesTableSeeder Integration Tests', function () {
             $eventMatches = EventMatch::take(10)->get();
 
             // Assert
+            expect($eventMatches)->not->toBeEmpty();
+
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->event_id)->toBeInt();
-                expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
-                expect($eventMatch->match_number)->toBeInt();
-                expect($eventMatch->match_number)->toBeGreaterThan(0);
+                expect($eventMatch->event_id)->toBeInt()
+                    ->and($eventMatch->match_type)->toBeInstanceOf(MatchType::class)
+                    ->and($eventMatch->match_number)->toBeInt()
+                    ->toBeGreaterThan(0);
             }
-            expect(true)->toBeTrue();
         });
 
         test('event matches have valid order sequence', function () {
@@ -64,24 +63,29 @@ describe('MatchesTableSeeder Integration Tests', function () {
             $eventMatches = EventMatch::take(10)->get();
 
             // Assert
+            expect($eventMatches)->not->toBeEmpty();
+
             foreach ($eventMatches as $eventMatch) {
                 expect($eventMatch->match_number)->toBeBetween(1, 20); // Reasonable match number range
             }
-            expect(true)->toBeTrue();
         });
 
-        test('event matches can have preview text', function () {
+        test('event matches have valid preview text', function () {
             // Arrange
-            $eventMatches = EventMatch::whereNotNull('preview')->take(5)->get();
+            $eventMatches = EventMatch::take(10)->get();
 
             // Assert
+            expect($eventMatches)->not->toBeEmpty();
+
             foreach ($eventMatches as $eventMatch) {
-                if ($eventMatch->preview) {
-                    expect($eventMatch->preview)->toBeString();
-                    expect($eventMatch->preview)->not->toBeEmpty();
+                if ($eventMatch->preview === null) {
+                    expect($eventMatch->preview)->toBeNull();
+
+                    continue;
                 }
+
+                expect($eventMatch->preview)->not->toBeEmpty();
             }
-            expect(true)->toBeTrue();
         });
     });
 
@@ -95,11 +99,12 @@ describe('MatchesTableSeeder Integration Tests', function () {
             $eventMatches = EventMatch::take(10)->get();
 
             // Assert
+            expect($eventMatches)->not->toBeEmpty();
+
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->event_id)->toBeInt();
-                expect($eventMatch->event_id)->toBeGreaterThan(0);
+                expect($eventMatch->event_id)->toBeInt()
+                    ->toBeGreaterThan(0);
             }
-            expect(true)->toBeTrue();
         });
 
         test('event matches have valid match type associations', function () {
@@ -107,21 +112,20 @@ describe('MatchesTableSeeder Integration Tests', function () {
             $eventMatches = EventMatch::take(10)->get();
 
             // Assert
+            expect($eventMatches)->not->toBeEmpty();
+
             foreach ($eventMatches as $eventMatch) {
                 expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
             }
-            expect(true)->toBeTrue();
         });
 
         test('event matches can load relationships', function () {
             // Arrange
-            $eventMatch = EventMatch::with(['event'])->first();
+            $eventMatch = EventMatch::with(['event'])->firstOrFail();
 
             // Assert
-            expect($eventMatch->event)->not()->toBeNull();
-            expect($eventMatch->event->name)->toBeString();
+            expect($eventMatch->event()->firstOrFail()->name)->toBeString();
             expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
-            expect(true)->toBeTrue();
         });
 
         test('seeder creates consistent data', function () {
@@ -133,7 +137,6 @@ describe('MatchesTableSeeder Integration Tests', function () {
 
             // Assert - Should maintain or increase count
             expect(EventMatch::count())->toBeGreaterThanOrEqual($initialCount);
-            expect(true)->toBeTrue();
         });
     });
 });

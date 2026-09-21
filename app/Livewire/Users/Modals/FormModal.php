@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Modals;
 
+use App\Actions\Users\CreateAction;
+use App\Actions\Users\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 /**
@@ -15,11 +16,25 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
+    protected ?string $createdEventName = 'userCreated';
+
+    #[\Override]
+    protected ?string $updatedEventName = 'userUpdated';
+
+    #[\Override]
+    protected bool $resetFormAfterSubmission = true;
+
     public CreateEditForm $form;
 
-    protected function getFormClass(): string
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
 
     protected function getModelClass(): string
@@ -27,77 +42,45 @@ class FormModal extends BaseFormModal
         return User::class;
     }
 
-    protected function getModalPath(): string
+    protected function populateDummyData(): void
     {
-        return 'livewire.users.modals.form-modal';
+        $this->form->first_name = fake()->firstName();
+        $this->form->last_name = fake()->lastName();
+        $this->form->email = fake()->unique()->safeEmail();
+        $this->form->password = 'password123';
+        $this->form->password_confirmation = 'password123';
+        $this->form->role = 'basic';
     }
 
-    protected function getDummyDataFields(): array
-    {
-        return [
-            'first_name' => fn () => fake()->firstName(),
-            'last_name' => fn () => fake()->lastName(),
-            'email' => fn () => fake()->unique()->safeEmail(),
-            'password' => fn () => 'password123',
-            'password_confirmation' => fn () => 'password123',
-            'role' => fn () => 'basic',
-        ];
-    }
-
-    public function openModal(mixed $modelId = null): void
-    {
-        // Check authorization before opening modal
-        if ($modelId !== null) {
-            // Editing existing user - check update permission
-            Gate::authorize('update', User::class);
-        } else {
-            // Creating new user - check create permission
-            Gate::authorize('create', User::class);
-        }
-
-        parent::openModal($modelId);
-    }
-
+    #[\Override]
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit User';
         }
 
         return 'Create User';
     }
 
-    public function submitForm(): bool
+    protected function updateForm(): void
     {
-        // Store whether we're creating or updating before the form submission
-        $isCreating = $this->form->isCreating();
-
-        $result = parent::submitForm();
-
-        if ($result) {
-            // Dispatch the appropriate event based on whether we created or updated
-            if ($isCreating) {
-                $this->dispatch('userCreated');
-            } else {
-                $this->dispatch('userUpdated');
-            }
-
-            // Reset the form after successful submission
-            $this->form->reset();
-        }
-
-        return $result;
+        $this->updateAction->handle($this->form->user(), $this->form->toData());
     }
 
+    protected function createForm(): void
+    {
+        $this->createAction->handle($this->form->toData());
+    }
+
+    #[\Override]
     public function closeModal(): void
     {
         parent::closeModal();
-        // Reset the form when modal is closed
         $this->form->reset();
     }
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.users.modals.form-modal');
+        return view('livewire.users.modals.form-modal');
     }
 }

@@ -6,12 +6,10 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Update a venue.
      *
@@ -23,26 +21,18 @@ class UpdateAction
      * @param  Venue  $venue  The venue to update
      * @param  VenueData  $venueData  The updated venue information
      * @return Venue The updated venue instance
-     *
-     * @example
-     * ```php
-     * $venueData = new VenueData([
-     *     'name' => 'Updated Arena Name',
-     *     'street_address' => 'New Address'
-     * ]);
-     * $updatedVenue = UpdateAction::run($venue, $venueData);
-     * ```
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {
-        $venue->update([
-            'name' => $venueData->name,
-            'street_address' => $venueData->street_address,
-            'city' => $venueData->city,
-            'state' => $venueData->state,
-            'zipcode' => $venueData->zipcode,
-        ]);
+        return DB::transaction(function () use ($venue, $venueData): Venue {
+            $lockedVenue = $venue->refreshForUpdate();
 
-        return $venue;
+            $lockedVenue->update([
+                'name' => $venueData->name,
+                'address' => $venueData->address,
+            ]);
+
+            return $lockedVenue;
+        });
     }
 }

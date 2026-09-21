@@ -15,6 +15,7 @@ readonly class StableData
         public string $name,
         public ?Carbon $start_date,
         public StableMembershipData $members,
+        public ?Carbon $end_date = null,
     ) {}
 
     /**
@@ -30,7 +31,7 @@ readonly class StableData
      */
     public function hasStartDate(): bool
     {
-        return $this->start_date !== null;
+        return $this->start_date instanceof Carbon;
     }
 
     /**

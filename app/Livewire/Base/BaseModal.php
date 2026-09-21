@@ -4,161 +4,75 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use LivewireUI\Modal\ModalComponent;
+use LogicException;
 
 /**
- * Base class for all modal components.
- *
- * This abstract class provides the foundation for all modal dialog components
- * in the application. It handles the common modal lifecycle, form integration,
- * and provides a consistent interface for modal operations across different
- * entity types.
- *
- * The class is designed to work seamlessly with BaseForm implementations,
- * providing a standardized way to display forms within modal dialogs while
- * maintaining proper state management and user experience patterns.
- *
- * Key Features:
- * - Seamless integration with BaseForm classes
- * - Automatic modal title generation based on operation type
- * - Proper model binding and form state management
- * - Event dispatching for component communication
- * - Consistent modal lifecycle management
- * - Type safety through generics
- *
  * @template TModelForm of BaseForm
  * @template TModelType of Model
- *
- * @see BaseForm For form integration requirements
- * @see BaseFormModal For form-specific modal implementation
  */
 abstract class BaseModal extends ModalComponent
 {
-    /**
-     * @var TModelType|null
-     */
-    protected ?Model $model;
+    protected string $modelTitleField = 'name';
 
-    /**
-     * @var TModelForm|null
-     */
-    protected BaseForm $modelForm;
+    /** @return class-string<TModelType> */
+    abstract protected function getModelClass(): string;
 
-    /**
-     * @var TModelType
-     */
-    protected Model $modelType;
+    /** @return TModelForm */
+    abstract protected function getModelForm(): BaseForm;
 
-    protected string $modalFormPath;
-
-    protected string $modelTitleField;
-
-    protected string $titleField;
-
-    /**
-     * Initialize the modal with proper configuration and lifecycle setup.
-     *
-     * This method is called automatically by Livewire when the modal component
-     * is instantiated. It handles the initial setup including model loading,
-     * form binding, and state preparation for both create and edit operations.
-     *
-     * @param  int|string|null  $modelId  The ID of the model to edit, or null for creation mode
-     */
     public function mount(int|string|null $modelId = null): void
     {
-        if ($modelId !== null) {
-            try {
-                $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-                $this->model = $this->modelType::findOrFail($id);
-                $this->modelForm->setModel($this->model);
-            } catch (Exception $e) {
-                Log::error($e->getMessage());
-            }
-        } else {
-            // Reset to create mode
-            $this->model = null;
-            $this->modelForm->reset();
+        $modelForm = $this->getModelForm();
+
+        if ($modelId === null) {
+            $modelForm->reset();
+
+            return;
         }
+
+        $id = is_numeric($modelId) ? (int) $modelId : $modelId;
+        $modelForm->setModel($this->findModel($id));
     }
 
-    /**
-     * Generate the modal title based on the current operation.
-     *
-     * Creates user-friendly modal titles that indicate whether the user is
-     * creating a new record or editing an existing one. For edit operations,
-     * it attempts to include the model's display name for better context.
-     *
-     * @return string The generated modal title
-     */
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
-            return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
+        $modelForm = $this->getModelForm();
+
+        if ($modelForm->modelId !== null) {
+            $model = $this->findModel($modelForm->modelId);
+            $value = $model->{$this->modelTitleField};
+
+            return 'Edit '.(string) ($value ?? 'Unknown');
         }
 
-        return 'Add '.(isset($this->modelType) ? class_basename($this->modelType) : 'Record');
+        return 'Add '.class_basename($this->getModelClass());
     }
 
-    /**
-     * Clear the form and reset it to the appropriate state.
-     *
-     * Resets the form to its initial state, either with the bound model data
-     * (for edit operations) or to empty state (for create operations).
-     */
     public function clear(): void
     {
-        if ($this->modelForm === null) {
-            return; // Cannot clear if form is not initialized
+        $modelForm = $this->getModelForm();
+
+        if ($modelForm->modelId !== null) {
+            $modelForm->setModel($this->findModel($modelForm->modelId));
+
+            return;
         }
 
-        if ($this->model !== null) {
-            $this->modelForm->setModel($this->model);
-        } else {
-            $this->modelForm->reset();
-        }
+        $modelForm->reset();
     }
 
-    /**
-     * Save the form data and handle the modal lifecycle.
-     *
-     * Processes the form submission, and if successful, dispatches events
-     * to refresh related components and closes the modal. This provides
-     * a consistent save workflow across all modal implementations.
-     */
-    public function save(): void
+    /** @return TModelType */
+    private function findModel(int|string $modelId): Model
     {
-        if ($this->modelForm->store()) {
-            $this->dispatch('refreshDatatable');
+        $modelClass = $this->getModelClass();
+        $model = $modelClass::query()->findOrFail($modelId);
 
-            $this->closeModal();
-        }
-    }
-
-    /**
-     * Render the modal view.
-     *
-     * Returns the appropriate view for the modal, with fallback handling
-     * for missing views to prevent errors during development.
-     *
-     * @return View The rendered modal view
-     */
-    public function render(): View
-    {
-        // Ensure modalFormPath is set
-        if (! isset($this->modalFormPath)) {
-            $this->modalFormPath = 'blank';
+        if (! $model instanceof $modelClass) {
+            throw new LogicException("Expected an instance of {$modelClass}.");
         }
 
-        $view = 'livewire.'.$this->modalFormPath;
-
-        if (! view()->exists($view)) {
-            $view = 'blank';
-        }
-
-        return view($view);
+        return $model;
     }
 }

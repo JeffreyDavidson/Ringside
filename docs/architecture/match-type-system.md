@@ -56,13 +56,13 @@ MatchType::factory()->royalRumble()->create();  // Special rumble format
 'slug' => 'tagteam'
 'min_competitors' => 2
 'max_competitors' => 2
-'allowed_types' => ['tag_team']
+'allowed_types' => ['wrestler', 'tag_team']
 ```
 
 **Rules:**
-- Exactly 2 tag teams required
-- Only tag teams allowed (no individual wrestlers)
-- Team-based competition format
+- Exactly two represented roster members are required on each side
+- Wrestlers, tag teams, or mixed combinations are allowed
+- A selected tag team represents all of its current wrestlers
 
 ### Triple Threat Match
 
@@ -192,14 +192,14 @@ Each match type defines allowed competitor types:
 // Example MatchType method
 public function getAllowedCompetitorTypes(): array
 {
-    return match ($this->slug) {
-        'singles', 'royal-rumble', 'battle-royal' => ['wrestler'],
-        'tagteam' => ['tag_team'],
-        'triple-threat', 'fatal-4-way' => ['wrestler', 'tag_team'],
+    return match ($this) {
+        self::Singles, self::Triangle, self::BattleRoyal, self::RoyalRumble => ['wrestler'],
         default => ['wrestler', 'tag_team'],
     };
 }
 ```
+
+`MatchCompetitorRequirements` is the authoritative assignment boundary. It applies these type restrictions, prevents duplicate representation, and validates competitor-entry and represented-roster-member compositions before persistence.
 
 ## Match Type Validation
 

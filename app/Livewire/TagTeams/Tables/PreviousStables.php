@@ -4,47 +4,40 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
-use App\Models\Stables\Stable;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 
+/** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
 {
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
-    public ?int $tagTeamId;
+    #[Locked]
+    public ?int $tagTeamId = null;
 
     /**
-     * @return Builder<Stable>
+     * @return StableBuilder<Stable>
      */
-    public function builder(): Builder
+    public function builder(): StableBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
-        }
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return Stable::query()
-            ->join('stables_tag_teams', 'stables.id', '=', 'stables_tag_teams.stable_id')
-            ->where('stables_tag_teams.tag_team_id', $this->tagTeamId)
-            ->whereNotNull('stables_tag_teams.left_at')
-            ->select('stables.*')
-            ->addSelect([
-                'joined_at' => DB::raw('stables_tag_teams.joined_at'),
-                'left_at' => DB::raw('stables_tag_teams.left_at'),
-            ])
-            ->orderByDesc('stables_tag_teams.joined_at');
+            ->previousForTagTeamId($tagTeamId);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
-        $this->setPrimaryKey('id')
-            ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setPaginationEnabled()
-            ->setPerPageAccepted([5, 10, 25, 50, 100])
-            ->setLoadingPlaceholderContent('Loading')
-            ->setLoadingPlaceholderEnabled();
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+
+        $this->setSearchPlaceholder('Search '.$this->resourceName)
+            ->setPerPageAccepted([5, 10, 25, 50, 100]);
     }
 }

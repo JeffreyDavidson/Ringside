@@ -1,3 +1,1 @@
-<div class="flex flex-col space-y-1">
-    {{ $slot }}
-</div>
+<div class="flex flex-col space-y-1">{{ $slot }}</div>

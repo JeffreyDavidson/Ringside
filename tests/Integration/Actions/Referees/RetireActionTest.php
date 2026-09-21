@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\RetireAction;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,22 +14,23 @@ beforeEach(function () {
 
 test('it retires an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isRetired())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentRetirement()->exists())->toBeFalse();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -39,35 +40,37 @@ test('it retires referee with specific retirement date', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(10);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $referee->refresh();
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Employment should be ended on the same date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $retirementDate->toDateTimeString(),
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(7);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $referee->refresh();
 
-    // DateHelper should have processed the retirement date
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    // The provided retirement date should be persisted
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -77,82 +80,82 @@ test('it validates referee can be retired', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be retired', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
-    expect(fn () => RetireAction::run($referee))
+    expect(fn () => resolve(RetireAction::class)->handle($referee))
         ->toThrow(CannotBeRetiredException::class);
 });
 
 test('it ends employment when retiring', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($employment->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $employment->refresh();
     expect($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
 test('it ends suspension before retiring', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $referee = Referee::factory()->suspended()->create();
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it ends injury before retiring', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $referee = Referee::factory()->injured()->create();
+    $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->isInjured())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
-    expect($referee->isInjured())->toBeFalse();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeFalse()
+        ->and($injury->ended_at)->not->toBeNull();
 });
 
 test('it creates retirement record with correct structure', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(5);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
-    $retirement = $referee->fresh()->currentRetirement;
+    $retirement = freshModel($referee)->currentRetirement()->firstOrFail();
 
-    expect($retirement)->not->toBeNull();
-    expect($retirement->referee_id)->toBe($referee->id);
-    expect($retirement->started_at->toDateTimeString())->toBe($retirementDate->toDateTimeString());
-    expect($retirement->ended_at)->toBeNull();
+    expect($retirement)->not->toBeNull()
+        ->and($retirement->retirable->is($referee))->toBeTrue()
+        ->and(requiredDate($retirement->started_at)->toDateTimeString())->toBe($retirementDate->toDateTimeString())
+        ->and($retirement->ended_at)->toBeNull();
 });

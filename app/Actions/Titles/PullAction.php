@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Titles\CannotBePulledException;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class PullAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
+    ) {}
 
     /**
      * Pull a title from active competition and make it inactive.
@@ -29,47 +37,22 @@ class PullAction
      * @param  Title  $title  The title to pull
      * @param  Carbon|null  $pullDate  The pull date (defaults to now)
      * @param  string|null  $notes  Optional notes about the pull
-     * @throws CannotBeDeactivatedException When title cannot be pulled due to business rules
-     *
-     * @example
-     * ```php
-     * // Pull title immediately
-     * PullAction::run($title, null, 'Brand overhaul');
-     *
-     * // Pull with specific date
-     * PullAction::run($title, Carbon::parse('2024-06-30'), 'Summer break');
-     * ```
      */
     public function handle(Title $title, ?Carbon $pullDate = null, ?string $notes = null): void
     {
-        $this->ensureCanBePulled($title);
+        $date = $pullDate ?? now();
 
-        $pullDate = $pullDate ?? now();
-
-        DB::transaction(function () use ($title, $pullDate): void {
-            $currentActivityPeriod = $title->currentActivityPeriod()->first();
-            if ($currentActivityPeriod) {
-                $currentActivityPeriod->update(['ended_at' => $pullDate]);
-            }
+        DB::transaction(function () use ($title, $date, $notes): void {
+            $lockedTitle = $title->refreshForUpdate();
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Pull);
+            $this->endActivityPeriod->handle($lockedTitle, $date);
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Pulled,
+                $date,
+                array_filter(['notes' => $notes]),
+            );
         });
-    }
-
-    /**
-     * Ensure the title can be pulled from active competition.
-     *
-     * @param  Title  $title  The title to validate
-     * @throws CannotBePulledException When the title cannot be pulled
-     */
-    private function ensureCanBePulled(Title $title): void
-    {
-        // A title can only be pulled if it's currently active
-        if (! $title->isCurrentlyActive()) {
-            throw CannotBePulledException::notActive($title);
-        }
-
-        // Cannot pull a retired title
-        if ($title->isRetired()) {
-            throw CannotBePulledException::retired($title);
-        }
     }
 }

@@ -2,127 +2,155 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchType;
 use App\Livewire\Matches\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Users\User;
-use Livewire\Livewire;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
-/**
- * @group matches
- * @group integration
- * @group livewire
- * @group tables
- */
-describe('Matches Main Table Component Integration', function () {
-    beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
-        $this->event = Event::factory()->scheduled()->create(['name' => 'Test Event']);
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
+beforeEach(function (): void {
+    actingAs(administrator());
+});
+
+describe('matches table', function (): void {
+    it('renders an empty state without matches', function (): void {
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('No records found.');
     });
 
-    describe('component rendering and data display', function () {
-        test('renders matches table with complete data relationships', function () {
-            $match = EventMatch::factory()->create([
-                'event_id' => $this->event->id,
-                'match_number' => 1,
-            ]);
+    it('renders matches by newest event and match number', function (): void {
+        // Arrange
+        $latestEvent = Event::factory()->create(['date' => Date::tomorrow()]);
+        $earliestEvent = Event::factory()->create(['date' => Date::yesterday()]);
+        $firstMatchWrestler = Wrestler::factory()->create(['name' => 'First Match Wrestler']);
+        $secondMatchWrestler = Wrestler::factory()->create(['name' => 'Second Match Wrestler']);
+        $earliestMatchWrestler = Wrestler::factory()->create(['name' => 'Earlier Match Wrestler']);
+        EventMatch::factory()
+            ->forEvent($latestEvent)
+            ->withMatchNumber(2)
+            ->withCompetitors([$secondMatchWrestler])
+            ->create();
+        EventMatch::factory()
+            ->forEvent($latestEvent)
+            ->withMatchNumber(1)
+            ->withCompetitors([$firstMatchWrestler])
+            ->create();
+        EventMatch::factory()
+            ->forEvent($earliestEvent)
+            ->withMatchNumber(1)
+            ->withCompetitors([$earliestMatchWrestler])
+            ->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+        // Act
+        $component = livewire(Main::class);
 
-            $component->assertOk();
-        });
-
-        test('displays match information correctly', function () {
-            $match = EventMatch::factory()->create([
-                'event_id' => $this->event->id,
-                'match_number' => 2,
-            ]);
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Test Event');
-        });
-
-        test('loads event relationships for display', function () {
-            $match = EventMatch::factory()->create([
-                'event_id' => $this->event->id,
-            ]);
-
-            expect($match->event)->not()->toBeNull();
-            expect($match->event->name)->toBe('Test Event');
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Test Event');
-        });
+        // Assert
+        $component->assertSeeInOrder([
+            'First Match Wrestler',
+            'Second Match Wrestler',
+            'Earlier Match Wrestler',
+        ]);
     });
 
-    describe('authorization integration', function () {
-        test('component requires proper authorization for access', function () {
-            $basicUser = User::factory()->create();
+    it('renders event, match type, competitors, and an empty result', function (): void {
+        // Arrange
+        $event = Event::factory()->create(['name' => 'Summer Spectacular']);
+        $wrestler = Wrestler::factory()->create(['name' => 'Singles Wrestler']);
+        $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team']);
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withMatchNumber(3)
+            ->withMatchType(MatchType::TagTeam)
+            ->withCompetitors([$wrestler, $tagTeam])
+            ->create();
 
-            Livewire::actingAs($basicUser)
-                ->test(Main::class)
-                ->assertForbidden();
-        });
+        // Act
+        $component = livewire(Main::class);
 
-        test('guest users cannot access component', function () {
-            Livewire::test(Main::class)
-                ->assertForbidden();
-        });
-
-        test('admin can access matches table', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
-
-            $component->assertOk();
-        });
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('Summer Spectacular')
+            ->assertSee(route('events.show', $event))
+            ->assertSee('3')
+            ->assertSee(MatchType::TagTeam->label())
+            ->assertSee('Singles Wrestler')
+            ->assertSee('Tag Team')
+            ->assertSee('N/A');
     });
 
-    describe('query optimization and performance', function () {
-        test('component loads efficiently with many matches', function () {
-            EventMatch::factory()->count(10)->create([
-                'event_id' => $this->event->id,
-            ]);
+    it('searches matches by type and clears the search', function (): void {
+        // Arrange
+        EventMatch::factory()
+            ->withMatchType(MatchType::Singles)
+            ->create();
+        EventMatch::factory()
+            ->withMatchType(MatchType::TagTeam)
+            ->create();
+        $component = livewire(Main::class);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+        // Act
+        $component->set('search', 'Singles');
 
-            $component->assertOk();
-        });
+        // Assert
+        $component
+            ->assertSee('Singles')
+            ->assertDontSee('Tag Team');
 
-        test('eager loading relationships works correctly', function () {
-            $match = EventMatch::factory()->create([
-                'event_id' => $this->event->id,
-            ]);
+        // Act
+        $component->set('search', '');
 
-            expect($match->event)->not()->toBeNull();
-
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Test Event');
-        });
+        // Assert
+        $component
+            ->assertSee('Singles')
+            ->assertSee('Tag Team');
     });
 
-    describe('component state management', function () {
-        test('component maintains state through action calls', function () {
-            $match = EventMatch::factory()->create([
-                'event_id' => $this->event->id,
-            ]);
+    it('deletes a match', function (): void {
+        // Arrange
+        $match = EventMatch::factory()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+        // Act
+        $component = livewire(Main::class);
+        $component->call('delete', $match);
 
-            $component->assertOk();
-
-            expect(EventMatch::find($match->id))->not()->toBeNull();
-        });
+        // Assert
+        $component
+            ->assertHasNoErrors()
+            ->assertDispatched(
+                'flash-message',
+                type: 'status',
+                message: __('matches.actions.deleted'),
+            );
+        $this->assertSoftDeleted($match);
     });
+
+    it('forbids users without match access', function (string $actor): void {
+        // Arrange
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });

@@ -5,21 +5,19 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
-use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
-use App\Services\StableValidationService;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Models\Roster\Stables\Stable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected EstablishAction $establishAction,
+        protected SynchronizeStableMembersAction $synchronizeStableMembersAction,
     ) {}
 
     /**
@@ -34,43 +32,44 @@ class UpdateAction
      * @param  Stable  $stable  The stable to update
      * @param  StableData  $stableData  The updated stable information
      * @return Stable The updated stable instance
-     *
-     * @example
-     * ```php
-     * $stableData = new StableData(
-     *     name: 'Updated Stable Name',
-     *     start_date: null,
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$wrestler1, $wrestler2, $wrestler3]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $updatedStable = UpdateAction::run($stable, $stableData);
-     * ```
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {
-        return DB::transaction(function () use ($stable, $stableData): Stable {
-            // Validate business rules before updating
-            $validationService = app(StableValidationService::class);
-            $validationService->validateUniqueName($stableData->getTrimmedName(), $stable);
-            $validationService->validateMembersAvailable($stableData->members);
+        if ($stableData->start_date instanceof Carbon && $stableData->end_date instanceof Carbon && $stableData->end_date->lt($stableData->start_date)) {
+            throw InvalidDateRangeException::endBeforeStart(
+                $stableData->start_date,
+                $stableData->end_date,
+                'stable activity',
+            );
+        }
 
-            $stable->update([
+        return DB::transaction(function () use ($stable, $stableData): Stable {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $lockedStable->update([
                 'name' => $stableData->getTrimmedName(),
             ]);
 
-            // Use enhanced DTO method and centralized validation
+            $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
+
             if ($stableData->hasStartDate()) {
-                $validationService->validateEstablishmentDateChange($stable);
-                $this->establishAction->handle($stable, $stableData->start_date);
+                $activityPeriod = $lockedStable->firstActivityPeriod()->lockForUpdate()->first();
+
+                if ($activityPeriod) {
+                    $activityPeriod->update([
+                        'started_at' => $stableData->start_date,
+                        'ended_at' => $stableData->end_date,
+                    ]);
+                } else {
+                    $this->establishAction->handle(
+                        $lockedStable,
+                        $stableData->start_date,
+                        $stableData->end_date,
+                    );
+                }
             }
 
-            // Update stable membership using service
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->updateMembership($stable, $stableData->members, now());
-
-            return $stable;
+            return $lockedStable;
         });
     }
 }

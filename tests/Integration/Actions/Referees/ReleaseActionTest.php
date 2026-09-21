@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\ReleaseAction;
-use App\Exceptions\Roster\CannotBeReleasedException;
-use App\Models\Referees\Referee;
+use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,20 +14,20 @@ beforeEach(function () {
 
 test('it releases an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -35,34 +35,34 @@ test('it releases an employed referee', function () {
 
 test('it releases referee with specific release date', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
     $releaseDate = now()->subDays(4);
 
-    ReleaseAction::run($referee, $releaseDate);
+    resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($employment->ended_at->toDateTimeString())->toBe($releaseDate->toDateTimeString());
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and(requiredDate($employment->ended_at)->toDateTimeString())->toBe($releaseDate->toDateTimeString());
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $releaseDate = now()->subDays(6);
 
-    ReleaseAction::run($referee, $releaseDate);
+    resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 
     $referee->refresh();
 
-    // DateHelper should have processed the release date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    // The provided release date should be persisted
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -71,85 +71,85 @@ test('it validates referee can be released', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 });
 
 test('it throws exception when referee cannot be released', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($referee))
+    expect(fn () => resolve(ReleaseAction::class)->handle($referee))
         ->toThrow(CannotBeReleasedException::class);
 });
 
 test('it ends suspension before releasing', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $referee = Referee::factory()->suspended()->create();
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it ends injury before releasing', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $referee = Referee::factory()->injured()->create();
+    $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->isInjured())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->isInjured())->toBeFalse();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->currentInjury()->exists())->toBeFalse()
+        ->and($injury->ended_at)->not->toBeNull();
 });
 
 test('it maintains transaction boundaries', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
-    $employment = $referee->currentEmployment;
-    $suspension = $referee->currentSuspension;
+    $referee = Referee::factory()->suspended()->create();
+    $employment = $referee->currentEmployment()->firstOrFail();
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
     $suspension->refresh();
 
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($employment->ended_at)->not->toBeNull()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it preserves employment history', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
     $originalStartedAt = $employment->started_at;
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $employment->refresh();
 
     // Employment record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
+        'employable_id' => $referee->id,
         'started_at' => $originalStartedAt->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

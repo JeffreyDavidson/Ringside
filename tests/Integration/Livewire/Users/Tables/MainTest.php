@@ -5,437 +5,205 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Livewire\Users\Tables\Main;
-use App\Livewire\Users\Tables\UsersTable;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
+use Illuminate\Support\Facades\Auth;
 
-/**
- * Integration tests for UsersTable Livewire component.
- *
- * INTEGRATION TEST SCOPE:
- * - Component rendering with complex data relationships
- * - Filtering and search functionality integration
- * - Action dropdown integration
- * - Status display integration
- * - Real database interaction with user data
- */
-describe('UsersTable Component', function () {
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-    beforeEach(function () {
-        $this->user = administrator();
-        $this->actingAs($this->user);
+beforeEach(function (): void {
+    actingAs(administrator());
+});
+
+describe('users table', function (): void {
+    it('renders the configured table controls and user attributes', function (): void {
+        // Arrange
+        $administrator = User::factory()->administrator()->create([
+            'first_name' => 'John',
+            'last_name' => 'Admin',
+            'email' => 'admin@example.com',
+            'phone_number' => '1234567890',
+            'status' => UserStatus::Active,
+        ]);
+        $basicUser = User::factory()->unverified()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Member',
+            'email' => 'member@example.com',
+        ]);
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('Add User')
+            ->assertSeeHtml('placeholder="Search users"')
+            ->assertSee('John Admin')
+            ->assertSee($administrator->email)
+            ->assertSee('(123) 456-7890')
+            ->assertSee(Role::Administrator->name)
+            ->assertSee('Jane Member')
+            ->assertSee($basicUser->email)
+            ->assertSee(Role::Basic->name);
     });
 
-    describe('component rendering integration', function () {
-        test('renders users table with complete data relationships', function () {
-            // Create users with different roles and statuses
-            $adminUser = User::factory()->administrator()->create([
-                'first_name' => 'John',
-                'last_name' => 'Admin',
-                'email' => 'admin@example.com',
-            ]);
-            $basicUser = User::factory()->create([
-                'role' => Role::Basic,
-                'first_name' => 'Jane',
-                'last_name' => 'User',
-                'email' => 'user@example.com',
-            ]);
-            $unverifiedUser = User::factory()->unverified()->create([
-                'first_name' => 'Bob',
-                'last_name' => 'Unverified',
-                'email' => 'unverified@example.com',
-            ]);
+    it('filters users by status', function (UserStatus $status): void {
+        // Arrange
+        User::factory()->create([
+            'first_name' => 'Matching',
+            'last_name' => 'Account',
+            'status' => $status,
+        ]);
+        $hiddenStatus = $status === UserStatus::Active
+            ? UserStatus::Inactive
+            : UserStatus::Active;
+        User::factory()->create([
+            'first_name' => 'Hidden',
+            'last_name' => 'Account',
+            'status' => $hiddenStatus,
+        ]);
+        $component = livewire(Main::class);
 
-            $component = Livewire::test(Main::class);
+        // Act
+        $component->set('filterValues.status', $status->value);
 
-            $component
-                ->assertSee('John Admin')
-                ->assertSee('Jane User')
-                ->assertSee('Bob Unverified')
-                ->assertSee('admin@example.com')
-                ->assertSee('user@example.com')
-                ->assertSee('unverified@example.com');
-        });
+        // Assert
+        $component
+            ->assertSee('Matching Account')
+            ->assertDontSee('Hidden Account');
+    })->with(UserStatus::cases());
 
-        test('displays correct role labels for different user types', function () {
-            $adminUser = User::factory()->administrator()->create(['first_name' => 'Admin']);
-            $basicUser = User::factory()->create([
-                'role' => Role::Basic,
-                'first_name' => 'Basic',
-            ]);
+    it('searches users by name and clears the search', function (): void {
+        // Arrange
+        User::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Smith',
+        ]);
+        User::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+        ]);
+        $component = livewire(Main::class);
 
-            $component = Livewire::test(Main::class);
+        // Act
+        $component->set('search', 'John');
 
-            $component
-                ->assertSee('Admin')
-                ->assertSee('Basic')
-                ->assertSee('Administrator')
-                ->assertSee('Basic');
-        });
+        // Assert
+        $component
+            ->assertSee('John Smith')
+            ->assertDontSee('Jane Doe');
 
-        test('displays correct status indicators for different user states', function () {
-            $activeUser = User::factory()->create([
-                'status' => UserStatus::Active,
-                'first_name' => 'Active',
-            ]);
-            $inactiveUser = User::factory()->create([
-                'status' => UserStatus::Inactive,
-                'first_name' => 'Inactive',
-            ]);
-            $unverifiedUser = User::factory()->create([
-                'status' => UserStatus::Unverified,
-                'first_name' => 'Unverified',
-            ]);
+        // Act
+        $component->set('search', '');
 
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->assertSee('Active')
-                ->assertSee('Inactive')
-                ->assertSee('Unverified');
-        });
-
-        test('displays formatted phone numbers correctly', function () {
-            $userWithPhone = User::factory()->create([
-                'first_name' => 'Phone',
-                'last_name' => 'User',
-                'phone_number' => '1234567890',
-            ]);
-            $userWithoutPhone = User::factory()->create([
-                'first_name' => 'No Phone',
-                'last_name' => 'User',
-                'phone_number' => null,
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->assertSee('Phone User')
-                ->assertSee('No Phone User')
-                ->assertSee('(123) 456-7890');
-        });
+        // Assert
+        $component
+            ->assertSee('John Smith')
+            ->assertSee('Jane Doe');
     });
 
-    describe('filtering and search integration', function () {
-        test('search functionality filters users by name correctly', function () {
-            $john = User::factory()->create([
-                'first_name' => 'John',
-                'last_name' => 'Smith',
-                'email' => 'john@example.com',
-            ]);
-            $jane = User::factory()->create([
-                'first_name' => 'Jane',
-                'last_name' => 'Doe',
-                'email' => 'jane@example.com',
-            ]);
-            $bob = User::factory()->create([
-                'first_name' => 'Bob',
-                'last_name' => 'Baker',
-                'email' => 'bob@example.com',
-            ]);
+    it('searches users by email', function (): void {
+        // Arrange
+        $matchingUser = User::factory()->create([
+            'first_name' => 'Unique',
+            'last_name' => 'Account',
+            'email' => 'unique@domain.com',
+        ]);
+        $hiddenUser = User::factory()->create([
+            'first_name' => 'Different',
+            'last_name' => 'Account',
+            'email' => 'different@domain.com',
+        ]);
+        $component = livewire(Main::class);
 
-            // Ensure virtual columns are computed
-            $john->fresh();
-            $jane->fresh();
-            $bob->fresh();
+        // Act
+        $component->set('search', 'unique@');
 
-            $component = Livewire::test(Main::class);
-
-            // Test search by first name
-            $component
-                ->set('search', 'John')
-                ->assertSee('John Smith')
-                ->assertDontSee('Jane Doe')
-                ->assertDontSee('Bob Baker');
-
-            // Test search by last name
-            $component
-                ->set('search', 'Doe')
-                ->assertSee('Jane Doe')
-                ->assertDontSee('John Smith')
-                ->assertDontSee('Bob Baker');
-
-            // Test clearing search
-            $component
-                ->set('search', '')
-                ->assertSee('John Smith')
-                ->assertSee('Jane Doe')
-                ->assertSee('Bob Baker');
-        });
-
-        test('search functionality filters users by email correctly', function () {
-            User::factory()->create([
-                'first_name' => 'Test',
-                'last_name' => 'User1',
-                'email' => 'unique@domain.com',
-            ]);
-            User::factory()->create([
-                'first_name' => 'Test',
-                'last_name' => 'User2',
-                'email' => 'different@domain.com',
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->set('search', 'unique@')
-                ->assertSee('Test User1')
-                ->assertSee('unique@domain.com')
-                ->assertDontSee('Test User2')
-                ->assertDontSee('different@domain.com');
-        });
-
-        test('component handles complex search patterns', function () {
-            User::factory()->create([
-                'first_name' => 'John',
-                'last_name' => 'Smith',
-                'email' => 'john.smith@company.com',
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            // Search should work with partial matches
-            $component
-                ->set('search', 'john')
-                ->assertSee('John Smith');
-
-            $component
-                ->set('search', 'smith')
-                ->assertSee('John Smith');
-
-            $component
-                ->set('search', 'company')
-                ->assertSee('John Smith');
-        });
+        // Assert
+        $component
+            ->assertSee('Unique Account')
+            ->assertSee($matchingUser->email)
+            ->assertDontSee('Different Account')
+            ->assertDontSee($hiddenUser->email);
     });
 
-    describe('data ordering and presentation', function () {
-        test('users are ordered by last name as configured', function () {
-            $userA = User::factory()->create([
-                'first_name' => 'John',
-                'last_name' => 'Anderson',
-                'created_at' => now()->subDay(),
-            ]);
-            $userB = User::factory()->create([
-                'first_name' => 'Jane',
-                'last_name' => 'Baker',
-                'created_at' => now(),
-            ]);
-            $userC = User::factory()->create([
-                'first_name' => 'Bob',
-                'last_name' => 'Cooper',
-                'created_at' => now()->subHour(),
-            ]);
+    it('orders users by last name', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Bob', 'last_name' => 'Cooper']);
+        User::factory()->create(['first_name' => 'John', 'last_name' => 'Anderson']);
+        User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Baker']);
 
-            $component = Livewire::test(Main::class);
+        // Act
+        $component = livewire(Main::class);
 
-            // Get the rendered content to check ordering
-            $html = $component->html();
-
-            // Anderson should appear before Baker, Baker before Cooper
-            $andersonPos = mb_strpos($html, 'Anderson');
-            $bakerPos = mb_strpos($html, 'Baker');
-            $cooperPos = mb_strpos($html, 'Cooper');
-
-            expect($andersonPos)->toBeLessThan($bakerPos);
-            expect($bakerPos)->toBeLessThan($cooperPos);
-        });
-
-        test('component selects correct fields for performance', function () {
-            $user = User::factory()->create([
-                'first_name' => 'Test',
-                'last_name' => 'User',
-                'email' => 'test@example.com',
-                'phone_number' => '1234567890',
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            // Verify the component loads without N+1 issues
-            $users = $component->instance()->builder()->get();
-            expect($users)->toBeCollection();
-            expect($users->count())->toBeGreaterThan(0);
-        });
+        // Assert
+        $component->assertSeeInOrder([
+            'John Anderson',
+            'Jane Baker',
+            'Bob Cooper',
+        ]);
     });
 
-    describe('component state management', function () {
-        test('component maintains state between interactions', function () {
-            $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-            $jane = User::factory()->create(['first_name' => 'SearchExcluded', 'last_name' => 'Fixture']);
+    it('renders updated user data after a refresh', function (): void {
+        // Arrange
+        $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        $component = livewire(Main::class);
+        $component->assertSee('Original Name');
+        $user->update(['first_name' => 'Updated']);
 
-            // Ensure virtual columns are computed
-            $john->fresh();
-            $jane->fresh();
+        // Act
+        $component->call('$refresh');
 
-            $component = Livewire::test(Main::class);
-
-            // Set search and verify it persists
-            $component
-                ->set('search', 'John')
-                ->assertSee('John Doe')
-                ->assertDontSee('SearchExcluded Fixture');
-
-            // Component should maintain search state
-            $component
-                ->call('$refresh')
-                ->assertSee('John Doe')
-                ->assertDontSee('SearchExcluded Fixture');
-        });
-
-        test('component handles real-time data updates', function () {
-            $user = User::factory()->create([
-                'first_name' => 'Original',
-                'last_name' => 'Name',
-            ]);
-
-            $component = Livewire::test(Main::class);
-            $component->assertSee('Original Name');
-
-            // Update user data
-            $user->update([
-                'first_name' => 'Updated',
-                'last_name' => 'Name',
-            ]);
-
-            // Refresh component
-            $component->call('$refresh');
-            $component->assertSee('Updated Name');
-            $component->assertDontSee('Original Name');
-        });
+        // Assert
+        $component
+            ->assertSee('Updated Name')
+            ->assertDontSee('Original Name');
     });
 
-    describe('action integration', function () {
-        test('component integrates with authorization policies', function () {
-            $user = User::factory()->create(['first_name' => 'Test', 'last_name' => 'User']);
+    it('renders users without phone numbers', function (): void {
+        // Arrange
+        User::factory()->create([
+            'first_name' => 'Missing',
+            'last_name' => 'Phone',
+            'phone_number' => null,
+        ]);
 
-            // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
-            $component->assertOk();
-            $component->assertSee($user->first_name);
-        });
+        // Act
+        $component = livewire(Main::class);
 
-        test('component handles action availability based on user permissions', function () {
-            $testUser = User::factory()->create(['first_name' => 'Action', 'last_name' => 'Test']);
-
-            $component = Livewire::actingAs($this->user)->test(Main::class);
-
-            // Administrator should see the user
-            $component->assertSee('Action Test');
-        });
+        // Assert
+        $component->assertSee('Missing Phone');
     });
 
-    describe('performance and scalability', function () {
-        test('component handles large datasets efficiently', function () {
-            // Create multiple users with various attributes
-            User::factory()->count(20)->create();
+    it('treats hostile search input as plain text', function (): void {
+        // Arrange
+        $user = User::factory()->create(['first_name' => 'Valid', 'last_name' => 'User']);
+        $component = livewire(Main::class);
 
-            $component = Livewire::test(Main::class);
+        // Act
+        $component->set('search', "'; DROP TABLE users; --");
 
-            // Component should render efficiently
-            $component->assertOk();
-
-            // Should not have N+1 query issues (query counting would require additional setup)
-            $users = $component->instance()->builder()->get();
-            expect($users)->not->toBeEmpty();
-        });
-
-        test('component eager loads necessary relationships', function () {
-            $userWithWrestler = User::factory()->create(['first_name' => 'Wrestler', 'last_name' => 'Owner']);
-            Wrestler::factory()->create(['user_id' => $userWithWrestler->id]);
-
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->assertOk()
-                ->assertSee('Wrestler Owner');
-        });
+        // Assert
+        $component->assertDontSee('Valid User');
+        expect(User::query()->whereKey($user)->exists())->toBeTrue();
     });
 
-    describe('user status and role display integration', function () {
-        test('component displays role information correctly', function () {
-            $admin = User::factory()->administrator()->create(['first_name' => 'Super', 'last_name' => 'Admin']);
-            $basic = User::factory()->create(['role' => Role::Basic, 'first_name' => 'Regular', 'last_name' => 'User']);
+    it('forbids users without administrative access', function (string $actor): void {
+        // Arrange
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
 
-            $component = Livewire::test(Main::class);
+        // Act
+        $component = livewire(Main::class);
 
-            $component
-                ->assertSee('Super Admin')
-                ->assertSee('Regular User');
-        });
-
-        test('component handles different user statuses correctly', function () {
-            $activeUser = User::factory()->create([
-                'status' => UserStatus::Active,
-                'first_name' => 'Active',
-                'last_name' => 'User',
-            ]);
-            $inactiveUser = User::factory()->create([
-                'status' => UserStatus::Inactive,
-                'first_name' => 'Inactive',
-                'last_name' => 'User',
-            ]);
-            $unverifiedUser = User::factory()->create([
-                'status' => UserStatus::Unverified,
-                'first_name' => 'Unverified',
-                'last_name' => 'User',
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->assertSee('Active User')
-                ->assertSee('Inactive User')
-                ->assertSee('Unverified User');
-        });
-    });
-
-    describe('error handling and edge cases', function () {
-        test('component handles empty datasets gracefully', function () {
-            // Clear all users except the acting user
-            User::where('id', '!=', $this->user->id)->delete();
-
-            $component = Livewire::test(Main::class);
-
-            $component->assertOk();
-            // Should still show the acting user
-            $component->assertSee($this->user->first_name);
-        });
-
-        test('component handles users with missing data gracefully', function () {
-            $userWithNulls = User::factory()->create([
-                'first_name' => 'Missing',
-                'last_name' => 'Data',
-                'phone_number' => null,
-                'avatar_path' => null,
-            ]);
-
-            $component = Livewire::test(Main::class);
-
-            $component
-                ->assertOk()
-                ->assertSee('Missing Data');
-        });
-
-        test('component handles invalid search input gracefully', function () {
-            User::factory()->create(['first_name' => 'Valid', 'last_name' => 'User']);
-
-            $component = Livewire::test(Main::class);
-
-            // Test with special characters
-            $component
-                ->set('search', '@#$%^&*()')
-                ->assertOk();
-
-            // Test with very long search
-            $component
-                ->set('search', str_repeat('a', 1000))
-                ->assertOk();
-
-            // Test with SQL injection attempt
-            $component
-                ->set('search', "'; DROP TABLE users; --")
-                ->assertOk();
-        });
-    });
+        // Assert
+        $component->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });

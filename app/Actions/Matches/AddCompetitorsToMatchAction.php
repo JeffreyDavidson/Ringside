@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Lifecycle\Matches\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
-use Illuminate\Support\Arr;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddCompetitorsToMatchAction
 {
-    use AsAction;
+    public function __construct(
+        protected AddTagTeamsToMatchAction $addTagTeamsToMatchAction,
+        protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
+        private readonly MatchCompetitorRequirements $requirements,
+    ) {}
 
     /**
      * Add competitors to an event match.
@@ -29,53 +31,34 @@ class AddCompetitorsToMatchAction
      * - Ensures all competitors are available for the event date
      *
      * BUSINESS RULES:
-     * - Matches must have at least 2 sides with competitors
+     * - Competitor side and entrant counts must satisfy the selected match type
      * - Wrestlers cannot be assigned to multiple sides in the same match
      * - Tag teams must be active and available for competition
      * - Competitors must not have conflicting bookings on the event date
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
-     * @param  Collection<int, array<string, array<int, Wrestler|TagTeam>>>  $competitors  Competitors organized by side number and type
-     *
-     * @example
-     * ```php
-     * // Singles match: John Cena vs Randy Orton
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$johnCena], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$randyOrton], 'tag_teams' => []]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     *
-     * // Tag team match: The Hardy Boyz vs Edge & Christian
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [], 'tag_teams' => [$hardyBoyz]],
-     *     2 => ['wrestlers' => [], 'tag_teams' => [$edgeAndChristian]]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     *
-     * // Triple threat match: Stone Cold vs The Rock vs Triple H
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$stoneColid], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$theRock], 'tag_teams' => []],
-     *     3 => ['wrestlers' => [$tripleH], 'tag_teams' => []]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     * ```
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side number and type
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        // Validate competitor distribution before processing
-        $competitorArray = $competitors->toArray();
-        if (! $this->validateCompetitorDistribution($competitorArray)) {
-            throw new InvalidArgumentException('Match must have at least 2 sides with competitors');
-        }
-
         DB::transaction(function () use ($eventMatch, $competitors): void {
-            // Process each side and add competitors
-            foreach ($competitors as $sideNumber => $sideCompetitors) {
-                $this->addSideCompetitors($eventMatch, (int) $sideNumber, $sideCompetitors);
-            }
+            $lockedMatch = $eventMatch->refreshForUpdate();
+            $this->handleWithinTransaction($lockedMatch, $competitors);
         });
+    }
+
+    /**
+     * Add competitors while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $competitors): void
+    {
+        $this->requirements->ensureSatisfied($lockedMatch, $competitors);
+
+        foreach ($competitors as $sideNumber => $sideCompetitors) {
+            $this->addSideCompetitors($lockedMatch, (int) $sideNumber, $sideCompetitors);
+        }
     }
 
     /**
@@ -83,49 +66,30 @@ class AddCompetitorsToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
      * @param  int  $sideNumber  The side number (1, 2, 3, etc.)
-     * @param  array<string, array<int, Wrestler|TagTeam>>  $sideCompetitors  Competitors for this side
+     * @param  array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}  $sideCompetitors  Competitors for this side
      */
     private function addSideCompetitors(EventMatch $eventMatch, int $sideNumber, array $sideCompetitors): void
     {
         // Add wrestlers to this side
-        if (Arr::exists($sideCompetitors, 'wrestlers') && ! empty($sideCompetitors['wrestlers'])) {
-            resolve(AddWrestlersToMatchAction::class)->handle(
+        $wrestlers = $sideCompetitors['wrestlers'] ?? [];
+
+        if ($wrestlers !== []) {
+            $this->addWrestlersToMatchAction->handleWithinTransaction(
                 $eventMatch,
-                collect((array) Arr::get($sideCompetitors, 'wrestlers')),
+                collect($wrestlers),
                 $sideNumber
             );
         }
 
         // Add tag teams to this side
-        if (Arr::exists($sideCompetitors, 'tag_teams') && ! empty($sideCompetitors['tag_teams'])) {
-            resolve(AddTagTeamsToMatchAction::class)->handle(
+        $tagTeams = $sideCompetitors['tag_teams'] ?? [];
+
+        if ($tagTeams !== []) {
+            $this->addTagTeamsToMatchAction->handleWithinTransaction(
                 $eventMatch,
-                collect((array) Arr::get($sideCompetitors, 'tag_teams')),
+                collect($tagTeams),
                 $sideNumber
             );
         }
-    }
-
-    /**
-     * Validate match competitors for proper side distribution.
-     *
-     * @param  array<int, array<string, mixed>>  $competitors  Competitors organized by side
-     * @return bool True if competitor distribution is valid for the match type
-     */
-    private function validateCompetitorDistribution(array $competitors): bool
-    {
-        // Ensure we have at least 2 sides with competitors
-        $sidesWithCompetitors = 0;
-
-        foreach ($competitors as $sideCompetitors) {
-            $hasWrestlers = ! empty($sideCompetitors['wrestlers'] ?? []);
-            $hasTagTeams = ! empty($sideCompetitors['tag_teams'] ?? []);
-
-            if ($hasWrestlers || $hasTagTeams) {
-                $sidesWithCompetitors++;
-            }
-        }
-
-        return $sidesWithCompetitors >= 2;
     }
 }

@@ -1,9 +1,9 @@
 # Ringside Testing Architecture & Quality Audit
 
 **Issue:** INF-56 — Ringside: testing architecture and quality audit  
-**Repo/branch audited:** `/Users/jeffreydavidson/.openclaw/workspace/ringside-app` on `development`  
+**Repo/branch audited:** `/Users/jeffreydavidson/.openclaw/workspace/ringside-app` on `develop`
 **Audit date:** 2026-05-13  
-**Updated:** 2026-05-15 after INF-62 Laravel 13 baseline alignment  
+**Updated:** 2026-09-15 after browser workflow coverage and scaffold replacement
 **Standard:** `/Users/jeffreydavidson/.openclaw/workspace/docs/testing-quality-standard.md`
 
 
@@ -16,7 +16,8 @@ What changed after the original audit:
 - `composer.json` remains the source of truth: `laravel/framework ^13.7`, `livewire/livewire ^4.0`.
 - CI/PCOV now target Laravel 13 and use `composer install` against the committed dependency set instead of `composer require laravel/framework:12.*` during CI.
 - Local verification can boot far enough to run the Pest suite under Laravel 13.
-- The suite is **not green yet**: the Laravel 13 baseline exposes known failures that are tracked separately.
+- The current repository checks are green for the maintained Laravel 13 baseline; the failure buckets below describe historical audit findings and remain useful follow-up coverage targets.
+- Browser coverage now includes login, dashboard, match results, event match booking, and an event-list smoke path.
 
 Follow-up tickets created from the exposed failure buckets:
 
@@ -34,20 +35,20 @@ Ringside has a large and valuable Pest test suite, but it is not yet aligned wit
 1. **The suite is broad but uneven:** 299 `*Test.php` files and ~4,410 `test()` / `it()` calls, but only a partial 1:1 mirror of production classes.
 2. **Type boundaries are blurred:** many `Unit` tests require Laravel/database behavior; several `Feature` workflow tests are effectively Livewire integration tests; Browser tests include a default Laravel example.
 3. **First-class categories are incomplete:** Architecture exists, Browser exists but is thin, Static Analysis exists in scripts/CI, but Contract, Snapshot/Approval, Performance, Accessibility, and Visual testing are not materially represented.
-4. **Architecture tests are currently too generic and partially stale:** several rules reference namespaces/patterns that do not match this app (`Repositories`, `Interfaces`, `Contracts` suffix, model usage only in repositories), and there is no rule enforcing required class/test pairing.
+4. **Architecture tests are currently too generic and partially stale:** several historical findings reference namespaces/patterns that do not match this app (`Repositories`, `Interfaces`, `Contracts` suffix, model usage only in repositories). A new action-to-test mirror guard documents the remaining known gaps and prevents new omissions.
 5. **Original local verification was blocked:** PHP was not available in the first audit environment and `vendor/` was missing. After INF-62, local verification can boot with Herd PHP/Composer, but the Laravel 13 suite still exposes known failures tracked in INF-103–106.
 
 ## Evidence Collected
 
 ### Configuration and gates
 
-- `composer.json` declares Pest, Pest Browser, Larastan, Pint, Rector, type coverage, PHP 8.4.
+- `composer.json` declares Pest, Pest Browser, Larastan, Pint, Rector, type coverage, PHP 8.5.
 - `phpunit.xml` defines suites: `Feature`, `Unit`, `Browser`, `Integration`.
-- `phpunit.dusk.xml` exists for browser suite with `APP_URL=http://ringside.test`.
+- Browser tests use Pest Browser through the `Browser` PHPUnit suite; Laravel Dusk is not installed.
 - `.github/workflows/ci.yml` runs Feature, Integration, Unit, and PHPStan against Laravel 13 after INF-62 / PR #633.
-- `.github/workflows/run-tests-pcov-pull.yml` runs Feature/Integration/Unit with coverage against Laravel 13 after INF-62 / PR #633.
+- `.github/workflows/coverage.yml` provides the manually dispatched PCOV coverage workflow for the Laravel 13 baseline.
 - `composer test` runs type coverage, Rector dry-run, Pint test, PHPStan, and Pest with coverage.
-- Local verification uses Herd PHP/Composer in this workspace; the suite currently boots but has known Laravel 13 failure buckets tracked in INF-103–106.
+- Local verification uses Herd PHP/Composer in this workspace; maintained checks run against the committed Laravel 13 dependency set. INF-103–106 remain historical follow-up coverage tickets.
 
 ### Suite inventory
 
@@ -58,7 +59,7 @@ Current `*Test.php` files by top-level suite/path:
 | `tests/Unit` | 130 |
 | `tests/Integration` | 121 |
 | `tests/Feature` | 44 |
-| `tests/Browser` | 3 |
+| `tests/Browser` | 5 |
 | Root Architecture test | 1 |
 | **Total** | **299** |
 
@@ -88,9 +89,6 @@ Notable missing 1:1 areas by production path:
 
 Representative missing/high-value paths:
 
-- `app/Actions/Matches/AddMatchForEventAction.php`
-- `app/Actions/Matches/AddRefereesToMatchAction.php`
-- `app/Actions/Matches/AddTagTeamsToMatchAction.php`
 - Most `app/Actions/Stables/*` beyond lifecycle/retire/split coverage
 - Most `app/Actions/Titles/*` beyond activate/create/update coverage
 - All `app/Services/*`
@@ -107,7 +105,7 @@ Representative missing/high-value paths:
 
 Strengths:
 
-- Many core models have mirrored tests, e.g. `app/Models/Wrestlers/Wrestler.php` → `tests/Unit/Models/Wrestlers/WrestlerTest.php`.
+- Many core models have mirrored tests, e.g. `app/Models/Roster/Wrestlers/Wrestler.php` → `tests/Unit/Models/Roster/Wrestlers/WrestlerTest.php`.
 - Many action classes have mirrored integration tests, especially roster employment/status actions.
 - Controllers mostly have mirrored feature tests under `tests/Feature/Http/Controllers/...`.
 - Arch tests are correctly treated as a grouped exception at `tests/ArchitectureTest.php`.
@@ -150,7 +148,7 @@ Strengths:
 
 Gaps:
 
-- Matches coverage lacks full parity: `AddCompetitorsToMatchAction`, `AddTitlesToMatchAction`, and `AddWrestlersToMatchAction` are covered, but `AddMatchForEventAction`, `AddRefereesToMatchAction`, and `AddTagTeamsToMatchAction` are not mirrored.
+- Matches coverage lacks full parity: match creation, competitor assignment, title assignment, and wrestler assignment are covered, but `AddRefereesToMatchAction` and `AddTagTeamsToMatchAction` are not mirrored.
 - Events, Venues, Titles, and Stables action coverage is incomplete compared with production action surface.
 - Service classes are untested despite encoding membership/lifecycle/validation behavior.
 - There is no clear integration suite for contracts, booking constraints across bookable competitors/officials, or computed status interactions spanning promotions/events/matches/titles.
@@ -181,13 +179,13 @@ Files:
 
 - `tests/Browser/DashboardTest.php`
 - `tests/Browser/LoginTest.php`
-- `tests/Browser/ExampleTest.php`
+- `tests/Browser/ExampleTest.php` (the login smoke test)
 
 Gaps:
 
 - `ExampleTest.php` asserts default Laravel content at `/` and should be removed or replaced.
 - No browser coverage for critical Livewire/JS workflows: creating/editing roster members, event/match booking modal behavior, dynamic match type UI, title management, table filtering/search/action dropdowns, or onboarding/login-to-dashboard journey beyond basics.
-- Browser suite is not included in the main GitHub CI workflows seen during audit.
+- Browser tests run in the main GitHub CI workflow through Pest Browser.
 
 ### 6. Architecture tests
 
@@ -202,7 +200,7 @@ Gaps / stale rules:
 - Rules reference `App\Repositories` and `App\Interfaces`, which appear absent.
 - `contracts directories only contain interfaces with Interface suffix` conflicts with actual contracts like `Bookable`, `Employable`, `Retirable`, etc.
 - `models are only used in repositories` conflicts with an Eloquent Laravel app where actions, policies, factories, Livewire, and tests naturally use models.
-- No Arch test enforces mirrored class-to-test expectations.
+- The action mirror guard documents no existing gaps and fails when application actions lack a matching test file.
 - No Arch rule around Ringside domain boundaries: actions vs models vs Livewire vs controllers, computed status not stored, bookable competitor/official interfaces, or domain exception placement.
 
 ### 7. Contract tests
@@ -271,12 +269,12 @@ High-value Ringside candidates:
 |---|---|---|
 | Wrestlers | Strong model/action/workflow/table coverage | Browser coverage; true unit tests for computed status edge cases; contracts/bookability across matches |
 | Managers | Strong action and table coverage | Manager assignment service coverage; workflow assertions should prove actual assignment behavior |
-| Referees | Good action/table coverage | Match officiating/bookable official rules and `AddRefereesToMatchAction` missing |
-| Tag teams | Good employment/action/model coverage | Add-to-match action missing; membership service/lifecycle service tests missing |
+| Referees | Good action/table coverage | Match officiating/bookable official rules and broader workflow assertions |
+| Tag teams | Good employment/action/model coverage | Membership service/lifecycle service tests missing |
 | Stables | Some lifecycle/retire/split coverage | Many actions missing 1:1 tests; membership/orchestrator/service coverage incomplete |
 | Titles | Some activate/create/update/model coverage | Debut/deactivate/pull/reinstate/retire/unretire/delete coverage incomplete; championship summaries/snapshots missing |
-| Events | Workflow + lifecycle coverage | Create/update/delete/restore action parity; event-match booking flow needs stronger feature/browser coverage |
-| Matches | Some action/rule/dynamic UI coverage | Full match booking flow, referees/tag teams/titles/result/decision contracts, performance/query guards |
+| Events | Workflow + lifecycle coverage | Create/restore action parity and broader event-card assertions |
+| Matches | Action/rule/dynamic UI coverage | Referees/tag teams/titles/result decision contracts and performance/query guards |
 | Venues | Controller/workflow/seeder coverage | Action parity and venue-event relationship behavior needs more explicit integration coverage |
 | Contracts | Mentioned as core feature but no obvious app surface/test coverage in audited tree | Define production surface and add contract/feature/integration tests when implemented |
 | Computed status | Well represented in factories/actions/models | Need Arch/static guard that status is not stored; focused unit matrix for priority order across domains |
@@ -288,12 +286,12 @@ High-value Ringside candidates:
 2. **Groups are documented as mandatory but rarely used.** Only 19 group calls across ~4,410 tests.
 3. **Some tests assert implementation structure more than behavior.** Trait/interface/fillable checks are useful as architecture/structural guards, but they should not crowd out behavior tests.
 4. **Generic exceptions appear in business-rule tests.** Many action tests assert `Exception::class` instead of domain-specific exceptions, reducing regression precision.
-5. **Default/scaffold tests remain.** `tests/Browser/ExampleTest.php` should be removed/replaced.
+5. **Browser tests must remain application-specific.** The former framework scaffold was replaced by application-specific login smoke coverage.
 6. **Feature/Integration boundaries are fuzzy.** Livewire component interactions often live in Feature when they are closer to Integration.
 7. **Architecture tests are partially stale.** Some rules likely encode a previous architecture and may produce false confidence or false failures.
 8. **Naming drift hurts navigation.** Examples: `*UnitTest.php`, lowercase `tests/Unit/database`, lifecycle catch-all files, and tests that cover multiple production classes without clear per-class mirrors.
 9. **Coverage gates may be misleading.** Main source excludes Livewire/Console/providers, while Livewire is a major part of the app.
-10. **Laravel 13 baseline failures are now visible.** INF-62 aligned docs/CI with Laravel 13, and the remaining failures are tracked in INF-103–106 instead of being hidden by a framework downgrade.
+10. **Laravel 13 baseline findings are documented.** INF-62 aligned docs/CI with Laravel 13; the historical failure buckets in INF-103–106 remain follow-up coverage work rather than an active CI blocker.
 
 ## Recommended Test Improvement Tickets
 
@@ -307,7 +305,7 @@ High-value Ringside candidates:
 
 2. **INF-56-P0-B: Replace stale Architecture rules and add mirror enforcement**
    - Remove or update stale `Repositories`, `Interfaces`, `Contracts Interface suffix`, and `models only used in repositories` rules.
-   - Add an Arch/static test for required production class → test class pairing.
+   - The action-to-test mirror guard is now in place; extend it to additional production boundaries as coverage is completed.
    - Add allowlist with reasons for Arch tests, tiny glue, framework-only files, and intentional cross-cutting workflow tests.
 
 3. **INF-56-P0-C: Reclassify Unit vs Integration boundaries**
@@ -317,7 +315,6 @@ High-value Ringside candidates:
 
 4. **INF-56-P0-D: Close critical domain action parity gaps**
    - Add mirrored integration tests for match/event/title/stable/venue actions that currently lack 1:1 coverage, especially:
-     - `Actions\Matches\AddMatchForEventAction`
      - `Actions\Matches\AddRefereesToMatchAction`
      - `Actions\Matches\AddTagTeamsToMatchAction`
      - missing `Actions\Titles\*` lifecycle actions
@@ -325,18 +322,18 @@ High-value Ringside candidates:
      - missing `Actions\Events\*` and `Actions\Venues\*`
 
 5. **INF-56-P0-E: Replace scaffold Browser test**
-   - Delete/replace `tests/Browser/ExampleTest.php`.
-   - Add at least one real smoke E2E: login → dashboard → roster list or event list.
+   - **Completed:** `tests/Browser/ExampleTest.php` now covers an administrator loading the event list and seeing a scheduled event.
 
 ### P1 — High-value hardening
 
 1. **INF-56-P1-A: Add service and domain collaboration integration tests**
-   - `StableLifecycleService`, `StableMembershipService`, `StableValidationService`
-   - `TagTeamLifecycleService`, `TagTeamMembershipService`, `TagTeamValidationService`
+   - `StableMembershipService`
+   - `TagTeamMembershipService`
    - `WrestlerManagerAssignmentService`
    - `ErrorMessageMappingService`
 
 2. **INF-56-P1-B: Add computed status and bookability matrices**
+   - Initial wrestler/referee bookability matrix coverage is now present; extend the matrix to remaining roster and status combinations as domain rules evolve.
    - Status priority: retired > employed > future employment > released > unemployed.
    - Injured/suspended interactions across wrestlers/managers/referees/tag teams.
    - Bookable competitors: wrestlers/tag teams.
@@ -344,6 +341,7 @@ High-value Ringside candidates:
    - Managers explicitly not bookable.
 
 3. **INF-56-P1-C: Add high-level feature workflows for core promoter jobs**
+   - Initial event → title match booking → result workflow coverage is now present; expand to non-title matches, tag teams, and additional promoter paths.
    - Create roster member → employ/suspend/retire/reinstate.
    - Create tag team from wrestlers → book into event match.
    - Create event at venue → add match → assign competitors/referees/title → record result.
@@ -418,7 +416,7 @@ tests/
     Data/...
     Enums/...
     Exceptions/...
-    Support/DateHelperTest.php
+    Support/ConsecutiveIntegerSequenceTest.php
     ValueObjects/HeightTest.php
     Rules/...              # only if no DB/framework dependency
   Integration/
@@ -447,4 +445,4 @@ tests/
 
 ## Immediate Next Action
 
-First finish the Laravel 13 baseline follow-ups from INF-62: **INF-103**, **INF-104**, **INF-105**, and **INF-106**. Then start **P0-B** (Architecture cleanup + mirror enforcement) and **P0-D** (critical action parity). That sequence keeps the baseline truthful before adding stricter guardrails.
+The Laravel 13 baseline checks are green and the browser scaffold replacement is complete. Next reconcile the historical INF-103–106 findings, then continue **P0-B** (Architecture cleanup + mirror enforcement) and **P0-D** with the remaining event/venue action parity gaps. This keeps the audit aligned with the maintained code before adding stricter guardrails.

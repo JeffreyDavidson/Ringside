@@ -4,50 +4,37 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\EmploymentCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Models\TagTeams\TagTeam;
-use App\Support\DateHelper;
-use Exception;
+use App\Actions\Managers\EmployCurrentManagersAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
+use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly TagTeamEmploymentEligibility $eligibility,
+        private readonly EmployCurrentWrestlersAction $employCurrentWrestlers,
+        private readonly EmployCurrentManagersAction $employCurrentManagers,
+    ) {}
 
     /**
-     * Employ a tag team using the StatusTransitionPipeline.
-     *
-     * This handles the complete tag team employment workflow using the StatusTransitionPipeline:
-     * - Validates the tag team can be employed (not retired, not already employed)
-     * - Ends retirement if currently retired
-     * - Creates an employment record for the tag team
-     * - Employs all current wrestlers through cascading
-     * - Employs all current managers through cascading
-     * - Makes the tag team available for match bookings and championships
-     *
-     * @param  TagTeam  $tagTeam  The tag team to employ
-     * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     * @throws Exception When tag team cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Employ tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Young Bucks')->first();
-     * EmployAction::run($tagTeam);
-     *
-     * // Employ with specific start date
-     * EmployAction::run($tagTeam, Carbon::parse('2024-01-01'));
-     * ```
+     * Employ a tag team and its eligible members.
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
-        $employmentDate = DateHelper::resolveDate($employmentDate);
+        $effectiveDate = $employmentDate ?? now();
 
-        StatusTransitionPipeline::employ($tagTeam, $employmentDate)
-            ->withCascade(EmploymentCascadeStrategy::wrestlers())
-            ->withCascade(EmploymentCascadeStrategy::managers())
-            ->execute();
+        DB::transaction(function () use ($tagTeam, $effectiveDate): void {
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
+
+            $this->eligibility->ensureCanEmploy($lockedTagTeam);
+            $this->employmentPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Employed);
+            $this->employCurrentWrestlers->handle($lockedTagTeam, $effectiveDate);
+            $this->employCurrentManagers->handle($lockedTagTeam, $effectiveDate);
+        });
     }
 }

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\Collection;
+use App\Services\Matches\MatchAssignmentConflictService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddTitlesToMatchAction
 {
-    use AsAction;
+    public function __construct(
+        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchTitleRequirements $requirements,
+    ) {}
 
     /**
      * Add titles to an event match.
@@ -42,65 +46,52 @@ class AddTitlesToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add titles to
      * @param  Collection<int, Title>  $titles  The championships at stake in the match
-     *
-     * @example
-     * ```php
-     * // WWE Championship title defense
-     * $titles = collect([$wweChampionship]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Unification match with two titles
-     * $titles = collect([$wweChampionship, $universalTitle]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Tag team championship match
-     * $titles = collect([$tagTeamChampionship]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Vacant title tournament final
-     * $titles = collect([$vacantIntercontinentalTitle]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     * ```
      */
-    public function handle(EventMatch $eventMatch, \Illuminate\Support\Collection $titles): void
+    public function handle(EventMatch $eventMatch, Collection $titles): void
     {
-        // Pre-filter titles to ensure only eligible championships are processed
-        $eligibleTitles = $titles->filter(
-            fn (Title $title) => $this->isTitleEligibleForMatch($title, $eventMatch)
-        );
+        $requestedTitles = $titles->unique('id')->values();
 
-        // Validate we have titles to add after filtering
-        if ($eligibleTitles->isEmpty()) {
-            throw new InvalidArgumentException('No eligible titles provided for championship match');
+        if ($requestedTitles->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleTitles): void {
-            // Add each eligible title as championship stakes
-            $eligibleTitles->each(function (Title $title) use ($eventMatch) {
-                $eventMatch->titles()->attach($title->id);
-            });
+        DB::transaction(function () use ($eventMatch, $requestedTitles): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
+            $this->handleWithinTransaction($lockedMatch, $requestedTitles);
         });
     }
 
     /**
-     * Check if a title is eligible to be at stake in the match.
+     * Assign titles while the caller owns the match transaction and lock.
      *
-     * @param  Title  $title  The title to validate
-     * @param  EventMatch  $eventMatch  The match where it would be at stake
-     * @return bool True if the title can be defended/competed for
+     * @param  Collection<int, Title>  $titles
      */
-    private function isTitleEligibleForMatch(Title $title, EventMatch $eventMatch): bool
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $titles): void
     {
-        // Basic availability checks - title must be active and available
-        if (! $title->isCurrentlyActive()) {
-            return false;
+        $requestedTitles = $titles->unique('id')->values();
+
+        if ($requestedTitles->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        // Check for conflicts with existing title defenses
-        // Note: More complex validation would be implemented here
-        // such as ensuring the current champion is participating in the match
-        // Could validate against $eventMatch->event->date for scheduling conflicts
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedTitles = Title::query()
+            ->whereKey($requestedTitles->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
 
-        return true;
+        if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
+            fn (Title $title): bool => ! $title->currentActivityPeriod()->exists()
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('titles');
+        }
+
+        $this->conflictService->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
+        $this->requirements->ensureSatisfied($lockedMatch, $lockedTitles);
+
+        $lockedTitles->each(function (Title $title) use ($lockedMatch): void {
+            $lockedMatch->titles()->attach($title->id);
+        });
     }
 }
