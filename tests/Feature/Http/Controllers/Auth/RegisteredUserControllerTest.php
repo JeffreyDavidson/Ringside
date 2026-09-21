@@ -19,12 +19,12 @@ test('registration screen can be rendered', function () {
     $response->assertSuccessful();
 });
 
-test('a user can register with their account details', function () {
+test('a user can register with their account details', function (string $email): void {
     // Arrange
     $registrationData = [
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
-        'email' => 'jeffrey@example.com',
+        'email' => $email,
         'password' => 'password',
         'password_confirmation' => 'password',
     ];
@@ -43,7 +43,7 @@ test('a user can register with their account details', function () {
         ->and(Hash::check('password', $user->password))->toBeTrue();
 
     assertAuthenticatedAs($user);
-});
+})->with(['jeffrey@example.com', 'Jeffrey@Example.COM']);
 
 test('registration requires valid account details', function () {
     // Arrange
@@ -66,4 +66,24 @@ test('registration requires valid account details', function () {
         ->assertSessionHasInput('email')
         ->assertSessionMissing('_old_input.password')
         ->assertSessionMissing('_old_input.password_confirmation');
+});
+
+test('registration checks uniqueness after normalizing email', function (): void {
+    // Arrange
+    User::factory()->create(['email' => 'existing@example.com']);
+
+    // Act
+    $response = $this->from(route('register'))
+        ->post(route('register'), [
+            'first_name' => 'Taylor',
+            'last_name' => 'Promoter',
+            'email' => 'Existing@Example.COM',
+            'password' => 'test-password',
+            'password_confirmation' => 'test-password',
+        ]);
+
+    // Assert
+    $response->assertSessionHasErrors(['email' => __('validation.unique', ['attribute' => 'email'])])
+        ->assertSessionHasInput('email', 'Existing@Example.COM');
+    expect(User::query()->count())->toBe(1);
 });

@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+@font-face {
+    font-family: Anton;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/anton/anton-regular.ttf') format('truetype');
+}
+
 @source inline("{sm:,md:,lg:,xl:,2xl:,}max-w-{sm,md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl}");
 
 @theme {
