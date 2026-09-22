@@ -80,6 +80,24 @@ Wrestler and Tag Team define their current and historical manager relationships 
 
 Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.
 
+## Promotion Context and Membership
+
+Users are global platform identities. A user's relationship to a promotion is
+stored in the `promotion_user` membership table, where role and membership
+status are scoped to that promotion. This allows one global user to participate
+in more than one promotion without duplicating authentication records.
+
+The application resolves an active promotion through the scoped
+`PromotionContext` service. Promotion-owned records will adopt explicit
+promotion ownership in staged migrations; this foundation does not yet claim
+ownership for existing roster, event, title, or history tables. Until those
+migrations and their backfill plan are complete, new promotion-bound reads and
+writes must not be treated as fully isolated tenancy behavior.
+
+Custom domains, subdomains, and physical tenant databases are deferred. The
+initial boundary is a central platform with one database and explicit logical
+promotion ownership.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)

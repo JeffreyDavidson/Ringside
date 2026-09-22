@@ -7,14 +7,19 @@ namespace App\Models\Users;
 use App\Builders\Users\UserBuilder;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
+use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionMembership;
 use App\ValueObjects\PhoneNumber;
 use Database\Factories\Users\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -38,6 +43,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property-read Role $role
+ * @property-read Collection<int, Promotion> $promotions
+ * @property-read Collection<int, PromotionMembership> $promotionMemberships
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  *
  * @method static \Database\Factories\Users\UserFactory factory($count = null, $state = [])
@@ -55,6 +62,21 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
+
+    /** @return BelongsToMany<Promotion, $this, PromotionMembership> */
+    public function promotions(): BelongsToMany
+    {
+        return $this->belongsToMany(Promotion::class)
+            ->using(PromotionMembership::class)
+            ->withPivot(['role', 'status'])
+            ->withTimestamps();
+    }
+
+    /** @return HasMany<PromotionMembership, $this> */
+    public function promotionMemberships(): HasMany
+    {
+        return $this->hasMany(PromotionMembership::class);
+    }
 
     /**
      * The model's default values for attributes.
