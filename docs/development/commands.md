@@ -64,6 +64,16 @@ Local development uses PostgreSQL so application behavior matches the intended
 shared relational database. Automated tests continue to use SQLite in memory
 for fast isolated runs.
 
+On macOS with Homebrew, install and start PostgreSQL, create the application
+database, and set `DB_USERNAME` in `.env` to the local PostgreSQL role:
+
+```bash
+brew install postgresql@17
+brew services start postgresql@17
+createdb ringside
+php artisan migrate
+```
+
 ### Database Commands
 - `php artisan migrate` - Run database migrations
 - `php artisan db:seed` - Seed database with test data
