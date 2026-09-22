@@ -48,10 +48,7 @@
                 :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
                 class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
-                <x-heroicon-s-chevron-left
-                    class="size-4 origin-center transform-gpu transition-all duration-[var(--sidebar-transition-duration)] ease-in-out"
-                    x-bind:class="expanded ? 'rotate-0' : 'rotate-180'"
-                />
+                <x-heroicon-s-chevron-left class="size-4 origin-center transform-gpu transition-all duration-[var(--sidebar-transition-duration)] ease-in-out group-data-[collapsed=true]:rotate-180" />
             </button>
             <button
                 @click="$store.sidebar && $store.sidebar.closeMobile()"
