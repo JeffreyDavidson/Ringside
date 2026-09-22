@@ -21,24 +21,24 @@
 <body class="layout1 bg-ringside-surface text-ringside-ink min-h-dvh antialiased">
     <!-- Page -->
     <!-- Main -->
-    <div class="flex min-h-dvh grow">
+    <div class="flex h-dvh min-h-dvh grow overflow-hidden">
         <!-- Sidebar -->
         <x-sidebar />
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
-            class="flex min-h-dvh grow flex-col pt-[--header-height] transition-all duration-300 lg:pt-[--header-height]"
+            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:pt-[var(--header-height)]"
             x-data
             :class="$store.sidebar && $store.sidebar.expanded
-                ? 'lg:ps-[--sidebar-default-width]'
-                : 'lg:ps-[--sidebar-collapsed-width]'"
+                ? 'lg:ps-[var(--sidebar-default-width)]'
+                : 'lg:ps-[var(--sidebar-collapsed-width)]'"
         >
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->
             <x-flash-messages />
             <!-- Content -->
-            <main class="grow p-4 lg:p-7">{{ $slot }}</main>
+            <main class="min-h-0 min-w-0 grow overflow-y-auto p-4 lg:p-7">{{ $slot }}</main>
             <!-- End of Content -->
             <!-- Footer -->
             @persist('page-footer')
