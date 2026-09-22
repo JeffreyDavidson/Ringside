@@ -32,7 +32,7 @@ test('user can authenticate successfully', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('authentication fails with invalid credentials', function () {
@@ -124,7 +124,7 @@ test('remember me can be selected during login', function (): void {
         ->assertChecked('@remember')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('login form works on mobile viewports', function () {
@@ -143,7 +143,7 @@ test('login form works on mobile viewports', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('user can logout successfully', function () {
@@ -160,7 +160,7 @@ test('user can logout successfully', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard')
+        ->assertSee('Overview')
         ->click('@profile-menu')
         ->press('Log out')
         ->assertScript('window.location.pathname === "/login"')
@@ -181,7 +181,7 @@ test('authenticated users are redirected away from login page', function () {
     $page = visit(route('login'));
 
     $page->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('login form handles longer processing times', function () {
@@ -197,7 +197,7 @@ test('login form handles longer processing times', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('password recovery and reset work through the branded forms', function (): void {
