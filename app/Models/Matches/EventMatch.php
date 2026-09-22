@@ -16,11 +16,13 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionContextService;
 use Database\Factories\Matches\MatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -82,6 +84,29 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchFactory::class)]
 class EventMatch extends Model implements SoftDeletable
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope('promotion_context', function (Builder $builder): void {
+            $context = app(PromotionContextService::class);
+
+            if (! $context->isEnforced()) {
+                return;
+            }
+
+            $promotion = $context->current();
+
+            $builder->whereHas('event', function (Builder $eventQuery) use ($promotion): void {
+                if ($promotion === null) {
+                    $eventQuery->whereNull('promotion_id')->whereNotNull('promotion_id');
+
+                    return;
+                }
+
+                $eventQuery->where('promotion_id', $promotion->getKey());
+            });
+        });
+    }
+
     /** @use HasFactory<MatchFactory> */
     use HasFactory;
 
