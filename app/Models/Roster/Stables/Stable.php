@@ -7,6 +7,7 @@ namespace App\Models\Roster\Stables;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Lifecycle\Roster\Stables\StableStatusResolver;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
@@ -17,6 +18,7 @@ use App\Models\Contracts\SoftDeletable;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Roster\Stables\StableFactory;
@@ -37,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @implements Retirable<static>
  *
  * @property int $id
+ * @property int|null $promotion_id
  * @property string $name
  * @property StableStatus $status
  * @property Carbon|null $created_at
@@ -59,6 +62,7 @@ use Illuminate\Support\Carbon;
  * @property-read ActivityPeriod|null $futureActivityPeriod
  * @property-read ActivityPeriod|null $previousActivityPeriod
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
+ * @property-read Promotion|null $promotion
  *
  * @method static StableBuilder<static>|Stable disbanded()
  * @method static StableBuilder<static>|Stable established()
@@ -83,6 +87,8 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(StableBuilder::class)]
 class Stable extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
+    use BelongsToPromotion;
+
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
