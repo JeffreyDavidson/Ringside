@@ -119,15 +119,13 @@
 .layout1 {
     --sidebar-transition-duration: 0.3s;
     --sidebar-transition-timing: ease;
-    --sidebar-default-width: 256px;
-    --sidebar-width: 288px;
+    --sidebar-default-width: 288px;
     --header-height: 72px;
-    --sidebar-collapsed-width: 80px;
+    --sidebar-collapsed-width: 88px;
 }
 
 @media (max-width: 1024px) {
     .layout1 {
-        --sidebar-width: 288px;
         --header-height: 64px;
     }
 }

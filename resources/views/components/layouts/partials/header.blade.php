@@ -27,31 +27,24 @@
 <header
     x-data="{ searchOpen: false }"
     @keydown.escape.window="searchOpen = false"
-    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-10 flex h-[--header-height] items-center border-b lg:start-[--sidebar-default-width]"
+    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b lg:start-[var(--sidebar-default-width)]"
     :class="$store.sidebar && $store.sidebar.expanded
-        ? 'lg:start-[--sidebar-default-width]'
-        : 'lg:start-[--sidebar-collapsed-width]'"
+        ? 'lg:start-[var(--sidebar-default-width)]'
+        : 'lg:start-[var(--sidebar-collapsed-width)]'"
 >
-    <div class="flex w-full items-center gap-3 px-4 lg:px-7">
-        <button
-            @click="$store.sidebar && $store.sidebar.openMobile()"
-            aria-label="Open navigation"
-            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
-        >
-            <x-heroicon-o-bars-3 class="size-5" />
-        </button>
-        <button
-            @click="$store.sidebar && $store.sidebar.toggle()"
-            :aria-label="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-            :title="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink hidden size-11 items-center justify-center lg:inline-flex"
-        >
-            <x-heroicon-o-rectangle-group class="size-5" />
-        </button>
-        <span class="bg-ringside-line hidden h-5 w-px lg:block" aria-hidden="true"></span>
-        <nav class="flex min-w-0 items-center gap-3 text-sm" aria-label="Breadcrumb">
-            <span class="text-ringside-muted truncate">{{ $workspaceLabel }}</span>
-            <x-heroicon-o-chevron-right class="text-ringside-muted hidden size-4 shrink-0 sm:block" />
+    <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">
+        <button @click="$store.sidebar && $store.sidebar.openMobile()"
+        aria-label="Open navigation"
+        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
+    >
+        <x-heroicon-o-bars-3 class="size-5" />
+    </button>
+    <nav class="flex min-w-0 items-center gap-2 text-sm" aria-label="Breadcrumb">
+        <span class="bg-ringside-signal hidden size-1.5 shrink-0 sm:block" aria-hidden="true"></span>
+        <span
+            class="text-ringside-muted truncate text-xs font-semibold tracking-[0.08em] uppercase"
+        >{{ $workspaceLabel }}</span>
+            <x-heroicon-o-chevron-right class="text-ringside-muted hidden size-3.5 shrink-0 sm:block" />
             <strong class="text-ringside-ink truncate font-semibold">{{ $pageLabel }}</strong>
         </nav>
         <div class="relative ms-auto">
