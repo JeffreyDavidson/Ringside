@@ -35,7 +35,7 @@
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
             <a
-                class="font-display text-[2rem] leading-none tracking-tight transition-transform duration-300 group-data-[collapsed=true]:translate-x-1.5"
+                class="font-display text-[2rem] leading-none tracking-tight transition-[transform,left] duration-300 group-data-[collapsed=true]:absolute group-data-[collapsed=true]:start-[calc(50%_-_8px)] group-data-[collapsed=true]:-translate-x-1/2"
                 href="{{ route('dashboard') }}"
                 aria-label="Ringside dashboard"
             >
