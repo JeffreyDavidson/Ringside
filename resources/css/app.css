@@ -119,6 +119,7 @@
 .layout1 {
     --sidebar-transition-duration: 600ms;
     --sidebar-transition-timing: ease-in-out;
+    --sidebar-toggle-transition-duration: 900ms;
     --sidebar-default-width: 288px;
     --header-height: 72px;
     --sidebar-collapsed-width: 88px;
@@ -128,6 +129,15 @@
     .layout1 {
         --header-height: 64px;
     }
+}
+
+.sidebar-toggle-icon {
+    transform: rotate(0deg);
+    transition: transform var(--sidebar-toggle-transition-duration) var(--sidebar-transition-timing);
+}
+
+.group[data-collapsed='true'] .sidebar-toggle-icon {
+    transform: rotate(180deg);
 }
 
 @layer components {
