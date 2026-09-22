@@ -93,6 +93,9 @@ events and titles now have nullable explicit promotion ownership. Venues are
 global shared resources that can host events for multiple promotions. Venue
 routes remain outside the promotion context middleware; a venue is globally
 visible while its related event history is filtered by the active promotion.
+When promotion context is enforced, new promotion-owned models receive the
+active promotion during creation without exposing ownership columns to
+mass-assignment.
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Match data inherits ownership
