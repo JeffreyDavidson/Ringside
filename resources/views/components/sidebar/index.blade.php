@@ -33,7 +33,7 @@
         class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-300 ease-out"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
-        <div class="border-ringside-line flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
+        <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
             <a
                 class="font-display text-[2rem] leading-none tracking-tight"
                 href="{{ route('dashboard') }}"
@@ -46,7 +46,7 @@
                 @click="toggle()"
                 :aria-expanded="expanded"
                 :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink ms-auto hidden size-8 shrink-0 items-center justify-center border transition-transform duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
+                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center border transition-transform duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
                 <x-heroicon-s-chevron-left
                     class="size-4 transition-transform duration-300"

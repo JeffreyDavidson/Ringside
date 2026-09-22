@@ -27,7 +27,7 @@
 <header
     x-data="{ searchOpen: false }"
     @keydown.escape.window="searchOpen = false"
-    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b lg:start-[var(--sidebar-default-width)]"
+    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b transition-[inset-inline-start] duration-300 ease-out lg:start-[var(--sidebar-default-width)] lg:end-0"
     :class="$store.sidebar && $store.sidebar.expanded
         ? 'lg:start-[var(--sidebar-default-width)]'
         : 'lg:start-[var(--sidebar-collapsed-width)]'"
