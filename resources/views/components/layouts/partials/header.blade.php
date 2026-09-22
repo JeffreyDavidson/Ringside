@@ -1,26 +1,106 @@
+@php
+    $activePromotion = $promotionSwitcherPromotions->firstWhere('id', $activePromotionId);
+    $promotionName = $activePromotion?->name ?? 'Ringside';
+
+    $pageLabel = match (true) {
+        request()->routeIs('dashboard') => 'Overview',
+        request()->routeIs('events.*') => 'Events',
+        request()->routeIs('wrestlers.*') => 'Wrestlers',
+        request()->routeIs('tag-teams.*') => 'Tag teams',
+        request()->routeIs('managers.*') => 'Managers',
+        request()->routeIs('referees.*') => 'Referees',
+        request()->routeIs('stables.*') => 'Stables',
+        request()->routeIs('titles.*') => 'Titles',
+        request()->routeIs('venues.*') => 'Venues',
+        request()->routeIs('users.*') => 'User management',
+        default => 'Ringside',
+    };
+@endphp
+
 <header
-    x-data="{ atTop: true }"
-    @scroll.window="atTop = window.pageYOffset > 1 ? false : true"
-    class="fixed start-0 end-0 top-0 z-10 flex h-[--header-height] shrink-0 items-stretch bg-[--page-bg] lg:start-[280px] lg:h-[--header-height]"
-    :class="atTop === false ? 'shadow-sm' : ''"
+    x-data="{ searchOpen: false }"
+    @keydown.escape.window="searchOpen = false"
+    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-10 flex h-[--header-height] items-center border-b lg:start-[--sidebar-default-width]"
+    :class="$store.sidebar && $store.sidebar.expanded
+        ? 'lg:start-[--sidebar-default-width]'
+        : 'lg:start-[--sidebar-collapsed-width]'"
 >
-    <!-- Container -->
-    <x-container-fixed class="flex items-stretch justify-between lg:gap-4">
-        <!-- Mobile Logo & Menu Toggle -->
-        <div class="-ms-1 flex items-center gap-1 lg:hidden">
-            <a class="shrink-0" href="{{ route('dashboard') }}">
-                <span class="text-lg font-bold text-gray-900">Ringside</span>
-            </a>
-            <div class="flex items-center">
-                <button
-                    @click="$store.sidebar && $store.sidebar.openMobile()"
-                    class="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md border border-transparent leading-none text-gray-700"
-                >
-                    <x-heroicon-o-bars-3 class="size-5 text-gray-600" />
-                </button>
+    <div class="flex w-full items-center gap-3 px-4 lg:px-7">
+        <button @click="$store.sidebar && $store.sidebar.openMobile()"
+        aria-label="Open navigation"
+        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
+    >
+        <x-heroicon-o-bars-3 class="size-5" />
+    </button>
+    <button
+        @click="$store.sidebar && $store.sidebar.toggle()"
+        :aria-label="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+        :title="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink hidden size-11 items-center justify-center lg:inline-flex"
+    >
+        <x-heroicon-o-rectangle-group class="size-5" />
+    </button>
+    <span class="bg-ringside-line hidden h-5 w-px lg:block" aria-hidden="true"></span>
+    <nav class="flex min-w-0 items-center gap-3 text-sm" aria-label="Breadcrumb">
+        <span
+            class="text-ringside-muted truncate"
+        >{{ $pageLabel === 'Venues' ? 'Shared directory' : $promotionName }}</span>
+            <x-heroicon-o-chevron-right class="text-ringside-muted hidden size-4 shrink-0 sm:block" />
+            <strong class="text-ringside-ink truncate font-semibold">{{ $pageLabel }}</strong>
+        </nav>
+        <div class="relative ms-auto">
+            <button
+                @click="searchOpen = ! searchOpen"
+                :aria-expanded="searchOpen"
+                aria-haspopup="dialog"
+                aria-label="Search navigation"
+                class="border-ringside-line text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex min-h-11 items-center gap-2 border px-3 text-sm"
+            >
+                <x-heroicon-o-magnifying-glass class="size-4" /><span class="hidden sm:inline">Search</span
+                ><kbd class="text-ringside-muted hidden text-xs sm:inline">⌘ K</kbd>
+            </button>
+            <div
+                x-cloak
+                x-show="searchOpen"
+                x-transition.origin.top.right
+                @click.outside="searchOpen = false"
+                class="border-ringside-line bg-ringside-surface absolute end-0 top-[calc(100%+8px)] z-40 w-[min(24rem,calc(100vw-2rem))] border p-2 shadow-xl"
+                role="dialog"
+                aria-label="Search navigation"
+            >
+                <label class="sr-only" for="shell-search">Find a section</label>
+                <div class="border-ringside-line flex items-center gap-2 border-b px-3">
+                    <x-heroicon-o-magnifying-glass class="text-ringside-muted size-4" /><input
+                        x-ref="search"
+                        id="shell-search"
+                        type="search"
+                        placeholder="Find a section…"
+                        class="placeholder:text-ringside-muted min-h-12 w-full bg-transparent text-sm outline-none"
+                    />
+                </div>
+                <div class="py-2">
+                    <a
+                        href="{{ route('dashboard') }}"
+                        @click="searchOpen = false"
+                        class="hover:bg-ringside-surface-hover flex min-h-11 items-center px-3 text-sm"
+                    >Overview<span class="text-ringside-muted ms-auto text-xs">Promotion</span></a>
+                    <a
+                        href="{{ route('events.index') }}"
+                        @click="searchOpen = false"
+                        class="hover:bg-ringside-surface-hover flex min-h-11 items-center px-3 text-sm"
+                    >Events<span class="text-ringside-muted ms-auto text-xs">Promotion</span></a>
+                    <a
+                        href="{{ route('wrestlers.index') }}"
+                        @click="searchOpen = false"
+                        class="hover:bg-ringside-surface-hover flex min-h-11 items-center px-3 text-sm"
+                    >Wrestlers<span class="text-ringside-muted ms-auto text-xs">Promotion</span></a>
+                    <a
+                        href="{{ route('venues.index') }}"
+                        @click="searchOpen = false"
+                        class="hover:bg-ringside-surface-hover flex min-h-11 items-center px-3 text-sm"
+                    >Venues<span class="text-ringside-muted ms-auto text-xs">Shared directory</span></a>
+                </div>
             </div>
         </div>
-        <!-- Topbar -->
-        <x-topbar />
-    </x-container-fixed>
+    </div>
 </header>

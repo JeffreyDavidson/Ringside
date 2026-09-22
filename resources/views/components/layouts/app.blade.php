@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full" lang="en" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,16 +18,16 @@
     @stack('styles')
 </head>
 
-<body class="layout1 flex h-full bg-[--page-bg] text-base text-gray-700 antialiased">
+<body class="layout1 bg-ringside-surface text-ringside-ink min-h-dvh antialiased">
     <!-- Page -->
     <!-- Main -->
-    <div class="flex grow">
+    <div class="flex min-h-dvh grow">
         <!-- Sidebar -->
         <x-sidebar />
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
-            class="flex grow flex-col pt-[--header-height] transition-all duration-300 lg:pt-[--header-height]"
+            class="flex min-h-dvh grow flex-col pt-[--header-height] transition-all duration-300 lg:pt-[--header-height]"
             x-data
             :class="$store.sidebar && $store.sidebar.expanded
                 ? 'lg:ps-[--sidebar-default-width]'
@@ -38,7 +38,7 @@
             <!-- End of Header -->
             <x-flash-messages />
             <!-- Content -->
-            <main class="grow pt-5">{{ $slot }}</main>
+            <main class="grow p-4 lg:p-7">{{ $slot }}</main>
             <!-- End of Content -->
             <!-- Footer -->
             @persist('page-footer')

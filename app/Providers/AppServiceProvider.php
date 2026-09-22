@@ -104,7 +104,12 @@ class AppServiceProvider extends ServiceProvider
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
 
-        View::composer('components.topbar.profile', PromotionSwitcherComposer::class);
+        View::composer([
+            'components.topbar.profile',
+            'components.sidebar',
+            'components.sidebar.index',
+            'components.layouts.partials.header',
+        ], PromotionSwitcherComposer::class);
 
         $this->bootRoute();
     }
