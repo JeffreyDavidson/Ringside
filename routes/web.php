@@ -7,6 +7,7 @@ use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
+use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
@@ -32,6 +33,7 @@ Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
 
     Route::middleware('promotion.context')->group(function () {
         Route::prefix('roster')->group(function () {

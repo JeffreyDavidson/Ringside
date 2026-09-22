@@ -37,6 +37,35 @@
 
             <div class="my-2.5 border-b border-gray-200"></div>
 
+            @if ($promotionSwitcherPromotions->isNotEmpty())
+                <div class="flex flex-col gap-2 px-4 py-1.5">
+                    <span class="text-xs font-semibold text-gray-700">{{ __('promotions.active_promotion') }}</span>
+                    <form action="{{ route('promotions.switch') }}" method="post" class="flex flex-col gap-2">
+                        @csrf
+                        <label class="sr-only" for="active_promotion_id">{{ __('promotions.active_promotion') }}</label>
+                        <select
+                            id="active_promotion_id"
+                            name="promotion_id"
+                            class="h-9 rounded-md border border-gray-300 bg-white px-2 text-xs font-medium text-gray-800"
+                        >
+                            @foreach ($promotionSwitcherPromotions as $promotion)
+                                <option value="{{ $promotion->id }}" @selected($promotion->id === $activePromotionId)>
+                                    {{ $promotion->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button
+                            type="submit"
+                            class="btn-light-default btn-light-states w-full justify-center rounded-md px-3 py-2 text-xs font-medium"
+                        >
+                            {{ __('promotions.switch') }}
+                        </button>
+                    </form>
+                </div>
+
+                <div class="my-2.5 border-b border-gray-200"></div>
+            @endif
+
             {{-- Logout --}}
             <div class="flex flex-col px-4 py-1.5">
                 <form action="{{ route('logout') }}" method="post">

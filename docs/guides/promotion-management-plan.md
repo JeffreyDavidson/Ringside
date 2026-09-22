@@ -42,8 +42,9 @@ before they change data. The `promotion.context` middleware establishes the
 selected active membership for scoped routes, direct promotion-owned queries
 are filtered to that context, and event matches inherit the event boundary.
 Platform administrators remain a deliberate global exception when no active
-membership is selected. Lifecycle and history ownership, promotion switching
-UI, and background-job context remain follow-up work.
+membership is selected. The authenticated profile menu now provides a
+membership-validated promotion switcher. Lifecycle and history ownership and
+background-job context remain follow-up work.
 
 ## Decisions to resolve before implementation
 
