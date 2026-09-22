@@ -60,6 +60,10 @@ directly in `package.json`.
 
 ## Database
 
+Local development uses PostgreSQL so application behavior matches the intended
+shared relational database. Automated tests continue to use SQLite in memory
+for fast isolated runs.
+
 ### Database Commands
 - `php artisan migrate` - Run database migrations
 - `php artisan db:seed` - Seed database with test data
