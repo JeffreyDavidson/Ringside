@@ -27,7 +27,7 @@
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
-            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-in-out lg:pt-[var(--header-height)]"
+            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:pt-[var(--header-height)]"
             x-data
             :class="$store.sidebar && $store.sidebar.expanded
                 ? 'lg:ps-[var(--sidebar-default-width)]'

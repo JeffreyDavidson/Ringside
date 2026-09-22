@@ -30,17 +30,18 @@
             $store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         ]"
         :data-collapsed="! expanded"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-in-out"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
             <a
-                class="font-display text-[2rem] leading-none tracking-tight transition-[transform,left] duration-[var(--sidebar-transition-duration)] ease-in-out group-data-[collapsed=true]:absolute group-data-[collapsed=true]:start-[calc(50%_-_8px)] group-data-[collapsed=true]:-translate-x-1/2"
+                class="sidebar-brand font-display text-[2rem] leading-none tracking-tight"
                 href="{{ route('dashboard') }}"
                 aria-label="Ringside dashboard"
             >
-                <span x-show="expanded">RING<span class="text-ringside-signal">SIDE</span></span>
-                <span x-show="! expanded" aria-hidden="true">R<span class="text-ringside-signal">S</span></span>
+                <span class="sidebar-brand-full" aria-hidden="true"
+                    >RING<span class="text-ringside-signal">SIDE</span></span>
+                <span class="sidebar-brand-short" aria-hidden="true">R<span class="text-ringside-signal">S</span></span>
             </a>
             <button
                 @click="toggle()"
