@@ -8,6 +8,7 @@ use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Lifecycle\Titles\TitleStatusResolver;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
@@ -18,6 +19,7 @@ use App\Models\Contracts\SoftDeletable;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
+use App\Models\Promotions\Promotion;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -38,6 +40,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property string $name
+ * @property int|null $promotion_id
  * @property TitleStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -56,6 +59,7 @@ use Illuminate\Support\Carbon;
  * @property-read ActivityPeriod|null $futureActivityPeriod
  * @property-read ActivityPeriod|null $previousActivityPeriod
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
+ * @property-read Promotion|null $promotion
  *
  * @method static TitleBuilder<static>|Title active()
  * @method static \Database\Factories\Titles\TitleFactory factory($count = null, $state = [])
@@ -78,6 +82,8 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TitleBuilder::class)]
 class Title extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
+    use BelongsToPromotion;
+
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 

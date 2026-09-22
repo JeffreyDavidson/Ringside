@@ -6,10 +6,12 @@ namespace App\Models\Events;
 
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -29,12 +31,14 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property Carbon|null $date
  * @property int|null $venue_id
+ * @property int|null $promotion_id
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property-read EventStatus $status
  * @property-read Venue|null $venue
+ * @property-read Promotion|null $promotion
  * @property-read Collection<int, EventMatch> $matches
  *
  * @method static \Database\Factories\Events\EventFactory factory($count = null, $state = [])
@@ -57,6 +61,8 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model implements SoftDeletable
 {
+    use BelongsToPromotion;
+
     /** @use HasFactory<EventFactory> */
     use HasFactory;
 
