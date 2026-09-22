@@ -38,7 +38,7 @@
             <!-- End of Header -->
             <x-flash-messages />
             <!-- Content -->
-            <main class="grow">{{ $slot }}</main>
+            <main class="grow p-4 lg:p-7">{{ $slot }}</main>
             <!-- End of Content -->
             <!-- Footer -->
             @persist('page-footer')
