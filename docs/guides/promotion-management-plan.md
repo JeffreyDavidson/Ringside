@@ -30,6 +30,12 @@ Existing data needs an explicit ownership/backfill plan before enforcing require
 ownership. Tests must cover multiple users and promotions, reads, writes,
 switching, cross-promotion relationships, and missing context.
 
+The first ownership slice adds nullable `promotion_id` columns to wrestlers,
+managers, referees, tag teams, and stables. Existing records can be previewed
+or assigned with `promotions:backfill-roster-ownership`; the command requires
+`--force` before it changes data. Query and authorization enforcement remains a
+follow-up after the remaining promotion-owned roots are migrated.
+
 ## Decisions to resolve before implementation
 
 The historical proposal suggested ownership foreign keys, global scopes, a

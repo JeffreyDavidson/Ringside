@@ -6,6 +6,7 @@ namespace App\Models\Roster\Managers;
 
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
@@ -21,6 +22,7 @@ use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -44,6 +46,7 @@ use Illuminate\Support\Carbon;
  * @implements Suspendable<static>
  *
  * @property int $id
+ * @property int|null $promotion_id
  * @property string $first_name
  * @property string $last_name
  * @property-read string $full_name
@@ -75,6 +78,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, TagTeam> $currentTagTeams
  * @property-read Collection<int, TagTeam> $previousTagTeams
+ * @property-read Promotion|null $promotion
  *
  * @method static ManagerBuilder<static>|Manager employed()
  * @method static \Database\Factories\Roster\Managers\ManagerFactory factory($count = null, $state = [])
@@ -97,6 +101,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(ManagerBuilder::class)]
 class Manager extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
+    use BelongsToPromotion;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */

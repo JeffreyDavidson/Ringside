@@ -7,6 +7,7 @@ namespace App\Models\Roster\Referees;
 use App\Builders\Matches\EventMatchBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
@@ -23,6 +24,7 @@ use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use Database\Factories\Roster\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -42,6 +44,7 @@ use Illuminate\Support\Carbon;
  * @implements Suspendable<static>
  *
  * @property int $id
+ * @property int|null $promotion_id
  * @property string $first_name
  * @property string $last_name
  * @property-read string $full_name
@@ -69,6 +72,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Suspension> $previousSuspensions
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
+ * @property-read Promotion|null $promotion
  *
  * @method static RefereeBuilder<static>|Referee employed()
  * @method static \Database\Factories\Roster\Referees\RefereeFactory factory($count = null, $state = [])
@@ -91,6 +95,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(RefereeBuilder::class)]
 class Referee extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
+    use BelongsToPromotion;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<RefereeFactory> */
