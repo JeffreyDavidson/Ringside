@@ -57,4 +57,14 @@
         </x-slot:icon>
         Venues
     </x-sidebar.menu-item>
+
+    @if (auth()->user()?->role->isAdministrator())
+        <x-sidebar.menu-heading>Platform</x-sidebar.menu-heading>
+        <x-sidebar.menu-item href="{{ route('promotions.index') }}" :active="request()->routeIs('promotions.*')">
+            <x-slot:icon>
+                <x-heroicon-o-building-office-2 class="size-5" />
+            </x-slot:icon>
+            Promotions
+        </x-sidebar.menu-item>
+    @endif
 </nav>

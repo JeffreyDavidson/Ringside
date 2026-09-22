@@ -4,6 +4,7 @@
 
     $pageLabel = match (true) {
         request()->routeIs('dashboard') => 'Overview',
+        request()->routeIs('promotions.*') => 'Promotions',
         request()->routeIs('events.*') => 'Events',
         request()->routeIs('wrestlers.*') => 'Wrestlers',
         request()->routeIs('tag-teams.*') => 'Tag teams',
@@ -14,6 +15,12 @@
         request()->routeIs('venues.*') => 'Venues',
         request()->routeIs('users.*') => 'User management',
         default => 'Ringside',
+    };
+
+    $workspaceLabel = match (true) {
+        $pageLabel === 'Venues' => 'Shared directory',
+        $pageLabel === 'Promotions' => 'Platform',
+        default => $promotionName,
     };
 @endphp
 
@@ -26,25 +33,24 @@
         : 'lg:start-[--sidebar-collapsed-width]'"
 >
     <div class="flex w-full items-center gap-3 px-4 lg:px-7">
-        <button @click="$store.sidebar && $store.sidebar.openMobile()"
-        aria-label="Open navigation"
-        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
-    >
-        <x-heroicon-o-bars-3 class="size-5" />
-    </button>
-    <button
-        @click="$store.sidebar && $store.sidebar.toggle()"
-        :aria-label="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-        :title="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink hidden size-11 items-center justify-center lg:inline-flex"
-    >
-        <x-heroicon-o-rectangle-group class="size-5" />
-    </button>
-    <span class="bg-ringside-line hidden h-5 w-px lg:block" aria-hidden="true"></span>
-    <nav class="flex min-w-0 items-center gap-3 text-sm" aria-label="Breadcrumb">
-        <span
-            class="text-ringside-muted truncate"
-        >{{ $pageLabel === 'Venues' ? 'Shared directory' : $promotionName }}</span>
+        <button
+            @click="$store.sidebar && $store.sidebar.openMobile()"
+            aria-label="Open navigation"
+            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
+        >
+            <x-heroicon-o-bars-3 class="size-5" />
+        </button>
+        <button
+            @click="$store.sidebar && $store.sidebar.toggle()"
+            :aria-label="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+            :title="$store.sidebar && $store.sidebar.expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink hidden size-11 items-center justify-center lg:inline-flex"
+        >
+            <x-heroicon-o-rectangle-group class="size-5" />
+        </button>
+        <span class="bg-ringside-line hidden h-5 w-px lg:block" aria-hidden="true"></span>
+        <nav class="flex min-w-0 items-center gap-3 text-sm" aria-label="Breadcrumb">
+            <span class="text-ringside-muted truncate">{{ $workspaceLabel }}</span>
             <x-heroicon-o-chevron-right class="text-ringside-muted hidden size-4 shrink-0 sm:block" />
             <strong class="text-ringside-ink truncate font-semibold">{{ $pageLabel }}</strong>
         </nav>
