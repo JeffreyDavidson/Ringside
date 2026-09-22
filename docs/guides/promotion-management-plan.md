@@ -1,13 +1,17 @@
 # Promotion Management Plan
 
-Status: retained product proposal; implementation and scheduling require a
-separate task. This is not documentation of an existing tenancy boundary.
+Status: foundation implementation in progress. This document remains the
+forward-looking product and migration plan; it is not documentation of a fully
+enforced tenancy boundary yet.
 
 ## Product requirements
 
-- A promotion represents a wrestling company with a name, slug, owner, and
-  settings. One account may manage multiple promotions.
-- Users can create and switch between promotions they are authorized to manage.
+- A promotion represents a wrestling company with a name and slug. Promotion
+  memberships store the scoped role and status; the current foundation keeps
+  users global and does not duplicate authentication records.
+- Users can switch between promotions where they have an active membership; the
+  product may restrict promotion ownership to one promotion without limiting a
+  user's ability to work for multiple promotions.
 - Wrestlers, tag teams, managers, referees, stables, events, venues, and titles
   belong to a promotion. Match data must follow its event's ownership boundary.
 - Promotion data must remain isolated for reads and writes, including related
