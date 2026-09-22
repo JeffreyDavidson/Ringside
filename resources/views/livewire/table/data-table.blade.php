@@ -1,37 +1,41 @@
-<div>
-    {{-- Before wrapper (configurable area for page header / add buttons) --}}
+<div class="flex flex-col gap-4">
     @if ($beforeWrapperView)
         <x-dynamic-component :component="$beforeWrapperView" />
     @endif
 
-    {{-- Card wrapper --}}
-    <div class="shadow-light rounded-lg border border-gray-200 bg-white">
-        {{-- Search and Filters --}}
-        <div class="flex items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
-            {{-- Search --}}
-            <div class="bg-light-active flex h-9 w-64 items-center gap-2 rounded-md border border-gray-300 px-3">
-                <x-heroicon-o-magnifying-glass class="size-4 shrink-0 text-gray-500" />
+    <div class="border-ringside-line bg-ringside-surface-header border">
+        <div class="border-ringside-line flex flex-wrap items-center justify-between gap-3 border-b p-4">
+            <div class="border-ringside-line flex min-h-11 w-full items-center gap-2 border px-3 sm:w-72">
+                <x-heroicon-o-magnifying-glass class="text-ringside-muted size-4 shrink-0" />
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="{{ $searchPlaceholder }}"
-                    class="m-0 grow border-none bg-transparent p-0 text-xs outline-none placeholder:text-gray-500 focus:ring-0"
+                    class="text-ringside-ink placeholder:text-ringside-muted m-0 grow border-none bg-transparent p-0 text-sm outline-none focus:ring-0"
                 />
                 @if ($search)
-                    <button wire:click="$set('search', '')" class="text-gray-400 hover:text-gray-600">
+                    <button
+                        wire:click="$set('search', '')"
+                        class="text-ringside-muted hover:text-ringside-ink"
+                        aria-label="Clear search"
+                    >
                         <x-heroicon-o-x-mark class="size-3.5" />
                     </button>
                 @endif
             </div>
 
-            {{-- Filters --}}
             @if (count($filters) > 0)
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     @foreach ($filters as $filter)
                         @if ($filter instanceof \App\Livewire\Table\Filters\SelectFilter)
+                            <label
+                                class="sr-only"
+                                for="table-filter-{{ $filter->getKey() }}"
+                            >{{ $filter->getName() }}</label>
                             <select
+                                id="table-filter-{{ $filter->getKey() }}"
                                 wire:model.live="filterValues.{{ $filter->getKey() }}"
-                                class="bg-light-active focus:border-primary h-9 appearance-none rounded-md border border-gray-300 px-2.5 text-xs font-medium text-gray-600 focus:ring-0"
+                                class="border-ringside-line bg-ringside-surface text-ringside-muted focus:border-ringside-ink min-h-11 appearance-none border px-3 text-sm focus:ring-0"
                             >
                                 @foreach ($filter->getOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -43,21 +47,20 @@
             @endif
         </div>
 
-        {{-- Table --}}
         <div class="overflow-x-auto">
-            <table class="w-full table-auto border-collapse text-left text-sm font-medium text-gray-700">
+            <table class="w-full min-w-[40rem] table-auto border-collapse text-left text-sm">
                 <thead>
                     <tr>
                         @foreach ($columns as $column)
                             <th
-                                class="bg-gray-100 text-gray-600 font-medium text-2sm align-middle py-2.5 px-4 border-b border-gray-200
-                                {{ !$loop->last ? 'border-e border-e-gray-200' : '' }}
+                                class="border-ringside-line bg-ringside-surface-panel text-ringside-muted px-4 py-3 align-middle text-xs font-semibold tracking-[0.08em] uppercase
+                                {{ !$loop->last ? 'border-e' : '' }}
                                 {{ $column->getTitle() === __('core.actions') ? 'w-[60px]' : '' }}"
                             >
                                 @if ($column->isSortable())
                                     <button
                                         wire:click="sort('{{ $column->getField() }}')"
-                                        class="flex items-center gap-1 hover:text-gray-900"
+                                        class="text-ringside-muted hover:text-ringside-ink flex items-center gap-1"
                                     >
                                         {{ $column->getTitle() }}
                                         @if ($sortField === $column->getField())
@@ -77,11 +80,14 @@
                 </thead>
                 <tbody>
                     @forelse ($rows as $row)
-                        <tr wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}" class="border-b border-gray-200">
+                        <tr
+                            wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}"
+                            class="border-ringside-line hover:bg-ringside-surface-hover border-b transition-colors"
+                        >
                             @foreach ($columns as $column)
                                 <td
-                                    class="py-3 px-4
-                                    {{ !$loop->last ? 'border-e border-e-gray-200' : '' }}"
+                                    class="text-ringside-ink px-4 py-4
+                                    {{ !$loop->last ? 'border-ringside-line border-e' : '' }}"
                                 >
                                     @if ($column->isHtml())
                                         {!! $column->resolveValue($row) !!}
@@ -93,7 +99,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($columns) }}" class="px-4 py-8 text-center text-gray-500">
+                            <td colspan="{{ count($columns) }}" class="text-ringside-muted px-4 py-16 text-center">
                                 No records found.
                             </td>
                         </tr>
@@ -102,14 +108,13 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
         @if ($rows->hasPages())
-            <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4">
-                <div class="flex items-center gap-2 text-xs text-gray-600">
+            <div class="border-ringside-line flex flex-wrap items-center justify-between gap-4 border-t px-4 py-4">
+                <div class="text-ringside-muted flex items-center gap-2 text-sm">
                     <span>Per page:</span>
                     <select
                         wire:model.live="perPage"
-                        class="bg-light-active focus:border-primary h-8 w-16 appearance-none rounded-md border border-gray-300 px-2.5 text-xs font-medium focus:ring-0"
+                        class="border-ringside-line bg-ringside-surface text-ringside-muted focus:border-ringside-ink min-h-10 w-20 appearance-none border px-3 text-sm focus:ring-0"
                     >
                         @foreach ($perPageOptions as $option)
                             <option value="{{ $option }}">{{ $option }}</option>
@@ -121,8 +126,10 @@
         @endif
     </div>
 
-    {{-- Loading overlay --}}
-    <div wire:loading.delay class="fixed inset-0 z-50 flex items-center justify-center bg-white/50">
-        <div class="text-sm text-gray-500">Loading...</div>
+    <div
+        wire:loading.delay
+        class="border-ringside-line bg-ringside-surface-header text-ringside-muted fixed end-4 bottom-4 z-50 border px-4 py-3 text-sm shadow-xl"
+    >
+        Updating…
     </div>
 </div>
