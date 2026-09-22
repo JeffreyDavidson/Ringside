@@ -127,6 +127,7 @@
                     <button @click="open = ! open"
                     :aria-expanded="open"
                     aria-controls="account-menu"
+                    data-test="profile-menu"
                     class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start"
                 >
                     <span
