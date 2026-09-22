@@ -90,7 +90,9 @@ in more than one promotion without duplicating authentication records.
 The application resolves an active promotion through the scoped
 `PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
 events and titles now have nullable explicit promotion ownership. Venues are
-global shared resources that can host events for multiple promotions.
+global shared resources that can host events for multiple promotions. Venue
+routes remain outside the promotion context middleware; a venue is globally
+visible while its related event history is filtered by the active promotion.
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Match data inherits ownership

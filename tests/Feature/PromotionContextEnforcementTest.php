@@ -3,6 +3,7 @@
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
@@ -61,6 +62,26 @@ test('promotion-scoped models only return records from the active promotion', fu
         ->toContain($otherEvent->id)
         ->and(Wrestler::query()->pluck('id')->all())
         ->toContain($otherWrestler->id);
+});
+
+test('global venues remain visible while their event history follows the active promotion', function () {
+    $promotion = Promotion::factory()->create();
+    $otherPromotion = Promotion::factory()->create();
+    $venue = Venue::factory()->create();
+    $ownedEvent = Event::factory()->for($promotion, 'promotion')->atVenue($venue)->create();
+    $otherEvent = Event::factory()->for($otherPromotion, 'promotion')->atVenue($venue)->create();
+    $context = app(PromotionContextService::class);
+
+    $context->set($promotion);
+    $context->enforce();
+
+    expect(Venue::query()->findOrFail($venue->id)->is($venue))->toBeTrue()
+        ->and($venue->events()->pluck('id')->all())->toBe([$ownedEvent->id]);
+
+    $context->clear();
+
+    expect($venue->events()->pluck('id')->all())
+        ->toEqualCanonicalizing([$ownedEvent->id, $otherEvent->id]);
 });
 
 test('promotion middleware rejects users without an active membership', function () {
