@@ -16,6 +16,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\View\Composers\PromotionSwitcherComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -23,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -101,6 +103,8 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
+
+        View::composer('components.topbar.profile', PromotionSwitcherComposer::class);
 
         $this->bootRoute();
     }
