@@ -9,7 +9,6 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Artisan;
-use InvalidArgumentException;
 
 function createUnassignedRosterRecord(string $modelClass): Wrestler|Manager|Referee|TagTeam|Stable
 {
