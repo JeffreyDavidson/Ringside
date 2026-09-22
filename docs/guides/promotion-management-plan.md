@@ -32,8 +32,8 @@ switching, cross-promotion relationships, and missing context.
 
 The first ownership slice adds nullable `promotion_id` columns to wrestlers,
 managers, referees, tag teams, and stables. The second adds the same explicit
-ownership to events, venues, and titles; match data follows its event. Existing
-records can be previewed or assigned with
+ownership to events and titles; venues remain global shared resources, and match
+data follows its event. Existing records can be previewed or assigned with
 `promotions:backfill-roster-ownership` and
 `promotions:backfill-event-title-ownership`; both commands require `--force`
 before they change data. Query and authorization enforcement remains a

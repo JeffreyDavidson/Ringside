@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Events\Event;
-use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 use Illuminate\Console\Attributes\Description;
@@ -14,8 +13,8 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
-#[Signature('promotions:backfill-event-title-ownership {promotion : The promotion ID that should own unassigned events, venues, and titles} {--force : Apply the ownership updates} {--dry-run : Report the records that would be updated}')]
-#[Description('Backfill unassigned events, venues, and titles to an existing promotion')]
+#[Signature('promotions:backfill-event-title-ownership {promotion : The promotion ID that should own unassigned events and titles} {--force : Apply the ownership updates} {--dry-run : Report the records that would be updated}')]
+#[Description('Backfill unassigned events and titles to an existing promotion')]
 class BackfillPromotionEventTitleOwnership extends Command
 {
     /**
@@ -23,7 +22,6 @@ class BackfillPromotionEventTitleOwnership extends Command
      */
     private const array PROMOTION_OWNED_MODELS = [
         Event::class,
-        Venue::class,
         Title::class,
     ];
 

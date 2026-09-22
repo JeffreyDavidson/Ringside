@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
-use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
-use App\Models\Promotions\Promotion;
 use App\ValueObjects\Address;
 use Database\Factories\Events\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -29,13 +27,11 @@ use Illuminate\Support\Carbon;
  * @property string $city
  * @property string $state
  * @property string $zipcode
- * @property int|null $promotion_id
  * @property Address $address
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property-read Collection<int, Event> $events
- * @property-read Promotion|null $promotion
  *
  * @method static \Database\Factories\Events\VenueFactory factory($count = null, $state = [])
  * @method static VenueBuilder<static>|Venue newModelQuery()
@@ -53,8 +49,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model implements SoftDeletable
 {
-    use BelongsToPromotion;
-
     /** @use HasFactory<VenueFactory> */
     use HasFactory;
 

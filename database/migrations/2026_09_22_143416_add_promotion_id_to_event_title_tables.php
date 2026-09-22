@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        foreach (['events', 'venues', 'titles'] as $tableName) {
+        foreach (['events', 'titles'] as $tableName) {
             Schema::table($tableName, function (Blueprint $table): void {
                 $table->foreignIdFor(Promotion::class)
                     ->nullable()
