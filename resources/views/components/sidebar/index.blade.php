@@ -30,12 +30,12 @@
             $store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         ]"
         :data-collapsed="! expanded"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-300 ease-out"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-in-out"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
             <a
-                class="font-display text-[2rem] leading-none tracking-tight transition-[transform,left] duration-300 group-data-[collapsed=true]:absolute group-data-[collapsed=true]:start-[calc(50%_-_8px)] group-data-[collapsed=true]:-translate-x-1/2"
+                class="font-display text-[2rem] leading-none tracking-tight transition-[transform,left] duration-[var(--sidebar-transition-duration)] ease-in-out group-data-[collapsed=true]:absolute group-data-[collapsed=true]:start-[calc(50%_-_8px)] group-data-[collapsed=true]:-translate-x-1/2"
                 href="{{ route('dashboard') }}"
                 aria-label="Ringside dashboard"
             >
@@ -49,7 +49,7 @@
                 class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
                 <x-heroicon-s-chevron-left
-                    class="size-4 origin-center transform-gpu transition-transform duration-300 ease-in-out"
+                    class="size-4 origin-center transform-gpu transition-transform duration-[var(--sidebar-transition-duration)] ease-in-out"
                     x-bind:class="expanded ? 'rotate-0' : 'rotate-180'"
                 />
             </button>

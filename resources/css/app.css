@@ -117,8 +117,8 @@
 
 /* Layout Variables */
 .layout1 {
-    --sidebar-transition-duration: 0.3s;
-    --sidebar-transition-timing: ease;
+    --sidebar-transition-duration: 450ms;
+    --sidebar-transition-timing: ease-in-out;
     --sidebar-default-width: 288px;
     --header-height: 72px;
     --sidebar-collapsed-width: 88px;
