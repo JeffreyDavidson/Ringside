@@ -2,62 +2,21 @@
     'href' => '#',
     'icon' => null,
     'active' => false,
-    'nested' => false,
-    'deep' => false,
 ])
 
-@if ($nested)
-    {{-- Nested Menu Item Link --}}
-    <div>
-        <a
-            href="{{ $href }}"
-            tabindex="0"
-            @class([
-                'flex border border-transparent items-center grow ps-[10px] pe-[10px] py-[5px] rounded-lg',
-                'gap-[5px]' => $deep,
-                'gap-[14px]' => ! $deep,
-                'bg-secondary-active' => $active,
-                'hover:bg-secondary-active' => ! $active,
-            ])
-        >
-            <span
-                @class([
-                    'flex w-[6px] -start-[3px] relative',
-                    'before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-y-1/2',
-                    'before:bg-primary' => $active,
-                    'hover:before:bg-primary' => ! $active,
-                ])
-            ></span>
-
-            <span @class([
-                'text-2sm text-foreground hover:text-primary',
-                'font-semibold text-primary' => $active,
-                'font-normal' => ! $active,
-            ])>
-                {{ $slot }}
-            </span>
-        </a>
-    </div>
-@else
-    {{-- Top-Level Menu Item Link --}}
-    <div>
-        <a
-            href="{{ $href }}"
-            tabindex="0"
-            class="flex grow cursor-pointer items-center gap-[10px] border border-transparent py-[6px] ps-[10px] pe-[10px]"
-        >
-            @if ($icon)
-                <span class="flex w-[20px] shrink-0 items-center text-gray-500"> {{ $icon }} </span>
-            @endif
-
-            <span @class([
-                'text-sm text-foreground hover:text-primary',
-                'group-data-[collapsed=true]:opacity-0 group-hover:opacity-100 transition-opacity duration-200',
-                'font-semibold text-primary' => $active,
-                'font-medium' => ! $active,
-            ])>
-                {{ $slot }}
-            </span>
-        </a>
-    </div>
-@endif
+<a
+    href="{{ $href }}"
+    @class([
+        'group/menu relative flex min-h-11 items-center gap-3 px-3 text-sm text-ringside-muted transition-colors hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-ink',
+        'bg-ringside-surface-hover text-ringside-ink' => $active,
+    ])
+    @if ($active) aria-current="page" @endif
+>
+    @if ($icon)
+        <span @class(['shrink-0', 'text-ringside-signal' => $active])>{{ $icon }}</span>
+    @endif
+    <span class="truncate group-data-[collapsed=true]:hidden">{{ $slot }}</span>
+    @if ($active)
+        <span class="bg-ringside-signal absolute inset-y-3 start-0 w-px" aria-hidden="true"></span>
+    @endif
+</a>

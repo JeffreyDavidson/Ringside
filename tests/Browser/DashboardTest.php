@@ -14,7 +14,8 @@ test('authenticated user can access dashboard', function () {
 
     $page = visit('/dashboard');
 
-    $page->assertSee('Dashboard')
+    $page->assertSee('Overview')
+        ->assertSee('User management')
         ->assertNoJavascriptErrors();
 });
 
@@ -54,7 +55,8 @@ test('dashboard has basic navigation structure', function () {
     $page = visit('/dashboard');
 
     // Check for basic page structure elements
-    $page->assertSee('Dashboard')
+    $page->assertSee('Overview')
+        ->assertSee('User management')
         ->assertDontSee('Sign in')
         ->assertNoJavascriptErrors();
 });

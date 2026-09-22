@@ -1,115 +1,175 @@
-{{-- Desktop Sidebar --}}
-<aside
+@php
+    $user = Auth::user();
+    $activePromotion = $promotionSwitcherPromotions->firstWhere('id', $activePromotionId);
+@endphp
+
+<div
     x-data="{
         expanded: $store.sidebar ? $store.sidebar.expanded : true,
         init() {
-            if ($store.sidebar) {
-                this.$watch('$store.sidebar.expanded', (value) => (this.expanded = value));
-            }
+            if ($store.sidebar) this.$watch('$store.sidebar.expanded', (value) => (this.expanded = value));
         },
         toggle() {
             if ($store.sidebar) $store.sidebar.toggle();
         },
     }"
-    @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
-    @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
-    :class="expanded ? 'w-[280px]' : 'w-[80px] hover:w-[280px]'"
-    :data-collapsed="! expanded"
-    class="bg-background border-e-border group fixed top-0 bottom-0 z-20 hidden shrink-0 flex-col items-stretch border-e transition-all duration-300 lg:flex"
-    :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
 >
-    {{-- Sidebar Header --}}
-    <div class="relative hidden h-[70px] shrink-0 items-center justify-between px-3 lg:flex lg:px-6">
-        <a href="{{ route('dashboard') }}">
-            <img
-                class="default-logo min-h-[22px] max-w-none transition-opacity duration-200"
-                :class="expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
-                src="{{ Vite::image('app/default-logo.svg') }}"
-                alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
-            />
-            <img
-                class="small-logo absolute top-1/2 left-6 min-h-[22px] max-w-none -translate-y-1/2 transition-opacity duration-200"
-                :class="expanded ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'"
-                src="{{ Vite::image('app/mini-logo.svg') }}"
-                alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
-            />
-        </a>
-
-        {{-- Toggle Button --}}
-        <button
-            @click="toggle()"
-            @keydown.escape="$store.sidebar && ($store.sidebar.expanded = false)"
-            :aria-expanded="expanded"
-            aria-label="Toggle sidebar navigation"
-            class="border-border bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-primary absolute start-full top-2/4 inline-flex size-[30px] -translate-x-2/4 -translate-y-2/4 cursor-pointer items-center justify-center rounded-lg border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-        >
-            <x-heroicon-s-chevron-left
-                class="text-muted-foreground size-4 transition-all duration-300"
-                x-bind:class="expanded ? '' : 'rotate-180'"
-            />
-        </button>
-    </div>
-
-    {{-- Sidebar Content --}}
-    <div class="flex shrink-0 grow py-5 pe-2">
-        <div class="scrollbar-thumb-muted hover:scrollbar-thumb-muted-foreground flex shrink-0 grow scrollbar-thin scrollbar-track-transparent overflow-y-auto ps-2 pe-1 lg:ps-5 lg:pe-3">
-            <x-sidebar.menu />
-        </div>
-    </div>
-</aside>
-
-{{-- Mobile Sidebar Drawer --}}
-<div x-data x-show="$store.sidebar && $store.sidebar.mobileOpen" x-cloak class="fixed inset-0 z-50 lg:hidden">
-    {{-- Backdrop --}}
     <div
         x-show="$store.sidebar && $store.sidebar.mobileOpen"
-        x-transition:enter="transition-opacity ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition-opacity ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
+        x-cloak
         @click="$store.sidebar && $store.sidebar.closeMobile()"
-        class="absolute inset-0 bg-black/50"
+        class="fixed inset-0 z-20 bg-black/70 lg:hidden"
+        aria-hidden="true"
     ></div>
 
-    {{-- Drawer --}}
     <aside
-        x-show="$store.sidebar && $store.sidebar.mobileOpen"
-        x-transition:enter="transition-transform ease-out duration-300"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition-transform ease-in duration-200"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-        @keydown.escape.window="$store.sidebar && $store.sidebar.closeMobile()"
-        class="bg-background border-e-border relative flex h-full w-[280px] flex-col border-e"
+        @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
+        @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
+        :class="[
+            expanded ? 'lg:w-[--sidebar-default-width]' : 'lg:w-[--sidebar-collapsed-width]',
+            $store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+        ]"
+        :data-collapsed="! expanded"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-30 flex w-[--sidebar-width] shrink-0 flex-col border-e transition-all duration-300"
+        :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
-        {{-- Mobile Logo Area --}}
-        <div class="border-border flex h-[60px] shrink-0 items-center justify-between border-b px-6">
-            <a href="{{ route('dashboard') }}">
-                <img
-                    class="min-h-[22px] max-w-none"
-                    src="{{ Vite::image('app/default-logo.svg') }}"
-                    alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
-                />
+        <div class="border-ringside-line flex h-[--header-height] shrink-0 items-center border-b px-6">
+            <a
+                class="font-display text-[2rem] leading-none tracking-tight"
+                href="{{ route('dashboard') }}"
+                aria-label="Ringside dashboard"
+            >
+                <span class="group-data-[collapsed=true]:hidden">RING<span class="text-ringside-signal">SIDE</span></span>
+                <span class="hidden group-data-[collapsed=true]:inline">R<span class="text-ringside-signal">S</span></span>
             </a>
-
-            {{-- Close Button --}}
+            <button
+                @click="toggle()"
+                :aria-expanded="expanded"
+                :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute start-full top-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center border transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
+            >
+                <x-heroicon-s-chevron-left
+                    class="size-4 transition-transform duration-300"
+                    x-bind:class="expanded ? '' : 'rotate-180'"
+                />
+            </button>
             <button
                 @click="$store.sidebar && $store.sidebar.closeMobile()"
                 aria-label="Close navigation"
-                class="text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:ring-primary inline-flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink ms-auto inline-flex size-10 items-center justify-center lg:hidden"
             >
                 <x-heroicon-o-x-mark class="size-5" />
             </button>
         </div>
 
-        {{-- Mobile Menu Area --}}
-        <div class="flex shrink-0 grow py-5 pe-2">
-            <div class="flex shrink-0 grow overflow-y-auto ps-5 pe-3">
-                <x-sidebar.menu />
-            </div>
+        <div class="flex min-h-0 grow [scrollbar-color:var(--color-ringside-line)_transparent] flex-col overflow-y-auto px-3 py-6">
+            @if ($activePromotion)
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = ! open"
+                    :aria-expanded="open"
+                    aria-controls="promotion-menu"
+                    class="border-ringside-line hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-ringside-ink flex min-h-[68px] w-full items-center gap-3 border px-3 text-start focus-visible:outline-2 focus-visible:outline-offset-4"
+                >
+                    <span
+                        class="border-ringside-line font-display grid size-9 shrink-0 place-items-center border text-lg leading-none"
+                        aria-hidden="true"
+                    >{{ str($activePromotion->name)->substr(0, 2)->upper() }}</span>
+                        <span class="min-w-0 flex-1 group-data-[collapsed=true]:hidden"
+                            ><span class="block truncate text-sm font-semibold">{{ $activePromotion->name }}</span
+                            ><span class="text-ringside-muted mt-1 block text-xs">Promotion workspace</span></span>
+                        <x-heroicon-o-chevron-down class="text-ringside-muted size-4 shrink-0 group-data-[collapsed=true]:hidden" />
+                    </button>
+                    <div
+                        x-cloak
+                        x-show="open"
+                        x-transition.origin.top.left
+                        @click.outside="open = false"
+                        id="promotion-menu"
+                        class="border-ringside-line bg-ringside-surface absolute start-0 top-[calc(100%+8px)] z-40 w-60 border p-2 shadow-xl"
+                    >
+                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">Your promotions</p>
+                        @foreach ($promotionSwitcherPromotions as $promotion)
+                            <form action="{{ route('promotions.switch') }}" method="post">
+                                @csrf
+                                <input type="hidden" name="promotion_id" value="{{ $promotion->id }}" />
+                                <button
+                                    type="submit"
+                                    class="hover:bg-ringside-surface-hover flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm"
+                                >
+                                    <span class="truncate">{{ $promotion->name }}</span>
+                                    @if ($promotion->id === $activePromotionId)
+                                        <x-heroicon-o-check class="text-ringside-signal ms-auto size-4" />
+                                    @endif
+                                </button>
+                            </form>
+                        @endforeach
+                        <p class="text-ringside-muted px-3 pt-3 pb-1 text-xs">
+                            Memberships determine available workspaces.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
+            <x-sidebar.menu />
+        </div>
+
+        <div class="shrink-0 px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+            <a
+                href="{{ route('users.index') }}"
+                @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted hover:bg-ringside-surface hover:text-ringside-ink', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
+            >
+                <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" /><span
+                    class="truncate text-sm group-data-[collapsed=true]:hidden"
+                    >User management</span>
+            </a>
+            @if ($user instanceof \App\Models\Users\User)
+                <div x-data="{ open: false }" class="border-ringside-line relative mt-4 border-t pt-3">
+                    <button @click="open = ! open"
+                    :aria-expanded="open"
+                    aria-controls="account-menu"
+                    class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start"
+                >
+                    <span
+                        class="bg-ringside-surface-hover grid size-8 shrink-0 place-items-center text-xs font-semibold"
+                    >{{ str($user->full_name)->explode(' ')->filter()->map(fn ($part) => str($part)->substr(0, 1))->join('') }}</span>
+                        <span class="min-w-0 flex-1 group-data-[collapsed=true]:hidden"
+                            ><span class="block truncate text-sm font-semibold">{{ $user->full_name }}</span
+                            ><span
+                                class="text-ringside-muted mt-1 block truncate text-xs"
+                                >{{ $user->email }}</span
+                            ></span>
+                        <x-heroicon-o-chevron-up class="text-ringside-muted size-4 shrink-0 group-data-[collapsed=true]:hidden" />
+                    </button>
+                    <div
+                        x-cloak
+                        x-show="open"
+                        x-transition.origin.bottom.left
+                        @click.outside="open = false"
+                        id="account-menu"
+                        class="border-ringside-line bg-ringside-surface absolute start-0 bottom-[calc(100%+8px)] z-40 w-60 border p-2 shadow-xl"
+                    >
+                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">Your account</p>
+                        <a
+                            href="#profile"
+                            class="hover:bg-ringside-surface-hover flex min-h-11 items-center gap-3 px-3 text-sm"
+                        ><x-heroicon-o-user class="size-4" />Profile</a>
+                        <a
+                            href="#account-settings"
+                            class="hover:bg-ringside-surface-hover flex min-h-11 items-center gap-3 px-3 text-sm"
+                        ><x-heroicon-o-cog-6-tooth class="size-4" />Account settings</a>
+                        <div class="border-ringside-line my-2 border-t"></div>
+                        <form action="{{ route('logout') }}" method="post">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm"
+                            >
+                                <x-heroicon-o-arrow-left-start-on-rectangle class="size-4" />Log out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
         </div>
     </aside>
 </div>
