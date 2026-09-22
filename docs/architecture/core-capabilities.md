@@ -94,9 +94,13 @@ global shared resources that can host events for multiple promotions.
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Match data inherits ownership
-through its event. Ownership is not yet enforced at the query or
-authorization boundary, and lifecycle/history tables still require their own
-staged migrations. This is not yet fully isolated tenancy behavior.
+through its event. Promotion-scoped routes establish the context from the
+session's selected active membership, defaulting to the first active
+membership when none is selected. Promotion-owned model queries are then
+filtered to that context, and platform administrators may operate without a
+selected membership as a deliberate global-platform exception. Lifecycle and
+history tables still require their own staged migrations, so this is not yet
+fully isolated tenancy behavior.
 
 Custom domains, subdomains, and physical tenant databases are deferred. The
 initial boundary is a central platform with one database and explicit logical
