@@ -87,7 +87,7 @@
                         id="promotion-menu"
                         class="border-ringside-line bg-ringside-surface absolute start-0 top-[calc(100%+8px)] z-40 w-60 border p-2 shadow-xl"
                     >
-                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">Your promotions</p>
+                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">{{ __('promotions.switch') }}</p>
                         @foreach ($promotionSwitcherPromotions as $promotion)
                             <form action="{{ route('promotions.switch') }}" method="post">
                                 @csrf
