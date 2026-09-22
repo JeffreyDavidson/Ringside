@@ -31,10 +31,13 @@ ownership. Tests must cover multiple users and promotions, reads, writes,
 switching, cross-promotion relationships, and missing context.
 
 The first ownership slice adds nullable `promotion_id` columns to wrestlers,
-managers, referees, tag teams, and stables. Existing records can be previewed
-or assigned with `promotions:backfill-roster-ownership`; the command requires
-`--force` before it changes data. Query and authorization enforcement remains a
-follow-up after the remaining promotion-owned roots are migrated.
+managers, referees, tag teams, and stables. The second adds the same explicit
+ownership to events and titles; venues remain global shared resources, and match
+data follows its event. Existing records can be previewed or assigned with
+`promotions:backfill-roster-ownership` and
+`promotions:backfill-event-title-ownership`; both commands require `--force`
+before they change data. Query and authorization enforcement remains a
+follow-up after lifecycle and history ownership is migrated.
 
 ## Decisions to resolve before implementation
 

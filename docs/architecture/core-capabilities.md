@@ -88,13 +88,15 @@ status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
 The application resolves an active promotion through the scoped
-`PromotionContextService`. Wrestlers, managers, referees, tag teams, and
-stables now have nullable explicit promotion ownership, and existing unowned
-records can be assigned through the guarded
-`promotions:backfill-roster-ownership` command. Ownership is not yet enforced
-at the query or authorization boundary, and events, titles, venues, matches,
-and history tables still require their own staged migrations. This is not yet
-fully isolated tenancy behavior.
+`PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
+events and titles now have nullable explicit promotion ownership. Venues are
+global shared resources that can host events for multiple promotions.
+Existing unowned roster records can be assigned through the guarded
+`promotions:backfill-roster-ownership` command; events and titles use
+`promotions:backfill-event-title-ownership`. Match data inherits ownership
+through its event. Ownership is not yet enforced at the query or
+authorization boundary, and lifecycle/history tables still require their own
+staged migrations. This is not yet fully isolated tenancy behavior.
 
 Custom domains, subdomains, and physical tenant databases are deferred. The
 initial boundary is a central platform with one database and explicit logical
