@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -14,12 +15,16 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
+use App\View\Composers\PromotionSwitcherComposer;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
     #[\Override]
     public function register(): void
     {
+        $this->app->scoped(PromotionContextService::class);
+
         $this->registerLegacyRosterModelAliases();
 
     }
@@ -68,9 +75,20 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        Gate::before(
-            fn (User $user): ?bool => $user->role->isAdministrator() ? true : null,
-        );
+        Gate::before(function (User $user, string $ability, array $arguments): ?bool {
+            if (! $user->role->isAdministrator()) {
+                return null;
+            }
+
+            $subject = $arguments[0] ?? null;
+            $context = app(PromotionContextService::class);
+
+            $isPromotionOwned = $subject instanceof Model
+                && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
+                    || $subject instanceof EventMatch);
+
+            return ! ($isPromotionOwned && $context->isEnforced() && ! $context->owns($subject));
+        });
         Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
@@ -85,6 +103,8 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
+
+        View::composer('components.topbar.profile', PromotionSwitcherComposer::class);
 
         $this->bootRoute();
     }

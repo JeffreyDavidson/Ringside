@@ -1,15 +1,21 @@
 # Promotion Management Plan
 
-Status: retained product proposal; implementation and scheduling require a
-separate task. This is not documentation of an existing tenancy boundary.
+Status: foundation implementation in progress. This document remains the
+forward-looking product and migration plan; direct promotion ownership and
+request-context enforcement are implemented, while lifecycle and history
+ownership remain staged follow-up work.
 
 ## Product requirements
 
-- A promotion represents a wrestling company with a name, slug, owner, and
-  settings. One account may manage multiple promotions.
-- Users can create and switch between promotions they are authorized to manage.
-- Wrestlers, tag teams, managers, referees, stables, events, venues, and titles
-  belong to a promotion. Match data must follow its event's ownership boundary.
+- A promotion represents a wrestling company with a name and slug. Promotion
+  memberships store the scoped role and status; the current foundation keeps
+  users global and does not duplicate authentication records.
+- Users can switch between promotions where they have an active membership; the
+  product may restrict promotion ownership to one promotion without limiting a
+  user's ability to work for multiple promotions.
+- Wrestlers, tag teams, managers, referees, stables, events, and titles belong
+  to a promotion. Venues are global shared resources. Match data must follow
+  its event's ownership boundary.
 - Promotion data must remain isolated for reads and writes, including related
   records, direct record URLs, and background operations.
 - Settings may include timezone, currency, date/time display, default match
@@ -25,6 +31,20 @@ Missing or unauthorized promotion context must not expose all records.
 Existing data needs an explicit ownership/backfill plan before enforcing required
 ownership. Tests must cover multiple users and promotions, reads, writes,
 switching, cross-promotion relationships, and missing context.
+
+The first ownership slice adds nullable `promotion_id` columns to wrestlers,
+managers, referees, tag teams, and stables. The second adds the same explicit
+ownership to events and titles; venues remain global shared resources, and match
+data follows its event. Existing records can be previewed or assigned with
+`promotions:backfill-roster-ownership` and
+`promotions:backfill-event-title-ownership`; both commands require `--force`
+before they change data. The `promotion.context` middleware establishes the
+selected active membership for scoped routes, direct promotion-owned queries
+are filtered to that context, and event matches inherit the event boundary.
+Platform administrators remain a deliberate global exception when no active
+membership is selected. The authenticated profile menu now provides a
+membership-validated promotion switcher. Lifecycle and history ownership and
+background-job context remain follow-up work.
 
 ## Decisions to resolve before implementation
 

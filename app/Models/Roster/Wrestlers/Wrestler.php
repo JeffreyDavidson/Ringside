@@ -6,6 +6,7 @@ namespace App\Models\Roster\Wrestlers;
 
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasMatchParticipations;
@@ -27,6 +28,7 @@ use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
@@ -60,6 +62,7 @@ use Illuminate\Support\Carbon;
  * @implements Suspendable<static>
  *
  * @property int $id
+ * @property int|null $promotion_id
  * @property string $name
  * @property Height $height
  * @property Weight $weight
@@ -102,6 +105,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
+ * @property-read Promotion|null $promotion
  */
 #[Fillable('name', 'height', 'weight', 'hometown', 'signature_move')]
 #[Appends('status')]
@@ -109,6 +113,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
+    use BelongsToPromotion;
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
