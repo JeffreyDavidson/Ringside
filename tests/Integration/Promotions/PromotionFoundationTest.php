@@ -48,13 +48,13 @@ test('promotion context is explicitly established and required', function () {
     $context = app(PromotionContext::class);
     $promotion = Promotion::factory()->create();
 
-    expect($context->current())->toBeNull();
-    expect(fn () => $context->required())->toThrow(LogicException::class);
+    expect($context->current())->toBeNull()
+        ->and(fn () => $context->required())->toThrow(LogicException::class);
 
     $context->set($promotion);
 
-    expect($context->current())->toBe($promotion);
-    expect($context->required())->toBe($promotion);
+    expect($context->current())->toBe($promotion)
+        ->and($context->required())->toBe($promotion);
 
     $context->clear();
 
