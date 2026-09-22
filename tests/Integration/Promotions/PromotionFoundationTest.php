@@ -7,7 +7,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
-use App\Services\Promotions\PromotionContext;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\QueryException;
 
 test('a promotion can have global users with scoped membership data', function () {
@@ -45,7 +45,7 @@ test('a user cannot have duplicate membership in the same promotion', function (
 });
 
 test('promotion context is explicitly established and required', function () {
-    $context = app(PromotionContext::class);
+    $context = app(PromotionContextService::class);
     $promotion = Promotion::factory()->create();
 
     expect($context->current())->toBeNull()

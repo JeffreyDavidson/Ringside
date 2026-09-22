@@ -6,7 +6,7 @@ namespace App\Services\Promotions;
 
 use App\Models\Promotions\Promotion;
 
-class PromotionContext
+class PromotionContextService
 {
     private ?Promotion $promotion = null;
 

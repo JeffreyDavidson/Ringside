@@ -14,7 +14,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Services\Promotions\PromotionContext;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
     #[\Override]
     public function register(): void
     {
-        $this->app->scoped(PromotionContext::class);
+        $this->app->scoped(PromotionContextService::class);
 
         $this->registerLegacyRosterModelAliases();
 

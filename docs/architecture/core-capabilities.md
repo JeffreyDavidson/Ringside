@@ -88,7 +88,7 @@ status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
 The application resolves an active promotion through the scoped
-`PromotionContext` service. Promotion-owned records will adopt explicit
+`PromotionContextService`. Promotion-owned records will adopt explicit
 promotion ownership in staged migrations; this foundation does not yet claim
 ownership for existing roster, event, title, or history tables. Until those
 migrations and their backfill plan are complete, new promotion-bound reads and
