@@ -11,5 +11,6 @@ return [
 
     'actions' => [
         'deleted' => 'Match successfully deleted.',
+        'edit' => 'Edit Match',
     ],
 ];

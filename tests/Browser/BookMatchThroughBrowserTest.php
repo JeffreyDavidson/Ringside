@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\MatchType;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
@@ -33,6 +34,41 @@ test('administrator can book a singles match through the event page', function (
         ->assertNoJavascriptErrors();
 
     expect($event->matches()->count())->toBe(1);
+});
+
+test('administrator can edit an unresulted match from the event page', function (): void {
+    $event = Event::factory()->scheduled()->withVenue()->create();
+    $referee = Referee::factory()->bookable()->create();
+    $firstWrestler = Wrestler::factory()->bookable()->create(['name' => 'First Edit Competitor']);
+    $originalOpponent = Wrestler::factory()->bookable()->create(['name' => 'Original Edit Opponent']);
+    $replacementOpponent = Wrestler::factory()->bookable()->create(['name' => 'Replacement Edit Opponent']);
+    $match = EventMatch::factory()
+        ->for($event)
+        ->withCompetitors([$firstWrestler, $originalOpponent])
+        ->create([
+            'match_type' => MatchType::Singles,
+            'preview' => 'The original match preview.',
+        ]);
+    $match->referees()->attach($referee);
+
+    $this->actingAs(administrator());
+
+    $page = visit(route('events.show', $event));
+
+    $page->assertSee('Add Event Match');
+    $page
+        ->assertSee('Edit Match')
+        ->click('[data-test="match-edit-action"]')
+        ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
+        ->select('select[name="form.competitors.1.wrestlers.0"]', (string) $replacementOpponent->id)
+        ->fill('textarea[name="form.preview"]', 'The challenger steps into the spotlight.')
+        ->press('Save')
+        ->assertSee('Replacement Edit Opponent')
+        ->assertNoJavascriptErrors();
+
+    expect($match->refresh()->preview)->toBe('The challenger steps into the spotlight.')
+        ->and($match->wrestlers()->pluck('wrestlers.id')->all())
+        ->toBe([$firstWrestler->id, $replacementOpponent->id]);
 });
 
 test('administrator can create and edit an event with a showtime', function (): void {
