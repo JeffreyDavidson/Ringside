@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$manager->full_name">
     <x-slot:sidebar>
         <x-managers.show.general-info :$manager />
     </x-slot:sidebar>

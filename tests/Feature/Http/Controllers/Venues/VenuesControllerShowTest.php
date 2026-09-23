@@ -27,6 +27,8 @@ describe('Venues Controller', function () {
             ->get(route('venues.show', $this->venue))
             ->assertOk()
             ->assertViewIs('venues.show')
+            ->assertSee($this->venue->name)
+            ->assertSee('Address')
             ->assertViewHas('venue', $this->venue)
             ->assertSeeLivewire(PreviousEvents::class);
     });

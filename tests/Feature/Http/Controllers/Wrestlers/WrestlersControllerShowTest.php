@@ -31,6 +31,8 @@ describe('Wrestlers Controller', function () {
             ->get(route('wrestlers.show', $this->wrestler))
             ->assertOk()
             ->assertViewIs('wrestlers.show')
+            ->assertSee($this->wrestler->name)
+            ->assertSee('Status')
             ->assertViewHas('wrestler', $this->wrestler)
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
@@ -46,11 +48,12 @@ describe('Wrestlers Controller', function () {
         actingAs(administrator())
             ->get(route('wrestlers.show', $this->wrestler))
             ->assertOk()
-            ->assertViewHas('wrestler', fn (Wrestler $wrestler): bool => count($wrestler->getRelations()) === 4
+            ->assertViewHas('wrestler', fn (Wrestler $wrestler): bool => count($wrestler->getRelations()) === 5
                 && $wrestler->relationLoaded('currentManagers')
                 && $wrestler->relationLoaded('currentStable')
                 && $wrestler->relationLoaded('currentTagTeam')
-                && $wrestler->relationLoaded('firstEmployment'));
+                && $wrestler->relationLoaded('firstEmployment')
+                && $wrestler->relationLoaded('currentChampionships'));
     });
 
     /**

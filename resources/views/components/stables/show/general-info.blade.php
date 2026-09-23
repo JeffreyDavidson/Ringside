@@ -1,4 +1,5 @@
 <x-card.general-info>
+    <x-card.general-info.stat label="Status" :value="$stable->status->label()" />
     @if ($stable->currentWrestlers->isNotEmpty())
         <x-card.general-info.link-list label="Current Wrestler(s)">
             @foreach ($stable->currentWrestlers as $wrestler)

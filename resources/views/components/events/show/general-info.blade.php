@@ -1,4 +1,5 @@
 <x-card.general-info>
+    <x-card.general-info.stat label="Status" :value="$event->status->label()" />
     <x-card.general-info.stat label="Date" :value="$event->date?->format('Y-m-j g:i A') ?? 'Unscheduled'" />
     @if ($event->venue)
         <x-card.general-info.links label="Venue">

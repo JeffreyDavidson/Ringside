@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$tagTeam->name">
     <x-slot:sidebar>
         <x-tag-teams.show.general-info :$tagTeam />
     </x-slot:sidebar>
