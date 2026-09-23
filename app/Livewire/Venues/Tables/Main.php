@@ -62,6 +62,16 @@ class Main extends BaseTable
         ];
     }
 
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Venue $row) => view('components.tables.columns.venue-actions', [
+                'venue' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
+    }
+
     public function delete(Venue $venue, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $venue);

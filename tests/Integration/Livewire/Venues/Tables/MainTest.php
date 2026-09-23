@@ -32,6 +32,10 @@ describe('venues table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSee('Add Venue')
+            ->assertSeeHtml('placeholder="Search venues"')
+            ->assertSeeHtml('aria-label="Actions for Madison Square Garden"')
+            ->assertSeeHtml('role="menu"')
             ->assertSee('Madison Square Garden')
             ->assertSee('4 Pennsylvania Plaza')
             ->assertSee('New York')

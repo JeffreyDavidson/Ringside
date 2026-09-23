@@ -29,6 +29,7 @@ describe('Venues Controller', function () {
         $response
             ->assertSuccessful()
             ->assertViewIs('venues.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

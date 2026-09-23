@@ -8,6 +8,7 @@ return [
     'city' => 'City',
     'state' => 'State',
     'zipcode' => 'Zip Code',
+    'index_description' => 'Manage shared venues available to every promotion and their event history.',
 
     'actions' => [
         'deleted' => 'Venue successfully deleted.',
