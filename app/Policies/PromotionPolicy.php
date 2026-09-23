@@ -26,6 +26,14 @@ class PromotionPolicy
     }
 
     /**
+     * Determine whether the user can manage promotion memberships.
+     */
+    public function manageMembers(User $user, Promotion $promotion): bool
+    {
+        return false;
+    }
+
+    /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
