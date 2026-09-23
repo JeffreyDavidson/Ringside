@@ -36,6 +36,10 @@ describe('events table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSee('Add Event')
+            ->assertSeeHtml('placeholder="Search events"')
+            ->assertSeeHtml('aria-label="Actions for Future Showcase"')
+            ->assertSeeHtml('role="menu"')
             ->assertSee('Future Showcase')
             ->assertSee('Past Showcase')
             ->assertSee('Draft Showcase')
