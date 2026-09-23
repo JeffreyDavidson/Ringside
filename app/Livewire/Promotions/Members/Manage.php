@@ -143,11 +143,10 @@ class Manage extends Component
                     $query->whereKey($promotion->getKey());
                 })
                 ->where(function (Builder $query) use ($search): void {
-                    $normalizedSearch = mb_strtolower($search);
-                    $searchPattern = "%{$normalizedSearch}%";
+                    $searchPattern = "%{$search}%";
 
-                    $query->whereRaw('LOWER(full_name) LIKE ?', [$searchPattern])
-                        ->orWhereRaw('LOWER(email) LIKE ?', [$searchPattern]);
+                    $query->whereLike('full_name', $searchPattern)
+                        ->orWhereLike('email', $searchPattern);
                 })
                 ->orderBy('full_name')
                 ->limit(8)

@@ -60,6 +60,19 @@ it('adds an existing global account to only the selected promotion with its sele
         ->and($user->promotions()->count())->toBe(1);
 });
 
+it('searches for available accounts by email without case sensitivity', function () {
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create([
+        'email' => 'global.member@example.test',
+        'status' => UserStatus::Active,
+    ]);
+
+    Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id])
+        ->set('search', mb_strtoupper($user->email))
+        ->assertSee($user->email);
+});
+
 it('does not allow an inactive account to be added as a promotion member', function () {
     $promotion = Promotion::factory()->create();
     $user = User::factory()->create(['status' => UserStatus::Inactive]);
