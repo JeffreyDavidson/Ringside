@@ -35,9 +35,12 @@ Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
-    Route::get('promotions', PromotionsController::class)
+    Route::get('promotions', [PromotionsController::class, 'index'])
         ->can('viewAny', Promotion::class)
         ->name('promotions.index');
+    Route::get('promotions/{promotion}', [PromotionsController::class, 'show'])
+        ->can('view', 'promotion')
+        ->name('promotions.show');
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
 
     Route::middleware('promotion.context')->group(function () {

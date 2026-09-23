@@ -53,7 +53,14 @@
                         <tbody class="divide-ringside-line divide-y">
                             @foreach ($promotions as $promotion)
                                 <tr class="hover:bg-ringside-surface-hover">
-                                    <td class="text-ringside-ink px-4 py-4 font-semibold">{{ $promotion->name }}</td>
+                                    <td class="text-ringside-ink px-4 py-4 font-semibold">
+                                        <a
+                                            href="{{ route('promotions.show', $promotion) }}"
+                                            class="hover:text-ringside-signal focus-visible:outline-ringside-white focus-visible:outline-2 focus-visible:outline-offset-4"
+                                        >
+                                            {{ $promotion->name }}
+                                        </a>
+                                    </td>
                                     <td class="text-ringside-muted px-4 py-4">{{ $promotion->slug }}</td>
                                     <td class="text-ringside-muted px-4 py-4">{{ $promotion->users_count }}</td>
                                     <td class="text-ringside-muted px-4 py-4">

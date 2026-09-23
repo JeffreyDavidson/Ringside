@@ -13,13 +13,20 @@ class PromotionsController extends Controller
     /**
      * Display the platform promotion directory.
      */
-    public function __invoke(): View
+    public function index(): View
     {
         return view('promotions.index', [
             'promotions' => Promotion::query()
                 ->withCount('users')
                 ->orderBy('name')
                 ->get(),
+        ]);
+    }
+
+    public function show(Promotion $promotion): View
+    {
+        return view('promotions.show', [
+            'promotion' => $promotion->loadCount('memberships'),
         ]);
     }
 }
