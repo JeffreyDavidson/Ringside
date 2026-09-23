@@ -1,60 +1,68 @@
-<div class="flex" x-data="{ open: false }">
-    <div class="m-0 flex flex-col p-0">
+<div class="flex justify-center" x-data="{ open: false }">
+    <div class="relative">
         <button
+            type="button"
             x-ref="button"
             @click="open = ! open"
-            class="flex w-8 shrink-0 grow cursor-pointer items-center justify-center gap-0 p-0 hover:border-transparent hover:bg-gray-200 hover:text-gray-800 hover:shadow-none"
+            :aria-expanded="open"
+            aria-haspopup="menu"
+            aria-label="Actions for {{ $wrestler->name }}"
+            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex size-9 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
         >
-            <x-heroicon-m-ellipsis-vertical class="size-5" />
+            <x-heroicon-m-ellipsis-vertical class="size-5" aria-hidden="true" />
         </button>
         <div
+            x-cloak
             x-show="open"
             @click.outside="open = false"
+            @keydown.escape.stop="open = false"
             x-anchor.bottom-start="$refs.button"
-            class="z-[105] m-0 w-full max-w-[175px] rounded-xl border border-solid border-gray-200 bg-white py-2.5 shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)]"
+            x-transition.origin.top.left
+            class="border-ringside-line bg-ringside-surface-header text-ringside-ink z-[105] m-0 w-48 border p-1 shadow-xl"
+            role="menu"
+            aria-label="Wrestler actions"
         >
-            <ul>
+            <ul class="m-0 list-none p-0">
                 <li class="m-0 flex flex-col p-0">
                     <a
-                        class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                        role="menuitem"
+                        class="hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 items-center gap-3 px-3 text-sm focus-visible:outline-2"
                         x-on:click="open = false"
                         href="{{ route('wrestlers.show', $wrestler) }}"
                     >
-                        <span class="me-2.5 flex shrink-0 items-center">
-                            <x-heroicon-m-magnifying-glass class="group-hover:text-primary size-5 text-gray-500" />
-                        </span>
-                        <span class="text-2sm flex grow items-center font-medium text-gray-800">View</span>
+                        <x-heroicon-m-eye class="text-ringside-muted size-5" aria-hidden="true" />
+                        <span>View</span>
                     </a>
                 </li>
-                <div class="my-2.5 border-b border-solid border-gray-200"></div>
+                <li role="separator" class="border-ringside-line my-1 border-t"></li>
                 @can('update', $wrestler)
                     <li class="m-0 flex flex-col p-0">
                         <button
-                            class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                            type="button"
+                            role="menuitem"
+                            class="hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm focus-visible:outline-2"
                             x-on:click="open = false"
                             wire:click="$dispatch('openModal', { component: 'wrestlers.modals.form-modal', arguments: { 'modelId': '{{ $wrestler->id }}' }})"
                         >
-                            <span class="me-2.5 flex shrink-0 items-center">
-                                <x-heroicon-m-pencil-square class="group-hover:text-primary size-5 text-gray-500" />
-                            </span>
-                            <span class="text-2sm flex grow items-center font-medium text-gray-800">Edit</span>
+                            <x-heroicon-m-pencil-square class="text-ringside-muted size-5" aria-hidden="true" />
+                            <span>Edit</span>
                         </button>
                     </li>
-                    <div class="my-2.5 border-b border-solid border-gray-200"></div>
+                    <li role="separator" class="border-ringside-line my-1 border-t"></li>
                 @endcan
                 @can('delete', $wrestler)
                     <li class="m-0 flex flex-col p-0">
-                        <a
-                            class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                        <button
+                            type="button"
+                            role="menuitem"
+                            class="text-ringside-signal-soft hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm focus-visible:outline-2"
                             x-on:click="open = false"
                             wire:click="delete({{ $wrestler->id }})"
                             wire:confirm
                         >
-                            <span class="me-2.5 flex shrink-0 items-center">
-                                <x-heroicon-m-trash class="group-hover:text-primary size-5 text-gray-500" />
-                            </span>
-                            <span class="text-2sm flex grow items-center font-medium text-gray-800">Remove</span>
-                        </a>
+                            <x-heroicon-m-trash class="size-5" aria-hidden="true" />
+                            <span>Remove</span>
+                        </button>
                     </li>
                 @endcan
             </ul>

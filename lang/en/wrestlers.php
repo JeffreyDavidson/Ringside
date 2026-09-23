@@ -6,6 +6,7 @@ return [
     'weight' => 'Weight',
     'signature_move' => 'Signature Move',
     'hometown' => 'Hometown',
+    'index_description' => 'Manage your promotion’s roster, employment, and wrestler records.',
     'date_hired' => 'Date Hired',
     'date_left' => 'Date Left',
     'feet' => 'Feet',
