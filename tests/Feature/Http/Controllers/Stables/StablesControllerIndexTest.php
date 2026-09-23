@@ -22,6 +22,7 @@ describe('Stables Controller', function () {
             ->get(route('stables.index'))
             ->assertOk()
             ->assertViewIs('stables.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 
