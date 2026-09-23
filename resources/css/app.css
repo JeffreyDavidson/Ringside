@@ -163,6 +163,11 @@
     transition: transform var(--sidebar-transition-duration) var(--sidebar-transition-timing);
 }
 
+.event-date-time::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
 .group[data-collapsed='true'] .sidebar-toggle-icon {
     transform: rotate(180deg);
 }

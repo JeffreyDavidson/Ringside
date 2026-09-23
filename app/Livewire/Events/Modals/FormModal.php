@@ -43,7 +43,7 @@ class FormModal extends BaseFormModal
     protected function populateDummyData(): void
     {
         $this->form->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s');
+        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d\\TH:i');
         $venue = Venue::query()->inRandomOrder()->first();
 
         if ($venue !== null) {

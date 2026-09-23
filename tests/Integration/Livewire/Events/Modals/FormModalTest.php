@@ -59,9 +59,10 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'Summer Showcase')
-            ->assertSet('form.date', $eventDate->toDateTimeString())
+            ->assertSet('form.date', $eventDate->format('Y-m-d\\TH:i'))
             ->assertSet('form.venue_id', $venue->id)
             ->assertSet('form.preview', 'A championship showcase.')
+            ->assertSeeHtml('type="datetime-local"')
             ->assertSee('Edit Event');
     });
 
@@ -78,7 +79,7 @@ describe('authorized event form interactions', function () {
         $modal->call('openModal');
         $modal->set([
             'form.name' => 'WrestleMania 40',
-            'form.date' => $eventDate->toDateTimeString(),
+            'form.date' => $eventDate->format('Y-m-d\\TH:i'),
             'form.venue_id' => $venue->id,
             'form.preview' => 'The biggest event of the year.',
         ]);
@@ -145,7 +146,7 @@ describe('authorized event form interactions', function () {
         $modal->call('openModal', $event->id);
         $modal->set([
             'form.name' => 'Updated Event',
-            'form.date' => $updatedDate->toDateTimeString(),
+            'form.date' => $updatedDate->format('Y-m-d\\TH:i'),
             'form.venue_id' => $updatedVenue->id,
             'form.preview' => 'Updated preview.',
         ]);

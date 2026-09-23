@@ -8,6 +8,11 @@
     </div>
     <div>
         <x-buttons.light wire:click="clear">Clear</x-buttons.light>
-        <x-buttons.primary wire:click="save">Save</x-buttons.primary>
+        <x-buttons.primary
+            class="!bg-ringside-red !text-ringside-white hover:!bg-ringside-red-dark !rounded-none"
+            wire:click="save"
+        >
+            Save
+        </x-buttons.primary>
     </div>
 </div>
