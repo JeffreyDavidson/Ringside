@@ -81,6 +81,16 @@ class Main extends BaseTable
         ];
     }
 
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Manager $row) => view('components.tables.columns.manager-actions', [
+                'manager' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
+    }
+
     /**
      * @return array<int, Filter>
      */
