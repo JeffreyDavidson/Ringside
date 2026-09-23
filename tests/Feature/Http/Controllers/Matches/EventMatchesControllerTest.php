@@ -24,6 +24,7 @@ describe('Event Matches Controller', function () {
             ->get(route('events.matches.index', $event))
             ->assertOk()
             ->assertViewIs('matches.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertViewHas('event', $event);
     });
 
