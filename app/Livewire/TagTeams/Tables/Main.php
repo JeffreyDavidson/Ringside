@@ -76,6 +76,16 @@ class Main extends BaseTable
         ];
     }
 
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (TagTeam $row) => view('components.tables.columns.tag-team-actions', [
+                'tagTeam' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
+    }
+
     /**
      * @return array<int, Filter>
      */

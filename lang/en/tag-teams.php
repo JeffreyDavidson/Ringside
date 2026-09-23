@@ -8,6 +8,7 @@ return [
     'date_joined' => 'Date Joined',
     'date_left' => 'Date Left',
     'partner' => 'Partner',
+    'index_description' => 'Manage your promotion’s tag teams, partnerships, and records.',
 
     'actions' => [
         'employed' => 'Tag team has been hired.',
