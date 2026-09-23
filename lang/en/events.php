@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'name' => 'Event Name',
     'date' => 'Date',
+    'date_time' => 'Date and time',
     'venue' => 'Venue',
     'preview' => 'Preview',
     'index_description' => 'Manage event schedules, venues, and promotion cards in one place.',

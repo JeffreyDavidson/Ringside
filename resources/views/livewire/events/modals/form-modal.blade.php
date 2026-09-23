@@ -4,7 +4,12 @@
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.date label="{{ __('events.date') }}" wire:model="form.date" />
+        <x-form.input
+            type="datetime-local"
+            label="{{ __('events.date_time') }}"
+            wire:model="form.date"
+            class="event-date-time [color-scheme:dark]"
+        />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
