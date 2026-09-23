@@ -22,6 +22,7 @@ describe('Referees Controller', function () {
             ->get(route('referees.index'))
             ->assertOk()
             ->assertViewIs('referees.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

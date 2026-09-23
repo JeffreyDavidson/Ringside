@@ -6,6 +6,7 @@ return [
     'last_name' => 'Last Name',
     'date_hired' => 'Date Hired',
     'date_fired' => 'Date Fired',
+    'index_description' => 'Manage your promotion’s referees, assignments, and officiating records.',
 
     'actions' => [
         'employed' => 'Referee has been hired.',
