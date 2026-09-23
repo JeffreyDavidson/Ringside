@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -76,12 +79,61 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::before(function (User $user, string $ability, array $arguments): ?bool {
-            if (! $user->role->isAdministrator()) {
-                return null;
-            }
-
             $subject = $arguments[0] ?? null;
             $context = app(PromotionContextService::class);
+
+            if (! $user->role->isAdministrator()) {
+                if ($subject instanceof Promotion) {
+                    $membership = $subject->memberships()
+                        ->where('user_id', $user->getKey())
+                        ->where('status', MembershipStatus::Active)
+                        ->first();
+
+                    if ($membership === null) {
+                        return false;
+                    }
+
+                    return match ($ability) {
+                        'view' => true,
+                        'manageMembers', 'update' => $membership->role === MembershipRole::Owner,
+                        default => false,
+                    };
+                }
+
+                $isPromotionOwnedClass = is_string($subject)
+                    && class_exists($subject)
+                    && ($subject === EventMatch::class
+                        || in_array(BelongsToPromotion::class, class_uses_recursive($subject), true));
+
+                $isPromotionOwnedModel = $subject instanceof Model
+                    && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
+                        || $subject instanceof EventMatch);
+
+                if (! $isPromotionOwnedClass && ! $isPromotionOwnedModel) {
+                    return null;
+                }
+
+                if (! $context->isEnforced()) {
+                    return null;
+                }
+
+                $promotion = $context->current();
+
+                if (! $promotion instanceof Promotion) {
+                    return false;
+                }
+
+                if ($subject instanceof Model && ! $context->owns($subject)) {
+                    return false;
+                }
+
+                $membership = $promotion->memberships()
+                    ->where('user_id', $user->getKey())
+                    ->where('status', MembershipStatus::Active)
+                    ->first();
+
+                return $membership?->role->allows($ability) ?? false;
+            }
 
             $isPromotionOwned = $subject instanceof Model
                 && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)

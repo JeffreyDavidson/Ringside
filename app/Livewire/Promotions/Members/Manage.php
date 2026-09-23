@@ -126,6 +126,7 @@ class Manage extends Component
     public function render(): View
     {
         $promotion = $this->promotion();
+        Gate::authorize('view', $promotion);
 
         $members = PromotionMembership::query()
             ->where('promotion_id', $promotion->getKey())
@@ -133,10 +134,11 @@ class Manage extends Component
             ->orderBy('created_at')
             ->get();
 
+        $canManageMembers = Gate::allows('manageMembers', $promotion);
         $availableUsers = collect();
         $search = trim($this->search);
 
-        if (mb_strlen($search) >= 2) {
+        if ($canManageMembers && mb_strlen($search) >= 2) {
             $availableUsers = User::query()
                 ->where('status', UserStatus::Active)
                 ->whereDoesntHave('promotions', function (Builder $query) use ($promotion): void {
@@ -156,6 +158,7 @@ class Manage extends Component
         return view('livewire.promotions.members.manage', [
             'members' => $members,
             'availableUsers' => $availableUsers,
+            'canManageMembers' => $canManageMembers,
             'roles' => MembershipRole::cases(),
             'activeStatus' => MembershipStatus::Active,
             'suspendedStatus' => MembershipStatus::Suspended,
