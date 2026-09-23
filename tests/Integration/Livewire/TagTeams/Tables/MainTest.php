@@ -27,6 +27,8 @@ describe('tag teams table', function (): void {
             ->assertSuccessful()
             ->assertSee('Add Tag Team')
             ->assertSeeHtml('placeholder="Search tag teams"')
+            ->assertSeeHtml('aria-label="Actions for The Hardy Boyz"')
+            ->assertSeeHtml('role="menu"')
             ->assertSee('The Hardy Boyz')
             ->assertSee(EmploymentStatus::Employed->label());
     });
