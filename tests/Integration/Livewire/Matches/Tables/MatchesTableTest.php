@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
@@ -91,6 +95,50 @@ describe('rendering', function (): void {
             ->assertSee('Correct Result')
             ->assertSeeHtml("matchId: {$unresultedMatch->id}")
             ->assertSeeHtml("matchId: {$resultedMatch->id}");
+    });
+
+    it('offers editing only for matches without a recorded result', function (): void {
+        // Arrange
+        $event = Event::factory()->create();
+        $editableMatch = EventMatch::factory()->forEvent($event)->create();
+        $completedMatch = EventMatch::factory()->forEvent($event)->create([
+            'match_finish' => MatchFinish::TimeLimitDraw,
+        ]);
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml('data-test="match-edit-action"')
+            ->assertSeeHtml('data-match-id="'.$editableMatch->id.'"')
+            ->assertDontSeeHtml('data-match-id="'.$completedMatch->id.'"')
+            ->assertSeeHtml("eventId: {$event->id}, modelId: {$editableMatch->id}");
+    });
+
+    it('hides match editing from promotion members without update access', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        $match = EventMatch::factory()->forEvent($event)->create();
+        $member = basicUser();
+        $promotion->users()->attach($member, [
+            'role' => MembershipRole::Member->value,
+            'status' => MembershipStatus::Active->value,
+        ]);
+        actingAs($member);
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee($match->match_type->label())
+            ->assertDontSeeHtml('data-test="match-edit-action"');
     });
 });
 
