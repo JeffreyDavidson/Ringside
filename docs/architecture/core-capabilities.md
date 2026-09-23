@@ -87,6 +87,15 @@ stored in the `promotion_user` membership table, where role and membership
 status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
+Promotion roles apply only within the active promotion context. Members can
+view promotion-owned data. Managers can view and manage promotion-owned roster,
+event, match, stable, and title data, but cannot update promotion settings or
+membership roles. Owners have the manager capabilities and can also update
+promotion settings and manage that promotion's memberships. Platform
+administrators retain their global access, subject to the active-context
+ownership guard. Promotion directory management, global users, and shared
+venues remain outside promotion-member permissions.
+
 The application resolves an active promotion through the scoped
 `PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
 events and titles now have nullable explicit promotion ownership. Venues are
