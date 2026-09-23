@@ -22,6 +22,7 @@ describe('Titles Controller', function () {
             ->get(route('titles.index'))
             ->assertOk()
             ->assertViewIs('titles.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

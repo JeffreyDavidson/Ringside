@@ -5,6 +5,8 @@ declare(strict_types=1);
 return [
     'name' => 'Title Name',
     'type' => 'Title Type',
+    'current_champion' => 'Current Champion',
+    'index_description' => 'Manage championships, title status, and current champions for your promotion.',
 
     'actions' => [
         'deleted' => 'Title successfully deleted.',

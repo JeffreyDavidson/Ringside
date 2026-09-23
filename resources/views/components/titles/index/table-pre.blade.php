@@ -1,11 +1,16 @@
-<div class="flex flex-wrap items-center justify-between gap-5 pb-7.5 lg:items-end">
-    <div class="flex flex-col justify-center gap-2">
-        <x-tables.meta-data />
-    </div>
-    <div class="flex items-center gap-2.5">
+<x-layouts.table-header title="Titles" :subtitle="__('titles.index_description')">
+    <x-slot:actions>
         @can('create', \App\Models\Titles\Title::class)
-            <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'titles.modals.form-modal' })">
-                Add Title</x-buttons.primary>
+            <x-button
+                variant="ringside"
+                size="md"
+                class="min-h-11"
+                @click="$dispatch('openModal', { component: 'titles.modals.form-modal' })"
+            >
+                Add Title
+            </x-button>
         @endcan
-    </div>
-</div>
+    </x-slot:actions>
+</x-layouts.table-header>
+
+<x-tables.meta-data />
