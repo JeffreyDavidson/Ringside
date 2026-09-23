@@ -29,6 +29,8 @@ describe('stables table', function (): void {
             ->assertSuccessful()
             ->assertSee('Add Stable')
             ->assertSeeHtml('placeholder="Search stables"')
+            ->assertSeeHtml('aria-label="Actions for The Four Horsemen"')
+            ->assertSeeHtml('role="menu"')
             ->assertSee('The Four Horsemen')
             ->assertSee(StableStatus::Active->label());
     });
