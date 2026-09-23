@@ -29,6 +29,8 @@ describe('Events Controller', function () {
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
             ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSee($this->event->name)
+            ->assertSee('Status')
             ->assertSeeLivewire(MatchesTable::class);
     });
 

@@ -29,6 +29,8 @@ describe('Managers Controller', function () {
             ->get(route('managers.show', $this->manager))
             ->assertOk()
             ->assertViewIs('managers.show')
+            ->assertSee($this->manager->full_name)
+            ->assertSee('Status')
             ->assertViewHas('manager', $this->manager)
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)

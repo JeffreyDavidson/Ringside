@@ -1,4 +1,5 @@
 <x-card.general-info>
+    <x-card.general-info.stat label="Status" :value="$wrestler->status->label()" />
     <x-card.general-info.stat label="Height" :value="$wrestler->height" />
     <x-card.general-info.stat label="Weight" :value="$wrestler->weight" />
     <x-card.general-info.stat label="Hometown" :value="$wrestler->hometown" />
@@ -30,15 +31,18 @@
             />
         </x-card.general-info.links>
     @endif
-    {{-- @if ($wrestler->currentChampionships->isNotEmpty())
+    @if ($wrestler->currentChampionships->isNotEmpty())
         <x-card.general-info.link-list label="Current Title Championship(s)">
             @foreach ($wrestler->currentChampionships as $currentChampionship)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
+                    <x-route-link
+                        :route="route('titles.show', $currentChampionship->title)"
+                        label="{{ $currentChampionship->title->name }}"
+                    />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
-    @endif --}}
+    @endif
     <x-card.general-info.stat
         label="Start Date"
         :value="$wrestler->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'"

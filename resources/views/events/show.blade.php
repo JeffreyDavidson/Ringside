@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$event->name">
     <x-slot:sidebar>
         <x-events.show.general-info :$event />
     </x-slot:sidebar>

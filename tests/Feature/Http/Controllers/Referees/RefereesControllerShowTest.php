@@ -26,6 +26,8 @@ describe('Referees Controller', function () {
         actingAs(administrator())
             ->get(route('referees.show', $this->referee))
             ->assertViewIs('referees.show')
+            ->assertSee($this->referee->full_name)
+            ->assertSee('Status')
             ->assertViewHas('referee', $this->referee)
             ->assertSeeLivewire(PreviousMatches::class);
     });

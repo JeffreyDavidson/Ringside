@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$stable->name">
     <x-slot:sidebar>
         <x-stables.show.general-info :$stable />
     </x-slot:sidebar>

@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$wrestler->name">
     <x-slot:sidebar>
         <x-wrestlers.show.general-info :$wrestler />
     </x-slot:sidebar>
