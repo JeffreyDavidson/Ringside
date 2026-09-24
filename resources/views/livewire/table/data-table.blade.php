@@ -15,8 +15,9 @@
                 />
                 @if ($search)
                     <button
+                        type="button"
                         wire:click="$set('search', '')"
-                        class="text-ringside-muted hover:text-ringside-ink"
+                        class="text-ringside-muted hover:text-ringside-ink inline-flex min-h-11 min-w-11 items-center justify-center"
                         aria-label="Clear search"
                     >
                         <x-heroicon-o-x-mark class="size-3.5" />
@@ -100,7 +101,20 @@
                     @empty
                         <tr>
                             <td colspan="{{ count($columns) }}" class="text-ringside-muted px-4 py-16 text-center">
-                                No records found.
+                                @if ($search !== '')
+                                    <div class="flex flex-col items-center gap-3">
+                                        <p class="m-0">No results for “{{ $search }}”.</p>
+                                        <button
+                                            type="button"
+                                            wire:click="$set('search', '')"
+                                            class="text-ringside-ink hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink border-ringside-line inline-flex min-h-11 items-center border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                                        >
+                                            Clear search
+                                        </button>
+                                    </div>
+                                @else
+                                    No records found.
+                                @endif
                             </td>
                         </tr>
                     @endforelse

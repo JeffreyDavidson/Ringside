@@ -20,6 +20,12 @@
 
     // Generate ID
     $inputId = $attributes->get('id', $fieldName);
+    $fieldErrorId = $inputId.'-error';
+    $describedBy = collect(preg_split('/\s+/', trim((string) $attributes->get('aria-describedby'))))
+        ->merge($fieldName && $errors->has($fieldName) ? [$fieldErrorId] : [])
+        ->filter()
+        ->unique()
+        ->implode(' ');
 
     // Build input classes matching .kt-input specifications
     $inputClasses = collect([
@@ -50,12 +56,12 @@
     $hidePasswordLabel = __($fieldName === 'password_confirmation' ? 'auth-forms.hide_password_confirmation' : 'auth-forms.hide_password');
 
     // Forward all attributes except field-specific ones
-    $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'appearance']);
+    $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'appearance', 'aria-describedby', 'aria-invalid']);
 @endphp
 
 @if ($appearance === 'ringside' && $type === 'password')
     <div class="relative">
-        <input {{ $inputAttributes->merge(['type' => 'password', 'name' => $fieldName, 'id' => $inputId, 'class' => $inputClasses]) }} />
+        <input {{ $inputAttributes->merge(['type' => 'password', 'name' => $fieldName, 'id' => $inputId, 'class' => $inputClasses, 'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null, 'aria-describedby' => $describedBy ?: null]) }} />
         <button
             type="button"
             class="{{ $toggleClasses }}"
@@ -72,7 +78,13 @@
     </div>
 @elseif ($label || $description)
     {{-- Shorthand mode: auto-wrap in field (Flux pattern) --}}
-    <x-form.with-field :label="$label" :description="$description" :variant="$variant" :name="$fieldName">
+    <x-form.with-field
+        :label="$label"
+        :description="$description"
+        :variant="$variant"
+        :name="$fieldName"
+        :id="$inputId"
+    >
         @if ($type === 'password')
             <div class="relative" x-data="{ showPassword: false }">
                 <input
@@ -82,6 +94,8 @@
                             'name' => $fieldName,
                             'id' => $inputId,
                             'class' => $inputClasses,
+                            'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                            'aria-describedby' => $describedBy ?: null,
                         ])
                     }}
                     :type="showPassword ? 'text' : 'password'"
@@ -109,6 +123,8 @@
                     'name' => $fieldName,
                     'id' => $inputId,
                     'class' => $inputClasses,
+                    'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                    'aria-describedby' => $describedBy ?: null,
                 ])
             }} />
         @endif
@@ -151,6 +167,8 @@
                 'name' => $fieldName,
                 'id' => $inputId,
                 'class' => $inputClasses,
+                'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                'aria-describedby' => $describedBy ?: null,
             ])
         }} />
     @endif

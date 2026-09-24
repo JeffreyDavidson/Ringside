@@ -20,6 +20,11 @@
     }
 
     $inputId = $attributes->get('id', $fieldName);
+    $fieldErrorId = $inputId.'-error';
+    $describedBy = collect([$attributes->get('aria-describedby'), $fieldName && $errors->has($fieldName) ? $fieldErrorId : null])
+        ->filter()
+        ->unique()
+        ->implode(' ');
 
     $selectClasses = collect([
         'block w-full appearance-none outline-none',
@@ -31,19 +36,27 @@
         $size === 'lg' ? 'h-[calc(var(--spacing)*10)] px-[calc(var(--spacing)*4)] text-sm' : null,
     ])->filter()->implode(' ');
 
-    $selectAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'options', 'selected', 'placeholder', 'multiple']);
+    $selectAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'options', 'selected', 'placeholder', 'multiple', 'aria-describedby', 'aria-invalid']);
 
     $selectedValues = is_array($selected) ? $selected : ($selected !== null ? [$selected] : []);
 @endphp
 
 @if ($label || $description)
-    <x-form.with-field :label="$label" :description="$description" :variant="$variant" :name="$fieldName">
+    <x-form.with-field
+        :label="$label"
+        :description="$description"
+        :variant="$variant"
+        :name="$fieldName"
+        :id="$inputId"
+    >
         <select {{
             $selectAttributes->merge([
                 'name' => $multiple ? "{$fieldName}[]" : $fieldName,
                 'id' => $inputId,
                 'class' => $selectClasses,
                 'multiple' => $multiple ?: null,
+                'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                'aria-describedby' => $describedBy ?: null,
             ])
         }}>
             @if ($placeholder && ! $multiple)
@@ -61,6 +74,8 @@
             'id' => $inputId,
             'class' => $selectClasses,
             'multiple' => $multiple ?: null,
+            'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+            'aria-describedby' => $describedBy ?: null,
         ])
     }}>
         @if ($placeholder && ! $multiple)

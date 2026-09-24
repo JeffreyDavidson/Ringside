@@ -38,7 +38,7 @@ describe('titles table', function (): void {
             ->assertSee('Add Title')
             ->assertSeeHtml('placeholder="Search titles"')
             ->assertSeeHtml('aria-label="Actions for World Title"')
-            ->assertSeeHtml('role="menu"')
+            ->assertSeeHtml('role="group"')
             ->assertSee($title->name)
             ->assertSee('Current Champion')
             ->assertSee(TitleStatus::Active->label())
