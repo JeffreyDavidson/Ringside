@@ -17,7 +17,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 
-test('administrator can create and edit a user while preserving account status', function (): void {
+test('administrator can create a basic user with unverified status', function (): void {
     $this->actingAs(administrator());
 
     $page = visit(route('users.index'));
@@ -36,10 +36,24 @@ test('administrator can create and edit a user while preserving account status',
         ->assertSee(Role::Basic->name)
         ->assertSee(UserStatus::Unverified->label());
 
+    $page->assertNoJavascriptErrors();
+
     $user = User::query()->where('email', 'browser.user@example.com')->firstOrFail();
 
     expect($user->role)->toBe(Role::Basic)
         ->and($user->status)->toBe(UserStatus::Unverified);
+});
+
+test('administrator can edit a user role without changing account status', function (): void {
+    $user = User::factory()->basicUser()->create([
+        'first_name' => 'Browser',
+        'last_name' => 'User',
+        'email' => 'browser.user@example.com',
+        'status' => UserStatus::Unverified,
+    ]);
+    $this->actingAs(administrator());
+
+    $page = visit(route('users.index'));
 
     $page
         ->click('tr:has-text("Browser User") button[x-ref="button"]')
