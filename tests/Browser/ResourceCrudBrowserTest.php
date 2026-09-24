@@ -148,8 +148,8 @@ test('administrator can create and edit a manager from the roster page', functio
         ->assertSee('Browser Test Representative')
         ->assertNoJavascriptErrors();
 
-    expect(Manager::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Representative');
-    expect(Manager::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
+    expect(Manager::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Representative')
+        ->and(Manager::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
 });
 
 test('administrator can create and edit a referee from the roster page', function (): void {
@@ -179,8 +179,8 @@ test('administrator can create and edit a referee from the roster page', functio
         ->assertSee('Browser Test Official')
         ->assertNoJavascriptErrors();
 
-    expect(Referee::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Official');
-    expect(Referee::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
+    expect(Referee::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Official')
+        ->and(Referee::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
 });
 
 test('administrator can create and edit a stable from the roster page', function (): void {
