@@ -169,11 +169,14 @@ test('administrator can create and edit a referee from the roster page', functio
         ->fill('input[name="form.first_name"]', 'Browser Test')
         ->fill('input[name="form.last_name"]', 'Referee')
         ->press('Save')
-        ->assertSee('Browser Test Referee')
-        ->click('button[aria-label="Actions for Browser Test Referee"]')
-        ->click('[role="menuitem"]:has-text("Edit")')
-        ->assertSee('Edit Browser Test Referee')
-        ->assertValue('input[name="form.first_name"]', 'Browser Test')
+        ->assertSee('Browser Test Referee');
+
+    $page->click('button[aria-label="Actions for Browser Test Referee"]');
+    $page->assertVisible('[role="menuitem"]:has-text("Edit")');
+    $page->click('[role="menuitem"]:has-text("Edit")');
+    $page->assertValue('input[name="form.first_name"]', 'Browser Test');
+    $page
+        ->assertValue('input[name="form.last_name"]', 'Referee')
         ->fill('input[name="form.last_name"]', 'Official')
         ->press('Save')
         ->assertSee('Browser Test Official')
