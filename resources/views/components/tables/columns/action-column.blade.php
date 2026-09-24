@@ -42,20 +42,22 @@
                     <div class="border-ringside-line my-2.5 border-b"></div>
                     @include($additionalActionsView, ['rowId' => $rowId, 'statusAction' => $statusAction])
                 @endisset
-                <div class="border-ringside-line my-2.5 border-b"></div>
-                <li class="m-0 flex flex-col p-0">
-                    <a
-                        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink group m-0 mx-2.5 flex grow cursor-pointer items-center p-2.5"
-                        x-on:click="open = false"
-                        wire:click="delete({{ $rowId }})"
-                        wire:confirm
-                    >
-                        <span class="me-2.5 flex shrink-0 items-center">
-                            <x-heroicon-m-trash class="size-5" />
-                        </span>
-                        <span class="flex grow items-center text-sm font-medium">Remove</span>
-                    </a>
-                </li>
+                @if ($canDelete)
+                    <div class="border-ringside-line my-2.5 border-b"></div>
+                    <li class="m-0 flex flex-col p-0">
+                        <a
+                            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink group m-0 mx-2.5 flex grow cursor-pointer items-center p-2.5"
+                            x-on:click="open = false"
+                            wire:click="delete({{ $rowId }})"
+                            wire:confirm
+                        >
+                            <span class="me-2.5 flex shrink-0 items-center">
+                                <x-heroicon-m-trash class="size-5" />
+                            </span>
+                            <span class="flex grow items-center text-sm font-medium">Remove</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>

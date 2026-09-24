@@ -8,6 +8,7 @@ use App\Livewire\Table\Column;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use LogicException;
 
 /**
@@ -47,6 +48,7 @@ trait HasActionColumn
             'path' => $this->routeBasePath,
             'rowId' => $rowId,
             'resourceName' => $this->resourceName,
+            'canDelete' => method_exists($this, 'delete') && Gate::allows('delete', $row),
         ];
     }
 }
