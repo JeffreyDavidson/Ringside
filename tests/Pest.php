@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -77,12 +78,12 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 
 function administrator(): User
 {
-    return User::factory()->administrator()->create();
+    return User::factory()->administrator()->create(['status' => UserStatus::Active]);
 }
 
 function basicUser(): User
 {
-    return User::factory()->basicUser()->create();
+    return User::factory()->basicUser()->create(['status' => UserStatus::Active]);
 }
 
 /**

@@ -47,4 +47,6 @@ return [
     'roster' => 'Roster',
     'events' => 'Events',
     'championships' => 'Championships',
+    'account_pending' => 'Your account is awaiting activation by a platform administrator. You can sign in once it is active.',
+    'account_inactive' => 'Your account is inactive. Contact a platform administrator if you believe this is a mistake.',
 ];

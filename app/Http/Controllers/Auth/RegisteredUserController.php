@@ -10,7 +10,6 @@ use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\Users\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -35,8 +34,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard');
+        return redirect()
+            ->route('login')
+            ->with('status', __('auth-forms.account_pending'));
     }
 }

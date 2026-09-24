@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,6 +76,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Livewire::addPersistentMiddleware([EnsureUserIsActive::class]);
+
         if (config('app.force_https')) {
             URL::forceScheme('https');
         }

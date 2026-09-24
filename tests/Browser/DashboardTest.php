@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 
 test('authenticated user can access dashboard', function () {
     $user = User::factory()->administrator()->create([
         'email' => 'dashboard@test.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $this->actingAs($user);
@@ -31,6 +33,7 @@ test('dashboard page loads without errors', function () {
     $user = User::factory()->administrator()->create([
         'email' => 'load@test.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $this->actingAs($user);
@@ -48,6 +51,7 @@ test('dashboard has basic navigation structure', function () {
     $user = User::factory()->administrator()->create([
         'email' => 'nav@test.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $this->actingAs($user);
