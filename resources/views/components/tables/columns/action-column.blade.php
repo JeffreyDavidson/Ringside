@@ -26,7 +26,6 @@
                         <span class="flex grow items-center text-sm font-medium">View</span>
                     </a>
                 </li>
-                <div class="border-ringside-line my-2.5 border-b"></div>
                 <li class="m-0 flex flex-col p-0">
                     <button
                         class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink group m-0 mx-2.5 flex grow cursor-pointer items-center p-2.5"
@@ -39,6 +38,10 @@
                         <span class="flex grow items-center text-sm font-medium">Edit</span>
                     </button>
                 </li>
+                @isset($additionalActionsView)
+                    <div class="border-ringside-line my-2.5 border-b"></div>
+                    @include($additionalActionsView, ['rowId' => $rowId, 'statusAction' => $statusAction])
+                @endisset
                 <div class="border-ringside-line my-2.5 border-b"></div>
                 <li class="m-0 flex flex-col p-0">
                     <a
