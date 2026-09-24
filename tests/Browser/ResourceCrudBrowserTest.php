@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Titles\TitleType;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
@@ -11,6 +12,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 
 test('administrator can create a wrestler from the roster page', function (): void {
     $promotion = Promotion::factory()->create();
@@ -227,4 +229,39 @@ test('administrator can create and edit a stable from the roster page', function
         ->assertNoJavascriptErrors();
 
     expect(Stable::query()->whereName('Updated Browser Test Stable')->value('promotion_id'))->toBe($promotion->id);
+});
+
+test('administrator can create and edit a title from the title directory', function (): void {
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $this->actingAs($administrator);
+
+    $page = visit(route('titles.index'));
+
+    $page
+        ->click('Add Title')
+        ->assertSee('Create Title')
+        ->fill('input[name="form.name"]', 'Browser Test Championship Title')
+        ->select('select[name="form.type"]', TitleType::Singles->value)
+        ->press('Save')
+        ->assertSee('Browser Test Championship Title')
+        ->click('button[aria-label="Actions for Browser Test Championship Title"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertSee('Edit Title')
+        ->assertValue('input[name="form.name"]', 'Browser Test Championship Title')
+        ->assertValue('select[name="form.type"]', TitleType::Singles->value)
+        ->fill('input[name="form.name"]', 'Updated Browser Test Championship Title')
+        ->select('select[name="form.type"]', TitleType::TagTeam->value)
+        ->press('Save')
+        ->assertSee('Updated Browser Test Championship Title')
+        ->assertNoJavascriptErrors();
+
+    $title = Title::query()->whereName('Updated Browser Test Championship Title')->firstOrFail();
+
+    expect($title->type)->toBe(TitleType::TagTeam)
+        ->and($title->promotion_id)->toBe($promotion->id);
 });
