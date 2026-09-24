@@ -1,18 +1,25 @@
-<div class="flex flex-1 justify-between">
-    <div>
+<div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex">
         @env('local')
             @empty($this->modelForm->formModel)
-                <x-buttons.info wire:click="fillDummyFields">Auto Fill</x-buttons.info>
+                <x-button
+                    variant="secondary"
+                    class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !h-9 !rounded-none !border !bg-transparent"
+                    wire:click="fillDummyFields"
+                >
+                    Auto fill
+                </x-button>
             @endempty
         @endenv
     </div>
-    <div>
-        <x-buttons.light wire:click="clear">Clear</x-buttons.light>
-        <x-buttons.primary
-            class="!bg-ringside-red !text-ringside-white hover:!bg-ringside-red-dark !rounded-none"
-            wire:click="save"
+    <div class="flex justify-end gap-2">
+        <x-button
+            variant="secondary"
+            class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !h-9 !rounded-none !border !bg-transparent"
+            wire:click="clear"
         >
-            Save
-        </x-buttons.primary>
+            Clear
+        </x-button>
+        <x-button variant="ringside" size="md" wire:click="save"> Save </x-button>
     </div>
 </div>

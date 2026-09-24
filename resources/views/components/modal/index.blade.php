@@ -2,17 +2,14 @@
     'size' => null,
 ])
 
-<div
-    {{
-        $attributes->class([
-            'relative mx-auto rounded-xl bg-white flex flex-col outline-none box-shadow-modal lg:top-[15%]',
-            'max-w-[400px]' => $size === 'sm',
-            'max-w-[800px]' => $size === null || $size === '',
-            'max-w-[1100px]' => $size === 'lg',
-        ])
-    }}
-    style="z-index: 90"
->
+<div {{
+    $attributes->class([
+        'relative mx-auto flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden border border-ringside-line bg-ringside-surface-panel text-ringside-ink shadow-2xl outline-none',
+        'max-w-[400px]' => $size === 'sm',
+        'max-w-[800px]' => $size === null || $size === '',
+        'max-w-[1100px]' => $size === 'lg',
+    ])
+}}>
     <x-modal.header />
     <x-modal.body> {{ $slot }} </x-modal.body>
     @if ($footer->isNotEmpty())
