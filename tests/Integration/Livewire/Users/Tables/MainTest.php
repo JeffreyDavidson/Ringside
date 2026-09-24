@@ -45,7 +45,9 @@ describe('users table', function (): void {
             ->assertSee(Role::Administrator->name)
             ->assertSee('Jane Member')
             ->assertSee($basicUser->email)
-            ->assertSee(Role::Basic->name);
+            ->assertSee(Role::Basic->name)
+            ->assertDontSee('Remove')
+            ->assertDontSeeHtml('wire:click="delete(');
     });
 
     it('lets an administrator activate an unverified user account', function (): void {
