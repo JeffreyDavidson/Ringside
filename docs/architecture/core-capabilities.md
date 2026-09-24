@@ -80,6 +80,14 @@ Wrestler and Tag Team define their current and historical manager relationships 
 
 Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.
 
+Global user accounts have `Unverified`, `Active`, and `Inactive` statuses.
+Platform administrators can activate unverified accounts, deactivate active
+accounts, and reactivate inactive accounts from the user directory. Account
+status is separate from email verification: changing status does not set or
+clear `email_verified_at`. Only active users are eligible for promotion
+membership, but account status does not currently block authentication or end
+existing sessions.
+
 ## Promotion Context and Membership
 
 Users are global platform identities. A user's relationship to a promotion is

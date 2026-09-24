@@ -79,6 +79,27 @@ test('administrator can edit a user role without changing account status', funct
         ->and($user->status)->toBe(UserStatus::Unverified);
 });
 
+test('administrator can activate a user from the actions menu', function (): void {
+    $user = User::factory()->unverified()->create([
+        'first_name' => 'Pending',
+        'last_name' => 'Account',
+        'email' => 'pending.account@example.com',
+    ]);
+    $this->actingAs(administrator());
+
+    $page = visit(route('users.index'));
+
+    $page
+        ->click('tr:has-text("Pending Account") button[x-ref="button"]')
+        ->click('tr:has-text("Pending Account") button:has-text("Activate account")')
+        ->assertSee(UserStatus::Active->label())
+        ->assertPresent('tr:has-text("Pending Account"):has-text("Active")')
+        ->assertNoJavascriptErrors();
+
+    expect($user->refresh()->status)->toBe(UserStatus::Active)
+        ->and($user->email_verified_at)->toBeNull();
+});
+
 test('administrator can create a wrestler from the roster page', function (): void {
     $promotion = Promotion::factory()->create();
     $administrator = administrator();

@@ -48,6 +48,41 @@ describe('users table', function (): void {
             ->assertSee(Role::Basic->name);
     });
 
+    it('lets an administrator activate an unverified user account', function (): void {
+        $user = User::factory()->unverified()->create();
+
+        livewire(Main::class)
+            ->call('changeStatus', $user->id, UserStatus::Active->value)
+            ->assertHasNoErrors()
+            ->assertDispatched('flash-message', type: 'status', message: 'User account status changed to Active.');
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active)
+            ->and($user->email_verified_at)->toBeNull();
+    });
+
+    it('lets an administrator deactivate and reactivate user accounts', function (): void {
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $component = livewire(Main::class);
+
+        $component->call('changeStatus', $user->id, UserStatus::Inactive->value);
+
+        expect($user->refresh()->status)->toBe(UserStatus::Inactive);
+
+        $component->call('changeStatus', $user->id, UserStatus::Active->value);
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active);
+    });
+
+    it('rejects invalid user status values', function (): void {
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+
+        livewire(Main::class)
+            ->call('changeStatus', $user->id, 'suspended')
+            ->assertHasErrors('status');
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active);
+    });
+
     it('filters users by status', function (UserStatus $status): void {
         // Arrange
         User::factory()->create([
