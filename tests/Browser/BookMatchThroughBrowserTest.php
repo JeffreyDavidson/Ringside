@@ -97,7 +97,7 @@ test('administrator can create and edit an event with a showtime', function (): 
     $updatedDate = $eventDate->copy()->addHour();
     $page
         ->click('button[aria-label="Actions for Night of Champions"]')
-        ->click('[data-row-actions-panel] button:has-text("Edit")')
+        ->click('tr:has-text("Night of Champions") [data-row-actions-panel] button:has-text("Edit")')
         ->assertSee('Edit Event')
         ->assertValue('input[name="form.date"]', $eventDate->format('Y-m-d\\TH:i'))
         ->fill('input[name="form.date"]', $updatedDate->format('Y-m-d\\TH:i'))
