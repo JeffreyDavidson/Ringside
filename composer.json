@@ -127,7 +127,7 @@
         "test:types:pest": "phpstan analyze --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
         "test:application": "php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --parallel",
         "test:tia": "php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --tia --filtered",
-        "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser --parallel --processes=2",
+        "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser",
         "test:unit": "php -d memory_limit=4G -d pcov.enabled=1 -d pcov.directory=./app ./vendor/bin/pest --colors=always --parallel --coverage --min=44",
         "test:type-coverage": "php -d memory_limit=4G ./vendor/bin/pest --type-coverage --min=100",
         "test:push": [

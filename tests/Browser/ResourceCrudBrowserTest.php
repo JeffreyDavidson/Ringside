@@ -265,9 +265,11 @@ test('administrator can create and edit a referee from the roster page', functio
 
     $page = visit(route('referees.index'));
 
+    $page->click('Add Referee');
+    $page->assertNoJavascriptErrors();
+    $page->assertVisible('input[name="form.first_name"]');
+
     $page
-        ->click('Add Referee')
-        ->assertSee('Add Referee')
         ->fill('input[name="form.first_name"]', 'Browser Test')
         ->fill('input[name="form.last_name"]', 'Referee')
         ->press('Save')
