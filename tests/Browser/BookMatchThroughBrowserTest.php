@@ -31,6 +31,8 @@ test('administrator can book a singles match through the event page', function (
         ->press('Save')
         ->waitForText('First Browser Competitor')
         ->assertSee('Second Browser Competitor')
+        ->assertScript('!document.querySelector("#modal-container").checkVisibility()')
+        ->wait(0.35)
         ->assertNoJavascriptErrors();
 
     expect($event->matches()->count())->toBe(1);
