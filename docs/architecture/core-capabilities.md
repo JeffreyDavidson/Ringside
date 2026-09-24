@@ -85,8 +85,10 @@ Platform administrators can activate unverified accounts, deactivate active
 accounts, and reactivate inactive accounts from the user directory. Account
 status is separate from email verification: changing status does not set or
 clear `email_verified_at`. Only active users are eligible for promotion
-membership, but account status does not currently block authentication or end
-existing sessions.
+membership and authentication. New registrations remain unverified until a
+platform administrator activates them. Inactive accounts cannot sign in, and
+existing sessions are ended on their next web or Livewire request. Email
+verification remains independent of account activation.
 
 ## Promotion Context and Membership
 
