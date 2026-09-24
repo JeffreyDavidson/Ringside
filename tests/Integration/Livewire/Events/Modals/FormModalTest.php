@@ -116,6 +116,52 @@ describe('authorized event form interactions', function () {
         $modal->assertHasNoErrors();
     });
 
+    it('keeps the create form open and reports a venue scheduling conflict', function () {
+        $venue = Venue::factory()->create(['name' => 'Ringside Arena']);
+        $eventDate = now()->addMonth()->startOfMinute();
+        Event::factory()->for($venue)->create(['date' => $eventDate]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Second Event',
+            'form.date' => $eventDate->format('Y-m-d\\TH:i'),
+            'form.venue_id' => $venue->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.date'])
+            ->assertSet('isModalOpen', true)
+            ->assertSee('Venue [Ringside Arena] is already booked at this event time.')
+            ->assertNotDispatched('closeModal');
+        expect(Event::query()->count())->toBe(1);
+    });
+
+    it('keeps the edit form open and reports a venue scheduling conflict', function () {
+        $venue = Venue::factory()->create(['name' => 'Ringside Arena']);
+        $eventDate = now()->addMonth()->startOfMinute();
+        $existingEvent = Event::factory()->for($venue)->create(['date' => $eventDate]);
+        $event = Event::factory()->future()->create(['name' => 'Original Event']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $event->id);
+        $modal->set([
+            'form.date' => $eventDate->format('Y-m-d\\TH:i'),
+            'form.venue_id' => $venue->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.date'])
+            ->assertSet('isModalOpen', true)
+            ->assertSee('Venue [Ringside Arena] is already booked at this event time.')
+            ->assertNotDispatched('closeModal');
+        expect($event->refresh()->date?->isSameSecond($eventDate))->toBeFalse()
+            ->and($event->venue_id)->not->toBe($venue->id)
+            ->and($existingEvent->refresh()->date?->isSameSecond($eventDate))->toBeTrue();
+    });
+
     it('allows creating historical event records', function () {
         $eventDate = today()->subDay();
         $modal = livewire(FormModal::class);

@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Modals;
 
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
+use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
@@ -75,5 +76,16 @@ class FormModal extends BaseFormModal
     public function render(): View
     {
         return view('livewire.events.modals.form-modal');
+    }
+
+    public function submitForm(): bool
+    {
+        try {
+            return parent::submitForm();
+        } catch (SchedulingConflictException $exception) {
+            $this->addError('form.date', $exception->getMessage());
+
+            return false;
+        }
     }
 }
