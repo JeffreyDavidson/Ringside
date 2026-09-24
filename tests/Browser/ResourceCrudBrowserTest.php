@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Titles\TitleType;
+use App\Enums\Users\Role;
+use App\Enums\Users\UserStatus;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
@@ -13,6 +15,69 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Users\User;
+
+test('administrator can create a basic user with unverified status', function (): void {
+    $this->actingAs(administrator());
+
+    $page = visit(route('users.index'));
+
+    $page
+        ->click('Add User')
+        ->assertSee('Create User')
+        ->fill('input[name="form.first_name"]', 'Browser')
+        ->fill('input[name="form.last_name"]', 'User')
+        ->fill('input[name="form.email"]', 'browser.user@example.com')
+        ->select('select[name="form.role"]', Role::Basic->value)
+        ->fill('input[name="form.password"]', 'password123')
+        ->fill('input[name="form.password_confirmation"]', 'password123')
+        ->press('Save')
+        ->assertSee('Browser User')
+        ->assertSee(Role::Basic->name)
+        ->assertSee(UserStatus::Unverified->label());
+
+    $page->assertNoJavascriptErrors();
+
+    $user = User::query()->where('email', 'browser.user@example.com')->firstOrFail();
+
+    expect($user->role)->toBe(Role::Basic)
+        ->and($user->status)->toBe(UserStatus::Unverified);
+});
+
+test('administrator can edit a user role without changing account status', function (): void {
+    $user = User::factory()->basicUser()->create([
+        'first_name' => 'Browser',
+        'last_name' => 'User',
+        'email' => 'browser.user@example.com',
+        'status' => UserStatus::Unverified,
+    ]);
+    $this->actingAs(administrator());
+
+    $page = visit(route('users.index'));
+
+    $page
+        ->click('tr:has-text("Browser User") button[x-ref="button"]')
+        ->click('tr:has-text("Browser User") button:has-text("Edit")')
+        ->assertSee('Edit User')
+        ->assertValue('input[name="form.first_name"]', 'Browser')
+        ->assertValue('input[name="form.last_name"]', 'User')
+        ->assertValue('input[name="form.email"]', 'browser.user@example.com')
+        ->assertValue('select[name="form.role"]', Role::Basic->value)
+        ->assertValue('input[name="form.password"]', '')
+        ->fill('input[name="form.last_name"]', 'Administrator')
+        ->select('select[name="form.role"]', Role::Administrator->value)
+        ->press('Save')
+        ->assertSee('Browser Administrator')
+        ->assertSee(Role::Administrator->name)
+        ->assertSee(UserStatus::Unverified->label())
+        ->assertNoJavascriptErrors();
+
+    $user->refresh();
+
+    expect($user->last_name)->toBe('Administrator')
+        ->and($user->role)->toBe(Role::Administrator)
+        ->and($user->status)->toBe(UserStatus::Unverified);
+});
 
 test('administrator can create a wrestler from the roster page', function (): void {
     $promotion = Promotion::factory()->create();
