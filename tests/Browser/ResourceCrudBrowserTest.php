@@ -55,7 +55,7 @@ test('administrator can create a wrestler from the roster page', function (): vo
     expect($wrestler->promotion_id)->toBe($promotion->id);
 });
 
-test('administrator can create a tag team from the roster page', function (): void {
+test('administrator can create and edit a tag team from the roster page', function (): void {
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
     $promotion->users()->attach($administrator, [
@@ -70,6 +70,10 @@ test('administrator can create a tag team from the roster page', function (): vo
         'name' => 'Browser Team Member Two',
         'promotion_id' => $promotion->id,
     ]);
+    $replacementWrestler = Wrestler::factory()->bookable()->create([
+        'name' => 'Browser Team Replacement Member',
+        'promotion_id' => $promotion->id,
+    ]);
     $this->actingAs($administrator);
 
     $page = visit(route('tag-teams.index'));
@@ -82,12 +86,22 @@ test('administrator can create a tag team from the roster page', function (): vo
         ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
         ->press('Save')
         ->assertSee('Browser Test Tag Team')
+        ->click('button[aria-label="Actions for Browser Test Tag Team"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertValue('input[name="form.name"]', 'Browser Test Tag Team')
+        ->assertValue('select[name="form.wrestlerA"]', (string) $firstWrestler->id)
+        ->assertValue('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
+        ->fill('input[name="form.name"]', 'Updated Browser Test Tag Team')
+        ->select('select[name="form.wrestlerB"]', (string) $replacementWrestler->id)
+        ->press('Save')
+        ->assertSee('Updated Browser Test Tag Team')
         ->assertNoJavascriptErrors();
 
-    $tagTeam = TagTeam::query()->whereName('Browser Test Tag Team')->firstOrFail();
+    $tagTeam = TagTeam::query()->whereName('Updated Browser Test Tag Team')->firstOrFail();
 
     expect($tagTeam->currentWrestlers->modelKeys())
-        ->toContain($firstWrestler->id, $secondWrestler->id);
+        ->toContain($firstWrestler->id, $replacementWrestler->id)
+        ->not->toContain($secondWrestler->id);
 });
 
 test('administrator can create and edit a venue from the venue directory', function (): void {
