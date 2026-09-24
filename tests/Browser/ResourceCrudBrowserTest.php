@@ -6,6 +6,9 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
@@ -116,4 +119,95 @@ test('administrator can create and edit a venue from the venue directory', funct
         ->assertNoJavascriptErrors();
 
     expect(Venue::query()->whereName('Browser Test Arena')->value('city'))->toBe('Sparks');
+});
+
+test('administrator can create and edit a manager from the roster page', function (): void {
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $this->actingAs($administrator);
+
+    $page = visit(route('managers.index'));
+
+    $page
+        ->click('Add Manager')
+        ->assertSee('Add Manager')
+        ->fill('input[name="form.first_name"]', 'Browser Test')
+        ->fill('input[name="form.last_name"]', 'Manager')
+        ->press('Save')
+        ->assertSee('Browser Test Manager')
+        ->click('button[aria-label="Actions for Browser Test Manager"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertValue('input[name="form.first_name"]', 'Browser Test')
+        ->assertValue('input[name="form.last_name"]', 'Manager')
+        ->fill('input[name="form.last_name"]', 'Representative')
+        ->press('Save')
+        ->assertSee('Browser Test Representative')
+        ->assertNoJavascriptErrors();
+
+    expect(Manager::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Representative');
+    expect(Manager::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
+});
+
+test('administrator can create and edit a referee from the roster page', function (): void {
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $this->actingAs($administrator);
+
+    $page = visit(route('referees.index'));
+
+    $page
+        ->click('Add Referee')
+        ->assertSee('Add Referee')
+        ->fill('input[name="form.first_name"]', 'Browser Test')
+        ->fill('input[name="form.last_name"]', 'Referee')
+        ->press('Save')
+        ->assertSee('Browser Test Referee')
+        ->click('button[aria-label="Actions for Browser Test Referee"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertSee('Edit Browser Test Referee')
+        ->assertValue('input[name="form.first_name"]', 'Browser Test')
+        ->fill('input[name="form.last_name"]', 'Official')
+        ->press('Save')
+        ->assertSee('Browser Test Official')
+        ->assertNoJavascriptErrors();
+
+    expect(Referee::query()->where('first_name', 'Browser Test')->value('last_name'))->toBe('Official');
+    expect(Referee::query()->where('first_name', 'Browser Test')->value('promotion_id'))->toBe($promotion->id);
+});
+
+test('administrator can create and edit a stable from the roster page', function (): void {
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $this->actingAs($administrator);
+
+    $page = visit(route('stables.index'));
+
+    $page
+        ->click('Add Stable')
+        ->assertSee('Create Stable')
+        ->fill('input[name="form.name"]', 'Browser Test Stable')
+        ->press('Save')
+        ->assertSee('Browser Test Stable')
+        ->click('button[aria-label="Actions for Browser Test Stable"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertSee('Edit Stable')
+        ->assertValue('input[name="form.name"]', 'Browser Test Stable')
+        ->fill('input[name="form.name"]', 'Updated Browser Test Stable')
+        ->press('Save')
+        ->assertSee('Updated Browser Test Stable')
+        ->assertNoJavascriptErrors();
+
+    expect(Stable::query()->whereName('Updated Browser Test Stable')->value('promotion_id'))->toBe($promotion->id);
 });
