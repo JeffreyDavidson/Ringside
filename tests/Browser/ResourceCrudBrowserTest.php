@@ -265,3 +265,42 @@ test('administrator can create and edit a title from the title directory', funct
     expect($title->type)->toBe(TitleType::TagTeam)
         ->and($title->promotion_id)->toBe($promotion->id);
 });
+
+test('platform administrator can create and edit a promotion from the directory', function (): void {
+    $this->actingAs(administrator());
+
+    $page = visit(route('promotions.index'));
+
+    $page
+        ->click('Create promotion')
+        ->assertSee('Create Promotion')
+        ->fill('input[name="form.name"]', 'Browser Test Promotion')
+        ->fill('input[name="form.slug"]', 'browser-test-promotion')
+        ->press('Save')
+        ->assertNoJavascriptErrors();
+
+    $page = visit(route('promotions.index'));
+
+    $page
+        ->assertSee('Browser Test Promotion')
+        ->assertSee('browser-test-promotion')
+        ->click('Edit')
+        ->assertSee('Edit Promotion')
+        ->assertValue('input[name="form.name"]', 'Browser Test Promotion')
+        ->assertValue('input[name="form.slug"]', 'browser-test-promotion')
+        ->fill('input[name="form.name"]', 'Updated Browser Test Promotion')
+        ->fill('input[name="form.slug"]', 'updated-browser-test-promotion')
+        ->press('Save')
+        ->assertNoJavascriptErrors();
+
+    $page = visit(route('promotions.index'));
+
+    $page
+        ->assertSee('Updated Browser Test Promotion')
+        ->assertSee('updated-browser-test-promotion')
+        ->assertNoJavascriptErrors();
+
+    $promotion = Promotion::query()->whereSlug('updated-browser-test-promotion')->firstOrFail();
+
+    expect($promotion->name)->toBe('Updated Browser Test Promotion');
+});
