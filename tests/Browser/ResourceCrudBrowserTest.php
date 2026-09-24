@@ -183,6 +183,7 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
         ->press('Save')
         ->assertSee('Browser Test Tag Team')
+        ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Tag Team"]')
         ->click('tr:has-text("Browser Test Tag Team") [data-row-actions-panel] button:has-text("Edit")')
         ->assertValue('input[name="form.name"]', 'Browser Test Tag Team')
@@ -217,6 +218,7 @@ test('administrator can create and edit a venue from the venue directory', funct
         ->fill('input[name="form.zipcode"]', '89501')
         ->press('Save')
         ->assertSee('Browser Test Arena')
+        ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Arena"]')
         ->click('tr:has-text("Browser Test Arena") [data-row-actions-panel] button:has-text("Edit")')
         ->assertValue('input[name="form.city"]', 'Reno')
@@ -247,6 +249,7 @@ test('administrator can create and edit a manager from the roster page', functio
         ->fill('input[name="form.last_name"]', 'Manager')
         ->press('Save')
         ->assertSee('Browser Test Manager')
+        ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Manager"]')
         ->click('tr:has-text("Browser Test Manager") [data-row-actions-panel] button:has-text("Edit")')
         ->assertValue('input[name="form.first_name"]', 'Browser Test')
@@ -285,6 +288,7 @@ test('administrator can create and edit a referee from the roster page', functio
 
     $page->press('Save');
     $page->assertSee('Browser Test Referee');
+    $page->wait(0.35);
 
     $page->click('button[aria-label="Actions for Browser Test Referee"]');
     $page->assertVisible('tr:has-text("Browser Test Referee") [data-row-actions-panel] button:has-text("Edit")');
@@ -318,6 +322,7 @@ test('administrator can create and edit a stable from the roster page', function
         ->fill('input[name="form.name"]', 'Browser Test Stable')
         ->press('Save')
         ->assertSee('Browser Test Stable')
+        ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Stable"]')
         ->click('tr:has-text("Browser Test Stable") [data-row-actions-panel] button:has-text("Edit")')
         ->assertSee('Edit Stable')
@@ -348,6 +353,7 @@ test('administrator can create and edit a title from the title directory', funct
         ->select('select[name="form.type"]', TitleType::Singles->value)
         ->press('Save')
         ->assertSee('Browser Test Championship Title')
+        ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Championship Title"]')
         ->click('tr:has-text("Browser Test Championship Title") [data-row-actions-panel] button:has-text("Edit")')
         ->assertSee('Edit Title')

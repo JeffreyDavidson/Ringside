@@ -91,6 +91,8 @@ test('administrator can create and edit an event with a showtime', function (): 
         ->assertSee('Night of Champions')
         ->assertNoJavascriptErrors();
 
+    $page->wait(0.35);
+
     $event = Event::query()->whereName('Night of Champions')->firstOrFail();
     expect($event->date?->toDateTimeString())->toBe($eventDate->toDateTimeString());
 
