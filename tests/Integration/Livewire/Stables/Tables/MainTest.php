@@ -30,7 +30,7 @@ describe('stables table', function (): void {
             ->assertSee('Add Stable')
             ->assertSeeHtml('placeholder="Search stables"')
             ->assertSeeHtml('aria-label="Actions for The Four Horsemen"')
-            ->assertSeeHtml('role="menu"')
+            ->assertSeeHtml('role="group"')
             ->assertSee('The Four Horsemen')
             ->assertSee(StableStatus::Active->label());
     });

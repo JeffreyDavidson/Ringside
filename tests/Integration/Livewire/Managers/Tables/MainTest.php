@@ -31,7 +31,7 @@ describe('managers table', function (): void {
             ->assertSee('Add Manager')
             ->assertSeeHtml('placeholder="Search managers"')
             ->assertSeeHtml('aria-label="Actions for Bobby Heenan"')
-            ->assertSeeHtml('role="menu"')
+            ->assertSeeHtml('role="group"')
             ->assertSee('Bobby Heenan')
             ->assertSee(EmploymentStatus::Employed->label());
     });

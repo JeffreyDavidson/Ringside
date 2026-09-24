@@ -3,6 +3,7 @@
     'description' => null,
     'variant' => 'block',
     'name' => null,
+    'id' => null,
 ])
 
 @php
@@ -22,7 +23,7 @@
 <div {{ $attributes->merge(['class' => $classes]) }} data-form-field>
     {{-- Label Section --}}
     @if ($label)
-        <x-form.label data-form-label>{{ $label }}</x-form.label>
+        <x-form.label :for="$id" data-form-label>{{ $label }}</x-form.label>
     @endif
 
     {{-- Form Control Section --}}
@@ -36,7 +37,7 @@
     {{-- Error Section --}}
     @if (is_string($name) && $name !== '')
         @if ($errors->has($name))
-            <div data-form-error>
+            <div id="{{ $id }}-error" data-form-error>
                 <x-form.error :name="$name" />
             </div>
         @endif

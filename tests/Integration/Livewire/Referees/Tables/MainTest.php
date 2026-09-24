@@ -31,7 +31,7 @@ describe('referees table', function (): void {
             ->assertSee('Add Referee')
             ->assertSeeHtml('placeholder="Search referees"')
             ->assertSeeHtml('aria-label="Actions for Earl Hebner"')
-            ->assertSeeHtml('role="menu"')
+            ->assertSeeHtml('role="group"')
             ->assertSee('Earl Hebner')
             ->assertSee(EmploymentStatus::Employed->label());
     });

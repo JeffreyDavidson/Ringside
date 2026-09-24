@@ -155,6 +155,29 @@ describe('data table pagination', function (): void {
 });
 
 describe('data table filtering', function (): void {
+    test('empty search results explain the query and can be cleared', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Searchable User']);
+        $component = livewire(TestDataTableComponent::class);
+
+        // Act
+        $component->set('search', 'no matching record');
+
+        // Assert
+        $component
+            ->assertSee('No results for “no matching record”.')
+            ->assertSee('Clear search')
+            ->assertDontSee('Searchable User');
+
+        // Act
+        $component->set('search', '');
+
+        // Assert
+        $component
+            ->assertSee('Searchable User')
+            ->assertDontSee('Clear search');
+    });
+
     test('matches either searchable column without bypassing the selected filter', function (): void {
         // Arrange
         User::factory()->administrator()->create([
