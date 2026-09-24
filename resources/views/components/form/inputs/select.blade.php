@@ -31,9 +31,10 @@
         'border border-solid border-[var(--input)] bg-background text-foreground',
         'rounded-[calc(var(--radius)-2px)] shadow-[var(--tw-input-box-shadow)] transition-[color,box-shadow]',
         'focus-visible:outline-none focus-visible:border-[var(--ring)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklab,var(--ring)_30%,transparent)]',
-        $size === 'sm' ? 'h-[calc(var(--spacing)*7)] px-[calc(var(--spacing)*2.5)] text-xs' : null,
-        $size === 'md' ? 'h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm' : null,
-        $size === 'lg' ? 'h-[calc(var(--spacing)*10)] px-[calc(var(--spacing)*4)] text-sm' : null,
+        $multiple ? 'h-auto min-h-28 px-[calc(var(--spacing)*3)] py-2 text-2sm' : null,
+        ! $multiple && $size === 'sm' ? 'h-[calc(var(--spacing)*7)] px-[calc(var(--spacing)*2.5)] text-xs' : null,
+        ! $multiple && $size === 'md' ? 'h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm' : null,
+        ! $multiple && $size === 'lg' ? 'h-[calc(var(--spacing)*10)] px-[calc(var(--spacing)*4)] text-sm' : null,
     ])->filter()->implode(' ');
 
     $selectAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'options', 'selected', 'placeholder', 'multiple', 'aria-describedby', 'aria-invalid']);

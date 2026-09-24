@@ -73,6 +73,32 @@ test('administrator can edit an unresulted match from the event page', function 
         ->toBe([$firstWrestler->id, $replacementOpponent->id]);
 });
 
+test('match form layouts adapt to narrow screens and keep multiple selections usable', function (): void {
+    $event = Event::factory()->scheduled()->withVenue()->create();
+
+    $this->actingAs(administrator());
+
+    $page = visit(route('events.show', $event));
+
+    $page->resize(390, 844);
+    $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
+
+    $page
+        ->waitForText('Create Match')
+        ->select('select[name="form.matchType"]', MatchType::TripleThreat->value)
+        ->waitForText('Competitor 3')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=match-setup-grid]")).gridTemplateColumns.split(" ").length === 1')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=match-competitors-grid]")).gridTemplateColumns.split(" ").length === 1')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->resize(1440, 1000)
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=match-setup-grid]")).gridTemplateColumns.split(" ").length === 2')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=match-competitors-grid]")).gridTemplateColumns.split(" ").length === 3')
+        ->select('select[name="form.matchType"]', MatchType::TagTeam->value)
+        ->waitForText('Team A')
+        ->assertScript('document.querySelector("select[name=\"form.competitors.0.wrestlers[]\"]").getBoundingClientRect().height >= 112')
+        ->assertNoJavascriptErrors();
+});
+
 test('administrator can create and edit an event with a showtime', function (): void {
     $venue = Venue::factory()->create();
     $this->actingAs(administrator());
