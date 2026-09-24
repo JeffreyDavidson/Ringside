@@ -29,13 +29,30 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->fill('input[name="form.height_inches"]', '2')
         ->fill('input[name="form.weight"]', '245')
         ->press('Save')
-        ->assertSee('Browser Test Wrestler')
-        ->assertNoJavascriptErrors();
+        ->assertSee('Browser Test Wrestler');
 
-    expect(Wrestler::query()
+    $createdWrestler = Wrestler::query()
         ->withoutGlobalScope('promotion_context')
         ->whereName('Browser Test Wrestler')
-        ->exists())->toBeTrue();
+        ->firstOrFail();
+
+    expect($createdWrestler->promotion_id)->toBe($promotion->id);
+
+    $page
+        ->click('button[aria-label="Actions for Browser Test Wrestler"]')
+        ->click('[role="menuitem"]:has-text("Edit")')
+        ->assertValue('input[name="form.name"]', 'Browser Test Wrestler')
+        ->fill('input[name="form.name"]', 'Updated Browser Test Wrestler')
+        ->press('Save')
+        ->assertSee('Updated Browser Test Wrestler')
+        ->assertNoJavascriptErrors();
+
+    $wrestler = Wrestler::query()
+        ->withoutGlobalScope('promotion_context')
+        ->whereName('Updated Browser Test Wrestler')
+        ->firstOrFail();
+
+    expect($wrestler->promotion_id)->toBe($promotion->id);
 });
 
 test('administrator can create a tag team from the roster page', function (): void {

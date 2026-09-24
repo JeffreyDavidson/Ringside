@@ -16,7 +16,7 @@
             x-show="open"
             @click.outside="open = false"
             @keydown.escape.stop="open = false"
-            x-anchor.bottom-start="$refs.button"
+            x-anchor.fixed.bottom-start="$refs.button"
             x-transition.origin.top.left
             class="border-ringside-line bg-ringside-surface-header text-ringside-ink z-[105] m-0 w-48 border p-1 shadow-xl"
             role="menu"
