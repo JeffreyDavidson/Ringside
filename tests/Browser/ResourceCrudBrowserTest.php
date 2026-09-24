@@ -277,13 +277,11 @@ test('platform administrator can create and edit a promotion from the directory'
         ->fill('input[name="form.name"]', 'Browser Test Promotion')
         ->fill('input[name="form.slug"]', 'browser-test-promotion')
         ->press('Save')
-        ->assertNoJavascriptErrors();
-
-    $page = visit(route('promotions.index'));
-
-    $page
         ->assertSee('Browser Test Promotion')
         ->assertSee('browser-test-promotion')
+        ->assertNoJavascriptErrors();
+
+    $page
         ->click('Edit')
         ->assertSee('Edit Promotion')
         ->assertValue('input[name="form.name"]', 'Browser Test Promotion')
@@ -291,11 +289,6 @@ test('platform administrator can create and edit a promotion from the directory'
         ->fill('input[name="form.name"]', 'Updated Browser Test Promotion')
         ->fill('input[name="form.slug"]', 'updated-browser-test-promotion')
         ->press('Save')
-        ->assertNoJavascriptErrors();
-
-    $page = visit(route('promotions.index'));
-
-    $page
         ->assertSee('Updated Browser Test Promotion')
         ->assertSee('updated-browser-test-promotion')
         ->assertNoJavascriptErrors();
