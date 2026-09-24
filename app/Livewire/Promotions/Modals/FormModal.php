@@ -16,10 +16,10 @@ use Illuminate\View\View;
 class FormModal extends BaseFormModal
 {
     #[\Override]
-    protected ?string $createdEventName = 'promotionSaved';
+    protected ?string $createdEventName = 'promotion-saved';
 
     #[\Override]
-    protected ?string $updatedEventName = 'promotionSaved';
+    protected ?string $updatedEventName = 'promotion-saved';
 
     #[\Override]
     protected bool $resetFormAfterSubmission = true;

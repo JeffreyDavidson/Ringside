@@ -47,7 +47,7 @@ describe('promotion form interactions', function () {
             ->toBe('Ringside Championship Wrestling');
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('promotionSaved')
+            ->assertDispatched('promotion-saved')
             ->assertSet('isModalOpen', false)
             ->assertSet('form.name', '')
             ->assertSet('form.slug', '');
@@ -65,7 +65,7 @@ describe('promotion form interactions', function () {
 
         expect($promotion->refresh()->name)->toBe('Updated Promotion Name')
             ->and($promotion->slug)->toBe('old-promotion-name');
-        $modal->assertHasNoErrors()->assertDispatched('promotionSaved');
+        $modal->assertHasNoErrors()->assertDispatched('promotion-saved');
     });
 
     it('rejects duplicate and invalid slugs', function (string $slug, string $rule) {
