@@ -108,6 +108,7 @@ test('administrator can create and edit an event with a showtime', function (): 
 
     $page
         ->click('Add Event')
+        ->assertPathIs('/events')
         ->assertSee('Create Event')
         ->assertAttribute('input[name="form.date"]', 'type', 'datetime-local')
         ->fill('input[name="form.name"]', 'Night of Champions')
@@ -126,6 +127,7 @@ test('administrator can create and edit an event with a showtime', function (): 
     $page
         ->click('button[aria-label="Actions for Night of Champions"]')
         ->click('tr:has-text("Night of Champions") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/events')
         ->assertSee('Edit Event')
         ->assertValue('input[name="form.date"]', $eventDate->format('Y-m-d\\TH:i'))
         ->fill('input[name="form.date"]', $updatedDate->format('Y-m-d\\TH:i'))

@@ -24,6 +24,7 @@ test('administrator can create a basic user with unverified status', function ()
 
     $page
         ->click('Add User')
+        ->assertPathIs('/user-management/users')
         ->assertSee('Create User')
         ->fill('input[name="form.first_name"]', 'Browser')
         ->fill('input[name="form.last_name"]', 'User')
@@ -58,6 +59,7 @@ test('administrator can edit a user role without changing account status', funct
     $page
         ->click('tr:has-text("Browser User") button[x-ref="button"]')
         ->click('tr:has-text("Browser User") button:has-text("Edit")')
+        ->assertPathIs('/user-management/users')
         ->assertSee('Edit User')
         ->assertValue('input[name="form.first_name"]', 'Browser')
         ->assertValue('input[name="form.last_name"]', 'User')
@@ -222,6 +224,7 @@ test('administrator can create and edit a venue from the venue directory', funct
 
     $page
         ->click('Add Venue')
+        ->assertPathIs('/venues')
         ->assertSee('Create Venue')
         ->fill('input[name="form.name"]', 'Browser Test Arena')
         ->fill('input[name="form.street_address"]', '100 Main Street')
@@ -233,6 +236,7 @@ test('administrator can create and edit a venue from the venue directory', funct
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Arena"]')
         ->click('tr:has-text("Browser Test Arena") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/venues')
         ->assertValue('input[name="form.city"]', 'Reno')
         ->fill('input[name="form.city"]', 'Sparks')
         ->assertValue('input[name="form.city"]', 'Sparks')
@@ -256,6 +260,7 @@ test('administrator can create and edit a manager from the roster page', functio
 
     $page
         ->click('Add Manager')
+        ->assertPathIs('/roster/managers')
         ->assertSee('Add Manager')
         ->fill('input[name="form.first_name"]', 'Browser Test')
         ->fill('input[name="form.last_name"]', 'Manager')
@@ -264,6 +269,7 @@ test('administrator can create and edit a manager from the roster page', functio
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Manager"]')
         ->click('tr:has-text("Browser Test Manager") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/roster/managers')
         ->assertValue('input[name="form.first_name"]', 'Browser Test')
         ->assertValue('input[name="form.last_name"]', 'Manager')
         ->fill('input[name="form.last_name"]', 'Representative')
@@ -287,6 +293,7 @@ test('administrator can create and edit a referee from the roster page', functio
     $page = visit(route('referees.index'));
 
     $page->click('Add Referee');
+    $page->assertPathIs('/roster/referees');
     $page->assertNoJavascriptErrors();
     $page->assertVisible('input[name="form.first_name"]');
     $page->wait(0.35);
@@ -305,6 +312,7 @@ test('administrator can create and edit a referee from the roster page', functio
     $page->click('button[aria-label="Actions for Browser Test Referee"]');
     $page->assertVisible('tr:has-text("Browser Test Referee") [data-row-actions-panel] button:has-text("Edit")');
     $page->click('tr:has-text("Browser Test Referee") [data-row-actions-panel] button:has-text("Edit")');
+    $page->assertPathIs('/roster/referees');
     $page->assertValue('input[name="form.first_name"]', 'Browser Test');
     $page
         ->assertValue('input[name="form.last_name"]', 'Referee')
@@ -330,6 +338,7 @@ test('administrator can create and edit a stable from the roster page', function
 
     $page
         ->click('Add Stable')
+        ->assertPathIs('/roster/stables')
         ->assertSee('Create Stable')
         ->fill('input[name="form.name"]', 'Browser Test Stable')
         ->press('Save')
@@ -337,6 +346,7 @@ test('administrator can create and edit a stable from the roster page', function
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Stable"]')
         ->click('tr:has-text("Browser Test Stable") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/roster/stables')
         ->assertSee('Edit Stable')
         ->assertValue('input[name="form.name"]', 'Browser Test Stable')
         ->fill('input[name="form.name"]', 'Updated Browser Test Stable')
@@ -360,6 +370,7 @@ test('administrator can create and edit a title from the title directory', funct
 
     $page
         ->click('Add Title')
+        ->assertPathIs('/titles')
         ->assertSee('Create Title')
         ->fill('input[name="form.name"]', 'Browser Test Championship Title')
         ->select('select[name="form.type"]', TitleType::Singles->value)
@@ -368,6 +379,7 @@ test('administrator can create and edit a title from the title directory', funct
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Championship Title"]')
         ->click('tr:has-text("Browser Test Championship Title") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/titles')
         ->assertSee('Edit Title')
         ->assertValue('input[name="form.name"]', 'Browser Test Championship Title')
         ->assertValue('select[name="form.type"]', TitleType::Singles->value)
@@ -390,6 +402,7 @@ test('platform administrator can create and edit a promotion from the directory'
 
     $page
         ->click('Create promotion')
+        ->assertPathIs('/promotions')
         ->assertSee('Create Promotion')
         ->fill('input[name="form.name"]', 'Browser Test Promotion')
         ->fill('input[name="form.slug"]', 'browser-test-promotion')
@@ -400,6 +413,7 @@ test('platform administrator can create and edit a promotion from the directory'
 
     $page
         ->click('Edit')
+        ->assertPathIs('/promotions')
         ->assertSee('Edit Promotion')
         ->assertValue('input[name="form.name"]', 'Browser Test Promotion')
         ->assertValue('input[name="form.slug"]', 'browser-test-promotion')
