@@ -164,6 +164,48 @@ describe('authorized event form interactions', function () {
             ->assertSet('isModalOpen', false);
     });
 
+    it('keeps the edit form open after a venue scheduling conflict and allows recovery', function () {
+        $originalVenue = Venue::factory()->create();
+        $conflictingVenue = Venue::factory()->create();
+        $originalDate = now()->addMonth()->startOfMinute();
+        $conflictingDate = now()->addMonths(2)->startOfMinute();
+        $event = Event::factory()->for($originalVenue)->create([
+            'name' => 'Original Event',
+            'date' => $originalDate,
+        ]);
+        Event::factory()->for($conflictingVenue)->create(['date' => $conflictingDate]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $event->id);
+        $modal->set([
+            'form.name' => 'Rescheduled Event',
+            'form.date' => $conflictingDate->format('Y-m-d\\TH:i'),
+            'form.venue_id' => $conflictingVenue->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.venue_id'])
+            ->assertSet('isModalOpen', true)
+            ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+            ->assertNotDispatched('closeModal');
+        expect($event->refresh()->name)->toBe('Original Event')
+            ->and($event->date?->toDateTimeString())->toBe($originalDate->toDateTimeString())
+            ->and($event->venue_id)->toBe($originalVenue->id);
+
+        $availableDate = $conflictingDate->copy()->addHour();
+        $modal->set('form.date', $availableDate->format('Y-m-d\\TH:i'));
+        $modal->call('save');
+
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false)
+            ->assertDispatched('closeModal');
+        expect($event->refresh()->name)->toBe('Rescheduled Event')
+            ->and($event->date?->toDateTimeString())->toBe($availableDate->toDateTimeString())
+            ->and($event->venue_id)->toBe($conflictingVenue->id);
+    });
+
     it('requires an event name', function () {
         $modal = livewire(FormModal::class);
 

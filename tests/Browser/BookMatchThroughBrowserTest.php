@@ -172,3 +172,45 @@ test('administrator can recover from a venue scheduling conflict in the event fo
     expect($event->date?->toDateTimeString())->toBe($availableDate->toDateTimeString())
         ->and($event->venue_id)->toBe($venue->id);
 });
+
+test('administrator can recover from a venue scheduling conflict while editing an event', function (): void {
+    $originalVenue = Venue::factory()->create();
+    $conflictingVenue = Venue::factory()->create();
+    $conflictingDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
+    $event = Event::factory()->for($originalVenue)->create([
+        'name' => 'Original Browser Event',
+        'date' => $conflictingDate,
+    ]);
+    Event::factory()->for($conflictingVenue)->create(['date' => $conflictingDate]);
+
+    $this->actingAs(administrator());
+
+    $page = visit(route('events.index'));
+
+    $page
+        ->click('button[aria-label="Actions for Original Browser Event"]')
+        ->click('tr:has-text("Original Browser Event") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertSee('Edit Event')
+        ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
+        ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
+        ->press('Save')
+        ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+        ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
+        ->assertSee('Edit Event');
+
+    expect($event->refresh()->name)->toBe('Original Browser Event')
+        ->and($event->date?->toDateTimeString())->toBe($conflictingDate->toDateTimeString())
+        ->and($event->venue_id)->toBe($originalVenue->id);
+
+    $availableDate = $conflictingDate->copy()->addHour();
+    $page
+        ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
+        ->press('Save')
+        ->assertSee('Rescheduled Browser Event')
+        ->assertDontSee('Edit Event')
+        ->assertNoJavascriptErrors();
+
+    expect($event->refresh()->name)->toBe('Rescheduled Browser Event')
+        ->and($event->date?->toDateTimeString())->toBe($availableDate->toDateTimeString())
+        ->and($event->venue_id)->toBe($conflictingVenue->id);
+});
