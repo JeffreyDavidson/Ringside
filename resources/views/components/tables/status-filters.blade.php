@@ -1,10 +1,10 @@
-@props(['metadata', 'label', 'allLabel', 'selected' => ''])
+@props(['metadata', 'label', 'allLabel', 'selected' => '', 'statusId' => 'roster-status', 'testId' => 'roster-status-filters'])
 
 @php
     $options = [['value' => '', 'label' => $allLabel, 'count' => $metadata['total']], ...$metadata['statuses']];
 @endphp
 
-<div class="border-ringside-line border-b" data-test="roster-status-filters">
+<div class="border-ringside-line border-b" data-test="{{ $testId }}">
     <div class="hidden flex-wrap gap-x-1 px-3 xl:flex" role="group" aria-label="{{ $label }}">
         @foreach ($options as $option)
             <button
@@ -24,10 +24,10 @@
         @endforeach
     </div>
     <div class="flex items-center gap-3 px-4 py-3 xl:hidden">
-        <label for="roster-status" class="text-ringside-muted text-sm">{{ __('core.status') }}</label>
+        <label for="{{ $statusId }}" class="text-ringside-muted text-sm">{{ __('core.status') }}</label>
         <div class="relative min-w-0 grow">
             <select
-                id="roster-status"
+                id="{{ $statusId }}"
                 wire:model.live="filterValues.status"
                 class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2"
             >
