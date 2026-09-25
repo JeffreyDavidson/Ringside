@@ -1,5 +1,5 @@
 <x-form-modal>
-    <x-layouts.form-grid>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="wrestler-profile-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('wrestlers.name') }}" wire:model="form.name" />
         </x-form-modal.modal-input>
@@ -7,9 +7,9 @@
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('wrestlers.hometown') }}" wire:model="form.hometown" />
         </x-form-modal.modal-input>
-    </x-layouts.form-grid>
+    </div>
 
-    <x-layouts.form-grid :columns="3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3" data-test="wrestler-physical-details-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('wrestlers.feet') }}" wire:model="form.height_feet" />
         </x-form-modal.modal-input>
@@ -21,9 +21,9 @@
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('wrestlers.weight') }}" wire:model="form.weight" />
         </x-form-modal.modal-input>
-    </x-layouts.form-grid>
+    </div>
 
-    <x-layouts.form-grid>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="wrestler-career-details-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('wrestlers.signature_move') }}" wire:model="form.signature_move" />
         </x-form-modal.modal-input>
@@ -31,5 +31,5 @@
         <x-form-modal.modal-input>
             <x-form.inputs.date label="{{ __('employments.started_at') }}" wire:model="form.employment_date" />
         </x-form-modal.modal-input>
-    </x-layouts.form-grid>
+    </div>
 </x-form-modal>
