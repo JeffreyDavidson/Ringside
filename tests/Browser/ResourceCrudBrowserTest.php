@@ -118,12 +118,18 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->assertPathIs('/roster/wrestlers')
         ->assertSee('Add Wrestler')
         ->assertVisible('input[name="form.name"]')
+        ->press('Save')
+        ->assertSee('The name field is required.')
+        ->assertVisible('[id="form.name-error"]')
+        ->assertAttribute('input[name="form.name"]', 'aria-invalid', 'true')
+        ->assertScript('document.querySelector("#modal-container").checkVisibility()')
         ->fill('input[name="form.name"]', 'Browser Test Wrestler')
         ->fill('input[name="form.hometown"]', 'Reno, Nevada')
         ->fill('input[name="form.height_feet"]', '6')
         ->fill('input[name="form.height_inches"]', '2')
         ->fill('input[name="form.weight"]', '245')
         ->press('Save')
+        ->assertScript('!document.querySelector("#modal-container").checkVisibility()')
         ->assertSee('Browser Test Wrestler')
         ->wait(0.35);
 
