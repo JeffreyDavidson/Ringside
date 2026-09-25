@@ -29,6 +29,9 @@ describe('managers table', function (): void {
         $component
             ->assertSuccessful()
             ->assertSee('Add Manager')
+            ->assertSeeHtml('data-test="managers-table"')
+            ->assertSee('Filter managers by status')
+            ->assertDontSee('All Managers')
             ->assertSeeHtml('placeholder="Search managers"')
             ->assertSeeHtml('aria-label="Actions for Bobby Heenan"')
             ->assertSeeHtml('role="group"')
@@ -83,6 +86,26 @@ describe('managers table', function (): void {
             ->assertSee('Matching Manager')
             ->assertDontSee('Hidden Manager');
     })->with(EmploymentStatus::cases());
+
+    it('clears manager search and filters', function (): void {
+        // Arrange
+        $component = livewire(Main::class);
+        $component->set('search', 'Bobby');
+        $component->set('filterValues.status', EmploymentStatus::Employed->value);
+        $component->set('filterValues.employment_date', [
+            'minDate' => '2020-01-01',
+            'maxDate' => '2020-12-31',
+        ]);
+
+        // Act
+        $component->call('clearFilters');
+
+        // Assert
+        $component
+            ->assertSet('search', '')
+            ->assertSet('filterValues.status', '')
+            ->assertSet('filterValues.employment_date', []);
+    });
 
     it('loads the employment state used by the table', function (): void {
         // Arrange

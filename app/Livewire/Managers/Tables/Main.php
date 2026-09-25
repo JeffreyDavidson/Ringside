@@ -28,6 +28,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Managers\Manager;
 use Closure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Manager> */
@@ -62,6 +63,24 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Manager::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.managers.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+            'beforeWrapperView' => $this->beforeWrapperView,
+        ]);
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->filterValues['status'] = '';
+        $this->filterValues['employment_date'] = [];
+        $this->resetPage();
     }
 
     /**

@@ -28,6 +28,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Referees\Referee;
 use Closure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Referee> */
@@ -60,6 +61,24 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Referee::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.referees.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+            'beforeWrapperView' => $this->beforeWrapperView,
+        ]);
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->filterValues['status'] = '';
+        $this->filterValues['employment_date'] = [];
+        $this->resetPage();
     }
 
     /** @return array<int, Column> */
