@@ -43,6 +43,16 @@ class FormModal extends BaseFormModal
         return TagTeam::class;
     }
 
+    #[\Override]
+    public function getModalTitle(): string
+    {
+        if ($this->form->isEditing()) {
+            return 'Edit '.$this->form->tagTeam()->name;
+        }
+
+        return 'Create Tag Team';
+    }
+
     protected function populateDummyData(): void
     {
         $wrestlers = Wrestler::query()

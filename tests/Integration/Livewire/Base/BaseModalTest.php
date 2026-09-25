@@ -25,7 +25,7 @@ describe('clearing modal forms', function (): void {
         // Assert
         $component
             ->assertSet('form.name', '')
-            ->assertSee('Add TagTeam');
+            ->assertSee('Create Tag Team');
     });
 
     it('restores the persisted model when clearing an edit form', function (): void {

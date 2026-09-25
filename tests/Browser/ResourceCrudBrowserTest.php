@@ -177,6 +177,8 @@ test('administrator can create and edit a tag team from the roster page', functi
 
     $page
         ->click('Add Tag Team')
+        ->assertPathIs('/roster/tag-teams')
+        ->assertSee('Create Tag Team')
         ->assertPresent('input[name="form.name"]')
         ->assertScript('document.querySelector("[data-test=tag-team-managers-field]").innerText.includes("Managers")')
         ->fill('input[name="form.name"]', 'Browser Test Tag Team')
@@ -184,9 +186,15 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
         ->press('Save')
         ->assertSee('Browser Test Tag Team')
-        ->wait(0.35)
+        ->wait(0.35);
+
+    $createdTagTeam = TagTeam::query()->whereName('Browser Test Tag Team')->firstOrFail();
+
+    $page
         ->click('button[aria-label="Actions for Browser Test Tag Team"]')
         ->click('tr:has-text("Browser Test Tag Team") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/roster/tag-teams')
+        ->assertSee('Edit Browser Test Tag Team')
         ->assertValue('input[name="form.name"]', 'Browser Test Tag Team')
         ->assertValue('select[name="form.wrestlerA"]', (string) $firstWrestler->id)
         ->assertValue('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
