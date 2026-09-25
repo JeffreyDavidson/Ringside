@@ -1,7 +1,12 @@
 <x-layouts.table-header title="Wrestlers" :subtitle="__('wrestlers.index_description')">
     <x-slot:actions>
         @can('create', \App\Models\Roster\Wrestlers\Wrestler::class)
-            <x-button variant="ringside" size="md" class="min-h-11" tag="a" href="{{ route('wrestlers.create') }}">
+            <x-button
+                variant="ringside"
+                size="md"
+                class="min-h-11"
+                @click="$dispatch('openModal', { component: 'wrestlers.modals.form-modal' })"
+            >
                 Add Wrestler
             </x-button>
         @endcan
