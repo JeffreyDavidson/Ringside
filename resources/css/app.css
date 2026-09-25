@@ -132,29 +132,45 @@
 
 .sidebar-brand {
     position: absolute;
-    inset-inline: 24px 32px;
+    inset: 0 32px 0 24px;
+    display: flex;
+    align-items: center;
     overflow: hidden;
 }
 
 .sidebar-brand > span {
+    position: absolute;
+    inset-inline-start: 0;
     width: max-content;
     white-space: nowrap;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    transition:
+        opacity var(--sidebar-transition-duration) var(--sidebar-transition-timing),
+        transform var(--sidebar-transition-duration) var(--sidebar-transition-timing),
+        font-size var(--sidebar-transition-duration) var(--sidebar-transition-timing);
 }
 
 .sidebar-brand > .sidebar-brand-full {
-    display: block;
+    top: 50%;
+    opacity: 1;
 }
 
 .sidebar-brand-short {
-    display: none;
+    top: 50%;
+    font-size: 1.5rem;
+    opacity: 0;
+    transform: translate(-4px, -50%) scale(0.9);
 }
 
 .group[data-collapsed='true'] .sidebar-brand-full {
-    display: none;
+    opacity: 0;
+    transform: translate(-4px, -50%) scale(0.96);
 }
 
 .group[data-collapsed='true'] .sidebar-brand-short {
-    display: block;
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
 }
 
 .sidebar-toggle-icon {

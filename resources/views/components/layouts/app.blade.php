@@ -27,11 +27,13 @@
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
-            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:pt-[var(--header-height)]"
+            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:ps-[var(--shell-sidebar-width)] lg:pt-[var(--header-height)]"
             x-data
-            :class="$store.sidebar && $store.sidebar.expanded
-                ? 'lg:ps-[var(--sidebar-default-width)]'
-                : 'lg:ps-[var(--sidebar-collapsed-width)]'"
+            style="--shell-sidebar-width: var(--sidebar-default-width)"
+            :style="$store.sidebar && $store.sidebar.expanded
+                ? '--shell-sidebar-width: var(--sidebar-default-width)'
+                : '--shell-sidebar-width: var(--sidebar-collapsed-width)'"
+            data-test="app-shell-wrapper"
         >
             <!-- Header -->
             <x-layouts.partials.header />
