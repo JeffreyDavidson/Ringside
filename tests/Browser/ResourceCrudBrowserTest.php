@@ -114,6 +114,8 @@ test('administrator can create a wrestler from the roster page', function (): vo
     $page = visit(route('wrestlers.index'));
 
     $page
+        ->assertScript('!document.querySelector("[aria-label=\\"Content workspace\\"]").classList.contains("border-dashed")')
+        ->assertPresent('[data-test="roster-status-filters"]')
         ->click('Add Wrestler')
         ->assertPathIs('/roster/wrestlers')
         ->assertSee('Add Wrestler')
@@ -161,6 +163,79 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->firstOrFail();
 
     expect($wrestler->promotion_id)->toBe($promotion->id);
+});
+
+test('wrestler roster status filters reset pagination and recover from empty searches', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    Wrestler::factory()->employed()->count(11)->create(['promotion_id' => $promotion->id]);
+    Wrestler::factory()->retired()->create(['name' => 'Retired Legend', 'promotion_id' => $promotion->id]);
+    $this->actingAs($administrator);
+
+    // Act / Assert
+    $page = visit(route('wrestlers.index'));
+    $page
+        ->resize(1440, 1000)
+        ->assertSee('1–10 of 12 wrestlers')
+        ->click('button[aria-label="Next page"]')
+        ->assertSee('11–12 of 12 wrestlers')
+        ->click('button:has-text("Retired")')
+        ->assertSee('1–1 of 1 wrestlers')
+        ->assertSee('Retired Legend')
+        ->assertAttribute('button:has-text("Retired")', 'aria-pressed', 'true')
+        ->fill('#roster-search', 'NoSuchWrestler')
+        ->assertSee('No matching wrestlers')
+        ->click('Clear filters')
+        ->assertValue('#roster-search', '')
+        ->assertAttribute('button:has-text("All wrestlers")', 'aria-pressed', 'true')
+        ->assertSee('1–10 of 12 wrestlers')
+        ->select('#roster-per-page', '25')
+        ->assertSee('1–12 of 12 wrestlers')
+        ->assertNoJavascriptErrors();
+});
+
+test('mobile wrestler roster keeps long names actions and empty-state recovery inside the viewport', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $name = 'The Unstoppable International Heavyweight Champion';
+    Wrestler::factory()->employed()->create(['name' => $name, 'promotion_id' => $promotion->id]);
+    $this->actingAs($administrator);
+
+    // Act / Assert
+    $page = visit(route('wrestlers.index'));
+    $page
+        ->resize(390, 844)
+        ->assertSee($name)
+        ->assertVisible('button[aria-label="Actions for '.$name.'"]')
+        ->assertScript('document.querySelector("[data-test=roster-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->click('button[aria-label="Actions for '.$name.'"]')
+        ->assertVisible('[data-row-actions-panel]')
+        ->assertScript('Array.from(document.querySelectorAll("[data-row-actions-panel]")).filter(panel => panel.checkVisibility()).every(panel => { const rect = panel.getBoundingClientRect(); return rect.left >= 0 && rect.right <= innerWidth; })')
+        ->click('[data-row-actions-panel] button:has-text("Edit")')
+        ->assertVisible('input[name="form.name"]')
+        ->assertValue('input[name="form.name"]', $name)
+        ->assertNoJavascriptErrors();
+
+    $page = visit(route('wrestlers.index'));
+    $page
+        ->resize(390, 844)
+        ->select('#roster-status', 'retired')
+        ->assertSee('No matching wrestlers')
+        ->assertScript('document.querySelector("[data-test=roster-empty-state]").getBoundingClientRect().right <= innerWidth')
+        ->click('Clear filters')
+        ->assertSee($name)
+        ->assertNoJavascriptErrors();
 });
 
 test('administrator can create and edit a tag team from the roster page', function (): void {
