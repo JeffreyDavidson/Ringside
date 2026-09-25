@@ -27,10 +27,8 @@
 <header
     x-data="{ searchOpen: false }"
     @keydown.escape.window="searchOpen = false"
-    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b transition-[inset-inline-start] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:start-[var(--shell-header-start)] lg:end-0"
-    :style="$store.sidebar && $store.sidebar.expanded
-        ? '--shell-header-start: var(--sidebar-default-width)'
-        : '--shell-header-start: var(--sidebar-collapsed-width)'"
+    class="border-ringside-line bg-ringside-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b transition-[inset-inline-start] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:start-[var(--shell-sidebar-width)] lg:end-0"
+    data-test="app-shell-header"
 >
     <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">
         <button @click="$store.sidebar && $store.sidebar.openMobile()"

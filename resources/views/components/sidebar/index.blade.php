@@ -6,13 +6,38 @@
 <div
     x-data="{
         expanded: $store.sidebar ? $store.sidebar.expanded : true,
+        menuTooltip: { label: '', top: 0 },
         init() {
-            if ($store.sidebar) this.$watch('$store.sidebar.expanded', (value) => (this.expanded = value));
+            if ($store.sidebar)
+                this.$watch('$store.sidebar.expanded', (value) => {
+                    this.expanded = value;
+                    this.menuTooltip = { label: '', top: 0 };
+                });
         },
         toggle() {
             if ($store.sidebar) $store.sidebar.toggle();
         },
+        showMenuTooltip(event) {
+            const trigger = event.target.closest('[data-sidebar-tooltip]');
+
+            if (this.expanded || ! trigger) return;
+
+            const bounds = trigger.getBoundingClientRect();
+            this.menuTooltip = {
+                label: trigger.dataset.tooltip,
+                top: bounds.top + bounds.height / 2,
+            };
+        },
+        hideMenuTooltip(event) {
+            if (! event.relatedTarget?.closest('[data-sidebar-tooltip]')) {
+                this.menuTooltip = { label: '', top: 0 };
+            }
+        },
     }"
+    @mouseover="showMenuTooltip($event)"
+    @mouseout="hideMenuTooltip($event)"
+    @focusin="showMenuTooltip($event)"
+    @focusout="hideMenuTooltip($event)"
 >
     <div
         x-show="$store.sidebar && $store.sidebar.mobileOpen"
@@ -25,12 +50,13 @@
     <aside
         @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
         @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
-        :class="[
-            expanded ? 'lg:w-[var(--sidebar-default-width)]' : 'lg:w-[var(--sidebar-collapsed-width)]',
-            $store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        ]"
+        :class="[$store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']"
         :data-collapsed="! expanded"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)]"
+        style="--sidebar-width: var(--sidebar-initial-width, var(--sidebar-default-width))"
+        :style="expanded
+            ? '--sidebar-width: var(--sidebar-default-width)'
+            : '--sidebar-width: var(--sidebar-collapsed-width)'"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
@@ -47,7 +73,7 @@
                 @click="toggle()"
                 :aria-expanded="expanded"
                 :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
+                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
                 <x-heroicon-s-chevron-left class="sidebar-toggle-icon size-4" />
             </button>
@@ -60,7 +86,10 @@
             </button>
         </div>
 
-        <div class="flex min-h-0 grow [scrollbar-color:var(--color-ringside-line)_transparent] flex-col overflow-y-auto px-3 py-6">
+        <div
+            @scroll="$dispatch('sidebar-tooltip-hide')"
+            class="flex min-h-0 grow [scrollbar-color:var(--color-ringside-line)_transparent] flex-col overflow-y-auto px-3 py-6"
+        >
             @if ($activePromotion)
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = ! open"
@@ -114,6 +143,10 @@
         <div class="shrink-0 px-3 pb-[max(12px,env(safe-area-inset-bottom))] group-data-[collapsed=true]:px-2">
             <a
                 href="{{ route('users.index') }}"
+                aria-label="User management"
+                :title="expanded ? 'User management' : null"
+                data-sidebar-tooltip
+                data-tooltip="User management"
                 @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted transition-[background-color,color,padding] duration-300 ease-out hover:bg-ringside-surface hover:text-ringside-ink group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
             >
                 <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" /><span x-show="expanded" class="truncate text-sm"
@@ -124,6 +157,10 @@
                     <button @click="open = ! open"
                     :aria-expanded="open"
                     aria-controls="account-menu"
+                    aria-label="Account menu"
+                    :title="expanded ? 'Account menu' : null"
+                    data-sidebar-tooltip
+                    data-tooltip="Account menu"
                     data-test="profile-menu"
                     class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start transition-[background-color,color,padding] duration-300 ease-out group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0"
                 >
@@ -168,6 +205,18 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <div
+            x-cloak
+            x-show="window.innerWidth >= 1024 && ! expanded && menuTooltip.label"
+            x-transition.opacity.duration.150ms
+            data-test="sidebar-tooltip"
+            :style="'top: ' + menuTooltip.top + 'px'"
+            class="border-ringside-line bg-ringside-surface-header text-ringside-ink pointer-events-none fixed start-[calc(var(--sidebar-collapsed-width)_+_10px)] z-[60] -translate-y-1/2 border px-3 py-2 text-sm whitespace-nowrap motion-reduce:transition-none"
+            aria-hidden="true"
+        >
+            <span x-text="menuTooltip.label"></span>
         </div>
     </aside>
 </div>

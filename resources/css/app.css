@@ -119,9 +119,15 @@
 .layout1 {
     --sidebar-transition-duration: 600ms;
     --sidebar-transition-timing: ease-in-out;
+    --sidebar-chevron-transition-duration: 300ms;
+    --sidebar-chevron-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-default-width: 288px;
     --header-height: 72px;
     --sidebar-collapsed-width: 88px;
+}
+
+html[data-sidebar-initializing] * {
+    transition: none !important;
 }
 
 @media (max-width: 1024px) {
@@ -132,35 +138,51 @@
 
 .sidebar-brand {
     position: absolute;
-    inset-inline: 24px 32px;
+    inset: 0 32px 0 24px;
+    display: flex;
+    align-items: center;
     overflow: hidden;
 }
 
 .sidebar-brand > span {
+    position: absolute;
+    inset-inline-start: 0;
     width: max-content;
     white-space: nowrap;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    transition:
+        opacity var(--sidebar-transition-duration) var(--sidebar-transition-timing),
+        transform var(--sidebar-transition-duration) var(--sidebar-transition-timing),
+        font-size var(--sidebar-transition-duration) var(--sidebar-transition-timing);
 }
 
 .sidebar-brand > .sidebar-brand-full {
-    display: block;
+    top: 50%;
+    opacity: 1;
 }
 
 .sidebar-brand-short {
-    display: none;
+    top: 50%;
+    font-size: 1.5rem;
+    opacity: 0;
+    transform: translate(-4px, -50%) scale(0.9);
 }
 
 .group[data-collapsed='true'] .sidebar-brand-full {
-    display: none;
+    opacity: 0;
+    transform: translate(-4px, -50%) scale(0.96);
 }
 
 .group[data-collapsed='true'] .sidebar-brand-short {
-    display: block;
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
 }
 
 .sidebar-toggle-icon {
     transform-origin: center;
     transform: rotate(0deg);
-    transition: transform var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+    transition: transform var(--sidebar-chevron-transition-duration) var(--sidebar-chevron-transition-timing);
 }
 
 .event-date-time::-webkit-calendar-picker-indicator {
@@ -175,6 +197,7 @@
 @media (prefers-reduced-motion: reduce) {
     .layout1 {
         --sidebar-transition-duration: 0ms;
+        --sidebar-chevron-transition-duration: 0ms;
     }
 }
 
