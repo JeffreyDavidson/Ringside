@@ -18,6 +18,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
@@ -60,6 +61,24 @@ class Main extends BaseTable
         $this->addAdditionalSelects([
             'events.venue_id',
         ]);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.events.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+        ]);
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->filterValues['status'] = '';
+        $this->filterValues['venue'] = '';
+        $this->filterValues['event_dates'] = [];
+        $this->resetPage();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 test('event schedule fields stack on narrow screens and share a row on wider screens', function (): void {
@@ -18,5 +19,32 @@ test('event schedule fields stack on narrow screens and share a row on wider scr
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->resize(1440, 1000)
         ->assertScript('getComputedStyle(document.querySelector("[data-test=event-schedule-grid]")).gridTemplateColumns.split(" ").length === 2')
+        ->assertNoJavascriptErrors();
+});
+
+test('event index filters and table fit a narrow viewport', function (): void {
+    // Arrange
+    $venue = Venue::factory()->create(['name' => 'Riverside Hall']);
+    Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Summer Showdown']);
+    $this->actingAs(administrator());
+
+    // Act
+    $page = visit(route('events.index'));
+    $page->resize(390, 844);
+
+    // Assert
+    $page
+        ->assertSee('Summer Showdown')
+        ->assertSee('Riverside Hall')
+        ->assertVisible('#events-status')
+        ->assertScript('document.querySelector("[data-test=events-table]").getBoundingClientRect().right <= innerWidth')
+        ->click('Filters')
+        ->assertVisible('#events-venue')
+        ->assertVisible('#events-date-from')
+        ->assertVisible('#events-date-to')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->screenshot(fullPage: false, filename: 'events-index-mobile')
+        ->resize(1440, 900)
+        ->screenshot(fullPage: false, filename: 'events-index-desktop')
         ->assertNoJavascriptErrors();
 });

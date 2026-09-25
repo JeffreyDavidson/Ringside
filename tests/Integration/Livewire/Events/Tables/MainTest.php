@@ -38,15 +38,17 @@ describe('events table', function (): void {
             ->assertSuccessful()
             ->assertSee('Add Event')
             ->assertSeeHtml('placeholder="Search events"')
+            ->assertSeeHtml('data-test="events-table"')
+            ->assertSeeHtml('data-test="events-status-filters"')
             ->assertSeeHtml('aria-label="Actions for Future Showcase"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Future Showcase')
             ->assertSee('Past Showcase')
             ->assertSee('Draft Showcase')
-            ->assertSee($scheduledDate->format('Y-m-d'))
-            ->assertSee('No Date Set')
+            ->assertSee($scheduledDate->format('M j, Y'))
+            ->assertSee(__('events.no_date'))
             ->assertSee($venue->name)
-            ->assertSee('No Venue')
+            ->assertSee(__('events.no_venue'))
             ->assertDontSee('Deleted Showcase');
     });
 
@@ -142,6 +144,31 @@ describe('events table', function (): void {
             ->assertDontSee('After Range');
     });
 
+    it('clears all event filters together', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Clear Filter Arena']);
+        Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Visible After Clear']);
+        $component = livewire(Main::class)
+            ->set('search', 'No matching event')
+            ->set('filterValues.status', EventStatus::Past->value)
+            ->set('filterValues.venue', (string) $venue->id)
+            ->set('filterValues.event_dates', [
+                'minDate' => '2026-06-01',
+                'maxDate' => '2026-06-30',
+            ]);
+
+        // Act
+        $component->call('clearFilters');
+
+        // Assert
+        $component
+            ->assertSet('search', '')
+            ->assertSet('filterValues.status', '')
+            ->assertSet('filterValues.venue', '')
+            ->assertSet('filterValues.event_dates', [])
+            ->assertSee('Visible After Clear');
+    });
+
     it('orders dated events newest first and unscheduled events last', function (): void {
         // Arrange
         Event::factory()->create([
@@ -211,7 +238,8 @@ describe('events table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee(__('events.empty_title'))
+            ->assertSee(__('events.empty_description'));
     });
 
     it('forbids users without administrative access', function (string $actor): void {
