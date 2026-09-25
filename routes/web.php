@@ -15,7 +15,6 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
-use App\Http\Controllers\Wrestlers\WrestlerEditsController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -49,8 +48,6 @@ Route::middleware('auth')->group(function () {
             Route::get('stables', [StablesController::class, 'index'])->can('viewAny', Stable::class)->name('stables.index');
             Route::get('stables/{stable}', [StablesController::class, 'show'])->can('view', 'stable')->name('stables.show');
             Route::get('wrestlers', [WrestlersController::class, 'index'])->can('viewAny', Wrestler::class)->name('wrestlers.index');
-            Route::get('wrestlers/create', [WrestlersController::class, 'create'])->can('create', Wrestler::class)->name('wrestlers.create');
-            Route::get('wrestlers/{wrestler}/edit', [WrestlerEditsController::class, 'edit'])->can('update', 'wrestler')->name('wrestlers.edit.edit');
             Route::get('wrestlers/{wrestler}', [WrestlersController::class, 'show'])->can('view', 'wrestler')->name('wrestlers.show');
             Route::get('managers', [ManagersController::class, 'index'])->can('viewAny', Manager::class)->name('managers.index');
             Route::get('managers/{manager}', [ManagersController::class, 'show'])->can('view', 'manager')->name('managers.show');

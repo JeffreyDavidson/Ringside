@@ -15,11 +15,13 @@ test('wrestler form fields stack on narrow screens and use responsive rows on wi
     ]);
     $this->actingAs($administrator);
 
-    $page = visit(route('wrestlers.create'));
+    $page = visit(route('wrestlers.index'));
     $page->resize(390, 844);
 
     $page
+        ->click('Add Wrestler')
         ->assertSee('Add Wrestler')
+        ->assertVisible('input[name="form.name"]')
         ->assertScript('document.querySelectorAll("[data-test^=wrestler-]").length === 3')
         ->assertScript('Array.from(document.querySelectorAll("[data-test^=wrestler-]"), grid => getComputedStyle(grid).gridTemplateColumns.split(" ").length).every(columns => columns === 1)')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')

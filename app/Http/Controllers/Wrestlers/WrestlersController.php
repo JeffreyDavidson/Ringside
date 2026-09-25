@@ -14,11 +14,6 @@ class WrestlersController
         return view('wrestlers.index');
     }
 
-    public function create(): View
-    {
-        return view('wrestlers.form');
-    }
-
     public function show(Wrestler $wrestler): View
     {
         return view('wrestlers.show', [

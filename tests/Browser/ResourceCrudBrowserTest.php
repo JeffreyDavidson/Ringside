@@ -113,13 +113,15 @@ test('administrator can create a wrestler from the roster page', function (): vo
 
     $page
         ->click('Add Wrestler')
-        ->assertPresent('input[name="form.name"]')
+        ->assertPathIs('/roster/wrestlers')
+        ->assertSee('Add Wrestler')
+        ->assertVisible('input[name="form.name"]')
         ->fill('input[name="form.name"]', 'Browser Test Wrestler')
         ->fill('input[name="form.hometown"]', 'Reno, Nevada')
         ->fill('input[name="form.height_feet"]', '6')
         ->fill('input[name="form.height_inches"]', '2')
         ->fill('input[name="form.weight"]', '245')
-        ->press('Save Wrestler')
+        ->press('Save')
         ->assertSee('Browser Test Wrestler')
         ->wait(0.35);
 
@@ -133,11 +135,12 @@ test('administrator can create a wrestler from the roster page', function (): vo
     $page
         ->click('button[aria-label="Actions for Browser Test Wrestler"]')
         ->assertVisible('[role="group"][aria-label="Wrestler actions"]')
-        ->click('tr:has-text("Browser Test Wrestler") [data-row-actions-panel] a:has-text("Edit")')
+        ->click('tr:has-text("Browser Test Wrestler") [data-row-actions-panel] button:has-text("Edit")')
+        ->assertPathIs('/roster/wrestlers')
         ->assertSee('Edit Browser Test Wrestler')
         ->assertValue('input[name="form.name"]', 'Browser Test Wrestler')
         ->fill('input[name="form.name"]', 'Updated Browser Test Wrestler')
-        ->press('Save Wrestler')
+        ->press('Save')
         ->assertNoJavascriptErrors();
 
     $page
