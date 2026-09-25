@@ -119,7 +119,7 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->fill('input[name="form.height_feet"]', '6')
         ->fill('input[name="form.height_inches"]', '2')
         ->fill('input[name="form.weight"]', '245')
-        ->press('Save')
+        ->press('Save Wrestler')
         ->assertSee('Browser Test Wrestler')
         ->wait(0.35);
 
@@ -133,11 +133,11 @@ test('administrator can create a wrestler from the roster page', function (): vo
     $page
         ->click('button[aria-label="Actions for Browser Test Wrestler"]')
         ->assertVisible('[role="group"][aria-label="Wrestler actions"]')
-        ->click('tr:has-text("Browser Test Wrestler") [data-row-actions-panel] button:has-text("Edit")')
+        ->click('tr:has-text("Browser Test Wrestler") [data-row-actions-panel] a:has-text("Edit")')
         ->assertSee('Edit Browser Test Wrestler')
         ->assertValue('input[name="form.name"]', 'Browser Test Wrestler')
         ->fill('input[name="form.name"]', 'Updated Browser Test Wrestler')
-        ->press('Save')
+        ->press('Save Wrestler')
         ->assertNoJavascriptErrors();
 
     $page
