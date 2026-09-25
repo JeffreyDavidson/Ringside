@@ -7,7 +7,7 @@
         <x-form.inputs.text label="{{ __('venues.street_address') }}" wire:model="form.street_address" />
     </x-form-modal.modal-input>
 
-    <x-layouts.form-grid :columns="3">
+    <x-layouts.form-grid :columns="3" data-test="venue-address-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.text label="{{ __('venues.city') }}" wire:model="form.city" />
         </x-form-modal.modal-input>
