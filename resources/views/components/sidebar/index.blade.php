@@ -212,7 +212,7 @@
             x-show="window.innerWidth >= 1024 && ! expanded && menuTooltip.label"
             x-transition.opacity.duration.150ms
             data-test="sidebar-tooltip"
-            :style="'top: ' + menuTooltip.top + 'px'"
+            :style="{ top: menuTooltip.top + 'px' }"
             class="border-ringside-line bg-ringside-surface-header text-ringside-ink pointer-events-none fixed start-[calc(var(--sidebar-collapsed-width)_+_10px)] z-[60] -translate-y-1/2 border px-3 py-2 text-sm whitespace-nowrap motion-reduce:transition-none"
             aria-hidden="true"
         >
