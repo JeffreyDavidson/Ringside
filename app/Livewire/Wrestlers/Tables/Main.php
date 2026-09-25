@@ -28,6 +28,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Closure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Wrestler> */
@@ -59,6 +60,15 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Wrestler::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.wrestlers.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+        ]);
     }
 
     /**
