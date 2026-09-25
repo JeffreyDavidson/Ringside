@@ -16,7 +16,7 @@ return [
     'clear_filters' => 'Clear filters',
     'measurements' => 'Height / weight',
     'empty_title' => 'Your roster starts here',
-    'empty_description' => 'Add your first wrestler to start building your promotion’s roster.',
+    'empty_description' => 'Add a wrestler to get started.',
     'empty_read_only_description' => 'Wrestlers will appear here when they are added to this promotion.',
     'no_results_title' => 'No matching wrestlers',
     'no_results_description' => 'Try another name or clear the filters to see the full roster.',

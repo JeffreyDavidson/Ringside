@@ -102,6 +102,7 @@
                     <x-tables.empty-state
                         :title="__('wrestlers.empty_title')"
                         :description="__('wrestlers.empty_description')"
+                        description-class="text-xs whitespace-nowrap sm:text-sm"
                         icon="heroicon-o-users"
                         data-test="roster-empty-state"
                     />
