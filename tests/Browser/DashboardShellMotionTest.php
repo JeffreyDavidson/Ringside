@@ -10,6 +10,7 @@ test('dashboard shell renders at its expanded offset and content reflows without
 
     $page
         ->assertSee('Overview')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=sidebar-tooltip]")).display === "none"')
         ->assertScript('document.querySelector("[data-test=app-shell-wrapper]").style.getPropertyValue("--shell-sidebar-width") === "var(--sidebar-default-width)"')
         ->assertScript('getComputedStyle(document.querySelector("[data-test=app-shell-wrapper]")).paddingLeft === "288px"')
         ->assertScript('getComputedStyle(document.querySelector(".sidebar-brand-full")).opacity === "1"')
@@ -56,6 +57,7 @@ test('dashboard shell renders at its expanded offset and content reflows without
         ->assertScript('document.querySelector("[data-test=sidebar-menu-label]").getAnimations().some(animation => animation.playState === "running")')
         ->wait(0.7)
         ->assertScript('getComputedStyle(document.querySelector("[data-test=app-shell-wrapper]")).paddingLeft === "288px"')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=sidebar-tooltip]")).display === "none"')
         ->assertScript('getComputedStyle(document.querySelector(".sidebar-toggle-icon")).transform === "matrix(1, 0, 0, 1, 0, 0)"')
         ->assertScript('Math.abs((() => { const icon = document.querySelector("[data-test=sidebar-menu-icon]").getBoundingClientRect(); const label = document.querySelector("[data-test=sidebar-menu-label]").getBoundingClientRect(); return label.left - icon.right - 12; })()) < 0.5')
         ->assertNoJavascriptErrors();
