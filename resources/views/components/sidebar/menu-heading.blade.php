@@ -2,11 +2,11 @@
     <span
         :aria-hidden="! expanded"
         data-test="sidebar-menu-heading-label"
-        class="absolute start-3 top-3 transition-opacity duration-200 ease-out group-data-[collapsed=true]:opacity-0 motion-reduce:transition-none"
+        class="absolute start-3 top-3 transition-opacity duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] group-data-[collapsed=true]:opacity-0 motion-reduce:transition-none"
     >{{ $slot }}</span>
     <span
         :aria-hidden="expanded"
         data-test="sidebar-menu-heading-collapsed"
-        class="absolute inset-x-0 top-3 text-center opacity-0 transition-opacity duration-200 ease-out group-data-[collapsed=true]:opacity-100 motion-reduce:transition-none"
+        class="absolute inset-x-0 top-3 text-center opacity-0 transition-opacity duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] group-data-[collapsed=true]:opacity-100 motion-reduce:transition-none"
     >…</span>
 </p>

@@ -119,9 +119,15 @@
 .layout1 {
     --sidebar-transition-duration: 600ms;
     --sidebar-transition-timing: ease-in-out;
+    --sidebar-chevron-transition-duration: 300ms;
+    --sidebar-chevron-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-default-width: 288px;
     --header-height: 72px;
     --sidebar-collapsed-width: 88px;
+}
+
+html[data-sidebar-initializing] * {
+    transition: none !important;
 }
 
 @media (max-width: 1024px) {
@@ -176,7 +182,7 @@
 .sidebar-toggle-icon {
     transform-origin: center;
     transform: rotate(0deg);
-    transition: transform var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+    transition: transform var(--sidebar-chevron-transition-duration) var(--sidebar-chevron-transition-timing);
 }
 
 .event-date-time::-webkit-calendar-picker-indicator {
@@ -191,6 +197,7 @@
 @media (prefers-reduced-motion: reduce) {
     .layout1 {
         --sidebar-transition-duration: 0ms;
+        --sidebar-chevron-transition-duration: 0ms;
     }
 }
 

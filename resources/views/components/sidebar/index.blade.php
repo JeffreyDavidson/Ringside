@@ -50,12 +50,13 @@
     <aside
         @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
         @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
-        :class="[
-            expanded ? 'lg:w-[var(--sidebar-default-width)]' : 'lg:w-[var(--sidebar-collapsed-width)]',
-            $store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        ]"
+        :class="[$store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']"
         :data-collapsed="! expanded"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)]"
+        style="--sidebar-width: var(--sidebar-initial-width, var(--sidebar-default-width))"
+        :style="expanded
+            ? '--sidebar-width: var(--sidebar-default-width)'
+            : '--sidebar-width: var(--sidebar-collapsed-width)'"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
@@ -72,7 +73,7 @@
                 @click="toggle()"
                 :aria-expanded="expanded"
                 :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
-                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
+                class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
                 <x-heroicon-s-chevron-left class="sidebar-toggle-icon size-4" />
             </button>
@@ -143,6 +144,7 @@
             <a
                 href="{{ route('users.index') }}"
                 aria-label="User management"
+                :title="expanded ? 'User management' : null"
                 data-sidebar-tooltip
                 data-tooltip="User management"
                 @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted transition-[background-color,color,padding] duration-300 ease-out hover:bg-ringside-surface hover:text-ringside-ink group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
@@ -156,6 +158,7 @@
                     :aria-expanded="open"
                     aria-controls="account-menu"
                     aria-label="Account menu"
+                    :title="expanded ? 'Account menu' : null"
                     data-sidebar-tooltip
                     data-tooltip="Account menu"
                     data-test="profile-menu"

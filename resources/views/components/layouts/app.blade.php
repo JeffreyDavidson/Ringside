@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
+    <script>
+        document.documentElement.setAttribute('data-sidebar-initializing', '');
+
+        try {
+            const sidebarExpanded = window.localStorage.getItem('ringside.sidebar.expanded');
+
+            document.documentElement.dataset.sidebarCollapsed = String(sidebarExpanded === 'false');
+        } catch {}
+    </script>
+
     <title>{{ \Illuminate\Support\Facades\Config::string('app.name', 'Ringside') }}</title>
 
     <link
@@ -19,17 +29,32 @@
 </head>
 
 <body class="layout1 bg-ringside-surface text-ringside-ink min-h-dvh antialiased">
+    <script>
+        document.body.style.setProperty(
+            '--sidebar-initial-width',
+            document.documentElement.dataset.sidebarCollapsed === 'true'
+                ? 'var(--sidebar-collapsed-width)'
+                : 'var(--sidebar-default-width)',
+        );
+    </script>
+
     <!-- Page -->
     <!-- Main -->
     <div class="flex h-dvh min-h-dvh grow overflow-hidden">
         <!-- Sidebar -->
         <x-sidebar />
+        <script>
+            if (document.documentElement.dataset.sidebarCollapsed === 'true') {
+                document.querySelector('aside')?.setAttribute('data-collapsed', 'true');
+            }
+        </script>
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
             class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:ps-[var(--shell-sidebar-width)] lg:pt-[var(--header-height)]"
             x-data
-            style="--shell-sidebar-width: var(--sidebar-default-width)"
+            x-init="$nextTick(() => document.documentElement.removeAttribute('data-sidebar-initializing'))"
+            style="--shell-sidebar-width: var(--sidebar-initial-width, var(--sidebar-default-width))"
             :style="$store.sidebar && $store.sidebar.expanded
                 ? '--shell-sidebar-width: var(--sidebar-default-width)'
                 : '--shell-sidebar-width: var(--sidebar-collapsed-width)'"
