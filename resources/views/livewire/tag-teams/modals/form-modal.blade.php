@@ -36,7 +36,7 @@
     <div data-test="tag-team-managers-field">
         <x-form-modal.modal-input>
             <x-form.inputs.select
-                label="{{ __('tag-teams.managers') }}"
+                label="{{ __('core.managers') }}"
                 wire:model="form.managers"
                 :options="$this->getManagers"
                 :multiple="true"

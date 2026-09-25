@@ -178,6 +178,7 @@ test('administrator can create and edit a tag team from the roster page', functi
     $page
         ->click('Add Tag Team')
         ->assertPresent('input[name="form.name"]')
+        ->assertScript('document.querySelector("[data-test=tag-team-managers-field]").innerText.includes("Managers")')
         ->fill('input[name="form.name"]', 'Browser Test Tag Team')
         ->select('select[name="form.wrestlerA"]', (string) $firstWrestler->id)
         ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
