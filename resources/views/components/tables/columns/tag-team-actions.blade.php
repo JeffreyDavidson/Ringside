@@ -16,7 +16,7 @@
                 type="button"
                 class="hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm focus-visible:outline-2"
                 x-on:click="open = false"
-                wire:click="$dispatch('openModal', { component: 'tag-teams.modals.form-modal', arguments: { 'modelId': '{{ $tagTeam->id }}' }})"
+                wire:click="$dispatch('openModal', { component: 'tag-teams.modals.form-modal', arguments: { modelId: {{ $tagTeam->id }} } })"
             >
                 <x-heroicon-m-pencil-square class="text-ringside-muted size-5" aria-hidden="true" />
                 <span>Edit</span>
