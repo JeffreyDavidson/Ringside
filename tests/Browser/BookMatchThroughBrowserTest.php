@@ -137,3 +137,38 @@ test('administrator can create and edit an event with a showtime', function (): 
 
     expect($event->refresh()->date?->toDateTimeString())->toBe($updatedDate->toDateTimeString());
 });
+
+test('administrator can recover from a venue scheduling conflict in the event form', function (): void {
+    $venue = Venue::factory()->create();
+    $conflictingDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
+    Event::factory()->for($venue)->create(['date' => $conflictingDate]);
+
+    $this->actingAs(administrator());
+
+    $page = visit(route('events.index'));
+
+    $page
+        ->click('Add Event')
+        ->assertSee('Create Event')
+        ->fill('input[name="form.name"]', 'Second Night at the Venue')
+        ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
+        ->select('select[name="form.venue_id"]', (string) $venue->id)
+        ->press('Save')
+        ->assertSee("Venue [{$venue->name}] is already booked at this event time.")
+        ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
+        ->assertSee('Create Event');
+
+    expect(Event::query()->count())->toBe(1);
+
+    $availableDate = $conflictingDate->copy()->addHour();
+    $page
+        ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
+        ->press('Save')
+        ->assertSee('Second Night at the Venue')
+        ->assertDontSee('Create Event')
+        ->assertNoJavascriptErrors();
+
+    $event = Event::query()->whereName('Second Night at the Venue')->firstOrFail();
+    expect($event->date?->toDateTimeString())->toBe($availableDate->toDateTimeString())
+        ->and($event->venue_id)->toBe($venue->id);
+});
