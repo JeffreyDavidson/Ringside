@@ -26,6 +26,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 
@@ -53,12 +54,22 @@ class Main extends BaseTable
         return TagTeam::query()
             ->withEmploymentStatusState()
             ->withFirstEmployment()
+            ->with('currentWrestlers')
             ->oldest('name');
     }
 
     protected function configure(): void
     {
         Gate::authorize('viewAny', TagTeam::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.tag-teams.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+        ]);
     }
 
     /**
