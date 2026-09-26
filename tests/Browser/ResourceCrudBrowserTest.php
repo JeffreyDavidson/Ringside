@@ -23,6 +23,13 @@ test('administrator can create a basic user with unverified status', function ()
     $page = visit(route('users.index'));
 
     $page
+        ->resize(320, 740)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900);
+
+    $page
         ->click('Add User')
         ->assertPathIs('/user-management/users')
         ->assertSee('Create User')
@@ -35,7 +42,13 @@ test('administrator can create a basic user with unverified status', function ()
         ->press('Save')
         ->assertSee('Browser User')
         ->assertSee(Role::Basic->name)
-        ->assertSee(UserStatus::Unverified->label());
+        ->assertSee(UserStatus::Unverified->label())
+        ->resize(320, 740)
+        ->assertSee('Scroll horizontally to view all columns')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900);
 
     $page->assertNoJavascriptErrors();
 
@@ -214,11 +227,15 @@ test('mobile wrestler roster keeps long names actions and empty-state recovery i
     // Act / Assert
     $page = visit(route('wrestlers.index'));
     $page
-        ->resize(390, 844)
+        ->resize(320, 740)
         ->assertSee($name)
         ->assertVisible('button[aria-label="Actions for '.$name.'"]')
         ->assertScript('document.querySelector("[data-test=roster-table]").getBoundingClientRect().right <= innerWidth')
         ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.querySelector("[data-test=roster-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(390, 844)
         ->click('button[aria-label="Actions for '.$name.'"]')
         ->assertVisible('[data-row-actions-panel]')
         ->assertScript('Array.from(document.querySelectorAll("[data-row-actions-panel]")).filter(panel => panel.checkVisibility()).every(panel => { const rect = panel.getBoundingClientRect(); return rect.left >= 0 && rect.right <= innerWidth; })')
@@ -262,6 +279,13 @@ test('administrator can create and edit a tag team from the roster page', functi
     $page = visit(route('tag-teams.index'));
 
     $page
+        ->resize(320, 740)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900);
+
+    $page
         ->click('Add Tag Team')
         ->assertPathIs('/roster/tag-teams')
         ->assertSee('Create Tag Team')
@@ -272,6 +296,13 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
         ->press('Save')
         ->assertSee('Browser Test Tag Team')
+        ->resize(320, 740)
+        ->assertScript('document.querySelector("[data-test=tag-team-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.querySelector("[data-test=tag-team-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900)
         ->wait(0.35);
 
     $createdTagTeam = TagTeam::query()->whereName('Browser Test Tag Team')->firstOrFail();
@@ -304,6 +335,13 @@ test('administrator can create and edit a venue from the venue directory', funct
     $page = visit(route('venues.index'));
 
     $page
+        ->resize(320, 740)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900);
+
+    $page
         ->click('Add Venue')
         ->assertPathIs('/venues')
         ->assertSee('Create Venue')
@@ -314,6 +352,12 @@ test('administrator can create and edit a venue from the venue directory', funct
         ->fill('input[name="form.zipcode"]', '89501')
         ->press('Save')
         ->assertSee('Browser Test Arena')
+        ->resize(320, 740)
+        ->assertSee('Scroll horizontally to view all columns')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900)
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Arena"]')
         ->click('tr:has-text("Browser Test Arena") [data-row-actions-panel] button:has-text("Edit")')
@@ -450,6 +494,13 @@ test('administrator can create and edit a title from the title directory', funct
     $page = visit(route('titles.index'));
 
     $page
+        ->resize(320, 740)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900);
+
+    $page
         ->click('Add Title')
         ->assertPathIs('/titles')
         ->assertSee('Create Title')
@@ -457,6 +508,13 @@ test('administrator can create and edit a title from the title directory', funct
         ->select('select[name="form.type"]', TitleType::Singles->value)
         ->press('Save')
         ->assertSee('Browser Test Championship Title')
+        ->resize(320, 740)
+        ->assertScript('document.querySelector("[data-test=titles-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.querySelector("[data-test=titles-table]").getBoundingClientRect().right <= innerWidth')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900)
         ->wait(0.35)
         ->click('button[aria-label="Actions for Browser Test Championship Title"]')
         ->click('tr:has-text("Browser Test Championship Title") [data-row-actions-panel] button:has-text("Edit")')
@@ -486,6 +544,11 @@ test('platform administrator can create and edit a promotion from the directory'
     $page->resize(390, 844)
         ->assertVisible('[data-test=table-toolbar]')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->resize(320, 740)
+        ->assertVisible('[data-test=table-toolbar]')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->resize(1440, 900);
 
     $page
@@ -497,6 +560,12 @@ test('platform administrator can create and edit a promotion from the directory'
         ->press('Save')
         ->assertSee('Browser Test Promotion')
         ->assertSee('browser-test-promotion')
+        ->resize(320, 740)
+        ->assertSee('Scroll horizontally to view all columns')
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(768, 1024)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(1440, 900)
         ->assertNoJavascriptErrors();
 
     $page
