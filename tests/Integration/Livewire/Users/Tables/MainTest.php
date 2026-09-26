@@ -37,6 +37,11 @@ describe('users table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSee('Users')
+            ->assertSee('Manage global accounts and platform access.')
+            ->assertSeeHtml('data-test="index-page-header"')
+            ->assertSeeHtml('data-test="table-metadata"')
+            ->assertSeeHtml('data-test="table-toolbar"')
             ->assertSee('Add User')
             ->assertSeeHtml('placeholder="Search users"')
             ->assertSee('John Admin')

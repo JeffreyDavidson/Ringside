@@ -9,6 +9,7 @@ test('venue address fields use responsive columns without horizontal overflow', 
     $page->resize(390, 844);
 
     $page
+        ->assertScript('document.querySelector("[data-test=table-metadata]").closest("[data-test=table-toolbar]") !== null')
         ->click('Add Venue')
         ->assertSee('Create Venue')
         ->assertScript('getComputedStyle(document.querySelector("[data-test=venue-address-grid]")).gridTemplateColumns.split(" ").length === 1')

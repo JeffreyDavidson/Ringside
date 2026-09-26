@@ -480,6 +480,13 @@ test('platform administrator can create and edit a promotion from the directory'
     $this->actingAs(administrator());
 
     $page = visit(route('promotions.index'));
+    $page
+        ->assertScript('document.querySelector("[data-test=table-metadata]").closest("[data-test=table-toolbar]") !== null')
+        ->assertScript('Array.from(document.querySelectorAll("button")).find(button => button.textContent.includes("Create promotion"))?.getBoundingClientRect().height === 44');
+    $page->resize(390, 844)
+        ->assertVisible('[data-test=table-toolbar]')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
+        ->resize(1440, 900);
 
     $page
         ->click('Create promotion')

@@ -14,6 +14,7 @@ it('lets platform administrators create and edit promotions from the directory',
     actingAs(User::factory()->administrator()->create(['status' => UserStatus::Active]))
         ->get(route('promotions.index'))
         ->assertOk()
+        ->assertSee(__('promotions.index_description'))
         ->assertSee('Ringside Wrestling')
         ->assertSee(__('promotions.create'))
         ->assertSee(__('promotions.edit'));

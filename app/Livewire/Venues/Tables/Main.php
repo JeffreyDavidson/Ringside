@@ -42,6 +42,9 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Venue::class);
+        $this->emptyStateTitle = __('venues.empty_title');
+        $this->emptyStateDescription = __('venues.empty_description');
+        $this->emptyStateIcon = 'heroicon-o-building-office-2';
     }
 
     /**

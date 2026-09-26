@@ -28,6 +28,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
 
     protected string $databaseTableName = 'events_matches';
 
+    #[\Override]
     protected string $resourceName = 'matches';
 
     public function boot(MatchTableFormatter $matchTableFormatter): void

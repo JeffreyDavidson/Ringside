@@ -32,6 +32,9 @@ describe('venues table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSeeHtml('data-test="table-toolbar"')
+            ->assertSeeHtml('data-test="table-metadata"')
+            ->assertSeeHtml('data-test="index-page-header"')
             ->assertSee('Add Venue')
             ->assertSeeHtml('placeholder="Search venues"')
             ->assertSeeHtml('aria-label="Actions for Madison Square Garden"')
@@ -41,6 +44,15 @@ describe('venues table', function (): void {
             ->assertSee('New York')
             ->assertSee('10001')
             ->assertDontSee('Deleted Arena');
+    });
+
+    it('uses the shared search and pagination controls', function (): void {
+        Venue::factory()->count(12)->create();
+
+        livewire(Main::class)
+            ->assertSeeHtml('role="searchbox"')
+            ->assertSee('Rows per page')
+            ->assertSee('1–10 of 12 venues');
     });
 
     it('searches across venue name and address fields', function (string $searchTerm): void {
@@ -159,7 +171,10 @@ describe('venues table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSeeHtml('data-test="venues-empty-state"')
+            ->assertSee(__('venues.empty_title'))
+            ->assertSee(__('venues.empty_description'))
+            ->assertDontSee('No records found.');
     });
 
     it('forbids users without administrative access', function (string $actor): void {

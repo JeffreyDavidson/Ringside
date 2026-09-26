@@ -28,6 +28,7 @@ class PreviousTagTeams extends DataTableComponent
 
     protected string $databaseTableName = 'tag_teams_managers';
 
+    #[\Override]
     protected string $resourceName = 'tag teams';
 
     /** @return ManagerAssignmentBuilder<TagTeamManager> */

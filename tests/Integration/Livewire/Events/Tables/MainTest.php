@@ -40,6 +40,8 @@ describe('events table', function (): void {
             ->assertSeeHtml('placeholder="Search events"')
             ->assertSeeHtml('data-test="events-table"')
             ->assertSeeHtml('data-test="events-status-filters"')
+            ->assertSeeHtml('data-test="events-venue-filter"')
+            ->assertSeeHtml('data-test="table-toolbar"')
             ->assertSeeHtml('aria-label="Actions for Future Showcase"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Future Showcase')
@@ -50,6 +52,14 @@ describe('events table', function (): void {
             ->assertSee($venue->name)
             ->assertSee(__('events.no_venue'))
             ->assertDontSee('Deleted Showcase');
+    });
+
+    it('renders the shared empty state when there are no events', function (): void {
+        livewire(Main::class)
+            ->assertSeeHtml('data-test="events-empty-state"')
+            ->assertSee(__('events.empty_title'))
+            ->assertSee(__('events.empty_description'))
+            ->assertDontSee('No records found.');
     });
 
     it('searches events by name and clears the search', function (): void {

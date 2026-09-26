@@ -15,12 +15,7 @@ class PromotionsController extends Controller
      */
     public function index(): View
     {
-        return view('promotions.index', [
-            'promotions' => Promotion::query()
-                ->withCount('users')
-                ->orderBy('name')
-                ->get(),
-        ]);
+        return view('promotions.index');
     }
 
     public function show(Promotion $promotion): View
