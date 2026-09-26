@@ -18,24 +18,21 @@ use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Base\Tables\BaseRosterTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Concerns\ExecutesBusinessActions;
-use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-/** @extends BaseTable<Wrestler> */
-class Main extends BaseTable
+/** @extends BaseRosterTable<Wrestler> */
+class Main extends BaseRosterTable
 {
     use ExecutesBusinessActions;
-    use ExecutesRosterActions;
 
     #[\Override]
     protected bool $showActionColumn = true;
@@ -48,6 +45,18 @@ class Main extends BaseTable
 
     #[\Override]
     protected string $resourceName = 'wrestlers';
+
+    protected function findRosterModel(RosterLifecycleAction $lifecycleAction, int $modelId): Wrestler
+    {
+        return $lifecycleAction->usesTrashedModel()
+            ? Wrestler::onlyTrashed()->findOrFail($modelId)
+            : Wrestler::findOrFail($modelId);
+    }
+
+    protected function rosterEntityType(): RosterEntityType
+    {
+        return RosterEntityType::Wrestler;
+    }
 
     /** @return WrestlerBuilder<Wrestler> */
     public function builder(): WrestlerBuilder
@@ -124,7 +133,7 @@ class Main extends BaseTable
      */
     public function restore(int $wrestlerId, RestoreAction $restoreAction): void
     {
-        if ($this->executeWrestlerAction(RosterLifecycleAction::Restore, $wrestlerId, fn (Wrestler $wrestler) => $restoreAction->handle($wrestler))) {
+        if ($this->executeRosterLifecycleAction(RosterLifecycleAction::Restore, $wrestlerId, fn (Wrestler $wrestler) => $restoreAction->handle($wrestler))) {
             $this->redirectRoute('wrestlers.index');
         }
     }
@@ -162,7 +171,7 @@ class Main extends BaseTable
     ): void {
         $lifecycleAction = RosterLifecycleAction::from($action);
 
-        $successful = $this->executeWrestlerAction($lifecycleAction, $wrestlerId, match ($lifecycleAction) {
+        $successful = $this->executeRosterLifecycleAction($lifecycleAction, $wrestlerId, match ($lifecycleAction) {
             RosterLifecycleAction::Employ => fn (Wrestler $wrestler) => $employAction->handle($wrestler),
             RosterLifecycleAction::Release => fn (Wrestler $wrestler) => $releaseAction->handle($wrestler),
             RosterLifecycleAction::Retire => fn (Wrestler $wrestler) => $retireAction->handle($wrestler),
@@ -177,25 +186,5 @@ class Main extends BaseTable
         if ($successful && $lifecycleAction === RosterLifecycleAction::Restore) {
             $this->redirectRoute('wrestlers.index');
         }
-    }
-
-    /** @param Closure(Wrestler): void $action */
-    private function executeWrestlerAction(RosterLifecycleAction $lifecycleAction, int $wrestlerId, Closure $action): bool
-    {
-        $wrestler = $lifecycleAction->usesTrashedModel()
-            ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
-            : Wrestler::findOrFail($wrestlerId);
-
-        return match ($lifecycleAction) {
-            RosterLifecycleAction::Employ,
-            RosterLifecycleAction::Release,
-            RosterLifecycleAction::Retire,
-            RosterLifecycleAction::Unretire,
-            RosterLifecycleAction::Suspend,
-            RosterLifecycleAction::Reinstate,
-            RosterLifecycleAction::Injure,
-            RosterLifecycleAction::ClearFromInjury,
-            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => $action($wrestler)),
-        };
     }
 }

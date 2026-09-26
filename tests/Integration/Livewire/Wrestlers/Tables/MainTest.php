@@ -159,6 +159,21 @@ describe('wrestlers table', function (): void {
         expect(freshModel($wrestler)->status)->toBe(EmploymentStatus::Retired);
     });
 
+    it('restores a deleted wrestler and redirects to the index', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->trashed()->create();
+        $component = livewire(Main::class);
+
+        // Act
+        $component->call('restore', $wrestler->id);
+
+        // Assert
+        $component
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('wrestlers.index');
+        expect(Wrestler::find($wrestler->id))->not->toBeNull();
+    });
+
     it('forbids users without wrestler access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {
