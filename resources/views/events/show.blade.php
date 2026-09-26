@@ -14,5 +14,5 @@
         </div>
     @endcan
 
-    <livewire:matches.tables.matches-table :eventId="$event->id" />
+    <livewire:matches.tables.matches-table :eventId="$event->id" defer.bundle />
 </x-layouts.show-page>

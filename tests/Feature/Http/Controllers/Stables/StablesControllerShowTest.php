@@ -34,6 +34,7 @@ describe('Stables Controller', function () {
             ->assertSee($this->stable->name)
             ->assertSee('Status')
             ->assertViewHas('stable', $this->stable)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)
             ->assertSeeLivewire(PreviousManagers::class);

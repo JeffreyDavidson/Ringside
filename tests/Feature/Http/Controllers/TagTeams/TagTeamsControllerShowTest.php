@@ -34,6 +34,7 @@ describe('TagTeams Controller', function () {
             ->assertSee($this->tagTeam->name)
             ->assertSee('Status')
             ->assertViewHas('tagTeam', $this->tagTeam)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
             ->assertSeeLivewire(PreviousWrestlers::class)

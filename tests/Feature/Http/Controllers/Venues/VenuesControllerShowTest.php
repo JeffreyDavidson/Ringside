@@ -30,6 +30,7 @@ describe('Venues Controller', function () {
             ->assertSee($this->venue->name)
             ->assertSee('Address')
             ->assertViewHas('venue', $this->venue)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousEvents::class);
     });
 

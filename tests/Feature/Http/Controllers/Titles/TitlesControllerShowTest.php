@@ -32,6 +32,7 @@ describe('Titles Controller', function () {
             ->assertSee('Current Champion')
             ->assertSee('Vacant')
             ->assertViewHas('title', $this->title)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class);
     });
 

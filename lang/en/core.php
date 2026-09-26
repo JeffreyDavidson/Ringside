@@ -8,6 +8,7 @@ return [
     'clear_search' => 'Clear search',
     'clear_filters' => 'Clear filters',
     'full_name' => 'Full Name',
+    'loading_form' => 'Loading form…',
     'loading_table' => 'Loading table data…',
     'no_records_description' => 'Records will appear here once they have been added.',
     'no_records_found' => 'No records found.',

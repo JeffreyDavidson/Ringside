@@ -165,6 +165,12 @@ class Manage extends Component
         ]);
     }
 
+    /** @param array<string, mixed> $params */
+    public function placeholder(array $params = []): View
+    {
+        return view('livewire.promotions.members.loading-placeholder');
+    }
+
     private function promotion(): Promotion
     {
         return Promotion::query()->findOrFail($this->promotionId);

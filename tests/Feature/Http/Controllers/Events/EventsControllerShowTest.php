@@ -31,6 +31,7 @@ describe('Events Controller', function () {
             ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSee($this->event->name)
             ->assertSee('Status')
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(MatchesTable::class);
     });
 
