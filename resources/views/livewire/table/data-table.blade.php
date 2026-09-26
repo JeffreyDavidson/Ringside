@@ -36,7 +36,22 @@
         </x-tables.toolbar>
 
         @if ($rows->isNotEmpty())
-            <div class="overflow-x-auto">
+            <p
+                id="{{ $this->resourceName }}-table-scroll-hint"
+                class="border-ringside-line text-ringside-muted flex items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden"
+            >
+                {{ __('core.table_scroll_hint') }}
+                <x-heroicon-o-arrow-right class="size-4 shrink-0" aria-hidden="true" />
+            </p>
+
+            <div
+                data-test="resource-table-scroll"
+                role="region"
+                tabindex="0"
+                aria-label="{{ __('core.table_results_region') }}"
+                aria-describedby="{{ $this->resourceName }}-table-scroll-hint"
+                class="focus-visible:outline-ringside-ink overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+            >
                 <table class="w-full min-w-[40rem] table-auto border-collapse text-left text-sm">
                     <thead>
                         <tr>
