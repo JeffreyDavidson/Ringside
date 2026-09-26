@@ -33,6 +33,8 @@ describe('stables table', function (): void {
             ->assertSee(__('stables.activation_date'))
             ->assertSeeHtml('id="stables-date-from"')
             ->assertSeeHtml('id="stables-date-to"')
+            ->assertSeeHtml('wire:model.live="filterValues.activation_date.minDate"')
+            ->assertSeeHtml('wire:model.live="filterValues.activation_date.maxDate"')
             ->assertSeeHtml('aria-label="Actions for The Four Horsemen"')
             ->assertSeeHtml('role="group"')
             ->assertSee('The Four Horsemen')

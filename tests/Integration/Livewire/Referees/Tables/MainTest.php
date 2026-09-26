@@ -33,6 +33,8 @@ describe('referees table', function (): void {
             ->assertSee('Filter referees by status')
             ->assertDontSee('All Referees')
             ->assertSeeHtml('placeholder="Search referees"')
+            ->assertSeeHtml('wire:model.live="filterValues.employment_date.minDate"')
+            ->assertSeeHtml('wire:model.live="filterValues.employment_date.maxDate"')
             ->assertSeeHtml('aria-label="Actions for Earl Hebner"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Earl Hebner')

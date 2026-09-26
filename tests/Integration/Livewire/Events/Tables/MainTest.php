@@ -41,6 +41,8 @@ describe('events table', function (): void {
             ->assertSeeHtml('data-test="events-table"')
             ->assertSeeHtml('data-test="events-status-filters"')
             ->assertSeeHtml('data-test="events-venue-filter"')
+            ->assertSeeHtml('wire:model.live="filterValues.event_dates.minDate"')
+            ->assertSeeHtml('wire:model.live="filterValues.event_dates.maxDate"')
             ->assertSeeHtml('data-test="table-toolbar"')
             ->assertSeeHtml('aria-label="Actions for Future Showcase"')
             ->assertSeeHtml('role="group"')

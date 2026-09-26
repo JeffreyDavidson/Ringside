@@ -49,35 +49,13 @@
                     />
                 </summary>
                 <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
-                    <fieldset class="grid gap-2">
-                        <legend class="text-ringside-muted text-xs font-medium">{{ __('events.date_range') }}</legend>
-                        <div data-test="events-date-range-grid" class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
-                            <div class="grid gap-1">
-                                <label
-                                    for="events-date-from"
-                                    class="text-ringside-muted text-xs"
-                                >{{ __('events.from') }}</label>
-                                <input
-                                    id="events-date-from"
-                                    type="date"
-                                    wire:model.live="filterValues.event_dates.minDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                            <div class="grid gap-1">
-                                <label
-                                    for="events-date-to"
-                                    class="text-ringside-muted text-xs"
-                                >{{ __('events.to') }}</label>
-                                <input
-                                    id="events-date-to"
-                                    type="date"
-                                    wire:model.live="filterValues.event_dates.maxDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                        </div>
-                    </fieldset>
+                    <x-tables.date-range-filter
+                        id-prefix="events"
+                        filter-key="event_dates"
+                        :label="__('events.date_range')"
+                        :from-label="__('events.from')"
+                        :to-label="__('events.to')"
+                    />
                     <button
                         type="button"
                         wire:click="clearFilters"

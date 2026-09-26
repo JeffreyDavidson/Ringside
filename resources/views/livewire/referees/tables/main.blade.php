@@ -34,38 +34,13 @@
                     />
                 </summary>
                 <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
-                    <fieldset class="grid gap-2">
-                        <legend class="text-ringside-muted text-xs font-medium">
-                            {{ __('referees.employment_date') }}
-                        </legend>
-                        <div
-                            data-test="referees-date-range-grid"
-                            class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2"
-                        >
-                            <div class="grid gap-1">
-                                <label for="referees-date-from" class="text-ringside-muted text-xs">
-                                    {{ __('referees.from') }}
-                                </label>
-                                <input
-                                    id="referees-date-from"
-                                    type="date"
-                                    wire:model.live="filterValues.employment_date.minDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                            <div class="grid gap-1">
-                                <label for="referees-date-to" class="text-ringside-muted text-xs">
-                                    {{ __('referees.to') }}
-                                </label>
-                                <input
-                                    id="referees-date-to"
-                                    type="date"
-                                    wire:model.live="filterValues.employment_date.maxDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                        </div>
-                    </fieldset>
+                    <x-tables.date-range-filter
+                        id-prefix="referees"
+                        filter-key="employment_date"
+                        :label="__('referees.employment_date')"
+                        :from-label="__('referees.from')"
+                        :to-label="__('referees.to')"
+                    />
                     <button
                         type="button"
                         wire:click="clearFilters"
