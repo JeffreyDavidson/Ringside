@@ -202,6 +202,13 @@ abstract class DataTableComponent extends Component
     /** @param array<string, mixed> $params */
     public function placeholder(array $params = []): View
     {
+        $isRelationshipTable = collect(array_keys($params))
+            ->contains(fn (string $parameter): bool => str_ends_with($parameter, 'Id'));
+
+        if ($isRelationshipTable) {
+            return view('livewire.table.relationship-loading-placeholder');
+        }
+
         return view('livewire.table.loading-placeholder');
     }
 

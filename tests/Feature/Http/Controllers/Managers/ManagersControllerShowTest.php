@@ -32,6 +32,7 @@ describe('Managers Controller', function () {
             ->assertSee($this->manager->full_name)
             ->assertSee('Status')
             ->assertViewHas('manager', $this->manager)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)
             ->assertSeeLivewire(PreviousStables::class);

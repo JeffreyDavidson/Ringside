@@ -21,7 +21,7 @@ it('shows a promotion detail page and its member manager to platform administrat
         ->assertOk()
         ->assertViewIs('promotions.show')
         ->assertSee('Ringside Wrestling')
-        ->assertSee('No users are assigned to this promotion.')
+        ->assertSeeHtml('data-test="promotion-members-loading-placeholder"')
         ->assertSeeLivewire(Manage::class);
 });
 

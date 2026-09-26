@@ -29,6 +29,7 @@ describe('Referees Controller', function () {
             ->assertSee($this->referee->full_name)
             ->assertSee('Status')
             ->assertViewHas('referee', $this->referee)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousMatches::class);
     });
 

@@ -7,5 +7,5 @@
         </x-card.general-info>
     </x-slot:sidebar>
 
-    <livewire:promotions.members.manage :promotion-id="$promotion->id" />
+    <livewire:promotions.members.manage :promotion-id="$promotion->id" defer.bundle />
 </x-layouts.show-page>

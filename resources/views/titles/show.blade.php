@@ -3,5 +3,5 @@
         <x-titles.show.general-info :$title />
     </x-slot:sidebar>
 
-    <livewire:titles.tables.previous-title-championships :titleId="$title->id" />
+    <livewire:titles.tables.previous-title-championships :titleId="$title->id" defer.bundle />
 </x-layouts.show-page>
