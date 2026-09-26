@@ -51,7 +51,7 @@
                 <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
                     <fieldset class="grid gap-2">
                         <legend class="text-ringside-muted text-xs font-medium">{{ __('events.date_range') }}</legend>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div data-test="events-date-range-grid" class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
                             <div class="grid gap-1">
                                 <label
                                     for="events-date-from"
