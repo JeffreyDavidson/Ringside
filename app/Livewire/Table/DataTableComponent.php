@@ -199,6 +199,12 @@ abstract class DataTableComponent extends Component
         ]);
     }
 
+    /** @param array<string, mixed> $params */
+    public function placeholder(array $params = []): View
+    {
+        return view('livewire.table.loading-placeholder');
+    }
+
     /**
      * @return array<int, Column>
      */
