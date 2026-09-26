@@ -6,10 +6,12 @@ use App\Enums\Titles\TitleLifecycleTransition;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -36,13 +38,32 @@ describe('titles table', function (): void {
         $component
             ->assertSuccessful()
             ->assertSee('Add Title')
+            ->assertSeeHtml('data-test="titles-status-filters"')
+            ->assertSeeHtml('data-test="titles-table"')
+            ->assertDontSee('All Titles')
             ->assertSeeHtml('placeholder="Search titles"')
+            ->assertSee(__('titles.activation_date'))
+            ->assertSeeHtml('id="titles-date-from"')
             ->assertSeeHtml('aria-label="Actions for World Title"')
             ->assertSeeHtml('role="group"')
             ->assertSee($title->name)
             ->assertSee('Current Champion')
             ->assertSee(TitleStatus::Active->label())
             ->assertSee($champion->name);
+    });
+
+    it('renders the championship empty state when no titles exist', function (): void {
+        // Arrange
+        $component = livewire(Main::class);
+
+        // Act
+        $component->assertSuccessful();
+
+        // Assert
+        $component
+            ->assertSee(__('titles.empty_title'))
+            ->assertSee(__('titles.empty_description'))
+            ->assertSeeHtml('data-test="titles-empty-state"');
     });
 
     it('filters titles by name and clears the search', function (): void {
@@ -111,6 +132,50 @@ describe('titles table', function (): void {
             ->assertSee($visibleTitle->name)
             ->assertDontSee($hiddenTitle->name);
     })->with(TitleType::cases());
+
+    it('filters titles by activation date range', function (): void {
+        // Arrange
+        Title::factory()
+            ->has(ActivityPeriod::factory()->started(Date::parse('2026-01-15')), 'activityPeriods')
+            ->create(['name' => 'January Championship']);
+        Title::factory()
+            ->has(ActivityPeriod::factory()->started(Date::parse('2026-02-15')), 'activityPeriods')
+            ->create(['name' => 'February Championship']);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('filterValues.activation_date', [
+            'minDate' => '2026-01-01',
+            'maxDate' => '2026-01-31',
+        ]);
+
+        // Assert
+        $component
+            ->assertSee('January Championship')
+            ->assertDontSee('February Championship');
+    });
+
+    it('clears title search and all filters together', function (): void {
+        // Arrange
+        $component = livewire(Main::class)
+            ->set('search', 'Championship')
+            ->set('filterValues.status', TitleStatus::Active->value)
+            ->set('filterValues.type', TitleType::TagTeam->value)
+            ->set('filterValues.activation_date', [
+                'minDate' => '2026-01-01',
+                'maxDate' => '2026-12-31',
+            ]);
+
+        // Act
+        $component->call('clearFilters');
+
+        // Assert
+        $component
+            ->assertSet('search', '')
+            ->assertSet('filterValues.status', '')
+            ->assertSet('filterValues.type', '')
+            ->assertSet('filterValues.activation_date', []);
+    });
 
     it('remains on the table when a lifecycle action is rejected', function (TitleLifecycleTransition $transition): void {
         // Arrange

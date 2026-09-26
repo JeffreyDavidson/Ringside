@@ -23,6 +23,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Title> */
@@ -55,6 +56,25 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Title::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.titles.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+            'beforeWrapperView' => $this->beforeWrapperView,
+        ]);
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->filterValues['status'] = '';
+        $this->filterValues['type'] = '';
+        $this->filterValues['activation_date'] = [];
+        $this->resetPage();
     }
 
     /** @return array<int, Column> */
