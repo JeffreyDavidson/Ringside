@@ -38,7 +38,10 @@
                         <legend class="text-ringside-muted text-xs font-medium">
                             {{ __('managers.employment_date') }}
                         </legend>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div
+                            data-test="managers-date-range-grid"
+                            class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2"
+                        >
                             <div class="grid gap-1">
                                 <label for="managers-date-from" class="text-ringside-muted text-xs">
                                     {{ __('managers.from') }}

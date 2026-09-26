@@ -36,7 +36,7 @@
                         <legend class="text-ringside-muted text-xs font-medium">
                             {{ __('stables.activation_date') }}
                         </legend>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div data-test="stables-date-range-grid" class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
                             <div class="grid gap-1">
                                 <label
                                     for="stables-date-from"
