@@ -12,6 +12,8 @@ use function Pest\Livewire\livewire;
 
 describe('data table component', function (): void {
     test('components can declare additional columns through the base extension point', function (): void {
+        User::factory()->create();
+
         // Act
         $component = livewire(TestDataTableComponent::class);
 
@@ -165,7 +167,9 @@ describe('data table filtering', function (): void {
 
         // Assert
         $component
-            ->assertSee('No results for “no matching record”.')
+            ->assertSeeHtml('data-test="records-empty-state"')
+            ->assertSee(__('core.no_results_title'))
+            ->assertSee(__('core.no_results_description'))
             ->assertSee('Clear search')
             ->assertDontSee('Searchable User');
 

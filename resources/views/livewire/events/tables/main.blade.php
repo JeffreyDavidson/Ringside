@@ -14,15 +14,32 @@
             test-id="events-status-filters"
         />
 
-        <div class="flex flex-wrap items-center justify-between gap-3 p-4">
-            <x-tables.search-field
-                id="events-search"
-                model="search"
-                :value="$search"
-                :label="__('events.search')"
-                :placeholder="__('events.search')"
-                :clear-label="__('events.clear_search')"
-            />
+        <x-tables.toolbar
+            id="events-search"
+            model="search"
+            :value="$search"
+            :label="__('events.search')"
+            :placeholder="__('events.search')"
+            :clear-label="__('events.clear_search')"
+        >
+            <label for="events-venue" class="sr-only">{{ __('events.venue') }}</label>
+            <div class="relative w-full sm:w-auto">
+                <select
+                    id="events-venue"
+                    data-test="events-venue-filter"
+                    wire:model.live="filterValues.venue"
+                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2 sm:w-auto"
+                >
+                    <option value="">{{ __('events.all_venues') }}</option>
+                    @foreach ($this->getVenues as $venueId => $venueName)
+                        <option value="{{ $venueId }}">{{ $venueName }}</option>
+                    @endforeach
+                </select>
+                <x-heroicon-o-chevron-down
+                    class="text-ringside-muted pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2"
+                    aria-hidden="true"
+                />
+            </div>
             <details class="group relative w-full sm:w-auto">
                 <summary class="border-ringside-line text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                     {{ __('events.filters') }}
@@ -32,22 +49,6 @@
                     />
                 </summary>
                 <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
-                    <div class="grid gap-2">
-                        <label
-                            for="events-venue"
-                            class="text-ringside-muted text-xs font-medium"
-                        >{{ __('events.venue') }}</label>
-                        <select
-                            id="events-venue"
-                            wire:model.live="filterValues.venue"
-                            class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full border px-3 text-sm focus-visible:outline-2"
-                        >
-                            <option value="">{{ __('events.all_venues') }}</option>
-                            @foreach ($this->getVenues as $venueId => $venueName)
-                                <option value="{{ $venueId }}">{{ $venueName }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <fieldset class="grid gap-2">
                         <legend class="text-ringside-muted text-xs font-medium">{{ __('events.date_range') }}</legend>
                         <div class="grid grid-cols-2 gap-3">
@@ -92,7 +93,7 @@
                 role="status"
                 class="text-ringside-muted text-xs"
             >{{ __('events.updating') }}</span>
-        </div>
+        </x-tables.toolbar>
 
         @if ($rows->isNotEmpty())
             <table class="w-full table-fixed border-collapse text-left text-sm" data-test="events-table">

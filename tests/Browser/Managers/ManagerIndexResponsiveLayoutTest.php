@@ -34,3 +34,15 @@ test('manager index filters and table fit narrow and wide viewports', function (
         ->assertNoJavascriptErrors()
         ->assertNoAccessibilityIssues();
 });
+
+test('manager empty-state help uses the available width on desktop', function (): void {
+    $this->actingAs(administrator());
+
+    $page = visit(route('managers.index'));
+    $page->resize(1440, 900);
+
+    $page
+        ->assertSee('Add a manager to build your roster and represent your talent.')
+        ->assertScript('getComputedStyle(document.querySelector("[data-test=managers-empty-state] p")).maxWidth === "none"')
+        ->assertScript('document.querySelector("[data-test=managers-empty-state] p").getBoundingClientRect().height === parseFloat(getComputedStyle(document.querySelector("[data-test=managers-empty-state] p")).lineHeight)');
+});

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Venues\Tables\Main;
+use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -14,6 +15,7 @@ beforeEach(function (): void {
 describe('table configuration', function (): void {
     it('configures an index table for its resource', function (): void {
         // Act
+        Venue::factory()->create();
         $table = livewire(Main::class);
 
         // Assert

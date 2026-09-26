@@ -12,5 +12,3 @@
         @endcan
     </x-slot:actions>
 </x-layouts.table-header>
-
-<x-tables.meta-data />

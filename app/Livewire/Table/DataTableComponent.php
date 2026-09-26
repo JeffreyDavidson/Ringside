@@ -40,6 +40,14 @@ abstract class DataTableComponent extends Component
 
     protected string $searchPlaceholder = 'Search...';
 
+    protected string $resourceName = 'records';
+
+    protected ?string $emptyStateTitle = null;
+
+    protected ?string $emptyStateDescription = null;
+
+    protected string $emptyStateIcon = 'heroicon-o-inbox';
+
     /** @var array<string> */
     protected array $additionalSelects = [];
 
@@ -132,6 +140,17 @@ abstract class DataTableComponent extends Component
         $this->resetPage();
     }
 
+    public function clearFilters(): void
+    {
+        $this->search = '';
+
+        foreach ($this->filters() as $filter) {
+            $this->filterValues[$filter->getKey()] = $filter->getDefaultValue();
+        }
+
+        $this->resetPage();
+    }
+
     public function updatedPerPage(): void
     {
         if (! in_array($this->perPage, $this->perPageAccepted, true)) {
@@ -160,10 +179,20 @@ abstract class DataTableComponent extends Component
 
     public function render(): View
     {
+        $filters = $this->filters();
+        $hasAppliedFilters = collect($filters)->contains(
+            fn (Filter $filter): bool => ($this->filterValues[$filter->getKey()] ?? $filter->getDefaultValue()) !== $filter->getDefaultValue(),
+        );
+
         return view('livewire.table.data-table', [
             'columns' => $this->getColumns(),
             'rows' => $this->getRows(),
-            'filters' => $this->filters(),
+            'filters' => $filters,
+            'hasActiveFilters' => $this->search !== '' || $hasAppliedFilters,
+            'hasAppliedFilters' => $hasAppliedFilters,
+            'emptyStateTitle' => $this->emptyStateTitle,
+            'emptyStateDescription' => $this->emptyStateDescription,
+            'emptyStateIcon' => $this->emptyStateIcon,
             'perPageOptions' => $this->perPageAccepted,
             'searchPlaceholder' => $this->searchPlaceholder,
             'beforeWrapperView' => $this->beforeWrapperView,

@@ -36,10 +36,12 @@ test('event index filters and table fit a narrow viewport', function (): void {
     $page
         ->assertSee('Summer Showdown')
         ->assertSee('Riverside Hall')
+        ->assertScript('document.querySelector("#events-venue").closest("[data-test=table-toolbar]") !== null')
         ->assertVisible('#events-status')
+        ->assertVisible('#events-venue')
+        ->assertScript('document.querySelector("#events-venue").closest("details") === null')
         ->assertScript('document.querySelector("[data-test=events-table]").getBoundingClientRect().right <= innerWidth')
         ->click('Filters')
-        ->assertVisible('#events-venue')
         ->assertVisible('#events-date-from')
         ->assertVisible('#events-date-to')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
