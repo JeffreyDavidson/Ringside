@@ -25,6 +25,7 @@ class PreviousEvents extends DataTableComponent
 
     protected string $databaseTableName = 'events';
 
+    #[\Override]
     protected string $resourceName = 'events';
 
     /**

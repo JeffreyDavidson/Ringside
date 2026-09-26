@@ -79,7 +79,7 @@
                                     {{ !$loop->last ? 'border-ringside-line border-e' : '' }}"
                                     >
                                         @if ($column->isHtml())
-                                            {!! $column->resolveValue($row) !!}
+                                            {{ $column->resolveHtmlValue($row) }}
                                         @else
                                             {{ $column->resolveValue($row) }}
                                         @endif

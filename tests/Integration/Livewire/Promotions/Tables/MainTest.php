@@ -47,3 +47,15 @@ it('renders the shared empty state when no promotions exist', function (): void 
         ->assertSee(__('promotions.empty_title'))
         ->assertSee(__('promotions.empty_description'));
 });
+
+it('escapes promotion names while rendering trusted table links', function (): void {
+    $promotion = Promotion::factory()->create([
+        'name' => '<img src=x onerror=alert(1)>',
+    ]);
+
+    livewire(Main::class)
+        ->assertSeeHtml('&lt;img src=x onerror=alert(1)&gt;')
+        ->assertDontSeeHtml('<img src=x onerror=alert(1)>')
+        ->assertSeeHtml('<a')
+        ->assertSeeHtml('href="'.route('promotions.show', $promotion).'"');
+});
