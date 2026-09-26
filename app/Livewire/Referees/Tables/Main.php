@@ -82,14 +82,6 @@ class Main extends BaseRosterTable
         ]);
     }
 
-    public function clearFilters(): void
-    {
-        $this->search = '';
-        $this->filterValues['status'] = '';
-        $this->filterValues['employment_date'] = [];
-        $this->resetPage();
-    }
-
     /** @return array<int, Column> */
     public function columns(): array
     {
