@@ -9,23 +9,10 @@
 ])
 
 @php
-    // Extract name from wire:model if not provided (Flux pattern)
-    $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
-    if ($fieldName !== null && ! is_string($fieldName)) {
-        throw new \InvalidArgumentException('Form field names must be strings.');
-    }
-    if ($fieldName && str_contains($fieldName, '=')) {
-        $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
-    }
-
-    // Generate ID
-    $inputId = $attributes->get('id', $fieldName);
-    $fieldErrorId = $inputId.'-error';
-    $describedBy = collect(preg_split('/\s+/', trim((string) $attributes->get('aria-describedby'))))
-        ->merge($fieldName && $errors->has($fieldName) ? [$fieldErrorId] : [])
-        ->filter()
-        ->unique()
-        ->implode(' ');
+    $field = \App\View\Forms\FormFieldContext::from($name, $attributes, $errors);
+    $fieldName = $field->name;
+    $inputId = $field->id;
+    $describedBy = $field->describedBy;
 
     // Build input classes matching .kt-input specifications
     $inputClasses = collect([
@@ -61,7 +48,7 @@
 
 @if ($appearance === 'ringside' && $type === 'password')
     <div class="relative">
-        <input {{ $inputAttributes->merge(['type' => 'password', 'name' => $fieldName, 'id' => $inputId, 'class' => $inputClasses, 'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null, 'aria-describedby' => $describedBy ?: null]) }} />
+        <input {{ $inputAttributes->merge(['type' => 'password', 'name' => $fieldName, 'id' => $inputId, 'class' => $inputClasses, 'aria-invalid' => $field->hasError ? 'true' : null, 'aria-describedby' => $describedBy ?: null]) }} />
         <button
             type="button"
             class="{{ $toggleClasses }}"
@@ -94,7 +81,7 @@
                             'name' => $fieldName,
                             'id' => $inputId,
                             'class' => $inputClasses,
-                            'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                            'aria-invalid' => $field->hasError ? 'true' : null,
                             'aria-describedby' => $describedBy ?: null,
                         ])
                     }}
@@ -123,7 +110,7 @@
                     'name' => $fieldName,
                     'id' => $inputId,
                     'class' => $inputClasses,
-                    'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                    'aria-invalid' => $field->hasError ? 'true' : null,
                     'aria-describedby' => $describedBy ?: null,
                 ])
             }} />
@@ -167,7 +154,7 @@
                 'name' => $fieldName,
                 'id' => $inputId,
                 'class' => $inputClasses,
-                'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                'aria-invalid' => $field->hasError ? 'true' : null,
                 'aria-describedby' => $describedBy ?: null,
             ])
         }} />

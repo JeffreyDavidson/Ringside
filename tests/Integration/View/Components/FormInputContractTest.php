@@ -23,26 +23,41 @@ it('derives field names from Livewire bindings and renders validation errors', f
         ->toContain('A name is required.');
 })->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
 
-it('preserves existing descriptions when associating a validation error', function (): void {
+it('uses custom IDs for labels and validation descriptions', function (string $component): void {
     $errors = new ViewErrorBag()->put('default', new MessageBag(['form.name' => 'A name is required.']));
     view()->share('errors', $errors);
 
-    $html = Blade::render('<x-form.input wire:model="form.name" label="Name" aria-describedby="name-help" />');
+    $html = Blade::render('<x-'.$component.' wire:model="form.name" id="custom-name" label="Name" />');
+
+    expect($html)
+        ->toContain('id="custom-name"')
+        ->toContain('for="custom-name"')
+        ->toContain('aria-describedby="custom-name-error"')
+        ->toContain('id="custom-name-error"');
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
+
+it('preserves existing descriptions when associating a validation error', function (string $component): void {
+    $errors = new ViewErrorBag()->put('default', new MessageBag(['form.name' => 'A name is required.']));
+    view()->share('errors', $errors);
+
+    $html = Blade::render('<x-'.$component.' wire:model="form.name" label="Name" aria-describedby="name-help" />');
 
     expect($html)->toContain('aria-describedby="name-help form.name-error"');
-});
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
 
-it('does not repeat a validation error in existing descriptions', function (): void {
+it('does not repeat a validation error in existing descriptions', function (string $component): void {
     $errors = new ViewErrorBag()->put('default', new MessageBag(['form.name' => 'A name is required.']));
     view()->share('errors', $errors);
 
-    $html = Blade::render('<x-form.input wire:model="form.name" label="Name" aria-describedby="name-help form.name-error" />');
+    $html = Blade::render('<x-'.$component.' wire:model="form.name" label="Name" aria-describedby="name-help form.name-error" />');
 
     expect($html)->toContain('aria-describedby="name-help form.name-error"')
         ->not->toContain('aria-describedby="name-help form.name-error form.name-error"');
-});
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
 
 it('rejects non-string field names', function (string $component): void {
+    view()->share('errors', new ViewErrorBag);
+
     expect(fn (): string => Blade::render('<x-'.$component.' :name="[1, 2]" />'))
         ->toThrow(ViewException::class, 'Form field names must be strings.');
 })->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
