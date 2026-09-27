@@ -24,6 +24,8 @@ describe('authorized user form interactions', function () {
         $modal
             ->assertPropertyWired('form.first_name')
             ->assertPropertyWired('form.last_name')
+            ->assertSee('First Name')
+            ->assertSee('Last Name')
             ->assertPropertyWired('form.email')
             ->assertPropertyWired('form.role')
             ->assertPropertyWired('form.password')

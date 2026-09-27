@@ -22,7 +22,9 @@ describe('authorized manager form interactions', function () {
         $modal
             ->assertPropertyWired('form.first_name')
             ->assertPropertyWired('form.last_name')
-            ->assertPropertyWired('form.employment_date');
+            ->assertPropertyWired('form.employment_date')
+            ->assertSee('First Name')
+            ->assertSee('Last Name');
     });
 
     it('opens an empty form for creating a manager', function () {
