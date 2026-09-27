@@ -21,8 +21,8 @@ class CreateAction
         return DB::transaction(function () use ($wrestlerData): Wrestler {
             $wrestler = Wrestler::query()->create([
                 'name' => $wrestlerData->name,
-                'height' => $wrestlerData->height->toInches(),
-                'weight' => $wrestlerData->weight->toPounds(),
+                'height' => $wrestlerData->height,
+                'weight' => $wrestlerData->weight,
                 'hometown' => $wrestlerData->hometown,
                 'signature_move' => $wrestlerData->signature_move,
             ]);
