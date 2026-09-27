@@ -35,8 +35,3 @@ it('does not assign records during a dry run', function (): void {
     expect($unassignedCount)->toBe(1)
         ->and($unownedWrestler->promotion_id)->toBeNull();
 });
-test('example', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
-});
