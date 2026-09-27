@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
-use App\Data\Stables\StableMembershipData;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +20,7 @@ class MergeStablesAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected AddStableMembersAction $addStableMembersAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected StableMembershipService $membershipService,
         protected StableRestructuringEligibility $eligibility,
     ) {}
 
@@ -55,10 +56,7 @@ class MergeStablesAction
 
             $this->eligibility->ensureCanMerge($lockedPrimaryStable, $lockedSecondaryStable);
 
-            $members = new StableMembershipData(
-                wrestlers: $lockedSecondaryStable->currentWrestlers,
-                tagTeams: $lockedSecondaryStable->currentTagTeams,
-            );
+            $members = $this->membershipService->currentMembers($lockedSecondaryStable);
 
             $this->eligibility->ensureMergeMembersAvailable($members);
 
