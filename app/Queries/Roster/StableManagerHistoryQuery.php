@@ -93,7 +93,7 @@ final class StableManagerHistoryQuery
 
     private static function wrestlerAssociation(QueryBuilder $query): QueryBuilder
     {
-        return $query
+        $query
             ->selectRaw('1')
             ->from('wrestlers_managers')
             ->join(
@@ -101,17 +101,15 @@ final class StableManagerHistoryQuery
                 'stables_wrestlers.wrestler_id',
                 '=',
                 'wrestlers_managers.wrestler_id',
-            )
-            ->where(function (QueryBuilder $membershipEndQuery): void {
-                $membershipEndQuery
-                    ->whereNull('stables_wrestlers.left_at')
-                    ->orWhereColumn('wrestlers_managers.hired_at', '<=', 'stables_wrestlers.left_at');
-            })
-            ->where(function (QueryBuilder $assignmentEndQuery): void {
-                $assignmentEndQuery
-                    ->whereNull('wrestlers_managers.fired_at')
-                    ->orWhereColumn('stables_wrestlers.joined_at', '<=', 'wrestlers_managers.fired_at');
-            });
+            );
+
+        return self::whereAssociationPeriodsOverlap(
+            $query,
+            'stables_wrestlers.joined_at',
+            'stables_wrestlers.left_at',
+            'wrestlers_managers.hired_at',
+            'wrestlers_managers.fired_at',
+        );
     }
 
     private static function previousTagTeamAssociation(QueryBuilder $query): QueryBuilder
@@ -133,7 +131,7 @@ final class StableManagerHistoryQuery
 
     private static function tagTeamAssociation(QueryBuilder $query): QueryBuilder
     {
-        return $query
+        $query
             ->selectRaw('1')
             ->from('tag_teams_managers')
             ->join(
@@ -141,16 +139,34 @@ final class StableManagerHistoryQuery
                 'stables_tag_teams.tag_team_id',
                 '=',
                 'tag_teams_managers.tag_team_id',
-            )
-            ->where(function (QueryBuilder $membershipEndQuery): void {
+            );
+
+        return self::whereAssociationPeriodsOverlap(
+            $query,
+            'stables_tag_teams.joined_at',
+            'stables_tag_teams.left_at',
+            'tag_teams_managers.hired_at',
+            'tag_teams_managers.fired_at',
+        );
+    }
+
+    private static function whereAssociationPeriodsOverlap(
+        QueryBuilder $query,
+        string $membershipStart,
+        string $membershipEnd,
+        string $assignmentStart,
+        string $assignmentEnd,
+    ): QueryBuilder {
+        return $query
+            ->where(function (QueryBuilder $membershipEndQuery) use ($membershipEnd, $assignmentStart): void {
                 $membershipEndQuery
-                    ->whereNull('stables_tag_teams.left_at')
-                    ->orWhereColumn('tag_teams_managers.hired_at', '<=', 'stables_tag_teams.left_at');
+                    ->whereNull($membershipEnd)
+                    ->orWhereColumn($assignmentStart, '<=', $membershipEnd);
             })
-            ->where(function (QueryBuilder $assignmentEndQuery): void {
+            ->where(function (QueryBuilder $assignmentEndQuery) use ($membershipStart, $assignmentEnd): void {
                 $assignmentEndQuery
-                    ->whereNull('tag_teams_managers.fired_at')
-                    ->orWhereColumn('stables_tag_teams.joined_at', '<=', 'tag_teams_managers.fired_at');
+                    ->whereNull($assignmentEnd)
+                    ->orWhereColumn($membershipStart, '<=', $assignmentEnd);
             });
     }
 }
