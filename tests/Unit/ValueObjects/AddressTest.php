@@ -17,6 +17,19 @@ test('it represents and formats a venue address', function () {
         ]);
 });
 
+test('it constructs from persisted venue address attributes', function () {
+    $address = Address::fromAttributes([
+        'street_address' => '4 Pennsylvania Plaza',
+        'city' => 'New York',
+        'state' => 'New York',
+        'zipcode' => '10001',
+    ]);
+
+    expect($address)->toEqual(
+        new Address('4 Pennsylvania Plaza', 'New York', UnitedStatesState::NewYork, '10001'),
+    );
+});
+
 test('it rejects incomplete address fields', function (string $street, string $city) {
     expect(fn () => new Address($street, $city, UnitedStatesState::NewYork, '10001'))
         ->toThrow(InvalidArgumentException::class);
