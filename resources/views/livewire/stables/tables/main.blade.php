@@ -32,37 +32,13 @@
                     />
                 </summary>
                 <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
-                    <fieldset class="grid gap-2">
-                        <legend class="text-ringside-muted text-xs font-medium">
-                            {{ __('stables.activation_date') }}
-                        </legend>
-                        <div data-test="stables-date-range-grid" class="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
-                            <div class="grid gap-1">
-                                <label
-                                    for="stables-date-from"
-                                    class="text-ringside-muted text-xs"
-                                >{{ __('stables.from') }}</label>
-                                <input
-                                    id="stables-date-from"
-                                    type="date"
-                                    wire:model.live="filterValues.activation_date.minDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                            <div class="grid gap-1">
-                                <label
-                                    for="stables-date-to"
-                                    class="text-ringside-muted text-xs"
-                                >{{ __('stables.to') }}</label>
-                                <input
-                                    id="stables-date-to"
-                                    type="date"
-                                    wire:model.live="filterValues.activation_date.maxDate"
-                                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
-                                />
-                            </div>
-                        </div>
-                    </fieldset>
+                    <x-tables.date-range-filter
+                        id-prefix="stables"
+                        filter-key="activation_date"
+                        :label="__('stables.activation_date')"
+                        :from-label="__('stables.from')"
+                        :to-label="__('stables.to')"
+                    />
                     <button
                         type="button"
                         wire:click="clearFilters"
