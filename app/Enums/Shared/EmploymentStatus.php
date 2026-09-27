@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums\Shared;
 
+use App\Support\Enums\ProvidesFilterOptions;
+
 /**
  * Employment status enum for entities that can be employed.
  *
@@ -13,6 +15,8 @@ namespace App\Enums\Shared;
  */
 enum EmploymentStatus: string
 {
+    use ProvidesFilterOptions;
+
     case Employed = 'employed';
     case FutureEmployment = 'future_employment';
     case Released = 'released';
@@ -39,20 +43,5 @@ enum EmploymentStatus: string
             self::Retired => 'Retired',
             self::Unemployed => 'Unemployed',
         };
-    }
-
-    /** @return array<string, string> */
-    public static function filterOptions(): array
-    {
-        /** @var array<string, string> $statusOptions */
-        $statusOptions = array_combine(
-            array_map(static fn (self $status): string => $status->value, self::cases()),
-            array_map(static fn (self $status): string => $status->label(), self::cases()),
-        );
-
-        return [
-            '' => __('core.all'),
-            ...$statusOptions,
-        ];
     }
 }

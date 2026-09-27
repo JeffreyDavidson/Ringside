@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Enums\Titles;
 
+use App\Support\Enums\ProvidesFilterOptions;
+
 enum TitleStatus: string
 {
+    use ProvidesFilterOptions;
+
     case Undebuted = 'undebuted';          // Title exists, but has never debuted
     case PendingDebut = 'pending_debut';   // Scheduled to debut in the future
     case Active = 'active';                // Currently active and defendable
@@ -32,20 +36,5 @@ enum TitleStatus: string
             self::Inactive => 'Inactive',
             self::Retired => 'Retired',
         };
-    }
-
-    /** @return array<string, string> */
-    public static function filterOptions(): array
-    {
-        /** @var array<string, string> $statusOptions */
-        $statusOptions = array_combine(
-            array_map(static fn (self $status): string => $status->value, self::cases()),
-            array_map(static fn (self $status): string => $status->label(), self::cases()),
-        );
-
-        return [
-            '' => __('core.all'),
-            ...$statusOptions,
-        ];
     }
 }
