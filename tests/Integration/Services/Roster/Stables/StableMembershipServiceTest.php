@@ -35,8 +35,7 @@ test('it returns only current stable members with weighted headcount', function 
     expect($members)->toBeInstanceOf(StableMembershipData::class)
         ->and($wrestlerIds)->toEqualCanonicalizing($currentWrestlers->modelKeys())
         ->and($tagTeamIds)->toBe([$currentTagTeam->id])
-        ->and($members->getTotalMemberCount())->toBe(4)
-        ->and($members->hasMinimumMembers())->toBeTrue();
+        ->and($members->getTotalMemberCount())->toBe(4);
 });
 
 test('it returns empty membership data for a stable without current members', function (): void {
@@ -45,6 +44,5 @@ test('it returns empty membership data for a stable without current members', fu
     $members = resolve(StableMembershipService::class)->currentMembers($stable);
 
     expect($members->isEmpty())->toBeTrue()
-        ->and($members->getTotalMemberCount())->toBe(0)
-        ->and($members->hasMinimumMembers())->toBeFalse();
+        ->and($members->getTotalMemberCount())->toBe(0);
 });

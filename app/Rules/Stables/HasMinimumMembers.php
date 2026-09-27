@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Stables;
 
 use App\Data\Stables\StableMembershipData;
+use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Closure;
@@ -30,8 +31,8 @@ class HasMinimumMembers implements ValidationRule
         $members = new StableMembershipData($this->wrestlers, $this->tagTeams);
         $totalMembersCount = $members->getTotalMemberCount();
 
-        if (! $members->hasMinimumMembers()) {
-            $fail('A stable must have at least '.StableMembershipData::MINIMUM_MEMBER_COUNT." members. Currently adding {$totalMembersCount} members.");
+        if (! StableMembershipRequirements::hasMinimumHeadcount($totalMembersCount)) {
+            $fail('A stable must have at least '.StableMembershipRequirements::MINIMUM_MEMBER_COUNT." members. Currently adding {$totalMembersCount} members.");
         }
     }
 }

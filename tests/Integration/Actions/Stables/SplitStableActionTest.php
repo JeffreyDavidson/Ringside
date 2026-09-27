@@ -8,6 +8,7 @@ use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
@@ -502,8 +503,8 @@ describe('SplitStableAction Integration Tests', function () {
             $refreshedOriginal = freshModel($this->originalStable);
             $originalMemberCount = resolve(StableMembershipService::class)->currentMembers($refreshedOriginal)->getTotalMemberCount();
 
-            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT)
-                ->and($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
+            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipRequirements::MINIMUM_MEMBER_COUNT)
+                ->and($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
         });
 
         test('split validates member employment status', function () {
