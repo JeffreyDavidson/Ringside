@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data\Events;
 
-use App\Enums\Shared\UnitedStatesState;
 use App\ValueObjects\Address;
 
 readonly class VenueData
@@ -21,6 +20,11 @@ readonly class VenueData
         public string $state,
         public string $zipcode,
     ) {
-        $this->address = new Address($street_address, $city, UnitedStatesState::from($state), $zipcode);
+        $this->address = Address::fromAttributes([
+            'street_address' => $street_address,
+            'city' => $city,
+            'state' => $state,
+            'zipcode' => $zipcode,
+        ]);
     }
 }

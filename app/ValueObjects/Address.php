@@ -7,6 +7,7 @@ namespace App\ValueObjects;
 use App\Casts\AddressCast;
 use App\Enums\Shared\UnitedStatesState;
 use Illuminate\Contracts\Database\Eloquent\Castable;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
 readonly class Address implements Castable
@@ -29,6 +30,17 @@ readonly class Address implements Castable
     public function formatted(): string
     {
         return "{$this->streetAddress}, {$this->city}, {$this->state->value} {$this->zipcode}";
+    }
+
+    /** @param array<string, mixed> $attributes */
+    public static function fromAttributes(array $attributes): self
+    {
+        return new self(
+            streetAddress: Arr::string($attributes, 'street_address'),
+            city: Arr::string($attributes, 'city'),
+            state: UnitedStatesState::from(Arr::string($attributes, 'state')),
+            zipcode: Arr::string($attributes, 'zipcode'),
+        );
     }
 
     /**
