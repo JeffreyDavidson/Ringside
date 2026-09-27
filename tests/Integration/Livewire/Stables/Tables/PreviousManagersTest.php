@@ -83,6 +83,44 @@ describe('PreviousManagers query', function (): void {
             $previousWrestlerManager->id,
         ]);
     });
+
+    it('includes associations whose membership and manager periods touch at an endpoint', function (): void {
+        // Arrange
+        $boundary = Date::parse('2024-01-01');
+        $wrestler = Wrestler::factory()->create();
+        $tagTeam = TagTeam::factory()->create();
+        $membershipBoundaryManager = Manager::factory()->create();
+        $assignmentBoundaryManager = Manager::factory()->create();
+
+        $this->stable->wrestlers()->attach($wrestler, [
+            'joined_at' => $boundary->copy()->subMonth(),
+            'left_at' => $boundary,
+        ]);
+        $wrestler->managers()->attach($membershipBoundaryManager, [
+            'hired_at' => $boundary,
+            'fired_at' => $boundary->copy()->addMonth(),
+        ]);
+
+        $this->stable->tagTeams()->attach($tagTeam, [
+            'joined_at' => $boundary,
+            'left_at' => $boundary->copy()->addMonth(),
+        ]);
+        $tagTeam->managers()->attach($assignmentBoundaryManager, [
+            'hired_at' => $boundary->copy()->subMonth(),
+            'fired_at' => $boundary,
+        ]);
+        $table = new PreviousManagers;
+        $table->stableId = $this->stable->id;
+
+        // Act
+        $managers = $table->builder()->get();
+
+        // Assert
+        expect($managers->modelKeys())->toEqualCanonicalizing([
+            $membershipBoundaryManager->id,
+            $assignmentBoundaryManager->id,
+        ]);
+    });
 });
 
 describe('PreviousManagers rendering', function (): void {
