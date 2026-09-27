@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\Promotions\MembershipRole;
-use App\Enums\Promotions\MembershipStatus;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
@@ -89,8 +88,8 @@ class AppServiceProvider extends ServiceProvider
             if (! $user->role->isAdministrator()) {
                 if ($subject instanceof Promotion) {
                     $membership = $subject->memberships()
-                        ->where('user_id', $user->getKey())
-                        ->where('status', MembershipStatus::Active)
+                        ->forUser($user)
+                        ->active()
                         ->first();
 
                     if ($membership === null) {
@@ -132,8 +131,8 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 $membership = $promotion->memberships()
-                    ->where('user_id', $user->getKey())
-                    ->where('status', MembershipStatus::Active)
+                    ->forUser($user)
+                    ->active()
                     ->first();
 
                 return $membership?->role->allows($ability) ?? false;
