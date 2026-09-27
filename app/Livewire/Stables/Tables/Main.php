@@ -65,14 +65,6 @@ class Main extends BaseTable
         ]);
     }
 
-    public function clearFilters(): void
-    {
-        $this->search = '';
-        $this->filterValues['status'] = '';
-        $this->filterValues['activation_date'] = [];
-        $this->resetPage();
-    }
-
     /**
      * @return array<int, Column>
      */

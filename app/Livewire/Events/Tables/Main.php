@@ -72,15 +72,6 @@ class Main extends BaseTable
         ]);
     }
 
-    public function clearFilters(): void
-    {
-        $this->search = '';
-        $this->filterValues['status'] = '';
-        $this->filterValues['venue'] = '';
-        $this->filterValues['event_dates'] = [];
-        $this->resetPage();
-    }
-
     /**
      * @return array<int, Column>
      */
