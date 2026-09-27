@@ -8,20 +8,10 @@
 ])
 
 @php
-    $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
-    if ($fieldName !== null && ! is_string($fieldName)) {
-        throw new \InvalidArgumentException('Form field names must be strings.');
-    }
-    if ($fieldName && str_contains($fieldName, '=')) {
-        $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
-    }
-
-    $inputId = $attributes->get('id', $fieldName);
-    $fieldErrorId = $inputId.'-error';
-    $describedBy = collect([$attributes->get('aria-describedby'), $fieldName && $errors->has($fieldName) ? $fieldErrorId : null])
-        ->filter()
-        ->unique()
-        ->implode(' ');
+    $field = \App\View\Forms\FormFieldContext::from($name, $attributes, $errors);
+    $fieldName = $field->name;
+    $inputId = $field->id;
+    $describedBy = $field->describedBy;
 
     $textareaClasses = collect([
         'block w-full appearance-none outline-none resize-y',
@@ -52,7 +42,7 @@
                     'id' => $inputId,
                     'rows' => $rows,
                     'class' => $textareaClasses,
-                    'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                    'aria-invalid' => $field->hasError ? 'true' : null,
                     'aria-describedby' => $describedBy ?: null,
                 ])
             }}
@@ -66,7 +56,7 @@
                 'id' => $inputId,
                 'rows' => $rows,
                 'class' => $textareaClasses,
-                'aria-invalid' => $fieldName && $errors->has($fieldName) ? 'true' : null,
+                'aria-invalid' => $field->hasError ? 'true' : null,
                 'aria-describedby' => $describedBy ?: null,
             ])
         }}
