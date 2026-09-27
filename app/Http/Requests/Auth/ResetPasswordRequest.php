@@ -4,24 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\Concerns\NormalizesEmail;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class ResetPasswordRequest extends FormRequest
 {
+    use NormalizesEmail;
+
     public function authorize(): bool
     {
         return true;
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $email = $this->input('email');
-
-        if (is_string($email)) {
-            $this->merge(['email' => Str::lower($email)]);
-        }
     }
 
     /**
