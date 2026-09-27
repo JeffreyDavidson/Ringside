@@ -16,8 +16,6 @@ use Illuminate\Support\Collection;
  */
 readonly class StableMembershipData
 {
-    public const int MINIMUM_MEMBER_COUNT = 3;
-
     /**
      * Create a new stable membership data instance.
      *
@@ -55,10 +53,5 @@ readonly class StableMembershipData
         $tagTeamCount = $this->tagTeams?->count() ?? 0;
 
         return $wrestlerCount + ($tagTeamCount * 2);
-    }
-
-    public function hasMinimumMembers(): bool
-    {
-        return $this->getTotalMemberCount() >= self::MINIMUM_MEMBER_COUNT;
     }
 }
