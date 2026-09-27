@@ -18,7 +18,14 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('full_name')->virtualAs("CONCAT(first_name,' ',last_name)");
+            $fullName = $table->string('full_name');
+
+            if (Schema::getConnection()->getDriverName() === 'pgsql') {
+                $fullName->storedAs("first_name || ' ' || last_name");
+            } else {
+                $fullName->virtualAs("CONCAT(first_name,' ',last_name)");
+            }
+
             $table->timestamps();
             $table->softDeletes();
         });

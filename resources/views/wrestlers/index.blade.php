@@ -1,3 +1,5 @@
 <x-layouts.app>
-    <livewire:wrestlers.tables.main />
+    <x-layouts.workspace-canvas class="min-w-0">
+        <livewire:wrestlers.tables.main defer />
+    </x-layouts.workspace-canvas>
 </x-layouts.app>

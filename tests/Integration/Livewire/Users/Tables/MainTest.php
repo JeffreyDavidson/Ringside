@@ -37,6 +37,11 @@ describe('users table', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSee('Users')
+            ->assertSee('Manage global accounts and platform access.')
+            ->assertSeeHtml('data-test="index-page-header"')
+            ->assertSeeHtml('data-test="table-metadata"')
+            ->assertSeeHtml('data-test="table-toolbar"')
             ->assertSee('Add User')
             ->assertSeeHtml('placeholder="Search users"')
             ->assertSee('John Admin')
@@ -45,7 +50,44 @@ describe('users table', function (): void {
             ->assertSee(Role::Administrator->name)
             ->assertSee('Jane Member')
             ->assertSee($basicUser->email)
-            ->assertSee(Role::Basic->name);
+            ->assertSee(Role::Basic->name)
+            ->assertDontSee('Remove')
+            ->assertDontSeeHtml('wire:click="delete(');
+    });
+
+    it('lets an administrator activate an unverified user account', function (): void {
+        $user = User::factory()->unverified()->create();
+
+        livewire(Main::class)
+            ->call('changeStatus', $user->id, UserStatus::Active->value)
+            ->assertHasNoErrors()
+            ->assertDispatched('flash-message', type: 'status', message: 'User account status changed to Active.');
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active)
+            ->and($user->email_verified_at)->toBeNull();
+    });
+
+    it('lets an administrator deactivate and reactivate user accounts', function (): void {
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $component = livewire(Main::class);
+
+        $component->call('changeStatus', $user->id, UserStatus::Inactive->value);
+
+        expect($user->refresh()->status)->toBe(UserStatus::Inactive);
+
+        $component->call('changeStatus', $user->id, UserStatus::Active->value);
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active);
+    });
+
+    it('rejects invalid user status values', function (): void {
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+
+        livewire(Main::class)
+            ->call('changeStatus', $user->id, 'suspended')
+            ->assertHasErrors('status');
+
+        expect($user->refresh()->status)->toBe(UserStatus::Active);
     });
 
     it('filters users by status', function (UserStatus $status): void {

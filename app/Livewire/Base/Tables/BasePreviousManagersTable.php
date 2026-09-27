@@ -21,6 +21,7 @@ abstract class BasePreviousManagersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[\Override]
     protected string $resourceName = 'managers';
 
     protected string $databaseTableName;

@@ -1,128 +1,153 @@
-<div>
-    {{-- Before wrapper (configurable area for page header / add buttons) --}}
+<div class="flex flex-col gap-6">
     @if ($beforeWrapperView)
         <x-dynamic-component :component="$beforeWrapperView" />
     @endif
 
-    {{-- Card wrapper --}}
-    <div class="shadow-light rounded-lg border border-gray-200 bg-white">
-        {{-- Search and Filters --}}
-        <div class="flex items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
-            {{-- Search --}}
-            <div class="bg-light-active flex h-9 w-64 items-center gap-2 rounded-md border border-gray-300 px-3">
-                <x-heroicon-o-magnifying-glass class="size-4 shrink-0 text-gray-500" />
-                <input
-                    type="text"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="{{ $searchPlaceholder }}"
-                    class="m-0 grow border-none bg-transparent p-0 text-xs outline-none placeholder:text-gray-500 focus:ring-0"
-                />
-                @if ($search)
-                    <button wire:click="$set('search', '')" class="text-gray-400 hover:text-gray-600">
-                        <x-heroicon-o-x-mark class="size-3.5" />
-                    </button>
-                @endif
-            </div>
+    <div class="border-ringside-line bg-ringside-surface-header border">
+        <x-tables.toolbar
+            :id="$this->resourceName.'-search'"
+            model="search"
+            :value="$search"
+            :label="$searchPlaceholder"
+            :placeholder="$searchPlaceholder"
+            :clear-label="__('core.clear_search')"
+        >
+            <x-tables.meta-data />
 
-            {{-- Filters --}}
             @if (count($filters) > 0)
-                <div class="flex items-center gap-3">
-                    @foreach ($filters as $filter)
-                        @if ($filter instanceof \App\Livewire\Table\Filters\SelectFilter)
-                            <select
-                                wire:model.live="filterValues.{{ $filter->getKey() }}"
-                                class="bg-light-active focus:border-primary h-9 appearance-none rounded-md border border-gray-300 px-2.5 text-xs font-medium text-gray-600 focus:ring-0"
-                            >
-                                @foreach ($filter->getOptions() as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        @endif
-                    @endforeach
-                </div>
+                @foreach ($filters as $filter)
+                    @if ($filter instanceof \App\Livewire\Table\Filters\SelectFilter)
+                        <label
+                            class="sr-only"
+                            for="table-filter-{{ $filter->getKey() }}"
+                        >{{ $filter->getName() }}</label>
+                        <select
+                            id="table-filter-{{ $filter->getKey() }}"
+                            wire:model.live="filterValues.{{ $filter->getKey() }}"
+                            class="border-ringside-line bg-ringside-surface text-ringside-muted focus:border-ringside-ink min-h-11 appearance-none border px-3 text-sm focus:ring-0"
+                        >
+                            @foreach ($filter->getOptions() as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                @endforeach
             @endif
-        </div>
+        </x-tables.toolbar>
 
-        {{-- Table --}}
-        <div class="overflow-x-auto">
-            <table class="w-full table-auto border-collapse text-left text-sm font-medium text-gray-700">
-                <thead>
-                    <tr>
-                        @foreach ($columns as $column)
-                            <th
-                                class="bg-gray-100 text-gray-600 font-medium text-2sm align-middle py-2.5 px-4 border-b border-gray-200
-                                {{ !$loop->last ? 'border-e border-e-gray-200' : '' }}
-                                {{ $column->getTitle() === __('core.actions') ? 'w-[60px]' : '' }}"
-                            >
-                                @if ($column->isSortable())
-                                    <button
-                                        wire:click="sort('{{ $column->getField() }}')"
-                                        class="flex items-center gap-1 hover:text-gray-900"
-                                    >
-                                        {{ $column->getTitle() }}
-                                        @if ($sortField === $column->getField())
-                                            @if ($sortDirection === 'asc')
-                                                <x-heroicon-s-chevron-up class="size-3" />
-                                            @else
-                                                <x-heroicon-s-chevron-down class="size-3" />
-                                            @endif
-                                        @endif
-                                    </button>
-                                @else
-                                    {{ $column->getTitle() }}
-                                @endif
-                            </th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($rows as $row)
-                        <tr wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}" class="border-b border-gray-200">
+        @if ($rows->isNotEmpty())
+            <p
+                id="{{ $this->resourceName }}-table-scroll-hint"
+                class="border-ringside-line text-ringside-muted flex items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden"
+            >
+                {{ __('core.table_scroll_hint') }}
+                <x-heroicon-o-arrow-right class="size-4 shrink-0" aria-hidden="true" />
+            </p>
+
+            <div
+                data-test="resource-table-scroll"
+                role="region"
+                tabindex="0"
+                aria-label="{{ __('core.table_results_region') }}"
+                aria-describedby="{{ $this->resourceName }}-table-scroll-hint"
+                class="focus-visible:outline-ringside-ink overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+            >
+                <table class="w-full min-w-[40rem] table-auto border-collapse text-left text-sm">
+                    <thead>
+                        <tr>
                             @foreach ($columns as $column)
-                                <td
-                                    class="py-3 px-4
-                                    {{ !$loop->last ? 'border-e border-e-gray-200' : '' }}"
+                                <th
+                                    class="border-ringside-line bg-ringside-surface-panel text-ringside-muted px-4 py-3 align-middle text-xs font-semibold tracking-[0.08em] uppercase
+                                {{ !$loop->last ? 'border-e' : '' }}
+                                {{ $column->getTitle() === __('core.actions') ? 'w-[60px]' : '' }}"
                                 >
-                                    @if ($column->isHtml())
-                                        {!! $column->resolveValue($row) !!}
+                                    @if ($column->isSortable())
+                                        <button
+                                            wire:click="sort('{{ $column->getField() }}')"
+                                            class="text-ringside-muted hover:text-ringside-ink flex items-center gap-1"
+                                        >
+                                            {{ $column->getTitle() }}
+                                            @if ($sortField === $column->getField())
+                                                @if ($sortDirection === 'asc')
+                                                    <x-heroicon-s-chevron-up class="size-3" />
+                                                @else
+                                                    <x-heroicon-s-chevron-down class="size-3" />
+                                                @endif
+                                            @endif
+                                        </button>
                                     @else
-                                        {{ $column->resolveValue($row) }}
+                                        {{ $column->getTitle() }}
                                     @endif
-                                </td>
+                                </th>
                             @endforeach
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ count($columns) }}" class="px-4 py-8 text-center text-gray-500">
-                                No records found.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Pagination --}}
-        @if ($rows->hasPages())
-            <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4">
-                <div class="flex items-center gap-2 text-xs text-gray-600">
-                    <span>Per page:</span>
-                    <select
-                        wire:model.live="perPage"
-                        class="bg-light-active focus:border-primary h-8 w-16 appearance-none rounded-md border border-gray-300 px-2.5 text-xs font-medium focus:ring-0"
-                    >
-                        @foreach ($perPageOptions as $option)
-                            <option value="{{ $option }}">{{ $option }}</option>
+                    </thead>
+                    <tbody>
+                        @foreach ($rows as $row)
+                            <tr
+                                wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}"
+                                class="border-ringside-line hover:bg-ringside-surface-hover border-b transition-colors"
+                            >
+                                @foreach ($columns as $column)
+                                    <td
+                                        class="text-ringside-ink px-4 py-4
+                                    {{ !$loop->last ? 'border-ringside-line border-e' : '' }}"
+                                    >
+                                        @if ($column->isHtml())
+                                            {{ $column->resolveHtmlValue($row) }}
+                                        @else
+                                            {{ $column->resolveValue($row) }}
+                                        @endif
+                                    </td>
+                                @endforeach
+                            </tr>
                         @endforeach
-                    </select>
-                </div>
-                <div class="flex items-center gap-1">{{ $rows->links() }}</div>
+                    </tbody>
+                </table>
             </div>
+        @elseif ($hasActiveFilters)
+            <x-tables.empty-state
+                :title="__('core.no_results_title')"
+                :description="__('core.no_results_description')"
+                icon="heroicon-o-magnifying-glass"
+                :data-test="$this->resourceName.'-empty-state'"
+                class="border-b"
+            >
+                <button
+                    type="button"
+                    wire:click="clearFilters"
+                    class="text-ringside-ink hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink border-ringside-line mt-2 inline-flex min-h-11 items-center border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                    {{ $hasAppliedFilters ? __('core.clear_filters') : __('core.clear_search') }}
+                </button>
+            </x-tables.empty-state>
+        @else
+            <x-tables.empty-state
+                :title="$emptyStateTitle ?? __('core.no_records_found')"
+                :description="$emptyStateDescription ?? __('core.no_records_description')"
+                :icon="$emptyStateIcon"
+                :data-test="$this->resourceName.'-empty-state'"
+                class="border-b"
+            />
         @endif
+
+        <x-tables.footer
+            :paginator="$rows"
+            :per-page-options="$perPageOptions"
+            :per-page-id="$this->resourceName.'-per-page'"
+            :results-label="__('core.table_results', ['first' => $rows->firstItem(), 'last' => $rows->lastItem(), 'total' => $rows->total(), 'resource' => $this->resourceName])"
+            :per-page-label="__('core.rows_per_page')"
+            :pagination-label="__('core.table_pages')"
+            :previous-page-label="__('core.previous_page')"
+            :next-page-label="__('core.next_page')"
+            :page-label="__('core.page', ['current' => $rows->currentPage(), 'last' => $rows->lastPage()])"
+        />
     </div>
 
-    {{-- Loading overlay --}}
-    <div wire:loading.delay class="fixed inset-0 z-50 flex items-center justify-center bg-white/50">
-        <div class="text-sm text-gray-500">Loading...</div>
+    <div
+        wire:loading.delay
+        class="border-ringside-line bg-ringside-surface-header text-ringside-muted fixed end-4 bottom-4 z-50 border px-4 py-3 text-sm shadow-xl"
+    >
+        Updating…
     </div>
 </div>

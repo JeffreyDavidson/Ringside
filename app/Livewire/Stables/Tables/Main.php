@@ -20,6 +20,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Stables\Stable;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
@@ -46,12 +47,22 @@ class Main extends BaseTable
         return Stable::query()
             ->withActivityStatusState()
             ->withFirstActivityPeriod()
+            ->with(['currentWrestlers', 'currentTagTeams'])
             ->oldest('name');
     }
 
     protected function configure(): void
     {
         Gate::authorize('viewAny', Stable::class);
+    }
+
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.stables.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+        ]);
     }
 
     /**
@@ -67,6 +78,16 @@ class Main extends BaseTable
                 ->excludeFromColumnSelect(),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
+    }
+
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Stable $row) => view('components.tables.columns.stable-actions', [
+                'stable' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 
     /**

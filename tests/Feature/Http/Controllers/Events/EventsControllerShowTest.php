@@ -28,6 +28,10 @@ describe('Events Controller', function () {
             ->get(route('events.show', $this->event))
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSee($this->event->name)
+            ->assertSee('Status')
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(MatchesTable::class);
     });
 

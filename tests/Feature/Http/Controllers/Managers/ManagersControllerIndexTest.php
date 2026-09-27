@@ -22,6 +22,7 @@ describe('Managers Controller', function () {
             ->get(route('managers.index'))
             ->assertOk()
             ->assertViewIs('managers.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

@@ -19,6 +19,7 @@ abstract class BasePreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[\Override]
     protected string $resourceName = 'wrestlers';
 
     protected string $databaseTableName;

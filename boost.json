@@ -6,17 +6,16 @@
     "guidelines": true,
     "mcp": true,
     "nightwatch": true,
-    "packages": [
-        "barryvdh/laravel-debugbar"
-    ],
     "sail": false,
     "skills": [
         "infer-conventions",
         "laravel-best-practices",
+        "configure-nightwatch",
+        "newdebugbar-local-development",
+        "pennant-development",
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
-        "debug-using-debugbar",
         "pest-plugin-agent"
     ]
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
+use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -33,6 +35,12 @@ Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('promotions', [PromotionsController::class, 'index'])
+        ->can('viewAny', Promotion::class)
+        ->name('promotions.index');
+    Route::get('promotions/{promotion}', [PromotionsController::class, 'show'])
+        ->can('view', 'promotion')
+        ->name('promotions.show');
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
 
     Route::middleware('promotion.context')->group(function () {

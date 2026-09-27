@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
@@ -24,6 +25,7 @@ test('user can authenticate successfully', function () {
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $page = visit(route('login'));
@@ -32,7 +34,7 @@ test('user can authenticate successfully', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('authentication fails with invalid credentials', function () {
@@ -113,6 +115,7 @@ test('remember me can be selected during login', function (): void {
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $page = visit(route('login'));
@@ -124,7 +127,7 @@ test('remember me can be selected during login', function (): void {
         ->assertChecked('@remember')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('login form works on mobile viewports', function () {
@@ -132,6 +135,7 @@ test('login form works on mobile viewports', function () {
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $page = visit(route('login'))->on()->mobile();
@@ -143,7 +147,7 @@ test('login form works on mobile viewports', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('user can logout successfully', function () {
@@ -151,6 +155,7 @@ test('user can logout successfully', function () {
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     // First login
@@ -160,7 +165,7 @@ test('user can logout successfully', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard')
+        ->assertSee('Overview')
         ->click('@profile-menu')
         ->press('Log out')
         ->assertScript('window.location.pathname === "/login"')
@@ -174,14 +179,14 @@ test('user can logout successfully', function () {
 });
 
 test('authenticated users are redirected away from login page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['status' => UserStatus::Active]);
 
     $this->actingAs($user);
 
     $page = visit(route('login'));
 
     $page->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('login form handles longer processing times', function () {
@@ -189,6 +194,7 @@ test('login form handles longer processing times', function () {
     $admin = User::factory()->administrator()->create([
         'email' => 'administrator@example.com',
         'password' => 'password',
+        'status' => UserStatus::Active,
     ]);
 
     $page = visit(route('login'));
@@ -197,13 +203,13 @@ test('login form handles longer processing times', function () {
         ->type('@password', 'password')
         ->press('@sign-in')
         ->assertScript('window.location.pathname === "/dashboard"')
-        ->assertSee('Dashboard');
+        ->assertSee('Overview');
 });
 
 test('password recovery and reset work through the branded forms', function (): void {
     // Arrange
     Notification::fake();
-    $user = User::factory()->administrator()->create();
+    $user = User::factory()->administrator()->create(['status' => UserStatus::Active]);
     $page = visit(route('login'));
 
     // Act
@@ -252,8 +258,9 @@ test('registration submits from the branded form', function (): void {
         ->press('Create an account');
 
     // Assert
-    $page->assertPathIs('/dashboard');
-    $this->assertAuthenticated();
+    $page->assertPathIs('/login')
+        ->assertSee(__('auth-forms.account_pending'));
+    $this->assertGuest();
     $this->assertDatabaseHas('users', ['email' => 'taylor@example.com']);
 });
 

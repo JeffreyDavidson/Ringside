@@ -26,7 +26,10 @@ describe('Referees Controller', function () {
         actingAs(administrator())
             ->get(route('referees.show', $this->referee))
             ->assertViewIs('referees.show')
+            ->assertSee($this->referee->full_name)
+            ->assertSee('Status')
             ->assertViewHas('referee', $this->referee)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousMatches::class);
     });
 

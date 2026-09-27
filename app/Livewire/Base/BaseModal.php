@@ -16,6 +16,11 @@ abstract class BaseModal extends ModalComponent
 {
     protected string $modelTitleField = 'name';
 
+    public static function modalMaxWidth(): string
+    {
+        return '4xl';
+    }
+
     /** @return class-string<TModelType> */
     abstract protected function getModelClass(): string;
 

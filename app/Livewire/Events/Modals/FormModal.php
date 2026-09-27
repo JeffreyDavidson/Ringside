@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Modals;
 
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
@@ -43,7 +44,7 @@ class FormModal extends BaseFormModal
     protected function populateDummyData(): void
     {
         $this->form->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s');
+        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d\\TH:i');
         $venue = Venue::query()->inRandomOrder()->first();
 
         if ($venue !== null) {
@@ -65,6 +66,18 @@ class FormModal extends BaseFormModal
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->event(), $this->form->toData());
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.venue_id', $exception->getMessage());
+
+            return false;
+        }
     }
 
     protected function createForm(): void

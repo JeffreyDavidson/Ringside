@@ -26,6 +26,7 @@ class PreviousTitleChampionships extends DataTableComponent
 
     protected string $databaseTableName = 'titles_championships';
 
+    #[\Override]
     protected string $resourceName = 'title championships';
 
     /**

@@ -1,12 +1,6 @@
 <div>
     <x-form-modal>
-        <x-form-modal.modal-input>
-            <x-form.inputs.text label="First Name" wire:model="form.first_name" />
-        </x-form-modal.modal-input>
-
-        <x-form-modal.modal-input>
-            <x-form.inputs.text label="Last Name" wire:model="form.last_name" />
-        </x-form-modal.modal-input>
+        <x-form-modal.person-name-fields first-name-label="First Name" last-name-label="Last Name" />
 
         <x-form-modal.modal-input>
             <x-form.inputs.text label="Email" wire:model="form.email" />

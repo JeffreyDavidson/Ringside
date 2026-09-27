@@ -42,6 +42,9 @@ class Main extends BaseTable
     protected function configure(): void
     {
         Gate::authorize('viewAny', Venue::class);
+        $this->emptyStateTitle = __('venues.empty_title');
+        $this->emptyStateDescription = __('venues.empty_description');
+        $this->emptyStateIcon = 'heroicon-o-building-office-2';
     }
 
     /**
@@ -60,6 +63,16 @@ class Main extends BaseTable
                 ->searchable(),
             Column::make(__('venues.zipcode'), 'zipcode'),
         ];
+    }
+
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Venue $row) => view('components.tables.columns.venue-actions', [
+                'venue' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 
     public function delete(Venue $venue, DeleteAction $deleteAction): void

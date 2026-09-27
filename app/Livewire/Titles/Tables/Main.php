@@ -23,6 +23,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Title> */
@@ -57,6 +58,16 @@ class Main extends BaseTable
         Gate::authorize('viewAny', Title::class);
     }
 
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.titles.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+            'beforeWrapperView' => $this->beforeWrapperView,
+        ]);
+    }
+
     /** @return array<int, Column> */
     public function columns(): array
     {
@@ -70,6 +81,16 @@ class Main extends BaseTable
                 ->label(fn (Title $row) => TitleChampionshipQuery::currentChampion($row)->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
+    }
+
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Title $row) => view('components.tables.columns.title-actions', [
+                'title' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 
     /** @return array<int, Filter> */

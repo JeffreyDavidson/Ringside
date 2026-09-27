@@ -31,7 +31,10 @@ describe('TagTeams Controller', function () {
             ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
             ->assertViewIs('tag-teams.show')
+            ->assertSee($this->tagTeam->name)
+            ->assertSee('Status')
             ->assertViewHas('tagTeam', $this->tagTeam)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
             ->assertSeeLivewire(PreviousWrestlers::class)
@@ -46,10 +49,11 @@ describe('TagTeams Controller', function () {
         actingAs(administrator())
             ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
-            ->assertViewHas('tagTeam', fn (TagTeam $tagTeam): bool => count($tagTeam->getRelations()) === 3
+            ->assertViewHas('tagTeam', fn (TagTeam $tagTeam): bool => count($tagTeam->getRelations()) === 4
                 && $tagTeam->relationLoaded('currentManagers')
                 && $tagTeam->relationLoaded('currentStable')
-                && $tagTeam->relationLoaded('currentWrestlers'));
+                && $tagTeam->relationLoaded('currentWrestlers')
+                && $tagTeam->relationLoaded('currentChampionships'));
     });
 
     /**

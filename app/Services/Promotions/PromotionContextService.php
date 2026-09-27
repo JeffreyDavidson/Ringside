@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Promotions;
 
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use Illuminate\Database\Eloquent\Model;
@@ -58,7 +59,14 @@ class PromotionContextService
         $promotionKey = $this->promotion->getKey();
 
         if ($model instanceof EventMatch) {
-            return $model->event->promotion_id === $promotionKey;
+            $event = $model->relationLoaded('event')
+                ? $model->getRelation('event')
+                : $model->event()
+                    ->withTrashed()
+                    ->withoutGlobalScope('promotion_context')
+                    ->first();
+
+            return $event instanceof Event && $event->promotion_id === $promotionKey;
         }
 
         $modelPromotionId = $model->getAttribute('promotion_id');

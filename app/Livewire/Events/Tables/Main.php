@@ -18,6 +18,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
@@ -62,6 +63,15 @@ class Main extends BaseTable
         ]);
     }
 
+    #[\Override]
+    public function render(): View
+    {
+        return view('livewire.events.tables.main', [
+            'rows' => $this->getRows(),
+            'perPageOptions' => $this->perPageAccepted,
+        ]);
+    }
+
     /**
      * @return array<int, Column>
      */
@@ -82,6 +92,16 @@ class Main extends BaseTable
                 ->location(fn (Event $row): string => $row->venue ? route('venues.show', $row->venue) : ''),
 
         ];
+    }
+
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (Event $row) => view('components.tables.columns.event-actions', [
+                'event' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 
     /**

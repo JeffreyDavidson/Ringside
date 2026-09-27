@@ -22,6 +22,7 @@ describe('Users Controller', function () {
             ->get(route('users.index'))
             ->assertOk()
             ->assertViewIs('users.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

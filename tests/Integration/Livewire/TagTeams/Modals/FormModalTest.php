@@ -48,7 +48,7 @@ describe('authorized tag team form interactions', function () {
             ->assertSet('form.wrestlerB', null)
             ->assertSet('form.managers', [])
             ->assertSet('form.employment_date', '')
-            ->assertSee('Add TagTeam');
+            ->assertSee('Create Tag Team');
     });
 
     it('loads an existing tag team for editing', function () {

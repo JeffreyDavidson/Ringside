@@ -2,7 +2,9 @@
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
@@ -18,7 +20,7 @@ function attachActivePromotion(User $user, Promotion $promotion): void
 }
 
 test('promotion middleware establishes the selected active promotion', function () {
-    $user = User::factory()->administrator()->create();
+    $user = User::factory()->administrator()->create(['status' => UserStatus::Active]);
     $firstPromotion = Promotion::factory()->create();
     $secondPromotion = Promotion::factory()->create();
     attachActivePromotion($user, $firstPromotion);
@@ -63,8 +65,28 @@ test('promotion-scoped models only return records from the active promotion', fu
         ->toContain($otherWrestler->id);
 });
 
+test('global venues remain visible while their event history follows the active promotion', function () {
+    $promotion = Promotion::factory()->create();
+    $otherPromotion = Promotion::factory()->create();
+    $venue = Venue::factory()->create();
+    $ownedEvent = Event::factory()->for($promotion, 'promotion')->atVenue($venue)->create();
+    $otherEvent = Event::factory()->for($otherPromotion, 'promotion')->atVenue($venue)->create();
+    $context = app(PromotionContextService::class);
+
+    $context->set($promotion);
+    $context->enforce();
+
+    expect(Venue::query()->findOrFail($venue->id)->is($venue))->toBeTrue()
+        ->and($venue->events()->pluck('id')->all())->toBe([$ownedEvent->id]);
+
+    $context->clear();
+
+    expect($venue->events()->pluck('id')->all())
+        ->toEqualCanonicalizing([$ownedEvent->id, $otherEvent->id]);
+});
+
 test('promotion middleware rejects users without an active membership', function () {
-    $user = User::factory()->basicUser()->create();
+    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
 
     Route::middleware(['web', 'promotion.context'])->get('/promotion-context-test', fn () => response()->noContent());
 

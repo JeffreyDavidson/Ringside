@@ -19,6 +19,7 @@ abstract class BasePreviousStablesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[\Override]
     protected string $resourceName = 'stables';
 
     protected string $databaseTableName;

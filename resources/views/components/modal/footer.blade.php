@@ -1,1 +1,1 @@
-<div class="flex border-t border-solid border-gray-200 py-2.5 ps-5 pe-5">{{ $slot }}</div>
+<div class="border-ringside-line shrink-0 border-t px-6 py-4">{{ $slot }}</div>

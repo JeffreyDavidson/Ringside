@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 use App\Enums\Users\Role;
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Hash;
 
-use function Pest\Laravel\assertAuthenticatedAs;
+use function Pest\Laravel\assertGuest;
 
 test('registration screen can be rendered', function () {
     // Arrange
@@ -33,16 +34,18 @@ test('a user can register with their account details', function (string $email):
     $response = $this->post(route('register'), $registrationData);
 
     // Assert
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('login'))
+        ->assertSessionHas('status', __('auth-forms.account_pending'));
     $user = User::query()->where('email', 'jeffrey@example.com')->firstOrFail();
 
     expect($user)
         ->first_name->toBe('Jeffrey')
         ->last_name->toBe('Davidson')
         ->role->toBe(Role::Basic)
+        ->status->toBe(UserStatus::Unverified)
         ->and(Hash::check('password', $user->password))->toBeTrue();
 
-    assertAuthenticatedAs($user);
+    assertGuest();
 })->with(['jeffrey@example.com', 'Jeffrey@Example.COM']);
 
 test('registration requires valid account details', function () {

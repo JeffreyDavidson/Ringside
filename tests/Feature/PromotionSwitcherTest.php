@@ -2,6 +2,7 @@
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 
@@ -14,7 +15,7 @@ function attachActivePromotionMembership(User $user, Promotion $promotion): void
 }
 
 test('a user can switch to another active promotion', function () {
-    $user = User::factory()->basicUser()->create();
+    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
     $firstPromotion = Promotion::factory()->create();
     $secondPromotion = Promotion::factory()->create();
     attachActivePromotionMembership($user, $firstPromotion);
@@ -33,7 +34,7 @@ test('a user can switch to another active promotion', function () {
 });
 
 test('a user cannot switch to a promotion without an active membership', function () {
-    $user = User::factory()->basicUser()->create();
+    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
     $promotion = Promotion::factory()->create();
     $otherPromotion = Promotion::factory()->create();
     attachActivePromotionMembership($user, $promotion);
@@ -47,7 +48,7 @@ test('a user cannot switch to a promotion without an active membership', functio
 });
 
 test('the authenticated layout displays active promotions', function () {
-    $user = User::factory()->basicUser()->create();
+    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
     $promotion = Promotion::factory()->create(['name' => 'Ringside Wrestling']);
     attachActivePromotionMembership($user, $promotion);
 

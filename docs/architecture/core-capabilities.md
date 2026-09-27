@@ -80,6 +80,16 @@ Wrestler and Tag Team define their current and historical manager relationships 
 
 Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.
 
+Global user accounts have `Unverified`, `Active`, and `Inactive` statuses.
+Platform administrators can activate unverified accounts, deactivate active
+accounts, and reactivate inactive accounts from the user directory. Account
+status is separate from email verification: changing status does not set or
+clear `email_verified_at`. Only active users are eligible for promotion
+membership and authentication. New registrations remain unverified until a
+platform administrator activates them. Inactive accounts cannot sign in, and
+existing sessions are ended on their next web or Livewire request. Email
+verification remains independent of account activation.
+
 ## Promotion Context and Membership
 
 Users are global platform identities. A user's relationship to a promotion is
@@ -87,10 +97,24 @@ stored in the `promotion_user` membership table, where role and membership
 status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
+Promotion roles apply only within the active promotion context. Members can
+view promotion-owned data. Managers can view and manage promotion-owned roster,
+event, match, stable, and title data, but cannot update promotion settings or
+membership roles. Owners have the manager capabilities and can also update
+promotion settings and manage that promotion's memberships. Platform
+administrators retain their global access, subject to the active-context
+ownership guard. Promotion directory management, global users, and shared
+venues remain outside promotion-member permissions.
+
 The application resolves an active promotion through the scoped
 `PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
 events and titles now have nullable explicit promotion ownership. Venues are
-global shared resources that can host events for multiple promotions.
+global shared resources that can host events for multiple promotions. Venue
+routes remain outside the promotion context middleware; a venue is globally
+visible while its related event history is filtered by the active promotion.
+When promotion context is enforced, new promotion-owned models receive the
+active promotion during creation without exposing ownership columns to
+mass-assignment.
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Match data inherits ownership

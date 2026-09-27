@@ -17,8 +17,6 @@ trait BaseTableTrait
 
     protected string $routeBasePath = '';
 
-    protected string $resourceName = '';
-
     public function mountBaseTableTrait(): void
     {
         $this->addAdditionalSelects([$this->databaseTableName.'.id as id'])

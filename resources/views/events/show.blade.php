@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$event->name">
     <x-slot:sidebar>
         <x-events.show.general-info :$event />
     </x-slot:sidebar>
@@ -14,5 +14,5 @@
         </div>
     @endcan
 
-    <livewire:matches.tables.matches-table :eventId="$event->id" />
+    <livewire:matches.tables.matches-table :eventId="$event->id" defer.bundle />
 </x-layouts.show-page>

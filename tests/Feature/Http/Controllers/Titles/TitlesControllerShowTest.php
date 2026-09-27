@@ -28,7 +28,11 @@ describe('Titles Controller', function () {
             ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertViewIs('titles.show')
+            ->assertSee($this->title->name)
+            ->assertSee('Current Champion')
+            ->assertSee('Vacant')
             ->assertViewHas('title', $this->title)
+            ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class);
     });
 
@@ -46,7 +50,8 @@ describe('Titles Controller', function () {
             ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
-            ->assertViewHas('title', fn (Title $title): bool => count($title->getRelations()) === 1
+            ->assertViewHas('title', fn (Title $title): bool => count($title->getRelations()) === 2
+                && $title->relationLoaded('currentChampionship')
                 && $title->relationLoaded('firstActivityPeriod'));
     });
 

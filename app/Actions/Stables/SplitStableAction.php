@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -104,12 +105,12 @@ class SplitStableAction
             throw CannotBeSplitException::allMembersMoving();
         }
 
-        if ($newStableMemberCount < StableMembershipData::MINIMUM_MEMBER_COUNT) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, StableMembershipData::MINIMUM_MEMBER_COUNT);
+        if (! StableMembershipRequirements::hasMinimumHeadcount($newStableMemberCount)) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
         }
 
-        if ($remainingMemberCount < StableMembershipData::MINIMUM_MEMBER_COUNT) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, StableMembershipData::MINIMUM_MEMBER_COUNT);
+        if (! StableMembershipRequirements::hasMinimumHeadcount($remainingMemberCount)) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
         }
     }
 }

@@ -107,7 +107,8 @@ describe('PreviousEvents rendering', function (): void {
 
         // Assert
         $table
-            ->assertSee('No records found.')
+            ->assertSee('No matching records')
+            ->assertSee('Clear search')
             ->assertDontSee('Summer Elsewhere');
 
         // Act

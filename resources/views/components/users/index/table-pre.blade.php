@@ -1,11 +1,14 @@
-<div class="flex flex-wrap items-center justify-between gap-5 pb-7.5 lg:items-end">
-    <div class="flex flex-col justify-center gap-2">
-        <x-tables.meta-data />
-    </div>
-    <div class="flex items-center gap-2.5">
+<x-layouts.table-header :title="__('users.index_title')" :subtitle="__('users.index_description')">
+    <x-slot:actions>
         @can('create', \App\Models\Users\User::class)
-            <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'users.modals.form-modal' })">
-                Add User</x-buttons.primary>
+            <x-button
+                variant="ringside"
+                size="md"
+                class="min-h-11 shrink-0 whitespace-nowrap"
+                @click="$dispatch('openModal', { component: 'users.modals.form-modal' })"
+            >
+                {{ __('users.add') }}
+            </x-button>
         @endcan
-    </div>
-</div>
+    </x-slot:actions>
+</x-layouts.table-header>

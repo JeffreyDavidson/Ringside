@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\Stables\StableMembershipData;
+use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Stables\HasMinimumMembers;
@@ -174,7 +174,7 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
             $rule->validate('members', 'test', validationFailureCallback($failCallback));
 
             // Assert
-            expect($failMessage)->toContain((string) StableMembershipData::MINIMUM_MEMBER_COUNT);
+            expect($failMessage)->toContain((string) StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
         });
 
         test('error message includes actual member count', function () {
@@ -210,7 +210,7 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
             $rule->validate('members', 'test', validationFailureCallback($failCallback));
 
             // Assert
-            $expectedMessage = 'A stable must have at least '.StableMembershipData::MINIMUM_MEMBER_COUNT.' members. Currently adding 0 members.';
+            $expectedMessage = 'A stable must have at least '.StableMembershipRequirements::MINIMUM_MEMBER_COUNT.' members. Currently adding 0 members.';
             expect($failMessage)->toBe($expectedMessage);
         });
     });
@@ -277,7 +277,7 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
     describe('constant integration', function () {
         test('uses correct minimum members constant', function () {
             // This test ensures we're using the right constant value
-            expect(StableMembershipData::MINIMUM_MEMBER_COUNT)->toBe(3);
+            expect(StableMembershipRequirements::MINIMUM_MEMBER_COUNT)->toBe(3);
         });
 
         test('calculation logic aligns with business rules', function () {

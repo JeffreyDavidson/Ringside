@@ -24,6 +24,7 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 
     protected string $databaseTableName = 'titles_championships';
 
+    #[\Override]
     protected string $resourceName = 'title championships';
 
     protected RosterResourceRouteResolver $routeResolver;

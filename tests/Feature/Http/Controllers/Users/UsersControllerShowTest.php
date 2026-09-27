@@ -32,6 +32,30 @@ describe('Users Controller', function () {
     /**
      * @see UsersController::show()
      */
+    test('show renders the users general information', function () {
+        $user = User::factory()->administrator()->create([
+            'first_name' => 'Casey',
+            'last_name' => 'Ringside',
+            'email' => 'casey@example.test',
+            'phone_number' => '2125550198',
+            'email_verified_at' => now(),
+        ]);
+
+        actingAs(administrator())
+            ->get(route('users.show', $user))
+            ->assertOk()
+            ->assertSee('General Info')
+            ->assertSee('Casey Ringside')
+            ->assertSee('casey@example.test')
+            ->assertSee('(212) 555-0198')
+            ->assertSee('Administrator')
+            ->assertSee('Unverified')
+            ->assertSee('Verified');
+    });
+
+    /**
+     * @see UsersController::show()
+     */
     test('a basic user can view their user profile', function () {
         actingAs($user = basicUser())
             ->get(route('users.show', $user))

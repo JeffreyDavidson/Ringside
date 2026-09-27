@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\Promotions\MembershipRole;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -27,6 +30,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -71,17 +75,68 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Livewire::addPersistentMiddleware([EnsureUserIsActive::class]);
+
         if (config('app.force_https')) {
             URL::forceScheme('https');
         }
 
         Gate::before(function (User $user, string $ability, array $arguments): ?bool {
-            if (! $user->role->isAdministrator()) {
-                return null;
-            }
-
             $subject = $arguments[0] ?? null;
             $context = app(PromotionContextService::class);
+
+            if (! $user->role->isAdministrator()) {
+                if ($subject instanceof Promotion) {
+                    $membership = $subject->memberships()
+                        ->forUser($user)
+                        ->active()
+                        ->first();
+
+                    if ($membership === null) {
+                        return false;
+                    }
+
+                    return match ($ability) {
+                        'view' => true,
+                        'manageMembers', 'update' => $membership->role === MembershipRole::Owner,
+                        default => false,
+                    };
+                }
+
+                $isPromotionOwnedClass = is_string($subject)
+                    && class_exists($subject)
+                    && ($subject === EventMatch::class
+                        || in_array(BelongsToPromotion::class, class_uses_recursive($subject), true));
+
+                $isPromotionOwnedModel = $subject instanceof Model
+                    && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
+                        || $subject instanceof EventMatch);
+
+                if (! $isPromotionOwnedClass && ! $isPromotionOwnedModel) {
+                    return null;
+                }
+
+                if (! $context->isEnforced()) {
+                    return null;
+                }
+
+                $promotion = $context->current();
+
+                if (! $promotion instanceof Promotion) {
+                    return false;
+                }
+
+                if ($subject instanceof Model && ! $context->owns($subject)) {
+                    return false;
+                }
+
+                $membership = $promotion->memberships()
+                    ->forUser($user)
+                    ->active()
+                    ->first();
+
+                return $membership?->role->allows($ability) ?? false;
+            }
 
             $isPromotionOwned = $subject instanceof Model
                 && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
@@ -104,7 +159,12 @@ class AppServiceProvider extends ServiceProvider
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
 
-        View::composer('components.topbar.profile', PromotionSwitcherComposer::class);
+        View::composer([
+            'components.topbar.profile',
+            'components.sidebar',
+            'components.sidebar.index',
+            'components.layouts.partials.header',
+        ], PromotionSwitcherComposer::class);
 
         $this->bootRoute();
     }

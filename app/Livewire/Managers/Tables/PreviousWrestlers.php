@@ -25,6 +25,7 @@ class PreviousWrestlers extends DataTableComponent
 
     protected string $databaseTableName = 'wrestlers_managers';
 
+    #[\Override]
     protected string $resourceName = 'wrestlers';
 
     /** @return ManagerAssignmentBuilder<WrestlerManager> */

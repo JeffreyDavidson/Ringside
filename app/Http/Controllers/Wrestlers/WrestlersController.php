@@ -21,6 +21,7 @@ class WrestlersController
                 'currentManagers',
                 'currentStable',
                 'currentTagTeam',
+                'currentChampionships.title',
                 'firstEmployment',
             ]),
         ]);

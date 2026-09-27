@@ -22,6 +22,7 @@ describe('Wrestlers Controller', function () {
             ->get(route('wrestlers.index'))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

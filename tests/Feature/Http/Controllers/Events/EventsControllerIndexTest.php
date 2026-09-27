@@ -22,6 +22,7 @@ describe('Events Controller', function () {
             ->get(route('events.index'))
             ->assertOk()
             ->assertViewIs('events.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

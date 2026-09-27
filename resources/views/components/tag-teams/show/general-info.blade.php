@@ -1,4 +1,5 @@
 <x-card.general-info>
+    <x-card.general-info.stat label="Status" :value="$tagTeam->status->label()" />
     <x-card.general-info.links label="Current Tag Team Partners">
         @forelse ($tagTeam->currentWrestlers as $wrestler)
             <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
@@ -32,15 +33,18 @@
         </x-card.general-info.links>
     @endif
 
-    {{-- @if ($tagTeam->currentChampionships->isNotEmpty())
+    @if ($tagTeam->currentChampionships->isNotEmpty())
         <x-card.general-info.link-list label="Current Title Championship(s)">
             @foreach ($tagTeam->currentChampionships as $currentChampionship)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
+                    <x-route-link
+                        :route="route('titles.show', $currentChampionship->title)"
+                        label="{{ $currentChampionship->title->name }}"
+                    />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
-    @endif --}}
+    @endif
 
     @if ($tagTeam->signature_move)
         <x-card.general-info.stat label="Signature Move" :value="$tagTeam->signature_move" />

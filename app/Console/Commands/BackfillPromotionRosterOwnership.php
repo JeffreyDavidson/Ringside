@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Actions\Promotions\AssignUnownedPromotionRecordsAction;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
@@ -13,7 +14,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 #[Signature('promotions:backfill-roster-ownership {promotion : The promotion ID that should own unassigned roster records} {--force : Apply the ownership updates} {--dry-run : Report the records that would be updated}')]
@@ -31,7 +31,7 @@ class BackfillPromotionRosterOwnership extends Command
         Stable::class,
     ];
 
-    public function handle(): int
+    public function handle(AssignUnownedPromotionRecordsAction $assignUnownedPromotionRecords): int
     {
         $promotion = Promotion::query()->find($this->argument('promotion'));
 
@@ -52,20 +52,10 @@ class BackfillPromotionRosterOwnership extends Command
         $total = 0;
 
         foreach (self::ROSTER_MODELS as $modelClass) {
-            $count = $modelClass::query()->whereNull('promotion_id')->count();
+            $count = $assignUnownedPromotionRecords->handle($promotion, $modelClass, $isDryRun);
             $total += $count;
 
             $this->line(sprintf('%s: %d unassigned record(s)', class_basename($modelClass), $count));
-
-            if (! $isDryRun && $count > 0) {
-                $modelClass::query()
-                    ->whereNull('promotion_id')
-                    ->chunkById(200, function (Collection $records) use ($promotion): void {
-                        $records->each(function (Model $record) use ($promotion): void {
-                            $record->forceFill(['promotion_id' => $promotion->getKey()])->save();
-                        });
-                    });
-            }
         }
 
         $this->info($isDryRun

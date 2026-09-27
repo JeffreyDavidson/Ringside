@@ -22,6 +22,7 @@ class PreviousTagTeams extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[\Override]
     protected string $resourceName = 'tag teams';
 
     protected string $databaseTableName = 'stables_tag_teams';

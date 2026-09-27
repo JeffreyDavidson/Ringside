@@ -21,6 +21,7 @@ class TagTeamsController
                 'currentManagers',
                 'currentStable',
                 'currentWrestlers',
+                'currentChampionships.title',
             ]),
         ]);
     }

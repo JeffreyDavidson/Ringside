@@ -7,12 +7,16 @@ import.meta.glob(['../media/**']);
 
 Alpine.plugin(AlpineUI);
 
+const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';
+const storedSidebarExpanded = window.localStorage.getItem(sidebarExpandedStorageKey);
+
 Alpine.store('sidebar', {
-    expanded: true,
+    expanded: storedSidebarExpanded === null ? true : storedSidebarExpanded === 'true',
     hovered: false,
     mobileOpen: false,
     toggle() {
         this.expanded = !this.expanded;
+        window.localStorage.setItem(sidebarExpandedStorageKey, String(this.expanded));
     },
     openMobile() {
         this.mobileOpen = true;

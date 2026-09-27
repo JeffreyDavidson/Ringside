@@ -75,6 +75,44 @@ describe('PreviousStables query', function (): void {
             $previousTagTeamStable->id,
         ]);
     });
+
+    it('includes associations whose membership and manager periods touch at an endpoint', function (): void {
+        // Arrange
+        $boundary = Date::parse('2024-01-01');
+        $wrestler = Wrestler::factory()->create();
+        $tagTeam = TagTeam::factory()->create();
+        $membershipBoundaryStable = Stable::factory()->create(['name' => 'Alpha Stable']);
+        $assignmentBoundaryStable = Stable::factory()->create(['name' => 'Beta Stable']);
+
+        $wrestler->managers()->attach($this->manager, [
+            'hired_at' => $boundary,
+            'fired_at' => $boundary->copy()->addMonth(),
+        ]);
+        $membershipBoundaryStable->wrestlers()->attach($wrestler, [
+            'joined_at' => $boundary->copy()->subMonth(),
+            'left_at' => $boundary,
+        ]);
+
+        $tagTeam->managers()->attach($this->manager, [
+            'hired_at' => $boundary->copy()->subMonth(),
+            'fired_at' => $boundary,
+        ]);
+        $assignmentBoundaryStable->tagTeams()->attach($tagTeam, [
+            'joined_at' => $boundary,
+            'left_at' => $boundary->copy()->addMonth(),
+        ]);
+        $table = new PreviousStables;
+        $table->managerId = $this->manager->id;
+
+        // Act
+        $stables = $table->builder()->get();
+
+        // Assert
+        expect($stables->modelKeys())->toBe([
+            $membershipBoundaryStable->id,
+            $assignmentBoundaryStable->id,
+        ]);
+    });
 });
 
 describe('PreviousStables rendering', function (): void {

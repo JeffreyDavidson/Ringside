@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Titles;
 
+use App\Builders\Concerns\FiltersByInactiveActivity;
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstActivityPeriod;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TitleBuilder extends Builder
 {
+    use FiltersByInactiveActivity;
     use FiltersByName;
     use FiltersByRetirementStatus;
     use LoadsFirstActivityPeriod;
@@ -55,10 +57,7 @@ class TitleBuilder extends Builder
 
     public function inactive(): static
     {
-        return $this->whereHas('previousActivityPeriods')
-            ->whereDoesntHave('currentActivityPeriod')
-            ->whereDoesntHave('futureActivityPeriod')
-            ->whereDoesntHave('currentRetirement');
+        return $this->whereInactiveActivity();
     }
 
     public function withPendingDebut(): static

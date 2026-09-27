@@ -22,6 +22,7 @@ describe('TagTeams Controller', function () {
             ->get(route('tag-teams.index'))
             ->assertOk()
             ->assertViewIs('tag-teams.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
 

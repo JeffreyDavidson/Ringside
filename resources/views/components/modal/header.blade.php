@@ -1,6 +1,12 @@
-<div class="flex items-center justify-between border-b border-solid border-gray-200 py-2.5 ps-5 pe-5 pr-2.5">
-    <h3 class="text-sm leading-5 font-semibold text-gray-900">{{ $this->getModalTitle() }}</h3>
-    <x-buttons.light size="xs" iconOnly wire:click="$dispatch('closeModal')">
-        <x-heroicon-m-x-mark class="size-4 text-gray-500" />
+<div class="border-ringside-line flex shrink-0 items-center justify-between border-b px-6 py-5">
+    <h2 id="modal-title" class="text-ringside-ink text-lg leading-6 font-semibold">{{ $this->getModalTitle() }}</h2>
+    <x-buttons.light
+        size="sm"
+        iconOnly
+        class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !rounded-none !border !bg-transparent"
+        aria-label="Close dialog"
+        wire:click="$dispatch('closeModal')"
+    >
+        <x-heroicon-m-x-mark class="size-4" />
     </x-buttons.light>
 </div>

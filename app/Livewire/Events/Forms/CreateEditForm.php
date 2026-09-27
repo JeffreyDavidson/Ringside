@@ -29,6 +29,7 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
+        $this->date = $model->date?->format('Y-m-d\\TH:i');
         $this->venue_id = $model->venue_id;
     }
 

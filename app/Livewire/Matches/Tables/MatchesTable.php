@@ -26,6 +26,7 @@ class MatchesTable extends DataTableComponent
 
     protected string $databaseTableName = 'events_matches';
 
+    #[\Override]
     protected string $resourceName = 'matches';
 
     /**

@@ -1,3 +1,5 @@
 <x-layouts.app>
-    <livewire:tag-teams.tables.main />
+    <x-layouts.workspace-canvas class="min-w-0">
+        <livewire:tag-teams.tables.main defer />
+    </x-layouts.workspace-canvas>
 </x-layouts.app>

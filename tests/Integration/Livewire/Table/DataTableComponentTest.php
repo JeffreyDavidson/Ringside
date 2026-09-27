@@ -12,6 +12,8 @@ use function Pest\Livewire\livewire;
 
 describe('data table component', function (): void {
     test('components can declare additional columns through the base extension point', function (): void {
+        User::factory()->create();
+
         // Act
         $component = livewire(TestDataTableComponent::class);
 
@@ -155,6 +157,31 @@ describe('data table pagination', function (): void {
 });
 
 describe('data table filtering', function (): void {
+    test('empty search results explain the query and can be cleared', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Searchable User']);
+        $component = livewire(TestDataTableComponent::class);
+
+        // Act
+        $component->set('search', 'no matching record');
+
+        // Assert
+        $component
+            ->assertSeeHtml('data-test="records-empty-state"')
+            ->assertSee(__('core.no_results_title'))
+            ->assertSee(__('core.no_results_description'))
+            ->assertSee('Clear search')
+            ->assertDontSee('Searchable User');
+
+        // Act
+        $component->set('search', '');
+
+        // Assert
+        $component
+            ->assertSee('Searchable User')
+            ->assertDontSee('Clear search');
+    });
+
     test('matches either searchable column without bypassing the selected filter', function (): void {
         // Arrange
         User::factory()->administrator()->create([

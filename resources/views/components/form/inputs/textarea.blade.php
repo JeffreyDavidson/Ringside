@@ -8,15 +8,10 @@
 ])
 
 @php
-    $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
-    if ($fieldName !== null && ! is_string($fieldName)) {
-        throw new \InvalidArgumentException('Form field names must be strings.');
-    }
-    if ($fieldName && str_contains($fieldName, '=')) {
-        $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
-    }
-
-    $inputId = $attributes->get('id', $fieldName);
+    $field = \App\View\Forms\FormFieldContext::from($name, $attributes, $errors);
+    $fieldName = $field->name;
+    $inputId = $field->id;
+    $describedBy = $field->describedBy;
 
     $textareaClasses = collect([
         'block w-full appearance-none outline-none resize-y',
@@ -29,11 +24,17 @@
         $size === 'lg' ? 'px-[calc(var(--spacing)*4)] py-[calc(var(--spacing)*2.5)] text-sm' : null,
     ])->filter()->implode(' ');
 
-    $textareaAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'rows']);
+    $textareaAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'rows', 'aria-describedby', 'aria-invalid']);
 @endphp
 
 @if ($label || $description)
-    <x-form.with-field :label="$label" :description="$description" :variant="$variant" :name="$fieldName">
+    <x-form.with-field
+        :label="$label"
+        :description="$description"
+        :variant="$variant"
+        :name="$fieldName"
+        :id="$inputId"
+    >
         <textarea
             {{
                 $textareaAttributes->merge([
@@ -41,6 +42,8 @@
                     'id' => $inputId,
                     'rows' => $rows,
                     'class' => $textareaClasses,
+                    'aria-invalid' => $field->hasError ? 'true' : null,
+                    'aria-describedby' => $describedBy ?: null,
                 ])
             }}
         >{{ $slot }}</textarea>
@@ -53,6 +56,8 @@
                 'id' => $inputId,
                 'rows' => $rows,
                 'class' => $textareaClasses,
+                'aria-invalid' => $field->hasError ? 'true' : null,
+                'aria-describedby' => $describedBy ?: null,
             ])
         }}
     >{{ $slot }}</textarea>

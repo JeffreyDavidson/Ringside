@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Promotions;
 
 use App\Enums\Promotions\MembershipRole;
-use App\Enums\Promotions\MembershipStatus;
 use App\Models\Users\User;
 use Database\Factories\Promotions\PromotionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -47,18 +46,18 @@ class Promotion extends Model
 
     public function hasActiveMember(User $user): bool
     {
-        return $this->users()
-            ->whereKey($user)
-            ->wherePivot('status', MembershipStatus::Active)
+        return $this->memberships()
+            ->forUser($user)
+            ->active()
             ->exists();
     }
 
     public function hasMemberWithRole(User $user, MembershipRole ...$roles): bool
     {
-        return $this->users()
-            ->whereKey($user)
-            ->wherePivotIn('role', $roles)
-            ->wherePivot('status', MembershipStatus::Active)
+        return $this->memberships()
+            ->forUser($user)
+            ->active()
+            ->withRole(...$roles)
             ->exists();
     }
 }

@@ -55,7 +55,7 @@ test('nested resources use resourceful controllers', function () {
         ['controller' => $controller, 'method' => $method] = controllerAction($route);
         $parentResource = Str::studly(Str::singular($segments['parent']));
         $nestedResource = Str::studly($segments['nested']);
-        $expectedController = "{$parentResource}{$nestedResource}Controller";
+        $expectedController = Str::pluralStudly("{$parentResource}{$nestedResource}").'Controller';
         $expectedRouteName = Str::of($segments['parent'])
             ->append('.', $segments['nested'], ".{$method}")
             ->toString();

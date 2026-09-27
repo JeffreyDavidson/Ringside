@@ -28,9 +28,31 @@ describe('stables table', function (): void {
         $component
             ->assertSuccessful()
             ->assertSee('Add Stable')
+            ->assertSeeHtml('data-test="stables-table"')
             ->assertSeeHtml('placeholder="Search stables"')
+            ->assertSee(__('stables.activation_date'))
+            ->assertSeeHtml('id="stables-date-from"')
+            ->assertSeeHtml('id="stables-date-to"')
+            ->assertSeeHtml('wire:model.live="filterValues.activation_date.minDate"')
+            ->assertSeeHtml('wire:model.live="filterValues.activation_date.maxDate"')
+            ->assertSeeHtml('aria-label="Actions for The Four Horsemen"')
+            ->assertSeeHtml('role="group"')
             ->assertSee('The Four Horsemen')
             ->assertSee(StableStatus::Active->label());
+    });
+
+    it('renders the shared empty state when no stables exist', function (): void {
+        // Arrange
+        $component = livewire(Main::class);
+
+        // Act
+        $component->assertSuccessful();
+
+        // Assert
+        $component
+            ->assertSee(__('stables.empty_title'))
+            ->assertSee(__('stables.empty_description'))
+            ->assertSeeHtml('data-test="stables-empty-state"');
     });
 
     it('filters stables by name and clears the search', function (): void {
@@ -54,6 +76,52 @@ describe('stables table', function (): void {
         $component
             ->assertSee('The Four Horsemen')
             ->assertSee('New World Order');
+    });
+
+    it('filters stables by activation date range', function (): void {
+        // Arrange
+        Stable::factory()
+            ->has(ActivityPeriod::factory()->started(Date::parse('2026-01-15')), 'activityPeriods')
+            ->create(['name' => 'January Stable']);
+        Stable::factory()
+            ->has(ActivityPeriod::factory()->started(Date::parse('2026-02-15')), 'activityPeriods')
+            ->create(['name' => 'February Stable']);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('filterValues.activation_date', [
+            'minDate' => '2026-01-01',
+            'maxDate' => '2026-01-31',
+        ]);
+
+        // Assert
+        $component
+            ->assertSee('January Stable')
+            ->assertDontSee('February Stable');
+    });
+
+    it('clears search, status, and activation date filters together', function (): void {
+        // Arrange
+        Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
+        Stable::factory()->retired()->create(['name' => 'The Heenan Family']);
+        $component = livewire(Main::class)
+            ->set('search', 'Missing')
+            ->set('filterValues.status', StableStatus::Retired->value)
+            ->set('filterValues.activation_date', [
+                'minDate' => '2026-01-01',
+                'maxDate' => '2026-12-31',
+            ]);
+
+        // Act
+        $component->call('clearFilters');
+
+        // Assert
+        $component
+            ->assertSet('search', '')
+            ->assertSet('filterValues.status', '')
+            ->assertSet('filterValues.activation_date', [])
+            ->assertSee('The Four Horsemen')
+            ->assertSee('The Heenan Family');
     });
 
     it('filters stables by status', function (StableStatus $status): void {
@@ -282,6 +350,8 @@ describe('stables table', function (): void {
 
         // Assert
         expect($loadedStable->relationLoaded('firstActivityPeriod'))->toBeTrue()
+            ->and($loadedStable->relationLoaded('currentWrestlers'))->toBeTrue()
+            ->and($loadedStable->relationLoaded('currentTagTeams'))->toBeTrue()
             ->and($loadedStable->status)->toBe(StableStatus::Active);
     });
 });

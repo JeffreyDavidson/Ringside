@@ -7,6 +7,7 @@ namespace App\Livewire\Table;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use LogicException;
 use Stringable;
@@ -147,6 +148,18 @@ class Column
         }
 
         return $this->resolveStringValue(data_get($row, $this->field, ''));
+    }
+
+    /**
+     * Resolve markup for a column that explicitly opts into trusted HTML output.
+     */
+    public function resolveHtmlValue(mixed $row): HtmlString
+    {
+        if (! $this->isHtml()) {
+            throw new LogicException('Only HTML columns may resolve trusted HTML output.');
+        }
+
+        return new HtmlString($this->resolveValue($row));
     }
 
     private function resolveStringValue(mixed $value): string
