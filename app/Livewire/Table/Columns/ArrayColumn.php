@@ -7,6 +7,7 @@ namespace App\Livewire\Table\Columns;
 use App\Livewire\Table\Column;
 use Closure;
 use LogicException;
+use Stringable;
 
 class ArrayColumn extends Column
 {
@@ -25,6 +26,9 @@ class ArrayColumn extends Column
         return $this;
     }
 
+    /**
+     * Format each item. The callback owns its HTML and must return safe, already-escaped markup.
+     */
     public function outputFormat(Closure $callback): static
     {
         $this->outputFormatCallback = $callback;
@@ -70,7 +74,7 @@ class ArrayColumn extends Column
             : collect();
 
         if ($items->isEmpty()) {
-            return $this->emptyValue;
+            return e($this->emptyValue);
         }
 
         if ($this->outputFormatCallback instanceof Closure) {
@@ -78,7 +82,17 @@ class ArrayColumn extends Column
                 ->implode($this->separator);
         }
 
-        return $items->implode($this->separator);
+        return $items->map(fn (mixed $item): string => $this->escapePlainItem($item))
+            ->implode($this->separator);
+    }
+
+    private function escapePlainItem(mixed $item): string
+    {
+        if (! is_scalar($item) && ! $item instanceof Stringable) {
+            throw new LogicException('Array column items without an output format must be strings.');
+        }
+
+        return e((string) $item);
     }
 
     #[\Override]
