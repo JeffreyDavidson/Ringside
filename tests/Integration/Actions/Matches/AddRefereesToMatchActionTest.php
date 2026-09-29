@@ -8,6 +8,7 @@ use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
+use Illuminate\Support\Facades\DB;
 
 test('it rejects match assignment when no referee is available', function () {
     $match = EventMatch::factory()->create();
@@ -88,3 +89,20 @@ test('it does not duplicate an existing referee assignment', function () {
 
     expect($match->referees()->whereKey($referee)->count())->toBe(1);
 });
+
+test('it rejects an empty referee list without assigning anyone', function (Closure $assign) {
+    $match = EventMatch::factory()->create();
+
+    expect(fn () => $assign(resolve(AddRefereesToMatchAction::class), $match))
+        ->toThrow(EntityNotAvailableException::class, 'Selected referees must all be eligible for match assignment.')
+        ->and($match->referees()->exists())->toBeFalse();
+})->with([
+    'through handle' => [
+        fn (AddRefereesToMatchAction $action, EventMatch $match) => $action->handle($match, collect()),
+    ],
+    'within a caller transaction' => [
+        fn (AddRefereesToMatchAction $action, EventMatch $match) => DB::transaction(
+            fn () => $action->handleWithinTransaction($match->refreshForUpdate(), collect()),
+        ),
+    ],
+]);
