@@ -139,7 +139,7 @@ git cz
 ```
 
 ### CI/CD Integration
-Pull Request titles are automatically validated against conventional commits format. PRs with non-conforming titles will fail CI checks.
+No workflow in `.github/workflows/` validates commit messages or pull request titles. Check the format manually (and the final squash commit subject) before merging.
 
 ## Tools and Resources
 
@@ -188,8 +188,7 @@ git commit -m "feat(tag-teams): add new partnership management system"
 - ✅ **All merge commits** to develop/main
 
 ### Validation Points
-- **Pre-commit hooks** validate message format
-- **CI/CD pipeline** validates PR titles
+- **Manual review** of commit messages and PR titles (no hook or workflow validates the format)
 - **Code review** process includes format verification
 - **Automated tools** generate changelog and releases
 

@@ -5,30 +5,19 @@
 - **ALL code changes must be on properly named feature branches**
 - **ALL changes require PR approval before merging**
 
-## **Branch Protection Enforcement**
-**GitHub branch protection rules are enabled for `develop` and `main` branches:**
-
-- ✅ **PR Required**: Direct pushes are blocked - all changes must go through pull requests
-- ✅ **Status Checks Required**: CI workflow must pass before merge is allowed
-- ✅ **Signed Commits Required**: All commits must be cryptographically signed
-- ✅ **Auto-Styling Excluded**: Pint workflow cannot make direct commits to protected branches
+## **Branch Protection**
+Branch protection is configured in GitHub repository settings and is **not verifiable from this repository**. Check *Settings > Branches* for the rules currently applied to `develop` and `main`. See [GitHub Actions & CI/CD](ci-cd.md) for which workflows run on pull requests.
 
 **What this means in practice:**
 ```bash
-# ❌ This will FAIL - GitHub blocks direct pushes
+# ❌ Against project convention - never commit or push directly to develop or main
 git push origin develop
 
 # ✅ This is the normal way to get changes into develop/main
-git checkout -b feature/my-changes
-git push origin feature/my-changes
+git checkout -b feat/my-changes
+git push origin feat/my-changes
 gh pr create --base develop
 ```
-
-**Protection Benefits:**
-- **Prevents accidents** like auto-styling workflows making direct commits
-- **Enforces code review** through PR process  
-- **Ensures CI passes** before any code reaches protected branches
-- **Maintains clean history** with proper commit signing
 
 ## Branch Naming Convention
 - `feat/feature-name` - New features
