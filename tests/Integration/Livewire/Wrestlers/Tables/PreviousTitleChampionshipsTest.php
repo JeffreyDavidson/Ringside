@@ -209,3 +209,27 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
         'basic user' => ['basic user'],
     ]);
 });
+
+describe('PreviousTitleChampionshipsTable Deleted Titles', function () {
+    it('renders a championship without a link when its title was deleted', function (): void {
+        // Arrange
+        $title = Title::factory()->singles()->create(['name' => 'Vanished Singles Title']);
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($this->wrestler)
+            ->wonOn('2024-01-01')
+            ->lostOn('2024-06-01')
+            ->create();
+        $title->delete();
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('2024-01-01')
+            ->assertDontSee('Vanished Singles Title')
+            ->assertDontSeeHtml(route('titles.show', $title));
+    });
+});

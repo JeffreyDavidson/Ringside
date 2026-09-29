@@ -8,8 +8,21 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
 use Livewire\Component;
+
+/** @return array<int, string> */
+function validationErrorKeys(Closure $validation): array
+{
+    try {
+        $validation();
+    } catch (ValidationException $exception) {
+        return array_keys($exception->errors());
+    }
+
+    return [];
+}
 
 describe('stable create and edit form', function (): void {
     it('maps stable fields and selected members to typed application data', function (): void {
@@ -79,5 +92,28 @@ describe('stable create and edit form', function (): void {
             ->and($form->wrestlers)->toBe([$wrestler->id])
             ->and($form->tag_teams)->toBe([$tagTeam->id])
             ->and($selectedStable->is($stable))->toBeTrue();
+    });
+
+    it('treats a numeric string model key as the stable being edited when checking membership', function (): void {
+        // Arrange
+        $memberOfOtherStable = Wrestler::factory()->bookable()->create();
+        $otherStable = Stable::factory()->create();
+        $otherStable->wrestlers()->attach($memberOfOtherStable, ['joined_at' => '2024-01-01']);
+        $member = Wrestler::factory()->bookable()->create();
+        $stable = Stable::factory()->create(['name' => 'The Alliance']);
+        $stable->wrestlers()->attach($member, ['joined_at' => '2024-01-01']);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->modelId = (string) $stable->id;
+        $form->name = 'The Alliance';
+
+        // Act
+        $form->wrestlers = [$member->id];
+        $currentMemberErrors = validationErrorKeys(fn () => $form->validate());
+        $form->wrestlers = [$memberOfOtherStable->id];
+        $otherStableMemberErrors = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($currentMemberErrors)->toBeEmpty()
+            ->and($otherStableMemberErrors)->toBe(['form.wrestlers.0']);
     });
 });

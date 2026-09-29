@@ -162,3 +162,4 @@ function requiredReflectionType(?ReflectionType $type): ReflectionType
 
 require_once __DIR__.'/Helpers/TestHelpers.php';
 require_once __DIR__.'/Helpers/ReflectionHelpers.php';
+require_once __DIR__.'/Helpers/FakerHelpers.php';

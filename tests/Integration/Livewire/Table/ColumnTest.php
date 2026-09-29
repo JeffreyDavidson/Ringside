@@ -114,4 +114,24 @@ describe('table column values', function (): void {
         // Assert
         expect($value)->toBe('Score: 42');
     });
+
+    test('trusted html columns resolve their value as html', function (): void {
+        // Arrange
+        $column = Column::make('Link', 'markup')->html();
+
+        // Act
+        $value = $column->resolveHtmlValue(['markup' => '<b>Bold</b>']);
+
+        // Assert
+        expect($value->toHtml())->toBe('<b>Bold</b>');
+    });
+
+    test('columns that did not opt into html refuse to resolve trusted html', function (): void {
+        // Arrange
+        $column = Column::make('Link', 'markup');
+
+        // Act / Assert
+        expect(fn () => $column->resolveHtmlValue(['markup' => '<b>Bold</b>']))
+            ->toThrow(LogicException::class, 'Only HTML columns may resolve trusted HTML output.');
+    });
 });
