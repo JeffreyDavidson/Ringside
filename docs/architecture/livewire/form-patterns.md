@@ -24,8 +24,7 @@ changes and protected operations are authorized at the modal boundary.
 - stores a locked model identifier;
 - hydrates editable attributes through `setModel()`;
 - distinguishes create and edit state;
-- provides modal-title display values;
-- invokes the optional `loadExtraData()` hook; and
+- invokes the optional `loadModelData()` hook; and
 - requires each form to define its validation rules.
 
 It deliberately has no `store()`, `getModelClass()`, or `getModelData()` method.
@@ -33,8 +32,6 @@ It deliberately has no `store()`, `getModelClass()`, or `getModelData()` method.
 ```php
 abstract class BaseForm extends Form
 {
-    protected ?Model $formModel = null;
-
     #[Locked]
     public int|string|null $modelId = null;
 
@@ -44,7 +41,7 @@ abstract class BaseForm extends Form
 
     public function isEditing(): bool;
 
-    protected function loadExtraData(): void;
+    protected function loadModelData(Model $model): void;
 
     abstract protected function rules(): array;
 }
@@ -56,7 +53,7 @@ Each domain form extends `BaseForm` and normally contains:
 
 1. typed public properties matching the editable fields;
 2. `rules()` and, when useful, `validationAttributes()`;
-3. `loadExtraData()` for state stored outside the model's direct attributes;
+3. `loadModelData()` for state stored outside the model's direct attributes;
 4. `toData()` to construct the Action's typed input; and
 5. a typed model lookup used by edit Actions when required.
 
@@ -108,11 +105,13 @@ still enforcing transactional invariants that must hold for every caller.
 ```php
 protected function rules(): array
 {
+    $manager = $this->isEditing() ? $this->manager() : null;
+
     return [
         'employment_date' => [
             'nullable',
             'date',
-            new CanChangeEmploymentDate($this->formModel),
+            new CanChangeEmploymentDate($manager),
         ],
     ];
 }
@@ -121,17 +120,17 @@ protected function rules(): array
 ## Editing and extra data
 
 `BaseForm::setModel()` fills direct Eloquent attributes and then calls
-`loadExtraData()`. Override that hook only for values derived from casts or related
+`loadModelData()`. Override that hook only for values derived from casts or related
 records that cannot be filled from the model's attribute array.
 
 ```php
-protected function loadExtraData(): void
+protected function loadModelData(Model $model): void
 {
-    if (! $this->formModel instanceof Manager) {
+    if (! $model instanceof Manager) {
         return;
     }
 
-    $this->employment_date = $this->formModel
+    $this->employment_date = $model
         ->firstEmployment?->started_at?->toDateString();
 }
 ```

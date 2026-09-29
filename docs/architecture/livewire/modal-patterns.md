@@ -11,44 +11,36 @@ Domain form modals extend `BaseFormModal`; specialized workflows may extend
 - loads an existing model by identifier or initializes create state;
 - assigns the model to its form;
 - restores the original model state when clearing an edit form; and
-- derives a create or edit title.
+- derives a create or edit title (see below).
 
 It does not validate input or persist a model.
+
+### Titles
+
+`getModalTitle()` resolves the model from the form's locked `modelId` on every call
+(no cached title property) and reads the attribute named by `$modelTitleField`
+(`name` by default; Managers and Referees use `full_name`). The strings live in
+`core.modal.edit` (`Edit :name`) and `core.modal.add` (`Add :model`). Modals that need
+different wording, such as Stables, Titles, Venues, Events, Users, Matches, and Tag
+Teams, override `getModalTitle()` and use `<domain>.modal.create` / `.edit` keys;
+`ResultModal` uses `matches.modal.record_result` and `.correct_result`. Never
+hard-code English titles in the modal.
 
 ## Base form modal responsibilities
 
 `BaseFormModal` adds the shared form submission lifecycle:
 
-```php
-abstract class BaseFormModal extends BaseModal
-{
-    abstract protected function getModelClass(): string;
+- `openModal($modelId)` mounts create or edit state, authorizes, and marks the modal
+  open;
+- `submitForm()` (also reachable as `save()`) authorizes, calls `storeForm()`, and on
+  success dispatches `refreshDatatable`, closes the modal, dispatches `form-submitted`,
+  and dispatches the optional `$createdEventName` / `$updatedEventName`; and
+- the default `storeForm()` validates the form and calls `createForm()` or
+  `updateForm()`, which throw `LogicException` unless the domain modal overrides them
+  (or overrides `storeForm()` entirely, as the Matches modal does).
 
-    abstract protected function storeForm(): bool;
-
-    public function submitForm(): bool
-    {
-        if ($this->model !== null) {
-            $this->form->setModel($this->model);
-        }
-
-        if (! $this->storeForm()) {
-            return false;
-        }
-
-        $this->dispatch('refreshDatatable');
-        $this->closeModal();
-        $this->dispatch('closeModal');
-        $this->dispatch('form-submitted');
-
-        return true;
-    }
-}
-```
-
-The modal supplies only the concrete model class needed for edit-mode lookup.
-Livewire initializes the typed public form property, and each component's
-`render()` method owns its Blade view directly.
+Concrete modals supply `getModelClass()` and the typed public `$form` property; each
+component's `render()` method owns its Blade view.
 
 ## Domain modal pattern
 
@@ -76,19 +68,14 @@ final class FormModal extends BaseFormModal
         $this->updateAction = $updateAction;
     }
 
-    protected function storeForm(): bool
+    protected function createForm(): void
     {
-        $this->form->validate();
-
-        if ($this->form->isEditing()) {
-            $this->updateAction->handle($this->form->manager(), $this->form->toData());
-
-            return true;
-        }
-
         $this->createAction->handle($this->form->toData());
+    }
 
-        return true;
+    protected function updateForm(): void
+    {
+        $this->updateAction->handle($this->form->manager(), $this->form->toData());
     }
 }
 ```
@@ -98,27 +85,15 @@ and do not move their mutation logic into the modal.
 
 ## Authorization
 
-Authorize immediately before a protected operation. For modals that expose create
-and edit entry points, authorize the corresponding ability when opening or
-submitting the modal. A locked model identifier protects transport integrity but
-does not replace authorization.
-
-```php
-public function openModal(mixed $modelId = null): void
-{
-    if ($modelId === null) {
-        Gate::authorize('create', EventMatch::class);
-    } else {
-        Gate::authorize('update', EventMatch::query()->findOrFail($modelId));
-    }
-
-    parent::openModal($modelId);
-}
-```
+`BaseFormModal` calls `authorizeFormAccess()` both when the modal opens and when the
+form is submitted: `Gate::authorize('create', $modelClass)` in create mode, or
+`Gate::authorize('update', $model)` for the model resolved from the locked
+`modelId`. A locked model identifier protects transport integrity but does not replace
+authorization.
 
 ## Success and failure behavior
 
-Return `false` from `storeForm()` only when the modal should remain open without a
+Return `false` from an overridden `storeForm()` only when the modal should remain open without a
 successful completion event. On success, `BaseFormModal` refreshes tables, closes
 the modal, and dispatches `form-submitted`.
 

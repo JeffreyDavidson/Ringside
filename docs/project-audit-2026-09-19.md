@@ -1,5 +1,7 @@
 # Ringside project audit and remediation plan
 
+> Status: superseded, partially addressed. Remediation is tracked in git history (Sept 2026); see [refactoring-backlog.md](architecture/refactoring-backlog.md). Findings A01, A11, and A13 are only partially addressed and remain open observations.
+
 Date: 2026-09-19. Reviewed checkout: `1c6fea627`, branch `chore/standardize-project-tooling`.
 Canonical planning card: Ringside Hermes Kanban `t_efa022de`. This document is the evidence and proposed sequence; execution status belongs on the board. No implementation workers were dispatched.
 
