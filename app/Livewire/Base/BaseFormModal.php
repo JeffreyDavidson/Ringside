@@ -77,6 +77,13 @@ abstract class BaseFormModal extends BaseModal
         return true;
     }
 
+    /**
+     * Validate and persist the form through createForm()/updateForm().
+     *
+     * Overrides that translate a domain failure into a form error (see the Events and Matches
+     * modals) return false after adding the error, which keeps the modal open. This default
+     * always returns true because validation failures throw instead.
+     */
     protected function storeForm(): bool
     {
         $this->form->validate();
@@ -92,11 +99,13 @@ abstract class BaseFormModal extends BaseModal
         return true;
     }
 
+    /** Must be overridden unless the modal overrides storeForm() without calling parent::storeForm(). */
     protected function createForm(): void
     {
         throw new LogicException('A form modal must define createForm().');
     }
 
+    /** Must be overridden unless the modal overrides storeForm() without calling parent::storeForm(). */
     protected function updateForm(): void
     {
         throw new LogicException('A form modal must define updateForm().');
