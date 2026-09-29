@@ -15,13 +15,16 @@ use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Livewire\Concerns\ChecksIndividualLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Actions extends Component
 {
+    use ChecksIndividualLifecycleEligibility;
     use ExecutesRosterActions;
 
     public Wrestler $wrestler;
@@ -74,6 +77,12 @@ class Actions extends Component
     public function restore(RestoreAction $restoreAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Wrestler, $this->wrestler, fn () => $restoreAction->handle($this->wrestler));
+    }
+
+    public function canPerform(RosterLifecycleAction $action): bool
+    {
+        return Gate::allows($action->ability(), $this->wrestler)
+            && $this->isEligibleFor($action, $this->wrestler);
     }
 
     public function render(): View

@@ -15,13 +15,16 @@ use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Livewire\Concerns\ChecksIndividualLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Actions extends Component
 {
+    use ChecksIndividualLifecycleEligibility;
     use ExecutesRosterActions;
 
     public Referee $referee;
@@ -74,6 +77,12 @@ class Actions extends Component
     public function restore(RestoreAction $restoreAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Referee, $this->referee, fn () => $restoreAction->handle($this->referee));
+    }
+
+    public function canPerform(RosterLifecycleAction $action): bool
+    {
+        return Gate::allows($action->ability(), $this->referee)
+            && $this->isEligibleFor($action, $this->referee);
     }
 
     public function render(): View

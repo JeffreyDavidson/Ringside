@@ -10,6 +10,7 @@ use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Managers\Components\Actions;
 use App\Models\Roster\Managers\Manager;
 use JMac\Testing\Double;
@@ -117,4 +118,72 @@ describe('manager actions component', function (): void {
         'clearFromInjury',
         'restore',
     ]);
+
+    test('it only shows the lifecycle buttons that fit the manager state', function (
+        string $state,
+        array $visible,
+        array $hidden,
+    ): void {
+        // Arrange
+        $manager = Manager::factory()->{$state}()->create();
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['manager' => $manager]);
+
+        // Assert
+        foreach ($visible as $method) {
+            $component->assertSeeHtml("wire:click=\"{$method}\"");
+        }
+
+        foreach ($hidden as $method) {
+            $component->assertDontSeeHtml("wire:click=\"{$method}\"");
+        }
+    })->with([
+        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'unretire', 'restore']],
+        'employed' => ['employed', ['release', 'suspend', 'injure', 'retire'], ['employ', 'reinstate', 'clearFromInjury', 'unretire', 'restore']],
+        'suspended' => ['suspended', ['release', 'reinstate', 'retire'], ['employ', 'suspend', 'injure', 'clearFromInjury', 'unretire', 'restore']],
+        'injured' => ['injured', ['release', 'clearFromInjury', 'retire'], ['employ', 'suspend', 'reinstate', 'injure', 'unretire', 'restore']],
+        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'restore']],
+    ]);
+
+    test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {
+        // Arrange
+        $manager = Manager::factory()->unemployed()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['manager' => $manager]);
+
+        // Act
+        $component->call('employ');
+
+        // Assert
+        $component
+            ->assertDispatched('manager-updated')
+            ->assertSeeHtml('wire:click="retire"')
+            ->assertDontSeeHtml('wire:click="employ"');
+
+        // Act
+        $component->call('retire');
+
+        // Assert
+        $component
+            ->assertSeeHtml('wire:click="unretire"')
+            ->assertDontSeeHtml('wire:click="retire"');
+    });
+
+    test('it hides eligible lifecycle actions from users who are not authorized', function (): void {
+        // Arrange
+        $manager = Manager::factory()->unemployed()->create();
+
+        actingAs(basicUser());
+
+        // Act
+        $component = livewire(Actions::class, ['manager' => $manager]);
+
+        // Assert
+        expect($component->instance()->canPerform(RosterLifecycleAction::Employ))->toBeFalse();
+        $component->assertDontSeeHtml('wire:click="employ"');
+    });
 });

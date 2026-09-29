@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Referees\RefereesController;
+use App\Livewire\Referees\Components\Actions;
 use App\Livewire\Referees\Tables\PreviousMatches;
 use App\Models\Roster\Referees\Referee;
 
@@ -31,6 +32,16 @@ describe('Referees Controller', function () {
             ->assertViewHas('referee', $this->referee)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousMatches::class);
+    });
+
+    /**
+     * @see RefereesController::show()
+     */
+    test('show renders the lifecycle actions component', function () {
+        actingAs(administrator())
+            ->get(route('referees.show', $this->referee))
+            ->assertOk()
+            ->assertSeeLivewire(Actions::class);
     });
 
     /**
