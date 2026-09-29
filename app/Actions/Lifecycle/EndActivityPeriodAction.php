@@ -6,6 +6,7 @@ namespace App\Actions\Lifecycle;
 
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Contracts\HasActivityPeriods;
+use App\Support\ModelKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -32,12 +33,9 @@ class EndActivityPeriodAction
                 ->first();
 
             if (! $currentActivityPeriod) {
-                $activeableKey = $activeable->getKey();
-                $activeableIdentifier = is_int($activeableKey) || is_string($activeableKey)
-                    ? $activeableKey
-                    : 'unknown';
+                $activeableKey = ModelKey::of($activeable);
 
-                throw new LogicException(class_basename($activeable)." {$activeableIdentifier} does not have a current activity period.");
+                throw new LogicException(class_basename($activeable)." {$activeableKey} does not have a current activity period.");
             }
 
             if ($endedAt->lt($currentActivityPeriod->started_at)) {

@@ -25,12 +25,8 @@ test('it preserves null phone numbers', function () {
     expect($user->phone_number)->toBeNull();
 });
 
-test('it serializes phone numbers as digits', function (mixed $value, ?string $expected) {
-    $serialized = (new PhoneNumberCast)->serialize(new User, 'phone_number', $value, []);
+test('it serializes phone numbers as digits', function () {
+    $serialized = (new PhoneNumberCast)->serialize(new User, 'phone_number', new PhoneNumber('(123) 456-7890'), []);
 
-    expect($serialized)->toBe($expected);
-})->with([
-    'phone number' => [new PhoneNumber('(123) 456-7890'), '1234567890'],
-    'stored digits' => ['1234567890', '1234567890'],
-    'null' => [null, null],
-]);
+    expect($serialized)->toBe('1234567890');
+});

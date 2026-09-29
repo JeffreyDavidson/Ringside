@@ -119,30 +119,30 @@ describe('users table', function (): void {
     it('searches users by name and clears the search', function (): void {
         // Arrange
         User::factory()->create([
-            'first_name' => 'John',
-            'last_name' => 'Smith',
+            'first_name' => 'Xylo',
+            'last_name' => 'Quartzenberg',
         ]);
         User::factory()->create([
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
+            'first_name' => 'Zephyra',
+            'last_name' => 'Vandermolen',
         ]);
         $component = livewire(Main::class);
 
         // Act
-        $component->set('search', 'John');
+        $component->set('search', 'Xylo');
 
         // Assert
         $component
-            ->assertSee('John Smith')
-            ->assertDontSee('Jane Doe');
+            ->assertSee('Xylo Quartzenberg')
+            ->assertDontSee('Zephyra Vandermolen');
 
         // Act
         $component->set('search', '');
 
         // Assert
         $component
-            ->assertSee('John Smith')
-            ->assertSee('Jane Doe');
+            ->assertSee('Xylo Quartzenberg')
+            ->assertSee('Zephyra Vandermolen');
     });
 
     it('searches users by email', function (): void {

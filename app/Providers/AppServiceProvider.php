@@ -89,7 +89,6 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer([
             'components.topbar.profile',
-            'components.sidebar',
             'components.sidebar.index',
             'components.layouts.partials.header',
         ], PromotionSwitcherComposer::class);
