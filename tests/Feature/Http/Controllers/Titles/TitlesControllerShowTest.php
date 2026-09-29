@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
+use App\Livewire\Titles\Components\Actions;
 use App\Livewire\Titles\Tables\PreviousTitleChampionships;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Titles\Title;
@@ -34,6 +35,16 @@ describe('Titles Controller', function () {
             ->assertViewHas('title', $this->title)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class);
+    });
+
+    /**
+     * @see TitlesController::show()
+     */
+    test('show renders the lifecycle actions component', function () {
+        actingAs(administrator())
+            ->get(route('titles.show', $this->title))
+            ->assertOk()
+            ->assertSeeLivewire(Actions::class);
     });
 
     /**

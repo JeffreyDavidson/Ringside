@@ -8,6 +8,7 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
 use JMac\Testing\Double;
@@ -92,4 +93,63 @@ describe('title actions component', function (): void {
         'reinstate',
         'restore',
     ]);
+
+    test('it only shows the lifecycle buttons that fit the title state', function (
+        string $state,
+        array $visible,
+        array $hidden,
+    ): void {
+        // Arrange
+        $title = Title::factory()->{$state}()->create();
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['title' => $title]);
+
+        // Assert
+        foreach ($visible as $method) {
+            $component->assertSeeHtml("wire:click=\"{$method}\"");
+        }
+
+        foreach ($hidden as $method) {
+            $component->assertDontSeeHtml("wire:click=\"{$method}\"");
+        }
+    })->with([
+        'undebuted' => ['undebuted', ['debut'], ['retire', 'unretire', 'deactivate', 'reinstate', 'restore']],
+        'active' => ['active', ['retire', 'deactivate'], ['debut', 'unretire', 'reinstate', 'restore']],
+        'inactive' => ['inactive', ['retire', 'reinstate'], ['debut', 'unretire', 'deactivate', 'restore']],
+        'retired' => ['retired', ['unretire'], ['debut', 'retire', 'deactivate', 'reinstate', 'restore']],
+    ]);
+
+    test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {
+        // Arrange
+        $title = Title::factory()->undebuted()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['title' => $title]);
+
+        // Act
+        $component->call('debut');
+
+        // Assert
+        $component
+            ->assertDispatched('title-updated')
+            ->assertSeeHtml('wire:click="deactivate"')
+            ->assertDontSeeHtml('wire:click="debut"');
+    });
+
+    test('it hides eligible lifecycle actions from users who are not authorized', function (): void {
+        // Arrange
+        $title = Title::factory()->undebuted()->create();
+
+        actingAs(basicUser());
+
+        // Act
+        $component = livewire(Actions::class, ['title' => $title]);
+
+        // Assert
+        expect($component->instance()->canPerform(TitleLifecycleTransition::Debut))->toBeFalse();
+        $component->assertDontSeeHtml('wire:click="debut"');
+    });
 });

@@ -1,33 +1,31 @@
+@use('App\Enums\Roster\RosterLifecycleAction')
+
 <div class="flex flex-wrap gap-2">
-    @can('employ', $tagTeam)
-        <x-buttons.success wire:click="employ">{{ __('Employ') }}</x-buttons.success>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Employ))
+        <x-buttons.success wire:click="employ">{{ __('core.lifecycle_actions.employ') }}</x-buttons.success>
+    @endif
 
-    @can('release', $tagTeam)
-        <x-buttons.danger wire:click="release">{{ __('Release') }}</x-buttons.danger>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Release))
+        <x-buttons.danger wire:click="release">{{ __('core.lifecycle_actions.release') }}</x-buttons.danger>
+    @endif
 
-    @can('suspend', $tagTeam)
-        <x-buttons.warning wire:click="suspend">{{ __('Suspend') }}</x-buttons.warning>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Suspend))
+        <x-buttons.warning wire:click="suspend">{{ __('core.lifecycle_actions.suspend') }}</x-buttons.warning>
+    @endif
 
-    @can('reinstate', $tagTeam)
-        <x-buttons.success wire:click="reinstate">{{ __('Reinstate') }}</x-buttons.success>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Reinstate))
+        <x-buttons.success wire:click="reinstate">{{ __('core.lifecycle_actions.reinstate') }}</x-buttons.success>
+    @endif
 
-    @can('retire', $tagTeam)
-        <x-buttons.warning wire:click="retire">{{ __('Retire') }}</x-buttons.warning>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Retire))
+        <x-buttons.warning wire:click="retire">{{ __('core.lifecycle_actions.retire') }}</x-buttons.warning>
+    @endif
 
-    @can('unretire', $tagTeam)
-        <x-buttons.success wire:click="unretire">{{ __('Unretire') }}</x-buttons.success>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Unretire))
+        <x-buttons.success wire:click="unretire">{{ __('core.lifecycle_actions.unretire') }}</x-buttons.success>
+    @endif
 
-    @can('delete', $tagTeam)
-        <x-buttons.danger wire:click="delete">{{ __('Delete') }}</x-buttons.danger>
-    @endcan
-
-    @can('restore', $tagTeam)
-        <x-buttons.success wire:click="restore">{{ __('Restore') }}</x-buttons.success>
-    @endcan
+    @if ($this->canPerform(RosterLifecycleAction::Restore))
+        <x-buttons.success wire:click="restore">{{ __('core.lifecycle_actions.restore') }}</x-buttons.success>
+    @endif
 </div>
