@@ -75,7 +75,7 @@ describe('Wrestlers Controller', function () {
      */
     test('show renders the related data displayed by the wrestler summary', function () {
         $wrestler = Wrestler::factory()->employed()->onCurrentTagTeam(TagTeam::factory()->create(['name' => 'Tag Team Alpha']))->create();
-        $manager = Manager::factory()->create();
+        $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
             ->for(Title::factory()->create(['name' => 'Heavyweight Belt']), 'title')
@@ -89,6 +89,7 @@ describe('Wrestlers Controller', function () {
             ->assertSee('Tag Team Alpha')
             ->assertSee($manager->full_name)
             ->assertSee('Heavyweight Belt')
+            ->assertDontSeeHtml('&amp;#039;')
             ->assertSee($wrestler->employments()->firstOrFail()->started_at->toDateString());
     });
 

@@ -74,7 +74,9 @@ describe('TagTeams Controller', function () {
      */
     test('show renders the related data displayed by the tag team summary', function () {
         $tagTeam = TagTeam::factory()->employed()->create();
-        $manager = Manager::factory()->create();
+        $tagTeam->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
+        $tagTeam->currentWrestlers->skip(1)->firstOrFail()->update(['name' => "D'Angelo & Sons"]);
+        $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
         $tagTeam->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
             ->for(Title::factory()->create(['name' => 'Tag Team Belt']), 'title')
@@ -89,6 +91,7 @@ describe('TagTeams Controller', function () {
             ->assertSee('Tag Team Belt');
 
         $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => $response->assertSee($wrestler->name));
+        $response->assertDontSeeHtml('&amp;#039;');
     });
 
     /**
