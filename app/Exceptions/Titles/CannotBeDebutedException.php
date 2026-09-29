@@ -15,11 +15,4 @@ final class CannotBeDebutedException extends BaseBusinessException
 
         return new self("{$context} has already been debuted and cannot be debuted again.");
     }
-
-    public static function retired(Title $title): static
-    {
-        $context = self::formatModelContext($title);
-
-        return new self("{$context} is retired and cannot be debuted.");
-    }
 }

@@ -12,27 +12,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 final class CannotBeReinstatedException extends BaseBusinessException
 {
-    public static function unemployed(Wrestler|Manager|Referee $entity): static
-    {
-        $context = self::formatModelContext($entity);
-
-        return new self("{$context} is unemployed and cannot be reinstated.");
-    }
-
-    public static function retired(Wrestler|Manager|Referee $entity): static
-    {
-        $context = self::formatModelContext($entity);
-
-        return new self("{$context} is retired and cannot be reinstated.");
-    }
-
-    public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
-    {
-        $context = self::formatModelContext($entity);
-
-        return new self("{$context} has not been officially employed and cannot be reinstated.");
-    }
-
     public static function injured(Wrestler|Manager|Referee $entity, ?string $injuryDetails = null): static
     {
         $context = self::formatModelContext($entity);

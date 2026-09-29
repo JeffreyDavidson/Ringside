@@ -30,13 +30,6 @@ final class CannotBeDisbandedException extends BaseBusinessException
         return new self("{$context} is already disbanded.");
     }
 
-    public static function retired(Stable $stable): static
-    {
-        $context = self::formatModelContext($stable);
-
-        return new self("{$context} is retired and cannot be disbanded.");
-    }
-
     public static function hasFutureActivation(Stable $stable): static
     {
         $context = self::formatModelContext($stable);

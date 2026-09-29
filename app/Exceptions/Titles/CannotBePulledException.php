@@ -15,11 +15,4 @@ final class CannotBePulledException extends BaseBusinessException
 
         return new self("{$context} is not currently active and cannot be pulled from competition.");
     }
-
-    public static function retired(Title $title): static
-    {
-        $context = self::formatModelContext($title);
-
-        return new self("{$context} is retired and cannot be pulled from competition.");
-    }
 }

@@ -51,10 +51,6 @@ final readonly class StableActivityEligibility
             throw CannotBeEstablishedException::established($stable);
         }
 
-        if ($stable->currentRetirement()->exists()) {
-            throw CannotBeEstablishedException::retired($stable);
-        }
-
         $members = $this->membershipService->currentMembers($stable);
 
         $memberCount = $members->getTotalMemberCount();
@@ -84,10 +80,6 @@ final readonly class StableActivityEligibility
 
         if (! $stable->currentActivityPeriod()->exists()) {
             throw CannotBeDisbandedException::disbanded($stable);
-        }
-
-        if ($stable->currentRetirement()->exists()) {
-            throw CannotBeDisbandedException::retired($stable);
         }
     }
 

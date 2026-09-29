@@ -42,10 +42,6 @@ final class TitleLifecycleEligibility
         if ($title->activityPeriods()->exists()) {
             throw CannotBeDebutedException::alreadyDebuted($title);
         }
-
-        if ($title->currentRetirement()->exists()) {
-            throw CannotBeDebutedException::retired($title);
-        }
     }
 
     private function ensureCanReinstate(Title $title): void
@@ -67,10 +63,6 @@ final class TitleLifecycleEligibility
     {
         if (! $title->currentActivityPeriod()->exists()) {
             throw CannotBePulledException::notActive($title);
-        }
-
-        if ($title->currentRetirement()->exists()) {
-            throw CannotBePulledException::retired($title);
         }
     }
 
