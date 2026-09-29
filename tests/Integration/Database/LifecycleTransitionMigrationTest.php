@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Shared\ActivationStatus;
 use App\Enums\Stables\StableStatus;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
@@ -33,7 +32,7 @@ test('legacy stable and title status history is preserved as lifecycle transitio
 
     DB::table('titles_status_changes')->insert([
         'title_id' => $title->id,
-        'status' => ActivationStatus::Active->value,
+        'status' => 'active',
         'changed_at' => $changedAt,
         'created_at' => $changedAt,
         'updated_at' => $changedAt,
@@ -53,7 +52,7 @@ test('legacy stable and title status history is preserved as lifecycle transitio
     $stableTransition = $stable->lifecycleTransitions()->sole();
 
     expect($titleTransition->transition)->toBe(LifecycleTransitionType::LegacyStatusChanged)
-        ->and($titleTransition->context)->toBe(['status' => ActivationStatus::Active->value])
+        ->and($titleTransition->context)->toBe(['status' => 'active'])
         ->and($stableTransition->transition)->toBe(LifecycleTransitionType::LegacyStatusChanged)
         ->and($stableTransition->context)->toBe(['status' => StableStatus::Inactive->value]);
 
