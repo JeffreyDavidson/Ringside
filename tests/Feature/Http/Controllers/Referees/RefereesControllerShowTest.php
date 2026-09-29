@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Referees\RefereesController;
-use App\Livewire\Components\LifecycleStatus;
+use App\Livewire\Components\GeneralInfo;
 use App\Livewire\Referees\Components\Actions;
 use App\Livewire\Referees\Tables\PreviousMatches;
 use App\Models\Roster\Referees\Referee;
@@ -48,23 +48,24 @@ describe('Referees Controller', function () {
     /**
      * @see RefereesController::show()
      */
-    test('show renders the lifecycle status component', function () {
+    test('show renders the general info component', function () {
         actingAs(administrator())
             ->get(route('referees.show', $this->referee))
             ->assertOk()
-            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSeeLivewire(GeneralInfo::class)
             ->assertSee($this->referee->status->label());
     });
 
     /**
      * @see RefereesController::show()
      */
-    test('show loads only the relationship rendered by the referee summary', function () {
+    test('show renders the start date displayed by the referee summary', function () {
+        $referee = Referee::factory()->employed()->create();
+
         actingAs(administrator())
-            ->get(route('referees.show', $this->referee))
+            ->get(route('referees.show', $referee))
             ->assertOk()
-            ->assertViewHas('referee', fn (Referee $referee): bool => count($referee->getRelations()) === 1
-                && $referee->relationLoaded('firstEmployment'));
+            ->assertSee($referee->employments()->firstOrFail()->started_at->toDateString());
     });
 
     /**

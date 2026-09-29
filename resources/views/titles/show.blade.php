@@ -1,6 +1,6 @@
 <x-layouts.show-page :title="$title->name">
     <x-slot:sidebar>
-        <x-titles.show.general-info :$title />
+        <livewire:components.general-info :model="$title" />
         <livewire:titles.components.actions :title="$title" />
     </x-slot:sidebar>
 

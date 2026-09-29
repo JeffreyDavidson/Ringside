@@ -1,5 +1,5 @@
 <x-card.general-info>
-    <livewire:components.lifecycle-status :model="$wrestler" updatedEvent="wrestler-updated" />
+    <x-card.general-info.stat label="Status" :value="$wrestler->status->label()" />
     <x-card.general-info.stat label="Height" :value="$wrestler->height" />
     <x-card.general-info.stat label="Weight" :value="$wrestler->weight" />
     <x-card.general-info.stat label="Hometown" :value="$wrestler->hometown" />

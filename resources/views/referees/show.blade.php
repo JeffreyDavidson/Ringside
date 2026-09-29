@@ -1,6 +1,6 @@
 <x-layouts.show-page :title="$referee->full_name">
     <x-slot:sidebar>
-        <x-referees.show.general-info :$referee />
+        <livewire:components.general-info :model="$referee" />
         <livewire:referees.components.actions :referee="$referee" />
     </x-slot:sidebar>
 

@@ -2,7 +2,7 @@
 
 <x-card.general-info>
     <x-card.general-info.stat label="Type" :value="$title->type->label()" />
-    <livewire:components.lifecycle-status :model="$title" updatedEvent="title-updated" />
+    <x-card.general-info.stat label="Status" :value="$title->status->label()" />
     <x-card.general-info.links label="Current Champion">
         @if ($title->currentChampionship)
             <x-route-link

@@ -3,14 +3,18 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Livewire\Components\LifecycleStatus;
+use App\Livewire\Components\GeneralInfo;
 use App\Livewire\TagTeams\Components\Actions;
 use App\Livewire\TagTeams\Tables\PreviousManagers;
 use App\Livewire\TagTeams\Tables\PreviousMatches;
 use App\Livewire\TagTeams\Tables\PreviousStables;
 use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
 use App\Livewire\TagTeams\Tables\PreviousWrestlers;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -57,26 +61,34 @@ describe('TagTeams Controller', function () {
     /**
      * @see TagTeamsController::show()
      */
-    test('show renders the lifecycle status component', function () {
+    test('show renders the general info component', function () {
         actingAs(administrator())
             ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
-            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSeeLivewire(GeneralInfo::class)
             ->assertSee($this->tagTeam->status->label());
     });
 
     /**
      * @see TagTeamsController::show()
      */
-    test('show loads only the relationships rendered by the tag team summary', function () {
-        actingAs(administrator())
-            ->get(route('tag-teams.show', $this->tagTeam))
+    test('show renders the related data displayed by the tag team summary', function () {
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $manager = Manager::factory()->create();
+        $tagTeam->managers()->attach($manager, ['hired_at' => now()->subDay()]);
+        TitleChampionship::factory()
+            ->for(Title::factory()->create(['name' => 'Tag Team Belt']), 'title')
+            ->forTagTeam($tagTeam)
+            ->current()
+            ->create();
+
+        $response = actingAs(administrator())
+            ->get(route('tag-teams.show', $tagTeam))
             ->assertOk()
-            ->assertViewHas('tagTeam', fn (TagTeam $tagTeam): bool => count($tagTeam->getRelations()) === 4
-                && $tagTeam->relationLoaded('currentManagers')
-                && $tagTeam->relationLoaded('currentStable')
-                && $tagTeam->relationLoaded('currentWrestlers')
-                && $tagTeam->relationLoaded('currentChampionships'));
+            ->assertSee($manager->full_name)
+            ->assertSee('Tag Team Belt');
+
+        $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => $response->assertSee($wrestler->name));
     });
 
     /**
