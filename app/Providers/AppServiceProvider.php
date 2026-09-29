@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -87,8 +86,6 @@ class AppServiceProvider extends ServiceProvider
             'venue' => Venue::class,
             'user' => User::class,
         ]);
-
-        Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
 
         View::composer([
             'components.topbar.profile',

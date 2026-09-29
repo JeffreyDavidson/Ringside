@@ -3,8 +3,6 @@ import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.e
 import AlpineUI from '@alpinejs/ui';
 import '../css/app.css';
 
-import.meta.glob(['../media/**']);
-
 Alpine.plugin(AlpineUI);
 
 const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';
