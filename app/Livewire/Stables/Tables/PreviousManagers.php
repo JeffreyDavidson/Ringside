@@ -43,7 +43,7 @@ class PreviousManagers extends BasePreviousManagersTable
                 ->searchable(function (ManagerBuilder $builder, string $searchTerm): void {
                     $builder->whereNameMatches($searchTerm);
                 }),
-            Column::make(__('managers.status'), 'status')
+            Column::make(__('core.status'), 'status')
                 ->label(fn (Manager $manager) => $manager->status->label()),
         ];
     }

@@ -65,7 +65,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 ->inputFormat('Y-m-d H:i:s')
                 ->outputFormat('Y-m-d')
                 ->emptyValue('N/A'),
-            ArrayColumn::make(__('event-matches.referees'))
+            ArrayColumn::make(__('matches.referees'))
                 ->data(fn (EventMatch $row) => $row->referees)
                 ->link(
                     title: fn (Referee $value): string => $value->full_name,
@@ -73,10 +73,10 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 )
                 ->separator(', ')
                 ->emptyValue('N/A'),
-            Column::make(__('event-matches.competitors'))
+            Column::make(__('matches.competitors'))
                 ->label(fn (EventMatch $row): string => $this->matchTableFormatter->competitorLinks($row))
                 ->html(),
-            ArrayColumn::make(__('event-matches.titles'))
+            ArrayColumn::make(__('matches.titles'))
                 ->data(fn (EventMatch $row) => $row->titles)
                 ->link(
                     title: fn (Title $value): string => $value->name,
@@ -84,7 +84,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 )
                 ->separator('<br />')
                 ->emptyValue('N/A'),
-            Column::make(__('event-matches.result'))
+            Column::make(__('matches.result'))
                 ->label(fn (EventMatch $row): string => $this->matchTableFormatter->result($row))
                 ->html(),
         ];
