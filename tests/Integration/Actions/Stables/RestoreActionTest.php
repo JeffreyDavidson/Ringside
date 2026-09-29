@@ -59,3 +59,10 @@ test('it restores a stable after the conflicting stable is deleted', function ()
 
     expect($stable->refresh()->trashed())->toBeFalse();
 });
+
+test('it reports a deleted stable without conflicts as restorable', function () {
+    $stable = Stable::factory()->create();
+    $stable->delete();
+
+    expect(resolve(StableDeletionEligibility::class)->canRestore($stable))->toBeTrue();
+});

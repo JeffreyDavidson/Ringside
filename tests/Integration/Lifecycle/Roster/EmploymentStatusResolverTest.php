@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\EmploymentStatusResolver;
+use App\Models\Events\Venue;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 test('resolves employment status from lifecycle state', function (
@@ -44,4 +45,9 @@ test('uses projected employment state when it is available', function () {
     ]);
 
     expect(EmploymentStatusResolver::resolveFor($wrestler))->toBe(EmploymentStatus::Employed);
+});
+
+test('it rejects models that are not employable and retirable', function () {
+    expect(fn () => EmploymentStatusResolver::resolveFor(Venue::factory()->create()))
+        ->toThrow(LogicException::class, 'Employment status requires an employable, retirable model.');
 });

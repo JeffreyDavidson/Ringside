@@ -584,3 +584,31 @@ describe('SplitStableAction Integration Tests', function () {
         });
     });
 });
+
+test('split rejects a stable that is not currently active', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $wrestlers = $stable->previousWrestlers()->get();
+
+    expect(fn () => resolve(SplitStableAction::class)->handle(
+        $stable,
+        'Breakaway Stable',
+        new StableMembershipData(wrestlers: $wrestlers),
+        now(),
+    ))->toThrow(CannotBeSplitException::class, 'is not currently active and cannot be split')
+        ->and(Stable::query()->where('name', 'Breakaway Stable')->exists())->toBeFalse();
+});
+
+test('split rejects an active stable with fewer than twice the minimum headcount', function () {
+    $stable = Stable::factory()->active()->create();
+    $wrestlers = $stable->currentWrestlers()->get();
+    $currentMemberCount = resolve(StableMembershipService::class)->currentMembers($stable)->getTotalMemberCount();
+
+    expect(fn () => resolve(SplitStableAction::class)->handle(
+        $stable,
+        'Breakaway Stable',
+        new StableMembershipData(wrestlers: $wrestlers),
+        now(),
+    ))->toThrow(CannotBeSplitException::class, "has only {$currentMemberCount} members but requires at least 6 members to split")
+        ->and(Stable::query()->where('name', 'Breakaway Stable')->exists())->toBeFalse()
+        ->and(resolve(StableMembershipService::class)->currentMembers($stable)->getTotalMemberCount())->toBe($currentMemberCount);
+});
