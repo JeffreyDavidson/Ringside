@@ -10,7 +10,6 @@ return [
     'result' => 'Result',
 
     'actions' => [
-        'deleted' => 'Match successfully deleted.',
         'edit' => 'Edit Match',
     ],
 ];
