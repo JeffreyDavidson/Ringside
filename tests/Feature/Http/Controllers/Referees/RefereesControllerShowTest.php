@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Referees\RefereesController;
+use App\Livewire\Components\LifecycleStatus;
 use App\Livewire\Referees\Components\Actions;
 use App\Livewire\Referees\Tables\PreviousMatches;
 use App\Models\Roster\Referees\Referee;
@@ -42,6 +43,17 @@ describe('Referees Controller', function () {
             ->get(route('referees.show', $this->referee))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see RefereesController::show()
+     */
+    test('show renders the lifecycle status component', function () {
+        actingAs(administrator())
+            ->get(route('referees.show', $this->referee))
+            ->assertOk()
+            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSee($this->referee->status->label());
     });
 
     /**

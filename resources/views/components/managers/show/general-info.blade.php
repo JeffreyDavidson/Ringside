@@ -1,5 +1,5 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$manager->status->label()" />
+    <livewire:components.lifecycle-status :model="$manager" updatedEvent="manager-updated" />
     @if ($manager->currentWrestlers->isNotEmpty())
         <x-card.general-info.link-list label="Current Wrestler(s)">
             @foreach ($manager->currentWrestlers as $wrestler)

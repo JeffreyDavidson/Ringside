@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Livewire\Components\LifecycleStatus;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Livewire\Wrestlers\Tables\PreviousManagers;
 use App\Livewire\Wrestlers\Tables\PreviousMatches;
@@ -51,6 +52,17 @@ describe('Wrestlers Controller', function () {
             ->get(route('wrestlers.show', $this->wrestler))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('show renders the lifecycle status component', function () {
+        actingAs(administrator())
+            ->get(route('wrestlers.show', $this->wrestler))
+            ->assertOk()
+            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSee($this->wrestler->status->label());
     });
 
     /**
