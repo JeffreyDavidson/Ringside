@@ -61,3 +61,11 @@ it('rejects non-string field names', function (string $component): void {
     expect(fn (): string => Blade::render('<x-'.$component.' :name="[1, 2]" />'))
         ->toThrow(ViewException::class, 'Form field names must be strings.');
 })->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
+
+it('rejects non-string field IDs', function (string $component) {
+    view()->share('errors', new ViewErrorBag);
+
+    $render = fn (): string => Blade::render('<x-'.$component.' name="name" :id="[1, 2]" />');
+
+    expect($render)->toThrow(ViewException::class, 'Form field IDs must be strings.');
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);

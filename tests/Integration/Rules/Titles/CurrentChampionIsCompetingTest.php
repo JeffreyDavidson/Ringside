@@ -73,3 +73,63 @@ test('it accepts a vacant title', function () {
 
     expect($validator->passes())->toBeTrue();
 });
+
+it('ignores a title identifier that is not numeric', function (mixed $value) {
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [1]]],
+        'titles' => [$value],
+    ], [
+        'titles.*' => [new CurrentChampionIsCompeting],
+    ]);
+
+    $passes = $validator->passes();
+
+    expect($passes)->toBeTrue();
+})->with([
+    'text' => ['champion'],
+    'array' => [[1]],
+    'boolean' => [true],
+]);
+
+it('rejects a title with a current champion when the competitors are malformed', function (mixed $competitors) {
+    $title = Title::factory()->active()->create();
+    $champion = Wrestler::factory()->create();
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+
+    $validator = Validator::make([
+        'competitors' => $competitors,
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new CurrentChampionIsCompeting],
+    ]);
+
+    $message = $validator->errors()->first('titles.0');
+
+    expect($message)->toBe('The current champion must be included in title matches.');
+})->with([
+    'competitors is not a list' => 'wrestlers',
+    'a side is not an array' => [['not-a-side']],
+    'wrestler identifiers are not a list' => [[['wrestlers' => 'wrestler']]],
+    'identifiers are not scalar' => [[['wrestlers' => [[1], null]]]],
+]);
+
+it('finds the champion on a later side after skipping malformed sides', function () {
+    $title = Title::factory()->active()->create();
+    $champion = Wrestler::factory()->create();
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+
+    $validator = Validator::make([
+        'competitors' => [
+            'not-a-side',
+            ['wrestlers' => 'wrestler'],
+            ['wrestlers' => [$champion->id]],
+        ],
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new CurrentChampionIsCompeting],
+    ]);
+
+    $passes = $validator->passes();
+
+    expect($passes)->toBeTrue();
+});
