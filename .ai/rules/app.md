@@ -22,3 +22,9 @@ Use typed BaseBusinessException subclasses for domain-rule rejections. Use Logic
 
 ## Use Laravel before custom infrastructure
 Prefer Laravel's native framework abstractions and APIs before introducing custom helpers, normalization, infrastructure, or replacement patterns. Preserve Eloquent and framework types through typed models, relationships, builders, casts, validation, and collections; add custom code only when Laravel does not provide the required behavior.
+
+## Persist request-scoped context middleware for Livewire
+Middleware that establishes request-scoped context, such as EstablishPromotionContext, must also be registered with Livewire::addPersistentMiddleware(). Livewire update requests do not run the page route's middleware, so without it the context is lost after the first interaction.
+
+## No orphaned docblocks
+A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.

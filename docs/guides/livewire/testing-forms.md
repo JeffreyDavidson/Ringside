@@ -272,10 +272,10 @@ describe('CreateEditForm Model Binding', function () {
 ```
 
 ### Extra Data Loading
-Test the `loadExtraData()` method:
+Test the `loadModelData()` method:
 
 ```php
-test('calls loadExtraData when model is set', function () {
+test('calls loadModelData when model is set', function () {
     $venue = Venue::factory()->create();
     $event = Event::factory()->create(['venue_id' => $venue->id]);
     
@@ -286,7 +286,7 @@ test('calls loadExtraData when model is set', function () {
     expect($form->venue_id)->toBe($event->venue_id);
 });
 
-test('handles complex relationships in loadExtraData', function () {
+test('handles complex relationships in loadModelData', function () {
     $venue = Venue::factory()->create();
     $event = Event::factory()->create(['venue_id' => $venue->id]);
     
