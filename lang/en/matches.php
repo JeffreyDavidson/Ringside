@@ -11,5 +11,9 @@ return [
 
     'actions' => [
         'edit' => 'Edit Match',
+        'remove' => 'Remove',
+        'remove_match' => 'Remove Match :number',
+        'confirm_remove' => 'Remove match :number?',
+        'deleted' => 'Match successfully deleted.',
     ],
 ];

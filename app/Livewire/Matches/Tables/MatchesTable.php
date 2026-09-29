@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Tables;
 
+use App\Actions\Matches\DeleteAction;
 use App\Builders\Matches\EventMatchBuilder;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Livewire\Table\Column;
@@ -20,6 +22,7 @@ use Livewire\Attributes\Locked;
 /** @extends DataTableComponent<EventMatch> */
 class MatchesTable extends DataTableComponent
 {
+    use ExecutesBusinessActions;
     use ShowTableTrait;
 
     protected MatchTableFormatter $matchTableFormatter;
@@ -98,5 +101,14 @@ class MatchesTable extends DataTableComponent
                 ->view('components.matches.table-result-action')
                 ->html(),
         ];
+    }
+
+    public function delete(EventMatch $eventMatch, DeleteAction $deleteAction): void
+    {
+        Gate::authorize('delete', $eventMatch);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $eventMatch): void {
+            $deleteAction->handle($eventMatch);
+        }, __('matches.actions.deleted'));
     }
 }

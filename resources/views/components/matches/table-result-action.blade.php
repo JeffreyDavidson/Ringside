@@ -20,4 +20,16 @@
     >
         {{ $row->match_finish === null ? 'Record Result' : 'Correct Result' }}
     </x-buttons.light>
+
+    @can('delete', $row)
+        <x-buttons.danger
+            size="sm"
+            data-test="match-delete-action"
+            aria-label="{{ __('matches.actions.remove_match', ['number' => $row->match_number]) }}"
+            wire:click="delete({{ $row->id }})"
+            wire:confirm="{{ __('matches.actions.confirm_remove', ['number' => $row->match_number]) }}"
+        >
+            {{ __('matches.actions.remove') }}
+        </x-buttons.danger>
+    @endcan
 </div>

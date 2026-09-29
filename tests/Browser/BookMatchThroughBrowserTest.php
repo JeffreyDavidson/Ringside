@@ -73,6 +73,30 @@ test('administrator can edit an unresulted match from the event page', function 
         ->toBe([$firstWrestler->id, $replacementOpponent->id]);
 });
 
+test('administrator can remove a match from the event page', function (): void {
+    $event = Event::factory()->scheduled()->withVenue()->create();
+    $firstWrestler = Wrestler::factory()->bookable()->create(['name' => 'First Removal Competitor']);
+    $secondWrestler = Wrestler::factory()->bookable()->create(['name' => 'Second Removal Competitor']);
+    $match = EventMatch::factory()
+        ->for($event)
+        ->withCompetitors([$firstWrestler, $secondWrestler])
+        ->create(['match_type' => MatchType::Singles]);
+
+    $this->actingAs(administrator());
+
+    $page = visit(route('events.show', $event));
+
+    $page->assertSee('First Removal Competitor');
+    $page->script('window.confirm = () => true');
+    $page
+        ->click('[data-test="match-delete-action"]')
+        ->waitForText('Match successfully deleted.')
+        ->assertDontSee('First Removal Competitor')
+        ->assertNoJavascriptErrors();
+
+    expect($match->refresh()->trashed())->toBeTrue();
+});
+
 test('match form layouts adapt to narrow screens and keep multiple selections usable', function (): void {
     $event = Event::factory()->scheduled()->withVenue()->create();
 
