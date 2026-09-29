@@ -258,6 +258,20 @@ describe('authorized match form interactions', function (): void {
         expect(EventMatch::query()->whereBelongsTo($this->event)->doesntExist())->toBeTrue();
     });
 
+    it('uses the friendly match stipulation name in validation messages', function (): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        $modal->set('form.matchStipulationId', PHP_INT_MAX);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        expect($modal->instance()->getErrorBag()->first('form.matchStipulationId'))
+            ->toBe('The selected match stipulation is invalid.');
+    });
+
     it('rejects unavailable wrestlers and referees', function (): void {
         // Arrange
         $unavailableWrestler = Wrestler::factory()->retired()->create();

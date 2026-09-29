@@ -139,6 +139,20 @@ describe('authorized title form interactions', function () {
         expect(Title::query()->doesntExist())->toBeTrue();
     });
 
+    it('uses the friendly title type name in validation messages', function () {
+        // Arrange
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set('form.name', 'Valid Championship Title');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        expect($modal->instance()->getErrorBag()->first('form.type'))
+            ->toBe('The title type field is required.');
+    });
+
     it('rejects invalid title field values', function (string $case) {
         [$field, $value, $rule] = match ($case) {
             'long name' => ['form.name', str_repeat('a', 256).' Title', 'max'],

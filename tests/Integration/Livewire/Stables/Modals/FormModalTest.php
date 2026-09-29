@@ -221,6 +221,28 @@ describe('authorized stable form interactions', function () {
         'missing tag team',
     ]);
 
+    it('uses friendly attribute names in stable validation messages', function (string $field, string $message) {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Stable',
+            'form.started_at' => '2024-01-01',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+
+        // Act
+        $modal->set($field, 'not-a-date');
+        $modal->call('save');
+
+        // Assert
+        expect($modal->instance()->getErrorBag()->first($field))->toBe($message);
+    })->with([
+        'start date' => ['form.started_at', 'The start date field must be a valid date.'],
+        'end date' => ['form.ended_at', 'The end date field must be a valid date.'],
+    ]);
+
     it('rejects the name of another active stable but permits a deleted stable name', function () {
         Stable::factory()->create(['name' => 'Active Stable']);
         $deletedStable = Stable::factory()->create(['name' => 'Former Stable']);

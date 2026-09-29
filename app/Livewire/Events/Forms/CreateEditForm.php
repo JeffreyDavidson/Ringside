@@ -61,7 +61,7 @@ class CreateEditForm extends BaseForm
 
     /** @return array<string, string> */
     #[\Override]
-    public function validationAttributes(): array
+    protected function validationAttributes(): array
     {
         return [
             'name' => 'event name',

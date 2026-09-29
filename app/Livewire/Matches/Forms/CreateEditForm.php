@@ -147,8 +147,8 @@ class CreateEditForm extends BaseForm
             ?? throw new LogicException('A match type is required before building match data.');
     }
 
-    /** @return array<string, string> */
-    protected function getCustomValidationAttributes(): array
+    #[\Override]
+    protected function validationAttributes(): array
     {
         return [
             'preview' => 'match preview',

@@ -54,8 +54,8 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    /** @return array<string, string> */
-    protected function getCustomValidationAttributes(): array
+    #[\Override]
+    protected function validationAttributes(): array
     {
         return [
             'type' => 'title type',
