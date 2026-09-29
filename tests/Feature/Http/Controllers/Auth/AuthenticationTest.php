@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
-use App\Providers\AppServiceProvider;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
@@ -40,7 +39,7 @@ test('users can authenticate using the login screen', function (string $email) {
     $response = post(route('login'), $credentials);
 
     // Assert
-    $response->assertRedirect(AppServiceProvider::HOME);
+    $response->assertRedirect(route('dashboard', absolute: false));
     assertAuthenticated();
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
