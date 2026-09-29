@@ -91,3 +91,16 @@ test('roster ownership backfill requires confirmation unless previewing', functi
         ->and($dryRunExitCode)->toBe(0)
         ->and($wrestler->promotion_id)->toBeNull();
 });
+
+test('roster ownership backfill fails when the promotion does not exist', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    $exitCode = Artisan::call('promotions:backfill-roster-ownership', [
+        'promotion' => 999_999,
+        '--force' => true,
+    ]);
+
+    expect($exitCode)->toBe(1)
+        ->and(Artisan::output())->toContain('The selected promotion does not exist.')
+        ->and($wrestler->refresh()->promotion_id)->toBeNull();
+});

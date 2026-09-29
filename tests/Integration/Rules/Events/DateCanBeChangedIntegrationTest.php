@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Validator;
 
 describe('DateCanBeChanged Validation Rule Integration Tests', function () {
     describe('rule logic with event instances', function () {
@@ -111,6 +112,44 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($failCalled)->toBeFalse();
+        });
+    });
+
+    describe('malformed input', function () {
+        test('non-string values are left for the other validation rules', function (mixed $value) {
+            // Arrange
+            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $validator = Validator::make(
+                ['date' => $value],
+                ['date' => [new DateCanBeChanged($pastEvent)]],
+            );
+
+            // Act
+            $passes = $validator->passes();
+
+            // Assert
+            expect($passes)->toBeTrue();
+        })->with([
+            'integer' => [20241225],
+            'array' => [['2024-12-25']],
+            'boolean' => [true],
+        ]);
+
+        test('the same rule rejects a past event date change submitted as a string', function () {
+            // Arrange
+            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $validator = Validator::make(
+                ['date' => now()->addWeek()->toDateTimeString()],
+                ['date' => [new DateCanBeChanged($pastEvent)]],
+            );
+
+            // Act
+            $fails = $validator->fails();
+
+            // Assert
+            expect($fails)->toBeTrue()
+                ->and($validator->errors()->first('date'))
+                ->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
         });
     });
 

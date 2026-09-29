@@ -29,3 +29,24 @@ test('it permits a referee to officiate another match on the same event card', f
         ->ensureCanBeAssigned($event->id, collect([$event->id]), collect([$referee])))
         ->not->toThrow(Throwable::class);
 });
+
+test('it permits a referee when the other event uses different referees', function () {
+    $otherEvent = Event::factory()->scheduled()->create();
+    $bookedReferee = Referee::factory()->bookable()->create();
+    $availableReferee = Referee::factory()->bookable()->create();
+    EventMatch::factory()->forEvent($otherEvent)->create()->referees()->attach($bookedReferee);
+
+    expect(fn () => resolve(MatchRefereeConflictService::class)
+        ->ensureCanBeAssigned(0, collect([$otherEvent->id]), collect([$availableReferee])))
+        ->not->toThrow(Throwable::class);
+});
+
+test('it permits a referee when the other event has no assigned referees', function () {
+    $otherEvent = Event::factory()->scheduled()->create();
+    $referee = Referee::factory()->bookable()->create();
+    EventMatch::factory()->forEvent($otherEvent)->create();
+
+    expect(fn () => resolve(MatchRefereeConflictService::class)
+        ->ensureCanBeAssigned(0, collect([$otherEvent->id]), collect([$referee])))
+        ->not->toThrow(Throwable::class);
+});
