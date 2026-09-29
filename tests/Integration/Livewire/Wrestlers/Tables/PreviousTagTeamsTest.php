@@ -242,3 +242,28 @@ describe('PreviousTagTeamsTable Authorization', function () {
         'basic user' => ['basic user'],
     ]);
 });
+
+describe('PreviousTagTeamsTable Deleted Tag Teams', function () {
+    it('renders a membership without a link when its tag team was deleted', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->create(['name' => 'Vanished Partners']);
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'wrestler_id' => $this->wrestler->id,
+            'joined_at' => Date::parse('2024-01-15'),
+            'left_at' => Date::parse('2024-06-30'),
+        ]);
+        $tagTeam->delete();
+
+        // Act
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('N/A')
+            ->assertSee('2024-01-15')
+            ->assertDontSee('Vanished Partners')
+            ->assertDontSeeHtml(route('tag-teams.show', $tagTeam));
+    });
+});

@@ -8,6 +8,7 @@ use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 use JMac\Testing\Double;
 use Livewire\Component;
 
@@ -40,4 +41,22 @@ describe('match form dummy data', function (): void {
             ->and($form->titles)->toBeEmpty()
             ->and($form->preview)->toBeString()->not->toBeEmpty();
     });
+
+    it('adds an active title only when the random outcome selects one', function (bool $outcome): void {
+        // Arrange
+        forceFakerBoolean($outcome);
+        $title = Title::factory()->active()->create();
+        Title::factory()->inactive()->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $dummyData = new MatchFormDummyData(app(RosterBookingEligibility::class));
+
+        // Act
+        $dummyData->fill($form);
+
+        // Assert
+        expect($form->titles)->toBe($outcome ? [$title->id] : []);
+    })->with([
+        'random outcome true' => true,
+        'random outcome false' => false,
+    ]);
 });

@@ -141,6 +141,42 @@ describe('authorized result recording', function (): void {
         expect($match->refresh()->match_finish)->toBeNull();
     });
 
+    it('keeps the selected winning side when the finish is cleared', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
+        $winningSideId = $competitors[0]->match_side_id;
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
+        $modal->set('form.finish', MatchFinish::Pinfall->value);
+        $modal->set('form.winningSideId', $winningSideId);
+
+        // Act
+        $modal->set('form.finish', '');
+
+        // Assert
+        $modal
+            ->assertSet('form.finish', '')
+            ->assertSet('form.winningSideId', $winningSideId);
+    });
+
+    it('reports a rejected result as an outcome error without closing the modal', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors(MatchType::BattleRoyal, 3);
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
+
+        // Act
+        $modal->set('form.finish', MatchFinish::Stipulation->value);
+        $modal->set('form.winningSideId', $competitors[0]->match_side_id);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['outcome'])
+            ->assertNotDispatched('refreshDatatable')
+            ->assertNotDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBeNull()
+            ->and($match->winning_side_id)->toBeNull();
+    });
+
     it('hides elimination inputs for ordinary matches', function (): void {
         // Arrange
         [$match] = createMatchWithResultCompetitors();

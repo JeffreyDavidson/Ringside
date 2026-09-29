@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\Matches\AddMatchForEventAction;
 use App\Enums\MatchType;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -12,6 +14,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use JMac\Testing\Double;
 use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
@@ -270,6 +273,40 @@ describe('authorized match form interactions', function (): void {
         // Assert
         expect($modal->instance()->getErrorBag()->first('form.matchStipulationId'))
             ->toBe('The selected match stipulation is invalid.');
+    });
+
+    it('attaches a current champion failure found while saving to the titles field', function (): void {
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()->active()->singles()->create(['name' => 'World Heavyweight Title']);
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')->throws(InvalidMatchConfigurationException::currentChampionMissing($title));
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.titles'])
+            ->assertHasNoErrors(['form.configuration'])
+            ->assertNotDispatched('matchCreated')
+            ->assertSet('isModalOpen', true);
+        expect($modal->instance()->getErrorBag()->first('form.titles'))
+            ->toBe('The current champion of [World Heavyweight Title] must compete in the title match.');
+        $action->verify();
     });
 
     it('rejects unavailable wrestlers and referees', function (): void {

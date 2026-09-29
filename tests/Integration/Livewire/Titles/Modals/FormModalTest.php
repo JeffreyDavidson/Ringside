@@ -249,6 +249,23 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.start_date', '');
     });
 
+    it('fills dummy data with the type and start date chosen by the random outcome', function (bool $outcome, TitleType $type, bool $hasStartDate) {
+        // Arrange
+        forceFakerBoolean($outcome);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+
+        // Assert
+        $modal->assertSet('form.type', $type->value);
+        expect($modal->get('form.start_date') !== null)->toBe($hasStartDate);
+    })->with([
+        'random outcome true' => [true, TitleType::Singles, true],
+        'random outcome false' => [false, TitleType::TagTeam, false],
+    ]);
+
     it('generates valid dummy data that can create a title', function () {
         $modal = livewire(FormModal::class);
 

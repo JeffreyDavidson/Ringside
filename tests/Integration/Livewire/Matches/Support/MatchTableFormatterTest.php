@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchFinish;
 use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -36,5 +37,40 @@ describe('match table formatting', function (): void {
 
         // Assert
         expect($result)->toBe('N/A');
+    });
+
+    it('formats a decisive result with the winning side and finish', function (): void {
+        // Arrange
+        $winner = Wrestler::factory()->create(['name' => 'Winning Wrestler']);
+        $loser = Wrestler::factory()->create(['name' => 'Losing Wrestler']);
+        $match = EventMatch::factory()
+            ->withCompetitors([$winner, $loser])
+            ->create();
+        $match->update([
+            'match_finish' => MatchFinish::Pinfall,
+            'winning_side_id' => $match->sides()->whereRelation('competitors', 'competitor_id', $winner->id)->firstOrFail()->id,
+        ]);
+        $formatter = app(MatchTableFormatter::class);
+
+        // Act
+        $result = $formatter->result($match->fresh());
+
+        // Assert
+        expect($result)->toBe('<a href="'.route('wrestlers.show', $winner).'">Winning Wrestler</a> by '.MatchFinish::Pinfall->label());
+    });
+
+    it('formats a finish without a winning side as the finish label', function (): void {
+        // Arrange
+        $match = EventMatch::factory()->create([
+            'match_finish' => MatchFinish::TimeLimitDraw,
+            'winning_side_id' => null,
+        ]);
+        $formatter = app(MatchTableFormatter::class);
+
+        // Act
+        $result = $formatter->result($match);
+
+        // Assert
+        expect($result)->toBe(MatchFinish::TimeLimitDraw->label());
     });
 });
