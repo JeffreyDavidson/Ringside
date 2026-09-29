@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Venues\Tables;
 
 use App\Actions\Venues\DeleteAction;
-use App\Actions\Venues\RestoreAction;
 use App\Builders\Events\VenueBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\ExecutesBusinessActions;
@@ -82,22 +81,5 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $venue): void {
             $deleteAction->handle($venue);
         }, __('venues.actions.deleted'));
-    }
-
-    /**
-     * Restore a deleted venue.
-     */
-    public function restore(int $venueId, RestoreAction $restoreAction): void
-    {
-        $venue = Venue::onlyTrashed()->findOrFail($venueId);
-
-        Gate::authorize('restore', $venue);
-
-        if ($this->executeBusinessAction(function () use ($restoreAction, $venue): void {
-            $restoreAction->handle($venue);
-        }, __('venues.actions.restored'))) {
-            $this->redirectRoute('venues.index');
-        }
-
     }
 }

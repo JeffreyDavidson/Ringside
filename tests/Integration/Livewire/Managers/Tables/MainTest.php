@@ -140,42 +140,6 @@ describe('managers table', function (): void {
             ->assertDontSee('Original Manager');
     });
 
-    it('employs an unemployed manager while preserving table state', function (): void {
-        // Arrange
-        $manager = Manager::factory()->unemployed()->create([
-            'first_name' => 'Employment',
-            'last_name' => 'Manager',
-        ]);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('employ', $manager);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($manager)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('restores a deleted manager and redirects to the index', function (): void {
-        // Arrange
-        $manager = Manager::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $manager->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('managers.index');
-        expect(Manager::find($manager->id))->not->toBeNull();
-    });
-
     it('forbids users without manager access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {

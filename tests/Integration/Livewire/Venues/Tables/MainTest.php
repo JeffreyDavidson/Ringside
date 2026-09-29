@@ -144,26 +144,6 @@ describe('venues table', function (): void {
         $this->assertSoftDeleted($venue);
     });
 
-    it('restores a venue and reports success', function (): void {
-        // Arrange
-        $venue = Venue::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $venue->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertDispatched(
-                'flash-message',
-                type: 'status',
-                message: __('venues.actions.restored'),
-            )
-            ->assertRedirectToRoute('venues.index');
-        $this->assertNotSoftDeleted($venue);
-    });
-
     it('renders an empty state when there are no venues', function (): void {
         // Act
         $component = livewire(Main::class);

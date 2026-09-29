@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\DeleteAction;
-use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -166,21 +165,5 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $event): void {
             $deleteAction->handle($event);
         }, __('events.actions.deleted'));
-    }
-
-    /**
-     * Restore a deleted scheduled event.
-     */
-    public function restore(int $eventId, RestoreAction $restoreAction): void
-    {
-        $event = Event::onlyTrashed()->findOrFail($eventId);
-
-        Gate::authorize('restore', $event);
-
-        if ($this->executeBusinessAction(function () use ($event, $restoreAction): void {
-            $restoreAction->handle($event);
-        }, __('events.actions.restored'))) {
-            $this->redirectRoute('events.index');
-        }
     }
 }
