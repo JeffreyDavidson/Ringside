@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Enums\Promotions\MembershipRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EstablishPromotionContext;
-use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
-use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -19,9 +16,9 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use App\Policies\PromotionGate;
 use App\Services\Promotions\PromotionContextService;
 use App\View\Composers\PromotionSwitcherComposer;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -76,69 +73,8 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        Gate::before(function (User $user, string $ability, array $arguments): ?bool {
-            $subject = $arguments[0] ?? null;
-            $context = app(PromotionContextService::class);
+        Gate::before(fn (User $user, string $ability, array $arguments): ?bool => app(PromotionGate::class)->before($user, $ability, $arguments));
 
-            if (! $user->role->isAdministrator()) {
-                if ($subject instanceof Promotion) {
-                    $membership = $subject->memberships()
-                        ->forUser($user)
-                        ->active()
-                        ->first();
-
-                    if ($membership === null) {
-                        return false;
-                    }
-
-                    return match ($ability) {
-                        'view' => true,
-                        'manageMembers', 'update' => $membership->role === MembershipRole::Owner,
-                        default => false,
-                    };
-                }
-
-                $isPromotionOwnedClass = is_string($subject)
-                    && class_exists($subject)
-                    && ($subject === EventMatch::class
-                        || in_array(BelongsToPromotion::class, class_uses_recursive($subject), true));
-
-                $isPromotionOwnedModel = $subject instanceof Model
-                    && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
-                        || $subject instanceof EventMatch);
-
-                if (! $isPromotionOwnedClass && ! $isPromotionOwnedModel) {
-                    return null;
-                }
-
-                if (! $context->isEnforced()) {
-                    return null;
-                }
-
-                $promotion = $context->current();
-
-                if (! $promotion instanceof Promotion) {
-                    return false;
-                }
-
-                if ($subject instanceof Model && ! $context->owns($subject)) {
-                    return false;
-                }
-
-                $membership = $promotion->memberships()
-                    ->forUser($user)
-                    ->active()
-                    ->first();
-
-                return $membership?->role->allows($ability) ?? false;
-            }
-
-            $isPromotionOwned = $subject instanceof Model
-                && (in_array(BelongsToPromotion::class, class_uses_recursive($subject), true)
-                    || $subject instanceof EventMatch);
-
-            return ! ($isPromotionOwned && $context->isEnforced() && ! $context->owns($subject));
-        });
         Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
