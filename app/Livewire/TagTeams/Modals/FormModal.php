@@ -47,10 +47,10 @@ class FormModal extends BaseFormModal
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {
-            return 'Edit '.$this->form->tagTeam()->name;
+            return parent::getModalTitle();
         }
 
-        return 'Create Tag Team';
+        return __('tag-teams.modal.create');
     }
 
     protected function populateDummyData(): void

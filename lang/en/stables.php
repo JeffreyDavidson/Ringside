@@ -30,6 +30,11 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
+    'modal' => [
+        'create' => 'Create Stable',
+        'edit' => 'Edit Stable',
+    ],
+
     'actions' => [
         'deleted' => 'Stable successfully deleted.',
     ],

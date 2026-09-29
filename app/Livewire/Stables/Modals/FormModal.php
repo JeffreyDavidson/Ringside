@@ -52,10 +52,10 @@ class FormModal extends BaseFormModal
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {
-            return 'Edit Stable';
+            return __('stables.modal.edit');
         }
 
-        return 'Create Stable';
+        return __('stables.modal.create');
     }
 
     protected function updateForm(): void
