@@ -8,7 +8,7 @@ The project uses four automated workflows:
 **Trigger**: Pushes to `develop` or `main`, and pull requests targeting `develop` or `main`. Pushing a feature branch on its own does **not** run this workflow; open a pull request to get CI feedback. A newer run for the same pull request or ref cancels the one in progress.
 **Purpose**: Comprehensive testing and static analysis
 
-**Jobs** (all eight run independently in parallel on `ubuntu-latest`; none uses `needs`):
+**Jobs** (all nine run independently in parallel on `ubuntu-latest`; none uses `needs`):
 
 | Job | Check name | What it runs |
 | --- | --- | --- |
@@ -19,16 +19,17 @@ The project uses four automated workflows:
 | `type-coverage` | Pest type coverage | `composer test:type-coverage` (100% minimum) |
 | `frontend-verification` | Frontend verification | `npm run lint`, `npm run build` |
 | `application-tests` | `CI - PHP-8.5 - Laravel-13.*` | Pest with the `Browser` suite excluded (Feature, Integration, and Unit run), in parallel |
+| `coverage` | Coverage (100%) | `composer test:coverage`: non-parallel Pest run with PCOV, Browser suite excluded, fails below 100% |
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 
 **Key Features:**
 - **Runtime**: PHP 8.5 (shared `.github/actions/setup-php-composer` action) and Node.js 24 for jobs that need it
 - **Impacted Tests First**: `application-tests` runs `pest --tia --baselined --filtered` and falls back to the full non-browser suite with a warning if TIA is unavailable or fails
-- **Parallel Test Execution**: `--parallel` flag for faster test runs
+- **Parallel Test Execution**: `application-tests` uses `--parallel` for speed. The `coverage` job deliberately does not (see Coverage policy below)
 - **Memory Limit**: 4G for PHP (`memory_limit=4G` in the setup action, `-d memory_limit=4G` for Pest, `--memory-limit=4G` for PHPStan)
 - **Dependency Caching**: The Composer download cache (keyed on `composer.lock`) and the npm cache (keyed on `package-lock.json`). PHPStan result caches are **not** cached between CI runs.
 - **Browser Tests**: Not gated. `browser-tests` runs on every trigger above, and failure screenshots are uploaded as the `pest-browser-screenshots` artifact for 7 days
-- **Test Environment**: `type-coverage`, `application-tests`, and `browser-tests` (as well as the Coverage and TIA Baseline workflows) run `cp .env.testing .env`, `php artisan key:generate`, and `php artisan config:cache` on the disposable runner
+- **Test Environment**: `type-coverage`, `application-tests`, `coverage`, and `browser-tests` (as well as the Coverage and TIA Baseline workflows) run `cp .env.testing .env`, `php artisan key:generate`, and `php artisan config:cache` on the disposable runner
 
 ### 2. **Security Scan** (`.github/workflows/security-scan.yml`, workflow name "Security")
 **Trigger**: Pull requests targeting `develop` or `main`, a weekly schedule (Mondays 09:00 UTC), and manual dispatch. It does not run on pushes.
@@ -40,7 +41,12 @@ The project uses four automated workflows:
 
 ### 4. **Coverage Testing** (`.github/workflows/coverage.yml`, workflow name "Code Coverage")
 **Trigger**: Manual dispatch only
-**Purpose**: Generate PCOV coverage for the Feature, Integration, and Unit suites (`--min=44`), upload `coverage.xml` as the `pest-coverage-report` artifact for 14 days, and upload it to Codecov (the run fails if the Codecov upload fails)
+**Purpose**: Generate PCOV coverage for the Feature, Integration, and Unit suites (`--min=100`, non-parallel), upload `coverage.xml` as the `pest-coverage-report` artifact for 14 days, and upload it to Codecov (the run fails if the Codecov upload fails)
+
+### Coverage policy (100%)
+The `coverage` job in `ci.yml` runs `composer test:coverage` on every pull request and push to `develop`/`main`. `phpunit.xml` has no `<source><exclude>` entries, so all of `app/` (Livewire, Console, and `AppServiceProvider` included) must be fully covered. The Browser suite is excluded from the gate because ordinary tests already cover what it reaches.
+
+The gate must run **without** `--parallel`: merged parallel-worker coverage drops some `match` header lines (the arms are covered, the header statement is lost), and which lines are dropped varies between runs. The non-parallel result was verified identical across repeated runs (6809 of 6809 statements). Do not use `@codeCoverageIgnore`; delete unreachable code or test it through its behavior. Locally the run takes about 2 minutes.
 
 ## Branch Protection Integration
 
@@ -116,11 +122,11 @@ composer test:lint
 
 **Coverage Not Generating:**
 ```bash
-# Run coverage locally (needs PCOV or Xdebug)
+# Run coverage locally (needs PCOV or Xdebug; see docs/testing/troubleshooting.md for Herd)
 composer test:coverage
 
 # Generate a local coverage report with the project minimum
-./vendor/bin/pest --coverage --min=44 --coverage-clover=coverage.xml
+./vendor/bin/pest --exclude-testsuite Browser --coverage --min=100 --coverage-clover=coverage.xml
 ```
 
 **Codecov Upload Failures:**

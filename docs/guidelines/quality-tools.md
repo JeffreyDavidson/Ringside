@@ -35,14 +35,14 @@ Automated code quality tools ensure consistent formatting, type safety, and mode
 # Code quality checks
 composer lint          # Format code
 composer test:types     # Static analysis
-composer test:coverage  # Pest suites with PCOV coverage (minimum 44%)
+composer test:coverage  # Pest suites with PCOV coverage (minimum 100%, non-parallel)
 composer rector         # Code modernization
 ```
 
 ## Quality Metrics
 
 ### Coverage Requirements
-- **Code Coverage**: Current automated minimum is 44%
+- **Code Coverage**: 100% line coverage of `app/` is enforced by `composer test:coverage` and the `coverage` CI job; no exclusions, no `@codeCoverageIgnore`
 - **Type Coverage**: 100% type coverage required
 - **Static Analysis**: PHPStan level 9 for application and Pest tests
 - **Code Style**: Laravel Pint compliance
