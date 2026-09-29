@@ -21,30 +21,20 @@ class PasswordResetLinkController extends Controller
         return view('auth.forgot-password');
     }
 
+    /**
+     * Every outcome (sent, throttled, unknown email) gets the same response so the form
+     * cannot be used to discover which emails are registered. The broker still enforces its
+     * cooldown and only notifies existing users.
+     */
     public function store(SendPasswordResetLinkRequest $request): RedirectResponse
     {
-        $status = Password::sendResetLink($request->validated());
+        Password::sendResetLink($request->validated());
 
-        if (in_array($status, [Password::RESET_LINK_SENT, Password::RESET_THROTTLED], true)) {
-            $throttle = Config::integer('auth.passwords.'.Config::string('auth.defaults.passwords').'.throttle');
-
-            $request->session()->flash('recovery_resend_at', now()->addSeconds($throttle)->timestamp);
-        }
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return back()
-                ->with('status', __($status))
-                ->with('recovery_email', $request->string('email')->value());
-        }
-
-        if ($status === Password::RESET_THROTTLED) {
-            return back()
-                ->with('recovery_email', $request->string('email')->value())
-                ->withErrors(['email' => __($status)]);
-        }
+        $throttle = Config::integer('auth.passwords.'.Config::string('auth.defaults.passwords').'.throttle');
 
         return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => __($status)]);
+            ->with('status', __('passwords.sent'))
+            ->with('recovery_email', $request->string('email')->value())
+            ->with('recovery_resend_at', now()->addSeconds($throttle)->timestamp);
     }
 }
