@@ -140,42 +140,6 @@ describe('referees table', function (): void {
             ->assertDontSee('Original Referee');
     });
 
-    it('employs an unemployed referee while preserving table state', function (): void {
-        // Arrange
-        $referee = Referee::factory()->unemployed()->create([
-            'first_name' => 'Employment',
-            'last_name' => 'Referee',
-        ]);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('employ', $referee);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($referee)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('restores a deleted referee and redirects to the index', function (): void {
-        // Arrange
-        $referee = Referee::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $referee->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('referees.index');
-        expect(Referee::find($referee->id))->not->toBeNull();
-    });
-
     it('forbids users without referee access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {

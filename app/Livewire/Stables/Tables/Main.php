@@ -5,11 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Actions\Stables\DeleteAction;
-use App\Actions\Stables\DisbandAction;
-use App\Actions\Stables\EstablishAction;
-use App\Actions\Stables\RestoreAction;
-use App\Actions\Stables\RetireAction;
-use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -125,77 +120,5 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $stable): void {
             $deleteAction->handle($stable);
         }, __('stables.actions.deleted'));
-    }
-
-    /**
-     * Establish a stable.
-     */
-    public function establish(Stable $stable, EstablishAction $establishAction): void
-    {
-        Gate::authorize('establish', $stable);
-
-        if ($this->executeBusinessAction(function () use ($establishAction, $stable): void {
-            $establishAction->handle($stable);
-        })) {
-            $this->redirectRoute('stables.index');
-        }
-    }
-
-    /**
-     * Disband a stable.
-     */
-    public function disband(Stable $stable, DisbandAction $disbandAction): void
-    {
-        Gate::authorize('disband', $stable);
-
-        if ($this->executeBusinessAction(function () use ($disbandAction, $stable): void {
-            $disbandAction->handle($stable);
-        })) {
-            $this->redirectRoute('stables.index');
-        }
-    }
-
-    /**
-     * Restore a stable.
-     */
-    public function restore(int $stableId, RestoreAction $restoreAction): void
-    {
-        $stable = Stable::onlyTrashed()->findOrFail($stableId);
-
-        Gate::authorize('restore', $stable);
-
-        if ($this->executeBusinessAction(function () use ($restoreAction, $stable): void {
-            $restoreAction->handle($stable);
-        })) {
-            $this->redirectRoute('stables.index');
-        }
-    }
-
-    /**
-     * Retire a stable.
-     */
-    public function retire(Stable $stable, RetireAction $retireAction): void
-    {
-        Gate::authorize('retire', $stable);
-
-        if ($this->executeBusinessAction(function () use ($retireAction, $stable): void {
-            $retireAction->handle($stable);
-        })) {
-            $this->redirectRoute('stables.index');
-        }
-    }
-
-    /**
-     * Unretire a stable.
-     */
-    public function unretire(Stable $stable, UnretireAction $unretireAction): void
-    {
-        Gate::authorize('unretire', $stable);
-
-        if ($this->executeBusinessAction(function () use ($unretireAction, $stable): void {
-            $unretireAction->handle($stable);
-        })) {
-            $this->redirectRoute('stables.index');
-        }
     }
 }

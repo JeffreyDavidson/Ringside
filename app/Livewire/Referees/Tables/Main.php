@@ -4,21 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
-use App\Actions\Referees\ClearFromInjuryAction;
 use App\Actions\Referees\DeleteAction;
-use App\Actions\Referees\EmployAction;
-use App\Actions\Referees\InjureAction;
-use App\Actions\Referees\ReinstateAction;
-use App\Actions\Referees\ReleaseAction;
-use App\Actions\Referees\RestoreAction;
-use App\Actions\Referees\RetireAction;
-use App\Actions\Referees\SuspendAction;
-use App\Actions\Referees\UnretireAction;
 use App\Builders\Roster\RefereeBuilder;
-use App\Enums\Roster\RosterEntityType;
-use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Livewire\Base\Tables\BaseRosterTable;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Concerns\ExecutesBusinessActions;
@@ -29,8 +18,8 @@ use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-/** @extends BaseRosterTable<Referee> */
-class Main extends BaseRosterTable
+/** @extends BaseTable<Referee> */
+class Main extends BaseTable
 {
     use ExecutesBusinessActions;
 
@@ -45,18 +34,6 @@ class Main extends BaseRosterTable
 
     #[\Override]
     protected string $resourceName = 'referees';
-
-    protected function findRosterModel(RosterLifecycleAction $lifecycleAction, int $modelId): Referee
-    {
-        return $lifecycleAction->usesTrashedModel()
-            ? Referee::onlyTrashed()->findOrFail($modelId)
-            : Referee::findOrFail($modelId);
-    }
-
-    protected function rosterEntityType(): RosterEntityType
-    {
-        return RosterEntityType::Referee;
-    }
 
     /** @return RefereeBuilder<Referee> */
     public function builder(): RefereeBuilder
@@ -134,52 +111,5 @@ class Main extends BaseRosterTable
         $this->executeBusinessAction(function () use ($deleteAction, $referee): void {
             $deleteAction->handle($referee);
         }, __('referees.actions.deleted'));
-    }
-
-    public function clearFromInjury(Referee $referee, ClearFromInjuryAction $clearFromInjuryAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::ClearFromInjury, $referee->id, fn (Referee $referee) => $clearFromInjuryAction->handle($referee));
-    }
-
-    public function employ(Referee $referee, EmployAction $employAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Employ, $referee->id, fn (Referee $referee) => $employAction->handle($referee));
-    }
-
-    public function injure(Referee $referee, InjureAction $injureAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Injure, $referee->id, fn (Referee $referee) => $injureAction->handle($referee));
-    }
-
-    public function reinstate(Referee $referee, ReinstateAction $reinstateAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Reinstate, $referee->id, fn (Referee $referee) => $reinstateAction->handle($referee));
-    }
-
-    public function release(Referee $referee, ReleaseAction $releaseAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Release, $referee->id, fn (Referee $referee) => $releaseAction->handle($referee));
-    }
-
-    public function restore(int $refereeId, RestoreAction $restoreAction): void
-    {
-        if ($this->executeRosterLifecycleAction(RosterLifecycleAction::Restore, $refereeId, fn (Referee $referee) => $restoreAction->handle($referee))) {
-            $this->redirectRoute('referees.index');
-        }
-    }
-
-    public function retire(Referee $referee, RetireAction $retireAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Retire, $referee->id, fn (Referee $referee) => $retireAction->handle($referee));
-    }
-
-    public function suspend(Referee $referee, SuspendAction $suspendAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Suspend, $referee->id, fn (Referee $referee) => $suspendAction->handle($referee));
-    }
-
-    public function unretire(Referee $referee, UnretireAction $unretireAction): void
-    {
-        $this->executeRosterLifecycleAction(RosterLifecycleAction::Unretire, $referee->id, fn (Referee $referee) => $unretireAction->handle($referee));
     }
 }

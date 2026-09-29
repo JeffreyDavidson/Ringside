@@ -223,26 +223,6 @@ describe('events table', function (): void {
         $this->assertSoftDeleted($event);
     });
 
-    it('restores an event and reports success', function (): void {
-        // Arrange
-        $event = Event::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $event->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertDispatched(
-                'flash-message',
-                type: 'status',
-                message: __('events.actions.restored'),
-            )
-            ->assertRedirectToRoute('events.index');
-        $this->assertNotSoftDeleted($event);
-    });
-
     it('renders an empty state when there are no events', function (): void {
         // Act
         $component = livewire(Main::class);

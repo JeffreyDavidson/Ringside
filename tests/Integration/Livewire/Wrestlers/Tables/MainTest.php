@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\Roster\RosterLifecycleAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -113,65 +112,6 @@ describe('wrestlers table', function (): void {
         $component
             ->assertSee('Updated Wrestler')
             ->assertDontSee('Original Wrestler');
-    });
-
-    it('employs an unemployed wrestler while preserving table state', function (): void {
-        // Arrange
-        $wrestler = Wrestler::factory()->unemployed()->create(['name' => 'Employment Wrestler']);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('handleWrestlerAction', RosterLifecycleAction::Employ->value, $wrestler->id);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($wrestler)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('releases an employed wrestler', function (): void {
-        // Arrange
-        $wrestler = Wrestler::factory()->bookable()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('handleWrestlerAction', RosterLifecycleAction::Release->value, $wrestler->id);
-
-        // Assert
-        $component->assertHasNoErrors();
-        expect(freshModel($wrestler)->status)->toBe(EmploymentStatus::Released);
-    });
-
-    it('retires an employed wrestler', function (): void {
-        // Arrange
-        $wrestler = Wrestler::factory()->bookable()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('handleWrestlerAction', RosterLifecycleAction::Retire->value, $wrestler->id);
-
-        // Assert
-        $component->assertHasNoErrors();
-        expect(freshModel($wrestler)->status)->toBe(EmploymentStatus::Retired);
-    });
-
-    it('restores a deleted wrestler and redirects to the index', function (): void {
-        // Arrange
-        $wrestler = Wrestler::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $wrestler->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('wrestlers.index');
-        expect(Wrestler::find($wrestler->id))->not->toBeNull();
     });
 
     it('forbids users without wrestler access', function (string $actor): void {

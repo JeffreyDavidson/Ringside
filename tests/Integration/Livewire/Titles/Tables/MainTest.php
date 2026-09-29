@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\Titles\TitleLifecycleTransition;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
@@ -175,45 +174,6 @@ describe('titles table', function (): void {
             ->assertSet('filterValues.status', '')
             ->assertSet('filterValues.type', '')
             ->assertSet('filterValues.activation_date', []);
-    });
-
-    it('remains on the table when a lifecycle action is rejected', function (TitleLifecycleTransition $transition): void {
-        // Arrange
-        $title = match ($transition) {
-            TitleLifecycleTransition::Debut => Title::factory()->active()->create(),
-            TitleLifecycleTransition::Pull => Title::factory()->inactive()->create(),
-            TitleLifecycleTransition::Retire => Title::factory()->retired()->create(),
-            TitleLifecycleTransition::Unretire, TitleLifecycleTransition::Reinstate => Title::factory()->active()->create(),
-        };
-        $action = match ($transition) {
-            TitleLifecycleTransition::Debut => 'debut',
-            TitleLifecycleTransition::Pull => 'putOnHold',
-            TitleLifecycleTransition::Reinstate => 'reinstate',
-            TitleLifecycleTransition::Retire => 'retire',
-            TitleLifecycleTransition::Unretire => 'unretire',
-        };
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call($action, $title);
-
-        // Assert
-        $component->assertNoRedirect();
-    })->with(TitleLifecycleTransition::cases());
-
-    it('restores a deleted title and redirects to the index', function (): void {
-        // Arrange
-        $title = Title::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $title->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('titles.index');
-        expect(Title::find($title->id))->not->toBeNull();
     });
 
     it('renders only the current champion', function (): void {
