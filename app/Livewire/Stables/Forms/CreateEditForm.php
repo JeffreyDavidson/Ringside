@@ -143,8 +143,8 @@ class CreateEditForm extends BaseForm
         throw new LogicException('Stable forms require integer model keys.');
     }
 
-    /** @return array<string, string> */
-    protected function getCustomValidationAttributes(): array
+    #[\Override]
+    protected function validationAttributes(): array
     {
         return [
             'started_at' => 'start date',
