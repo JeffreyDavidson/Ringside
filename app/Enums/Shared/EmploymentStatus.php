@@ -23,17 +23,6 @@ enum EmploymentStatus: string
     case Retired = 'retired';
     case Unemployed = 'unemployed';
 
-    public function color(): string
-    {
-        return match ($this) {
-            self::Employed => 'success',
-            self::FutureEmployment => 'warning',
-            self::Released => 'dark',
-            self::Retired => 'secondary',
-            self::Unemployed => 'info',
-        };
-    }
-
     public function label(): string
     {
         return match ($this) {

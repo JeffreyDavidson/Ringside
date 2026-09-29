@@ -24,15 +24,6 @@ enum EventStatus: string
         return $date->isPast() ? self::Past : self::Scheduled;
     }
 
-    public function color(): string
-    {
-        return match ($this) {
-            self::Past => 'dark',
-            self::Scheduled => 'success',
-            self::Unscheduled => 'danger',
-        };
-    }
-
     public function label(): string
     {
         return match ($this) {

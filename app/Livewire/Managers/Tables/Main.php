@@ -96,7 +96,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (ManagerBuilder $builder, string $value): void {
                     /** @var ManagerBuilder<Manager> $builder */

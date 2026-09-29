@@ -90,7 +90,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (RefereeBuilder $builder, string $value): void {
                     /** @var RefereeBuilder<Referee> $builder */

@@ -11,8 +11,6 @@ abstract class Filter
 {
     protected ?Closure $filterCallback = null;
 
-    protected string $pillTitle = '';
-
     public function __construct(
         protected string $name,
         protected ?string $key = null,
@@ -27,13 +25,6 @@ abstract class Filter
         return $this;
     }
 
-    public function setFilterPillTitle(string $title): static
-    {
-        $this->pillTitle = $title;
-
-        return $this;
-    }
-
     public function getName(): string
     {
         return $this->name;
@@ -42,11 +33,6 @@ abstract class Filter
     public function getKey(): string
     {
         return $this->key ?? str($this->name)->snake()->toString();
-    }
-
-    public function getPillTitle(): string
-    {
-        return $this->pillTitle ?: $this->name;
     }
 
     /**

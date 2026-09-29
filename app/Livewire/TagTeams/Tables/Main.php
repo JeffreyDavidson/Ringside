@@ -92,7 +92,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */

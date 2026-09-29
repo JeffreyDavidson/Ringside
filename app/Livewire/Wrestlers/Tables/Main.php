@@ -83,7 +83,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (WrestlerBuilder $builder, string $value): void {
                     $status = EmploymentStatus::tryFrom($value);

@@ -111,7 +111,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EventStatus::filterOptions())
                 ->filter(function (EventBuilder $builder, string $value): void {
                     $status = EventStatus::tryFrom($value);
