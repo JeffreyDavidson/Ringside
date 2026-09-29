@@ -6,7 +6,7 @@ This document provides a comprehensive reference for all development and testing
 
 ### Primary Test Commands
 - `composer test` - Run quality checks and the default Pest suites with coverage
-- `composer test:coverage` - Run the default Pest suites with PCOV coverage (minimum 44%)
+- `composer test:coverage` - Run the default Pest suites with PCOV coverage, non-parallel, Browser suite excluded (minimum 100%)
 - `composer test:application` - Run Feature, Unit, and Integration tests in parallel
 - `composer test:browser` - Run Browser tests in parallel
 - `composer test:tia` - Run tests selected by Test Impact Analysis

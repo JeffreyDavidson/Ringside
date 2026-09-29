@@ -4,11 +4,6 @@
     <include>
       <directory suffix=".php">./app</directory>
     </include>
-    <exclude>
-      <directory suffix=".php">./app/Livewire</directory>
-      <directory suffix=".php">./app/Console</directory>
-      <file>./app/Providers/AppServiceProvider.php</file>
-    </exclude>
   </source>
   <testsuites>
     <testsuite name="Feature">
