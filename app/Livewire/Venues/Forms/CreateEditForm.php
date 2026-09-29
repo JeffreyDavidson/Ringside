@@ -8,99 +8,21 @@ use App\Data\Events\VenueData;
 use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
-use App\ValueObjects\Address;
 use Illuminate\Validation\Rule;
 
-/**
- * Livewire form component for managing venue creation and editing.
- *
- * This form handles venue location data management for wrestling events and shows.
- * Provides validation for complete venue information including address verification
- * and state existence validation. Venues represent physical locations where
- * wrestling events take place, requiring accurate location data for event planning,
- * fan travel, and operational logistics.
- *
- * Key Responsibilities:
- * - Venue identification and naming with uniqueness enforcement
- * - Complete address management with comprehensive validation
- * - State verification against the supported United States values
- * - ZIP code format validation for postal accuracy
- * - Location data integrity for event management systems
- *
- * @extends BaseForm<Venue>
- *
- * @see BaseForm For base form functionality and patterns
- *
- * @property string $name Venue's official name for events and promotion
- * @property string $street_address Complete street address for location
- * @property string $city City where venue is located
- * @property string $state State name
- * @property int|string $zipcode 5-digit ZIP code for postal addressing
- */
+/** @extends BaseForm<Venue> */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * Venue's official name for events and promotional materials.
-     *
-     * Used in event announcements, ticket sales, promotional content,
-     * and venue booking systems. Must be unique across all venues
-     * to prevent confusion in event scheduling and fan communications.
-     *
-     * @var string Venue's primary name identifier
-     */
     public string $name = '';
 
-    /**
-     * Complete street address including number and street name.
-     *
-     * Full physical address for venue location, essential for GPS navigation,
-     * shipping logistics, emergency services, and official documentation.
-     * Combined with city, state, and ZIP code for complete addressing.
-     *
-     * @var string Street address for venue location
-     */
     public string $street_address = '';
 
-    /**
-     * City where the venue is located.
-     *
-     * Municipal location for the venue, used in event announcements,
-     * marketing materials, and fan travel planning. Critical for regional
-     * event scheduling and local promotional partnerships.
-     *
-     * @var string City name for venue location
-     */
     public string $city = '';
 
-    /**
-     * State where the venue is located.
-     *
-     * Validated against supported United States values to ensure data accuracy
-     * and prevent entry errors. Used for regional event planning, tax compliance,
-     * regulatory requirements, and state-specific operational procedures.
-     *
-     * @var string State name
-     */
     public string $state = '';
 
-    /**
-     * 5-digit ZIP code for postal addressing.
-     *
-     * Standard US postal code format essential for mail delivery, location
-     * identification, and regional analysis. Validated as exactly 5 digits
-     * to ensure proper format for shipping and correspondence systems.
-     *
-     * @var int|string|null ZIP code in 5-digit format (nullable for form handling)
-     */
     public int|string|null $zipcode = '';
 
-    /**
-     * Prepare venue data for model storage.
-     *
-     * Transforms form fields into model-compatible data structure ready
-     * for database persistence. All venue fields are passed through directly
-     * as they represent simple scalar values without complex transformations.
-     */
     public function toData(): VenueData
     {
         return new VenueData(
@@ -117,23 +39,6 @@ class CreateEditForm extends BaseForm
         return Venue::query()->findOrFail($this->modelId);
     }
 
-    /**
-     * Get the model class for venue form operations.
-     *
-     * Specifies the Venue model class for type-safe model operations
-     * including creation, updates, and relationship management.
-     *
-     * @return class-string<Venue> The Venue model class
-     */
-    /**
-     * Define validation rules for venue form fields.
-     *
-     * Provides comprehensive validation for all venue location data including
-     * uniqueness constraints, address completeness, state existence verification,
-     * and ZIP code format validation to ensure operational reliability.
-     *
-     * @return array<string, array<int, mixed>> Laravel validation rules array
-     */
     protected function rules(): array
     {
         return [
@@ -145,14 +50,6 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    /**
-     * Get venue-specific validation attributes.
-     *
-     * Extends standard attributes with venue-specific field names for better
-     * user experience in validation messages.
-     *
-     * @return array<string, string> Custom validation attributes for this form
-     */
     #[\Override]
     protected function validationAttributes(): array
     {
