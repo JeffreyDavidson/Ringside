@@ -7,6 +7,7 @@ use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Livewire\Events\Tables\Main as EventsTable;
 use App\Livewire\Managers\Tables\Main as ManagersTable;
+use App\Livewire\Matches\Tables\MatchesTable;
 use App\Livewire\Referees\Tables\Main as RefereesTable;
 use App\Livewire\Stables\Tables\Main as StablesTable;
 use App\Livewire\TagTeams\Tables\Main as TagTeamsTable;
@@ -16,6 +17,7 @@ use App\Livewire\Wrestlers\Tables\Main as WrestlersTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Lifecycle\LifecycleTransition;
+use App\Models\Matches\EventMatch;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -27,12 +29,12 @@ use Illuminate\Support\Facades\Lang;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-test('table deletions use the typed lifecycle action', function (LifecycleOwnerType $ownerType, Closure $createOwner, string $component, string $translationKey) {
+test('table deletions use the typed lifecycle action', function (LifecycleOwnerType $ownerType, Closure $createOwner, string $component, string $translationKey, ?Closure $componentParameters = null) {
     $owner = $createOwner();
 
     actingAs(administrator());
 
-    livewire($component)
+    livewire($component, $componentParameters === null ? [] : $componentParameters($owner))
         ->call('delete', $owner)
         ->assertHasNoErrors()
         ->assertDispatched(
@@ -54,6 +56,7 @@ test('table deletions use the typed lifecycle action', function (LifecycleOwnerT
 })->with([
     'event' => [LifecycleOwnerType::Event, fn () => Event::factory()->create(), EventsTable::class, 'events.actions.deleted'],
     'manager' => [LifecycleOwnerType::Manager, fn () => Manager::factory()->create(), ManagersTable::class, 'managers.actions.deleted'],
+    'match' => [LifecycleOwnerType::Match, fn () => EventMatch::factory()->create(), MatchesTable::class, 'matches.actions.deleted', fn (EventMatch $owner) => ['eventId' => $owner->event_id]],
     'referee' => [LifecycleOwnerType::Referee, fn () => Referee::factory()->create(), RefereesTable::class, 'referees.actions.deleted'],
     'stable' => [LifecycleOwnerType::Stable, fn () => Stable::factory()->inactive()->create(), StablesTable::class, 'stables.actions.deleted'],
     'tag team' => [LifecycleOwnerType::TagTeam, fn () => TagTeam::factory()->create(), TagTeamsTable::class, 'tag-teams.actions.deleted'],
