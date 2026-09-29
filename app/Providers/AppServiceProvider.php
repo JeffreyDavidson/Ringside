@@ -21,12 +21,9 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use App\View\Composers\PromotionSwitcherComposer;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
@@ -35,13 +32,6 @@ use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * The path to the "home" route for your application.
-     *
-     * This is used by Laravel authentication to redirect users after login.
-     */
-    public const string HOME = '/dashboard';
-
     /**
      * Register any application services.
      */
@@ -54,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
     }
 
+    /** Merged migrations import the old model class names and must never be edited, so keep these aliases. */
     private function registerLegacyRosterModelAliases(): void
     {
         $aliases = [
@@ -169,17 +160,5 @@ class AppServiceProvider extends ServiceProvider
             'components.sidebar.index',
             'components.layouts.partials.header',
         ], PromotionSwitcherComposer::class);
-
-        $this->bootRoute();
-    }
-
-    public function bootRoute(): void
-    {
-        RateLimiter::for('api', function (Request $request) {
-            /** @var User|null $user */
-            $user = $request->user();
-
-            return Limit::perMinute(60)->by($user?->id ?: $request->ip());
-        });
     }
 }
