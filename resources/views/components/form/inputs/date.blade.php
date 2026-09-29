@@ -1,1 +1,3 @@
-<x-form.input type="date" {{ $attributes }}>{{ $slot }}</x-form.input>
+@props(['label' => null])
+
+<x-form.input type="date" :$label {{ $attributes }}>{{ $slot }}</x-form.input>

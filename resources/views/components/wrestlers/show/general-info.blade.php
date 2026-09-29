@@ -10,7 +10,7 @@
         <x-card.general-info.links label="Current Tag Team">
             <x-route-link
                 :route="route('tag-teams.show', $wrestler->currentTagTeam)"
-                label="{{ $wrestler->currentTagTeam->name }}"
+                :label="$wrestler->currentTagTeam->name"
             />
         </x-card.general-info.links>
     @endif
@@ -18,7 +18,7 @@
         <x-card.general-info.link-list label="Current Manager(s)">
             @foreach ($wrestler->currentManagers as $manager)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('managers.show', $manager)" label="{{ $manager->full_name }}" />
+                    <x-route-link :route="route('managers.show', $manager)" :label="$manager->full_name" />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
@@ -27,7 +27,7 @@
         <x-card.general-info.links label="Current Stable">
             <x-route-link
                 :route="route('stables.show', $wrestler->currentStable)"
-                label="{{ $wrestler->currentStable->name }}"
+                :label="$wrestler->currentStable->name"
             />
         </x-card.general-info.links>
     @endif
@@ -37,7 +37,7 @@
                 <x-card.general-info.link-item>
                     <x-route-link
                         :route="route('titles.show', $currentChampionship->title)"
-                        label="{{ $currentChampionship->title->name }}"
+                        :label="$currentChampionship->title->name"
                     />
                 </x-card.general-info.link-item>
             @endforeach

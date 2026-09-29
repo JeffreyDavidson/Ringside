@@ -68,7 +68,7 @@ describe('Managers Controller', function () {
      */
     test('show renders the related data displayed by the manager summary', function () {
         $manager = Manager::factory()->employed()->create();
-        $wrestler = Wrestler::factory()->create();
+        $wrestler = Wrestler::factory()->create(['name' => "Sean O'Neil"]);
         $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team Alpha']);
         $manager->wrestlers()->attach($wrestler, ['hired_at' => now()->subDay()]);
         $manager->tagTeams()->attach($tagTeam, ['hired_at' => now()->subDay()]);
