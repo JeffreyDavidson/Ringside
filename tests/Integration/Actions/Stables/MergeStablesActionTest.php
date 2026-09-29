@@ -100,3 +100,28 @@ it('rejects merging stables that are not both active and unretired', function (C
         'is not currently active and cannot be merged',
     ],
 ]);
+
+it('merges regardless of which stable was created first', function (bool $primaryIsOlder) {
+    $olderStable = Stable::factory()->active()->create();
+    $newerStable = Stable::factory()->active()->create();
+    [$primaryStable, $secondaryStable] = $primaryIsOlder
+        ? [$olderStable, $newerStable]
+        : [$newerStable, $olderStable];
+    $primaryWrestlerIds = $primaryStable->currentWrestlers()->pluck('wrestlers.id');
+    $secondaryWrestlerIds = $secondaryStable->currentWrestlers()->pluck('wrestlers.id');
+
+    resolve(MergeStablesAction::class)->handle(
+        $primaryStable,
+        $secondaryStable,
+        now(),
+    );
+
+    expect($primaryStable->currentWrestlers()->pluck('wrestlers.id')->all())
+        ->toEqualCanonicalizing($primaryWrestlerIds->merge($secondaryWrestlerIds)->all())
+        ->and($secondaryStable->currentWrestlers()->exists())->toBeFalse()
+        ->and($primaryStable->refresh()->trashed())->toBeFalse()
+        ->and($secondaryStable->refresh()->trashed())->toBeTrue();
+})->with([
+    'primary is the older stable' => true,
+    'primary is the newer stable' => false,
+]);

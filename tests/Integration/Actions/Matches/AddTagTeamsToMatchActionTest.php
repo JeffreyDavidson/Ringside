@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddTagTeamsToMatchAction;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
@@ -89,3 +90,25 @@ test('it assigns a repeated tag team only once', function () {
 
     expect($match->competitors()->count())->toBe(1);
 });
+
+test('it rejects an empty tag team list without creating a side', function () {
+    $match = EventMatch::factory()->create();
+
+    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect(), 1))
+        ->toThrow(EntityNotAvailableException::class, 'Selected tag teams must all be eligible for match assignment.')
+        ->and($match->sides()->exists())->toBeFalse()
+        ->and($match->competitors()->exists())->toBeFalse();
+});
+
+test('it rejects a side number below one', function (int $sideNumber) {
+    $match = EventMatch::factory()->create();
+    $tagTeam = TagTeam::factory()->bookable()->create();
+
+    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), $sideNumber))
+        ->toThrow(InvalidMatchConfigurationException::class, "Match side number [{$sideNumber}] must be positive.")
+        ->and($match->sides()->exists())->toBeFalse()
+        ->and($match->competitors()->exists())->toBeFalse();
+})->with([
+    'zero' => 0,
+    'negative' => -1,
+]);

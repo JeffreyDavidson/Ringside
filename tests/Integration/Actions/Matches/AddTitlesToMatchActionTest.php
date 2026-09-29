@@ -15,6 +15,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Facades\DB;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -270,3 +271,20 @@ test('it rejects a tag team title assigned to wrestler competitors', function ()
         )
         ->and($match->titles()->exists())->toBeFalse();
 });
+
+test('it rejects an empty title list without attaching anything', function (Closure $assign) {
+    $match = createSinglesMatchWithCompetitors();
+
+    expect(fn () => $assign(resolve(AddTitlesToMatchAction::class), $match))
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.')
+        ->and($match->titles()->exists())->toBeFalse();
+})->with([
+    'through handle' => [
+        fn (AddTitlesToMatchAction $action, EventMatch $match) => $action->handle($match, collect()),
+    ],
+    'within a caller transaction' => [
+        fn (AddTitlesToMatchAction $action, EventMatch $match) => DB::transaction(
+            fn () => $action->handleWithinTransaction($match->refreshForUpdate(), collect()),
+        ),
+    ],
+]);

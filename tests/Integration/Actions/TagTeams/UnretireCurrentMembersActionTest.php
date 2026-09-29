@@ -10,6 +10,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
+use JMac\Testing\Matching\Argument;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -84,4 +85,33 @@ test('it does not swallow programmer errors while unretiring current members', f
 
     $unretireWrestler->verify();
     $unretireManager->unused();
+});
+
+test('it skips a manager rejected by unretirement rules and still unretires the others', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $rejectedManager = Manager::factory()->retired()->create();
+    $eligibleManager = Manager::factory()->retired()->create();
+    $tagTeam->managers()->attach([$rejectedManager->id, $eligibleManager->id], ['hired_at' => now()->subMonth()]);
+    $unretirementDate = now();
+    $unretireWrestler = Double::for(UnretireWrestlerAction::class);
+    $unretireManager = Double::for(UnretireManagerAction::class);
+    $unretireManager->expects('handle')
+        ->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Manager && $actual->is($rejectedManager)),
+            $unretirementDate,
+            false,
+        )
+        ->throws(CannotBeUnretiredException::notRetired($rejectedManager));
+    $unretireManager->expects('handle')
+        ->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Manager && $actual->is($eligibleManager)),
+            $unretirementDate,
+            false,
+        );
+
+    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager)
+        ->handle($tagTeam, $unretirementDate);
+
+    $unretireManager->verify();
+    $unretireWrestler->unused();
 });
