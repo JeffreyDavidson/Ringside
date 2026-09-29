@@ -61,16 +61,6 @@ final readonly class StableRetirementEligibility
             throw CannotBeUnretiredException::notRetired($stable);
         }
 
-        $conflictingStable = Stable::query()
-            ->whereName($stable->name)
-            ->whereKeyNot($stable->getKey())
-            ->whereRelation('activityPeriods', 'ended_at', null)
-            ->first();
-
-        if ($conflictingStable) {
-            throw CannotBeUnretiredException::nameConflict($stable, $conflictingStable->name);
-        }
-
         if (! $requireFormerMembers) {
             return;
         }

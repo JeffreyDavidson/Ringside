@@ -96,7 +96,7 @@ Stable unretirement changes only the stable's retirement and activity state. It 
 
 Stable restoration only restores the soft-deleted record and preserves its historical state. Reunion and activation remain explicit subsequent operations, so restoration does not depend on current former-member availability.
 
-Stable retirement eligibility is isolated in `StableRetirementEligibility`. Retirement and unretirement remain paired as opposite transitions of the retirement lifecycle dimension. The collaborator owns stable state, soft-deletion, name-conflict, and optional former-member availability rules; the Actions continue to own retirement-period persistence, dates, transactions, and establishment orchestration.
+Stable retirement eligibility is isolated in `StableRetirementEligibility`. Retirement and unretirement remain paired as opposite transitions of the retirement lifecycle dimension. The collaborator owns stable state, soft-deletion, and optional former-member availability rules; the Actions continue to own retirement-period persistence, dates, transactions, and establishment orchestration.
 
 Stable deletion eligibility is isolated in `StableDeletionEligibility`. Deletion requires the stable to have already been disbanded and its current memberships to have already ended, so `DeleteAction` changes only the soft-deletion state. Restoration remains paired with deletion and restores only the historical record without reuniting it.
 

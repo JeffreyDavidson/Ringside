@@ -6,7 +6,6 @@ namespace App\Livewire\Base;
 
 use Illuminate\Database\Eloquent\Model;
 use LivewireUI\Modal\ModalComponent;
-use LogicException;
 
 /**
  * @template TModelForm of BaseForm
@@ -68,16 +67,10 @@ abstract class BaseModal extends ModalComponent
         $modelForm->reset();
     }
 
-    /** @return TModelType */
     private function findModel(int|string $modelId): Model
     {
         $modelClass = $this->getModelClass();
-        $model = $modelClass::query()->findOrFail($modelId);
 
-        if (! $model instanceof $modelClass) {
-            throw new LogicException("Expected an instance of {$modelClass}.");
-        }
-
-        return $model;
+        return $modelClass::query()->findOrFail($modelId);
     }
 }

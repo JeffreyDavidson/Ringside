@@ -6,6 +6,7 @@ namespace App\Actions\Lifecycle;
 
 use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Support\ModelKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -34,12 +35,9 @@ class StartActivityPeriodAction
             }
 
             if ($openActivityPeriod) {
-                $activeableKey = $activeable->getKey();
-                $activeableIdentifier = is_int($activeableKey) || is_string($activeableKey)
-                    ? $activeableKey
-                    : 'unknown';
+                $activeableKey = ModelKey::of($activeable);
 
-                throw new LogicException(class_basename($activeable)." {$activeableIdentifier} already has an open activity period.");
+                throw new LogicException(class_basename($activeable)." {$activeableKey} already has an open activity period.");
             }
 
             return $lockedActiveable->activityPeriods()->create([

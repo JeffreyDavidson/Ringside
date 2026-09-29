@@ -18,7 +18,6 @@ use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use LogicException;
 
 /** @extends BaseForm<Stable> */
 class CreateEditForm extends BaseForm
@@ -132,15 +131,7 @@ class CreateEditForm extends BaseForm
 
     private function stableId(): ?int
     {
-        if ($this->modelId === null || is_int($this->modelId)) {
-            return $this->modelId;
-        }
-
-        if (ctype_digit($this->modelId)) {
-            return (int) $this->modelId;
-        }
-
-        throw new LogicException('Stable forms require integer model keys.');
+        return $this->modelId === null ? null : (int) $this->modelId;
     }
 
     #[\Override]

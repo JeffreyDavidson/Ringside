@@ -48,16 +48,13 @@ class Main extends BaseTable
     }
 
     /**
+     * @param  User  $row
      * @return array<string, mixed>
      */
     #[\Override]
     protected function getActionColumnViewData(Model $row): array
     {
         $viewData = parent::getActionColumnViewData($row);
-
-        if (! $row instanceof User) {
-            return $viewData;
-        }
 
         $statusAction = match ($row->status) {
             UserStatus::Unverified => ['label' => 'Activate account', 'status' => UserStatus::Active],
