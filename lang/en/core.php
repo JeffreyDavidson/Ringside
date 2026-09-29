@@ -23,6 +23,10 @@ return [
     ],
     'loading_form' => 'Loading form…',
     'loading_table' => 'Loading table data…',
+    'modal' => [
+        'add' => 'Add :model',
+        'edit' => 'Edit :name',
+    ],
     'no_records_description' => 'Records will appear here once they have been added.',
     'no_records_found' => 'No records found.',
     'no_results_description' => 'Try another search or adjust your filters.',

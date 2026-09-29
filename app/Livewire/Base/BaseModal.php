@@ -49,10 +49,10 @@ abstract class BaseModal extends ModalComponent
             $model = $this->findModel($modelForm->modelId);
             $value = $model->{$this->modelTitleField};
 
-            return 'Edit '.(string) ($value ?? 'Unknown');
+            return __('core.modal.edit', ['name' => (string) ($value ?? 'Unknown')]);
         }
 
-        return 'Add '.class_basename($this->getModelClass());
+        return __('core.modal.add', ['model' => class_basename($this->getModelClass())]);
     }
 
     public function clear(): void
