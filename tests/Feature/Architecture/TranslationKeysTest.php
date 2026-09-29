@@ -7,11 +7,6 @@ use Symfony\Component\Finder\Finder;
 
 test('literal translation keys used by the application resolve to translations', function (): void {
     // Arrange
-    $ignoredPaths = [
-        // Removed in Task 3.2 (unrendered components)
-        'app/Livewire/Matches/Tables/Main.php',
-        'app/Livewire/Titles/Tables/TitleChampionshipsTable.php',
-    ];
     $pattern = '/(?:(?<![\w$>:])(?:__|trans|trans_choice)|@lang)\(\s*([\'"])((?:[\w-]+::)?[\w-]+(?:\.[\w-]+)+)\1/';
     $missingKeys = [];
 
@@ -23,10 +18,6 @@ test('literal translation keys used by the application resolve to translations',
 
     foreach ($files as $file) {
         $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname()));
-
-        if (in_array($relativePath, $ignoredPaths, true)) {
-            continue;
-        }
 
         preg_match_all($pattern, $file->getContents(), $matches);
 

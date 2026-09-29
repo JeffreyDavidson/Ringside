@@ -43,8 +43,6 @@ return [
         'reinstated' => 'Tag team has been reinstated.',
         'restored' => 'Tag team has been restored.',
         'deleted' => 'Tag team has been deleted.',
-        'partners_added' => 'Partners have been added to the tag team.',
-        'partners_updated' => 'Tag team partners have been updated.',
     ],
 
     'errors' => [
@@ -83,24 +81,5 @@ return [
             'not_deleted' => 'This tag team has not been deleted.',
         ],
         'general' => 'An unexpected error occurred with this tag team action. Please try again.',
-        'cannot_delete' => 'Unable to delete this tag team.',
-        'has_active_wrestlers' => 'Cannot perform this action while tag team has active wrestler partnerships.',
-        'has_active_managers' => 'Cannot perform this action while tag team has active manager assignments.',
-        'invalid_partners' => 'Tag team must have exactly two partners.',
-        'duplicate_partners' => 'Cannot have the same wrestler as both partners.',
-        'partner_not_available' => 'One or more selected partners are not available for tag team participation.',
-        'validation_failed' => 'The tag team action could not be completed due to business rule violations.',
-        'database_error' => 'A database error occurred while processing the tag team action.',
-        'cascade_error' => 'An error occurred while updating related tag team relationships.',
-    ],
-
-    'partnerships' => [
-        'wrestler_added' => 'Wrestler has been added to the tag team.',
-        'wrestler_removed' => 'Wrestler has been removed from the tag team.',
-        'manager_assigned' => 'Manager has been assigned to the tag team.',
-        'manager_removed' => 'Manager has been removed from the tag team.',
-        'all_wrestlers_removed' => 'All wrestlers have been removed from the tag team.',
-        'all_managers_removed' => 'All managers have been removed from the tag team.',
-        'partnerships_dissolved' => 'All tag team partnerships have been dissolved.',
     ],
 ];

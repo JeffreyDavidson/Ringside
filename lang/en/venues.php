@@ -19,6 +19,5 @@ return [
 
     'actions' => [
         'deleted' => 'Venue successfully deleted.',
-        'restored' => 'Venue successfully restored.',
     ],
 ];
