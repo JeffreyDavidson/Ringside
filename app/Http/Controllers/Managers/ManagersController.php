@@ -17,11 +17,7 @@ class ManagersController
     public function show(Manager $manager): View
     {
         return view('managers.show', [
-            'manager' => $manager->load([
-                'currentTagTeams',
-                'currentWrestlers',
-                'firstEmployment',
-            ]),
+            'manager' => $manager,
         ]);
     }
 }

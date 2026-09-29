@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
-use App\Livewire\Components\LifecycleStatus;
+use App\Livewire\Components\GeneralInfo;
 use App\Livewire\Titles\Components\Actions;
 use App\Livewire\Titles\Tables\PreviousTitleChampionships;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -51,31 +53,31 @@ describe('Titles Controller', function () {
     /**
      * @see TitlesController::show()
      */
-    test('show renders the lifecycle status component', function () {
+    test('show renders the general info component', function () {
         actingAs(administrator())
             ->get(route('titles.show', $this->title))
             ->assertOk()
-            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSeeLivewire(GeneralInfo::class)
             ->assertSee($this->title->status->label());
     });
 
     /**
      * @see TitlesController::show()
      */
-    test('show renders the title summary from only its required relationship', function () {
+    test('show renders the related data displayed by the title summary', function () {
         $startedAt = today()->subDay();
         ActivityPeriod::factory()
             ->for($this->title, 'activeable')
             ->started($startedAt)
             ->create();
+        $wrestler = Wrestler::factory()->create();
+        TitleChampionship::factory()->for($this->title, 'title')->forWrestler($wrestler)->current()->create();
 
         actingAs(administrator())
             ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
-            ->assertViewHas('title', fn (Title $title): bool => count($title->getRelations()) === 2
-                && $title->relationLoaded('currentChampionship')
-                && $title->relationLoaded('firstActivityPeriod'));
+            ->assertSee($wrestler->name);
     });
 
     /**
