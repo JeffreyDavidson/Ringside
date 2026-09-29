@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Casts\PhoneNumberCast;
 use App\Models\Users\User;
 use App\ValueObjects\PhoneNumber;
 
@@ -23,3 +24,13 @@ test('it preserves null phone numbers', function () {
 
     expect($user->phone_number)->toBeNull();
 });
+
+test('it serializes phone numbers as digits', function (mixed $value, ?string $expected) {
+    $serialized = (new PhoneNumberCast)->serialize(new User, 'phone_number', $value, []);
+
+    expect($serialized)->toBe($expected);
+})->with([
+    'phone number' => [new PhoneNumber('(123) 456-7890'), '1234567890'],
+    'stored digits' => ['1234567890', '1234567890'],
+    'null' => [null, null],
+]);
