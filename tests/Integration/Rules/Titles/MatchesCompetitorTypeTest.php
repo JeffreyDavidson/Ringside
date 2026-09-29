@@ -95,3 +95,58 @@ test('it safely rejects a missing title', function () {
 
     expect($validator->errors()->first('titles.0'))->toBe('The selected title is invalid.');
 });
+
+it('rejects a title identifier that is not numeric', function (mixed $value) {
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [1], 'tag_teams' => []]],
+        'titles' => [$value],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    $message = $validator->errors()->first('titles.0');
+
+    expect($message)->toBe('The selected title is invalid.');
+})->with([
+    'text' => ['champion'],
+    'array' => [[1]],
+    'boolean' => [true],
+]);
+
+it('rejects a title when the competitors are malformed', function (mixed $competitors) {
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+
+    $validator = Validator::make([
+        'competitors' => $competitors,
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    $message = $validator->errors()->first('titles.0');
+
+    expect($message)->toBe("The {$title->name} may only be contested by wrestlers.");
+})->with([
+    'competitors is not a list' => 'wrestlers',
+    'a side is not an array' => [['not-a-side']],
+    'a side has no competitors' => [[['wrestlers' => []]]],
+]);
+
+it('accepts the expected competitors on a later side after skipping malformed sides', function () {
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $wrestler = Wrestler::factory()->create();
+
+    $validator = Validator::make([
+        'competitors' => [
+            'not-a-side',
+            ['wrestlers' => [$wrestler->id]],
+        ],
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    $passes = $validator->passes();
+
+    expect($passes)->toBeTrue();
+});
