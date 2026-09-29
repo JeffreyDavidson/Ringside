@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Models\Matches\EventMatch;
+use App\Policies\EventMatchPolicy;
 use App\Policies\EventPolicy;
 use App\Policies\ManagerPolicy;
-use App\Policies\MatchPolicy;
 use App\Policies\RefereePolicy;
 use App\Policies\StablePolicy;
 use App\Policies\TagTeamPolicy;
@@ -25,7 +26,7 @@ describe('Global Gate Hook Pattern', function () {
 
     beforeEach(function () {
         $this->policies = [
-            new MatchPolicy,
+            new EventMatchPolicy,
             new EventPolicy,
             new ManagerPolicy,
             new RefereePolicy,
@@ -67,6 +68,14 @@ describe('Global Gate Hook Pattern', function () {
                     ->toBeNull("Basic user should continue to {$methodName} check in ".$policy::class);
             }
         }
+    });
+
+    test('event matches resolve to the event match policy', function () {
+        // Act
+        $policy = Gate::getPolicyFor(EventMatch::class);
+
+        // Assert
+        expect($policy)->toBeInstanceOf(EventMatchPolicy::class);
     });
 
 });
