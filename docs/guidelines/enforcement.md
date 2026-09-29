@@ -21,7 +21,7 @@ Enforcement mechanisms ensure consistent code quality and adherence to standards
 # Code quality checks
 composer lint          # Format code
 composer test:types     # Static analysis
-composer test:unit      # Pest suites with PCOV coverage (minimum 44%)
+composer test:coverage  # Pest suites with PCOV coverage (minimum 44%)
 composer rector         # Code modernization
 ```
 
