@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Managers\ManagersController;
+use App\Livewire\Components\LifecycleStatus;
 use App\Livewire\Managers\Components\Actions;
 use App\Livewire\Managers\Tables\PreviousStables;
 use App\Livewire\Managers\Tables\PreviousTagTeams;
@@ -47,6 +48,17 @@ describe('Managers Controller', function () {
             ->get(route('managers.show', $this->manager))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see ManagersController::show()
+     */
+    test('show renders the lifecycle status component', function () {
+        actingAs(administrator())
+            ->get(route('managers.show', $this->manager))
+            ->assertOk()
+            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSee($this->manager->status->label());
     });
 
     /**

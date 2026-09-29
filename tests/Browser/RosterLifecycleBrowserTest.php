@@ -24,12 +24,16 @@ test('administrator can employ and retire a wrestler from the detail page', func
         ->assertSee($wrestler->name)
         ->assertPresent('button:has-text("Employ")')
         ->assertMissing('button:has-text("Retire")')
+        ->assertSeeIn('tr:has-text("Status:")', 'Unemployed')
         ->click('button:has-text("Employ")')
         ->assertSee('Wrestler has been hired.')
+        ->assertSeeIn('tr:has-text("Status:")', 'Employed')
+        ->assertDontSeeIn('tr:has-text("Status:")', 'Unemployed')
         ->assertPresent('button:has-text("Retire")')
         ->assertMissing('button:has-text("Employ")')
         ->click('button:has-text("Retire")')
         ->assertSee('Wrestler has been retired.')
+        ->assertSeeIn('tr:has-text("Status:")', 'Retired')
         ->assertPresent('button:has-text("Unretire")')
         ->assertNoJavascriptErrors();
 

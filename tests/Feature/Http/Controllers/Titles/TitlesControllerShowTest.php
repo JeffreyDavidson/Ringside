@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
+use App\Livewire\Components\LifecycleStatus;
 use App\Livewire\Titles\Components\Actions;
 use App\Livewire\Titles\Tables\PreviousTitleChampionships;
 use App\Models\Lifecycle\ActivityPeriod;
@@ -45,6 +46,17 @@ describe('Titles Controller', function () {
             ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see TitlesController::show()
+     */
+    test('show renders the lifecycle status component', function () {
+        actingAs(administrator())
+            ->get(route('titles.show', $this->title))
+            ->assertOk()
+            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSee($this->title->status->label());
     });
 
     /**

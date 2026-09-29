@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TagTeams\TagTeamsController;
+use App\Livewire\Components\LifecycleStatus;
 use App\Livewire\TagTeams\Components\Actions;
 use App\Livewire\TagTeams\Tables\PreviousManagers;
 use App\Livewire\TagTeams\Tables\PreviousMatches;
@@ -51,6 +52,17 @@ describe('TagTeams Controller', function () {
             ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see TagTeamsController::show()
+     */
+    test('show renders the lifecycle status component', function () {
+        actingAs(administrator())
+            ->get(route('tag-teams.show', $this->tagTeam))
+            ->assertOk()
+            ->assertSeeLivewire(LifecycleStatus::class)
+            ->assertSee($this->tagTeam->status->label());
     });
 
     /**
