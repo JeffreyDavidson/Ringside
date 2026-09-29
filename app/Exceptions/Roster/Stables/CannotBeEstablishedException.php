@@ -23,13 +23,6 @@ final class CannotBeEstablishedException extends BaseBusinessException
         return new self("{$context} is already established and cannot be re-established.");
     }
 
-    public static function retired(Stable $stable): static
-    {
-        $context = self::formatModelContext($stable);
-
-        return new self("{$context} is retired and cannot be established.");
-    }
-
     public static function insufficientMembers(Stable $stable, int $currentMembers, int $minimumMembers): static
     {
         $context = self::formatModelContext($stable);

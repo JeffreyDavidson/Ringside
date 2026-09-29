@@ -9,17 +9,6 @@ use App\Models\Events\Venue;
 
 final class VenueDeletionEligibility
 {
-    public function canRestore(Venue $venue): bool
-    {
-        try {
-            $this->ensureCanRestore($venue);
-
-            return true;
-        } catch (CannotBeRestoredException) {
-            return false;
-        }
-    }
-
     public function ensureCanRestore(Venue $venue): void
     {
         if (! $venue->trashed()) {

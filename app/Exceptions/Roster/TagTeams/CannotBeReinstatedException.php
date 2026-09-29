@@ -16,11 +16,4 @@ final class CannotBeReinstatedException extends BaseBusinessException
 
         return self::forReason(BusinessRuleReason::NotSuspended, "{$context} cannot be reinstated because it is not currently suspended. Only suspended tag teams can be reinstated to active competition.");
     }
-
-    public static function notEmployed(TagTeam $tagTeam): static
-    {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self("{$context} cannot be reinstated because it is no longer employed. Tag teams must maintain employment status during suspension periods.");
-    }
 }
