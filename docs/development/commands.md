@@ -6,7 +6,7 @@ This document provides a comprehensive reference for all development and testing
 
 ### Primary Test Commands
 - `composer test` - Run quality checks and the default Pest suites with coverage
-- `composer test:unit` - Run the default Pest suites with PCOV coverage (minimum 44%); despite its name, this is not limited to Unit tests
+- `composer test:coverage` - Run the default Pest suites with PCOV coverage (minimum 44%)
 - `composer test:application` - Run Feature, Unit, and Integration tests in parallel
 - `composer test:browser` - Run Browser tests in parallel
 - `composer test:tia` - Run tests selected by Test Impact Analysis
@@ -27,7 +27,6 @@ Pint rules, Rector exclusions, PHPStan levels, and coverage requirements.
 - `composer lint:check` - Alias for `test:lint`
 - `composer rector:fix` - Apply application and Pest Rector transformations
 - `composer rector:pest:fix` - Apply only Pest Rector transformations
-- `composer test:coverage` - Alias for the existing `test:unit` coverage command, with its current suite scope and 44% minimum
 - `composer frontend:check` - Run frontend lint and the production asset build
 
 The shared test commands also include `test:application`, `test:browser`,

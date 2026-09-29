@@ -35,7 +35,7 @@ Automated code quality tools ensure consistent formatting, type safety, and mode
 # Code quality checks
 composer lint          # Format code
 composer test:types     # Static analysis
-composer test:unit      # Pest suites with PCOV coverage (minimum 44%)
+composer test:coverage  # Pest suites with PCOV coverage (minimum 44%)
 composer rector         # Code modernization
 ```
 
