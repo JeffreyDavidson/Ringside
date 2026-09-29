@@ -131,16 +131,13 @@ class Main extends BaseTable
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
                 ->filter(function (EventBuilder $builder, array $dateRange): void {
                     /** @var array{minDate: string, maxDate: string} $dateRange */
-                    $startDate = Date::createFromFormat('Y-m-d', $dateRange['minDate']);
-                    $endDate = Date::createFromFormat('Y-m-d', $dateRange['maxDate']);
-
-                    if ($startDate === null || $endDate === null) {
+                    if (! Date::hasFormat($dateRange['minDate'], 'Y-m-d') || ! Date::hasFormat($dateRange['maxDate'], 'Y-m-d')) {
                         return;
                     }
 
                     $builder->whereBetween('date', [
-                        $startDate->startOfDay(),
-                        $endDate->endOfDay(),
+                        Date::parse($dateRange['minDate'])->startOfDay(),
+                        Date::parse($dateRange['maxDate'])->endOfDay(),
                     ]);
                 }),
             SelectFilter::make('Venue')

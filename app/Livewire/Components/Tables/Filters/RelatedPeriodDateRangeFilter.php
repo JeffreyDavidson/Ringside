@@ -32,8 +32,8 @@ abstract class RelatedPeriodDateRangeFilter extends DateRangeFilter
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange): void {
                 /** @var array{minDate: string, maxDate: string} $dateRange */
-                $startDate = Date::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay();
-                $endDate = Date::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay();
+                $startDate = Date::parse($this->validDate($dateRange['minDate']) ?? 'today')->startOfDay();
+                $endDate = Date::parse($this->validDate($dateRange['maxDate']) ?? 'today')->endOfDay();
 
                 $query->whereHas($this->filterRelationshipName, function (Builder|Relation $query) use ($endDate, $startDate): void {
                     $query
@@ -54,5 +54,10 @@ abstract class RelatedPeriodDateRangeFilter extends DateRangeFilter
         $this->filterEndField = $endField;
 
         return $this;
+    }
+
+    private function validDate(string $value): ?string
+    {
+        return Date::hasFormat($value, 'Y-m-d') ? $value : null;
     }
 }
