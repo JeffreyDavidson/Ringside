@@ -9,6 +9,13 @@ return [
     'preview' => 'Preview',
     'result' => 'Result',
 
+    'modal' => [
+        'create' => 'Create Match',
+        'edit' => 'Edit Match',
+        'record_result' => 'Record Match Result',
+        'correct_result' => 'Correct Match Result',
+    ],
+
     'actions' => [
         'edit' => 'Edit Match',
         'remove' => 'Remove',

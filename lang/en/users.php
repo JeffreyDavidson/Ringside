@@ -10,4 +10,9 @@ return [
     'role' => 'Role',
     'location' => 'Location',
     'activity' => 'Activity',
+
+    'modal' => [
+        'create' => 'Create User',
+        'edit' => 'Edit User',
+    ],
 ];

@@ -58,10 +58,10 @@ class FormModal extends BaseFormModal
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {
-            return 'Edit Venue';
+            return __('venues.modal.edit');
         }
 
-        return 'Create Venue';
+        return __('venues.modal.create');
     }
 
     public function render(): View
