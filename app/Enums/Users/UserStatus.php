@@ -14,15 +14,6 @@ enum UserStatus: string
     case Active = 'active';
     case Inactive = 'inactive';
 
-    public function color(): string
-    {
-        return match ($this) {
-            self::Unverified => 'warning',
-            self::Active => 'success',
-            self::Inactive => 'light',
-        };
-    }
-
     public function label(): string
     {
         return match ($this) {

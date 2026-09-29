@@ -12,17 +12,6 @@ enum StableStatus: string
     case Inactive = 'inactive';               // Previously established, now under threshold
     case Retired = 'retired';                 // Permanently retired from wrestling
 
-    public function color(): string
-    {
-        return match ($this) {
-            self::Unformed => 'bg-gray-500 text-white',
-            self::PendingEstablishment => 'bg-blue-500 text-white',
-            self::Active => 'bg-green-600 text-white',
-            self::Inactive => 'bg-yellow-500 text-black',
-            self::Retired => 'bg-red-600 text-white',
-        };
-    }
-
     public function label(): string
     {
         return match ($this) {

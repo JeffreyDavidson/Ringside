@@ -28,10 +28,6 @@ final readonly class FormFieldContext
             throw new InvalidArgumentException('Form field names must be strings.');
         }
 
-        if ($fieldName && str_contains($fieldName, '=')) {
-            $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
-        }
-
         $id = $attributes->get('id', $fieldName);
         if ($id !== null && ! is_string($id)) {
             throw new InvalidArgumentException('Form field IDs must be strings.');

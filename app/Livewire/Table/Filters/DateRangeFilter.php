@@ -42,14 +42,6 @@ class DateRangeFilter extends Filter
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    public function getConfig(): array
-    {
-        return $this->config;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function getDefaultValue(): array

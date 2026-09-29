@@ -178,9 +178,6 @@ All enums provide standardized methods for presentation and logic:
 // Label for display
 $status->label();  // "Currently Employed"
 
-// Color for UI styling  
-$status->color();  // "success"
-
 // Custom business logic
 $status->isActive();
 $status->canTransitionTo($newStatus);
@@ -215,11 +212,6 @@ $status->canTransitionTo($newStatus);
 test('employment status provides correct labels', function () {
     expect(EmploymentStatus::Employed->label())->toBe('Employed');
     expect(EmploymentStatus::Released->label())->toBe('Released');
-});
-
-test('title status color coding works', function () {
-    expect(TitleStatus::Active->color())->toBe('bg-green-600 text-white');
-    expect(TitleStatus::Inactive->color())->toBe('bg-yellow-500 text-black');
 });
 ```
 
