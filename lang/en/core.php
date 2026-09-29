@@ -7,7 +7,6 @@ return [
     'actions' => 'Actions',
     'clear_search' => 'Clear search',
     'clear_filters' => 'Clear filters',
-    'full_name' => 'Full Name',
     'lifecycle_actions' => [
         'clear_from_injury' => 'Clear from injury',
         'deactivate' => 'Deactivate',
