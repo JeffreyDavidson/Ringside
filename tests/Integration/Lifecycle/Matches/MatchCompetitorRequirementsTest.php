@@ -106,3 +106,17 @@ it('requires an individual side for every elimination-match entrant', function (
         'Each [Battle Royal] entrant must compete on an individual side.',
     );
 });
+
+it('rejects an open-ended elimination match with too few competitors', function () {
+    $match = EventMatch::factory()->withMatchType(MatchType::BattleRoyal)->create();
+    $firstWrestler = Wrestler::factory()->bookable()->create();
+    $secondWrestler = Wrestler::factory()->bookable()->create();
+
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+        ['wrestlers' => [$firstWrestler]],
+        ['wrestlers' => [$secondWrestler]],
+    ])))->toThrow(
+        InvalidMatchConfigurationException::class,
+        'This match requires at least 3 competitors.',
+    );
+});
