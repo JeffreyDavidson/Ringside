@@ -201,7 +201,9 @@ describe('PreviousManagers rendering', function (): void {
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous managers')
+            ->assertSee('No previous managers yet.')
+            ->assertDontSeeHtml('placeholder="Search managers"');
     });
 });
 

@@ -125,6 +125,14 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
     });
 
     it('renders the title championship history search control', function (): void {
+        // Arrange
+        TitleChampionship::factory()
+            ->for(Title::factory()->singles())
+            ->forWrestler($this->wrestler)
+            ->wonOn(now()->subMonths(3)->toDateString())
+            ->lostOn(now()->subMonth()->toDateString())
+            ->create();
+
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
@@ -178,7 +186,9 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous title championships')
+            ->assertSee('No previous title championships yet.')
+            ->assertDontSeeHtml('placeholder="Search title championships"');
     });
 });
 

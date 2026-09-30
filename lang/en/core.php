@@ -43,6 +43,7 @@ return [
     ],
     'no_records_description' => 'Records will appear here once they have been added.',
     'no_records_found' => 'No records found.',
+    'no_related_records' => 'No :resource yet.',
     'no_results_description' => 'Try another search or adjust your filters.',
     'no_results_title' => 'No matching records',
     'next_page' => 'Next page',

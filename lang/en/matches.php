@@ -19,5 +19,7 @@ return [
         'remove_match' => 'Remove Match :number',
         'confirm_remove' => 'Remove match :number?',
         'deleted' => 'Match successfully deleted.',
+        'menu' => 'More actions for match :number',
+        'menu_label' => 'Match actions',
     ],
 ];

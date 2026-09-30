@@ -130,7 +130,9 @@ describe('PreviousMatches rendering', function (): void {
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous matches')
+            ->assertSee('No previous matches yet.')
+            ->assertDontSeeHtml('placeholder="Search matches"');
     });
 });
 

@@ -1,6 +1,6 @@
 @props(['sidebar', 'title' => null])
 
-<x-layouts.app>
+<x-layouts.app :$title>
     <x-layouts.workspace-canvas class="flex flex-col gap-5 p-4 lg:gap-7.5 lg:p-7">
         @if ($title)
             <div>

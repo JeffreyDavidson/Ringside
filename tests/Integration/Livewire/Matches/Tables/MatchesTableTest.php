@@ -50,7 +50,9 @@ describe('rendering', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Matches')
+            ->assertSee('No matches yet.')
+            ->assertDontSeeHtml('placeholder="Search matches"');
     });
 
     it('renders the match competitors, referees, titles, and empty result', function (): void {
@@ -125,6 +127,7 @@ describe('rendering', function (): void {
 
         // Assert
         $component
+            ->assertSeeHtml('aria-label="More actions for match '.$editableMatch->match_number.'"')
             ->assertSeeHtml('data-test="match-edit-action"')
             ->assertSeeHtml('data-match-id="'.$editableMatch->id.'"')
             ->assertDontSeeHtml('data-match-id="'.$completedMatch->id.'"')
@@ -188,6 +191,8 @@ describe('deleting matches', function (): void {
         // Assert
         $component
             ->assertSuccessful()
+            ->assertSeeHtml('data-test="match-result-action"')
+            ->assertDontSeeHtml('aria-label="Match actions"')
             ->assertDontSeeHtml('data-test="match-delete-action"');
     });
 

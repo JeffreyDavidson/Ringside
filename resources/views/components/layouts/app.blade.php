@@ -1,3 +1,10 @@
+@props(['title' => null])
+
+@php
+    $appName = \Illuminate\Support\Facades\Config::string('app.name', 'Ringside');
+    $documentTitle = $title ? "{$title} · {$appName}" : $appName;
+@endphp
+
 <!DOCTYPE html>
 <html class="h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -15,7 +22,7 @@
         } catch {}
     </script>
 
-    <title>{{ \Illuminate\Support\Facades\Config::string('app.name', 'Ringside') }}</title>
+    <title>{{ $documentTitle }}</title>
 
     <link
         rel="stylesheet"

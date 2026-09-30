@@ -19,8 +19,15 @@ app/Livewire/{Domain}/
 ```
 
 Not every domain has every folder. For example, Stables and Promotions have no
-`Components/Actions.php` (see the refactoring backlog), and Matches uses
-`Tables/MatchesTable.php`.
+`Components/Actions.php` (see the refactoring backlog), Matches uses
+`Tables/MatchesTable.php`, and the title page uses `Titles/Tables/TitleHistory.php`
+because it lists every reign (current reign first, shown as "Current"), not only
+previous ones.
+
+Relationship tables use `ShowTableTrait`, which gives each table a heading derived from
+its `$resourceName` (for example "Title championships") and, when a table has no
+records and no search, a one-line "No {resource} yet." message instead of the full
+search, table and pager chrome.
 
 ## Component Naming Conventions
 

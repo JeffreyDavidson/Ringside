@@ -196,7 +196,17 @@ abstract class DataTableComponent extends Component
             'perPageOptions' => $this->perPageAccepted,
             'searchPlaceholder' => $this->searchPlaceholder,
             'beforeWrapperView' => $this->beforeWrapperView,
+            'tableHeading' => $this->tableHeading(),
         ]);
+    }
+
+    /**
+     * Heading shown above the table. Relationship tables on detail pages provide one
+     * so several tables on the same page can be told apart.
+     */
+    protected function tableHeading(): ?string
+    {
+        return null;
     }
 
     /** @param array<string, mixed> $params */

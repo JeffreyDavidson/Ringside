@@ -59,6 +59,7 @@ test('administrator can edit an unresulted match from the event page', function 
 
     $page->assertSee('Add Event Match');
     $page
+        ->click('[aria-label="More actions for match '.$match->match_number.'"]')
         ->assertSee('Edit Match')
         ->click('[data-test="match-edit-action"]')
         ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
@@ -89,6 +90,7 @@ test('administrator can remove a match from the event page', function (): void {
     $page->assertSee('First Removal Competitor');
     $page->script('window.confirm = () => true');
     $page
+        ->click('[aria-label="More actions for match '.$match->match_number.'"]')
         ->click('[data-test="match-delete-action"]')
         ->waitForText('Match successfully deleted.')
         ->assertDontSee('First Removal Competitor')

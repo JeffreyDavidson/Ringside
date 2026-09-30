@@ -20,17 +20,17 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<TitleChampionship> */
-class PreviousTitleChampionships extends DataTableComponent
+class TitleHistory extends DataTableComponent
 {
     use ShowTableTrait;
 
     protected string $databaseTableName = 'titles_championships';
 
     #[\Override]
-    protected string $resourceName = 'title championships';
+    protected string $resourceName = 'title reigns';
 
     /**
-     * Undocumented variable.
+     * Title whose reigns are listed.
      */
     #[Locked]
     public ?int $titleId = null;
@@ -56,7 +56,7 @@ class PreviousTitleChampionships extends DataTableComponent
 
         return TitleChampionship::query()
             ->forTitleId($titleId)
-            ->forPreviousHistory()
+            ->mostRecentlyWonFirst()
             ->with('champion');
     }
 
@@ -66,7 +66,7 @@ class PreviousTitleChampionships extends DataTableComponent
     public function columns(): array
     {
         return [
-            LinkColumn::make(__('championships.new_champion'))
+            LinkColumn::make(__('championships.champion'))
                 ->title(fn (TitleChampionship $row): string => $row->champion->name)
                 ->location(fn (TitleChampionship $row): string => $this->routeResolver->urlFor($row->champion))
                 ->searchable(function (TitleChampionshipBuilder $builder, string $searchTerm): void {
@@ -79,13 +79,6 @@ class PreviousTitleChampionships extends DataTableComponent
                         ),
                     );
                 }),
-            LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn (TitleChampionship $row): string => $row->previousChampionship?->champion->name ?? 'N/A')
-                ->location(function (TitleChampionship $row): ?string {
-                    $champion = $row->previousChampionship?->champion;
-
-                    return $champion === null ? null : $this->routeResolver->urlFor($champion);
-                }),
             Column::make(__('championships.dates_held'))
                 ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
             Column::make(__('championships.days_held'))
@@ -96,8 +89,8 @@ class PreviousTitleChampionships extends DataTableComponent
     private function datesHeld(TitleChampionship $championship): string
     {
         $wonAt = $championship->won_at->toDateString();
-        $lostAt = $championship->lost_at?->toDateString();
+        $lostAt = $championship->lost_at?->toDateString() ?? __('championships.current');
 
-        return $lostAt === null ? $wonAt : "{$wonAt} - {$lostAt}";
+        return "{$wonAt} - {$lostAt}";
     }
 }

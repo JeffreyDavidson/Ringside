@@ -1,56 +1,42 @@
 @props([
     'variant' => 'primary',
     'size' => 'md',
-    'iconOnly' => false,
     'tag' => 'button',
 ])
 
 @php
+    /*
+     * Ringside has three button roles (see DESIGN.md): primary for the main action,
+     * secondary for every other action, and destructive for actions that remove or end
+     * something. Older variant names are kept as aliases so existing views stay on brand.
+     */
+    $role = match ($variant) {
+        'secondary', 'light', 'success', 'warning', 'info' => 'secondary',
+        'destructive', 'danger' => 'destructive',
+        default => 'primary',
+    };
+
     $sizes = [
-        'xs' => 'h-7 px-2 text-2xs gap-1',
-        'sm' => 'h-8 px-3 text-xs gap-1.5',
-        'md' => 'h-9 px-4 text-sm gap-1.5',
-        'lg' => 'h-10 px-5 text-sm gap-2',
+        'sm' => 'min-h-9 px-3 text-xs gap-1.5',
+        'md' => 'min-h-11 px-4 text-sm gap-2',
         'xl' => 'min-h-14 px-6 py-3 text-base gap-2',
     ];
 
-    $iconOnlySizes = [
-        'xs' => 'size-7',
-        'sm' => 'size-8',
-        'md' => 'size-9',
-        'lg' => 'size-10',
+    $roles = [
+        'primary' => 'border-ringside-red bg-ringside-red text-ringside-white hover:border-ringside-red-dark hover:bg-ringside-red-dark',
+        'secondary' => 'border-ringside-outline bg-transparent text-ringside-ink hover:border-ringside-white hover:bg-ringside-surface-hover',
+        'destructive' => 'border-ringside-signal-border bg-transparent text-ringside-signal-soft hover:border-ringside-red-dark hover:bg-ringside-red-dark hover:text-ringside-white',
     ];
-
-    $variants = [
-        'ringside' => 'rounded-none bg-ringside-red text-ringside-white font-bold hover:bg-ringside-red-dark focus-visible:outline-2 focus-visible:outline-offset-6 focus-visible:outline-ringside-white disabled:cursor-not-allowed disabled:opacity-50',
-        'primary' => 'btn-primary-default btn-primary-states',
-        'success' => 'btn-success-default btn-success-states',
-        'danger' => 'btn-danger-default btn-danger-states',
-        'warning' => 'btn-warning-default btn-warning-states',
-        'info' => 'btn-info-default btn-info-states',
-        'light' => 'btn-light-default btn-light-states',
-        'secondary' => 'btn-secondary-default btn-secondary-states',
-        'link' => 'text-gray-700 hover:text-primary bg-transparent',
-    ];
-
-    $base = 'inline-flex items-center justify-center cursor-pointer';
-    if ($variant !== 'ringside') {
-        $base .= ' font-medium rounded-md transition-all';
-    } else {
-        $base .= ' transition-colors';
-    }
-    $sizeClass = $iconOnly
-        ? $iconOnlySizes[$size] ?? $iconOnlySizes['md']
-        : $sizes[$size] ?? $sizes['md'];
-    $variantClass = $variants[$variant] ?? $variants['primary'];
 @endphp
 
 <{{ $tag }}
     {{
         $attributes->merge(['type' => $tag === 'button' ? 'button' : null])->class([
-            $base,
-            $sizeClass,
-            $variantClass,
+            'inline-flex cursor-pointer items-center justify-center rounded-none border font-bold transition-colors',
+            'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            $sizes[$size] ?? $sizes['md'],
+            $roles[$role],
         ])
     }}
 >

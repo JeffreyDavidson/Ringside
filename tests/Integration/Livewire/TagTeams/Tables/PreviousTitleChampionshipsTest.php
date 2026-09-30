@@ -143,7 +143,9 @@ describe('PreviousTitleChampionships rendering', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous title championships')
+            ->assertSee('No previous title championships yet.')
+            ->assertDontSeeHtml('placeholder="Search title championships"');
     });
 });
 
