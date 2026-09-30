@@ -19,7 +19,7 @@ The project uses four automated workflows:
 | `type-coverage` | Pest type coverage | `composer test:type-coverage` (100% minimum) |
 | `frontend-verification` | Frontend verification | `npm run lint`, `npm run build` |
 | `application-tests` | `CI - PHP-8.5 - Laravel-13.*` | Pest with the `Browser` suite excluded (Feature, Integration, and Unit run), in parallel |
-| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. Production runs PostgreSQL while the other test jobs use in-memory SQLite, which ignores row locks (`lockForUpdate()`) and case-sensitive `LIKE` differences |
+| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. Production runs PostgreSQL while the other test jobs use in-memory SQLite, which ignores row locks (`lockForUpdate()`) and case-sensitive `LIKE` differences. A second step runs the opt-in `postgres-concurrency` group (`RUN_CONCURRENCY_TESTS=1`), which books matches from two real processes to prove there are no lock-order deadlocks; see `docs/testing/postgres-concurrency-tests.md` |
 | `coverage` | Coverage (100%) | `composer test:coverage`: non-parallel Pest run with PCOV, Browser suite excluded, fails below 100% |
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 

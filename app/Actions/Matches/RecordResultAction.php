@@ -11,6 +11,7 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
 class RecordResultAction
@@ -18,14 +19,14 @@ class RecordResultAction
     public function __construct(
         private readonly MatchOutcomeRequirements $requirements,
         private readonly ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
+        private readonly MatchAssignmentConflictService $conflictService,
     ) {}
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
         return DB::transaction(function () use ($match, $result): EventMatch {
-            $lockedMatch = $match->refreshForUpdate();
-            $lockedEvent = Event::query()->whereKey($lockedMatch->event_id)->lockForUpdate()->firstOrFail();
-            $lockedMatch->setRelation('event', $lockedEvent);
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($match);
+            $lockedMatch->setRelation('event', Event::query()->findOrFail($lockedMatch->event_id));
             $lockedWinningSide = $result->winningSide instanceof MatchSide
                 ? $result->winningSide->refreshForUpdate()
                 : null;

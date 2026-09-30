@@ -63,9 +63,9 @@ class AddTagTeamsToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
-            $lockedMatch = $eventMatch->refreshForUpdate();
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
             $this->handleWithinTransaction($lockedMatch, $requestedTagTeams, $sideNumber);
-        });
+        }, attempts: 3);
     }
 
     /**

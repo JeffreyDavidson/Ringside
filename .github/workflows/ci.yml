@@ -303,6 +303,11 @@ jobs:
             - name: Run application tests against PostgreSQL
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage
 
+            - name: Run PostgreSQL concurrency tests
+              env:
+                  RUN_CONCURRENCY_TESTS: 1
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --group=postgres-concurrency --no-coverage
+
     coverage:
         name: Coverage (100%)
         runs-on: ubuntu-latest
