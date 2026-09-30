@@ -8,6 +8,7 @@ use App\Builders\Concerns\FiltersByEmploymentStatus;
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstEmployment;
+use App\Builders\Concerns\OrdersByKeyForLocking;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,6 +23,7 @@ class TagTeamBuilder extends Builder
     use FiltersByName;
     use FiltersByRetirementStatus;
     use LoadsFirstEmployment;
+    use OrdersByKeyForLocking;
 
     /**
      * Project the current suspension state so availability badges render

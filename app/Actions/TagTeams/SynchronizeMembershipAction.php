@@ -19,7 +19,7 @@ class SynchronizeMembershipAction
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
         if ($members->wrestlers instanceof Collection) {
-            $currentWrestlers = $tagTeam->currentWrestlers;
+            $currentWrestlers = $tagTeam->currentWrestlers()->inLockOrder()->get();
 
             foreach ($currentWrestlers->diff($members->wrestlers) as $wrestler) {
                 $tagTeam->wrestlers()->newPivotStatementForId($wrestler->getKey())

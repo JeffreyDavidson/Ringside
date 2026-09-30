@@ -66,6 +66,21 @@ Examples include employing a tag team's members, ending a wrestler's professiona
 
 Callables may be replaced incrementally. A cascade must not hide unsupported model operations behind `method_exists()` checks when a domain contract can express the requirement.
 
+### Cascade lock order
+
+A cascade locks its members through the nested Actions it calls (`refreshForUpdate()` per member), so the order it iterates them in is the order it locks them in. Two transactions that lock the same rows in different orders can each hold one row and wait for the other, which PostgreSQL resolves as a deadlock (SQLSTATE 40P01). Unordered relationship queries return rows in whatever order the planner chooses (pivot order for a nested loop or sequential scan, id order for a merge join), so the order can differ between two callers on the same data.
+
+- **Ascending primary key.** Every collection a cascade iterates before locking its members is fetched with `inLockOrder()` (`OrdersByKeyForLocking`, used by the wrestler, manager, referee, tag-team, and championship builders). It orders by the member table's own qualified key, so a many-to-many relationship such as `currentWrestlers()` or `currentManagers()` sorts by the related row's id and never by the pivot's. This covers the tag-team member cascades (`EmployCurrentWrestlersAction`, `EmployCurrentManagersAction`, `Retire`, `Suspend`, `Reinstate`, and `UnretireCurrentMembersAction`), the membership and manager-assignment synchronizers, the stable member loops (`StableMembershipService::currentMembers()` feeds stable retirement, disbanding, and merging, and `SynchronizeStableMembersAction` removes members in the same order), and `ChampionshipReignManager::endCurrentReignsForChampion()`.
+- **Reigns.** A champion's current reigns are locked ascending by reign id, the order `RecordResultAction`, `ApplyMatchTitleOutcomesAction`, and `MatchTitleRequirements` already lock them in after the titles. A retirement, release, or deletion cascade of a wrestler or tag team that holds two titles therefore queues behind a multi-title result instead of inverting it.
+- **Parent first.** A cascade locks the row that owns it before any member, and never a member before its parent.
+- **Order between kinds.** Where one operation locks several kinds, the order is stable, then tag team, then wrestler, then manager, then championship reigns (titles come before their reigns, as in the scheduling order). Within a kind the order is ascending id. Tag-team cascades process wrestlers before managers, matching the individual Actions (a wrestler employment locks the wrestler and then its managers).
+- **Processing order.** Ordering changes only the order in which members are processed, never which ones. The visible effect is the order of the lifecycle transition and activity-log rows a cascade writes: members are now recorded in ascending id order instead of pivot order.
+
+Known limits, verified against PostgreSQL rather than assumed:
+
+- Bulk pivot updates (`EndMembershipsAction`, `EndManagerAssignmentsAction`, `EndManagerAssignmentsForManagerAction`, and the per-wrestler relationship cleanup) are single `UPDATE` statements; PostgreSQL locks the rows they touch in scan order and an `UPDATE` cannot be ordered.
+- A wrestler cascade ends the wrestler's manager assignments (pivot rows) without locking the manager rows, while a manager cascade locks the manager and then those pivot rows. A tag-team retirement, which retires wrestlers before managers, racing a retirement of a manager who manages both the team and one of its wrestlers can therefore still deadlock. Stable retirement retires individual wrestlers before tag teams, so a wrestler who is both an individual stable member and a member of one of the stable's tag teams can deadlock against a concurrent retirement of that team. Both are reproduced in the concurrency harness and are unchanged by member ordering; fixing them needs a cascade-wide lock plan (lock every owner and manager row up front in the order above) rather than a per-collection order.
+
 ### Relationship cleanup
 
 Ending an entity's own current relationships is a typed domain action, not a configurable cascade strategy. The manager, tag-team, and wrestler domains each expose an `EndCurrentRelationshipsAction` whose `handle()` method accepts the concrete entity and effective date.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Titles;
 
+use App\Builders\Concerns\OrdersByKeyForLocking;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TitleChampionshipBuilder extends Builder
 {
+    use OrdersByKeyForLocking;
+
     public function forTitleId(int $titleId): static
     {
         $this->where('title_id', $titleId);

@@ -21,6 +21,7 @@ class ReinstateCurrentMembersAction
     public function handle(TagTeam $tagTeam, Carbon $reinstatementDate): void
     {
         $wrestlers = $tagTeam->currentWrestlers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Wrestler $wrestler): bool => $wrestler->currentSuspension()->exists());
 
@@ -29,6 +30,7 @@ class ReinstateCurrentMembersAction
         }
 
         $managers = $tagTeam->currentManagers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Manager $manager): bool => $manager->currentSuspension()->exists());
 
