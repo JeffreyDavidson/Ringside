@@ -274,6 +274,28 @@ GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
 
+## Considered and rejected
+
+These were evaluated during the September 2026 refactor series and deliberately
+not done. Revisit only if the stated reason stops being true.
+
+### Generic base for per-entity roster Actions
+
+Wrestler, Manager, and Referee `Suspend`, `ClearFromInjury`, `Retire`, and
+`Release` Actions are near-identical apart from the model type. Each body is
+about five lines (transaction, owner lock, eligibility check, period write), and
+the Actions rules require typed per-entity Actions with owner locking. A shared
+base would save little code and weaken the typed boundaries those rules protect.
+
+### Removing the all-`false` policy methods
+
+Most policy methods return `false` because `PromotionGate` (via `Gate::before`)
+makes the real decision. They look redundant, but `.ai/rules/policies.md`
+requires conventional signatures and they document the ability surface for each
+model. Related: `PromotionPolicy` instance abilities can never be reached through
+the Gate, because `PromotionGate` always decides for a `Promotion` subject. They
+are kept and covered by direct policy tests.
+
 ## Research notes
 
 The following Laravel sources informed this backlog:
