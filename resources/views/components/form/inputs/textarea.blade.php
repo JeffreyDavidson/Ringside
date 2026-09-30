@@ -15,10 +15,10 @@
 
     $textareaClasses = collect([
         'block w-full appearance-none outline-none resize-y',
-        'border border-solid border-[var(--input)] bg-background text-foreground',
-        'rounded-[calc(var(--radius)-2px)] shadow-[var(--tw-input-box-shadow)] transition-[color,box-shadow]',
-        'placeholder-[var(--muted-foreground)]',
-        'focus-visible:outline-none focus-visible:border-[var(--ring)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklab,var(--ring)_30%,transparent)]',
+        'border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-signal-soft',
+        'rounded-none transition-colors',
+        'placeholder:text-ringside-muted',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-white',
         $size === 'sm' ? 'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-xs' : null,
         $size === 'md' ? 'px-[calc(var(--spacing)*3)] py-[calc(var(--spacing)*2)] text-2sm' : null,
         $size === 'lg' ? 'px-[calc(var(--spacing)*4)] py-[calc(var(--spacing)*2.5)] text-sm' : null,

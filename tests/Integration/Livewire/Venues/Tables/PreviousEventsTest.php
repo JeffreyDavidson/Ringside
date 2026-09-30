@@ -129,7 +129,9 @@ describe('PreviousEvents rendering', function (): void {
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous events')
+            ->assertSee('No previous events yet.')
+            ->assertDontSeeHtml('placeholder="Search events"');
     });
 });
 

@@ -69,3 +69,30 @@ it('rejects non-string field IDs', function (string $component) {
 
     expect($render)->toThrow(ViewException::class, 'Form field IDs must be strings.');
 })->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
+
+it('marks invalid fields with the Ringside error styling', function (string $component): void {
+    $errors = new ViewErrorBag()->put('default', new MessageBag(['form.name' => 'A name is required.']));
+    view()->share('errors', $errors);
+
+    $html = Blade::render('<x-'.$component.' wire:model="form.name" label="Name" />');
+
+    expect($html)
+        ->toContain('aria-invalid:border-ringside-signal-soft')
+        ->toContain('text-ringside-signal-soft')
+        ->toContain('<svg')
+        ->not->toContain('var(--input)')
+        ->not->toContain('text-destructive');
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
+
+it('renders standalone errors as a visible alert with an icon', function (): void {
+    $errors = new ViewErrorBag()->put('default', new MessageBag(['form.configuration' => 'This wrestler is not available for booking.']));
+    view()->share('errors', $errors);
+
+    $html = Blade::render('<x-form.error name="form.configuration" />');
+
+    expect($html)
+        ->toContain('role="alert"')
+        ->toContain('text-ringside-signal-soft')
+        ->toContain('<svg')
+        ->toContain('This wrestler is not available for booking.');
+});

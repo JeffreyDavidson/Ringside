@@ -92,6 +92,14 @@ describe('PreviousTagTeamsTable Query Building', function () {
 
 describe('PreviousTagTeamsTable Rendering', function () {
     it('renders the tag team history search control', function (): void {
+        // Arrange
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => TagTeam::factory()->create()->id,
+            'wrestler_id' => $this->wrestler->id,
+            'joined_at' => Date::now()->subMonths(3),
+            'left_at' => Date::now()->subMonth(),
+        ]);
+
         // Act
         $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
@@ -130,7 +138,9 @@ describe('PreviousTagTeamsTable Rendering', function () {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous tag teams')
+            ->assertSee('No previous tag teams yet.')
+            ->assertDontSeeHtml('placeholder="Search tag teams"');
     });
 
     it('renders previous tag team membership details', function (): void {

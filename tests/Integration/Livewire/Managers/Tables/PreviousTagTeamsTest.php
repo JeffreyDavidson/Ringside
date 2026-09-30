@@ -178,7 +178,9 @@ describe('PreviousTagTeams rendering', function (): void {
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous tag teams')
+            ->assertSee('No previous tag teams yet.')
+            ->assertDontSeeHtml('placeholder="Search tag teams"');
     });
 });
 

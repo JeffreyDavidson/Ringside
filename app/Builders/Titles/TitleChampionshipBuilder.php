@@ -87,6 +87,13 @@ class TitleChampionshipBuilder extends Builder
         return $this;
     }
 
+    public function mostRecentlyWonFirst(): static
+    {
+        $this->orderByDesc('won_at');
+
+        return $this;
+    }
+
     public function mostRecentlyLostFirst(): static
     {
         $this->orderByDesc('lost_at');

@@ -3,6 +3,17 @@
 Status: preserved design brief from April 2026. This captures product intent,
 not a claim that the component structure or page rebuild is complete.
 
+> **Superseded for visual identity (September 2026).** The app now shares one
+> visual system with the marketing site, defined in the landing repository's
+> `DESIGN.md` and implemented through `resources/css/tokens.css`: near-black
+> surfaces throughout (no light content area), Ringside red `#cb2028` for the
+> primary action with `#a61920` hover and `#ff4b50` signal, Anton display type
+> with Arial/Inter body text, square controls, thin rules, and no gold or blue
+> accents. The shared `<x-button>` component has three roles: `primary` (red
+> fill), `secondary` (outline) and `destructive` (signal-red outline). Older
+> variant names (`ringside`, `light`, `success`, `warning`, `info`, `danger`)
+> map onto those roles. The visual identity table below is kept as history.
+
 ## Visual identity
 
 The intended interface has a dark sidebar and header around a light content

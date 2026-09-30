@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Support\RosterResourceRouteResolver;
-use App\Livewire\Titles\Tables\PreviousTitleChampionships;
+use App\Livewire\Titles\Tables\TitleHistory;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -20,10 +20,10 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
-describe('PreviousTitleChampionships configuration', function (): void {
+describe('TitleHistory configuration', function (): void {
     it('requires a title', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships)->builder())
+        expect(fn () => (new TitleHistory)->builder())
             ->toThrow(LogicException::class, 'A title was not provided.');
     });
 
@@ -33,19 +33,19 @@ describe('PreviousTitleChampionships configuration', function (): void {
             'won_at' => '2025-01-01',
             'lost_at' => '2025-01-11',
         ]);
-        $table = new PreviousTitleChampionships;
+        $table = new TitleHistory;
         $table->boot(app(RosterResourceRouteResolver::class));
 
         // Act
-        $reignLength = $table->columns()[3]->resolveValue($championship);
+        $reignLength = $table->columns()[2]->resolveValue($championship);
 
         // Assert
         expect($reignLength)->toBe('10');
     });
 });
 
-describe('PreviousTitleChampionships query', function (): void {
-    it('returns only previous championships for the selected title in reverse chronological order', function (): void {
+describe('TitleHistory query', function (): void {
+    it('returns every reign for the selected title with the newest reign first', function (): void {
         // Arrange
         $olderChampionship = TitleChampionship::factory()->for($this->title)->ended()->create([
             'won_at' => Date::parse('2022-01-01'),
@@ -55,9 +55,11 @@ describe('PreviousTitleChampionships query', function (): void {
             'won_at' => Date::parse('2024-01-01'),
             'lost_at' => Date::parse('2025-01-01'),
         ]);
-        TitleChampionship::factory()->for($this->title)->current()->create();
+        $currentChampionship = TitleChampionship::factory()->for($this->title)->current()->create([
+            'won_at' => Date::parse('2025-01-01'),
+        ]);
         TitleChampionship::factory()->ended()->create();
-        $table = new PreviousTitleChampionships;
+        $table = new TitleHistory;
         $table->titleId = $this->title->id;
 
         // Act
@@ -65,13 +67,14 @@ describe('PreviousTitleChampionships query', function (): void {
 
         // Assert
         expect($championships->modelKeys())->toBe([
+            $currentChampionship->id,
             $latestChampionship->id,
             $olderChampionship->id,
         ]);
     });
 });
 
-describe('PreviousTitleChampionships rendering', function (): void {
+describe('TitleHistory rendering', function (): void {
     it('renders championship history from reign relationships and dates', function (): void {
         // Arrange
         $previousChampion = Wrestler::factory()->create(['name' => 'First Champion']);
@@ -90,20 +93,48 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->create();
 
         // Act
-        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
 
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSeeHtml('placeholder="Search title championships"')
+            ->assertSeeHtml('placeholder="Search title reigns"')
             ->assertSee('First Champion')
             ->assertSee('New Champions')
             ->assertSeeHtml(route('wrestlers.show', $previousChampion))
             ->assertSeeHtml(route('tag-teams.show', $newChampion))
-            ->assertSee('2024-06-01 - 2025-01-01');
+            ->assertSee('2024-06-01 - 2025-01-01')
+            ->assertSee('Champion')
+            ->assertDontSee('Previous Champion')
+            ->assertDontSee('N/A');
     });
 
-    it('searches previous championships by wrestler and tag team champion names', function (
+    it('shows the current champion at the top of the history', function (): void {
+        // Arrange
+        $formerChampion = Wrestler::factory()->create(['name' => 'Former Champion']);
+        $currentChampion = Wrestler::factory()->create(['name' => 'Reigning Champion']);
+        TitleChampionship::factory()
+            ->for($this->title)
+            ->forWrestler($formerChampion)
+            ->wonOn('2024-01-01')
+            ->lostOn('2025-01-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for($this->title)
+            ->forWrestler($currentChampion)
+            ->wonOn('2025-01-01')
+            ->create();
+
+        // Act
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSeeInOrder(['Reigning Champion', '2025-01-01 - Current', 'Former Champion', '2024-01-01 - 2025-01-01']);
+    });
+
+    it('searches reigns by wrestler and tag team champion names', function (
         string $search,
         string $visibleChampion,
         string $visibleDates,
@@ -138,7 +169,7 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->create();
 
         // Act
-        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
         $table->set('search', $search);
 
         // Assert
@@ -153,18 +184,20 @@ describe('PreviousTitleChampionships rendering', function (): void {
         'tag team champion' => ['Legendary', 'Legendary Tag Team', '2024-06-01 - 2025-01-01', '2023-01-01 - 2023-05-01'],
     ]);
 
-    it('renders an empty state when the title has no previous championships', function (): void {
+    it('renders an empty state when the title has no reigns', function (): void {
         // Act
-        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
 
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Title reigns')
+            ->assertSee('No title reigns yet.')
+            ->assertDontSeeHtml('placeholder="Search title reigns"');
     });
 });
 
-describe('PreviousTitleChampionships authorization', function (): void {
+describe('TitleHistory authorization', function (): void {
     it('authorizes the selected title instance', function (): void {
         // Arrange
         $authorizedTitle = null;
@@ -181,7 +214,7 @@ describe('PreviousTitleChampionships authorization', function (): void {
         actingAs(basicUser());
 
         // Act
-        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
 
         // Assert
         $table->assertSuccessful();
@@ -197,7 +230,7 @@ describe('PreviousTitleChampionships authorization', function (): void {
         }
 
         // Act
-        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
 
         // Assert
         $table->assertForbidden();

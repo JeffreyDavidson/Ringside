@@ -103,6 +103,34 @@ describe('authorized match form interactions', function (): void {
             ->assertPropertyWired('form.competitors.1.wrestlers.0');
     });
 
+    it('prompts for a match type instead of implying one is selected', function (): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal');
+
+        // Assert
+        $modal
+            ->assertSet('form.matchType', null)
+            ->assertSeeHtml('<option value="">Select a match type</option>');
+    });
+
+    it('returns to the match type prompt when the selection is cleared', function (): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set('form.matchType', '');
+
+        // Assert
+        $modal
+            ->assertSet('form.matchType', null)
+            ->assertSee('Select a match type to configure competitors');
+    });
+
     it('loads an existing match configuration for editing', function (): void {
         // Arrange
         $wrestler = Wrestler::factory()->bookable()->create();

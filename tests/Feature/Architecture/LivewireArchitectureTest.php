@@ -11,6 +11,7 @@ use App\Livewire\Matches\Tables\MatchesTable;
 use App\Livewire\Referees\Tables\PreviousMatches;
 use App\Livewire\Stables\Tables\PreviousManagers;
 use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
+use App\Livewire\Titles\Tables\TitleHistory;
 use App\Livewire\Venues\Tables\PreviousEvents;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -105,7 +106,7 @@ test('component context identifiers are locked', function (string $component, st
     [App\Livewire\TagTeams\Tables\PreviousStables::class, 'tagTeamId'],
     [PreviousTitleChampionships::class, 'tagTeamId'],
     [App\Livewire\TagTeams\Tables\PreviousWrestlers::class, 'tagTeamId'],
-    [App\Livewire\Titles\Tables\PreviousTitleChampionships::class, 'titleId'],
+    [TitleHistory::class, 'titleId'],
     [PreviousEvents::class, 'venueId'],
     [App\Livewire\Wrestlers\Tables\PreviousManagers::class, 'wrestlerId'],
     [App\Livewire\Wrestlers\Tables\PreviousMatches::class, 'wrestlerId'],

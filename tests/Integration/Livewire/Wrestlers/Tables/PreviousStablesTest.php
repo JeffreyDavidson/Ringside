@@ -108,6 +108,12 @@ describe('PreviousStablesTable Query Building', function () {
 
 describe('PreviousStablesTable Rendering', function () {
     it('renders the stable history search control', function (): void {
+        // Arrange
+        Stable::factory()->create()->wrestlers()->attach($this->wrestler, [
+            'joined_at' => Date::now()->subMonths(3),
+            'left_at' => Date::now()->subMonth(),
+        ]);
+
         // Act
         $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
@@ -144,7 +150,9 @@ describe('PreviousStablesTable Rendering', function () {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous stables')
+            ->assertSee('No previous stables yet.')
+            ->assertDontSeeHtml('placeholder="Search stables"');
     });
 
     it('renders previous stable membership details', function (): void {
