@@ -1,61 +1,25 @@
-# PHPStan Generic Typing Best Practices
+# PHPStan Generic Typing for Livewire Forms and Modals
 
-## Problem: Property Access on Dynamic Models
+The Livewire base classes are generic, so child classes get precise model and
+form types without casts or `getAttribute()` calls.
 
-When working with Livewire components that handle Eloquent models, PHPStan often complains about property access:
+## Base classes
 
-```php
-// ❌ PHPStan Error: Access to undefined property Model::$first_name
-$this->model->first_name
-```
+`app/Livewire/Base/BaseForm.php`, `BaseModal.php`, and `BaseFormModal.php`
+declare the templates:
 
-This happens because `$this->model` is typed as the generic `Model` class, not the specific model (e.g., `User`, `Referee`).
+- `BaseForm<TModel of Model>`
+- `BaseModal<TModelForm of BaseForm, TModelType of Model>`
+- `BaseFormModal<TForm of BaseForm, TModel of Model>`
 
-## ❌ Wrong Solution: Using getAttribute()
+Models are never stored as component state. Forms keep a locked `modelId` and
+resolve the model when needed (see `.ai/rules/livewire.md`, "Resolve models from
+locked identifiers").
 
-```php
-// This works but is verbose and defeats IDE autocomplete
-'first_name' => $this->model->getAttribute('first_name'),
-'last_name' => $this->model->getAttribute('last_name'),
-```
+## Concrete modals
 
-## ✅ Correct Solution: Proper Generic Typing
-
-### Step 1: Define Generic Templates in Base Classes
-
-**BaseModal.php:**
-```php
-/**
- * @template TModelForm of \App\Livewire\Base\BaseForm
- * @template TModelType of Model
- */
-abstract class BaseModal extends ModalComponent
-{
-    /**
-     * @var TModelType|null
-     */
-    protected ?Model $model;
-}
-```
-
-**BaseFormModal.php:**
-```php
-/**
- * @template TForm of BaseForm
- * @template TModel of Model
- *
- * @extends BaseModal<TForm, TModel>
- */
-abstract class BaseFormModal extends BaseModal
-{
-    /**
-     * @var TForm|null
-     */
-    public $form;
-}
-```
-
-### Step 2: Specify Generic Types in Child Classes
+Child modals bind the templates in an `@extends` tag and return the model class
+from `getModelClass()`. Example: `app/Livewire/Referees/Modals/FormModal.php`.
 
 ```php
 /**
@@ -63,73 +27,38 @@ abstract class BaseFormModal extends BaseModal
  */
 class FormModal extends BaseFormModal
 {
-    // Now $this->model is properly typed as Referee|null
-    // Direct property access works!
-    
-    public function openModal(mixed $modelId = null): void
+    public CreateEditForm $form;
+
+    protected function getModelClass(): string
     {
-        parent::openModal($modelId);
-        
-        if (isset($this->model) && ! is_null($this->model)) {
-            $this->originalModelData = [
-                'first_name' => $this->model->first_name,    // ✅ Works!
-                'last_name' => $this->model->last_name,      // ✅ Works!
-                'employment_date' => $this->model->firstEmployment?->started_at?->toDateString() ?? '',
-            ];
-        }
+        return Referee::class;
     }
 }
 ```
 
-### Step 3: Apply to Form Classes Too
+## Concrete forms
+
+Forms extend `BaseForm` and expose a typed accessor that resolves the current
+model from `modelId`, so callers get a real model type. Example:
+`app/Livewire/Referees/Forms/CreateEditForm.php`.
 
 ```php
-/**
- * @extends BaseForm<CreateEditForm, Referee>
- */
-class CreateEditForm extends BaseForm
+public function referee(): Referee
 {
-    // Form-specific properties and methods
+    return Referee::query()->findOrFail($this->modelId);
 }
 ```
 
-## Benefits
+## Keys
 
-1. **Type Safety**: PHPStan understands the exact model type
-2. **IDE Support**: Full autocomplete and type checking in IDEs
-3. **Cleaner Code**: Direct property access instead of `getAttribute()`
-4. **Better Performance**: No method call overhead
-5. **Maintainability**: Clear type relationships between components
+Use `App\Support\ModelKey::of($model)` when a model key must be an `int|string`;
+it throws a `LogicException` for a missing or non-scalar key instead of
+scattering per-site guards.
 
-## Results
+## Verifying
 
-- **Before**: 33 PHPStan errors with property access issues
-- **After**: 5 PHPStan errors, all property access issues resolved
-- **Improvement**: 85% error reduction + cleaner, more maintainable code
-
-## Pattern Template
-
-For any new Livewire component that works with models:
-
-```php
-/**
- * @extends BaseFormModal<YourFormClass, YourModelClass>
- */
-class YourFormModal extends BaseFormModal
-{
-    protected function getFormClass(): string
-    {
-        return YourFormClass::class;
-    }
-    
-    protected function getModelClass(): string  
-    {
-        return YourModelClass::class;
-    }
-    
-    // Now $this->model is properly typed as YourModelClass|null
-    // Direct property access works without PHPStan errors!
-}
+```bash
+composer test:types
 ```
 
-This approach scales to any generic class hierarchy and provides proper type safety throughout the application.
+This runs PHPStan for `app/` and for the Pest tests (`phpstan-pest.neon`).
