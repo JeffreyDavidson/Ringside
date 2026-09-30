@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Base;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use LivewireUI\Modal\ModalComponent;
 
 /**
@@ -51,7 +52,7 @@ abstract class BaseModal extends ModalComponent
             return __('core.modal.edit', ['name' => (string) ($value ?? 'Unknown')]);
         }
 
-        return __('core.modal.add', ['model' => class_basename($this->getModelClass())]);
+        return __('core.modal.add', ['model' => __("core.models.{$this->modelKey()}")]);
     }
 
     public function clear(): void
@@ -65,6 +66,11 @@ abstract class BaseModal extends ModalComponent
         }
 
         $modelForm->reset();
+    }
+
+    private function modelKey(): string
+    {
+        return Str::snake(class_basename($this->getModelClass()));
     }
 
     private function findModel(int|string $modelId): Model

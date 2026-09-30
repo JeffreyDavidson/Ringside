@@ -38,7 +38,7 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.name', '')
             ->assertSet('form.type', '')
             ->assertSet('form.start_date', '')
-            ->assertSee('Create Title');
+            ->assertSee('Add Title');
     });
 
     it('loads an existing title for editing', function () {
@@ -54,7 +54,7 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.name', 'World Championship Title')
             ->assertSet('form.type', TitleType::Singles->value)
             ->assertSet('form.start_date', '2024-01-15')
-            ->assertSee('Edit Title');
+            ->assertSee('Edit World Championship Title');
     });
 
     it('propagates a missing title failure', function () {

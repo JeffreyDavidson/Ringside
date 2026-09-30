@@ -33,11 +33,6 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
-    'modal' => [
-        'create' => 'Create Title',
-        'edit' => 'Edit Title',
-    ],
-
     'actions' => [
         'deleted' => 'Title successfully deleted.',
         'debuted' => 'Title successfully debuted.',

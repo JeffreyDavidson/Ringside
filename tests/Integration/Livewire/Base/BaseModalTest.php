@@ -47,7 +47,7 @@ describe('clearing modal forms', function (): void {
         // Assert
         $component
             ->assertSet('form.name', '')
-            ->assertSee('Create Tag Team');
+            ->assertSee('Add Tag Team');
     });
 
     it('restores the persisted model when clearing an edit form', function (): void {
@@ -112,13 +112,13 @@ describe('localized modal titles', function (): void {
     });
 
     dataset('localized modal titles', [
-        'stable' => [StableFormModal::class, fn (): Stable => Stable::factory()->create(), 'Create Stable', 'Edit Stable'],
-        'title' => [TitleFormModal::class, fn (): Title => Title::factory()->create(), 'Create Title', 'Edit Title'],
-        'venue' => [VenueFormModal::class, fn (): Venue => Venue::factory()->create(), 'Create Venue', 'Edit Venue'],
-        'event' => [EventFormModal::class, fn (): Event => Event::factory()->create(), 'Create Event', 'Edit Event'],
-        'user' => [UserFormModal::class, fn (): User => User::factory()->create(), 'Create User', 'Edit User'],
-        'promotion' => [PromotionFormModal::class, fn (): Promotion => Promotion::factory()->create(), 'Create Promotion', 'Edit Promotion'],
-        'tag team' => [FormModal::class, fn (): TagTeam => TagTeam::factory()->create(['name' => 'The Originals']), 'Create Tag Team', 'Edit The Originals'],
+        'stable' => [StableFormModal::class, fn (): Stable => Stable::factory()->create(['name' => 'The Four Horsemen']), 'Add Stable', 'Edit The Four Horsemen'],
+        'title' => [TitleFormModal::class, fn (): Title => Title::factory()->create(['name' => 'World Title']), 'Add Title', 'Edit World Title'],
+        'venue' => [VenueFormModal::class, fn (): Venue => Venue::factory()->create(['name' => 'Madison Square Garden']), 'Add Venue', 'Edit Madison Square Garden'],
+        'event' => [EventFormModal::class, fn (): Event => Event::factory()->create(['name' => 'Summer Showcase']), 'Add Event', 'Edit Summer Showcase'],
+        'user' => [UserFormModal::class, fn (): User => User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']), 'Add User', 'Edit Jane Smith'],
+        'promotion' => [PromotionFormModal::class, fn (): Promotion => Promotion::factory()->create(['name' => 'Ringside Wrestling']), 'Add Promotion', 'Edit Ringside Wrestling'],
+        'tag team' => [FormModal::class, fn (): TagTeam => TagTeam::factory()->create(['name' => 'The Originals']), 'Add Tag Team', 'Edit The Originals'],
     ]);
 
     it('renders the translated create and edit titles', function (string $modal, Closure $makeModel, string $createTitle, string $editTitle): void {
@@ -130,9 +130,20 @@ describe('localized modal titles', function (): void {
         $editing = livewire($modal)->call('openModal', $model->id);
 
         // Assert
-        $creating->assertSee($createTitle);
-        $editing->assertSee($editTitle);
+        $creating->assertSeeHtml(">{$createTitle}</h2>");
+        $editing->assertSeeHtml(">{$editTitle}</h2>");
     })->with('localized modal titles');
+
+    it('escapes record names in the edit title exactly once', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => "O'Neil & Sons"]);
+
+        // Act
+        $editing = livewire(VenueFormModal::class)->call('openModal', $venue->id);
+
+        // Assert
+        $editing->assertSeeHtml('>Edit O&#039;Neil &amp; Sons</h2>');
+    });
 
     it('renders the translated match form titles', function (): void {
         // Arrange
@@ -143,7 +154,7 @@ describe('localized modal titles', function (): void {
         $editing = livewire(MatchFormModal::class, ['eventId' => $match->event_id])->call('openModal', $match->id);
 
         // Assert
-        $creating->assertSee('Create Match');
+        $creating->assertSee('Add Match');
         $editing->assertSee('Edit Match');
     });
 

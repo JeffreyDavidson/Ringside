@@ -36,11 +36,6 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
-    'modal' => [
-        'create' => 'Create Event',
-        'edit' => 'Edit Event',
-    ],
-
     'actions' => [
         'deleted' => 'Event successfully deleted.',
     ],

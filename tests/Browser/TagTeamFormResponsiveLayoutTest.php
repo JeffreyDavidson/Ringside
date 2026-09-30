@@ -20,7 +20,7 @@ test('tag-team form groups related fields responsively and keeps managers full-w
 
     $page
         ->click('Add Tag Team')
-        ->assertSee('Add Tag Team')
+        ->assertSeeIn('#modal-title', 'Add Tag Team')
         ->assertScript('Array.from(document.querySelectorAll("[data-test$=-grid]"), grid => getComputedStyle(grid).gridTemplateColumns.split(" ").length).every(columns => columns === 1)')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->resize(1440, 1000)

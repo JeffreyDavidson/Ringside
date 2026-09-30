@@ -25,7 +25,7 @@ describe('promotion form interactions', function () {
         $modal->assertSet('isModalOpen', true);
         $modal->assertSeeHtml('wire:model="form.name"');
         $modal->assertSeeHtml('wire:model="form.slug"');
-        $modal->assertSee('Create Promotion');
+        $modal->assertSee('Add Promotion');
     });
 
     it('opens through the shared modal host', function () {

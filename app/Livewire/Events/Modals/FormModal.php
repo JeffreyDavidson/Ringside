@@ -53,16 +53,6 @@ class FormModal extends BaseFormModal
         $this->form->preview = Str::of(fake()->text())->value();
     }
 
-    #[\Override]
-    public function getModalTitle(): string
-    {
-        if ($this->form->isEditing()) {
-            return __('events.modal.edit');
-        }
-
-        return __('events.modal.create');
-    }
-
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->event(), $this->form->toData());
