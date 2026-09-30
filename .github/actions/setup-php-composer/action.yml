@@ -16,7 +16,7 @@ inputs:
     extensions:
         description: PHP extensions required by the application.
         required: false
-        default: bcmath, curl, dom, fileinfo, intl, mbstring, pdo_sqlite, xml, zip
+        default: bcmath, curl, dom, fileinfo, intl, mbstring, pdo_pgsql, pdo_sqlite, xml, zip
 
 runs:
     using: composite

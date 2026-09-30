@@ -258,6 +258,51 @@ jobs:
                   echo "::warning::Pest TIA was unavailable or failed validation; running the full application test suite."
                   php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage --parallel
 
+    postgres-tests:
+        name: Postgres tests
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        env:
+            DB_CONNECTION: pgsql
+            DB_HOST: 127.0.0.1
+            DB_PORT: 5432
+            DB_DATABASE: ringside_test
+            DB_USERNAME: ringside
+            DB_PASSWORD: ringside
+
+        services:
+            postgres:
+                image: postgres:17
+                env:
+                    POSTGRES_DB: ringside_test
+                    POSTGRES_USER: ringside
+                    POSTGRES_PASSWORD: ringside
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U ringside -d ringside_test"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Prepare Laravel
+              run: |
+                  cp .env.testing .env
+                  php artisan key:generate
+                  php artisan config:cache
+
+            - name: Run application tests against PostgreSQL
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage
+
     coverage:
         name: Coverage (100%)
         runs-on: ubuntu-latest

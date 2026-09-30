@@ -53,7 +53,11 @@ class UpdateAction
             $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
 
             if ($stableData->hasStartDate()) {
-                $activityPeriod = $lockedStable->firstActivityPeriod()->lockForUpdate()->first();
+                $activityPeriod = $lockedStable->activityPeriods()
+                    ->orderBy('started_at')
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($activityPeriod) {
                     $activityPeriod->update([

@@ -248,7 +248,7 @@ describe('deleting matches', function (): void {
 });
 
 describe('search and event scoping', function (): void {
-    it('searches matches by type and clears the search', function (): void {
+    it('searches matches by type and clears the search', function (string $searchTerm): void {
         // Arrange
         $event = Event::factory()->create();
         EventMatch::factory()
@@ -262,7 +262,7 @@ describe('search and event scoping', function (): void {
         $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
 
         // Act
-        $component->set('search', 'Singles');
+        $component->set('search', $searchTerm);
 
         // Assert
         $component
@@ -276,7 +276,11 @@ describe('search and event scoping', function (): void {
         $component
             ->assertSee('Singles')
             ->assertSee('Tag Team');
-    });
+    })->with([
+        'capitalized' => ['Singles'],
+        'lowercase' => ['singles'],
+        'uppercase' => ['SINGLES'],
+    ]);
 
     it('renders only matches belonging to the selected event', function (): void {
         // Arrange
