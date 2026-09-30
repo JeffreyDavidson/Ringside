@@ -18,6 +18,7 @@ class EmployCurrentManagersAction
     public function handle(Manageable $manageable, Carbon $employmentDate): void
     {
         $managers = $manageable->currentManagers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists() && ! $manager->futureEmployment()->exists());
 

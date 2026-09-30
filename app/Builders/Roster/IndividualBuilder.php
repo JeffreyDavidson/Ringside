@@ -7,6 +7,7 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\FiltersByEmploymentStatus;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstEmployment;
+use App\Builders\Concerns\OrdersByKeyForLocking;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,7 @@ abstract class IndividualBuilder extends Builder
     use FiltersByEmploymentStatus;
     use FiltersByRetirementStatus;
     use LoadsFirstEmployment;
+    use OrdersByKeyForLocking;
 
     /**
      * Project the current injury and suspension state so availability badges

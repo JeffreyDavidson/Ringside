@@ -462,6 +462,57 @@ function recordStatements(Closure $callback): array
 }
 
 /**
+ * The primary key a recorded statement was bound to: the first binding of a single-row lock, or the last binding of an
+ * update that targets one row of a pivot table.
+ *
+ * @param  array{sql: string, bindings: array<int, mixed>, locked: bool}  $statement
+ */
+function boundKey(array $statement, bool $last = false): int
+{
+    $binding = $last ? array_last($statement['bindings']) : ($statement['bindings'][0] ?? null);
+
+    return is_int($binding) ? $binding : throw new RuntimeException('Expected the statement to be bound to an integer key.');
+}
+
+/**
+ * The primary keys of the rows a recorded action locked one at a time in a table, in locking order.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @return array<int, int>
+ */
+function lockedRowIds(array $statements, string $table): array
+{
+    $ids = [];
+
+    foreach ($statements as $statement) {
+        if ($statement['locked'] && str_contains($statement['sql'], "from \"{$table}\"")) {
+            $ids[] = boundKey($statement);
+        }
+    }
+
+    return $ids;
+}
+
+/**
+ * The related keys of the pivot rows a recorded action updated one at a time, in update order.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @return array<int, int>
+ */
+function updatedRowIds(array $statements, string $table): array
+{
+    $ids = [];
+
+    foreach ($statements as $statement) {
+        if (str_starts_with($statement['sql'], "update \"{$table}\"")) {
+            $ids[] = boundKey($statement, last: true);
+        }
+    }
+
+    return $ids;
+}
+
+/**
  * A connection double that reports the given database driver, so the SQLite test database can exercise the
  * driver specific branches of collaborators that would otherwise only run on a server such as PostgreSQL.
  */

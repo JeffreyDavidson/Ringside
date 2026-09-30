@@ -23,7 +23,7 @@ class SynchronizeManagerAssignmentsAction
             return;
         }
 
-        $currentManagers = $manageable->currentManagers()->get();
+        $currentManagers = $manageable->currentManagers()->inLockOrder()->get();
 
         foreach ($currentManagers->diff($managers) as $manager) {
             $manageable->managers()->newPivotStatementForId($manager->getKey())

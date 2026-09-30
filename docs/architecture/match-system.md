@@ -40,7 +40,7 @@ Every scheduling operation acquires locks in this order. `MatchAssignmentConflic
 0. Only for actions that move an event to a date (`Events\UpdateAction`): the date-slot lock of the old and new date, ascending by timestamp (see below). Booking actions never take it.
 1. The complete scheduling event set in one statement ordered by ascending id: the action's own event plus every other event on the same exact date and time (an unscheduled event's set is itself alone, because unscheduled events conflict only within their own card).
 2. The match row (inserted last for `AddMatchForEventAction`, so nobody else can lock it first).
-3. Competitors and other resources in ascending id: referees, wrestlers, tag teams, then titles and their current reign.
+3. Competitors and other resources in ascending id: referees, wrestlers, tag teams, then titles and their current reign. A champion's own cascade (retirement, release, or deletion) closes its current reigns in ascending reign id too, so it queues behind a multi-title result instead of inverting it (see Cascade lock order in `lifecycle-operation-boundaries.md`).
 
 Locking the own event first and the rest of its date afterwards let two bookings on different events at the same time each hold one event and wait for the other, which PostgreSQL resolves as a deadlock (SQLSTATE 40P01) and the user saw as a server error even without a real conflict. Taking the whole set in one ordered statement makes the second booking queue behind the first, and it then sees the first booking's committed rows and raises a normal `SchedulingConflictException` when there is a genuine clash.
 

@@ -97,6 +97,7 @@ final class ChampionshipReignManager
     public function endCurrentReignsForChampion(Model&CanBeChampion $champion, Carbon $endedAt): void
     {
         $champion->currentChampionships()
+            ->inLockOrder()
             ->lockForUpdate()
             ->get()
             ->each->update(['lost_at' => $endedAt]);

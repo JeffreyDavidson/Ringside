@@ -18,8 +18,8 @@ class SynchronizeStableMembersAction
 
     public function handle(Stable $stable, StableMembershipData $desiredMembers, Carbon $date): void
     {
-        $currentMembers = $stable->currentWrestlers;
-        $currentTagTeams = $stable->currentTagTeams;
+        $currentMembers = $stable->currentWrestlers()->inLockOrder()->get();
+        $currentTagTeams = $stable->currentTagTeams()->inLockOrder()->get();
 
         if ($desiredMembers->wrestlers instanceof Collection) {
             $this->removeStableMembersAction->handle(
