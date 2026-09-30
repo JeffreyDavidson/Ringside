@@ -232,8 +232,8 @@ ability surface.
 ### Lifecycle UI parity and detail-page refresh
 
 **Priority:** Medium  
-**Status:** Completed for wrestlers, managers, referees, tag teams, and titles;
-open for stables.
+**Status:** Completed for wrestlers, managers, referees, stables, tag teams, and
+titles.
 
 Detail pages render `Components/Actions` components whose `canPerform()` combines
 the Gate ability with domain eligibility, and the General Info card is wrapped
@@ -241,11 +241,9 @@ in the shared `App\Livewire\Components\GeneralInfo` component so status and
 related rows refresh after each action. The index tables no longer carry
 unreachable lifecycle methods. Open follow-ups verified against the code:
 
-- Stables have no lifecycle actions component. `EstablishAction` runs only as
-  part of stable create and update; `DisbandAction`, `RetireAction`,
-  `UnretireAction`, `MergeStablesAction`, `SplitStableAction`, and
-  `ReuniteAction` have no Livewire or controller caller (kept intentionally as
-  planned features).
+- Stables render a lifecycle actions component (Establish, Disband, Retire,
+  Unretire) on the detail page. `MergeStablesAction`, `SplitStableAction`, and
+  `ReuniteAction` remain unwired (kept intentionally as planned features).
 - Modal titles are inconsistent: the base modal and the Wrestlers, Managers,
   and Referees modals say "Add X"/"Edit {name}", while Stables, Titles, Venues,
   Events, Users, Matches, and Tag Teams say "Create X" and (except Tag Teams)

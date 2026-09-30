@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\StablesController;
+use App\Livewire\Components\GeneralInfo;
+use App\Livewire\Stables\Components\Actions;
 use App\Livewire\Stables\Tables\PreviousManagers;
 use App\Livewire\Stables\Tables\PreviousTagTeams;
 use App\Livewire\Stables\Tables\PreviousWrestlers;
@@ -43,7 +45,7 @@ describe('Stables Controller', function () {
     /**
      * @see StablesController::show()
      */
-    test('show renders the stable summary from only its required relationships', function () {
+    test('show leaves the summary relationships to the general info component', function () {
         $startedAt = today()->subDay();
         ActivityPeriod::factory()
             ->for($this->stable, 'activeable')
@@ -54,10 +56,18 @@ describe('Stables Controller', function () {
             ->get(route('stables.show', $this->stable))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
-            ->assertViewHas('stable', fn (Stable $stable): bool => count($stable->getRelations()) === 3
-                && $stable->relationLoaded('currentTagTeams')
-                && $stable->relationLoaded('currentWrestlers')
-                && $stable->relationLoaded('firstActivityPeriod'));
+            ->assertSeeLivewire(GeneralInfo::class)
+            ->assertViewHas('stable', fn (Stable $stable): bool => $stable->getRelations() === []);
+    });
+
+    /**
+     * @see StablesController::show()
+     */
+    test('show renders the lifecycle actions component', function () {
+        actingAs(administrator())
+            ->get(route('stables.show', $this->stable))
+            ->assertOk()
+            ->assertSeeLivewire(Actions::class);
     });
 
     /**

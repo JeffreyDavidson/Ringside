@@ -37,7 +37,7 @@ Not every domain has every folder. For example, Stables and Promotions have no
 
 ## Lifecycle Actions Components
 
-Each detail page (wrestlers, managers, referees, tag teams, titles) renders a
+Each detail page (wrestlers, managers, referees, tag teams, stables, titles) renders a
 `Components/Actions` component (for example `livewire:wrestlers.components.actions`).
 These are the only Livewire entry points for lifecycle transitions; the index tables
 expose row actions such as delete but no lifecycle methods.
@@ -51,7 +51,11 @@ expose row actions such as delete but no lifecycle methods.
   the Gate ability with the domain eligibility check
   (`ChecksIndividualLifecycleEligibility` for wrestlers, managers and referees). Titles
   take a `TitleLifecycleTransition` instead. The Blade view never re-implements the rule.
-- Stables have no Actions component yet.
+- Stables offer Establish, Disband, Retire and Unretire. They take a
+  `StableLifecycleAction` in `canPerform()` (Gate ability plus `StableActivityEligibility` /
+  `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
+  a rejected action shows the domain exception's message. Merge, split and reunite remain
+  unwired.
 
 ## General Info Card
 
@@ -60,8 +64,8 @@ lifecycle changes appear without a reload.
 
 - `modelClass` and `modelId` are `#[Locked]`; the client cannot change what renders.
 - A private `CARDS` map, keyed by model class, defines the refresh event
-  (`wrestler-updated`, `manager-updated`, `referee-updated`, `tag-team-updated`,
-  `title-updated`), the anonymous Blade component that renders the card, that
+  (`wrestler-updated`, `manager-updated`, `referee-updated`, `stable-updated`,
+  `tag-team-updated`, `title-updated`), the anonymous Blade component that renders the card, that
   component's model prop, and the relationships to eager load.
 - On each render it re-queries the model with those relationships and renders the card
   through `x-dynamic-component`.

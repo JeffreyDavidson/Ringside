@@ -1,6 +1,7 @@
 <x-layouts.show-page :title="$stable->name">
     <x-slot:sidebar>
-        <x-stables.show.general-info :$stable />
+        <livewire:components.general-info :model="$stable" />
+        <livewire:stables.components.actions :stable="$stable" />
     </x-slot:sidebar>
 
     <livewire:stables.tables.previous-wrestlers :stableId="$stable->id" defer.bundle />

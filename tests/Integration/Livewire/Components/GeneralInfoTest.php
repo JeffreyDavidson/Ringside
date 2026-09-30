@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction as EmployManagerAction;
 use App\Actions\Referees\EmployAction as EmployRefereeAction;
+use App\Actions\Stables\DisbandAction as DisbandStableAction;
 use App\Actions\TagTeams\ReleaseAction as ReleaseTagTeamAction;
 use App\Actions\Titles\DebutAction;
 use App\Actions\Wrestlers\EmployAction as EmployWrestlerAction;
 use App\Livewire\Components\GeneralInfo;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -70,6 +72,13 @@ describe('general info component', function (): void {
             fn (Referee $model) => app(EmployRefereeAction::class)->handle($model, now()->subDays(10)),
             ['Unemployed', 'No Start Date Set'],
             fn (): array => ['Employed', now()->subDays(10)->toDateString()],
+        ],
+        'stable status and current members' => [
+            fn (): Model => Stable::factory()->active()->create(),
+            'stable-updated',
+            fn (Stable $model) => app(DisbandStableAction::class)->handle($model),
+            ['Active'],
+            fn (): array => ['Inactive'],
         ],
         'tag team status and current partners' => [
             fn (): Model => TagTeam::factory()->employed()->create(),
@@ -163,6 +172,22 @@ describe('general info component', function (): void {
                 return $tagTeam;
             },
             'tag-team-updated',
+        ],
+        'stable with current members' => [
+            function (int $count): Stable {
+                $stable = Stable::factory()->active()->create();
+                $stable->wrestlers()->attach(
+                    Wrestler::factory()->employed()->count($count)->create(),
+                    ['joined_at' => now()],
+                );
+                $stable->tagTeams()->attach(
+                    TagTeam::factory()->employed()->count($count)->create(),
+                    ['joined_at' => now()],
+                );
+
+                return $stable;
+            },
+            'stable-updated',
         ],
     ]);
 });
