@@ -25,6 +25,9 @@ class FormModal extends BaseFormModal
     #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
+    #[\Override]
+    protected string $modelTitleField = 'full_name';
+
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -50,16 +53,6 @@ class FormModal extends BaseFormModal
         $this->form->password = 'password123';
         $this->form->password_confirmation = 'password123';
         $this->form->role = 'basic';
-    }
-
-    #[\Override]
-    public function getModalTitle(): string
-    {
-        if ($this->form->isEditing()) {
-            return __('users.modal.edit');
-        }
-
-        return __('users.modal.create');
     }
 
     protected function updateForm(): void

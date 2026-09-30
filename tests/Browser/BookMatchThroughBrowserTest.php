@@ -23,7 +23,7 @@ test('administrator can book a singles match through the event page', function (
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
 
     $page
-        ->waitForText('Create Match')
+        ->waitForText('Add Match')
         ->select('select[name="form.matchType"]', MatchType::Singles->value)
         ->select('select[name="form.competitors.0.wrestlers.0"]', (string) $firstWrestler->id)
         ->select('select[name="form.competitors.1.wrestlers.0"]', (string) $secondWrestler->id)
@@ -108,7 +108,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
 
     $page
-        ->waitForText('Create Match')
+        ->waitForText('Add Match')
         ->select('select[name="form.matchType"]', MatchType::TripleThreat->value)
         ->waitForText('Competitor 3')
         ->assertScript('getComputedStyle(document.querySelector("[data-test=match-setup-grid]")).gridTemplateColumns.split(" ").length === 1')
@@ -133,7 +133,7 @@ test('administrator can create and edit an event with a showtime', function (): 
     $page
         ->click('Add Event')
         ->assertPathIs('/events')
-        ->assertSee('Create Event')
+        ->assertSeeIn('#modal-title', 'Add Event')
         ->assertAttribute('input[name="form.date"]', 'type', 'datetime-local')
         ->fill('input[name="form.name"]', 'Night of Champions')
         ->fill('input[name="form.date"]', $eventDate->format('Y-m-d\\TH:i'))
@@ -152,11 +152,11 @@ test('administrator can create and edit an event with a showtime', function (): 
         ->click('button[aria-label="Actions for Night of Champions"]')
         ->click('tr:has-text("Night of Champions") [data-row-actions-panel] button:has-text("Edit")')
         ->assertPathIs('/events')
-        ->assertSee('Edit Event')
+        ->assertSeeIn('#modal-title', 'Edit Night of Champions')
         ->assertValue('input[name="form.date"]', $eventDate->format('Y-m-d\\TH:i'))
         ->fill('input[name="form.date"]', $updatedDate->format('Y-m-d\\TH:i'))
         ->press('Save')
-        ->assertDontSee('Edit Event')
+        ->assertDontSee('Edit Night of Champions')
         ->assertNoJavascriptErrors();
 
     expect($event->refresh()->date?->toDateTimeString())->toBe($updatedDate->toDateTimeString());
@@ -173,14 +173,14 @@ test('administrator can recover from a venue scheduling conflict in the event fo
 
     $page
         ->click('Add Event')
-        ->assertSee('Create Event')
+        ->assertSeeIn('#modal-title', 'Add Event')
         ->fill('input[name="form.name"]', 'Second Night at the Venue')
         ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
         ->select('select[name="form.venue_id"]', (string) $venue->id)
         ->press('Save')
         ->assertSee("Venue [{$venue->name}] is already booked at this event time.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
-        ->assertSee('Create Event');
+        ->assertSeeIn('#modal-title', 'Add Event');
 
     expect(Event::query()->count())->toBe(1);
 
@@ -189,7 +189,7 @@ test('administrator can recover from a venue scheduling conflict in the event fo
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
         ->assertSee('Second Night at the Venue')
-        ->assertDontSee('Create Event')
+        ->assertMissing('#modal-title')
         ->assertNoJavascriptErrors();
 
     $event = Event::query()->whereName('Second Night at the Venue')->firstOrFail();
@@ -214,13 +214,13 @@ test('administrator can recover from a venue scheduling conflict while editing a
     $page
         ->click('button[aria-label="Actions for Original Browser Event"]')
         ->click('tr:has-text("Original Browser Event") [data-row-actions-panel] button:has-text("Edit")')
-        ->assertSee('Edit Event')
+        ->assertSeeIn('#modal-title', 'Edit Original Browser Event')
         ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
         ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
         ->press('Save')
         ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
-        ->assertSee('Edit Event');
+        ->assertSeeIn('#modal-title', 'Edit Original Browser Event');
 
     expect($event->refresh()->name)->toBe('Original Browser Event')
         ->and($event->date?->toDateTimeString())->toBe($conflictingDate->toDateTimeString())
@@ -231,7 +231,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
         ->assertSee('Rescheduled Browser Event')
-        ->assertDontSee('Edit Event')
+        ->assertDontSee('Edit Rescheduled Browser Event')
         ->assertNoJavascriptErrors();
 
     expect($event->refresh()->name)->toBe('Rescheduled Browser Event')

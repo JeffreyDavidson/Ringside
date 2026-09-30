@@ -8,9 +8,4 @@ return [
     'email' => 'Email Address',
     'phone' => 'Phone Number',
     'role' => 'Role',
-
-    'modal' => [
-        'create' => 'Create User',
-        'edit' => 'Edit User',
-    ],
 ];

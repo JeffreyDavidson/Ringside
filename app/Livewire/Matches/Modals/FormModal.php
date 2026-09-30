@@ -140,9 +140,11 @@ class FormModal extends BaseFormModal
     #[\Override]
     public function getModalTitle(): string
     {
-        return $this->form->isEditing()
-            ? __('matches.modal.edit')
-            : __('matches.modal.create');
+        if ($this->form->isEditing()) {
+            return __('matches.modal.edit');
+        }
+
+        return parent::getModalTitle();
     }
 
     public function updatedFormMatchType(mixed $value): void

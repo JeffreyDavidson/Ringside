@@ -30,10 +30,6 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
-    'modal' => [
-        'create' => 'Create Tag Team',
-    ],
-
     'actions' => [
         'employed' => 'Tag team has been hired.',
         'released' => 'Tag team contract has been terminated.',

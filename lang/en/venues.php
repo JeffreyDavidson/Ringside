@@ -12,11 +12,6 @@ return [
     'empty_description' => 'Venues added to the shared directory will appear here.',
     'empty_title' => 'No venues yet',
 
-    'modal' => [
-        'create' => 'Create Venue',
-        'edit' => 'Edit Venue',
-    ],
-
     'actions' => [
         'deleted' => 'Venue successfully deleted.',
     ],

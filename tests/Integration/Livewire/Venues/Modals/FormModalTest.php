@@ -72,7 +72,7 @@ describe('authorized venue form interactions', function () {
             ->assertSet('form.city', 'New York')
             ->assertSet('form.state', 'New York')
             ->assertSet('form.zipcode', '10001')
-            ->assertSee('Edit Venue');
+            ->assertSee('Edit Madison Square Garden');
     });
 
     it('propagates a missing venue failure', function () {

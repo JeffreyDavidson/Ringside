@@ -50,7 +50,7 @@ describe('authorized stable form interactions', function () {
             ->assertSet('form.ended_at', null)
             ->assertSet('form.wrestlers', [])
             ->assertSet('form.tag_teams', [])
-            ->assertSee('Create Stable');
+            ->assertSee('Add Stable');
     });
 
     it('loads an existing stable for editing', function () {
@@ -75,7 +75,7 @@ describe('authorized stable form interactions', function () {
             ->assertSet('form.ended_at', '2024-12-31')
             ->assertSet('form.wrestlers', [$wrestler->id])
             ->assertSet('form.tag_teams', [$tagTeam->id])
-            ->assertSee('Edit Stable');
+            ->assertSee('Edit The Four Horsemen');
     });
 
     it('propagates a missing stable failure', function () {

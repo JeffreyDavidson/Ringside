@@ -96,7 +96,7 @@ describe('authorized match form interactions', function (): void {
                 ['wrestlers' => [], 'tag_teams' => []],
                 ['wrestlers' => [], 'tag_teams' => []],
             ])
-            ->assertSee('Create Match')
+            ->assertSee('Add Match')
             ->assertPropertyWired('form.competitors.0.wrestlers.0')
             ->assertPropertyWired('form.competitors.1.wrestlers.0');
     });

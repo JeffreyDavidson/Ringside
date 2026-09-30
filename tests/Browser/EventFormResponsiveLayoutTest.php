@@ -14,7 +14,7 @@ test('event schedule fields stack on narrow screens and share a row on wider scr
 
     $page
         ->click('Add Event')
-        ->assertSee('Create Event')
+        ->assertSeeIn('#modal-title', 'Add Event')
         ->assertScript('getComputedStyle(document.querySelector("[data-test=event-schedule-grid]")).gridTemplateColumns.split(" ").length === 1')
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->resize(1440, 1000)
