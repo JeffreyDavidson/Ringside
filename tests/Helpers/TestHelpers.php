@@ -11,10 +11,14 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Matches\SchedulingSlotLockService;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use JMac\Testing\Double;
+use JMac\Testing\DoubleInterface;
 
 /**
  * Test helper functions for common testing scenarios.
@@ -455,4 +459,40 @@ function recordStatements(Closure $callback): array
     }
 
     return $statements;
+}
+
+/**
+ * A connection double that reports the given database driver, so the SQLite test database can exercise the
+ * driver specific branches of collaborators that would otherwise only run on a server such as PostgreSQL.
+ */
+function driverConnection(string $driver): Connection&DoubleInterface
+{
+    $connection = Double::for(Connection::class);
+    $connection->expects('getDriverName')->returns($driver)->times(minimum: 0);
+
+    return $connection;
+}
+
+/**
+ * A scheduling slot lock that runs its PostgreSQL branch. The advisory lock statement cannot run on SQLite,
+ * so it is handed to the observer instead of being sent to the database.
+ *
+ * @param  Closure(string, array<mixed>): mixed  $onStatement  Receives the SQL and its bindings
+ */
+function postgresSlotLock(Closure $onStatement): SchedulingSlotLockService
+{
+    $connection = driverConnection('pgsql');
+    $connection->expects('select')
+        ->resolves(function (mixed ...$arguments) use ($onStatement): array {
+            [$sql, $bindings] = $arguments;
+
+            is_string($sql) && is_array($bindings) || throw new LogicException('Expected the SQL and its bindings.');
+
+            $onStatement($sql, $bindings);
+
+            return [];
+        })
+        ->times(minimum: 0);
+
+    return new SchedulingSlotLockService($connection);
 }
