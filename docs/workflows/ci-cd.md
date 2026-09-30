@@ -69,6 +69,20 @@ gh pr create --base develop
 git push origin develop
 ```
 
+## Dependency Updates
+
+`.github/dependabot.yml` opens weekly (Monday, 06:00 America/New_York) update PRs against `develop` for
+Composer, npm, and GitHub Actions (the workflows and the local `setup-php-composer` action).
+
+- Minor and patch updates are grouped per ecosystem; major updates arrive as individual PRs.
+- Titles follow Conventional Commits (`chore(deps)`, `chore(deps-dev)`, `ci(deps)`).
+- Nothing merges automatically. Each update PR runs the normal required checks (including Dependency
+  validation, Coverage, and Postgres tests) and still needs a human merge; dependency changes need
+  approval per `AGENTS.md`.
+- Two lockfile advisories blocked every PR within one week in September 2026 (npm `brace-expansion`,
+  Composer `league/commonmark`). Enable **Dependabot security updates** in the repository settings to get
+  a PR as soon as an advisory is published, instead of waiting for the weekly run.
+
 ## Local Git Hooks
 
 `npm install` runs `git config core.hooksPath .githooks` (the `prepare` script), which enables:
