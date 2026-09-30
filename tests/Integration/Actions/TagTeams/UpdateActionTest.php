@@ -9,6 +9,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\travel;
+
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->employed()->create([
         'name' => 'Original Team',
@@ -145,7 +147,7 @@ test('it allows updating to the same name', function () {
 test('it updates timestamps correctly', function () {
     $originalUpdatedAt = $this->tagTeam->updated_at;
 
-    sleep(1);
+    travel(1)->second();
 
     $updateData = new TagTeamData(
         name: 'Timestamp Updated Team',

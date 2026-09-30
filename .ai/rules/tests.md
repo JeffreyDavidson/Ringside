@@ -25,3 +25,6 @@ composer test:coverage runs non-parallel (parallel runs lose attribution and are
 
 ## Keep tests independent of random Faker values
 Do not let random Faker output choose a branch or supply a search term. Use fixed, distinctive values (for example known names for search tests) and force boolean branches with the forceFakerBoolean() helper.
+
+## Keep expected dates on the frozen clock
+Tests must not compute expected dates or times outside the frozen clock: freeze time in the test and never evaluate now()/today()/Carbon in dataset definitions, so a run crossing midnight UTC cannot flip results. Integration and Feature tests are frozen by default in tests/Pest.php; use travel() to move the clock instead of sleep().

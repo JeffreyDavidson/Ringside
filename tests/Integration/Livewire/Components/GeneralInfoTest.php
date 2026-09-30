@@ -26,7 +26,7 @@ describe('general info component', function (): void {
         string $event,
         Closure $transition,
         array $visibleBefore,
-        array $visibleAfter,
+        Closure $visibleAfter,
     ): void {
         // Arrange
         $model = $makeModel();
@@ -46,7 +46,7 @@ describe('general info component', function (): void {
             $component->assertDontSee($text);
         }
 
-        foreach ($visibleAfter as $text) {
+        foreach ($visibleAfter() as $text) {
             $component->assertSee($text);
         }
     })->with([
@@ -55,35 +55,35 @@ describe('general info component', function (): void {
             'wrestler-updated',
             fn (Wrestler $model) => app(EmployWrestlerAction::class)->handle($model, now()->subDays(10)),
             ['Unemployed', 'No Start Date Set'],
-            ['Employed', now()->subDays(10)->toDateString()],
+            fn (): array => ['Employed', now()->subDays(10)->toDateString()],
         ],
         'manager status and start date' => [
             fn (): Model => Manager::factory()->unemployed()->create(),
             'manager-updated',
             fn (Manager $model) => app(EmployManagerAction::class)->handle($model, now()->subDays(10)),
             ['Unemployed', 'No Start Date Set'],
-            ['Employed', now()->subDays(10)->toDateString()],
+            fn (): array => ['Employed', now()->subDays(10)->toDateString()],
         ],
         'referee status and start date' => [
             fn (): Model => Referee::factory()->unemployed()->create(),
             'referee-updated',
             fn (Referee $model) => app(EmployRefereeAction::class)->handle($model, now()->subDays(10)),
             ['Unemployed', 'No Start Date Set'],
-            ['Employed', now()->subDays(10)->toDateString()],
+            fn (): array => ['Employed', now()->subDays(10)->toDateString()],
         ],
         'tag team status and current partners' => [
             fn (): Model => TagTeam::factory()->employed()->create(),
             'tag-team-updated',
             fn (TagTeam $model) => app(ReleaseTagTeamAction::class)->handle($model),
             ['Employed'],
-            ['Released', 'No Current Wrestlers Assigned'],
+            fn (): array => ['Released', 'No Current Wrestlers Assigned'],
         ],
         'title status and date introduced' => [
             fn (): Model => Title::factory()->undebuted()->create(),
             'title-updated',
             fn (Title $model) => app(DebutAction::class)->handle($model, now()->subDays(10)),
             ['Not Yet Debuted', 'No Start Date Set'],
-            ['Active', now()->subDays(10)->toDateString()],
+            fn (): array => ['Active', now()->subDays(10)->toDateString()],
         ],
     ]);
 

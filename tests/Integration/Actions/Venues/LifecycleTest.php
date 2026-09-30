@@ -12,6 +12,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travel;
 
 /**
  * Integration tests for Venue CRUD actions with database operations.
@@ -438,8 +439,8 @@ describe('Venue Action Integration Tests', function () {
             $venue = Venue::factory()->create(['name' => 'Original Name']);
             $originalUpdatedAt = $venue->updated_at;
 
-            // Wait for next second to ensure timestamp difference
-            sleep(1);
+            // Advance the frozen clock to ensure timestamp difference
+            travel(1)->second();
 
             $venueData = new VenueData(
                 name: 'Timestamp Updated Arena',
