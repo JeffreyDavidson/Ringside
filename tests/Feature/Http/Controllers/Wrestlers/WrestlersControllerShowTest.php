@@ -10,6 +10,8 @@ use App\Livewire\Wrestlers\Tables\PreviousMatches;
 use App\Livewire\Wrestlers\Tables\PreviousStables;
 use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
 use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -48,6 +50,37 @@ describe('Wrestlers Controller', function () {
             ->assertSeeLivewire(PreviousManagers::class)
             ->assertSeeLivewire(PreviousStables::class);
     });
+
+    /**
+     * @see WrestlersController::show()
+     */
+    test('show labels injured and suspended wrestlers', function (bool $injured, bool $suspended) {
+        $wrestler = Wrestler::factory()->employed()->create();
+
+        if ($injured) {
+            Injury::factory()->for($wrestler, 'injurable')->create();
+        }
+
+        if ($suspended) {
+            Suspension::factory()->for($wrestler, 'suspendable')->create();
+        }
+
+        $response = actingAs(administrator())
+            ->get(route('wrestlers.show', $wrestler))
+            ->assertOk()
+            ->assertSee('Employed');
+
+        expect($response->getContent())
+            ->when($injured, fn ($html) => $html->toContain('data-test="availability-injured"'))
+            ->unless($injured, fn ($html) => $html->not->toContain('data-test="availability-injured"'))
+            ->when($suspended, fn ($html) => $html->toContain('data-test="availability-suspended"'))
+            ->unless($suspended, fn ($html) => $html->not->toContain('data-test="availability-suspended"'));
+    })->with([
+        'injured' => [true, false],
+        'suspended' => [false, true],
+        'injured and suspended' => [true, true],
+        'available' => [false, false],
+    ]);
 
     /**
      * @see WrestlersController::show()

@@ -40,6 +40,7 @@ class Main extends BaseTable
     {
         return Referee::query()
             ->withEmploymentStatusState()
+            ->withAvailabilityState()
             ->withFirstEmployment()
             ->oldest('last_name');
     }

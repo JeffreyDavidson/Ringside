@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Tables\Main;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Facades\Auth;
 
@@ -157,4 +159,22 @@ describe('managers table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels injured and suspended managers without changing their employment status', function (): void {
+        // Arrange
+        $injured = Manager::factory()->employed()->create();
+        Injury::factory()->for($injured, 'injurable')->create();
+        $suspended = Manager::factory()->employed()->create();
+        Suspension::factory()->for($suspended, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-injured"')
+            ->toContain('data-test="availability-suspended"');
+    });
 });

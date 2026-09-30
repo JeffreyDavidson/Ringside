@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Referees\Tables\Main;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Facades\Auth;
 
@@ -157,4 +159,22 @@ describe('referees table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels injured and suspended referees without changing their employment status', function (): void {
+        // Arrange
+        $injured = Referee::factory()->employed()->create();
+        Injury::factory()->for($injured, 'injurable')->create();
+        $suspended = Referee::factory()->employed()->create();
+        Suspension::factory()->for($suspended, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-injured"')
+            ->toContain('data-test="availability-suspended"');
+    });
 });

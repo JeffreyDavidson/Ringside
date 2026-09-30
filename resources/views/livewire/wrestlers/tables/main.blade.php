@@ -61,10 +61,21 @@
                                 <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 wrap-break-word">
                                     {{ $row->hometown }}
                                 </p>
-                                <div class="mt-2 sm:hidden"><x-tables.status :status="$row->status" /></div>
+                                <div class="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
+                                    <x-tables.status :status="$row->status" />
+                                    <x-availability-badges
+                                        :injured="$row->isInjured()"
+                                        :suspended="$row->isSuspended()"
+                                    />
+                                </div>
                             </td>
                             <td class="hidden px-4 py-4 align-top sm:table-cell">
                                 <x-tables.status :status="$row->status" />
+                                <x-availability-badges
+                                    class="mt-2"
+                                    :injured="$row->isInjured()"
+                                    :suspended="$row->isSuspended()"
+                                />
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                 <div>{{ $row->height }}</div>

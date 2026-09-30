@@ -1,5 +1,8 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$wrestler->status->label()" />
+    <x-card.general-info.stat label="Status">
+        {{ $wrestler->status->label() }}
+        <x-availability-badges class="ms-2" :injured="$wrestler->isInjured()" :suspended="$wrestler->isSuspended()" />
+    </x-card.general-info.stat>
     <x-card.general-info.stat label="Height" :value="$wrestler->height" />
     <x-card.general-info.stat label="Weight" :value="$wrestler->weight" />
     <x-card.general-info.stat label="Hometown" :value="$wrestler->hometown" />

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -166,5 +169,53 @@ describe('wrestlers table metadata', function (): void {
                 'label' => 'Unemployed',
                 'count' => 1,
             ]);
+    });
+
+    it('labels injured and suspended wrestlers without changing their employment status', function (bool $injured, bool $suspended): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->employed()->create(['name' => 'Availability Wrestler']);
+
+        if ($injured) {
+            Injury::factory()->for($wrestler, 'injurable')->create();
+        }
+
+        if ($suspended) {
+            Suspension::factory()->for($wrestler, 'suspendable')->create();
+        }
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->when($injured, fn ($html) => $html->toContain('data-test="availability-injured"'))
+            ->unless($injured, fn ($html) => $html->not->toContain('data-test="availability-injured"'))
+            ->when($suspended, fn ($html) => $html->toContain('data-test="availability-suspended"'))
+            ->unless($suspended, fn ($html) => $html->not->toContain('data-test="availability-suspended"'));
+    })->with([
+        'injured' => [true, false],
+        'suspended' => [false, true],
+        'injured and suspended' => [true, true],
+        'available' => [false, false],
+    ]);
+
+    it('does not query availability per wrestler row', function (): void {
+        // Arrange
+        Wrestler::factory()->employed()->count(3)->create()->each(function (Wrestler $wrestler): void {
+            Injury::factory()->for($wrestler, 'injurable')->create();
+            Suspension::factory()->for($wrestler, 'suspendable')->create();
+        });
+
+        $wrestlers = (new Main)->builder()->withAvailabilityState()->get();
+
+        // Act
+        DB::enableQueryLog();
+        $wrestlers->each(fn (Wrestler $wrestler): bool => $wrestler->isInjured() && $wrestler->isSuspended());
+        $queries = DB::getQueryLog();
+
+        // Assert
+        expect($queries)->toBeEmpty();
     });
 });

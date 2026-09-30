@@ -20,4 +20,16 @@ abstract class IndividualBuilder extends Builder
     use FiltersByEmploymentStatus;
     use FiltersByRetirementStatus;
     use LoadsFirstEmployment;
+
+    /**
+     * Project the current injury and suspension state so availability badges
+     * render without per-row queries.
+     */
+    public function withAvailabilityState(): static
+    {
+        return $this->withExists([
+            'currentInjury as availability_current_injury_exists',
+            'currentSuspension as availability_current_suspension_exists',
+        ]);
+    }
 }

@@ -40,6 +40,7 @@ class Main extends BaseTable
     {
         return Wrestler::query()
             ->withEmploymentStatusState()
+            ->withAvailabilityState()
             ->withFirstEmployment();
     }
 

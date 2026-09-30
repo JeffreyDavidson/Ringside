@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\TagTeams\Tables\Main;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Facades\Auth;
 
@@ -124,4 +125,20 @@ describe('tag teams table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels suspended tag teams without changing their employment status', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->employed()->create();
+        Suspension::factory()->for($tagTeam, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-suspended"')
+            ->not->toContain('data-test="availability-injured"');
+    });
 });

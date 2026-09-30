@@ -50,6 +50,10 @@ return [
     'previous_page' => 'Previous page',
     'rows_per_page' => 'Rows per page',
     'status' => 'Status',
+    'availability' => [
+        'injured' => 'Injured',
+        'suspended' => 'Suspended',
+    ],
     'table_scroll_hint' => 'Scroll horizontally to view all columns',
     'table_pages' => 'Table pages',
     'table_results_region' => 'Table results',
