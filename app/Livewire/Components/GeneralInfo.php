@@ -6,6 +6,7 @@ namespace App\Livewire\Components;
 
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -23,7 +24,7 @@ class GeneralInfo extends Component
      * Card definition per supported model: the event that refreshes it, the anonymous
      * Blade component that renders it, that component's model prop, and the relationships it reads.
      *
-     * @var array<class-string<Wrestler|Manager|Referee|TagTeam|Title>, array{event: string, component: string, prop: string, with: list<string>}>
+     * @var array<class-string<Wrestler|Manager|Referee|Stable|TagTeam|Title>, array{event: string, component: string, prop: string, with: list<string>}>
      */
     private const array CARDS = [
         Wrestler::class => [
@@ -44,6 +45,12 @@ class GeneralInfo extends Component
             'prop' => 'referee',
             'with' => ['firstEmployment'],
         ],
+        Stable::class => [
+            'event' => 'stable-updated',
+            'component' => 'stables.show.general-info',
+            'prop' => 'stable',
+            'with' => ['currentTagTeams', 'currentWrestlers', 'firstActivityPeriod'],
+        ],
         TagTeam::class => [
             'event' => 'tag-team-updated',
             'component' => 'tag-teams.show.general-info',
@@ -58,14 +65,14 @@ class GeneralInfo extends Component
         ],
     ];
 
-    /** @var class-string<Wrestler|Manager|Referee|TagTeam|Title> */
+    /** @var class-string<Wrestler|Manager|Referee|Stable|TagTeam|Title> */
     #[Locked]
     public string $modelClass;
 
     #[Locked]
     public int $modelId;
 
-    public function mount(Wrestler|Manager|Referee|TagTeam|Title $model): void
+    public function mount(Wrestler|Manager|Referee|Stable|TagTeam|Title $model): void
     {
         $this->modelClass = $model::class;
         $this->modelId = $model->id;

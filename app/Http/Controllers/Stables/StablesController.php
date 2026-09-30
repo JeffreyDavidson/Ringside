@@ -17,11 +17,7 @@ class StablesController
     public function show(Stable $stable): View
     {
         return view('stables.show', [
-            'stable' => $stable->load([
-                'currentTagTeams',
-                'currentWrestlers',
-                'firstActivityPeriod',
-            ]),
+            'stable' => $stable,
         ]);
     }
 }

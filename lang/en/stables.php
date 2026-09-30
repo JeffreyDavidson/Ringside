@@ -32,5 +32,9 @@ return [
 
     'actions' => [
         'deleted' => 'Stable successfully deleted.',
+        'disbanded' => 'Stable successfully disbanded.',
+        'established' => 'Stable successfully established.',
+        'retired' => 'Stable successfully retired.',
+        'unretired' => 'Stable successfully unretired.',
     ],
 ];
