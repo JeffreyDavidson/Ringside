@@ -42,6 +42,7 @@ class Main extends BaseTable
     {
         return Manager::query()
             ->withEmploymentStatusState()
+            ->withAvailabilityState()
             ->withFirstEmployment()
             ->oldest('last_name');
     }

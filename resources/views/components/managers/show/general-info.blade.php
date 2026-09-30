@@ -1,5 +1,8 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$manager->status->label()" />
+    <x-card.general-info.stat label="Status">
+        {{ $manager->status->label() }}
+        <x-availability-badges class="ms-2" :injured="$manager->isInjured()" :suspended="$manager->isSuspended()" />
+    </x-card.general-info.stat>
     @if ($manager->currentWrestlers->isNotEmpty())
         <x-card.general-info.link-list label="Current Wrestler(s)">
             @foreach ($manager->currentWrestlers as $wrestler)

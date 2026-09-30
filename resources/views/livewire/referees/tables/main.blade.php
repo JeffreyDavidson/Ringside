@@ -86,13 +86,24 @@
                                     href="{{ route('referees.show', $row) }}"
                                     class="text-ringside-ink focus-visible:outline-ringside-ink font-semibold wrap-break-word underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                 >{{ $row->full_name }}</a>
-                                <div class="mt-2 sm:hidden"><x-tables.status :status="$row->status" /></div>
+                                <div class="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
+                                    <x-tables.status :status="$row->status" />
+                                    <x-availability-badges
+                                        :injured="$row->isInjured()"
+                                        :suspended="$row->isSuspended()"
+                                    />
+                                </div>
                                 <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
                                     {{ $row->firstEmployment?->started_at?->format('M j, Y') ?? '—' }}
                                 </p>
                             </td>
                             <td class="hidden px-4 py-4 align-top sm:table-cell">
                                 <x-tables.status :status="$row->status" />
+                                <x-availability-badges
+                                    class="mt-2"
+                                    :injured="$row->isInjured()"
+                                    :suspended="$row->isSuspended()"
+                                />
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                 {{ $row->firstEmployment?->started_at?->format('M j, Y') ?? '—' }}

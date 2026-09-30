@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
+use App\Lifecycle\LifecycleStateReader;
 use App\Models\Contracts\Injurable;
 use App\Models\Lifecycle\Injury;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,19 @@ trait IsInjurable
         LifecyclePeriodBuilder::constrainToOpen($relation->getQuery());
 
         return $relation;
+    }
+
+    /**
+     * Determine whether a current injury exists, reusing the `withAvailabilityState`
+     * projection when the model was loaded with it.
+     */
+    public function isInjured(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'availability_current_injury_exists',
+            fn (): bool => $this->currentInjury()->exists(),
+        );
     }
 
     /** @return MorphMany<Injury, TModel> */

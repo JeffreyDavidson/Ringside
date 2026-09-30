@@ -40,6 +40,7 @@ class Main extends BaseTable
     {
         return TagTeam::query()
             ->withEmploymentStatusState()
+            ->withAvailabilityState()
             ->withFirstEmployment()
             ->with('currentWrestlers')
             ->oldest('name');
