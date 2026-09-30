@@ -8,6 +8,7 @@ use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\UpdateMatchAction;
 use App\Enums\BusinessRuleReason;
 use App\Enums\MatchType;
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
@@ -103,10 +104,11 @@ class FormModal extends BaseFormModal
                 $event = Event::query()->findOrFail($this->eventId);
                 $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
             }
-        } catch (InvalidMatchConfigurationException $exception) {
-            $field = $exception->reason() === BusinessRuleReason::CurrentChampionMissing
-                ? 'form.titles'
-                : 'form.configuration';
+        } catch (BaseBusinessException $exception) {
+            $field = $exception instanceof InvalidMatchConfigurationException
+                && $exception->reason() === BusinessRuleReason::CurrentChampionMissing
+                    ? 'form.titles'
+                    : 'form.configuration';
 
             $this->addError($field, $exception->getMessage());
 

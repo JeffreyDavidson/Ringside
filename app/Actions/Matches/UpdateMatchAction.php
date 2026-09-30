@@ -8,6 +8,7 @@ use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Models\Matches\EventMatch;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateMatchAction
@@ -17,6 +18,7 @@ class UpdateMatchAction
         private readonly AddTitlesToMatchAction $addTitlesToMatchAction,
         private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
         private readonly MatchConfigurationRequirements $requirements,
+        private readonly MatchAssignmentConflictService $conflictService,
     ) {}
 
     public function handle(EventMatch $match, EventMatchData $data): EventMatch
@@ -24,7 +26,7 @@ class UpdateMatchAction
         $this->requirements->ensureComplete($data);
 
         return DB::transaction(function () use ($match, $data): EventMatch {
-            $lockedMatch = $match->refreshForUpdate();
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($match);
 
             if ($lockedMatch->match_finish !== null) {
                 throw InvalidMatchConfigurationException::resultAlreadyRecorded();
@@ -50,6 +52,6 @@ class UpdateMatchAction
             }
 
             return $lockedMatch->refresh();
-        });
+        }, attempts: 3);
     }
 }

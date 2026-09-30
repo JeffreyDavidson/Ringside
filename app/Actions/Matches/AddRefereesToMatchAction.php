@@ -56,9 +56,9 @@ class AddRefereesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedReferees): void {
-            $lockedMatch = $eventMatch->refreshForUpdate();
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
             $this->handleWithinTransaction($lockedMatch, $requestedReferees);
-        });
+        }, attempts: 3);
     }
 
     /**

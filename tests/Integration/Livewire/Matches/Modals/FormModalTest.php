@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -306,6 +308,70 @@ describe('authorized match form interactions', function (): void {
             ->assertSet('isModalOpen', true);
         expect($modal->instance()->getErrorBag()->first('form.titles'))
             ->toBe('The current champion of [World Heavyweight Title] must compete in the title match.');
+        $action->verify();
+    });
+
+    it('shows a scheduling conflict found while saving on the configuration field', function (): void {
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')->throws(SchedulingConflictException::competitorAlreadyBooked('Wrestler', 'John Cena'));
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.configuration'])
+            ->assertHasNoErrors(['form.titles'])
+            ->assertNotDispatched('matchCreated')
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.referees', [$referee->id]);
+        expect($modal->instance()->getErrorBag()->first('form.configuration'))
+            ->toBe('Wrestler [John Cena] is already booked at this event time.')
+            ->and(EventMatch::query()->whereBelongsTo($this->event)->doesntExist())->toBeTrue();
+        $action->verify();
+    });
+
+    it('shows an unavailable entity found while saving on the configuration field', function (): void {
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment('wrestlers'));
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.configuration'])
+            ->assertNotDispatched('matchCreated')
+            ->assertSet('isModalOpen', true);
         $action->verify();
     });
 

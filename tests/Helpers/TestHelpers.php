@@ -11,7 +11,10 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Test helper functions for common testing scenarios.
@@ -410,4 +413,46 @@ function wrestlingTimePeriod(string $type = 'employment'): array
         'started_at' => $start,
         'ended_at' => $end,
     ];
+}
+
+/**
+ * Record every SQL statement issued while the callback runs, flagging row-locking statements.
+ *
+ * SQLite discards row-lock clauses, so its grammar is swapped for one that renders the lock as a
+ * visible comment. PostgreSQL already emits the real clause. The original grammar is always restored.
+ *
+ * @return array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>
+ */
+function recordStatements(Closure $callback): array
+{
+    $connection = DB::connection();
+    $originalGrammar = $connection->getQueryGrammar();
+
+    if ($connection->getDriverName() === 'sqlite') {
+        $connection->setQueryGrammar(new class($connection) extends SQLiteGrammar
+        {
+            protected function compileLock(QueryBuilder $query, $value): string
+            {
+                return $value ? ' /* for update */' : ' /* for share */';
+            }
+        });
+    }
+
+    $statements = [];
+    DB::listen(function ($query) use (&$statements): void {
+        $sql = mb_strtolower($query->sql);
+        $statements[] = [
+            'sql' => $sql,
+            'bindings' => $query->bindings,
+            'locked' => str_contains($sql, 'for update'),
+        ];
+    });
+
+    try {
+        $callback();
+    } finally {
+        $connection->setQueryGrammar($originalGrammar);
+    }
+
+    return $statements;
 }

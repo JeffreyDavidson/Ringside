@@ -31,11 +31,25 @@ The match system handles complex wrestling match scenarios with flexible competi
 
 Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
 
-Match assignment actions lock the match and every event that shares its scheduling window before reloading and locking selected wrestlers, tag teams, referees, or titles. Availability and conflict checks use those locked rows, so stale caller models cannot bypass current booking rules and concurrent assignments serialize across the same event window.
+Match assignment actions lock the complete scheduling event set, then the match, and only then reload and lock selected wrestlers, tag teams, referees, or titles. Availability and conflict checks use those locked rows, so stale caller models cannot bypass current booking rules and concurrent assignments serialize across the same event window.
+
+### Canonical lock order for scheduling
+
+Every scheduling operation acquires row locks in this order, and `MatchAssignmentConflictService` owns the helpers (`lockEventSet()`, `lockMatchWithEventSet()`):
+
+1. The complete scheduling event set in one statement ordered by ascending id: the action's own event plus every other event on the same exact date and time (an unscheduled event's set is itself alone, because unscheduled events conflict only within their own card).
+2. The match row (inserted last for `AddMatchForEventAction`, so nobody else can lock it first).
+3. Competitors and other resources in ascending id: referees, wrestlers, tag teams, then titles and their current reign.
+
+Locking the own event first and the rest of its date afterwards let two bookings on different events at the same time each hold one event and wait for the other, which PostgreSQL resolves as a deadlock (SQLSTATE 40P01) and the user saw as a server error even without a real conflict. Taking the whole set in one ordered statement makes the second booking queue behind the first, and it then sees the first booking's committed rows and raises a normal `SchedulingConflictException` when there is a genuine clash.
+
+Actions that start from an existing match (`UpdateMatchAction`, `RecordResultAction`, and the standalone `Add*ToMatchAction::handle` entry points) cannot lock the match first, because another booking holds the event set and then wants that match. They read the match's event without a lock, lock that event's set, then lock the match and confirm it still belongs to that event (repeating once if it moved). The event date is verified the same way, so an event rescheduled between the read and the lock has its new set locked instead. The `handleWithinTransaction` variants run inside the caller's transaction and only re-issue the same ordered set statement.
+
+`AddMatchForEventAction`, `UpdateMatchAction`, and the standalone assignment actions run their outermost transaction with `attempts: 3`, matching `Events\UpdateAction`, as a backstop: Laravel re-runs a transaction that lost a deadlock only when it is the outermost one. Their closures only write to the database, so a retry is safe. `Events\UpdateAction` still locks its own event before the events at the target date; that path is independent of the match order above.
 
 Rescheduling an event reuses the same conflict boundary against every existing assignment on its card. The event update locks the source event and target scheduling window, rejects any wrestler, tag team, referee, or title collision, and changes the event date only when the complete card remains valid.
 
-Recorded outcomes are checked by `MatchOutcomeRequirements`, which explicitly composes focused winning-side, entry-order, and elimination-history requirements. Each requirement owns one cohesive rule family and raises `InvalidMatchOutcomeException`; the coordinator preserves their deterministic validation order without using a dynamic specification registry or mutation pipeline. `RecordResultAction` locks the match, its event date, the selected winning side, and the complete competitor collection before validation. Outcome requirements and championship reconciliation consume that shared snapshot rather than querying mutable match state independently.
+Recorded outcomes are checked by `MatchOutcomeRequirements`, which explicitly composes focused winning-side, entry-order, and elimination-history requirements. Each requirement owns one cohesive rule family and raises `InvalidMatchOutcomeException`; the coordinator preserves their deterministic validation order without using a dynamic specification registry or mutation pipeline. `RecordResultAction` locks the event's scheduling set, the match, its event date, the selected winning side, and the complete competitor collection before validation. Outcome requirements and championship reconciliation consume that shared snapshot rather than querying mutable match state independently.
 
 ## Event Card Scheduling
 
@@ -60,9 +74,9 @@ Competitor entries and represented roster members are separate concepts. Singles
 
 `MatchStipulation` is an optional match configuration selected from active definitions when a match is created or edited. The match retains that relationship as historical configuration even if the definition is later made inactive. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
 
-`AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.
+`AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event's scheduling set, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.
 
-`UpdateMatchAction` receives the same typed data, locks the match, and replaces its configuration and assignments in one transaction. Any unavailable replacement rolls the entire edit back to the previous configuration. Once a result has been recorded, the match configuration is immutable so its sides and competitors continue to describe that result.
+`UpdateMatchAction` receives the same typed data, locks the event set and then the match, and replaces its configuration and assignments in one transaction. Any unavailable replacement rolls the entire edit back to the previous configuration. Once a result has been recorded, the match configuration is immutable so its sides and competitors continue to describe that result.
 
 ## Winner/Loser System
 
