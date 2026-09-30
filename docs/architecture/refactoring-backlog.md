@@ -251,17 +251,6 @@ unreachable lifecycle methods. Open follow-ups verified against the code:
 - Matches can be deleted from the event matches table, but `DeleteAction` does
   not renumber; deleted numbers leave gaps by design.
 
-### Documentation examples
-
-**Priority:** Low  
-**Status:** Audit candidate.
-
-`docs/examples/livewire` and parts of `docs/guides/livewire` show illustrative
-component code (for example `App\Livewire\Modals\BaseFormModal` and
-`getModalPath()`) that predates the current `App\Livewire\Base` classes. Treat
-`docs/architecture/livewire*` and the code as authoritative and refresh or trim
-those guides when they are next touched.
-
 ### Branch protection observation
 
 **Priority:** Low  

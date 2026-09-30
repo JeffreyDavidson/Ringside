@@ -2,1325 +2,422 @@
 
 ## Overview
 
-This document provides real-world examples of Livewire components from the Ringside codebase, demonstrating best practices and implementation patterns for forms, modals, tables, and actions components.
+These examples are trimmed from real files in `app/Livewire`, `resources/views/livewire`, and
+`tests/Integration/Livewire`. The Wrestlers domain is the reference implementation. The structural
+rules behind them live in [Livewire Standards](../../architecture/livewire-standards.md) and
+[`docs/architecture/livewire/`](../../architecture/livewire/component-architecture.md); if an
+example here drifts from the code, the code wins.
 
-## Form Component Examples
+## Form Example
 
-### Event Form Component
+Source: `app/Livewire/Wrestlers/Forms/CreateEditForm.php`.
 
-Complete implementation of an event form with validation and relationships:
+A form extends `App\Livewire\Base\BaseForm`, declares typed public properties, defines `rules()`,
+hydrates derived values in the `loadModelData()` hook, and converts input to a typed data object with
+`toData()`. It never persists anything.
 
 ```php
-// app/Livewire/Events/Forms/CreateEditForm.php
-<?php
-
-namespace App\Livewire\Events\Forms;
-
-use App\Livewire\Forms\BaseForm;
-use App\Models\Events\Event;
-use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Model;
-
+/** @extends BaseForm<Wrestler> */
 class CreateEditForm extends BaseForm
 {
     public string $name = '';
-    public string $date = '';
-    public string $time = '';
-    public int $venue_id = 0;
-    public string $preview = '';
-    public bool $published = false;
-    
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-    
-    protected function getRules(): array
-    {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
-            'venue_id' => 'required|exists:venues,id',
-            'preview' => 'nullable|string|max:1000',
-            'published' => 'boolean',
-        ];
-        
-        // Add unique validation for create, exclude current for edit
-        if ($this->model) {
-            $rules['name'] .= '|unique:events,name,' . $this->model->id;
-        } else {
-            $rules['name'] .= '|unique:events,name';
-        }
-        
-        return $rules;
-    }
-    
-    protected function getModelData(): array
-    {
-        $datetime = $this->date . ' ' . $this->time;
-        
-        return [
-            'name' => $this->name,
-            'date' => $datetime,
-            'venue_id' => $this->venue_id,
-            'preview' => $this->preview,
-            'published' => $this->published,
-        ];
-    }
-    
-    protected function afterSave(Model $model): void
-    {
-        $eventName = $this->model ? 'eventUpdated' : 'eventCreated';
-        $this->dispatch($eventName, $model->id);
-        
-        // Send notification if published
-        if ($model->published) {
-            $this->dispatch('eventPublished', $model->id);
-        }
-    }
-    
-    public function mount(?Event $event = null): void
-    {
-        if ($event) {
-            $this->setModel($event);
-            $this->name = $event->name;
-            $this->date = $event->date->format('Y-m-d');
-            $this->time = $event->date->format('H:i');
-            $this->venue_id = $event->venue_id;
-            $this->preview = $event->preview ?? '';
-            $this->published = $event->published;
-        }
-    }
-    
-    public function getVenuesProperty()
-    {
-        return Venue::orderBy('name')->get();
-    }
-    
-    public function updatedVenueId($value)
-    {
-        // Clear any validation errors when venue is selected
-        $this->resetErrorBag('venue_id');
-    }
-    
-    public function generateDummyData(): void
-    {
-        $this->name = 'Demo Event ' . now()->format('Y-m-d H:i:s');
-        $this->date = now()->addDays(30)->format('Y-m-d');
-        $this->time = '19:00';
-        $this->venue_id = $this->venues->random()->id;
-        $this->preview = 'This is a demo event created for testing purposes.';
-        $this->published = false;
-    }
-}
-```
 
-### Wrestler Form Component
-
-Example with image uploads and complex validation:
-
-```php
-// app/Livewire/Wrestlers/Forms/CreateEditForm.php
-<?php
-
-namespace App\Livewire\Wrestlers\Forms;
-
-use App\Livewire\Forms\BaseForm;
-use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Model;
-use Livewire\WithFileUploads;
-
-class CreateEditForm extends BaseForm
-{
-    use WithFileUploads;
-    
-    public string $name = '';
-    public string $slug = '';
-    public int $height = 0;
-    public int $weight = 0;
     public string $hometown = '';
-    public string $signature_move = '';
-    public $photo;
-    public bool $active = true;
-    
-    // Employment fields are converted to typed Action data by the form.
-    public ?string $employed_from = null;
-    public ?string $employed_until = null;
-    
-    protected function getModelClass(): string
+
+    public int $height_feet = 0;
+
+    public int $height_inches = 0;
+
+    public int $weight = 0;
+
+    public ?string $signature_move = '';
+
+    public Carbon|string|null $employment_date = '';
+
+    protected function loadModelData(Model $model): void
     {
-        return Wrestler::class;
+        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
+
+        $height = $model->height;
+        $this->height_feet = (int) floor($height->toInches() / 12);
+        $this->height_inches = $height->toInches() % 12;
     }
-    
-    protected function getRules(): array
+
+    public function toData(): WrestlerData
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
-            'height' => 'required|integer|min:1',
-            'weight' => 'required|integer|min:1',
-            'hometown' => 'required|string|max:255',
-            'signature_move' => 'required|string|max:255',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'active' => 'boolean',
+        return new WrestlerData(
+            name: $this->name,
+            height: new Height($this->height_feet, $this->height_inches),
+            weight: $this->weight,
+            hometown: $this->hometown,
+            signature_move: $this->signature_move ?: null,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
+    }
+
+    public function wrestler(): Wrestler
+    {
+        return Wrestler::query()->findOrFail($this->modelId);
+    }
+
+    protected function rules(): array
+    {
+        $wrestler = $this->isEditing() ? $this->wrestler() : null;
+
+        return [
+            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->modelId)],
+            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($wrestler)],
+            // ...
         ];
-        
-        // Add employment validation from trait
-        $rules = array_merge($rules, $this->getEmploymentRules());
-        
-        // Add unique validation
-        $uniqueRule = $this->model ? 
-            'unique:wrestlers,slug,' . $this->model->id : 
-            'unique:wrestlers,slug';
-        $rules['slug'] .= '|' . $uniqueRule;
-        
-        return $rules;
-    }
-    
-    protected function getModelData(): array
-    {
-        $data = [
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'height' => $this->height,
-            'weight' => $this->weight,
-            'hometown' => $this->hometown,
-            'signature_move' => $this->signature_move,
-            'active' => $this->active,
-        ];
-        
-        // Add employment data from trait
-        $data = array_merge($data, $this->getEmploymentData());
-        
-        // Handle photo upload
-        if ($this->photo) {
-            $data['photo'] = $this->photo->store('wrestlers', 'public');
-        }
-        
-        return $data;
-    }
-    
-    protected function afterSave(Model $model): void
-    {
-        $eventName = $this->model ? 'wrestlerUpdated' : 'wrestlerCreated';
-        $this->dispatch($eventName, $model->id);
-        
-        // Clear photo after successful save
-        $this->photo = null;
-    }
-    
-    public function mount(?Wrestler $wrestler = null): void
-    {
-        if ($wrestler) {
-            $this->setModel($wrestler);
-            $this->name = $wrestler->name;
-            $this->slug = $wrestler->slug;
-            $this->height = $wrestler->height;
-            $this->weight = $wrestler->weight;
-            $this->hometown = $wrestler->hometown;
-            $this->signature_move = $wrestler->signature_move;
-            $this->active = $wrestler->active;
-            
-            // Load employment data from trait
-            $this->loadEmploymentData($wrestler);
-        }
-    }
-    
-    public function updatedName($value)
-    {
-        // Auto-generate slug from name
-        $this->slug = str($value)->slug();
-    }
-    
-    public function generateDummyData(): void
-    {
-        $names = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
-        $hometowns = ['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX'];
-        $moves = ['Suplex', 'DDT', 'Powerbomb', 'Submission Hold'];
-        
-        $this->name = fake()->randomElement($names);
-        $this->slug = str($this->name)->slug();
-        $this->height = fake()->numberBetween(165, 210);
-        $this->weight = fake()->numberBetween(70, 150);
-        $this->hometown = fake()->randomElement($hometowns);
-        $this->signature_move = fake()->randomElement($moves);
-        $this->active = true;
-        
-        // Generate dummy employment data
-        $this->generateDummyEmploymentData();
     }
 }
 ```
 
-## Modal Component Examples
+`BaseForm::setModel()` locks `modelId` and fills the direct attributes before calling
+`loadModelData()`. The form resolves the current model from that locked identifier (`wrestler()`)
+instead of keeping a model instance in component state.
 
-### Event Form Modal
+## Modal Example
 
-Simple modal integrating with form component:
+Source: `app/Livewire/Wrestlers/Modals/FormModal.php`.
+
+A domain modal extends `App\Livewire\Base\BaseFormModal`, receives its create and update Actions in
+`boot()`, and implements `getModelClass()`, `createForm()`, `updateForm()`, and `render()`.
+`BaseFormModal` handles authorization, validation, `refreshDatatable`, closing, and `form-submitted`.
 
 ```php
-// app/Livewire/Events/Modals/FormModal.php
-<?php
-
-namespace App\Livewire\Events\Modals;
-
-use App\Livewire\Events\Forms\CreateEditForm;
-use App\Livewire\Modals\BaseFormModal;
-use App\Models\Events\Event;
-
+/**
+ * @extends BaseFormModal<CreateEditForm, Wrestler>
+ */
 class FormModal extends BaseFormModal
 {
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
-    }
-    
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-    
-    protected function getModalPath(): string
-    {
-        return 'livewire.events.modals.form-modal';
-    }
-    
-    protected function getModalTitle(): string
-    {
-        return $this->model ? 'Edit Event' : 'Create Event';
-    }
-    
-    protected function afterSave(): void
-    {
-        $this->dispatch('refresh-table');
-        $this->dispatch('show-notification', 'Event saved successfully!');
-    }
-}
-```
+    public CreateEditForm $form;
 
-### Wrestler Form Modal
+    private CreateAction $createAction;
 
-Modal with additional validation and file upload handling:
+    private UpdateAction $updateAction;
 
-```php
-// app/Livewire/Wrestlers/Modals/FormModal.php
-<?php
-
-namespace App\Livewire\Wrestlers\Modals;
-
-use App\Livewire\Modals\BaseFormModal;
-use App\Livewire\Wrestlers\Forms\CreateEditForm;
-use App\Models\Roster\Wrestlers\Wrestler;
-
-class FormModal extends BaseFormModal
-{
-    protected function getFormClass(): string
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
     {
-        return CreateEditForm::class;
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
     }
-    
+
     protected function getModelClass(): string
     {
         return Wrestler::class;
     }
-    
-    protected function getModalPath(): string
+
+    protected function updateForm(): void
     {
-        return 'livewire.wrestlers.modals.form-modal';
+        $this->updateAction->handle($this->form->wrestler(), $this->form->toData());
     }
-    
-    protected function getModalTitle(): string
+
+    protected function createForm(): void
     {
-        return $this->model ? 'Edit Wrestler' : 'Create Wrestler';
+        $this->createAction->handle($this->form->toData());
     }
-    
-    protected function beforeSave(): bool
+
+    public function render(): View
     {
-        // Additional validation before save
-        if ($this->form->photo && $this->form->photo->getSize() > 2048000) {
-            $this->form->addError('photo', 'Photo must be less than 2MB');
-            return false;
-        }
-        
-        return parent::beforeSave();
-    }
-    
-    protected function afterSave(): void
-    {
-        $this->dispatch('refresh-table');
-        
-        $message = $this->model ? 
-            'Wrestler updated successfully!' : 
-            'Wrestler created successfully!';
-            
-        $this->dispatch('show-notification', $message);
-        
-        // Refresh wrestler roster if active
-        if ($this->form->active) {
-            $this->dispatch('refresh-roster');
-        }
+        return view('livewire.wrestlers.modals.form-modal');
     }
 }
 ```
 
-## Table Component Examples
+The real class also implements `populateDummyData()` for development-only form filling.
 
-### Events Table
+The modal title comes from `BaseModal::getModalTitle()` (`core.modal.add` / `core.modal.edit`), so
+the modal does not define one. Managers and Referees set `$modelTitleField = 'full_name'`.
 
-Comprehensive table with filtering, sorting, and actions:
+### Translating a domain failure
+
+Source: `app/Livewire/Events/Modals/FormModal.php`.
+
+A modal that must show a business rule failure on a field overrides `storeForm()`, catches only
+`BaseBusinessException`, and returns `false` so the modal stays open.
 
 ```php
-// app/Livewire/Events/Tables/Main.php
-<?php
-
-namespace App\Livewire\Events\Tables;
-
-use App\Livewire\Tables\BaseTable;
-use App\Models\Events\Event;
-use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Builder;
-
-class Main extends BaseTable
+#[\Override]
+protected function storeForm(): bool
 {
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-    
-    protected function getColumns(): array
-    {
-        return [
-            'name' => 'Event Name',
-            'date' => 'Date',
-            'venue.name' => 'Venue',
-            'status' => 'Status',
-            'published' => 'Published',
-        ];
-    }
-    
-    protected function getFilters(): array
-    {
-        return [
-            'status' => [
-                'label' => 'Status',
-                'options' => [
-                    'scheduled' => 'Scheduled',
-                    'completed' => 'Completed',
-                    'cancelled' => 'Cancelled',
-                ],
-            ],
-            'venue_id' => [
-                'label' => 'Venue',
-                'options' => Venue::orderBy('name')->pluck('name', 'id')->toArray(),
-            ],
-            'published' => [
-                'label' => 'Published',
-                'options' => [
-                    '1' => 'Published',
-                    '0' => 'Draft',
-                ],
-            ],
-        ];
-    }
-    
-    protected function getQuery(): Builder
-    {
-        return Event::with('venue')
-            ->when($this->filters['status'] ?? null, function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->when($this->filters['venue_id'] ?? null, function ($query, $venueId) {
-                $query->where('venue_id', $venueId);
-            })
-            ->when(isset($this->filters['published']), function ($query) {
-                $query->where('published', (bool) $this->filters['published']);
-            });
-    }
-    
-    protected function applySearch(Builder $query, string $search): Builder
-    {
-        return $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhereHas('venue', function ($venueQuery) use ($search) {
-                  $venueQuery->where('name', 'like', "%{$search}%");
-              });
-        });
-    }
-    
-    protected function getDefaultSort(): array
-    {
-        return ['date', 'desc'];
-    }
-    
-    public function getDateColumnAttribute($record): string
-    {
-        return $record->date->format('M j, Y g:i A');
-    }
-    
-    public function getStatusColumnAttribute($record): string
-    {
-        $statusClasses = [
-            'scheduled' => 'bg-blue-100 text-blue-800',
-            'completed' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-        ];
-        
-        $class = $statusClasses[$record->status] ?? 'bg-gray-100 text-gray-800';
-        
-        return "<span class=\"px-2 py-1 text-xs font-medium rounded-full {$class}\">" . 
-               ucfirst($record->status) . 
-               "</span>";
-    }
-    
-    public function getPublishedColumnAttribute($record): string
-    {
-        return $record->published ? 
-            '<span class="text-green-600">✓</span>' : 
-            '<span class="text-gray-400">—</span>';
-    }
-    
-    public function togglePublished($eventId): void
-    {
-        $event = Event::findOrFail($eventId);
-        $event->update(['published' => !$event->published]);
-        
-        $status = $event->published ? 'published' : 'unpublished';
-        $this->dispatch('show-notification', "Event {$status} successfully!");
-    }
-    
-    public function bulkDelete(array $ids): void
-    {
-        Event::whereIn('id', $ids)->delete();
-        $this->dispatch('show-notification', count($ids) . ' events deleted successfully!');
-        $this->selectedRecords = [];
-    }
-    
-    public function export(string $format = 'csv'): void
-    {
-        $events = $this->getQuery()->get();
-        
-        $this->dispatch('download-file', [
-            'filename' => 'events.' . $format,
-            'data' => $events->toArray(),
-            'format' => $format,
-        ]);
+    try {
+        return parent::storeForm();
+    } catch (BaseBusinessException $exception) {
+        $this->addError('form.venue_id', $exception->getMessage());
+
+        return false;
     }
 }
 ```
 
-### Wrestlers Table
+## Table Example
 
-Table with image display and complex status management:
+Source: `app/Livewire/Wrestlers/Tables/Main.php`.
+
+Index tables extend `App\Livewire\Base\Tables\BaseTable` (which extends
+`App\Livewire\Table\DataTableComponent`). They supply a `builder()`, `columns()`, and `filters()`
+built from `App\Livewire\Table\Column`, `App\Livewire\Table\Filter`, and the filter classes in
+`App\Livewire\Table\Filters`. `configure()` authorizes access.
 
 ```php
-// app/Livewire/Wrestlers/Tables/Main.php
-<?php
-
-namespace App\Livewire\Wrestlers\Tables;
-
-use App\Livewire\Tables\BaseTable;
-use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
-
+/** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
-    protected function getModelClass(): string
-    {
-        return Wrestler::class;
-    }
-    
-    protected function getColumns(): array
-    {
-        return [
-            'photo' => 'Photo',
-            'name' => 'Name',
-            'height' => 'Height',
-            'weight' => 'Weight',
-            'hometown' => 'Hometown',
-            'signature_move' => 'Signature Move',
-            'employment_status' => 'Status',
-            'active' => 'Active',
-        ];
-    }
-    
-    protected function getFilters(): array
-    {
-        return [
-            'active' => [
-                'label' => 'Active Status',
-                'options' => [
-                    '1' => 'Active',
-                    '0' => 'Inactive',
-                ],
-            ],
-            'employment_status' => [
-                'label' => 'Employment Status',
-                'options' => [
-                    'employed' => 'Employed',
-                    'unemployed' => 'Unemployed',
-                    'suspended' => 'Suspended',
-                    'injured' => 'Injured',
-                ],
-            ],
-        ];
-    }
-    
-    protected function getQuery(): Builder
+    use ExecutesBusinessActions;
+
+    #[\Override]
+    protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $databaseTableName = 'wrestlers';
+
+    #[\Override]
+    protected string $routeBasePath = 'wrestlers';
+
+    #[\Override]
+    protected string $resourceName = 'wrestlers';
+
+    /** @return WrestlerBuilder<Wrestler> */
+    public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->when(isset($this->filters['active']), function ($query) {
-                $query->where('active', (bool) $this->filters['active']);
-            })
-            ->when($this->filters['employment_status'] ?? null, function ($query, $status) {
-                $query->whereEmploymentStatus($status);
-            });
+            ->withEmploymentStatusState()
+            ->withFirstEmployment();
     }
-    
-    protected function applySearch(Builder $query, string $search): Builder
+
+    protected function configure(): void
     {
-        return $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('hometown', 'like', "%{$search}%")
-              ->orWhere('signature_move', 'like', "%{$search}%");
-        });
+        Gate::authorize('viewAny', Wrestler::class);
     }
-    
-    public function getPhotoColumnAttribute($record): string
+
+    public function columns(): array
     {
-        if ($record->photo) {
-            return "<img src=\"{$record->photo_url}\" alt=\"{$record->name}\" class=\"w-12 h-12 rounded-full object-cover\">";
-        }
-        
-        return '<div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">No Photo</div>';
-    }
-    
-    public function getHeightColumnAttribute($record): string
-    {
-        return $record->height . ' cm';
-    }
-    
-    public function getWeightColumnAttribute($record): string
-    {
-        return $record->weight . ' kg';
-    }
-    
-    public function getEmploymentStatusColumnAttribute($record): string
-    {
-        $statusClasses = [
-            'employed' => 'bg-green-100 text-green-800',
-            'unemployed' => 'bg-gray-100 text-gray-800',
-            'suspended' => 'bg-yellow-100 text-yellow-800',
-            'injured' => 'bg-red-100 text-red-800',
+        return [
+            Column::make(__('wrestlers.name'), 'name')
+                ->searchable(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn (Wrestler $row) => $row->status->label())
+                ->excludeFromColumnSelect(),
+            // ...
         ];
-        
-        $status = $record->employment_status;
-        $class = $statusClasses[$status] ?? 'bg-gray-100 text-gray-800';
-        
-        return "<span class=\"px-2 py-1 text-xs font-medium rounded-full {$class}\">" . 
-               ucfirst($status) . 
-               "</span>";
     }
-    
-    public function getActiveColumnAttribute($record): string
+
+    #[\Override]
+    public function filters(): array
     {
-        return $record->active ? 
-            '<span class="text-green-600">✓</span>' : 
-            '<span class="text-red-600">✗</span>';
+        return [
+            SelectFilter::make(__('core.status'))
+                ->options(EmploymentStatus::filterOptions())
+                ->filter(function (WrestlerBuilder $builder, string $value): void {
+                    $status = EmploymentStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereEmploymentStatus($status);
+                    }
+                }),
+        ];
     }
-    
-    public function toggleActive($wrestlerId): void
+
+    public function delete(Wrestler $wrestler, DeleteAction $deleteAction): void
     {
-        $wrestler = Wrestler::findOrFail($wrestlerId);
-        $wrestler->update(['active' => !$wrestler->active]);
-        
-        $status = $wrestler->active ? 'activated' : 'deactivated';
-        $this->dispatch('show-notification', "Wrestler {$status} successfully!");
+        Gate::authorize('delete', $wrestler);
+
+        $this->executeBusinessAction(function () use ($deleteAction, $wrestler): void {
+            $deleteAction->handle($wrestler);
+        }, __('wrestlers.actions.deleted'));
     }
 }
 ```
 
-## Actions Component Examples
+Relationship history tables on detail pages (for example
+`app/Livewire/Wrestlers/Tables/PreviousManagers.php`) extend a `BasePrevious*Table`, keep the
+parent id in a `#[Locked]` public property, and authorize `view` on the parent in `configure()`.
 
-### Event Actions
+## Actions Component Example
 
-Actions component with conditional visibility and confirmation:
+Source: `app/Livewire/Wrestlers/Components/Actions.php`.
 
-```php
-// app/Livewire/Events/Components/Actions.php
-<?php
-
-namespace App\Livewire\Events\Components;
-
-use App\Models\Events\Event;
-use Livewire\Component;
-
-class Actions extends Component
-{
-    public Event $event;
-    public bool $showConfirmation = false;
-    
-    public function mount(Event $event): void
-    {
-        $this->event = $event;
-    }
-    
-    public function render()
-    {
-        return view('livewire.events.components.actions-component');
-    }
-    
-    public function edit(): void
-    {
-        $this->dispatch('open-edit-modal', $this->event->id);
-    }
-    
-    public function duplicate(): void
-    {
-        $newEvent = $this->event->replicate();
-        $newEvent->name = 'Copy of ' . $this->event->name;
-        $newEvent->published = false;
-        $newEvent->save();
-        
-        $this->dispatch('event-duplicated', $newEvent->id);
-        $this->dispatch('refresh-table');
-        $this->dispatch('show-notification', 'Event duplicated successfully!');
-    }
-    
-    public function confirmDelete(): void
-    {
-        if ($this->event->isPast()) {
-            $this->dispatch('show-error', 'Cannot delete past events');
-            return;
-        }
-        
-        $this->showConfirmation = true;
-    }
-    
-    public function cancelDelete(): void
-    {
-        $this->showConfirmation = false;
-    }
-    
-    public function delete(): void
-    {
-        $this->event->delete();
-        
-        $this->dispatch('event-deleted', $this->event->id);
-        $this->dispatch('refresh-table');
-        $this->dispatch('show-notification', 'Event deleted successfully!');
-        
-        $this->showConfirmation = false;
-    }
-    
-    public function togglePublished(): void
-    {
-        if (!$this->event->canBePublished()) {
-            $this->dispatch('show-error', 'Event cannot be published without venue and matches');
-            return;
-        }
-        
-        $this->event->update(['published' => !$this->event->published]);
-        
-        $status = $this->event->published ? 'published' : 'unpublished';
-        $this->dispatch('show-notification', "Event {$status} successfully!");
-        $this->dispatch('refresh-table');
-    }
-    
-    public function cancel(): void
-    {
-        if ($this->event->status === 'completed') {
-            $this->dispatch('show-error', 'Cannot cancel completed events');
-            return;
-        }
-        
-        $this->event->update(['status' => 'cancelled']);
-        
-        $this->dispatch('event-cancelled', $this->event->id);
-        $this->dispatch('refresh-table');
-        $this->dispatch('show-notification', 'Event cancelled successfully!');
-    }
-    
-    public function reschedule(): void
-    {
-        $this->dispatch('open-reschedule-modal', $this->event->id);
-    }
-    
-    public function getCanEditProperty(): bool
-    {
-        return auth()->user()->can('update', $this->event);
-    }
-    
-    public function getCanDeleteProperty(): bool
-    {
-        return auth()->user()->can('delete', $this->event) && !$this->event->isPast();
-    }
-    
-    public function getCanPublishProperty(): bool
-    {
-        return auth()->user()->can('publish', $this->event);
-    }
-    
-    public function getCanCancelProperty(): bool
-    {
-        return auth()->user()->can('cancel', $this->event) && 
-               $this->event->status !== 'completed';
-    }
-}
-```
-
-### Wrestler Actions
-
-Actions with employment status management:
+Detail pages render `{Domain}\Components\Actions` for lifecycle transitions. Each transition resolves
+its Action through method injection and runs it through `executeAuthorizedRosterAction()` from
+`ExecutesRosterActions`, which authorizes with `Gate::authorize()`, translates a
+`BaseBusinessException` into a failure message, and dispatches `wrestler-updated` plus a
+`flash-message`. `canPerform()` decides which buttons render.
 
 ```php
-// app/Livewire/Wrestlers/Components/Actions.php
-<?php
-
-namespace App\Livewire\Wrestlers\Components;
-
-use App\Models\Roster\Wrestlers\Wrestler;
-use Livewire\Component;
-
 class Actions extends Component
 {
+    use ChecksIndividualLifecycleEligibility;
+    use ExecutesRosterActions;
+
     public Wrestler $wrestler;
-    public bool $showConfirmation = false;
-    public string $confirmationAction = '';
-    
+
     public function mount(Wrestler $wrestler): void
     {
         $this->wrestler = $wrestler;
     }
-    
-    public function render()
+
+    public function employ(EmployAction $employAction): void
     {
-        return view('livewire.wrestlers.components.actions-component');
+        $this->executeAuthorizedRosterAction(
+            RosterLifecycleAction::Employ,
+            RosterEntityType::Wrestler,
+            $this->wrestler,
+            fn () => $employAction->handle($this->wrestler),
+        );
     }
-    
-    public function edit(): void
+
+    public function canPerform(RosterLifecycleAction $action): bool
     {
-        $this->dispatch('open-edit-modal', $this->wrestler->id);
-    }
-    
-    public function viewProfile(): void
-    {
-        $this->dispatch('open-profile-modal', $this->wrestler->id);
-    }
-    
-    public function toggleActive(): void
-    {
-        $this->wrestler->update(['active' => !$this->wrestler->active]);
-        
-        $status = $this->wrestler->active ? 'activated' : 'deactivated';
-        $this->dispatch('show-notification', "Wrestler {$status} successfully!");
-        $this->dispatch('refresh-table');
-    }
-    
-    public function employ(): void
-    {
-        $this->wrestler->employ();
-        
-        $this->dispatch('wrestler-employed', $this->wrestler->id);
-        $this->dispatch('refresh-table');
-        $this->dispatch('show-notification', 'Wrestler employed successfully!');
-    }
-    
-    public function release(): void
-    {
-        $this->confirmationAction = 'release';
-        $this->showConfirmation = true;
-    }
-    
-    public function suspend(): void
-    {
-        $this->confirmationAction = 'suspend';
-        $this->showConfirmation = true;
-    }
-    
-    public function confirmAction(): void
-    {
-        switch ($this->confirmationAction) {
-            case 'release':
-                $this->wrestler->release();
-                $this->dispatch('show-notification', 'Wrestler released successfully!');
-                break;
-                
-            case 'suspend':
-                $this->wrestler->suspend();
-                $this->dispatch('show-notification', 'Wrestler suspended successfully!');
-                break;
-                
-            case 'delete':
-                $this->wrestler->delete();
-                $this->dispatch('show-notification', 'Wrestler deleted successfully!');
-                break;
-        }
-        
-        $this->dispatch('refresh-table');
-        $this->cancelConfirmation();
-    }
-    
-    public function cancelConfirmation(): void
-    {
-        $this->showConfirmation = false;
-        $this->confirmationAction = '';
-    }
-    
-    public function confirmDelete(): void
-    {
-        if ($this->wrestler->hasMatches()) {
-            $this->dispatch('show-error', 'Cannot delete wrestler with match history');
-            return;
-        }
-        
-        $this->confirmationAction = 'delete';
-        $this->showConfirmation = true;
-    }
-    
-    public function getCanEditProperty(): bool
-    {
-        return auth()->user()->can('update', $this->wrestler);
-    }
-    
-    public function getCanDeleteProperty(): bool
-    {
-        return auth()->user()->can('delete', $this->wrestler) && 
-               !$this->wrestler->hasMatches();
-    }
-    
-    public function getCanManageEmploymentProperty(): bool
-    {
-        return auth()->user()->can('manage-employment', $this->wrestler);
-    }
-    
-    public function getConfirmationMessageProperty(): string
-    {
-        return match ($this->confirmationAction) {
-            'release' => 'Are you sure you want to release this wrestler?',
-            'suspend' => 'Are you sure you want to suspend this wrestler?',
-            'delete' => 'Are you sure you want to delete this wrestler? This action cannot be undone.',
-            default => '',
-        };
+        return Gate::allows($action->ability(), $this->wrestler)
+            && $this->isEligibleFor($action, $this->wrestler);
     }
 }
 ```
 
-## Blade Template Examples
+The repository formats each of these methods on a single line; they are wrapped here for
+readability. The real component defines one method per lifecycle transition.
 
-### Event Form Template
+Managers, referees, tag teams, titles, and stables have equivalent components. Titles and stables use
+`ExecutesBusinessActions` and their own `canPerform()` argument types; see
+[Livewire Standards](../../architecture/livewire-standards.md#lifecycle-actions-components).
+
+## Blade Examples
+
+### Form modal view
+
+Source: `resources/views/livewire/wrestlers/modals/form-modal.blade.php`.
+
+The view is wrapped in `<x-form-modal>` and binds inputs to the form object with `wire:model="form.*"`.
+Labels come from lang files.
 
 ```blade
-{{-- resources/views/livewire/events/forms/create-edit-form.blade.php --}}
-<div class="space-y-6">
-    <form wire:submit.prevent="save" class="space-y-4">
-        {{-- Event Name --}}
-        <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">
-                Event Name <span class="text-red-500">*</span>
-            </label>
-            <input type="text" 
-                   wire:model.lazy="name" 
-                   id="name"
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                   placeholder="Enter event name">
-            @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-        
-        {{-- Date and Time --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="date" class="block text-sm font-medium text-gray-700">
-                    Date <span class="text-red-500">*</span>
-                </label>
-                <input type="date" 
-                       wire:model="date" 
-                       id="date"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                @error('date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-            
-            <div>
-                <label for="time" class="block text-sm font-medium text-gray-700">
-                    Time <span class="text-red-500">*</span>
-                </label>
-                <input type="time" 
-                       wire:model="time" 
-                       id="time"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                @error('time') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-        </div>
-        
-        {{-- Venue --}}
-        <div>
-            <label for="venue_id" class="block text-sm font-medium text-gray-700">
-                Venue <span class="text-red-500">*</span>
-            </label>
-            <select wire:model="venue_id" 
-                    id="venue_id"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option value="">Select a venue</option>
-                @foreach($this->venues as $venue)
-                    <option value="{{ $venue->id }}">{{ $venue->name }} - {{ $venue->city }}</option>
-                @endforeach
-            </select>
-            @error('venue_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-        
-        {{-- Preview --}}
-        <div>
-            <label for="preview" class="block text-sm font-medium text-gray-700">
-                Event Preview
-            </label>
-            <textarea wire:model="preview" 
-                      id="preview"
-                      rows="4"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      placeholder="Enter event description..."></textarea>
-            @error('preview') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-        
-        {{-- Published --}}
-        <div class="flex items-center">
-            <input type="checkbox" 
-                   wire:model="published" 
-                   id="published"
-                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-            <label for="published" class="ml-2 block text-sm text-gray-900">
-                Publish event immediately
-            </label>
-        </div>
-        
-        {{-- Form Actions --}}
-        <div class="flex justify-between items-center pt-4">
-            <button type="button" 
-                    wire:click="generateDummyData"
-                    class="text-sm text-gray-500 hover:text-gray-700">
-                Fill with dummy data
-            </button>
-            
-            <div class="flex space-x-3">
-                <button type="button" 
-                        wire:click="cancel"
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Cancel
-                </button>
-                
-                <button type="submit" 
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {{ $model ? 'Update' : 'Create' }} Event
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
+<x-form-modal>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="wrestler-profile-grid">
+        <x-form-modal.modal-input>
+            <x-form.inputs.text :label="__('wrestlers.name')" wire:model="form.name" />
+        </x-form-modal.modal-input>
+
+        <x-form-modal.modal-input>
+            <x-form.inputs.text :label="__('wrestlers.hometown')" wire:model="form.hometown" />
+        </x-form-modal.modal-input>
+    </div>
+</x-form-modal>
 ```
 
-### Events Table Template
+### Actions view
+
+Source: `resources/views/livewire/wrestlers/components/actions.blade.php`.
+
+The view asks the component whether a button applies and never re-implements the eligibility rule.
 
 ```blade
-{{-- resources/views/livewire/events/tables/events-table.blade.php --}}
-<div class="space-y-4">
-    {{-- Search and Filters --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
-        <div class="flex-1 max-w-md">
-            <input type="text" 
-                   wire:model.live="search" 
-                   placeholder="Search events..."
-                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-        </div>
-        
-        <div class="flex items-center space-x-2">
-            {{-- Status Filter --}}
-            <select wire:model.live="filters.status" 
-                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option value="">All Status</option>
-                @foreach($this->getFilterOptions('status') as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </select>
-            
-            {{-- Venue Filter --}}
-            <select wire:model.live="filters.venue_id" 
-                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                <option value="">All Venues</option>
-                @foreach($this->getFilterOptions('venue_id') as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </select>
-            
-            {{-- Clear Filters --}}
-            <button wire:click="resetFilters" 
-                    class="text-sm text-gray-500 hover:text-gray-700">
-                Clear
-            </button>
-        </div>
-    </div>
-    
-    {{-- Table --}}
-    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300">
-            <thead class="bg-gray-50">
-                <tr>
-                    @foreach($this->getColumns() as $column => $label)
-                        <th scope="col" 
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                            wire:click="sortBy('{{ $column }}')">
-                            {{ $label }}
-                            @if($sortBy === $column)
-                                <span class="ml-1">
-                                    @if($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                </span>
-                            @endif
-                        </th>
-                    @endforeach
-                    <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Actions</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($this->getRecords() as $event)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ $event->name }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $event->date->format('M j, Y g:i A') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $event->venue->name ?? 'No venue' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {!! $this->getStatusColumnAttribute($event) !!}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {!! $this->getPublishedColumnAttribute($event) !!}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <livewire:events.components.actions-component 
-                                :event="$event" 
-                                :key="'event-actions-' . $event->id" />
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                            No events found.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    
-    {{-- Pagination --}}
-    @if($this->getRecords()->hasPages())
-        <div class="px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-            {{ $this->getRecords()->links() }}
-        </div>
-    @endif
-</div>
+@use('App\Enums\Roster\RosterLifecycleAction')
+
+@if ($this->canPerform(RosterLifecycleAction::Employ))
+    <x-buttons.success wire:click="employ">{{ __('core.lifecycle_actions.employ') }}</x-buttons.success>
+@endif
 ```
 
 ## Testing Examples
 
-### Form Component Test
+Tests use Pest and the `livewire()` helper from `Pest\Livewire`. Integration tests mirror
+`app/Livewire` under `tests/Integration/Livewire`. See the [Livewire Testing Guide](../../guides/livewire/testing-guide.md).
+
+### Form test
+
+Source: `tests/Integration/Livewire/Wrestlers/Forms/CreateEditFormTest.php`.
 
 ```php
-// tests/Integration/Livewire/Events/Forms/CreateEditFormTest.php
-<?php
+use Livewire\Component;
 
-use App\Livewire\Events\Forms\CreateEditForm;
-use App\Models\Events\Event;
-use App\Models\Events\Venue;
-use App\Models\Users\User;
-use Livewire\Livewire;
+it('maps blank optional fields to null', function (): void {
+    // Arrange
+    $form = new CreateEditForm(Double::for(Component::class), 'form');
+    $form->name = 'Bret Hart';
+    $form->hometown = 'Calgary, Alberta';
+    $form->height_feet = 6;
+    $form->height_inches = 0;
+    $form->weight = 235;
+    $form->signature_move = '';
+    $form->employment_date = '';
 
-beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
-});
+    // Act
+    $data = $form->toData();
 
-describe('CreateEditForm Configuration', function () {
-    test('returns correct model class', function () {
-        $form = new CreateEditForm();
-        expect($form->getModelClass())->toBe(Event::class);
-    });
-    
-    test('has correct validation rules', function () {
-        $form = new CreateEditForm();
-        $rules = $form->getRules();
-        
-        expect($rules)->toHaveKey('name');
-        expect($rules)->toHaveKey('date');
-        expect($rules)->toHaveKey('venue_id');
-        expect($rules['name'])->toContain('required');
-        expect($rules['venue_id'])->toContain('exists:venues,id');
-    });
-});
-
-describe('CreateEditForm Creation', function () {
-    test('creates event with valid data', function () {
-        $venue = Venue::factory()->create();
-        
-        $component = Livewire::test(CreateEditForm::class)
-            ->set('name', 'Test Event')
-            ->set('date', '2024-12-01')
-            ->set('time', '19:00')
-            ->set('venue_id', $venue->id)
-            ->set('preview', 'Test preview')
-            ->call('save');
-        
-        expect(Event::where('name', 'Test Event')->exists())->toBeTrue();
-        $component->assertDispatched('eventCreated');
-    });
-    
-    test('validates required fields', function () {
-        $component = Livewire::test(CreateEditForm::class)
-            ->call('save');
-        
-        $component->assertHasErrors(['name', 'date', 'time', 'venue_id']);
-    });
-    
-    test('validates unique event name', function () {
-        $venue = Venue::factory()->create();
-        Event::factory()->create(['name' => 'Existing Event']);
-        
-        $component = Livewire::test(CreateEditForm::class)
-            ->set('name', 'Existing Event')
-            ->set('date', '2024-12-01')
-            ->set('time', '19:00')
-            ->set('venue_id', $venue->id)
-            ->call('save');
-        
-        $component->assertHasErrors(['name']);
-    });
-});
-
-describe('CreateEditForm Editing', function () {
-    test('updates existing event', function () {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create([
-            'name' => 'Original Event',
-            'venue_id' => $venue->id,
-        ]);
-        
-        $component = Livewire::test(CreateEditForm::class)
-            ->call('mount', $event)
-            ->set('name', 'Updated Event')
-            ->call('save');
-        
-        expect($event->fresh()->name)->toBe('Updated Event');
-        $component->assertDispatched('eventUpdated');
-    });
-    
-    test('allows same name when editing', function () {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create([
-            'name' => 'Test Event',
-            'venue_id' => $venue->id,
-        ]);
-        
-        $component = Livewire::test(CreateEditForm::class)
-            ->call('mount', $event)
-            ->set('name', 'Test Event') // Same name should be allowed
-            ->call('save');
-        
-        $component->assertHasNoErrors();
-    });
+    // Assert
+    expect($data->signature_move)->toBeNull()
+        ->and($data->employment_date)->toBeNull();
 });
 ```
 
-### Table Component Test
+### Modal test
+
+Source: `tests/Integration/Livewire/Wrestlers/Modals/FormModalTest.php`.
 
 ```php
-// tests/Integration/Livewire/Events/Tables/EventsTableTest.php
-<?php
-
-use App\Livewire\Events\Tables\EventsTable;
-use App\Models\Events\Event;
-use App\Models\Events\Venue;
-use App\Models\Users\User;
-use Livewire\Livewire;
-
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+    actingAs(administrator());
 });
 
-describe('EventsTable Configuration', function () {
-    test('returns correct model class', function () {
-        $table = new EventsTable();
-        expect($table->getModelClass())->toBe(Event::class);
-    });
-    
-    test('has correct columns', function () {
-        $table = new EventsTable();
-        $columns = $table->getColumns();
-        
-        expect($columns)->toHaveKey('name');
-        expect($columns)->toHaveKey('date');
-        expect($columns)->toHaveKey('venue.name');
-        expect($columns)->toHaveKey('status');
-    });
-});
+it('handles form validation errors', function () {
+    $component = livewire(FormModal::class);
 
-describe('EventsTable Data Display', function () {
-    test('displays events correctly', function () {
-        $venue = Venue::factory()->create(['name' => 'Test Arena']);
-        $event = Event::factory()->create([
-            'name' => 'Test Event',
-            'venue_id' => $venue->id,
-        ]);
-        
-        $component = Livewire::test(EventsTable::class);
-        
-        $component->assertSee('Test Event');
-        $component->assertSee('Test Arena');
-    });
-    
-    test('displays empty state when no events', function () {
-        $component = Livewire::test(EventsTable::class);
-        
-        $component->assertSee('No events found');
-    });
+    $component->set('form.name', '')
+        ->call('submitForm')
+        ->assertHasErrors(['form.name' => 'required']);
 });
+```
 
-describe('EventsTable Filtering', function () {
-    test('filters events by status', function () {
-        Event::factory()->create(['status' => 'scheduled', 'name' => 'Scheduled Event']);
-        Event::factory()->create(['status' => 'completed', 'name' => 'Completed Event']);
-        
-        $component = Livewire::test(EventsTable::class)
-            ->set('filters.status', 'scheduled');
-        
-        $component->assertSee('Scheduled Event');
-        $component->assertDontSee('Completed Event');
-    });
-    
-    test('searches events by name', function () {
-        Event::factory()->create(['name' => 'WrestleMania']);
-        Event::factory()->create(['name' => 'SummerSlam']);
-        
-        $component = Livewire::test(EventsTable::class)
-            ->set('search', 'WrestleMania');
-        
-        $component->assertSee('WrestleMania');
-        $component->assertDontSee('SummerSlam');
-    });
+### Table test
+
+Source: `tests/Integration/Livewire/Wrestlers/Tables/MainTest.php`.
+
+```php
+it('filters wrestlers by name and clears the search', function (): void {
+    // Arrange
+    Wrestler::factory()->create(['name' => 'John Cena']);
+    Wrestler::factory()->create(['name' => 'The Rock']);
+
+    $component = livewire(Main::class);
+
+    // Act
+    $component->set('search', 'John');
+
+    // Assert
+    $component
+        ->assertSee('John Cena')
+        ->assertDontSee('The Rock');
 });
+```
+
+### Actions test
+
+Source: `tests/Integration/Livewire/Wrestlers/Components/ActionsTest.php`.
+
+Action collaborators are replaced with `JMac\Testing\Double::for()` and bound in the container.
+
+```php
+$action->expects('handle')->with(
+    Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Wrestler && $actual->is($wrestler)),
+);
+app()->instance($actionClass, $action);
+
+actingAs(administrator());
+$component = livewire(Actions::class, ['wrestler' => $wrestler]);
+
+$component->call($method);
+
+$component
+    ->assertDispatched('wrestler-updated')
+    ->assertDispatched('flash-message', type: 'status', message: $message);
+$action->verify();
 ```
 
 ## Related Documentation
 
-- [Component Architecture](../../architecture/livewire/component-architecture.md) - Architecture patterns
-- [Testing Guide](../testing/testing-guide.md) - Testing approaches
-- [Form Patterns](../../architecture/livewire/form-patterns.md) - Form implementation
-- [Modal Patterns](../../architecture/livewire/modal-patterns.md) - Modal implementation
-- [Migration Guide](migration-guide.md) - Migration from old patterns
+- [Livewire Standards](../../architecture/livewire-standards.md)
+- [Component Architecture](../../architecture/livewire/component-architecture.md)
+- [Form Patterns](../../architecture/livewire/form-patterns.md)
+- [Modal Patterns](../../architecture/livewire/modal-patterns.md)
+- [Livewire Testing Guide](../../guides/livewire/testing-guide.md)
