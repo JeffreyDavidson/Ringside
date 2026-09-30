@@ -63,7 +63,7 @@ class Column
             return;
         }
 
-        $query->where($this->field, 'like', "%{$searchTerm}%");
+        $query->whereLike($this->field, "%{$searchTerm}%", caseSensitive: false);
     }
 
     public function sortable(): static

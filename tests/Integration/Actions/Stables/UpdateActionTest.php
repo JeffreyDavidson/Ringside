@@ -8,6 +8,9 @@ use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Roster\Stables\Stable;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
+use Illuminate\Support\Facades\DB;
 
 test('it rejects an activity end date before the start date', function () {
     $stable = Stable::factory()->inactive()->create(['name' => 'Original Name']);
@@ -63,4 +66,44 @@ test('it does not create an activity period when no start date is given', functi
 
     expect($updatedStable->name)->toBe('Renamed Stable')
         ->and($updatedStable->activityPeriods()->exists())->toBeFalse();
+});
+
+test('it never combines a row lock with a grouped query when updating an existing activity period', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $startedAt = now()->subMonth()->startOfSecond();
+    $connection = DB::connection();
+    $originalGrammar = $connection->getQueryGrammar();
+
+    // SQLite discards row-lock clauses, which hides "FOR UPDATE is not allowed with GROUP BY"
+    // errors that PostgreSQL raises. Render the lock as a comment so the executed SQL exposes it.
+    // PostgreSQL already emits the real clause (and rejects the query itself).
+    if ($connection->getDriverName() === 'sqlite') {
+        $connection->setQueryGrammar(new class($connection) extends SQLiteGrammar
+        {
+            protected function compileLock(Builder $query, $value): string
+            {
+                return $value ? ' /* for update */' : ' /* for share */';
+            }
+        });
+    }
+
+    $executedSql = [];
+    DB::listen(function ($query) use (&$executedSql): void {
+        $executedSql[] = mb_strtolower($query->sql);
+    });
+
+    try {
+        resolve(UpdateAction::class)->handle($stable, new StableData(
+            name: 'Renamed Stable',
+            start_date: $startedAt,
+            members: new StableMembershipData,
+        ));
+    } finally {
+        $connection->setQueryGrammar($originalGrammar);
+    }
+
+    $lockedSql = collect($executedSql)->filter(fn (string $sql): bool => str_contains($sql, 'for update'));
+
+    expect($lockedSql)->not->toBeEmpty()
+        ->and($lockedSql->filter(fn (string $sql): bool => str_contains($sql, 'group by')))->toBeEmpty();
 });
