@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Referees\Modals\FormModal;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -59,9 +58,10 @@ describe('authorized referee form interactions', function () {
             ->assertSee('Edit Earl Hebner');
     });
 
-    it('propagates a missing referee failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing referee', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates an employed referee', function () {

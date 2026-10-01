@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -59,9 +58,10 @@ describe('authorized manager form interactions', function () {
             ->assertSee('Edit Bobby Heenan');
     });
 
-    it('propagates a missing manager failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing manager', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates an employed manager', function () {

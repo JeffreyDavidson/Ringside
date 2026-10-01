@@ -15,7 +15,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use JMac\Testing\Double;
 use LivewireUI\Modal\Modal;
 
@@ -168,13 +167,15 @@ describe('authorized match form interactions', function (): void {
             ->assertSee('Edit Match');
     });
 
-    it('propagates a missing match failure', function (): void {
+    it('responds not found when opening a missing match', function (): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        // Act / Assert
-        expect(fn () => $modal->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+        // Act
+        $modal->call('openModal', PHP_INT_MAX);
+
+        // Assert
+        $modal->assertNotFound();
     });
 
     it('creates a singles match with its complete configuration', function (): void {

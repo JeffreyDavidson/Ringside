@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -57,9 +56,10 @@ describe('authorized title form interactions', function () {
             ->assertSee('Edit World Championship Title');
     });
 
-    it('propagates a missing title failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing title', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates and debuts a singles title', function () {

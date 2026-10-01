@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Livewire\Users\Modals\FormModal;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Hash;
 
 use function Pest\Laravel\actingAs;
@@ -71,9 +70,10 @@ describe('authorized user form interactions', function () {
             ->assertSee('Edit Jane Smith');
     });
 
-    it('propagates a missing user failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing user', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a user with its credentials and role', function () {
