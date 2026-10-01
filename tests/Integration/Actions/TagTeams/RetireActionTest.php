@@ -6,6 +6,8 @@ use App\Actions\TagTeams\RetireAction;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -271,4 +273,26 @@ test('it preserves employment and retirement history', function () {
     // Current employment should be ended, current retirement should be active
     expect($tagTeam->currentEmployment)->toBeNull();
     expect($tagTeam->currentRetirement)->not()->toBeNull();
+});
+
+test('it ends the current title reign of a retired tag team', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $title = Title::factory()->tagTeam()->active()->create();
+    $reign = TitleChampionship::factory()->for($title)->forTagTeam($tagTeam)->current()->create();
+    $retirementDate = now()->addHour();
+
+    resolve(RetireAction::class)->handle($tagTeam, $retirementDate);
+
+    expect($reign->refresh()->lost_at?->toDateTimeString())->toBe($retirementDate->toDateTimeString())
+        ->and($title->championships()->current()->exists())->toBeFalse()
+        ->and($tagTeam->refresh()->currentRetirement()->exists())->toBeTrue();
+});
+
+test('it keeps the reign open when retiring the tag team fails', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    $title = Title::factory()->tagTeam()->active()->create();
+    $reign = TitleChampionship::factory()->for($title)->forTagTeam($tagTeam)->current()->create();
+
+    expect(fn () => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class)
+        ->and($reign->refresh()->lost_at)->toBeNull();
 });
