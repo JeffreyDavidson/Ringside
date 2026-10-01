@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c4a29a7155a054ed257750b425f4fbc",
+    "content-hash": "a7b6bc20463625fdfe5d5410ec76c197",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -9127,20 +9127,20 @@
         },
         {
             "name": "jasonmccreary/double",
-            "version": "v0.3.0",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jasonmccreary/double.git",
-                "reference": "204006bd9fce4e6c1f69991c07b3bdc633764538"
+                "reference": "8d795c50489ce673882b3c819e9bbca0f6f0ef3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jasonmccreary/double/zipball/204006bd9fce4e6c1f69991c07b3bdc633764538",
-                "reference": "204006bd9fce4e6c1f69991c07b3bdc633764538",
+                "url": "https://api.github.com/repos/jasonmccreary/double/zipball/8d795c50489ce673882b3c819e9bbca0f6f0ef3a",
+                "reference": "8d795c50489ce673882b3c819e9bbca0f6f0ef3a",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.3"
+                "php": "^8.2"
             },
             "require-dev": {
                 "laravel/pint": "^1.29",
@@ -9163,6 +9163,7 @@
                 }
             ],
             "description": "A modern PHP double library that puts developer experience first.",
+            "homepage": "https://testdoublephp.com",
             "keywords": [
                 "Double",
                 "mock",
@@ -9171,10 +9172,11 @@
                 "testing"
             ],
             "support": {
+                "docs": "https://testdoublephp.com",
                 "issues": "https://github.com/jasonmccreary/double/issues",
-                "source": "https://github.com/jasonmccreary/double/tree/v0.3.0"
+                "source": "https://github.com/jasonmccreary/double"
             },
-            "time": "2026-08-05T23:16:48+00:00"
+            "time": "2026-09-28T13:00:45+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
