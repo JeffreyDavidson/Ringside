@@ -189,6 +189,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Squash merge feature, fix, refactor, chore, docs, and test branches into `develop` through pull requests.
 - Squash merge `hotfix/` branches into `main`; merge `release/` branches into `main` with regular merge commits. Do not rebase-merge pull requests.
 - Name release branches with the SemVer version they release, using `release/v<MAJOR>.<MINOR>.<PATCH>` (for example, `release/v0.3.0`). Use the same version in the release PR title and tag.
+- The release profile read by the `release` agent skill is in [docs/workflows/releases.md](docs/workflows/releases.md).
 - Before merging, verify the pull request's head branch, base branch, and merge method.
 - Every new commit must follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/): `type: description`, with an optional scope (`type(scope): description`) and optional breaking-change marker (`type(scope)!: description`).
 - Use lowercase types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `feat` for new features and `fix` for bug fixes; branch prefixes such as `feature/`, `hotfix/`, and `release/` are not commit types.
