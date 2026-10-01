@@ -8,6 +8,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use Closure;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,7 +34,7 @@ class EstablishPromotionContext
                 return $next($request);
             }
 
-            abort(403, 'An active promotion membership is required.');
+            throw new HttpResponseException(response()->view('promotions.no-membership', [], 403));
         }
 
         $selectedPromotionId = $request->session()->get('active_promotion_id');

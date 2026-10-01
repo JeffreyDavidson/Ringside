@@ -205,10 +205,7 @@ it('forbids users without administrative access from opening the venue form', fu
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal');
-
-    $modal->assertForbidden();
+    livewire(FormModal::class)->assertForbidden();
 })->with([
     'guest' => ['guest'],
     'basic user' => ['basic user'],

@@ -14,6 +14,8 @@ return [
     'empty_description' => 'Promotions created on the platform will appear here.',
     'empty_title' => 'No promotions yet',
     'members' => 'Members',
+    'no_membership_title' => 'You are not a member of a promotion yet',
+    'no_membership_description' => 'Ask a promotion owner to add you, and your overview will appear here.',
     'created' => 'Created',
     'search' => 'Search promotions',
     'index_description' => 'Every promotion on the Ringside platform.',

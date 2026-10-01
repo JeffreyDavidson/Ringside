@@ -136,7 +136,15 @@ through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the first active
 membership when none is selected. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
-selected membership as a deliberate global-platform exception. Lifecycle and
+selected membership as a deliberate global-platform exception. The scope fails
+closed: when no context is enforced, an authenticated non-administrator matches
+no promotion-owned records (`PromotionContextService::failsClosed()`), while
+administrators, console, queue and guest contexts stay unscoped. The dashboard
+runs inside the `promotion.context` group, and users without an active
+membership get a 403 "you are not a member of a promotion yet" page. Modals
+authorize on mount (`create` on the model class, or `update` on the loaded
+record), and `EstablishPromotionContext` runs before route model binding so
+bindings resolve inside the promotion scope. Lifecycle and
 history tables still require their own staged migrations, so this is not yet
 fully isolated tenancy behavior.
 

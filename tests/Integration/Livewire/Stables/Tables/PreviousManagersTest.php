@@ -216,7 +216,7 @@ describe('PreviousManagers authorization', function (): void {
         $table->assertSuccessful();
     });
 
-    it('forbids users without access to the stable', function (string $actor): void {
+    it('forbids users without access to the stable', function (string $actor, int $status): void {
         // Arrange
         if ($actor === 'guest') {
             Auth::logout();
@@ -228,9 +228,9 @@ describe('PreviousManagers authorization', function (): void {
         $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
 
         // Assert
-        $table->assertForbidden();
+        $table->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });

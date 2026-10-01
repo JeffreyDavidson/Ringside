@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Base;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use LivewireUI\Modal\ModalComponent;
 
@@ -32,13 +33,19 @@ abstract class BaseModal extends ModalComponent
         $modelForm = $this->getModelForm();
 
         if ($modelId === null) {
+            Gate::authorize('create', $this->getModelClass());
+
             $modelForm->reset();
 
             return;
         }
 
         $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-        $modelForm->setModel($this->findModel($id));
+        $model = $this->findModel($id);
+
+        Gate::authorize('update', $model);
+
+        $modelForm->setModel($model);
     }
 
     public function getModalTitle(): string

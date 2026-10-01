@@ -214,7 +214,7 @@ describe('wrestler previous managers table', function (): void {
             ]);
     });
 
-    it('forbids users without access to the wrestler', function (string $actor): void {
+    it('forbids users without access to the wrestler', function (string $actor, int $status): void {
         $wrestler = Wrestler::factory()->create();
 
         if ($actor === 'guest') {
@@ -224,9 +224,9 @@ describe('wrestler previous managers table', function (): void {
         }
 
         livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id])
-            ->assertForbidden();
+            ->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });

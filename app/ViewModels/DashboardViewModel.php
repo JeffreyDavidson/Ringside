@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Data for the promotion Overview page: what is coming up, who can be booked,
- * and who holds the titles. Queries respect the active promotion scope.
+ * and who holds the titles. Queries respect the active promotion scope; the dashboard route runs inside the
+ * `promotion.context` middleware, so users without an active membership never reach this class.
  */
 final readonly class DashboardViewModel
 {

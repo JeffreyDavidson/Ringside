@@ -640,7 +640,7 @@ describe('authorized match form interactions', function (): void {
     });
 });
 
-it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing): void {
+it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing, int $status): void {
     // Arrange
     $event = Event::factory()->create();
     $match = $editing
@@ -651,16 +651,14 @@ it('forbids :dataset from opening the match form', function (bool $authenticated
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class, ['eventId' => $event->id]);
-
     // Act
-    $modal->call('openModal', $match?->id);
+    $modal = livewire(FormModal::class, ['eventId' => $event->id, 'modelId' => $match?->id]);
 
     // Assert
-    $modal->assertForbidden();
+    $modal->assertStatus($status);
 })->with([
-    'a guest creating' => [false, false],
-    'a basic user creating' => [true, false],
-    'a guest editing' => [false, true],
-    'a basic user editing' => [true, true],
+    'a guest creating' => [false, false, 403],
+    'a basic user creating' => [true, false, 403],
+    'a guest editing' => [false, true, 403],
+    'a basic user editing' => [true, true, 404],
 ]);

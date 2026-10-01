@@ -7,6 +7,7 @@ namespace App\Services\Promotions;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 
 class PromotionContextService
@@ -48,6 +49,23 @@ class PromotionContextService
     public function isEnforced(): bool
     {
         return $this->enforced;
+    }
+
+    /**
+     * Promotion-scoped queries must match nothing for an authenticated non-administrator
+     * whose request has no enforced promotion context (a route outside `promotion.context`).
+     * Administrators stay global, and console, queue and guest contexts have no user so they
+     * remain unscoped.
+     */
+    public function failsClosed(): bool
+    {
+        if ($this->enforced) {
+            return false;
+        }
+
+        $user = auth()->user();
+
+        return $user instanceof User && ! $user->role->isAdministrator();
     }
 
     public function owns(Model $model): bool
