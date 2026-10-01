@@ -309,7 +309,9 @@ abstract class DataTableComponent extends Component
         if ($this->sortField !== '' && $this->isSortableField($this->sortField)) {
             $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-            $query->orderBy($this->sortField, $direction);
+            $query->reorder()
+                ->orderBy($this->sortField, $direction)
+                ->orderBy($query->getModel()->getQualifiedKeyName());
         }
     }
 

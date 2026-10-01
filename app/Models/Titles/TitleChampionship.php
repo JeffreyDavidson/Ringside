@@ -97,7 +97,7 @@ class TitleChampionship extends Model
      */
     public function champion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id')->withTrashed();
     }
 
     /**

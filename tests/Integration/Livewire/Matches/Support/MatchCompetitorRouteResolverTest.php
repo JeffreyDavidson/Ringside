@@ -33,6 +33,19 @@ describe('match competitor resource links', function (): void {
             ->toBe('<a href="'.route('tag-teams.show', $tagTeam).'">'.e($tagTeam->name).'</a>');
     });
 
+    it('renders deleted competitors as escaped plain text', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Gone <b>Wrestler</b>']);
+        $wrestler->delete();
+        $resolver = app(MatchCompetitorRouteResolver::class);
+
+        // Act
+        $link = $resolver->link($wrestler);
+
+        // Assert
+        expect($link)->toBe('Gone &lt;b&gt;Wrestler&lt;/b&gt;');
+    });
+
     it('escapes competitor names in generated links', function (): void {
         // Arrange
         $wrestler = Wrestler::factory()->make(['id' => 1, 'name' => '<script>alert(1)</script>']);

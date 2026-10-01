@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Enums\BusinessRuleReason;
+use App\Enums\MatchFinish;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
+use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 
 test('deletion predicate stays aligned with its guard', function (string $factoryState, bool $canDelete) {
@@ -60,4 +64,53 @@ test('future employment does not block restoring a duplicate tag-team name', fun
         ->create(['started_at' => now()->addDay()]);
 
     expect(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeTrue();
+});
+
+describe('booked tag team deletion', function (): void {
+    it('rejects a tag team booked in a match that is upcoming or has no result', function (
+        string $eventState,
+        ?MatchFinish $finish,
+    ): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->unemployed()->create();
+        EventMatch::factory()
+            ->forEvent(Event::factory()->{$eventState}()->create())
+            ->withCompetitors([$tagTeam, TagTeam::factory()->create()])
+            ->create(['match_finish' => $finish]);
+        $eligibility = resolve(TagTeamDeletionEligibility::class);
+
+        // Act
+        $canDelete = $eligibility->canDelete($tagTeam);
+
+        // Assert
+        expect($canDelete)->toBeFalse();
+        $reason = null;
+
+        try {
+            $eligibility->ensureCanDelete($tagTeam);
+        } catch (CannotBeDeletedException $exception) {
+            $reason = $exception->reason();
+        }
+
+        expect($reason)->toBe(BusinessRuleReason::BookedInMatch);
+    })->with([
+        'upcoming without result' => ['scheduled', null],
+        'past without result' => ['past', null],
+        'upcoming with result' => ['scheduled', MatchFinish::Pinfall],
+    ]);
+
+    it('allows a tag team who only appears in resulted past matches', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->unemployed()->create();
+        EventMatch::factory()
+            ->forEvent(Event::factory()->past()->create())
+            ->withCompetitors([$tagTeam, TagTeam::factory()->create()])
+            ->create(['match_finish' => MatchFinish::Pinfall]);
+
+        // Act
+        $canDelete = resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam);
+
+        // Assert
+        expect($canDelete)->toBeTrue();
+    });
 });

@@ -41,6 +41,16 @@ it('searches promotions by name and slug', function (): void {
         ->assertDontSee('Ringside Wrestling');
 });
 
+it('lets the chosen sort column override the default ordering', function (): void {
+    Promotion::factory()->create(['name' => 'Alpha Wrestling', 'slug' => 'zulu']);
+    Promotion::factory()->create(['name' => 'Beta Wrestling', 'slug' => 'alpha']);
+    $component = livewire(Main::class);
+
+    $component->call('sort', 'slug');
+
+    $component->assertSeeInOrder(['Beta Wrestling', 'Alpha Wrestling']);
+});
+
 it('renders the shared empty state when no promotions exist', function (): void {
     livewire(Main::class)
         ->assertSeeHtml('data-test="promotions-empty-state"')
