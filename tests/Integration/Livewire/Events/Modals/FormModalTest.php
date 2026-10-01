@@ -187,13 +187,13 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasErrors(['form.venue_id'])
             ->assertSet('isModalOpen', true)
-            ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+            ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
             ->assertNotDispatched('closeModal');
         expect($event->refresh()->name)->toBe('Original Event')
             ->and($event->date?->toDateTimeString())->toBe($originalDate->toDateTimeString())
             ->and($event->venue_id)->toBe($originalVenue->id);
 
-        $availableDate = $conflictingDate->copy()->addHour();
+        $availableDate = $conflictingDate->copy()->addDay();
         $modal->set('form.date', $availableDate->format('Y-m-d\\TH:i'));
         $modal->call('save');
 
