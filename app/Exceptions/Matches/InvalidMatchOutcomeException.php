@@ -6,6 +6,7 @@ namespace App\Exceptions\Matches;
 
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
+use App\Models\Titles\Title;
 
 final class InvalidMatchOutcomeException extends BaseBusinessException
 {
@@ -92,5 +93,10 @@ final class InvalidMatchOutcomeException extends BaseBusinessException
     public static function titleLineageHasAdvanced(): self
     {
         return new self('This result cannot be corrected because a later title reign depends on it.');
+    }
+
+    public static function titleResultOutOfDateOrder(Title $title): self
+    {
+        return new self("Title [{$title->name}] already has a result recorded after this event; record results in date order.");
     }
 }

@@ -17,6 +17,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 function sideWithCompetitor(
     EventMatch $match,
@@ -569,4 +571,158 @@ it('rejects correcting a title result after later lineage exists', function () {
     ))->toThrow(InvalidMatchOutcomeException::class)
         ->and($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
         ->and($title->championships()->current()->sole()->champion->is($laterChampion))->toBeTrue();
+});
+
+/**
+ * @param  Title|list<Title>  $titles
+ * @return array{EventMatch, MatchSide}
+ */
+function titleMatchOn(Carbon $date, Title|array $titles, Wrestler|TagTeam $winner): array
+{
+    $match = EventMatch::factory()
+        ->for(Event::factory()->create(['date' => $date]))
+        ->create();
+    $winningSide = sideWithCompetitor($match, 1, competitor: $winner);
+    sideWithCompetitor($match, 2, competitor: $winner instanceof TagTeam ? TagTeam::factory()->create() : Wrestler::factory()->create());
+    $match->titles()->attach(Arr::wrap($titles));
+
+    return [$match, $winningSide];
+}
+
+it('rejects a title result recorded before a later recorded result', function (TitleType $type): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => $type]);
+    $newChampion = fn () => $type === TitleType::Singles ? Wrestler::factory()->create() : TagTeam::factory()->create();
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, $newChampion());
+    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, $newChampion());
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle(
+        $earlierMatch,
+        matchResult(MatchFinish::Pinfall, $earlierSide),
+    );
+
+    // Assert
+    expect($record)->toThrow(
+        InvalidMatchOutcomeException::class,
+        "Title [{$title->name}] already has a result recorded after this event; record results in date order.",
+    )
+        ->and($earlierMatch->refresh()->match_finish)->toBeNull()
+        ->and($earlierMatch->winning_side_id)->toBeNull()
+        ->and($title->championships()->count())->toBe(1)
+        ->and($title->championships()->sole()->won_match_id)->toBe($laterMatch->id)
+        ->and($title->championships()->sole()->lost_at)->toBeNull();
+})->with([
+    'singles title' => TitleType::Singles,
+    'tag team title' => TitleType::TagTeam,
+]);
+
+it('records title results in date order with consistent reigns', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->create());
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->create());
+
+    // Act
+    resolve(RecordResultAction::class)->handle($earlierMatch, matchResult(MatchFinish::Pinfall, $earlierSide));
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+
+    // Assert
+    $firstReign = $title->championships()->where('won_match_id', $earlierMatch->id)->sole();
+    $secondReign = $title->championships()->where('won_match_id', $laterMatch->id)->sole();
+
+    expect($title->championships()->count())->toBe(2)
+        ->and($firstReign->lost_match_id)->toBe($laterMatch->id)
+        ->and($firstReign->lost_at?->gte($firstReign->won_at))->toBeTrue()
+        ->and($secondReign->lost_at)->toBeNull();
+});
+
+it('still corrects the result of the latest recorded title match', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $firstWinner = Wrestler::factory()->create();
+    $secondWinner = Wrestler::factory()->create();
+    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, $firstWinner);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, $secondWinner);
+    $otherSide = $laterMatch->sides()->where('id', '!=', $laterSide->id)->sole();
+    resolve(RecordResultAction::class)->handle($earlierMatch, matchResult(MatchFinish::Pinfall, $earlierSide));
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+
+    // Act
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $otherSide));
+
+    // Assert
+    expect($title->championships()->current()->sole()->champion->is($otherSide->competitors()->sole()->competitor))->toBeTrue()
+        ->and($title->championships()->current()->sole()->won_match_id)->toBe($laterMatch->id)
+        ->and($title->championships()->count())->toBe(2);
+});
+
+it('allows a title result at the same instant as the latest recorded reign', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    [$firstMatch, $firstSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->create());
+    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->create());
+    resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $secondSide));
+
+    // Act
+    resolve(RecordResultAction::class)->handle($firstMatch, matchResult(MatchFinish::Pinfall, $firstSide));
+
+    // Assert
+    expect($firstMatch->refresh()->match_finish)->toBe(MatchFinish::Pinfall);
+});
+
+it('does not apply the date order rule to non-title-changing results', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->create());
+    [$earlierMatch] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->create());
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+
+    // Act
+    resolve(RecordResultAction::class)->handle($earlierMatch, matchResult(MatchFinish::TimeLimitDraw, null));
+
+    // Assert
+    expect($earlierMatch->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
+        ->and($title->championships()->count())->toBe(1);
+});
+
+it('keeps rejecting an undated title change when a later reign exists', function (): void {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->create());
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+    $undatedMatch = EventMatch::factory()->for(Event::factory()->unscheduled())->create();
+    $undatedSide = sideWithCompetitor($undatedMatch, 1, competitor: Wrestler::factory()->create());
+    $undatedMatch->titles()->attach($title);
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle(
+        $undatedMatch,
+        matchResult(MatchFinish::Pinfall, $undatedSide),
+    );
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class, 'A title change cannot be recorded for an event without a date.');
+});
+
+it('rejects the whole result when only one of several titles is out of date order', function (): void {
+    // Arrange
+    $orderedTitle = Title::factory()->create(['type' => TitleType::Singles]);
+    $lateTitle = Title::factory()->create(['type' => TitleType::Singles]);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $lateTitle, Wrestler::factory()->create());
+    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), [$orderedTitle, $lateTitle], Wrestler::factory()->create());
+    resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle(
+        $earlierMatch,
+        matchResult(MatchFinish::Pinfall, $earlierSide),
+    );
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class)
+        ->and($earlierMatch->refresh()->match_finish)->toBeNull()
+        ->and($orderedTitle->championships()->count())->toBe(0)
+        ->and($lateTitle->championships()->count())->toBe(1);
 });
