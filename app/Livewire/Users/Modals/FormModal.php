@@ -6,6 +6,7 @@ namespace App\Livewire\Users\Modals;
 
 use App\Actions\Users\CreateAction;
 use App\Actions\Users\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
@@ -63,6 +64,18 @@ class FormModal extends BaseFormModal
     protected function createForm(): void
     {
         $this->createAction->handle($this->form->toData());
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.role', $exception->getMessage());
+
+            return false;
+        }
     }
 
     #[\Override]

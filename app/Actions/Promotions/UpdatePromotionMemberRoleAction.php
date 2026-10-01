@@ -9,8 +9,10 @@ use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
-final class UpdatePromotionMemberRoleAction
+final readonly class UpdatePromotionMemberRoleAction
 {
+    public function __construct(private EnsureAnotherActiveOwnerAction $ensureAnotherActiveOwner) {}
+
     public function handle(Promotion $promotion, User $user, MembershipRole $role): void
     {
         DB::transaction(function () use ($promotion, $user, $role): void {
@@ -19,10 +21,14 @@ final class UpdatePromotionMemberRoleAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $lockedPromotion->memberships()
+            $membership = $lockedPromotion->memberships()
                 ->where('user_id', $user->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($role !== MembershipRole::Owner) {
+                $this->ensureAnotherActiveOwner->handle($lockedPromotion, $membership);
+            }
 
             $lockedPromotion->users()->updateExistingPivot($user->getKey(), [
                 'role' => $role,

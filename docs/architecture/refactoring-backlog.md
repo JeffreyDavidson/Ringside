@@ -256,6 +256,24 @@ unreachable lifecycle methods. Open follow-ups verified against the code:
 - Matches can be deleted from the event matches table, but `DeleteAction` does
   not renumber; deleted numbers leave gaps by design.
 
+### Promotion member invitations
+
+**Priority:** Low  
+**Status:** Deferred feature.
+
+Owners add promotion members by typing the exact email of an existing active
+account; the member is attached immediately and no message is sent. The Manage
+component answers every non-match (unknown, inactive, partial, already a member)
+with one generic message so it does not confirm which accounts exist. A real
+invitation flow (an invitation record, an email, and an accept page, using the
+existing `MembershipStatus::Invited` state) is deferred.
+
+Business rules enforced in the membership and user Actions: a promotion always
+keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the
+platform always keeps at least one active administrator
+(`EnsureAnotherActiveAdministratorAction`). Global administrators may still
+repair a promotion that has no owner.
+
 ### Branch protection observation
 
 **Priority:** Low  
