@@ -113,6 +113,39 @@ describe('TitleHistory rendering', function (): void {
             ->assertDontSee('N/A');
     });
 
+    it('names a deleted former champion as plain text and keeps them searchable', function (
+        string $championClass,
+        string $showRoute,
+    ): void {
+        // Arrange
+        $champion = $championClass::factory()->create(['name' => 'Deleted Champion']);
+        TitleChampionship::factory()->for($this->title)->create([
+            'champion_type' => $champion->getMorphClass(),
+            'champion_id' => $champion->id,
+            'won_at' => Date::parse('2024-01-01'),
+            'lost_at' => Date::parse('2025-01-01'),
+        ]);
+        $champion->delete();
+
+        // Act
+        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSee('Deleted Champion')
+            ->assertDontSeeHtml(route($showRoute, $champion));
+
+        // Act
+        $table->set('search', 'Deleted');
+
+        // Assert
+        $table->assertSee('Deleted Champion');
+    })->with([
+        'wrestler' => [Wrestler::class, 'wrestlers.show'],
+        'tag team' => [TagTeam::class, 'tag-teams.show'],
+    ]);
+
     it('shows the current champion at the top of the history', function (): void {
         // Arrange
         $formerChampion = Wrestler::factory()->create(['name' => 'Former Champion']);

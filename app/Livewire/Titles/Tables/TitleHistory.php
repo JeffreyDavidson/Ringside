@@ -68,12 +68,14 @@ class TitleHistory extends DataTableComponent
         return [
             LinkColumn::make(__('championships.champion'))
                 ->title(fn (TitleChampionship $row): string => $row->champion->name)
-                ->location(fn (TitleChampionship $row): string => $this->routeResolver->urlFor($row->champion))
+                ->location(fn (TitleChampionship $row): ?string => $row->champion->trashed()
+                    ? null
+                    : $this->routeResolver->urlFor($row->champion))
                 ->searchable(function (TitleChampionshipBuilder $builder, string $searchTerm): void {
                     $builder->whereHasMorph(
                         'champion',
                         [Wrestler::class, TagTeam::class],
-                        fn (Builder $championQuery) => $championQuery->whereLike(
+                        fn (Builder $championQuery) => $championQuery->withTrashed()->whereLike(
                             'name',
                             '%'.mb_trim($searchTerm).'%',
                         ),

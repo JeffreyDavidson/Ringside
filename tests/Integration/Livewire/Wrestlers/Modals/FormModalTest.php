@@ -120,6 +120,45 @@ describe('FormModal Form Integration', function () {
             ]);
     });
 
+    it('rejects a zero height with a field error instead of failing', function () {
+        livewire(FormModal::class)
+            ->set('form.name', 'Zero Height Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 0)
+            ->set('form.height_inches', 0)
+            ->set('form.weight', 220)
+            ->call('submitForm')
+            ->assertHasErrors(['form.height_inches' => 'min'])
+            ->assertSuccessful();
+
+        expect(Wrestler::where('name', 'Zero Height Wrestler')->exists())->toBeFalse();
+    });
+
+    it('rejects negative heights', function (string $field) {
+        livewire(FormModal::class)
+            ->set('form.name', 'Negative Height Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 6)
+            ->set('form.height_inches', 2)
+            ->set("form.{$field}", -1)
+            ->set('form.weight', 220)
+            ->call('submitForm')
+            ->assertHasErrors(["form.{$field}" => 'min']);
+    })->with(['height_feet', 'height_inches']);
+
+    it('saves a height of inches only', function () {
+        livewire(FormModal::class)
+            ->set('form.name', 'Short Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 0)
+            ->set('form.height_inches', 5)
+            ->set('form.weight', 220)
+            ->call('submitForm')
+            ->assertHasNoErrors();
+
+        expect(Wrestler::where('name', 'Short Wrestler')->exists())->toBeTrue();
+    });
+
     it('handles form update correctly', function () {
         $wrestler = Wrestler::factory()->create([
             'name' => 'Original Name',

@@ -124,6 +124,40 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->assertSeeHtml(route('titles.show', $title));
     });
 
+    it('names a deleted previous champion as plain text', function (
+        string $championClass,
+        string $showRoute,
+    ): void {
+        // Arrange
+        $title = Title::factory()->create();
+        $previousChampion = $championClass::factory()->create(['name' => 'Deleted Champion']);
+        TitleChampionship::factory()->for($title)->create([
+            'champion_type' => $previousChampion->getMorphClass(),
+            'champion_id' => $previousChampion->id,
+            'won_at' => '2020-01-01',
+            'lost_at' => '2020-06-01',
+        ]);
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($this->wrestler)
+            ->wonOn('2020-06-01')
+            ->lostOn('2021-01-01')
+            ->create();
+        $previousChampion->delete();
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('Deleted Champion')
+            ->assertDontSeeHtml(route($showRoute, $previousChampion));
+    })->with([
+        'wrestler' => [Wrestler::class, 'wrestlers.show'],
+        'tag team' => [TagTeam::class, 'tag-teams.show'],
+    ]);
+
     it('renders the title championship history search control', function (): void {
         // Arrange
         TitleChampionship::factory()
