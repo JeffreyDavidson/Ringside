@@ -6,6 +6,7 @@ namespace App\Livewire\TagTeams\Modals;
 
 use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
@@ -60,6 +61,18 @@ class FormModal extends BaseFormModal
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->tagTeam(), $this->form->toData());
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.wrestlerA', $exception->getMessage());
+
+            return false;
+        }
     }
 
     protected function createForm(): void

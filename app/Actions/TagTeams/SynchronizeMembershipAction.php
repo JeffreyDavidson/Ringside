@@ -14,6 +14,7 @@ class SynchronizeMembershipAction
 {
     public function __construct(
         protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
+        protected LockIncomingWrestlersAction $lockIncomingWrestlersAction,
     ) {}
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
@@ -29,6 +30,8 @@ class SynchronizeMembershipAction
 
             $newWrestlers = $members->wrestlers->diff($currentWrestlers);
             if ($newWrestlers->isNotEmpty()) {
+                $this->lockIncomingWrestlersAction->handle($tagTeam, $newWrestlers);
+
                 $tagTeam->wrestlers()->attach($newWrestlers->modelKeys(), [
                     'joined_at' => $date,
                     'left_at' => null,

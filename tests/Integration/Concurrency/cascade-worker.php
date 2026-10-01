@@ -13,9 +13,12 @@ declare(strict_types=1);
  */
 
 use App\Actions\Matches\RecordResultAction;
+use App\Actions\TagTeams\CreateAction as CreateTagTeamAction;
 use App\Actions\TagTeams\RetireAction as RetireTagTeamAction;
+use App\Actions\TagTeams\UpdateAction as UpdateTagTeamAction;
 use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
 use App\Data\Matches\MatchResultData;
+use App\Data\TagTeams\TagTeamData;
 use App\Enums\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Matches\EventMatch;
@@ -40,7 +43,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{action: string, id: int, nested_loop_joins?: bool, sequential_scans?: bool, winning_position?: int} $spec */
+/** @var array{action: string, id: int, name?: string, wrestler_ids?: array<int, int>, nested_loop_joins?: bool, sequential_scans?: bool, winning_position?: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 $planner = array_merge(
@@ -52,10 +55,20 @@ foreach ($planner as $setting) {
     DB::statement("set {$setting} = off");
 }
 
+$tagTeamData = fn (): TagTeamData => new TagTeamData(
+    name: $spec['name'] ?? 'Worker Team',
+    signature_move: null,
+    employment_date: null,
+    wrestlerA: Wrestler::query()->findOrFail($spec['wrestler_ids'][0] ?? 0),
+    wrestlerB: Wrestler::query()->findOrFail($spec['wrestler_ids'][1] ?? 0),
+);
+
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
 try {
     match ($spec['action']) {
+        'create_tag_team' => resolve(CreateTagTeamAction::class)->handle($tagTeamData()),
+        'update_tag_team' => resolve(UpdateTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id']), $tagTeamData()),
         'retire_tag_team' => resolve(RetireTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id'])),
         'retire_wrestler' => resolve(RetireWrestlerAction::class)->handle(Wrestler::query()->findOrFail($spec['id'])),
         'record_result' => resolve(RecordResultAction::class)->handle(

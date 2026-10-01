@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\CreateAction;
+use App\Actions\TagTeams\EmployAction;
+use App\Actions\TagTeams\EstablishMembershipAction;
+use App\Data\TagTeams\TagTeamData;
+use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
 use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -114,6 +119,42 @@ describe('authorized tag team form interactions', function () {
             ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
+    });
+
+    it('shows a form error and keeps the modal open when the action rejects a wrestler claimed by another tag team', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $claimingTagTeam = TagTeam::factory()->create(['name' => 'The Claimers']);
+        $failure = CannotBeEstablishedException::wrestlerOnAnotherTagTeam($wrestlers->firstOrFail(), $claimingTagTeam);
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class)) extends CreateAction
+        {
+            public function __construct(
+                private readonly CannotBeEstablishedException $failure,
+                EstablishMembershipAction $establishMembershipAction,
+                EmployAction $employAction,
+            ) {
+                parent::__construct($establishMembershipAction, $employAction);
+            }
+
+            #[Override]
+            public function handle(TagTeamData $tagTeamData): never
+            {
+                throw $this->failure;
+            }
+        });
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'The Latecomers',
+            'form.wrestlerA' => $wrestlers->firstOrFail()->id,
+            'form.wrestlerB' => $wrestlers->skip(1)->firstOrFail()->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.wrestlerA'])
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('form-submitted');
     });
 
     it('creates a tag team without optional profile or employment data', function () {
