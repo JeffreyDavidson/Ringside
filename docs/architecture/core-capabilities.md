@@ -74,6 +74,20 @@ Wrestlers explicitly define current and historical tag team membership through t
 
 Single current/previous tag team and current Stable lookups use Laravel's native `HasOneThrough` relationships through the persisted membership models. Wrestler and Tag Team define their own current and historical Stable relationships explicitly because their pivot models, tables, and foreign keys differ. Stable-joining eligibility remains in validation rules and lifecycle collaborators. Collection relationships remain `BelongsToMany` so callers can inspect complete history and membership pivot dates. Do not reintroduce the abandoned `ankurk91/laravel-eloquent-relationships` package.
 
+### Single Current Tag Team
+
+**Rule**: A wrestler belongs to at most one current tag team (a membership row with `left_at` null). Memberships ended with `left_at` are history and never conflict.
+
+Enforcement has three layers:
+
+- **Form rule (UX)**: `CanJoinTagTeam` rejects unavailable wrestlers at the Livewire form boundary so the user sees the error next to the field.
+- **Action (authoritative)**: `EstablishMembershipAction` (create) and `SynchronizeMembershipAction` (update) call `LockIncomingWrestlersAction` before attaching. It locks the incoming wrestlers `ORDER BY id FOR UPDATE`, after the tag team row (inserted on create, locked by `refreshForUpdate()` on update), then `TagTeamMembershipEligibility` verifies none of them currently belongs to a different tag team (a soft-deleted team counts). A violation throws `TagTeams\CannotBeEstablishedException` and rolls the transaction back, so no tag team is created and no membership changes. Re-adding a wrestler to their own team is not a conflict. The tag-team form modal shows the exception message as a form error.
+- **Database (backstop)**: the partial unique index `tag_teams_wrestlers_one_current_membership_unique` on `tag_teams_wrestlers (wrestler_id) WHERE left_at IS NULL` (a generated `current_wrestler_id` column plus unique index on MySQL/MariaDB), the same pattern as `stables_wrestlers_one_current_membership_unique`.
+
+Lock order follows [Lifecycle Operation Boundaries](lifecycle-operation-boundaries.md): tag team before wrestlers, ascending id within the kind.
+
+**Migration pre-flight**: `2026_10_01_162139_enforce_single_current_tag_team_membership_for_wrestlers` first looks for wrestlers with more than one current membership. It never edits data; if any exist it aborts before any schema change, naming each wrestler and the tag teams involved. Operators must end the extra memberships (set `left_at` on the `tag_teams_wrestlers` rows that should no longer be current) and re-run `php artisan migrate`.
+
 Wrestler and Tag Team define their current and historical manager relationships directly so each model visibly owns its persistence mapping. The `Manageable` contract remains the type boundary for application code that operates on either model.
 
 ## User and Roster Separation

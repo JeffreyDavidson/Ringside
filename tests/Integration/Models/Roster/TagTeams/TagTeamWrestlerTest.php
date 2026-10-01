@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Integration tests for TagTeamWrestler pivot model functionality.
@@ -308,19 +310,14 @@ describe('TagTeamWrestler Pivot Model', function () {
     });
 
     describe('Business Rule Validation', function () {
-        test('wrestler should not have multiple concurrent tag team memberships', function () {
+        test('wrestler cannot have multiple concurrent tag team memberships', function () {
             createTagTeamMembership($this->wrestler, $this->tagTeam);
-            createTagTeamMembership($this->wrestler, $this->secondTagTeam, [
+
+            // The nested transaction becomes a savepoint, so PostgreSQL keeps the test transaction usable.
+            expect(fn () => DB::transaction(fn () => createTagTeamMembership($this->wrestler, $this->secondTagTeam, [
                 'joined_at' => Carbon::now()->subMonths(3),
-            ]);
-
-            // In this test, we'll verify that both exist but note this should be validated in business logic
-            expect($this->wrestler->tagTeams()->count())->toBe(2);
-
-            // Business logic should ensure only one current tag team
-            // This would be enforced by validation rules, not database constraints
-            $currentMemberships = $this->wrestler->tagTeams()->wherePivotNull('left_at')->count();
-            expect($currentMemberships)->toBeGreaterThan(1); // This shows the need for validation
+            ])))->toThrow(QueryException::class)
+                ->and($this->wrestler->tagTeams()->wherePivotNull('left_at')->count())->toBe(1);
         });
 
         test('tag team membership periods should not overlap incorrectly', function () {

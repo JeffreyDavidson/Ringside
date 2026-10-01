@@ -5,12 +5,14 @@ declare(strict_types=1);
 use App\Enums\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -209,4 +211,52 @@ test('retiring a champion of two titles while a multi-title result is recorded n
         }
     });
 })->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
+    ->group('postgres-concurrency');
+
+/*
+ * Membership writers race for the same wrestler. The gate holds the wrestler's row lock, so both writers queue behind it
+ * (on the old code, which takes no wrestler lock, they never block and the helper simply stops waiting). Whoever is
+ * released first attaches the wrestler; the other must then see that membership and fail with the domain exception, not a
+ * unique-index violation or a deadlock.
+ */
+dataset('tag team membership races', [
+    'two creations sharing a wrestler' => [
+        fn (Wrestler $shared, array $freeIds, TagTeam $teamOne, TagTeam $teamTwo): array => [
+            ['action' => 'create_tag_team', 'id' => 0, 'name' => 'Race One', 'wrestler_ids' => [$shared->id, $freeIds[0]]],
+            ['action' => 'create_tag_team', 'id' => 0, 'name' => 'Race Two', 'wrestler_ids' => [$shared->id, $freeIds[1]]],
+        ],
+    ],
+    'an update racing a creation' => [
+        fn (Wrestler $shared, array $freeIds, TagTeam $teamOne, TagTeam $teamTwo): array => [
+            ['action' => 'update_tag_team', 'id' => $teamOne->id, 'name' => $teamOne->name, 'wrestler_ids' => [$teamOne->currentWrestlers()->firstOrFail()->id, $shared->id]],
+            ['action' => 'create_tag_team', 'id' => 0, 'name' => 'Race Two', 'wrestler_ids' => [$shared->id, $freeIds[1]]],
+        ],
+    ],
+    'two updates adding the same wrestler to different tag teams' => [
+        fn (Wrestler $shared, array $freeIds, TagTeam $teamOne, TagTeam $teamTwo): array => [
+            ['action' => 'update_tag_team', 'id' => $teamOne->id, 'name' => $teamOne->name, 'wrestler_ids' => [$teamOne->currentWrestlers()->firstOrFail()->id, $shared->id]],
+            ['action' => 'update_tag_team', 'id' => $teamTwo->id, 'name' => $teamTwo->name, 'wrestler_ids' => [$teamTwo->currentWrestlers()->firstOrFail()->id, $shared->id]],
+        ],
+    ],
+]);
+
+test('concurrent tag team membership writes leave a wrestler on exactly one current tag team', function (Closure $workers) {
+    committedScratchData(function () use ($workers): void {
+        // Arrange
+        $shared = Wrestler::factory()->create();
+        $free = Wrestler::factory()->count(2)->create();
+        $teamOne = TagTeam::factory()->employed()->create();
+        $teamTwo = TagTeam::factory()->employed()->create();
+        $deadlocksBefore = resolvedDeadlocks();
+
+        // Act
+        $results = runBehindGate('select id from wrestlers where id = ? for update', [$shared->id], $workers($shared, $free->modelKeys(), $teamOne, $teamTwo));
+
+        // Assert
+        expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            ->and(collect($results)->pluck('exception')->sort()->values()->all())->toBe([null, CannotBeEstablishedException::class])
+            ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $shared->id)->count())->toBe(1);
+    });
+})->with('tag team membership races')
+    ->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
     ->group('postgres-concurrency');
