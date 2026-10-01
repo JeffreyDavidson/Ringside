@@ -6,6 +6,7 @@ namespace App\Actions\Titles;
 
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Data\Titles\TitleData;
+use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +18,7 @@ class UpdateAction
      * Update a title.
      *
      * This handles the complete title update workflow:
-     * - Updates title information (name, description, championship type)
+     * - Updates title information (name, championship type); the type is locked once the title has reigns or bookings
      * - Handles conditional debut if debut_date is provided and title is not active
      * - Maintains championship integrity and lineage throughout the update process
      * - Preserves all historical championship and status records
@@ -30,6 +31,8 @@ class UpdateAction
     {
         return DB::transaction(function () use ($title, $titleData): Title {
             $lockedTitle = $title->refreshForUpdate();
+
+            TitleTypeEligibility::ensureCanChange($lockedTitle, $titleData->type);
 
             $lockedTitle->update([
                 'name' => $titleData->name,
