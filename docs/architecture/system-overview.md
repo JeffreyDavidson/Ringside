@@ -250,7 +250,7 @@ Event dates become immutable once the event has occurred. `EventSchedulingEligib
 
 A venue may host only one event at a given date and time. Event creation and updates lock the selected venue row before `VenueSchedulingEligibility` checks its event relationship, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue time.
 
-Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot.
+Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot. It also takes the date-slot lock and rejects the restore with a scheduling conflict when a wrestler, tag team, referee, or title booked on the event's matches is booked in another event at that date and time (see the canonical lock order in `match-system.md`).
 
 Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
 Restoring a soft-deleted title locks the title row and verifies that no active title has claimed its name. Restoration preserves the title's historical state without bypassing active-name uniqueness.

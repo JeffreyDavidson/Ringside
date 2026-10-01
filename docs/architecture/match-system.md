@@ -37,7 +37,7 @@ Match assignment actions lock the complete scheduling event set, then the match,
 
 Every scheduling operation acquires locks in this order. `MatchAssignmentConflictService` owns the row-lock helpers (`lockEventSet()`, `lockMatchWithEventSet()`) and `SchedulingSlotLockService` owns the date-slot lock:
 
-0. Only for actions that move an event to a date (`Events\UpdateAction`): the date-slot lock of the old and new date, ascending by timestamp (see below). Booking actions never take it.
+0. Only for actions that move an event to a date or bring one back at its date (`Events\UpdateAction`, `Events\RestoreAction`): the date-slot lock of the old and new date, ascending by timestamp (see below). Booking actions never take it.
 1. The complete scheduling event set in one statement ordered by ascending id: the action's own event plus every other event on the same exact date and time (an unscheduled event's set is itself alone, because unscheduled events conflict only within their own card).
 2. The match row (inserted last for `AddMatchForEventAction`, so nobody else can lock it first).
 3. Competitors and other resources in ascending id: referees, wrestlers, tag teams, then titles and their current reign. A champion's own cascade (retirement, release, or deletion) closes its current reigns in ascending reign id too, so it queues behind a multi-title result instead of inverting it (see Cascade lock order in `lifecycle-operation-boundaries.md`).
@@ -48,11 +48,13 @@ Actions that start from an existing match (`UpdateMatchAction`, `RecordResultAct
 
 `AddMatchForEventAction`, `UpdateMatchAction`, and the standalone assignment actions run their outermost transaction with `attempts: 3`, matching `Events\UpdateAction`, as a backstop: Laravel re-runs a transaction that lost a deadlock only when it is the outermost one. Their closures only write to the database, so a retry is safe.
 
-### Date-slot lock for reschedules
+### Date-slot lock for reschedules and restores
 
 Row locks cannot lock a row that does not exist yet. Two `Events\UpdateAction` calls that move two different events into the same *empty* date lock nothing at that date, so under READ COMMITTED neither sees the other's uncommitted move and both pass `ensureEventCanBeRescheduled()`. If the events share a wrestler, tag team, referee, or title, that resource ends up booked twice at the same instant (a write-skew race, reproduced on PostgreSQL).
 
 `SchedulingSlotLockService` (`app/Services/Matches`) closes that phantom slot. `Events\UpdateAction` calls it first in its transaction, only when the date changes, for the old and the new date, before `refreshForUpdate()` or any other row lock. The rest of the flow is unchanged: own event row, venue row, then `ensureEventCanBeRescheduled()`, which row-locks the events already at the target date. Because reschedules into one slot now run one at a time, the second one starts after the first has committed and sees its move.
+
+`Events\RestoreAction` follows the same flow for the event's existing date, because restoring puts the event's matches back on that date's schedule: slot lock of the event's date (none for an unscheduled event), own event row, venue row (`VenueSchedulingEligibility`), then `ensureEventCanBeRescheduled($event, $event->date)` before the restore, which throws `SchedulingConflictException` and leaves the event deleted when a wrestler, tag team, referee, or title of the event's matches is booked in another event at that date. Only matches that still exist are checked; a soft-deleted match stays deleted on restore and is not re-validated. It uses `attempts: 3` like `UpdateAction` (the closure only writes to the database, so a retry is safe). It does not use `lockEventSet()`, which cannot load a soft-deleted event: a deleted event is invisible to booking actions' event sets, so nobody can hold-and-wait on its row, and the other events at the date are locked in ascending id by `ensureEventCanBeRescheduled()` exactly as for a reschedule.
 
 - **Key derivation.** The lock is `pg_advisory_xact_lock(int, int)`: the first integer is the fixed namespace `0x534C4F54` ("SLOT"), which keeps these locks apart from any other advisory lock, and the second is `crc32` of the exact slot's unix timestamp mapped to a signed 32-bit integer. The derivation is deterministic, so every process derives the same key for the same instant. Two different instants may share a key; that only serializes them needlessly and can never break correctness.
 - **Ordering.** Slots are locked in ascending timestamp order, deduplicated, so two transactions that both need two slots always queue in the same order. This also removes the deadlock two events swapping dates used to cause. Null dates take no lock.

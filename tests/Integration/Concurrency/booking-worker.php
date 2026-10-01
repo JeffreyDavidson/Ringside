@@ -10,9 +10,11 @@ declare(strict_types=1);
  *
  * The worker boots the application, opens its database connection, announces READY and then blocks on
  * STDIN until the parent sends a common start time, so every worker is released at the same instant.
- * It prints a single RESULT line as JSON.
+ * A start_delay_ms in the spec holds that one worker back after the common start, so it lands inside the
+ * other worker's transaction. It prints a single RESULT line as JSON.
  */
 
+use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Data\Events\EventData;
@@ -41,13 +43,13 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{event_id: int, reschedule_date: string}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
 // The parent sends the same absolute start time to every worker; spin until then so the actions overlap.
-$startAt = (float) fgets(STDIN);
+$startAt = (float) fgets(STDIN) + (($spec['start_delay_ms'] ?? 0) / 1000);
 
 while (microtime(true) < $startAt) {
     // Busy-wait for the release time.
@@ -56,7 +58,9 @@ while (microtime(true) < $startAt) {
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
 try {
-    if (isset($spec['reschedule_date'])) {
+    if (isset($spec['restore_event_id'])) {
+        resolve(RestoreAction::class)->handle(Event::withTrashed()->findOrFail($spec['restore_event_id']));
+    } elseif (isset($spec['reschedule_date'])) {
         $event = Event::query()->findOrFail($spec['event_id']);
 
         resolve(UpdateAction::class)->handle(
