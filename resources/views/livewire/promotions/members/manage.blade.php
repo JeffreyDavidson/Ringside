@@ -23,24 +23,28 @@
     </header>
 
     @if ($canManageMembers)
-        <div class="border-ringside-line grid gap-4 border-b px-5 py-5 lg:grid-cols-[minmax(0,1fr)_12rem] lg:px-6">
+        <form
+            wire:submit="addMember"
+            class="border-ringside-line grid gap-4 border-b px-5 py-5 lg:grid-cols-[minmax(0,1fr)_12rem_auto] lg:items-end lg:px-6"
+        >
             <div>
-                <label for="promotion-member-search" class="text-ringside-ink mb-2 block text-sm font-semibold">
+                <label for="promotion-member-email" class="text-ringside-ink mb-2 block text-sm font-semibold">
                     {{ __('promotions.add_member') }}
                 </label>
                 <x-form.input
-                    id="promotion-member-search"
+                    id="promotion-member-email"
+                    type="email"
                     appearance="ringside"
-                    wire:model.live.debounce.250ms="search"
-                    placeholder="{{ __('promotions.search_global_users') }}"
+                    wire:model="email"
+                    placeholder="{{ __('promotions.member_email') }}"
                     autocomplete="off"
-                    aria-describedby="promotion-member-search-help"
+                    aria-describedby="promotion-member-email-help"
                 />
-                <p id="promotion-member-search-help" class="text-ringside-muted mt-2 text-xs">
-                    {{ __('promotions.search_global_users_help') }}
+                <p id="promotion-member-email-help" class="text-ringside-muted mt-2 text-xs">
+                    {{ __('promotions.member_email_help') }}
                 </p>
 
-                @error('userId')
+                @error('email')
                     <p class="text-ringside-signal-soft mt-2 text-sm" role="alert">{{ $message }}</p>
                 @enderror
             </div>
@@ -59,40 +63,17 @@
                     @endforeach
                 </select>
             </div>
-        </div>
 
-        @if (mb_strlen(trim($search)) >= 2)
-            <div class="border-ringside-line border-b px-5 py-4 lg:px-6" aria-live="polite">
-                @if ($availableUsers->isEmpty())
-                    <p class="text-ringside-muted text-sm">{{ __('promotions.no_available_users') }}</p>
-                @else
-                    <ul class="divide-ringside-line divide-y">
-                        @foreach ($availableUsers as $user)
-                            <li
-                                wire:key="available-user-{{ $user->id }}"
-                                class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                            >
-                                <div class="min-w-0">
-                                    <p class="text-ringside-ink truncate text-sm font-semibold">
-                                        {{ $user->full_name }}
-                                    </p>
-                                    <p class="text-ringside-muted truncate text-xs">{{ $user->email }}</p>
-                                </div>
-                                <x-button
-                                    variant="ringside"
-                                    size="sm"
-                                    wire:click="addMember({{ $user->id }})"
-                                    wire:loading.attr="disabled"
-                                    wire:target="addMember"
-                                >
-                                    {{ __('promotions.add') }}
-                                </x-button>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
-        @endif
+            <x-button variant="ringside" type="submit" wire:loading.attr="disabled" wire:target="addMember">
+                {{ __('promotions.add') }}
+            </x-button>
+        </form>
+
+        @error('member')
+            <p class="text-ringside-signal-soft border-ringside-line border-b px-5 py-3 text-sm lg:px-6" role="alert">
+                {{ $message }}
+            </p>
+        @enderror
     @endif
 
     @if ($members->isEmpty())
