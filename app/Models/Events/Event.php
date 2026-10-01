@@ -42,12 +42,9 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, EventMatch> $matches
  *
  * @method static \Database\Factories\Events\EventFactory factory($count = null, $state = [])
- * @method static EventBuilder<static>|Event newModelQuery()
- * @method static EventBuilder<static>|Event newQuery()
  * @method static EventBuilder<static>|Event latestDatedFirst()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Event onlyTrashed()
  * @method static EventBuilder<static>|Event past()
- * @method static EventBuilder<static>|Event query()
  * @method static EventBuilder<static>|Event scheduled()
  * @method static EventBuilder<static>|Event unscheduled()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Event withTrashed()

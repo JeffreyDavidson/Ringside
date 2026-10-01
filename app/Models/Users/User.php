@@ -48,9 +48,6 @@ use Illuminate\Support\Carbon;
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  *
  * @method static \Database\Factories\Users\UserFactory factory($count = null, $state = [])
- * @method static UserBuilder<static>|User newModelQuery()
- * @method static UserBuilder<static>|User newQuery()
- * @method static UserBuilder<static>|User query()
  *
  * @mixin \Eloquent
  */

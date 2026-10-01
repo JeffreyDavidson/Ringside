@@ -16,7 +16,7 @@ test('it normalizes phone number values for storage', function () {
     $user = User::factory()->create(['phone_number' => new PhoneNumber('(123) 456-7890')]);
 
     expect($user->getRawOriginal('phone_number'))->toBe('1234567890')
-        ->and($user->toArray()['phone_number'])->toBe('1234567890');
+        ->and(data_get($user->toArray(), 'phone_number'))->toBe('1234567890');
 });
 
 test('it preserves null phone numbers', function () {

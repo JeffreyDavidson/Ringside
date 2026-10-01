@@ -25,9 +25,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, EventMatch> $eventMatches
  *
  * @method static \Database\Factories\Matches\MatchStipulationFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchStipulation newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchStipulation newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchStipulation query()
  *
  * @mixin \Eloquent
  */

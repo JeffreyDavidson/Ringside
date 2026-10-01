@@ -19,10 +19,6 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property int $user_id
  * @property MembershipRole $role
  * @property MembershipStatus $status
- *
- * @method static PromotionMembershipBuilder<static>|PromotionMembership newModelQuery()
- * @method static PromotionMembershipBuilder<static>|PromotionMembership newQuery()
- * @method static PromotionMembershipBuilder<static>|PromotionMembership query()
  */
 #[Fillable('promotion_id', 'user_id', 'role', 'status')]
 #[Table(name: 'promotion_user')]
