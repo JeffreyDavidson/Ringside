@@ -30,8 +30,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "@alpinejs/ui": "^3.17.4",
-        "glob": "^11.0.3"
+        "@alpinejs/ui": "^3.17.4"
     },
     "$schema": "https://www.schemastore.org/package.json"
 }
