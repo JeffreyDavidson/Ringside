@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\EndManagerAssignmentsAction;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 
@@ -16,9 +17,7 @@ class EndMembershipsAction
 
     public function handle(TagTeam $tagTeam, Carbon $date): void
     {
-        $tagTeam->wrestlers()->newPivotQuery()
-            ->whereNull('left_at')
-            ->update(['left_at' => $date]);
+        OpenPeriodEnder::end($tagTeam->wrestlers()->newPivotQuery(), 'joined_at', 'left_at', $date);
         $this->endManagerAssignmentsAction->handle($tagTeam, $date);
     }
 }

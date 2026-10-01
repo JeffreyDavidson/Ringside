@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EndManagerAssignmentsAction;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
@@ -24,15 +25,19 @@ class EndCurrentRelationshipsAction
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
             $lockedWrestler = $wrestler->refreshForUpdate();
 
-            TagTeamWrestler::query()
-                ->forWrestlerId($lockedWrestler->id)
-                ->current()
-                ->update(['left_at' => $effectiveDate]);
+            OpenPeriodEnder::end(
+                TagTeamWrestler::query()->forWrestlerId($lockedWrestler->id),
+                'joined_at',
+                'left_at',
+                $effectiveDate,
+            );
 
-            StableWrestler::query()
-                ->whereBelongsTo($lockedWrestler)
-                ->current()
-                ->update(['left_at' => $effectiveDate]);
+            OpenPeriodEnder::end(
+                StableWrestler::query()->whereBelongsTo($lockedWrestler),
+                'joined_at',
+                'left_at',
+                $effectiveDate,
+            );
 
             $this->endManagerAssignmentsAction->handle($lockedWrestler, $effectiveDate);
 
