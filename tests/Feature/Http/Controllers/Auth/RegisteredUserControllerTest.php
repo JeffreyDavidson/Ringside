@@ -90,3 +90,23 @@ test('registration checks uniqueness after normalizing email', function (): void
         ->assertSessionHasInput('email', 'Existing@Example.COM');
     expect(User::query()->count())->toBe(1);
 });
+
+test('registration rejects an email that only differs by case from an existing user', function () {
+    // Arrange
+    User::factory()->create(['email' => 'jeffrey@example.com']);
+    $registrationData = [
+        'first_name' => 'Jeffrey',
+        'last_name' => 'Davidson',
+        'email' => 'JEFFREY@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ];
+
+    // Act
+    $response = $this->from(route('register'))
+        ->post(route('register'), $registrationData);
+
+    // Assert
+    $response->assertSessionHasErrors('email');
+    expect(User::query()->count())->toBe(1);
+});

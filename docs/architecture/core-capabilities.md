@@ -102,7 +102,13 @@ clear `email_verified_at`. Only active users are eligible for promotion
 membership and authentication. New registrations remain unverified until a
 platform administrator activates them. Inactive accounts cannot sign in, and
 existing sessions are ended on their next web or Livewire request. Email
-verification remains independent of account activation.
+verification remains independent of account activation. User emails are
+case-insensitive: they are stored trimmed and lowercase, uniqueness is checked
+ignoring case (including soft-deleted users) and enforced by a unique index on
+`lower(email)`, and sign-in and password reset look users up ignoring case so
+legacy rows stored with mixed case keep working. The migration refuses to run
+(listing the user ids) when existing emails collide ignoring case; it never
+rewrites stored emails.
 
 ## Promotion Context and Membership
 
@@ -152,7 +158,7 @@ unique indexes, a second filtered index
 (SQLite and PostgreSQL; MySQL relies on form validation for unowned stables).
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
-`promotions:backfill-event-title-ownership`. Match data inherits ownership
+`promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the first active
 membership when none is selected. Promotion-owned model queries are then

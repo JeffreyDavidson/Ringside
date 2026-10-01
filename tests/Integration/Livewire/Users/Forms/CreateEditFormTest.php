@@ -6,6 +6,7 @@ use App\Data\Users\UserData;
 use App\Enums\Users\Role;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
+use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
 use Livewire\Component;
 
@@ -71,5 +72,44 @@ describe('user create and edit form', function (): void {
             ->and($form->password)->toBeEmpty()
             ->and($form->password_confirmation)->toBeEmpty()
             ->and($selectedUser->is($user))->toBeTrue();
+    });
+});
+
+describe('user form email uniqueness', function (): void {
+    it('rejects an email that only differs by case from another user', function (): void {
+        // Arrange
+        User::factory()->create(['email' => 'taken@example.com']);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->first_name = 'Jane';
+        $form->last_name = 'Smith';
+        $form->email = 'Taken@Example.com';
+        $form->role = Role::Basic->value;
+        $form->password = 'secure-password';
+        $form->password_confirmation = 'secure-password';
+
+        // Act
+        $errorKeys = [];
+        try {
+            $form->validate();
+        } catch (ValidationException $exception) {
+            $errorKeys = array_keys($exception->errors());
+        }
+
+        // Assert
+        expect($errorKeys)->toBe(['form.email']);
+    });
+
+    it('lets a user keep their own email when editing', function (): void {
+        // Arrange
+        $user = User::factory()->create(['email' => 'mine@example.com']);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($user);
+        $form->email = 'Mine@Example.com';
+
+        // Act
+        $validated = $form->validate();
+
+        // Assert
+        expect($validated['email'])->toBe('Mine@Example.com');
     });
 });

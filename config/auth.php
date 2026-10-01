@@ -18,7 +18,7 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            'driver' => 'eloquent-email',
             'model' => User::class,
         ],
     ],
