@@ -42,7 +42,10 @@ final readonly class MatchAssignmentConflictService
             return;
         }
 
+        // The promotion_context scope filters through the soft-deletable event, hiding the matches of an
+        // event being restored. The caller has already verified ownership of the event.
         $matches = EventMatch::query()
+            ->withoutGlobalScope('promotion_context')
             ->whereBelongsTo($event)
             ->with(['competitors.competitor', 'referees', 'titles'])
             ->get();
