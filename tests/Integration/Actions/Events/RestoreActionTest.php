@@ -7,10 +7,12 @@ use App\Actions\Events\RestoreAction;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionContextService;
 
 /**
  * Book a resource on a new match of the given event.
@@ -66,6 +68,32 @@ describe('event restore scheduling conflicts', function (): void {
         'tag team' => [fn () => TagTeam::factory()->bookable()->create()],
         'referee' => [fn () => Referee::factory()->bookable()->create()],
         'title' => [fn () => Title::factory()->create()],
+    ]);
+
+    test('it rejects restoring an event under an enforced promotion context when a booked resource is booked in another event at the same time', function (Closure $createResource): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $resource = $createResource($promotion);
+        $date = now()->addWeek();
+        $event = Event::factory()->for($promotion, 'promotion')->create(['date' => $date]);
+        bookResourceOnEvent($event, $resource);
+        $deletedEvent = deleteEvent($event);
+        $otherEvent = Event::factory()->for($promotion, 'promotion')->create(['date' => $date]);
+        bookResourceOnEvent($otherEvent, $resource);
+        resolve(PromotionContextService::class)->set($promotion);
+        resolve(PromotionContextService::class)->enforce();
+
+        // Act
+        $act = fn () => resolve(RestoreAction::class)->handle($deletedEvent);
+
+        // Assert
+        expect($act)->toThrow(SchedulingConflictException::class)
+            ->and(Event::onlyTrashed()->whereKey($event->id)->exists())->toBeTrue();
+    })->with([
+        'wrestler' => [fn (Promotion $promotion) => Wrestler::factory()->bookable()->for($promotion, 'promotion')->create()],
+        'tag team' => [fn (Promotion $promotion) => TagTeam::factory()->bookable()->for($promotion, 'promotion')->create()],
+        'referee' => [fn (Promotion $promotion) => Referee::factory()->bookable()->for($promotion, 'promotion')->create()],
+        'title' => [fn (Promotion $promotion) => Title::factory()->for($promotion, 'promotion')->create()],
     ]);
 
     test('it restores an event whose resource is booked in another event at a different time', function (): void {
