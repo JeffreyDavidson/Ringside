@@ -31,7 +31,7 @@
     },
     "dependencies": {
         "@alpinejs/ui": "^3.17.4",
-        "glob": "^11.0.3"
+        "glob": "^13.0.6"
     },
     "$schema": "https://www.schemastore.org/package.json"
 }
