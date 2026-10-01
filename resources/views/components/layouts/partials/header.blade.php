@@ -32,16 +32,16 @@
 >
     <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">
         <button @click="$store.sidebar && $store.sidebar.openMobile()"
-        aria-label="Open navigation"
-        class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
-    >
-        <x-heroicon-o-bars-3 class="size-5" />
-    </button>
-    <nav class="flex min-w-0 items-center gap-2 text-sm" aria-label="Breadcrumb">
-        <span class="bg-ringside-signal hidden size-1.5 shrink-0 sm:block" aria-hidden="true"></span>
-        <span
-            class="text-ringside-muted truncate text-xs font-semibold tracking-[0.08em] uppercase"
-        >{{ $workspaceLabel }}</span>
+            aria-label="Open navigation"
+            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
+        >
+            <x-heroicon-o-bars-3 class="size-5" />
+        </button>
+        <nav class="flex min-w-0 items-center gap-2 text-sm" aria-label="Breadcrumb">
+            <span class="bg-ringside-signal hidden size-1.5 shrink-0 sm:block" aria-hidden="true"></span>
+            <span
+                class="text-ringside-muted truncate text-xs font-semibold tracking-[0.08em] uppercase"
+            >{{ $workspaceLabel }}</span>
             <x-heroicon-o-chevron-right class="text-ringside-muted hidden size-3.5 shrink-0 sm:block" />
             <strong class="text-ringside-ink truncate font-semibold">{{ $pageLabel }}</strong>
         </nav>
