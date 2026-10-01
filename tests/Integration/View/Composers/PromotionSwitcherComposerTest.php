@@ -14,7 +14,7 @@ use function Pest\Laravel\actingAs;
 
 function composePromotionSwitcher(string $viewName): View
 {
-    $view = ViewFactory::make($viewName);
+    $view = ViewFactory::first([$viewName]);
     ViewFactory::callComposer($view);
 
     return $view;

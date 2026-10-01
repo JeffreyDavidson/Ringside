@@ -45,9 +45,6 @@ use Illuminate\Support\Carbon;
  * @method static MatchCompetitorBuilder<static>|MatchCompetitor forEventIds(\Illuminate\Support\Collection<int, int> $eventIds)
  * @method static MatchCompetitorBuilder<static>|MatchCompetitor forTagTeamIds(\Illuminate\Support\Collection<int, int> $tagTeamIds)
  * @method static MatchCompetitorBuilder<static>|MatchCompetitor forWrestlerIds(\Illuminate\Support\Collection<int, int> $wrestlerIds)
- * @method static MatchCompetitorBuilder<static>|MatchCompetitor newModelQuery()
- * @method static MatchCompetitorBuilder<static>|MatchCompetitor newQuery()
- * @method static MatchCompetitorBuilder<static>|MatchCompetitor query()
  *
  * @mixin \Eloquent
  */

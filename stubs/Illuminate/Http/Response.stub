@@ -2,6 +2,13 @@
 
 namespace Illuminate\Http;
 
+/**
+ * Livewire registers these as TestResponse macros only while the application runs in the testing environment.
+ * TestResponse mixes in this class, so declaring them here makes them visible to static analysis.
+ *
+ * @method \Illuminate\Testing\TestResponse assertSeeLivewire(string $component)
+ * @method \Illuminate\Testing\TestResponse assertDontSeeLivewire(string $component)
+ */
 class Response
 {
 }

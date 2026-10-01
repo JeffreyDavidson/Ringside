@@ -103,11 +103,12 @@ test('it skips a manager rejected by unretirement rules and still unretires the 
         )
         ->throws(CannotBeUnretiredException::notRetired($rejectedManager));
     $unretireManager->expects('handle')
-        ->with(
-            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Manager && $actual->is($eligibleManager)),
-            $unretirementDate,
-            false,
-        );
+        ->with(Argument::all(
+            fn (mixed ...$arguments): bool => ($arguments[0] ?? null) instanceof Manager
+                && $arguments[0]->is($eligibleManager)
+                && ($arguments[1] ?? null) == $unretirementDate
+                && ($arguments[2] ?? null) === false,
+        ));
 
     new UnretireCurrentMembersAction($unretireWrestler, $unretireManager)
         ->handle($tagTeam, $unretirementDate);

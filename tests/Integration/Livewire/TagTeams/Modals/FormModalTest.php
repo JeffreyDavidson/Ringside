@@ -11,7 +11,6 @@ use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -84,9 +83,10 @@ describe('authorized tag team form interactions', function () {
             ->assertSee('Edit The Midnight Express');
     });
 
-    it('propagates a missing tag team failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing tag team', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a tag team with its complete roster configuration', function () {

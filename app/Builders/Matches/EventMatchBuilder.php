@@ -10,7 +10,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -60,9 +59,7 @@ class EventMatchBuilder extends Builder
     }
 
     /**
-     * @template TRelatedModel of Model
-     *
-     * @param  Builder<TRelatedModel>  $query
+     * @param  Builder<EventMatch>  $query
      */
     public static function constrainToPastEvents(Builder $query): void
     {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -66,9 +65,10 @@ describe('authorized event form interactions', function () {
             ->assertSee('Edit Summer Showcase');
     });
 
-    it('propagates a missing event failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing event', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a scheduled event and closes the modal', function () {

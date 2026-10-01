@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
@@ -75,9 +74,10 @@ describe('authorized venue form interactions', function () {
             ->assertSee('Edit Madison Square Garden');
     });
 
-    it('propagates a missing venue failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing venue', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a venue and resets the modal', function () {
