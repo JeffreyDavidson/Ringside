@@ -25,7 +25,7 @@ use Symfony\Component\Process\Process;
 
 /**
  * Run one worker per spec with a start barrier, in real PHP processes: each books a match in an event
- * or, with a reschedule_date, moves an event to that date.
+ * or, with a reschedule_date, moves an event to that date, or, with a restore_event_id, restores that deleted event.
  *
  * @param  array<int, array<string, int|string>>  $bookings
  * @return array<int, array<mixed>>
@@ -286,6 +286,46 @@ test('two events swapping dates at once never deadlock', function () {
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and($firstEvent->refresh()->date?->toDateTimeString())->toBe($secondDate->toDateTimeString())
                 ->and($secondEvent->refresh()->date?->toDateTimeString())->toBe($firstDate->toDateTimeString());
+        }
+    });
+})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
+    ->group('postgres-concurrency');
+
+test('restoring an event while its wrestler is booked in another event at the same time admits only one', function () {
+    withCommittedData(function (): void {
+        // The restore is held back by a different delay each run so that, across the runs, it lands before, inside
+        // and after the booking's own conflict check; only an unguarded restore can slip in behind that check.
+        foreach ([30, 35, 40, 45, 50, 55, 60, 70] as $run => $restoreDelayMs) {
+            // Arrange
+            $date = now()->addWeeks($run + 1);
+            $deletedEvent = Event::factory()->create(['date' => $date]);
+            $otherEvent = Event::factory()->create(['date' => $date]);
+            $sharedWrestler = Wrestler::factory()->bookable()->create();
+            EventMatch::factory()->forEvent($deletedEvent)->withCompetitors([$sharedWrestler])->create();
+            $deletedEvent->delete();
+            $deadlocksBefore = deadlocksResolved();
+
+            // Act
+            $results = bookConcurrently([
+                ['restore_event_id' => $deletedEvent->id, 'start_delay_ms' => $restoreDelayMs],
+                bookingFor($otherEvent, $sharedWrestler),
+            ]);
+
+            // Assert
+            $liveEventsBookingTheWrestler = DB::table('events_matches_competitors')
+                ->join('events_matches', 'events_matches.id', '=', 'events_matches_competitors.match_id')
+                ->join('events', 'events.id', '=', 'events_matches.event_id')
+                ->where('events_matches_competitors.competitor_id', $sharedWrestler->id)
+                ->whereNull('events.deleted_at')
+                ->where('events.date', $date->toDateTimeString())
+                ->distinct()
+                ->count('events.id');
+
+            expect(deadlocksResolved())->toBe($deadlocksBefore)
+                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
+                ->and(collect($results)->where('ok', true))->toHaveCount(1)
+                ->and($liveEventsBookingTheWrestler)->toBe(1);
         }
     });
 })->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')

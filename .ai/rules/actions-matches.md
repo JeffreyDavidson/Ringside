@@ -12,4 +12,4 @@ RecordResultAction must apply match result metadata and all attached title outco
 Lock order for scheduling: the complete same-date event set (ascending id, including the action's own event) is locked first, then the match, then competitors/resources in ascending id; never lock an event or match row before the event set.
 
 ## Lock date slots before rescheduling
-Schedule changes that move an event to a date take the date-slot lock(s), ascending, before any event row lock; the slot lock is a transaction-scoped advisory lock on PostgreSQL and a no-op on SQLite.
+Schedule changes that move an event to a date (including Events RestoreAction, for the event's own date) take the date-slot lock(s), ascending, before any event row lock; the slot lock is a transaction-scoped advisory lock on PostgreSQL and a no-op on SQLite.
