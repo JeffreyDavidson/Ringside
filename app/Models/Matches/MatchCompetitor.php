@@ -107,6 +107,6 @@ class MatchCompetitor extends MorphPivot
      */
     public function competitor(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo()->withTrashed();
     }
 }

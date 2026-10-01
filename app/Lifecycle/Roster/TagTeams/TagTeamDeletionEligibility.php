@@ -6,6 +6,7 @@ namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
+use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 
 final class TagTeamDeletionEligibility
@@ -33,6 +34,16 @@ final class TagTeamDeletionEligibility
 
         if ($tagTeam->currentEmployment()->exists()) {
             throw CannotBeDeletedException::stillEmployed($tagTeam);
+        }
+
+        $isBookedInLiveMatch = EventMatch::query()
+            ->withoutGlobalScope('promotion_context')
+            ->forTagTeamId($tagTeam->id)
+            ->upcomingOrUnresulted()
+            ->exists();
+
+        if ($isBookedInLiveMatch) {
+            throw CannotBeDeletedException::bookedInUpcomingMatch($tagTeam);
         }
     }
 

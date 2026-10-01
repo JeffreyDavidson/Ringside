@@ -103,6 +103,19 @@ class EventMatchBuilder extends Builder
         return $this;
     }
 
+    /**
+     * Limit to matches that are still live: no recorded result, or an event that has not yet happened.
+     */
+    public function upcomingOrUnresulted(): static
+    {
+        $this->where(function (Builder $query): void {
+            $query->whereNull('match_finish')
+                ->orWhereRelation('event', 'date', '>=', now());
+        });
+
+        return $this;
+    }
+
     public function forReferee(Referee $referee): static
     {
         return $this->forRefereeId($referee->id);
