@@ -266,6 +266,16 @@ GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
 
+## Blocked dependency upgrades
+
+Dependabot proposed these in October 2026; they are deferred on purpose, not forgotten.
+
+- **ESLint 10 with `@eslint/js` 10.** `@eslint/js` 10 declares `eslint ^10` as a peer, while the project is on
+  ESLint 9. Upgrade both together, including the flat config, and not `@eslint/js` alone.
+- **Vite 8 with `laravel-vite-plugin` 3.** `laravel-vite-plugin` 3 requires `vite ^8`, and the project is on
+  Vite 7 (Tailwind's Vite plugin already supports 8). Vite 8 switches the bundler to Rolldown, so treat it as a
+  planned upgrade with a full build and browser-suite check, and not a lockfile bump.
+
 ## Considered and rejected
 
 These were evaluated during the September 2026 refactor series and deliberately

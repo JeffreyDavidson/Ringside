@@ -20,10 +20,16 @@ updates:
       labels:
           - dependencies
       groups:
+          # The framework, Livewire and Larastan change behaviour, test helpers and static-analysis types often
+          # enough that one red package must not block the rest of the group, so each gets its own PR.
           composer-minor-and-patch:
               update-types:
                   - minor
                   - patch
+              exclude-patterns:
+                  - 'laravel/framework'
+                  - 'livewire/livewire'
+                  - 'larastan/larastan'
 
     - package-ecosystem: npm
       directory: /
