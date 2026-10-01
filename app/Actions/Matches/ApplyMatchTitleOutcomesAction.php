@@ -51,7 +51,7 @@ class ApplyMatchTitleOutcomesAction
                 ? $this->championForTitle($title, $winningCompetitors)
                 : null;
 
-            $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $reigns);
+            $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $desiredChampions[$title->id], $reigns);
         }
 
         foreach ($titles as $title) {

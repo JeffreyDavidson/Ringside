@@ -34,6 +34,8 @@ A champion defense leaves the current reign open. A compatible challenger winnin
 
 Correcting a result soft deletes a reign incorrectly created by that match and reopens the preceding reign before applying the corrected outcome. Corrections are rejected after a later reign has been recorded because rewriting that earlier result would invalidate dependent lineage.
 
+Title results are recorded in date order. `ChampionshipReignManager::ensureMatchCanBeReconciled()` runs for every attached title before any write, and rejects the result with `InvalidMatchOutcomeException::titleResultOutOfDateOrder()` when it would create or change a reign (a title-changing winner, or a correction of the reign that match already created) while the title already has another non-deleted reign won strictly after the event date. The whole `RecordResultAction` transaction rolls back, so the match result and every other attached title stay unchanged. Reigns won at the same instant are allowed, results that leave the champion unchanged (draws, disqualifications, no-decisions with no reign at that match) are unaffected, and an undated event still fails with the undated-title-match exception. The existing lineage guard still fires first when the match's own reign has already been closed by a later reign.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)

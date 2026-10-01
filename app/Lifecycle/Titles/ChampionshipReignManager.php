@@ -21,13 +21,29 @@ final class ChampionshipReignManager
     public function ensureMatchCanBeReconciled(
         EventMatch $match,
         Title $title,
+        Wrestler|TagTeam|null $desiredChampion,
         Collection $reigns,
     ): void {
-        $reignWonAtMatch = $this->activeReignsForTitle($title, $reigns)
-            ->firstWhere('won_match_id', $match->id);
+        $activeReigns = $this->activeReignsForTitle($title, $reigns);
+        $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
 
         if ($reignWonAtMatch?->lost_match_id !== null) {
             throw InvalidMatchOutcomeException::titleLineageHasAdvanced();
+        }
+
+        $eventDate = $match->event->date;
+
+        if (! $eventDate instanceof Carbon || ($reignWonAtMatch === null && $desiredChampion === null)) {
+            return;
+        }
+
+        $laterReignExists = $activeReigns->contains(
+            fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
+                && $reign->won_at->greaterThan($eventDate),
+        );
+
+        if ($laterReignExists) {
+            throw InvalidMatchOutcomeException::titleResultOutOfDateOrder($title);
         }
     }
 

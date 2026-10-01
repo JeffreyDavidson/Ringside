@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleType;
 use App\Livewire\Matches\Modals\ResultModal;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -175,6 +178,34 @@ describe('authorized result recording', function (): void {
             ->assertNotDispatched('closeModal');
         expect($match->refresh()->match_finish)->toBeNull()
             ->and($match->winning_side_id)->toBeNull();
+    });
+
+    it('reports a title result recorded out of date order as an outcome error', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
+        $match->event->update(['date' => now()->subDays(10)]);
+        $title = Title::factory()->create(['type' => TitleType::Singles]);
+        $match->titles()->attach($title);
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler(Wrestler::factory()->create())
+            ->wonOn(now()->subDays(5)->toDateTimeString())
+            ->create();
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
+
+        // Act
+        $modal->set('form.finish', MatchFinish::Pinfall->value);
+        $modal->set('form.winningSideId', $competitors[0]->match_side_id);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['outcome'])
+            ->assertSee('record results in date order')
+            ->assertNotDispatched('refreshDatatable')
+            ->assertNotDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBeNull()
+            ->and($title->championships()->count())->toBe(1);
     });
 
     it('hides elimination inputs for ordinary matches', function (): void {

@@ -13,3 +13,6 @@ Lock order for scheduling: the complete same-date event set (ascending id, inclu
 
 ## Lock date slots before rescheduling
 Schedule changes that move an event to a date (including Events RestoreAction, for the event's own date) take the date-slot lock(s), ascending, before any event row lock; the slot lock is a transaction-scoped advisory lock on PostgreSQL and a no-op on SQLite.
+
+## Record title results in date order
+Title results are recorded in date order: a result that would create or change a reign earlier than the title's latest recorded reign is rejected with a domain exception, never written.
