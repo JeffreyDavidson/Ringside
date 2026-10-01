@@ -34,7 +34,6 @@ require __DIR__.'/auth.php';
 Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
-    Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('promotions', [PromotionsController::class, 'index'])
         ->can('viewAny', Promotion::class)
         ->name('promotions.index');
@@ -44,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
 
     Route::middleware('promotion.context')->group(function () {
+        Route::get('dashboard', DashboardController::class)->name('dashboard');
+
         Route::prefix('roster')->group(function () {
             Route::get('stables', [StablesController::class, 'index'])->can('viewAny', Stable::class)->name('stables.index');
             Route::get('stables/{stable}', [StablesController::class, 'show'])->can('view', 'stable')->name('stables.show');

@@ -5,6 +5,7 @@ use App\Http\Middleware\EstablishPromotionContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders()
@@ -17,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [EnsureUserIsActive::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/dashboard');
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EstablishPromotionContext::class);
+        $middleware->prependToPriorityList(before: EstablishPromotionContext::class, prepend: EnsureUserIsActive::class);
         $middleware->alias([
             'promotion.context' => EstablishPromotionContext::class,
         ]);

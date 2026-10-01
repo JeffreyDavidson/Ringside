@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Titles\Tables\TitleHistory;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
@@ -202,26 +206,27 @@ describe('TitleHistory authorization', function (): void {
         // Arrange
         $authorizedTitle = null;
 
-        Gate::before(function (mixed $user, string $ability, array $arguments) use (&$authorizedTitle): ?bool {
-            if ($ability !== 'view' || ! ($arguments[0] ?? null) instanceof Title) {
-                return null;
+        Gate::after(function (mixed $user, string $ability, mixed $result, array $arguments) use (&$authorizedTitle): void {
+            if ($ability === 'view' && ($arguments[0] ?? null) instanceof Title) {
+                $authorizedTitle = $arguments[0];
             }
-
-            $authorizedTitle = $arguments[0];
-
-            return true;
         });
-        actingAs(basicUser());
+        $user = basicUser();
+        actingAs($user);
+        $title = Title::factory()->for($promotion = Promotion::factory()->create(), 'promotion')->create();
+        $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        resolve(PromotionContextService::class)->set($promotion);
+        resolve(PromotionContextService::class)->enforce();
 
         // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
 
         // Assert
         $table->assertSuccessful();
-        expect($authorizedTitle?->is($this->title))->toBeTrue();
+        expect($authorizedTitle?->is($title))->toBeTrue();
     });
 
-    it('forbids users without access to the title', function (string $actor): void {
+    it('forbids users without access to the title', function (string $actor, int $status): void {
         // Arrange
         if ($actor === 'guest') {
             Auth::logout();
@@ -233,9 +238,9 @@ describe('TitleHistory authorization', function (): void {
         $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
 
         // Assert
-        $table->assertForbidden();
+        $table->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });

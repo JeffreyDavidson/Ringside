@@ -104,8 +104,6 @@ describe('promotion form interactions', function () {
     it('does not allow a regular user to open the promotion form', function () {
         actingAs(User::factory()->basicUser()->create());
 
-        livewire(FormModal::class)
-            ->call('openModal')
-            ->assertForbidden();
+        livewire(FormModal::class)->assertForbidden();
     });
 });

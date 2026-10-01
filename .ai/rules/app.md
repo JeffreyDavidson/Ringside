@@ -26,5 +26,8 @@ Prefer Laravel's native framework abstractions and APIs before introducing custo
 ## Persist request-scoped context middleware for Livewire
 Middleware that establishes request-scoped context, such as EstablishPromotionContext, must also be registered with Livewire::addPersistentMiddleware(). Livewire update requests do not run the page route's middleware, so without it the context is lost after the first interaction.
 
+## Establish promotion context before route model binding
+EstablishPromotionContext (and EnsureUserIsActive before it) is placed ahead of SubstituteBindings in the middleware priority list in bootstrap/app.php. Promotion scopes fail closed for non-administrators without an enforced context, so bindings resolved earlier would 404 for every member.
+
 ## No orphaned docblocks
 A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.

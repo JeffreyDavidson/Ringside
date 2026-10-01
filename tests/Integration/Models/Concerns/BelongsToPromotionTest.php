@@ -13,6 +13,8 @@ use App\Models\Titles\Title;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
 
+use function Pest\Laravel\actingAs;
+
 function createPromotionOwnedRecord(string $modelClass, ?Promotion $promotion): Model
 {
     $factory = match ($modelClass) {
@@ -105,4 +107,40 @@ it('refuses to create records when a promotion context is enforced without an ac
 })->with([
     'wrestler' => Wrestler::class,
     'title' => Title::class,
+]);
+
+it('returns no records to an authenticated non-administrator when no promotion context is enforced', function (string $modelClass) {
+    $promotion = Promotion::factory()->create();
+    createPromotionOwnedRecord($modelClass, $promotion);
+    createPromotionOwnedRecord($modelClass, null);
+    actingAs(basicUser());
+
+    $records = $modelClass::query()->get();
+
+    expect($records)->toBeEmpty();
+})->with([
+    'wrestler' => Wrestler::class,
+    'manager' => Manager::class,
+    'referee' => Referee::class,
+    'tag team' => TagTeam::class,
+    'stable' => Stable::class,
+    'title' => Title::class,
+    'event' => Event::class,
+]);
+
+it('stays unscoped without an enforced promotion context for administrators and unauthenticated contexts', function (string $modelClass, bool $isAdministrator) {
+    $record = createPromotionOwnedRecord($modelClass, Promotion::factory()->create());
+
+    if ($isAdministrator) {
+        actingAs(administrator());
+    }
+
+    $records = $modelClass::query()->pluck('id');
+
+    expect($records->all())->toBe([$record->getKey()]);
+})->with([
+    'wrestler as administrator' => [Wrestler::class, true],
+    'wrestler as guest or console' => [Wrestler::class, false],
+    'event as administrator' => [Event::class, true],
+    'event as guest or console' => [Event::class, false],
 ]);

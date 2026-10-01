@@ -351,7 +351,7 @@ it('paginates rendered matches using the selected page size', function (): void 
         ->assertDontSee('Singles');
 });
 
-it('forbids users without administrative access', function (string $actor): void {
+it('forbids users without administrative access', function (string $actor, int $status): void {
     // Arrange
     if ($actor === 'guest') {
         Auth::logout();
@@ -365,8 +365,8 @@ it('forbids users without administrative access', function (string $actor): void
     $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
 
     // Assert
-    $component->assertForbidden();
+    $component->assertStatus($status);
 })->with([
-    'guest' => ['guest'],
-    'basic user' => ['basic user'],
+    'guest' => ['guest', 403],
+    'basic user' => ['basic user', 404],
 ]);

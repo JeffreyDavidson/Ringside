@@ -285,10 +285,8 @@ it('forbids users without administrative access from opening the user form', fun
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $user?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $user?->id])
+        ->assertStatus(403);
 })->with([
     'guest creating' => ['guest', 'create'],
     'basic user creating' => ['basic user', 'create'],

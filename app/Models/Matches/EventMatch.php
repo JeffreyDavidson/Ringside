@@ -86,6 +86,12 @@ class EventMatch extends Model implements SoftDeletable
         static::addGlobalScope('promotion_context', function (Builder $builder): void {
             $context = app(PromotionContextService::class);
 
+            if ($context->failsClosed()) {
+                $builder->whereRaw('0 = 1');
+
+                return;
+            }
+
             if (! $context->isEnforced()) {
                 return;
             }

@@ -281,20 +281,18 @@ describe('authorized title form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the title form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the title form', function (string $actor, string $operation, int $status) {
     $title = $operation === 'update' ? Title::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $title?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $title?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);

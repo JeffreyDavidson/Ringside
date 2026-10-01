@@ -273,7 +273,7 @@ describe('authorized result recording', function (): void {
     });
 });
 
-it('requires an administrator to record a result', function (bool $authenticated): void {
+it('requires an administrator to open the result modal', function (bool $authenticated, int $status): void {
     // Arrange
     [$match] = createMatchWithResultCompetitors();
 
@@ -281,15 +281,12 @@ it('requires an administrator to record a result', function (bool $authenticated
         actingAs(basicUser());
     }
 
+    // Act
     $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    // Act
-    $modal->set('form.finish', MatchFinish::TimeLimitDraw->value);
-    $modal->call('save');
-
     // Assert
-    $modal->assertForbidden();
+    $modal->assertStatus($status);
 })->with([
-    'guest' => false,
-    'authenticated non-administrator' => true,
+    'guest' => [false, 403],
+    'authenticated non-administrator' => [true, 404],
 ]);

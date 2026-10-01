@@ -11,6 +11,8 @@ use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use function Pest\Laravel\actingAs;
+
 /**
  * Integration tests for EventMatch model structure and configuration.
  *
@@ -135,6 +137,30 @@ it('returns no matches when a promotion context is enforced without an active pr
 
     expect($eventMatches)->toBeEmpty();
 });
+
+it('returns no matches to an authenticated non-administrator when no promotion context is enforced', function () {
+    EventMatch::factory()->for(Event::factory()->for(Promotion::factory(), 'promotion'))->create();
+    actingAs(basicUser());
+
+    $eventMatches = EventMatch::query()->get();
+
+    expect($eventMatches)->toBeEmpty();
+});
+
+it('stays unscoped without an enforced promotion context for administrators and unauthenticated contexts', function (bool $isAdministrator) {
+    $eventMatch = EventMatch::factory()->for(Event::factory()->for(Promotion::factory(), 'promotion'))->create();
+
+    if ($isAdministrator) {
+        actingAs(administrator());
+    }
+
+    $eventMatches = EventMatch::query()->pluck('id');
+
+    expect($eventMatches->all())->toBe([$eventMatch->id]);
+})->with([
+    'administrator' => true,
+    'guest or console' => false,
+]);
 
 it('only returns matches of the active promotion when a promotion context is enforced', function () {
     $context = app(PromotionContextService::class);

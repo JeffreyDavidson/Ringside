@@ -201,7 +201,7 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
         $component->assertSuccessful();
     });
 
-    it('forbids users without access to the wrestler', function (string $actor): void {
+    it('forbids users without access to the wrestler', function (string $actor, int $status): void {
         // Arrange
         if ($actor === 'guest') {
             Auth::logout();
@@ -213,10 +213,10 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
         // Assert
-        $component->assertForbidden();
+        $component->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });
 
