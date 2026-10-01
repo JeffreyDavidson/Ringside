@@ -101,6 +101,10 @@ class CreateEditForm extends BaseForm
             ],
         ];
 
+        if ($stable?->firstActivityPeriod?->ended_at !== null) {
+            $rules['ended_at'] = ['required', 'date'];
+        }
+
         if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
             $rules['ended_at'][] = 'after:started_at';
         }
@@ -131,6 +135,14 @@ class CreateEditForm extends BaseForm
     private function stableId(): ?int
     {
         return $this->modelId === null ? null : (int) $this->modelId;
+    }
+
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        return [
+            'ended_at.required' => 'A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.',
+        ];
     }
 
     #[\Override]
