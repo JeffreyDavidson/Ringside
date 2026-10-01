@@ -19,5 +19,5 @@ return [
     'current_champions' => 'Current champions',
     'titles_link' => 'All titles',
     'no_champions' => 'No titles have a current champion yet.',
-    'champion_since' => 'Since :date · :days days',
+    'champion_since' => 'Since :date · :days day|Since :date · :days days',
 ];

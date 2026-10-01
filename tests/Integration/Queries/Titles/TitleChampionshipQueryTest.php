@@ -125,3 +125,14 @@ test('returns null records and champions for a title without reigns', function (
         ->and(TitleChampionshipQuery::reignCount($title))->toBe(0)
         ->and(TitleChampionshipQuery::isVacant($title))->toBeTrue();
 });
+
+test('never reports a negative reign length for a reign dated in the future', function () {
+    $championship = TitleChampionship::factory()
+        ->for($this->title)
+        ->forWrestler($this->firstChampion)
+        ->wonOn(now()->addDays(10)->toDateTimeString())
+        ->current()
+        ->make();
+
+    expect(TitleChampionshipQuery::reignLengthInDays($championship))->toBe(0);
+});
