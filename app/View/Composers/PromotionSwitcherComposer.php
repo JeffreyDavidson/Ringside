@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\View\Composers;
 
-use App\Enums\Promotions\MembershipStatus;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
@@ -25,10 +24,9 @@ class PromotionSwitcherComposer
             return;
         }
 
-        $promotions = $user->promotions()
-            ->wherePivot('status', MembershipStatus::Active)
-            ->orderBy('promotions.name')
-            ->get();
+        $promotions = $this->context->activePromotionsFor($user)
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
 
         $activePromotionId = $this->context->current()?->getKey();
 

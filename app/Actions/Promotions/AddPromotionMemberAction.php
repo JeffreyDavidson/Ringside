@@ -9,6 +9,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
 final class AddPromotionMemberAction
@@ -41,6 +42,8 @@ final class AddPromotionMemberAction
                 'role' => $role,
                 'status' => MembershipStatus::Active,
             ]);
+
+            app(PromotionContextService::class)->forgetMemberships();
 
             return true;
         });
