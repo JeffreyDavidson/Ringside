@@ -34,7 +34,25 @@ A champion defense leaves the current reign open. A compatible challenger winnin
 
 Correcting a result soft deletes a reign incorrectly created by that match and reopens the preceding reign before applying the corrected outcome. Corrections are rejected after a later reign has been recorded because rewriting that earlier result would invalidate dependent lineage.
 
+A correction reopens the preceding reign only when it is still valid: the title must still be active and the preceding champion must still exist and be employed (not retired, released, or soft deleted). Otherwise the preceding reign stays closed by this match, the title is left vacant (or crowns the corrected winner), and nothing is reopened for a champion who can no longer hold the title.
+
 Title results are recorded in date order. `ChampionshipReignManager::ensureMatchCanBeReconciled()` runs for every attached title before any write, and rejects the result with `InvalidMatchOutcomeException::titleResultOutOfDateOrder()` when it would create or change a reign (a title-changing winner, or a correction of the reign that match already created) while the title already has another non-deleted reign won strictly after the event date. The whole `RecordResultAction` transaction rolls back, so the match result and every other attached title stay unchanged. Reigns won at the same instant are allowed, results that leave the champion unchanged (draws, disqualifications, no-decisions with no reign at that match) are unaffected, and an undated event still fails with the undated-title-match exception. The existing lineage guard still fires first when the match's own reign has already been closed by a later reign.
+
+The date-order check also rejects a result that would create a reign when the event date falls inside another reign's closed interval (`won_at <= date < lost_at`), for example a back-dated result inside a reign that was vacated later by a retirement, release, or title retirement. A reign ending exactly at the event date does not block it. A correction that leaves the champion unchanged (the reign created by this match already belongs to the desired winner, such as correcting pinfall to submission) is a no-op and is never rejected for date order, even after a later vacancy and new reign.
+
+### Result preconditions
+
+`RecordResultAction` rejects every result, title or not, unless the event has already happened (`date <= now`; a future or unscheduled event fails with `InvalidMatchOutcomeException::eventNotHeld()`), so a reign can never be dated in the future. Inside the same locked transaction, a result that would put a different champion on a title re-checks current state before writing: the title must not be soft deleted (`titleDeleted()`) and must still be active (`titleNotActive()`, so a pulled or retired title never gains a reign), and the winner must still exist (`winnerDeleted()`) and pass `RosterBookingEligibility` (`winnerNotEligible()`; retired, released, unemployed, injured, and suspended winners are rejected). Results that do not change the champion (draws, disqualifications, a champion's own defence, corrections to the same winner) are not blocked by these checks, and a deleted title is skipped for them.
+
+### Reign dates
+
+A reign never ends before it began: `endCurrentReign()` and `endCurrentReignsForChampion()` clamp `lost_at` to `max(effective date, won_at)`. Reign length reporting (`TitleChampionshipQuery::reignLengthInDays()`) is clamped at zero days. Tag-team retirement ends the team's current reigns in the same locked transaction, like release and deletion do; wrestler retirement already did so.
+
+An event whose matches have created or closed a non-deleted reign cannot be moved or unscheduled (`CannotBeRescheduledException::hasTitleReigns()`, enforced in `EventSchedulingEligibility::ensureDateCanChange()` for both the Livewire rule and `Events\UpdateAction`), because reigns store the event date.
+
+### Title type
+
+A title's type (singles or tag team) is locked once it has any championship reign or is booked in a non-deleted match (`TitleTypeEligibility`, enforced by `Titles\UpdateAction` with `CannotChangeTypeException`). The title form modal renders the type select disabled with an explanatory note in that case.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

@@ -30,12 +30,12 @@ test('it leaves matches without titles unchanged', function (): void {
 test('it rejects a title match with multiple eligible winners', function (): void {
     $event = Event::factory()->past()->create();
     $match = EventMatch::factory()->forEvent($event)->create();
-    $title = Title::factory()->singles()->create();
+    $title = Title::factory()->singles()->active()->create();
     $match->titles()->attach($title);
     $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
-    $firstWinner = Wrestler::factory()->create();
-    $secondWinner = Wrestler::factory()->create();
+    $firstWinner = Wrestler::factory()->bookable()->create();
+    $secondWinner = Wrestler::factory()->bookable()->create();
     $match->competitors()->createMany([
         [
             'match_side_id' => $winningSide->id,
@@ -59,10 +59,10 @@ test('it rejects a title match with multiple eligible winners', function (): voi
 test('it transfers the current singles championship to the winning wrestler', function (): void {
     $event = Event::factory()->past()->create();
     $match = EventMatch::factory()->forEvent($event)->create();
-    $title = Title::factory()->singles()->create();
+    $title = Title::factory()->singles()->active()->create();
     $match->titles()->attach($title);
-    $champion = Wrestler::factory()->create();
-    $challenger = Wrestler::factory()->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $challenger = Wrestler::factory()->bookable()->create();
     $currentSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
     $match->competitors()->createMany([
@@ -98,10 +98,10 @@ test('it transfers the current singles championship to the winning wrestler', fu
 test('it keeps the existing championship changes when the same result is applied again', function (): void {
     $event = Event::factory()->past()->create();
     $match = EventMatch::factory()->forEvent($event)->create();
-    $title = Title::factory()->singles()->create();
+    $title = Title::factory()->singles()->active()->create();
     $match->titles()->attach($title);
-    $champion = Wrestler::factory()->create();
-    $challenger = Wrestler::factory()->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $challenger = Wrestler::factory()->bookable()->create();
     $currentSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
     $match->competitors()->createMany([

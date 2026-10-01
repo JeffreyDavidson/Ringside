@@ -12,6 +12,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 test('it rejects changing the date of an event that already occurred', function () {
     $originalDate = now()->subWeek();
@@ -99,4 +100,60 @@ test('it rejects rescheduling when a title is assigned at the target time', func
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
         ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.")
         ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+});
+
+test('it rejects moving or unscheduling an event whose matches created or closed a reign', function (bool $closesReign, ?int $targetWeeks): void {
+    // Arrange
+    $originalDate = now()->addWeek();
+    $event = Event::factory()->create(['date' => $originalDate]);
+    $match = EventMatch::factory()->forEvent($event)->create();
+    $reign = TitleChampionship::factory()->for(Title::factory()->active());
+
+    $reign = $closesReign
+        ? $reign->lostAtEventMatch($match)
+        : $reign->wonAtEventMatch($match);
+    $reign->create();
+    $data = new EventData($event->name, $targetWeeks === null ? null : now()->addWeeks($targetWeeks), null, null);
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($event, $data);
+
+    // Assert
+    expect($update)->toThrow(
+        CannotBeRescheduledException::class,
+        "Event [{$event->name}] cannot be rescheduled because its matches have created or ended title reigns.",
+    )
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+})->with([
+    'moved after creating a reign' => [false, 3],
+    'unscheduled after creating a reign' => [false, null],
+    'moved after closing a reign' => [true, 3],
+]);
+
+test('it still updates other details of an event with title reigns when its date is unchanged', function (): void {
+    // Arrange
+    $originalDate = now()->addWeek();
+    $event = Event::factory()->create(['date' => $originalDate]);
+    $match = EventMatch::factory()->forEvent($event)->create();
+    TitleChampionship::factory()->for(Title::factory()->active())->wonAtEventMatch($match)->create();
+
+    // Act
+    $updated = resolve(UpdateAction::class)->handle($event, new EventData('Renamed Event', $originalDate->copy(), null, null));
+
+    // Assert
+    expect($updated->name)->toBe('Renamed Event');
+});
+
+test('it reschedules an event whose reigns were voided', function (): void {
+    // Arrange
+    $event = Event::factory()->create(['date' => now()->addWeek()]);
+    $match = EventMatch::factory()->forEvent($event)->create();
+    TitleChampionship::factory()->for(Title::factory()->active())->wonAtEventMatch($match)->create()->delete();
+    $targetDate = now()->addWeeks(3);
+
+    // Act
+    $updated = resolve(UpdateAction::class)->handle($event, new EventData($event->name, $targetDate, null, null));
+
+    // Assert
+    expect($updated->date?->toDateTimeString())->toBe($targetDate->toDateTimeString());
 });
