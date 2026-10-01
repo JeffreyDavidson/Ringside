@@ -17,6 +17,7 @@ final class TitleDeletionEligibility
 
         $conflictingTitle = Title::query()
             ->whereName($title->name)
+            ->where('promotion_id', $title->promotion_id)
             ->whereKeyNot($title->getKey())
             ->first();
 

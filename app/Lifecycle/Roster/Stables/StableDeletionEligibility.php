@@ -67,6 +67,7 @@ final readonly class StableDeletionEligibility
 
         $conflictingStable = Stable::query()
             ->whereName($stable->name)
+            ->where('promotion_id', $stable->promotion_id)
             ->whereKeyNot($stable->getKey())
             ->first();
 

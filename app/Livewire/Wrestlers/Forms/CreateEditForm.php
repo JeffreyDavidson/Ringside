@@ -11,7 +11,6 @@ use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Wrestler> */
 class CreateEditForm extends BaseForm
@@ -61,12 +60,12 @@ class CreateEditForm extends BaseForm
         $wrestler = $this->isEditing() ? $this->wrestler() : null;
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->modelId)],
+            'name' => ['required', 'string', 'max:255', $this->uniqueInPromotion('wrestlers', 'name')],
             'hometown' => ['required', 'string', 'max:255'],
             'height_feet' => ['required', 'integer', 'min:0', 'max:7'],
             'height_inches' => ['required', 'integer', 'min:0', 'max:11', Rule::when($this->height_feet === 0, ['min:1'])],
             'weight' => ['required', 'integer', 'digits:3'],
-            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->modelId)],
+            'signature_move' => ['nullable', 'string', 'max:255', $this->uniqueInPromotion('wrestlers', 'signature_move')],
             'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($wrestler)],
         ];
     }
