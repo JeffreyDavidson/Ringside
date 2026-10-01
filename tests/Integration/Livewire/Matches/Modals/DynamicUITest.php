@@ -100,4 +100,57 @@ describe('dynamic match type UI', function (): void {
             ->assertSet('form.competitors.0', ['wrestlers' => [], 'tag_teams' => []])
             ->assertSet('form.competitors.1', ['wrestlers' => [], 'tag_teams' => []]);
     });
+
+    it('does not allow tag teams before a match type is selected', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $component->call('openModal');
+
+        // Assert
+        $component->assertSet('matchTypeAllowsTagTeams', false);
+    });
+
+    it('resets competitors when the match type arrives as its string value', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+        $component->set('form.matchType', MatchType::Singles);
+        $component->set('form.competitors.0.wrestlers', [123]);
+
+        // Act
+        $component->set('form.matchType', MatchType::TagTeam->value);
+
+        // Assert
+        $component
+            ->assertSet('form.competitors.0', ['wrestlers' => [], 'tag_teams' => []])
+            ->assertSet('form.competitors.1', ['wrestlers' => [], 'tag_teams' => []]);
+    });
+
+    it('keeps competitors when the match type is cleared', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+        $component->set('form.matchType', MatchType::Singles);
+        $component->set('form.competitors.0.wrestlers', [123]);
+
+        // Act
+        $component->set('form.matchType', null);
+
+        // Assert
+        $component
+            ->assertSet('form.matchType', null)
+            ->assertSet('form.competitors.0.wrestlers', [123]);
+    });
+
+    it('rejects a tampered match type value', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+
+        // Act / Assert
+        expect(fn () => $component->set('form.matchType', 'not-a-match-type'))
+            ->toThrow(ValueError::class);
+    });
 });

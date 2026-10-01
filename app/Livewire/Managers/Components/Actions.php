@@ -15,13 +15,16 @@ use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Livewire\Concerns\ChecksIndividualLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Actions extends Component
 {
+    use ChecksIndividualLifecycleEligibility;
     use ExecutesRosterActions;
 
     public Manager $manager;
@@ -74,6 +77,12 @@ class Actions extends Component
     public function restore(RestoreAction $restoreAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Manager, $this->manager, fn () => $restoreAction->handle($this->manager));
+    }
+
+    public function canPerform(RosterLifecycleAction $action): bool
+    {
+        return Gate::allows($action->ability(), $this->manager)
+            && $this->isEligibleFor($action, $this->manager);
     }
 
     public function render(): View

@@ -29,10 +29,6 @@ final class IndividualInjuryEligibility
             throw CannotBeInjuredException::unemployed($individual);
         }
 
-        if ($individual->currentRetirement()->exists()) {
-            throw CannotBeInjuredException::retired($individual);
-        }
-
         if ($individual->futureEmployment()->exists()) {
             throw CannotBeInjuredException::hasFutureEmployment($individual);
         }

@@ -1,1 +1,0 @@
-Torando Tag Match Competitors

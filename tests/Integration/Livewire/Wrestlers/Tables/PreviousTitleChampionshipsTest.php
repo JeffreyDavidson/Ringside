@@ -125,6 +125,14 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
     });
 
     it('renders the title championship history search control', function (): void {
+        // Arrange
+        TitleChampionship::factory()
+            ->for(Title::factory()->singles())
+            ->forWrestler($this->wrestler)
+            ->wonOn(now()->subMonths(3)->toDateString())
+            ->lostOn(now()->subMonth()->toDateString())
+            ->create();
+
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
@@ -178,7 +186,9 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous title championships')
+            ->assertSee('No previous title championships yet.')
+            ->assertDontSeeHtml('placeholder="Search title championships"');
     });
 });
 
@@ -208,4 +218,28 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+});
+
+describe('PreviousTitleChampionshipsTable Deleted Titles', function () {
+    it('renders a championship without a link when its title was deleted', function (): void {
+        // Arrange
+        $title = Title::factory()->singles()->create(['name' => 'Vanished Singles Title']);
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($this->wrestler)
+            ->wonOn('2024-01-01')
+            ->lostOn('2024-06-01')
+            ->create();
+        $title->delete();
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('2024-01-01')
+            ->assertDontSee('Vanished Singles Title')
+            ->assertDontSeeHtml(route('titles.show', $title));
+    });
 });

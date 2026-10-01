@@ -23,6 +23,7 @@ class RetireCurrentMembersAction
     public function handle(TagTeam $tagTeam, Carbon $retirementDate): void
     {
         $wrestlers = $tagTeam->currentWrestlers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Wrestler $wrestler): bool => $this->eligibility->canRetire($wrestler));
 
@@ -31,6 +32,7 @@ class RetireCurrentMembersAction
         }
 
         $managers = $tagTeam->currentManagers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Manager $manager): bool => $this->eligibility->canRetire($manager));
 

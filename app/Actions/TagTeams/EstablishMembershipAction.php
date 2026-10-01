@@ -14,11 +14,14 @@ class EstablishMembershipAction
 {
     public function __construct(
         protected AssignManagersAction $assignManagersAction,
+        protected LockIncomingWrestlersAction $lockIncomingWrestlersAction,
     ) {}
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
         if ($members->wrestlers instanceof Collection && $members->wrestlers->isNotEmpty()) {
+            $this->lockIncomingWrestlersAction->handle($tagTeam, $members->wrestlers);
+
             $tagTeam->wrestlers()->attach($members->wrestlers->modelKeys(), [
                 'joined_at' => $date,
                 'left_at' => null,

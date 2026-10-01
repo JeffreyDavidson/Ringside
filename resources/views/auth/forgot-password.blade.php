@@ -13,21 +13,11 @@
                     {{ __('auth-forms.check_email') }}
                 </h1>
                 <p role="status" class="text-ringside-muted mt-4 text-base leading-relaxed">
-                    {{ $errors->any() ? __('auth-forms.reset_requested_for') : __('auth-forms.reset_sent_to') }}
+                    {{ __('auth-forms.reset_sent_to') }}
                     <strong class="text-ringside-ink block wrap-anywhere">{{ $recoveryEmail }}</strong>
                 </p>
             </header>
             <p class="text-ringside-muted text-base leading-relaxed">{{ __('auth-forms.check_spam') }}</p>
-            @error('email')
-                <p
-                    role="alert"
-                    tabindex="-1"
-                    data-auth-error
-                    class="text-ringside-signal-soft focus-visible:outline-ringside-white focus-visible:outline-2 focus-visible:outline-offset-4"
-                >
-                    {{ $message }}
-                </p>
-            @enderror
             <form method="post" action="{{ route('password.email') }}">
                 @csrf
                 <input type="hidden" name="email" value="{{ $recoveryEmail }}" />

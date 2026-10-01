@@ -54,12 +54,9 @@
                                 </option>
                             @endforeach
                         </select>
-                        <button
-                            type="submit"
-                            class="btn-light-default btn-light-states w-full justify-center rounded-md px-3 py-2 text-xs font-medium"
-                        >
+                        <x-button type="submit" variant="secondary" size="sm" class="w-full">
                             {{ __('promotions.switch') }}
-                        </button>
+                        </x-button>
                     </form>
                 </div>
 
@@ -70,12 +67,7 @@
             <div class="flex flex-col px-4 py-1.5">
                 <form action="{{ route('logout') }}" method="post">
                     @csrf
-                    <button
-                        type="submit"
-                        class="btn-light-default btn-light-states w-full justify-center rounded-md px-3 py-2 text-xs font-medium"
-                    >
-                        Log out
-                    </button>
+                    <x-button type="submit" variant="secondary" size="sm" class="w-full">Log out</x-button>
                 </form>
             </div>
         </div>

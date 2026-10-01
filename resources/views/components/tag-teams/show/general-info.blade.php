@@ -1,8 +1,11 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$tagTeam->status->label()" />
+    <x-card.general-info.stat label="Status">
+        {{ $tagTeam->status->label() }}
+        <x-availability-badges class="ms-2" :suspended="$tagTeam->isSuspended()" />
+    </x-card.general-info.stat>
     <x-card.general-info.links label="Current Tag Team Partners">
         @forelse ($tagTeam->currentWrestlers as $wrestler)
-            <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
+            <x-route-link :route="route('wrestlers.show', $wrestler)" :label="$wrestler->name" />
             @if ($loop->count === 1)
                 and TBD
             @endif
@@ -18,7 +21,7 @@
         <x-card.general-info.link-list label="Current Manager(s)">
             @foreach ($tagTeam->currentManagers as $manager)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('managers.show', $manager)" label="{{ $manager->full_name }}" />
+                    <x-route-link :route="route('managers.show', $manager)" :label="$manager->full_name" />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
@@ -28,7 +31,7 @@
         <x-card.general-info.links label="Current Stable">
             <x-route-link
                 :route="route('stables.show', $tagTeam->currentStable)"
-                label="{{ $tagTeam->currentStable->name }}"
+                :label="$tagTeam->currentStable->name"
             />
         </x-card.general-info.links>
     @endif
@@ -39,7 +42,7 @@
                 <x-card.general-info.link-item>
                     <x-route-link
                         :route="route('titles.show', $currentChampionship->title)"
-                        label="{{ $currentChampionship->title->name }}"
+                        :label="$currentChampionship->title->name"
                     />
                 </x-card.general-info.link-item>
             @endforeach

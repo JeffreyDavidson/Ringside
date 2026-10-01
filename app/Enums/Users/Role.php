@@ -14,14 +14,6 @@ enum Role: string
         return $this === self::Administrator;
     }
 
-    public function color(): string
-    {
-        return match ($this) {
-            self::Administrator => 'success',
-            self::Basic => 'secondary',
-        };
-    }
-
     public function label(): string
     {
         return match ($this) {

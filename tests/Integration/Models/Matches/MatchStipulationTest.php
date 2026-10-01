@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
 use Database\Factories\Matches\MatchStipulationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -96,4 +97,16 @@ describe('MatchStipulation Model Integration Tests', function () {
             expect(MatchStipulation::factory())->toBeInstanceOf(MatchStipulationFactory::class);
         });
     });
+});
+
+it('lists the matches that use the stipulation', function () {
+    $stipulation = MatchStipulation::factory()->create();
+    $usingMatch = EventMatch::factory()->create(['match_stipulation_id' => $stipulation->id]);
+    EventMatch::factory()->create(['match_stipulation_id' => MatchStipulation::factory()->create()->id]);
+    EventMatch::factory()->create(['match_stipulation_id' => null]);
+
+    $eventMatches = $stipulation->eventMatches;
+
+    expect($eventMatches)->toHaveCount(1)
+        ->and($eventMatches->first()?->is($usingMatch))->toBeTrue();
 });

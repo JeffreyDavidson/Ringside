@@ -75,3 +75,18 @@ test('event and title ownership backfill requires confirmation unless previewing
         ->and($dryRunExitCode)->toBe(0)
         ->and($event->promotion_id)->toBeNull();
 });
+
+test('event and title ownership backfill fails when the promotion does not exist', function () {
+    $event = Event::factory()->create();
+    $title = Title::factory()->create();
+
+    $exitCode = Artisan::call('promotions:backfill-event-title-ownership', [
+        'promotion' => 999_999,
+        '--force' => true,
+    ]);
+
+    expect($exitCode)->toBe(1)
+        ->and(Artisan::output())->toContain('The selected promotion does not exist.')
+        ->and($event->refresh()->promotion_id)->toBeNull()
+        ->and($title->refresh()->promotion_id)->toBeNull();
+});

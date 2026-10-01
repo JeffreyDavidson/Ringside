@@ -68,7 +68,6 @@ single-consumer relationship traits or speculative override helpers.
 
 ## Essential Enum Usage
 - **Employment Status**: `App\Enums\Shared\EmploymentStatus` for pure employment states
-- **Activation Status**: `App\Enums\Shared\ActivationStatus` for general activation
 - **Title Status**: `App\Enums\Titles\TitleStatus` for title-specific states
 - **User Enums**: `App\Enums\Users\Role` and `App\Enums\Users\UserStatus`
 

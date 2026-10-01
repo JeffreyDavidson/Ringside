@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\DeleteAction;
-use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -112,7 +111,6 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->setFilterPillTitle(__('core.status'))
                 ->options(EventStatus::filterOptions())
                 ->filter(function (EventBuilder $builder, string $value): void {
                     $status = EventStatus::tryFrom($value);
@@ -133,16 +131,13 @@ class Main extends BaseTable
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
                 ->filter(function (EventBuilder $builder, array $dateRange): void {
                     /** @var array{minDate: string, maxDate: string} $dateRange */
-                    $startDate = Date::createFromFormat('Y-m-d', $dateRange['minDate']);
-                    $endDate = Date::createFromFormat('Y-m-d', $dateRange['maxDate']);
-
-                    if ($startDate === null || $endDate === null) {
+                    if (! Date::hasFormat($dateRange['minDate'], 'Y-m-d') || ! Date::hasFormat($dateRange['maxDate'], 'Y-m-d')) {
                         return;
                     }
 
                     $builder->whereBetween('date', [
-                        $startDate->startOfDay(),
-                        $endDate->endOfDay(),
+                        Date::parse($dateRange['minDate'])->startOfDay(),
+                        Date::parse($dateRange['maxDate'])->endOfDay(),
                     ]);
                 }),
             SelectFilter::make('Venue')
@@ -166,21 +161,5 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $event): void {
             $deleteAction->handle($event);
         }, __('events.actions.deleted'));
-    }
-
-    /**
-     * Restore a deleted scheduled event.
-     */
-    public function restore(int $eventId, RestoreAction $restoreAction): void
-    {
-        $event = Event::onlyTrashed()->findOrFail($eventId);
-
-        Gate::authorize('restore', $event);
-
-        if ($this->executeBusinessAction(function () use ($event, $restoreAction): void {
-            $restoreAction->handle($event);
-        }, __('events.actions.restored'))) {
-            $this->redirectRoute('events.index');
-        }
     }
 }

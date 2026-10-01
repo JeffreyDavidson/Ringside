@@ -11,4 +11,15 @@ enum TitleLifecycleTransition
     case Reinstate;
     case Retire;
     case Unretire;
+
+    public function ability(): string
+    {
+        return match ($this) {
+            self::Debut => 'debut',
+            self::Pull => 'pull',
+            self::Reinstate => 'reinstate',
+            self::Retire => 'retire',
+            self::Unretire => 'unretire',
+        };
+    }
 }

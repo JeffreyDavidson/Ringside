@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchStipulation;
+use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -100,4 +104,50 @@ describe('EventMatch Model Integration Tests', function () {
             expect($eventMatch)->toBeInstanceOf(EventMatch::class);
         });
     });
+});
+
+it('resolves the stipulation of a match', function () {
+    $stipulation = MatchStipulation::factory()->create();
+    $eventMatch = EventMatch::factory()->create(['match_stipulation_id' => $stipulation->id]);
+
+    $matchStipulation = $eventMatch->matchStipulation;
+
+    expect($matchStipulation)->toBeInstanceOf(MatchStipulation::class)
+        ->and($matchStipulation->is($stipulation))->toBeTrue();
+});
+
+it('has no stipulation for a standard match', function () {
+    $eventMatch = EventMatch::factory()->create(['match_stipulation_id' => null]);
+
+    $matchStipulation = $eventMatch->matchStipulation;
+
+    expect($matchStipulation)->toBeNull();
+});
+
+it('returns no matches when a promotion context is enforced without an active promotion', function () {
+    $context = app(PromotionContextService::class);
+    EventMatch::factory()->for(Event::factory()->for(Promotion::factory(), 'promotion'))->create();
+    EventMatch::factory()->for(Event::factory())->create();
+    $context->enforce();
+
+    $eventMatches = EventMatch::query()->get();
+    $context->clear();
+
+    expect($eventMatches)->toBeEmpty();
+});
+
+it('only returns matches of the active promotion when a promotion context is enforced', function () {
+    $context = app(PromotionContextService::class);
+    $promotion = Promotion::factory()->create();
+    $ownedMatch = EventMatch::factory()->for(Event::factory()->for($promotion, 'promotion'))->create();
+    EventMatch::factory()->for(Event::factory()->for(Promotion::factory(), 'promotion'))->create();
+    EventMatch::factory()->for(Event::factory())->create();
+    $context->set($promotion);
+    $context->enforce();
+
+    $eventMatches = EventMatch::query()->get();
+    $context->clear();
+
+    expect($eventMatches)->toHaveCount(1)
+        ->and($eventMatches->first()?->is($ownedMatch))->toBeTrue();
 });

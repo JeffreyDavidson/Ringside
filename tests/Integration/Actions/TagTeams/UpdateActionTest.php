@@ -9,6 +9,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\travel;
+
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->employed()->create([
         'name' => 'Original Team',
@@ -145,7 +147,7 @@ test('it allows updating to the same name', function () {
 test('it updates timestamps correctly', function () {
     $originalUpdatedAt = $this->tagTeam->updated_at;
 
-    sleep(1);
+    travel(1)->second();
 
     $updateData = new TagTeamData(
         name: 'Timestamp Updated Team',
@@ -233,4 +235,40 @@ test('it employs newly assigned members when the tag team is employed', function
         ->and($newManager->currentEmployment()->exists())->toBeTrue()
         ->and($this->tagTeam->currentWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeFalse()
         ->and($this->tagTeam->previousWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeTrue();
+});
+
+test('it employs a tag team that has never been employed when an employment date is given', function () {
+    $tagTeam = TagTeam::factory()->unemployed()->create();
+    [$wrestlerA, $wrestlerB] = $tagTeam->currentWrestlers()->get()->all();
+    $employmentDate = now()->subWeek()->startOfSecond();
+
+    $updatedTagTeam = resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: $tagTeam->name,
+        signature_move: $tagTeam->signature_move,
+        employment_date: $employmentDate,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+
+    expect($updatedTagTeam->currentEmployment()->sole()->started_at->toDateTimeString())
+        ->toBe($employmentDate->toDateTimeString())
+        ->and($wrestlerA->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestlerB->currentEmployment()->exists())->toBeTrue();
+});
+
+test('it does not employ a tag team when no employment date is given', function () {
+    $tagTeam = TagTeam::factory()->unemployed()->create();
+    [$wrestlerA, $wrestlerB] = $tagTeam->currentWrestlers()->get()->all();
+
+    $updatedTagTeam = resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: 'Renamed Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+
+    expect($updatedTagTeam->name)->toBe('Renamed Team')
+        ->and($updatedTagTeam->employments()->exists())->toBeFalse()
+        ->and($wrestlerA->employments()->exists())->toBeFalse();
 });

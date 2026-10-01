@@ -212,3 +212,12 @@ test('it assigns a repeated wrestler only once', function () {
 
     expect($match->competitors()->count())->toBe(1);
 });
+
+test('it rejects an empty wrestler list without creating a side', function () {
+    $match = EventMatch::factory()->create();
+
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect(), 1))
+        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.')
+        ->and($match->sides()->exists())->toBeFalse()
+        ->and($match->competitors()->exists())->toBeFalse();
+});

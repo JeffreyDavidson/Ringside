@@ -17,10 +17,7 @@ class TitlesController
     public function show(Title $title): View
     {
         return view('titles.show', [
-            'title' => $title->load([
-                'currentChampionship.champion',
-                'firstActivityPeriod',
-            ]),
+            'title' => $title,
         ]);
     }
 }

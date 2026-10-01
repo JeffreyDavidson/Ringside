@@ -1,5 +1,8 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$wrestler->status->label()" />
+    <x-card.general-info.stat label="Status">
+        {{ $wrestler->status->label() }}
+        <x-availability-badges class="ms-2" :injured="$wrestler->isInjured()" :suspended="$wrestler->isSuspended()" />
+    </x-card.general-info.stat>
     <x-card.general-info.stat label="Height" :value="$wrestler->height" />
     <x-card.general-info.stat label="Weight" :value="$wrestler->weight" />
     <x-card.general-info.stat label="Hometown" :value="$wrestler->hometown" />
@@ -10,7 +13,7 @@
         <x-card.general-info.links label="Current Tag Team">
             <x-route-link
                 :route="route('tag-teams.show', $wrestler->currentTagTeam)"
-                label="{{ $wrestler->currentTagTeam->name }}"
+                :label="$wrestler->currentTagTeam->name"
             />
         </x-card.general-info.links>
     @endif
@@ -18,7 +21,7 @@
         <x-card.general-info.link-list label="Current Manager(s)">
             @foreach ($wrestler->currentManagers as $manager)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('managers.show', $manager)" label="{{ $manager->full_name }}" />
+                    <x-route-link :route="route('managers.show', $manager)" :label="$manager->full_name" />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
@@ -27,7 +30,7 @@
         <x-card.general-info.links label="Current Stable">
             <x-route-link
                 :route="route('stables.show', $wrestler->currentStable)"
-                label="{{ $wrestler->currentStable->name }}"
+                :label="$wrestler->currentStable->name"
             />
         </x-card.general-info.links>
     @endif
@@ -37,7 +40,7 @@
                 <x-card.general-info.link-item>
                     <x-route-link
                         :route="route('titles.show', $currentChampionship->title)"
-                        label="{{ $currentChampionship->title->name }}"
+                        :label="$currentChampionship->title->name"
                     />
                 </x-card.general-info.link-item>
             @endforeach

@@ -29,11 +29,4 @@ final class CannotBeDeletedException extends BaseBusinessException
 
         return new self("{$context} cannot be deleted because it is still employed. Release the tag team from employment before deletion.");
     }
-
-    public static function stillSuspended(TagTeam $tagTeam): static
-    {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self("{$context} cannot be deleted because it is currently suspended. Resolve suspension status before deletion.");
-    }
 }

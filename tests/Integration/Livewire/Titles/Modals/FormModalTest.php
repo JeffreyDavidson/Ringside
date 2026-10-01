@@ -38,7 +38,7 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.name', '')
             ->assertSet('form.type', '')
             ->assertSet('form.start_date', '')
-            ->assertSee('Create Title');
+            ->assertSee('Add Title');
     });
 
     it('loads an existing title for editing', function () {
@@ -54,7 +54,7 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.name', 'World Championship Title')
             ->assertSet('form.type', TitleType::Singles->value)
             ->assertSet('form.start_date', '2024-01-15')
-            ->assertSee('Edit Title');
+            ->assertSee('Edit World Championship Title');
     });
 
     it('propagates a missing title failure', function () {
@@ -137,6 +137,20 @@ describe('authorized title form interactions', function () {
             ->assertNotDispatched('closeModal')
             ->assertSet('isModalOpen', true);
         expect(Title::query()->doesntExist())->toBeTrue();
+    });
+
+    it('uses the friendly title type name in validation messages', function () {
+        // Arrange
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set('form.name', 'Valid Championship Title');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        expect($modal->instance()->getErrorBag()->first('form.type'))
+            ->toBe('The title type field is required.');
     });
 
     it('rejects invalid title field values', function (string $case) {
@@ -234,6 +248,23 @@ describe('authorized title form interactions', function () {
             ->assertSet('form.type', '')
             ->assertSet('form.start_date', '');
     });
+
+    it('fills dummy data with the type and start date chosen by the random outcome', function (bool $outcome, TitleType $type, bool $hasStartDate) {
+        // Arrange
+        forceFakerBoolean($outcome);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+
+        // Assert
+        $modal->assertSet('form.type', $type->value);
+        expect($modal->get('form.start_date') !== null)->toBe($hasStartDate);
+    })->with([
+        'random outcome true' => [true, TitleType::Singles, true],
+        'random outcome false' => [false, TitleType::TagTeam, false],
+    ]);
 
     it('generates valid dummy data that can create a title', function () {
         $modal = livewire(FormModal::class);

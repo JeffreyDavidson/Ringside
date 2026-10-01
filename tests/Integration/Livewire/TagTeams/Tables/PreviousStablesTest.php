@@ -134,7 +134,9 @@ describe('PreviousStables rendering', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous stables')
+            ->assertSee('No previous stables yet.')
+            ->assertDontSeeHtml('placeholder="Search stables"');
     });
 });
 

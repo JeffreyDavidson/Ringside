@@ -37,16 +37,13 @@ class PhoneNumberCast implements CastsAttributes, SerializesCastableAttributes
         return new PhoneNumber($value)->toDigits();
     }
 
-    public function serialize(Model $model, string $key, mixed $value, array $attributes): ?string
+    /**
+     * Eloquent only serializes non-null values that were already cast by get().
+     *
+     * @param  PhoneNumber  $value
+     */
+    public function serialize(Model $model, string $key, mixed $value, array $attributes): string
     {
-        if ($value === null) {
-            return null;
-        }
-
-        if ($value instanceof PhoneNumber) {
-            return $value->toDigits();
-        }
-
-        return Arr::string(['value' => $value], 'value');
+        return $value->toDigits();
     }
 }

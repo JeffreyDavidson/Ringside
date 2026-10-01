@@ -71,17 +71,5 @@ final class IndividualSuspensionEligibility
         if (! $individual->currentSuspension()->exists()) {
             throw CannotBeReinstatedException::available($individual);
         }
-
-        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
-            throw CannotBeReinstatedException::unemployed($individual);
-        }
-
-        if ($individual->futureEmployment()->exists()) {
-            throw CannotBeReinstatedException::hasFutureEmployment($individual);
-        }
-
-        if ($individual->currentRetirement()->exists()) {
-            throw CannotBeReinstatedException::retired($individual);
-        }
     }
 }

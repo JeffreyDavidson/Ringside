@@ -27,6 +27,10 @@ relationship-focused boundary.
 **Priority:** High  
 **Status:** In progress; roster booking now delegates type-specific decisions to
 focused strategies while preserving the shared status and relationship checks.
+Eligibility guards that Action ordering makes unreachable (for example a retired
+subject reaching release, or a stable unretire name conflict blocked by the
+`stables_active_name_unique` index) have been deleted rather than tested; the
+ordering guarantee is recorded in `lifecycle-operation-boundaries.md`.
 
 Audit services that combine employment, injury, suspension, retirement, and
 activity checks. Keep domain-specific policies in their existing Lifecycle
@@ -167,18 +171,26 @@ Use API Resources for an actual API response boundary and ViewModels only when
 page payload assembly becomes nontrivial or reusable. Existing Blade and
 Livewire payloads should not gain ceremonial layers.
 
+`App\ViewModels\DashboardViewModel` is the first ViewModel: the Overview page
+combines upcoming events, roster availability counts and current champions.
+It queries Eloquent directly (no repository layer), relying on the promotion
+global scope, and the controller passes it to the view as `dashboard`.
+
 ### Architecture tests
 
 **Priority:** High  
-**Status:** Candidate.
+**Status:** In progress; `tests/Feature/Architecture` now enforces controller
+structure, exception construction, morph aliases, roster model namespaces, test
+suite boundaries, translation-key resolution, orphaned docblocks, locked Livewire
+context identifiers, and that Livewire components neither create records through
+factories nor write directly through Eloquent models.
 
-Extend the existing architecture suite to enforce the decisions above:
+Still to enforce from the decisions above:
 
 - model concerns expose persistence relationships, not new workflow commands;
 - Lifecycle eligibility classes remain in `app/Lifecycle`;
 - Services remain under their responsibility domains;
 - custom collections are tied to Eloquent models and remain type-safe;
-- Livewire components delegate protected writes to Actions or Services;
 - no new repository layer is introduced around Eloquent.
 
 ### CI and test feedback
@@ -190,6 +202,92 @@ CI quality checks now run in parallel, browser tests are gated behind required
 checks, and TIA no longer installs frontend tooling unnecessarily. Continue
 monitoring runtime and required-check names before further workflow changes.
 
+### Coverage policy
+
+**Priority:** High  
+**Status:** Completed; enforced.
+
+`composer test:coverage` requires 100% line coverage of `app/` (Livewire,
+Console, and the service providers included, Browser suite excluded) and the
+`Coverage (100%)` CI job runs it on every pull request. The gate runs
+non-parallel because parallel runs lose `match` header line attribution and are
+not deterministic. There are no `@codeCoverageIgnore` markers: unreachable code
+is deleted instead of tested, and randomized inputs in tests are pinned (fixed
+distinctive values or `forceFakerBoolean()`). Keep the threshold at 100 and treat
+a new uncovered line as either a missing behavior test or dead code.
+
+### Promotion gate extraction
+
+**Priority:** Medium  
+**Status:** Completed.
+
+The promotion-scoped `Gate::before` closure moved out of `AppServiceProvider`
+into `App\Policies\PromotionGate::before()`, covered by the characterization
+suite in `tests/Integration/Policies/PromotionGateTest.php`. The promotion
+context middleware is registered as Livewire persistent middleware so update
+requests keep the same scope as page loads.
+
+Known quirk, deliberately frozen: the gate inspects only the first ability
+argument, so `[Wrestler::class, $foreignWrestler]` is authorized as a class
+string. `PromotionPolicy` instance abilities (`view`, `manageMembers`, and so
+on) are unreachable through the Gate because the gate always answers first for a
+`Promotion` subject; they are kept, and covered by direct calls, to document the
+ability surface.
+
+### Lifecycle UI parity and detail-page refresh
+
+**Priority:** Medium  
+**Status:** Completed for wrestlers, managers, referees, stables, tag teams, and
+titles.
+
+Detail pages render `Components/Actions` components whose `canPerform()` combines
+the Gate ability with domain eligibility, and the General Info card is wrapped
+in the shared `App\Livewire\Components\GeneralInfo` component so status and
+related rows refresh after each action. The index tables no longer carry
+unreachable lifecycle methods. Open follow-ups verified against the code:
+
+- Stables render a lifecycle actions component (Establish, Disband, Retire,
+  Unretire) on the detail page. `MergeStablesAction`, `SplitStableAction`, and
+  `ReuniteAction` remain unwired (kept intentionally as planned features).
+- Modal titles are inconsistent: the base modal and the Wrestlers, Managers,
+  and Referees modals say "Add X"/"Edit {name}", while Stables, Titles, Venues,
+  Events, Users, Matches, and Tag Teams say "Create X" and (except Tag Teams)
+  a static "Edit X". Pick one wording before further title work.
+- Matches can be deleted from the event matches table, but `DeleteAction` does
+  not renumber; deleted numbers leave gaps by design.
+
+### Branch protection observation
+
+**Priority:** Low  
+**Status:** Operations observation.
+
+`main` reported required checks and signed commits when last queried through the
+GitHub API, while `develop` reported "Branch not protected". Protection lives in
+GitHub settings and cannot be verified from the repository; see
+`docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
+
+## Considered and rejected
+
+These were evaluated during the September 2026 refactor series and deliberately
+not done. Revisit only if the stated reason stops being true.
+
+### Generic base for per-entity roster Actions
+
+Wrestler, Manager, and Referee `Suspend`, `ClearFromInjury`, `Retire`, and
+`Release` Actions are near-identical apart from the model type. Each body is
+about five lines (transaction, owner lock, eligibility check, period write), and
+the Actions rules require typed per-entity Actions with owner locking. A shared
+base would save little code and weaken the typed boundaries those rules protect.
+
+### Removing the all-`false` policy methods
+
+Most policy methods return `false` because `PromotionGate` (via `Gate::before`)
+makes the real decision. They look redundant, but `.ai/rules/policies.md`
+requires conventional signatures and they document the ability surface for each
+model. Related: `PromotionPolicy` instance abilities can never be reached through
+the Gate, because `PromotionGate` always decides for a `Promotion` subject. They
+are kept and covered by direct policy tests.
+
 ## Research notes
 
 The following Laravel sources informed this backlog:
@@ -198,7 +296,7 @@ The following Laravel sources informed this backlog:
 - [Laravel Eloquent collections and custom collections](https://laravel.com/docs/master/eloquent-collections)
 - [Laravel Eloquent APIs and query scopes](https://laravel.com/docs/13.x/eloquent)
 - [Laravel framework issue: custom collections and BelongsTo relations](https://github.com/laravel/framework/issues/53241)
-- [Livewire actions and server-side authorization](https://livewire.laravel.com/docs/3.x/actions)
+- [Livewire actions and server-side authorization](https://livewire.laravel.com/docs/4.x/actions)
 - [Laravel Pipelines API](https://api.laravel.com/docs/13.x/Illuminate/Support/Facades/Pipeline.html)
 - [Laravel events and queued listeners](https://laravel.com/framework/docs/events)
 - [Laravel application structure, Jobs, Events, and configuration](https://laravel.com/docs/13.x/structure)

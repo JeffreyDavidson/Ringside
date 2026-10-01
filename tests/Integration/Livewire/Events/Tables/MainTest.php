@@ -156,6 +156,26 @@ describe('events table', function (): void {
             ->assertDontSee('After Range');
     });
 
+    it('ignores malformed event date range values', function (array $dateRange): void {
+        // Arrange
+        Event::factory()->scheduledOn('2026-05-31 12:00:00')->create(['name' => 'Before Range']);
+        Event::factory()->scheduledOn('2026-06-15 19:00:00')->create(['name' => 'Within Range']);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('filterValues.event_dates', $dateRange);
+
+        // Assert
+        $component
+            ->assertOk()
+            ->assertSee('Before Range')
+            ->assertSee('Within Range');
+    })->with([
+        'malformed minimum' => [['minDate' => 'not-a-date', 'maxDate' => '2026-06-30']],
+        'malformed maximum' => [['minDate' => '2026-06-01', 'maxDate' => 'not-a-date']],
+        'both malformed' => [['minDate' => 'not-a-date', 'maxDate' => 'also-not-a-date']],
+    ]);
+
     it('clears all event filters together', function (): void {
         // Arrange
         $venue = Venue::factory()->create(['name' => 'Clear Filter Arena']);
@@ -221,26 +241,6 @@ describe('events table', function (): void {
                 message: __('events.actions.deleted'),
             );
         $this->assertSoftDeleted($event);
-    });
-
-    it('restores an event and reports success', function (): void {
-        // Arrange
-        $event = Event::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $event->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertDispatched(
-                'flash-message',
-                type: 'status',
-                message: __('events.actions.restored'),
-            )
-            ->assertRedirectToRoute('events.index');
-        $this->assertNotSoftDeleted($event);
     });
 
     it('renders an empty state when there are no events', function (): void {

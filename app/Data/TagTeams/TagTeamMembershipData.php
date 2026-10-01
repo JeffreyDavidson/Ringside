@@ -60,22 +60,6 @@ readonly class TagTeamMembershipData
         return $this->managers ?? new Collection;
     }
 
-    /**
-     * Check if membership contains any wrestlers.
-     */
-    public function hasWrestlers(): bool
-    {
-        return $this->wrestlers instanceof Collection && $this->wrestlers->isNotEmpty();
-    }
-
-    /**
-     * Check if membership contains any managers.
-     */
-    public function hasManagers(): bool
-    {
-        return $this->managers instanceof Collection && $this->managers->isNotEmpty();
-    }
-
     public function combinedWeightInPounds(): int
     {
         return (int) $this->getWrestlers()->sum(

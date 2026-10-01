@@ -45,7 +45,7 @@ describe('authorized user form interactions', function () {
             ->assertSet('form.role', Role::Basic->value)
             ->assertSet('form.password', '')
             ->assertSet('form.password_confirmation', '')
-            ->assertSee('Create User');
+            ->assertSee('Add User');
     });
 
     it('loads an existing user without exposing the password', function () {
@@ -68,7 +68,7 @@ describe('authorized user form interactions', function () {
             ->assertSet('form.role', Role::Administrator->value)
             ->assertSet('form.password', '')
             ->assertSet('form.password_confirmation', '')
-            ->assertSee('Edit User');
+            ->assertSee('Edit Jane Smith');
     });
 
     it('propagates a missing user failure', function () {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Columns;
 
 use App\Livewire\Table\Column;
+use App\Support\ModelKey;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
-use LogicException;
 
 /**
  * Provides action column functionality for Livewire table components.
@@ -38,15 +38,9 @@ trait HasActionColumn
      */
     protected function getActionColumnViewData(Model $row): array
     {
-        $rowId = $row->getKey();
-
-        if (! is_int($rowId) && ! is_string($rowId)) {
-            throw new LogicException('Table actions require a persisted model identifier.');
-        }
-
         return [
             'path' => $this->routeBasePath,
-            'rowId' => $rowId,
+            'rowId' => ModelKey::of($row),
             'resourceName' => $this->resourceName,
             'canDelete' => method_exists($this, 'delete') && Gate::allows('delete', $row),
         ];

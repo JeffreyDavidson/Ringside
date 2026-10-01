@@ -2,54 +2,98 @@
 
 ## Component Standardization
 
-### ✅ **COMPLETED - Phase 5: Component Standardization**
-
-Successfully implemented standardized naming conventions across all Livewire components:
-
-### Implemented Changes:
-- **✅ Actions Components**: Renamed `ActionsComponent.php` → `Actions.php` across all domains
-- **✅ Form Components**: Renamed `EventMatchForm.php` → `CreateEditForm.php` for consistency
-- **✅ Table Components**: Renamed `{Entity}Table.php` → `Main.php` for primary entity tables
-- **✅ Relationship Tables**: Renamed `Previous{Entity}Table.php` → `Previous{Entity}.php`
-- **✅ Test Files**: Updated all test files to match new component names
-- **✅ Documentation**: Updated architecture and example documentation
-
-### Final Structure:
+Livewire components follow one naming and layout convention across domains. The folder
+supplies the component type, so class names do not repeat it.
 
 ```
 app/Livewire/{Domain}/
 ├── Components/
-│   └── Actions.php              ✅ (standardized naming)
+│   └── Actions.php              (lifecycle actions for a detail page)
 ├── Forms/
-│   └── CreateEditForm.php       ✅ (descriptive purpose)
+│   └── CreateEditForm.php
 ├── Modals/
-│   └── FormModal.php            ✅ (consistent pattern)
+│   └── FormModal.php
 └── Tables/
-    ├── Main.php                 ✅ (primary entity table)
-    ├── PreviousManagers.php     ✅ (relationship tables)
-    ├── PreviousMatches.php      ✅ (descriptive names)
-    └── PreviousEvents.php       ✅ (consistent pattern)
+    ├── Main.php                 (primary index table)
+    └── Previous{Entity}.php     (relationship history tables on detail pages)
 ```
 
-### Achieved Benefits:
-1. **✅ Eliminated redundant suffixes** - folder context provides component type
-2. **✅ Descriptive purposes** - `Main.php`, `Actions.php`, `CreateEditForm.php`
-3. **✅ Scalable structure** - supports multiple components per domain
-4. **✅ Consistent patterns** - same naming rules across all domains
-5. **✅ Improved maintainability** - clearer component organization
+Not every domain has every folder. For example, Stables and Promotions have no
+`Components/Actions.php` (see the refactoring backlog), Matches uses
+`Tables/MatchesTable.php`, and the title page uses `Titles/Tables/TitleHistory.php`
+because it lists every reign (current reign first, shown as "Current"), not only
+previous ones.
+
+Relationship tables use `ShowTableTrait`, which gives each table a heading derived from
+its `$resourceName` (for example "Title championships") and, when a table has no
+records and no search, a one-line "No {resource} yet." message instead of the full
+search, table and pager chrome.
 
 ## Component Naming Conventions
 
 ### Class to View Mapping:
-- Class: `MatchesTable` → Component: `matches.tables.matches-table`
-- Class: `EventMatchesTable` → Component: `matches.tables.event-matches-table`
+- Class: `App\Livewire\Wrestlers\Tables\Main` → Blade view: `livewire/wrestlers/tables/main.blade.php`
+- Class: `App\Livewire\Wrestlers\Modals\FormModal` → Blade view: `livewire/wrestlers/modals/form-modal.blade.php`
 - **Pattern:** PascalCase class → kebab-case with namespace dots
 
 ### Avoid Redundant Domain Prefixes:
-- ❌ `WrestlerActionsComponent` (inside `app/Livewire/Wrestlers/Components/`)
-- ✅ `ActionsComponent` (directory context makes domain clear)
+- ❌ `WrestlerActions` (inside `app/Livewire/Wrestlers/Components/`)
+- ✅ `Actions` (directory context makes domain clear)
 - ❌ `WrestlerFormModal` → ✅ `FormModal` (when inside Wrestlers directory)
 - **Rule:** Domain context from directory structure eliminates need for domain prefix in class names
+
+## Lifecycle Actions Components
+
+Each detail page (wrestlers, managers, referees, tag teams, stables, titles) renders a
+`Components/Actions` component (for example `livewire:wrestlers.components.actions`).
+These are the only Livewire entry points for lifecycle transitions; the index tables
+expose row actions such as delete but no lifecycle methods.
+
+- Each transition method resolves its typed Action from the container and runs it
+  through `ExecutesRosterActions::executeAuthorizedRosterAction()` (titles use
+  `ExecutesBusinessActions`), which authorizes with `Gate::authorize()`, executes the
+  Action, translates `BaseBusinessException` into a localized failure message, and
+  dispatches `{entity}-updated` plus a `flash-message` for the toast.
+- `canPerform(RosterLifecycleAction $action)` decides which buttons render. It combines
+  the Gate ability with the domain eligibility check
+  (`ChecksIndividualLifecycleEligibility` for wrestlers, managers and referees). Titles
+  take a `TitleLifecycleTransition` instead. The Blade view never re-implements the rule.
+- Stables offer Establish, Disband, Retire and Unretire. They take a
+  `StableLifecycleAction` in `canPerform()` (Gate ability plus `StableActivityEligibility` /
+  `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
+  a rejected action shows the domain exception's message. Merge, split and reunite remain
+  unwired.
+
+## General Info Card
+
+`App\Livewire\Components\GeneralInfo` wraps the General Info card of a show page so
+lifecycle changes appear without a reload.
+
+- `modelClass` and `modelId` are `#[Locked]`; the client cannot change what renders.
+- A private `CARDS` map, keyed by model class, defines the refresh event
+  (`wrestler-updated`, `manager-updated`, `referee-updated`, `stable-updated`,
+  `tag-team-updated`, `title-updated`), the anonymous Blade component that renders the card, that
+  component's model prop, and the relationships to eager load.
+- On each render it re-queries the model with those relationships and renders the card
+  through `x-dynamic-component`.
+
+Adding another entity means adding one `CARDS` entry, not a new Livewire component.
+
+## Modal Titles
+
+`BaseModal::getModalTitle()` resolves the model from the form's locked `modelId` on
+every call and reads `$modelTitleField` (default `name`; Managers and Referees use
+`full_name`). It uses `core.modal.edit` (`Edit :name`) and `core.modal.add`
+(`Add :model`). Modals with their own wording override `getModalTitle()` and use
+`<domain>.modal.*` keys. The base modal says "Add" while several domain modals say
+"Create"; this inconsistency is tracked in the refactoring backlog.
+
+## Model Keys
+
+`App\Support\ModelKey::of(Model $model): int|string` narrows Eloquent's untyped
+primary key and throws `LogicException` for a missing or non-scalar key. Use it instead
+of ad hoc `getKey()` guards (for example in `BaseForm::setModel()` and the shared
+activity period Actions).
 
 ## Trait Naming Guidelines
 

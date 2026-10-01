@@ -113,7 +113,9 @@ class ResultModal extends ModalComponent
 
     public function getModalTitle(): string
     {
-        return $this->match->match_finish === null ? 'Record Match Result' : 'Correct Match Result';
+        return $this->match->match_finish === null
+            ? __('matches.modal.record_result')
+            : __('matches.modal.correct_result');
     }
 
     public function render(): View

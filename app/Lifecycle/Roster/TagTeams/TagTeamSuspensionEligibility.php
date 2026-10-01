@@ -48,9 +48,5 @@ final class TagTeamSuspensionEligibility
         if (! $tagTeam->currentSuspension()->exists()) {
             throw CannotBeReinstatedException::notSuspended($tagTeam);
         }
-
-        if (! $tagTeam->currentEmployment()->exists()) {
-            throw CannotBeReinstatedException::notEmployed($tagTeam);
-        }
     }
 }

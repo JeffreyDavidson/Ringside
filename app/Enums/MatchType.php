@@ -129,14 +129,6 @@ enum MatchType: string
     }
 
     /**
-     * Check if a specific competitor type is allowed in this match type.
-     */
-    public function allowsCompetitorType(string $competitorType): bool
-    {
-        return in_array($competitorType, $this->getAllowedCompetitorTypes(), true);
-    }
-
-    /**
      * Get the minimum number of competitors required for this match type.
      */
     public function getMinimumCompetitors(): int

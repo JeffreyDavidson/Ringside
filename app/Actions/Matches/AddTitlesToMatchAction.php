@@ -56,9 +56,9 @@ class AddTitlesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
-            $lockedMatch = $eventMatch->refreshForUpdate();
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
             $this->handleWithinTransaction($lockedMatch, $requestedTitles);
-        });
+        }, attempts: 3);
     }
 
     /**

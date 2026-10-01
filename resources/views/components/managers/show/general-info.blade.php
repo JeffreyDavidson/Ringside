@@ -1,10 +1,13 @@
 <x-card.general-info>
-    <x-card.general-info.stat label="Status" :value="$manager->status->label()" />
+    <x-card.general-info.stat label="Status">
+        {{ $manager->status->label() }}
+        <x-availability-badges class="ms-2" :injured="$manager->isInjured()" :suspended="$manager->isSuspended()" />
+    </x-card.general-info.stat>
     @if ($manager->currentWrestlers->isNotEmpty())
         <x-card.general-info.link-list label="Current Wrestler(s)">
             @foreach ($manager->currentWrestlers as $wrestler)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
+                    <x-route-link :route="route('wrestlers.show', $wrestler)" :label="$wrestler->name" />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>
@@ -13,7 +16,7 @@
         <x-card.general-info.link-list label="Current Tag Team(s)">
             @foreach ($manager->currentTagTeams as $tagTeam)
                 <x-card.general-info.link-item>
-                    <x-route-link :route="route('tag-teams.show', $tagTeam)" label="{{ $tagTeam->name }}" />
+                    <x-route-link :route="route('tag-teams.show', $tagTeam)" :label="$tagTeam->name" />
                 </x-card.general-info.link-item>
             @endforeach
         </x-card.general-info.link-list>

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Casts\PhoneNumberCast;
 use App\Models\Users\User;
 use App\ValueObjects\PhoneNumber;
 
@@ -22,4 +23,10 @@ test('it preserves null phone numbers', function () {
     $user = User::factory()->create(['phone_number' => null]);
 
     expect($user->phone_number)->toBeNull();
+});
+
+test('it serializes phone numbers as digits', function () {
+    $serialized = (new PhoneNumberCast)->serialize(new User, 'phone_number', new PhoneNumber('(123) 456-7890'), []);
+
+    expect($serialized)->toBe('1234567890');
 });

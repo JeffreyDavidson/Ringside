@@ -48,16 +48,6 @@ class FormModal extends BaseFormModal
         $this->form->started_at = $this->generateOptionalStartDate();
     }
 
-    #[\Override]
-    public function getModalTitle(): string
-    {
-        if ($this->form->isEditing()) {
-            return 'Edit Stable';
-        }
-
-        return 'Create Stable';
-    }
-
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->stable(), $this->form->toData());

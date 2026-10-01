@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Base;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use LivewireUI\Modal\ModalComponent;
-use LogicException;
 
 /**
  * @template TModelForm of BaseForm
@@ -49,10 +49,10 @@ abstract class BaseModal extends ModalComponent
             $model = $this->findModel($modelForm->modelId);
             $value = $model->{$this->modelTitleField};
 
-            return 'Edit '.(string) ($value ?? 'Unknown');
+            return __('core.modal.edit', ['name' => (string) ($value ?? 'Unknown')]);
         }
 
-        return 'Add '.class_basename($this->getModelClass());
+        return __('core.modal.add', ['model' => __("core.models.{$this->modelKey()}")]);
     }
 
     public function clear(): void
@@ -68,16 +68,15 @@ abstract class BaseModal extends ModalComponent
         $modelForm->reset();
     }
 
-    /** @return TModelType */
+    private function modelKey(): string
+    {
+        return Str::snake(class_basename($this->getModelClass()));
+    }
+
     private function findModel(int|string $modelId): Model
     {
         $modelClass = $this->getModelClass();
-        $model = $modelClass::query()->findOrFail($modelId);
 
-        if (! $model instanceof $modelClass) {
-            throw new LogicException("Expected an instance of {$modelClass}.");
-        }
-
-        return $model;
+        return $modelClass::query()->findOrFail($modelId);
     }
 }

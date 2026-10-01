@@ -92,6 +92,14 @@ describe('PreviousTagTeamsTable Query Building', function () {
 
 describe('PreviousTagTeamsTable Rendering', function () {
     it('renders the tag team history search control', function (): void {
+        // Arrange
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => TagTeam::factory()->create()->id,
+            'wrestler_id' => $this->wrestler->id,
+            'joined_at' => Date::now()->subMonths(3),
+            'left_at' => Date::now()->subMonth(),
+        ]);
+
         // Act
         $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
@@ -130,7 +138,9 @@ describe('PreviousTagTeamsTable Rendering', function () {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous tag teams')
+            ->assertSee('No previous tag teams yet.')
+            ->assertDontSeeHtml('placeholder="Search tag teams"');
     });
 
     it('renders previous tag team membership details', function (): void {
@@ -241,4 +251,29 @@ describe('PreviousTagTeamsTable Authorization', function () {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+});
+
+describe('PreviousTagTeamsTable Deleted Tag Teams', function () {
+    it('renders a membership without a link when its tag team was deleted', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->create(['name' => 'Vanished Partners']);
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'wrestler_id' => $this->wrestler->id,
+            'joined_at' => Date::parse('2024-01-15'),
+            'left_at' => Date::parse('2024-06-30'),
+        ]);
+        $tagTeam->delete();
+
+        // Act
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('N/A')
+            ->assertSee('2024-01-15')
+            ->assertDontSee('Vanished Partners')
+            ->assertDontSeeHtml(route('tag-teams.show', $tagTeam));
+    });
 });

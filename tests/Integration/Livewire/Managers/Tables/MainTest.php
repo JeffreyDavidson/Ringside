@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Tables\Main;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Facades\Auth;
 
@@ -140,42 +142,6 @@ describe('managers table', function (): void {
             ->assertDontSee('Original Manager');
     });
 
-    it('employs an unemployed manager while preserving table state', function (): void {
-        // Arrange
-        $manager = Manager::factory()->unemployed()->create([
-            'first_name' => 'Employment',
-            'last_name' => 'Manager',
-        ]);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('employ', $manager);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($manager)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('restores a deleted manager and redirects to the index', function (): void {
-        // Arrange
-        $manager = Manager::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $manager->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('managers.index');
-        expect(Manager::find($manager->id))->not->toBeNull();
-    });
-
     it('forbids users without manager access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {
@@ -193,4 +159,22 @@ describe('managers table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels injured and suspended managers without changing their employment status', function (): void {
+        // Arrange
+        $injured = Manager::factory()->employed()->create();
+        Injury::factory()->for($injured, 'injurable')->create();
+        $suspended = Manager::factory()->employed()->create();
+        Suspension::factory()->for($suspended, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-injured"')
+            ->toContain('data-test="availability-suspended"');
+    });
 });

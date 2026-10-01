@@ -17,7 +17,7 @@ class RefereesController
     public function show(Referee $referee): View
     {
         return view('referees.show', [
-            'referee' => $referee->load('firstEmployment'),
+            'referee' => $referee,
         ]);
     }
 }

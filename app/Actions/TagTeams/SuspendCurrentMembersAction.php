@@ -21,6 +21,7 @@ class SuspendCurrentMembersAction
     public function handle(TagTeam $tagTeam, Carbon $suspensionDate): void
     {
         $wrestlers = $tagTeam->currentWrestlers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Wrestler $wrestler): bool => $wrestler->currentEmployment()->exists() && ! $wrestler->currentSuspension()->exists());
 
@@ -29,6 +30,7 @@ class SuspendCurrentMembersAction
         }
 
         $managers = $tagTeam->currentManagers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Manager $manager): bool => $manager->currentEmployment()->exists() && ! $manager->currentSuspension()->exists());
 

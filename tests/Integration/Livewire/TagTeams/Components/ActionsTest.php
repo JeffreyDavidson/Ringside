@@ -10,6 +10,7 @@ use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\TagTeams\Components\Actions;
 use App\Models\Roster\TagTeams\TagTeam;
 use JMac\Testing\Double;
@@ -96,4 +97,63 @@ describe('tag team actions component', function (): void {
         'delete',
         'restore',
     ]);
+
+    test('it only shows the lifecycle buttons that fit the tag team state', function (
+        string $state,
+        array $visible,
+        array $hidden,
+    ): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->{$state}()->create();
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['tagTeam' => $tagTeam]);
+
+        // Assert
+        foreach ($visible as $method) {
+            $component->assertSeeHtml("wire:click=\"{$method}\"");
+        }
+
+        foreach ($hidden as $method) {
+            $component->assertDontSeeHtml("wire:click=\"{$method}\"");
+        }
+    })->with([
+        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'retire', 'unretire', 'restore']],
+        'employed' => ['employed', ['release', 'suspend', 'retire'], ['employ', 'reinstate', 'unretire', 'restore']],
+        'suspended' => ['suspended', ['reinstate'], ['employ', 'suspend', 'unretire', 'restore']],
+        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'retire', 'restore']],
+    ]);
+
+    test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->employed()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['tagTeam' => $tagTeam]);
+
+        // Act
+        $component->call('suspend');
+
+        // Assert
+        $component
+            ->assertDispatched('tag-team-updated')
+            ->assertSeeHtml('wire:click="reinstate"')
+            ->assertDontSeeHtml('wire:click="suspend"');
+    });
+
+    test('it hides eligible lifecycle actions from users who are not authorized', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->unemployed()->create();
+
+        actingAs(basicUser());
+
+        // Act
+        $component = livewire(Actions::class, ['tagTeam' => $tagTeam]);
+
+        // Assert
+        expect($component->instance()->canPerform(RosterLifecycleAction::Employ))->toBeFalse();
+        $component->assertDontSeeHtml('wire:click="employ"');
+    });
 });

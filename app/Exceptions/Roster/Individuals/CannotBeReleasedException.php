@@ -19,13 +19,6 @@ final class CannotBeReleasedException extends BaseBusinessException
         return self::forReason(BusinessRuleReason::Unemployed, "{$context} is unemployed and cannot be released.");
     }
 
-    public static function retired(Wrestler|Manager|Referee $entity): static
-    {
-        $context = self::formatModelContext($entity);
-
-        return new self("{$context} is retired and cannot be released.");
-    }
-
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);

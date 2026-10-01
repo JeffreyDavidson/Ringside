@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Referees\Tables\Main;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Facades\Auth;
 
@@ -140,42 +142,6 @@ describe('referees table', function (): void {
             ->assertDontSee('Original Referee');
     });
 
-    it('employs an unemployed referee while preserving table state', function (): void {
-        // Arrange
-        $referee = Referee::factory()->unemployed()->create([
-            'first_name' => 'Employment',
-            'last_name' => 'Referee',
-        ]);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('employ', $referee);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($referee)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('restores a deleted referee and redirects to the index', function (): void {
-        // Arrange
-        $referee = Referee::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $referee->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('referees.index');
-        expect(Referee::find($referee->id))->not->toBeNull();
-    });
-
     it('forbids users without referee access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {
@@ -193,4 +159,22 @@ describe('referees table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels injured and suspended referees without changing their employment status', function (): void {
+        // Arrange
+        $injured = Referee::factory()->employed()->create();
+        Injury::factory()->for($injured, 'injurable')->create();
+        $suspended = Referee::factory()->employed()->create();
+        Suspension::factory()->for($suspended, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-injured"')
+            ->toContain('data-test="availability-suspended"');
+    });
 });

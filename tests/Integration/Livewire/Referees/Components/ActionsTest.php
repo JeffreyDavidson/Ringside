@@ -11,6 +11,7 @@ use App\Actions\Referees\RestoreAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Referees\Components\Actions;
 use App\Models\Roster\Referees\Referee;
 use JMac\Testing\Double;
@@ -102,4 +103,72 @@ describe('referee actions component', function (): void {
         'clearFromInjury',
         'restore',
     ]);
+
+    test('it only shows the lifecycle buttons that fit the referee state', function (
+        string $state,
+        array $visible,
+        array $hidden,
+    ): void {
+        // Arrange
+        $referee = Referee::factory()->{$state}()->create();
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['referee' => $referee]);
+
+        // Assert
+        foreach ($visible as $method) {
+            $component->assertSeeHtml("wire:click=\"{$method}\"");
+        }
+
+        foreach ($hidden as $method) {
+            $component->assertDontSeeHtml("wire:click=\"{$method}\"");
+        }
+    })->with([
+        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'unretire', 'restore']],
+        'employed' => ['employed', ['release', 'suspend', 'injure', 'retire'], ['employ', 'reinstate', 'clearFromInjury', 'unretire', 'restore']],
+        'suspended' => ['suspended', ['release', 'reinstate', 'retire'], ['employ', 'suspend', 'injure', 'clearFromInjury', 'unretire', 'restore']],
+        'injured' => ['injured', ['release', 'clearFromInjury', 'retire'], ['employ', 'suspend', 'reinstate', 'injure', 'unretire', 'restore']],
+        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'restore']],
+    ]);
+
+    test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {
+        // Arrange
+        $referee = Referee::factory()->unemployed()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['referee' => $referee]);
+
+        // Act
+        $component->call('employ');
+
+        // Assert
+        $component
+            ->assertDispatched('referee-updated')
+            ->assertSeeHtml('wire:click="retire"')
+            ->assertDontSeeHtml('wire:click="employ"');
+
+        // Act
+        $component->call('retire');
+
+        // Assert
+        $component
+            ->assertSeeHtml('wire:click="unretire"')
+            ->assertDontSeeHtml('wire:click="retire"');
+    });
+
+    test('it hides eligible lifecycle actions from users who are not authorized', function (): void {
+        // Arrange
+        $referee = Referee::factory()->unemployed()->create();
+
+        actingAs(basicUser());
+
+        // Act
+        $component = livewire(Actions::class, ['referee' => $referee]);
+
+        // Assert
+        expect($component->instance()->canPerform(RosterLifecycleAction::Employ))->toBeFalse();
+        $component->assertDontSeeHtml('wire:click="employ"');
+    });
 });

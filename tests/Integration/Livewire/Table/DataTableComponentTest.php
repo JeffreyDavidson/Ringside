@@ -282,3 +282,48 @@ describe('data table filtering', function (): void {
             ->assertDontSee('Unrelated Basic');
     });
 });
+
+describe('data table without searchable columns', function (): void {
+    test('a search term leaves the rows unfiltered', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Alpha']);
+        User::factory()->create(['first_name' => 'Zulu']);
+        $component = livewire(UnsearchableDataTableComponent::class);
+
+        // Act
+        $component->set('search', 'no such name');
+
+        // Assert
+        $component
+            ->assertSee('Alpha')
+            ->assertSee('Zulu')
+            ->assertDontSee('No records found.');
+    });
+
+    test('a default page size outside the accepted options falls back to the first option', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Alpha']);
+        $component = livewire(UnsearchableDataTableComponent::class);
+
+        // Assert
+        $component
+            ->assertSet('perPage', 25)
+            ->assertSee('Alpha');
+    });
+});
+
+describe('data table refreshing', function (): void {
+    test('the refresh event re-renders the table with newly created rows', function (): void {
+        // Arrange
+        User::factory()->create(['first_name' => 'Alpha']);
+        $component = livewire(TestDataTableComponent::class);
+        $component->assertDontSee('Latecomer');
+        User::factory()->create(['first_name' => 'Latecomer']);
+
+        // Act
+        $component->dispatch('refreshDatatable');
+
+        // Assert
+        $component->assertSee('Latecomer');
+    });
+});

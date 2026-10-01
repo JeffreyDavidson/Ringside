@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
-use App\Providers\AppServiceProvider;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertGuest;
+use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\from;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
+use function Pest\Laravel\travel;
 
 test('login screen can be rendered', function () {
     // Arrange
@@ -40,7 +43,7 @@ test('users can authenticate using the login screen', function (string $email) {
     $response = post(route('login'), $credentials);
 
     // Assert
-    $response->assertRedirect(AppServiceProvider::HOME);
+    $response->assertRedirect(route('dashboard', absolute: false));
     assertAuthenticated();
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
@@ -117,4 +120,59 @@ test('authenticated users can log out', function () {
     // Assert
     $response->assertRedirect(route('login'));
     assertGuest();
+});
+
+test('the sixth failed login within the throttle window is locked out', function () {
+    // Arrange
+    Event::fake([Lockout::class]);
+    freezeTime();
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    $credentials = ['email' => $user->email, 'password' => 'secret'];
+    foreach (range(1, 5) as $attempt) {
+        from(route('login'))->post(route('login'), [...$credentials, 'password' => 'wrong-password']);
+    }
+
+    // Act
+    $response = from(route('login'))->post(route('login'), $credentials);
+
+    // Assert
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionHasErrors(['email' => trans('auth.throttle', ['seconds' => 60, 'minutes' => 1])]);
+    Event::assertDispatched(Lockout::class);
+    assertGuest();
+});
+
+test('failed logins under the throttle limit do not lock the account', function () {
+    // Arrange
+    Event::fake([Lockout::class]);
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    foreach (range(1, 4) as $attempt) {
+        from(route('login'))->post(route('login'), ['email' => $user->email, 'password' => 'wrong-password']);
+    }
+
+    // Act
+    $response = post(route('login'), ['email' => $user->email, 'password' => 'secret']);
+
+    // Assert
+    $response->assertRedirect(route('dashboard', absolute: false));
+    Event::assertNotDispatched(Lockout::class);
+    assertAuthenticated();
+});
+
+test('users can log in again once the throttle window has passed', function () {
+    // Arrange
+    freezeTime();
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    foreach (range(1, 5) as $attempt) {
+        from(route('login'))->post(route('login'), ['email' => $user->email, 'password' => 'wrong-password']);
+    }
+    travel(61)->seconds();
+
+    // Act
+    $response = post(route('login'), ['email' => $user->email, 'password' => 'secret']);
+
+    // Assert
+    $response->assertRedirect(route('dashboard', absolute: false));
+    assertAuthenticated();
 });

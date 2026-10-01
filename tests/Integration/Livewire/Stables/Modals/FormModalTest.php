@@ -50,7 +50,7 @@ describe('authorized stable form interactions', function () {
             ->assertSet('form.ended_at', null)
             ->assertSet('form.wrestlers', [])
             ->assertSet('form.tag_teams', [])
-            ->assertSee('Create Stable');
+            ->assertSee('Add Stable');
     });
 
     it('loads an existing stable for editing', function () {
@@ -75,7 +75,7 @@ describe('authorized stable form interactions', function () {
             ->assertSet('form.ended_at', '2024-12-31')
             ->assertSet('form.wrestlers', [$wrestler->id])
             ->assertSet('form.tag_teams', [$tagTeam->id])
-            ->assertSee('Edit Stable');
+            ->assertSee('Edit The Four Horsemen');
     });
 
     it('propagates a missing stable failure', function () {
@@ -219,6 +219,28 @@ describe('authorized stable form interactions', function () {
         'end before start',
         'missing wrestler',
         'missing tag team',
+    ]);
+
+    it('uses friendly attribute names in stable validation messages', function (string $field, string $message) {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Stable',
+            'form.started_at' => '2024-01-01',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+
+        // Act
+        $modal->set($field, 'not-a-date');
+        $modal->call('save');
+
+        // Assert
+        expect($modal->instance()->getErrorBag()->first($field))->toBe($message);
+    })->with([
+        'start date' => ['form.started_at', 'The start date field must be a valid date.'],
+        'end date' => ['form.ended_at', 'The end date field must be a valid date.'],
     ]);
 
     it('rejects the name of another active stable but permits a deleted stable name', function () {

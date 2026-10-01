@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
 
+use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\withoutVite;
 
 pest()->tia()->baselined();
@@ -33,7 +34,13 @@ pest()->tia()->watch([
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Browser');
 
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration');
+pest()
+    ->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        freezeTime();
+    })
+    ->in('Integration');
 
 pest()
     ->beforeEach(function () {
@@ -49,6 +56,7 @@ pest()
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
         withoutVite();
+        freezeTime();
     })
     ->in('Feature');
 
@@ -162,3 +170,4 @@ function requiredReflectionType(?ReflectionType $type): ReflectionType
 
 require_once __DIR__.'/Helpers/TestHelpers.php';
 require_once __DIR__.'/Helpers/ReflectionHelpers.php';
+require_once __DIR__.'/Helpers/FakerHelpers.php';

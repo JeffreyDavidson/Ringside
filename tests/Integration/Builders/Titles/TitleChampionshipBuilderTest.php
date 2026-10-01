@@ -110,6 +110,10 @@ it('filters and orders title championship history', function () {
     $lossDateQuery->previous();
     $lossDateQuery->mostRecentlyLostFirst();
     $championshipsByLossDate = $lossDateQuery->get();
+    $newestWinQuery = TitleChampionship::query();
+    $newestWinQuery->forTitleId($title->id);
+    $newestWinQuery->mostRecentlyWonFirst();
+    $championshipsByNewestWin = $newestWinQuery->get();
 
     // Assert
     expect($championshipsByWinDate->modelKeys())->toBe([
@@ -117,6 +121,10 @@ it('filters and orders title championship history', function () {
         $latestChampionship->id,
         $currentChampionship->id,
     ])->and($championshipsByLossDate->modelKeys())->toBe([
+        $latestChampionship->id,
+        $firstChampionship->id,
+    ])->and($championshipsByNewestWin->modelKeys())->toBe([
+        $currentChampionship->id,
         $latestChampionship->id,
         $firstChampionship->id,
     ]);

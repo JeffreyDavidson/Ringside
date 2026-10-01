@@ -14,6 +14,9 @@ use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamSuspensionEligibility;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
@@ -70,6 +73,24 @@ class Actions extends Component
     public function restore(RestoreAction $restoreAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::TagTeam, $this->tagTeam, fn () => $restoreAction->handle($this->tagTeam));
+    }
+
+    public function canPerform(RosterLifecycleAction $action): bool
+    {
+        if (! Gate::allows($action->ability(), $this->tagTeam)) {
+            return false;
+        }
+
+        return match ($action) {
+            RosterLifecycleAction::Employ => app(TagTeamEmploymentEligibility::class)->canEmploy($this->tagTeam),
+            RosterLifecycleAction::Release => app(TagTeamEmploymentEligibility::class)->canRelease($this->tagTeam),
+            RosterLifecycleAction::Suspend => app(TagTeamSuspensionEligibility::class)->canSuspend($this->tagTeam),
+            RosterLifecycleAction::Reinstate => app(TagTeamSuspensionEligibility::class)->canReinstate($this->tagTeam),
+            RosterLifecycleAction::Retire => app(TagTeamRetirementEligibility::class)->canRetire($this->tagTeam),
+            RosterLifecycleAction::Unretire => app(TagTeamRetirementEligibility::class)->canUnretire($this->tagTeam),
+            RosterLifecycleAction::Restore => $this->tagTeam->trashed(),
+            default => false,
+        };
     }
 
     public function render(): View

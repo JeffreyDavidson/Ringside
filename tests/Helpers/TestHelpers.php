@@ -11,7 +11,14 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Matches\SchedulingSlotLockService;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use JMac\Testing\Double;
+use JMac\Testing\DoubleInterface;
 
 /**
  * Test helper functions for common testing scenarios.
@@ -410,4 +417,133 @@ function wrestlingTimePeriod(string $type = 'employment'): array
         'started_at' => $start,
         'ended_at' => $end,
     ];
+}
+
+/**
+ * Record every SQL statement issued while the callback runs, flagging row-locking statements.
+ *
+ * SQLite discards row-lock clauses, so its grammar is swapped for one that renders the lock as a
+ * visible comment. PostgreSQL already emits the real clause. The original grammar is always restored.
+ *
+ * @return array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>
+ */
+function recordStatements(Closure $callback): array
+{
+    $connection = DB::connection();
+    $originalGrammar = $connection->getQueryGrammar();
+
+    if ($connection->getDriverName() === 'sqlite') {
+        $connection->setQueryGrammar(new class($connection) extends SQLiteGrammar
+        {
+            protected function compileLock(QueryBuilder $query, $value): string
+            {
+                return $value ? ' /* for update */' : ' /* for share */';
+            }
+        });
+    }
+
+    $statements = [];
+    DB::listen(function ($query) use (&$statements): void {
+        $sql = mb_strtolower($query->sql);
+        $statements[] = [
+            'sql' => $sql,
+            'bindings' => $query->bindings,
+            'locked' => str_contains($sql, 'for update'),
+        ];
+    });
+
+    try {
+        $callback();
+    } finally {
+        $connection->setQueryGrammar($originalGrammar);
+    }
+
+    return $statements;
+}
+
+/**
+ * The primary key a recorded statement was bound to: the first binding of a single-row lock, or the last binding of an
+ * update that targets one row of a pivot table.
+ *
+ * @param  array{sql: string, bindings: array<int, mixed>, locked: bool}  $statement
+ */
+function boundKey(array $statement, bool $last = false): int
+{
+    $binding = $last ? array_last($statement['bindings']) : ($statement['bindings'][0] ?? null);
+
+    return is_int($binding) ? $binding : throw new RuntimeException('Expected the statement to be bound to an integer key.');
+}
+
+/**
+ * The primary keys of the rows a recorded action locked one at a time in a table, in locking order.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @return array<int, int>
+ */
+function lockedRowIds(array $statements, string $table): array
+{
+    $ids = [];
+
+    foreach ($statements as $statement) {
+        if ($statement['locked'] && str_contains($statement['sql'], "from \"{$table}\"")) {
+            $ids[] = boundKey($statement);
+        }
+    }
+
+    return $ids;
+}
+
+/**
+ * The related keys of the pivot rows a recorded action updated one at a time, in update order.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @return array<int, int>
+ */
+function updatedRowIds(array $statements, string $table): array
+{
+    $ids = [];
+
+    foreach ($statements as $statement) {
+        if (str_starts_with($statement['sql'], "update \"{$table}\"")) {
+            $ids[] = boundKey($statement, last: true);
+        }
+    }
+
+    return $ids;
+}
+
+/**
+ * A connection double that reports the given database driver, so the SQLite test database can exercise the
+ * driver specific branches of collaborators that would otherwise only run on a server such as PostgreSQL.
+ */
+function driverConnection(string $driver): Connection&DoubleInterface
+{
+    $connection = Double::for(Connection::class);
+    $connection->expects('getDriverName')->returns($driver)->times(minimum: 0);
+
+    return $connection;
+}
+
+/**
+ * A scheduling slot lock that runs its PostgreSQL branch. The advisory lock statement cannot run on SQLite,
+ * so it is handed to the observer instead of being sent to the database.
+ *
+ * @param  Closure(string, array<mixed>): mixed  $onStatement  Receives the SQL and its bindings
+ */
+function postgresSlotLock(Closure $onStatement): SchedulingSlotLockService
+{
+    $connection = driverConnection('pgsql');
+    $connection->expects('select')
+        ->resolves(function (mixed ...$arguments) use ($onStatement): array {
+            [$sql, $bindings] = $arguments;
+
+            is_string($sql) && is_array($bindings) || throw new LogicException('Expected the SQL and its bindings.');
+
+            $onStatement($sql, $bindings);
+
+            return [];
+        })
+        ->times(minimum: 0);
+
+    return new SchedulingSlotLockService($connection);
 }

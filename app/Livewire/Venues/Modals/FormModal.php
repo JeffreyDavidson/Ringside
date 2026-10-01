@@ -54,16 +54,6 @@ class FormModal extends BaseFormModal
         $this->form->zipcode = fake('en_US')->numerify('#####');
     }
 
-    #[\Override]
-    public function getModalTitle(): string
-    {
-        if ($this->form->isEditing()) {
-            return 'Edit Venue';
-        }
-
-        return 'Create Venue';
-    }
-
     public function render(): View
     {
         return view('livewire.venues.modals.form-modal');

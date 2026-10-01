@@ -100,7 +100,6 @@
         "lint": "pint --blade",
         "lint:dirty": "pint --dirty --blade --format agent",
         "lint:check": "@test:lint",
-        "test:coverage": "@test:unit",
         "frontend:check": [
             "npm run lint",
             "npm run build"
@@ -128,7 +127,7 @@
         "test:application": "php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --parallel",
         "test:tia": "php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --tia --filtered",
         "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser",
-        "test:unit": "php -d memory_limit=4G -d pcov.enabled=1 -d pcov.directory=./app ./vendor/bin/pest --colors=always --parallel --coverage --min=44",
+        "test:coverage": "php -d memory_limit=4G -d pcov.enabled=1 -d pcov.directory=./app ./vendor/bin/pest --colors=always --exclude-testsuite Browser --coverage --min=100",
         "test:type-coverage": "php -d memory_limit=4G ./vendor/bin/pest --type-coverage --min=100",
         "test:push": [
             "@test:type-coverage",
@@ -143,11 +142,11 @@
             "@test:rector",
             "@test:lint",
             "@test:types",
-            "@test:unit"
+            "@test:coverage"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+            "npx concurrently -c \"#c4b5fd,#fb7185,#fdba74\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=queue,logs,vite"
         ],
         "setup": [
             "composer install",

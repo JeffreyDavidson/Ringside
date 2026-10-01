@@ -12,8 +12,8 @@ final class StableMembershipService
     public function currentMembers(Stable $stable): StableMembershipData
     {
         return new StableMembershipData(
-            wrestlers: $stable->currentWrestlers,
-            tagTeams: $stable->currentTagTeams,
+            wrestlers: $stable->currentWrestlers()->inLockOrder()->get(),
+            tagTeams: $stable->currentTagTeams()->inLockOrder()->get(),
         );
     }
 }

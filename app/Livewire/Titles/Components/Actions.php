@@ -10,6 +10,8 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Titles\Title;
 use Illuminate\Contracts\View\View;
@@ -136,6 +138,17 @@ class Actions extends Component
         )) {
             $this->dispatch('title-updated');
         }
+    }
+
+    public function canPerform(TitleLifecycleTransition $transition): bool
+    {
+        return Gate::allows($transition->ability(), $this->title)
+            && app(TitleLifecycleEligibility::class)->allows($this->title, $transition);
+    }
+
+    public function canRestore(): bool
+    {
+        return $this->title->trashed() && Gate::allows('restore', $this->title);
     }
 
     public function render(): View

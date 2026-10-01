@@ -157,7 +157,9 @@ describe('PreviousWrestlers rendering', function (): void {
         // Assert
         $table
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Previous wrestlers')
+            ->assertSee('No previous wrestlers yet.')
+            ->assertDontSeeHtml('placeholder="Search wrestlers"');
     });
 });
 

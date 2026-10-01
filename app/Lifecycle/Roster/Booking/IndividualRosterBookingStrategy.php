@@ -15,7 +15,7 @@ final readonly class IndividualRosterBookingStrategy implements RosterBookingStr
     public function allows(): bool
     {
         return $this->individual->status === EmploymentStatus::Employed
-            && ! $this->individual->currentSuspension()->exists()
-            && ! $this->individual->currentInjury()->exists();
+            && ! $this->individual->isSuspended()
+            && ! $this->individual->isInjured();
     }
 }

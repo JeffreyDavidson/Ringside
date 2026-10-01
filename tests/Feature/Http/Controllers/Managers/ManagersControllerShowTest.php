@@ -3,10 +3,14 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Managers\ManagersController;
+use App\Livewire\Components\GeneralInfo;
+use App\Livewire\Managers\Components\Actions;
 use App\Livewire\Managers\Tables\PreviousStables;
 use App\Livewire\Managers\Tables\PreviousTagTeams;
 use App\Livewire\Managers\Tables\PreviousWrestlers;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -41,14 +45,40 @@ describe('Managers Controller', function () {
     /**
      * @see ManagersController::show()
      */
-    test('show loads only the relationships rendered by the manager summary', function () {
+    test('show renders the lifecycle actions component', function () {
         actingAs(administrator())
             ->get(route('managers.show', $this->manager))
             ->assertOk()
-            ->assertViewHas('manager', fn (Manager $manager): bool => count($manager->getRelations()) === 3
-                && $manager->relationLoaded('currentTagTeams')
-                && $manager->relationLoaded('currentWrestlers')
-                && $manager->relationLoaded('firstEmployment'));
+            ->assertSeeLivewire(Actions::class);
+    });
+
+    /**
+     * @see ManagersController::show()
+     */
+    test('show renders the general info component', function () {
+        actingAs(administrator())
+            ->get(route('managers.show', $this->manager))
+            ->assertOk()
+            ->assertSeeLivewire(GeneralInfo::class)
+            ->assertSee($this->manager->status->label());
+    });
+
+    /**
+     * @see ManagersController::show()
+     */
+    test('show renders the related data displayed by the manager summary', function () {
+        $manager = Manager::factory()->employed()->create();
+        $wrestler = Wrestler::factory()->create(['name' => "Sean O'Neil"]);
+        $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team Alpha']);
+        $manager->wrestlers()->attach($wrestler, ['hired_at' => now()->subDay()]);
+        $manager->tagTeams()->attach($tagTeam, ['hired_at' => now()->subDay()]);
+
+        actingAs(administrator())
+            ->get(route('managers.show', $manager))
+            ->assertOk()
+            ->assertSee($wrestler->name)
+            ->assertSee('Tag Team Alpha')
+            ->assertSee($manager->employments()->firstOrFail()->started_at->toDateString());
     });
 
     /**

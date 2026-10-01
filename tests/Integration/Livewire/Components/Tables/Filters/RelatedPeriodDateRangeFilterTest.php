@@ -124,4 +124,34 @@ describe('related period date range filtering', function (): void {
         ])->not->toContain($endsBeforeRange->id, $startsAfterRange->id, $withoutEmployment->id)
             ->and($wrestlers->every(fn (Wrestler $wrestler): bool => ! $wrestler->relationLoaded('employments')))->toBeTrue();
     });
+
+    test('malformed bounds are treated as absent and default to today', function (array $dateRange): void {
+        // Arrange
+        Date::setTestNow('2024-06-15 12:00:00');
+        $current = Wrestler::factory()
+            ->has(Employment::factory()->started(Date::parse('2024-06-01'))->current(), 'employments')
+            ->create();
+        $ended = Wrestler::factory()
+            ->has(
+                Employment::factory()
+                    ->started(Date::parse('2024-01-01'))
+                    ->ended(Date::parse('2024-02-01')),
+                'employments',
+            )
+            ->create();
+        $filter = FirstEmploymentFilter::make('Employment Period')
+            ->setFields('employments', 'employments.started_at', 'employments.ended_at');
+        $query = Wrestler::query();
+
+        // Act
+        $filter->apply($query, $dateRange);
+        $wrestlers = $query->get();
+
+        // Assert
+        expect($wrestlers->modelKeys())->toBe([$current->id])->not->toContain($ended->id);
+    })->with([
+        'malformed minimum' => [['minDate' => 'not-a-date', 'maxDate' => '2024-06-30']],
+        'malformed maximum' => [['minDate' => '2024-06-10', 'maxDate' => 'not-a-date']],
+        'both malformed' => [['minDate' => 'not-a-date', 'maxDate' => 'also-not-a-date']],
+    ]);
 });

@@ -1,9 +1,14 @@
 <x-form-modal>
-    <x-form.error name="form.configuration" show-icon />
+    <x-form.error name="form.configuration" />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-setup-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.select label="Match Type" wire:model.live="form.matchType" :options="$this->getMatchTypes" />
+            <x-form.inputs.select
+                label="Match Type"
+                wire:model.live="form.matchType"
+                :options="$this->getMatchTypes"
+                placeholder="Select a match type"
+            />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>

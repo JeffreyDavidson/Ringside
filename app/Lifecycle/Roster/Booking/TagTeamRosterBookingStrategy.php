@@ -19,7 +19,7 @@ final readonly class TagTeamRosterBookingStrategy implements RosterBookingStrate
     public function allows(): bool
     {
         if ($this->tagTeam->status !== EmploymentStatus::Employed
-            || $this->tagTeam->currentSuspension()->exists()) {
+            || $this->tagTeam->isSuspended()) {
             return false;
         }
 

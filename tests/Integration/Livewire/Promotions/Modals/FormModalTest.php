@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Promotions\Modals\FormModal;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -24,7 +25,7 @@ describe('promotion form interactions', function () {
         $modal->assertSet('isModalOpen', true);
         $modal->assertSeeHtml('wire:model="form.name"');
         $modal->assertSeeHtml('wire:model="form.slug"');
-        $modal->assertSee('Create Promotion');
+        $modal->assertSee('Add Promotion');
     });
 
     it('opens through the shared modal host', function () {
@@ -83,6 +84,22 @@ describe('promotion form interactions', function () {
         'duplicate' => ['already-used', 'unique'],
         'spaces' => ['not a slug', 'alpha_dash'],
     ]);
+
+    it('fills dummy data with a name and its matching slug that can create a promotion', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+
+        $modal->call('fillDummyFields');
+        $name = $modal->get('form.name');
+
+        expect($name)->toBeString()->not->toBeEmpty();
+        $modal->assertSet('form.slug', Str::slug($name));
+
+        $modal->call('save');
+
+        $modal->assertHasNoErrors()->assertDispatched('promotion-saved');
+        expect(Promotion::query()->where('slug', Str::slug($name))->exists())->toBeTrue();
+    });
 
     it('does not allow a regular user to open the promotion form', function () {
         actingAs(User::factory()->basicUser()->create());

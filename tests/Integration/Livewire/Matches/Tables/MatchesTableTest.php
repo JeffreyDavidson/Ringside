@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
@@ -24,6 +26,19 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
+function actingInPromotion(Promotion $promotion, MembershipRole $role): void
+{
+    $user = basicUser();
+    $promotion->users()->attach($user, [
+        'role' => $role->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    actingAs($user);
+    $context = app(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+}
+
 describe('rendering', function (): void {
     it('renders an empty state when the event has no matches', function (): void {
         // Arrange
@@ -35,7 +50,9 @@ describe('rendering', function (): void {
         // Assert
         $component
             ->assertSuccessful()
-            ->assertSee('No records found.');
+            ->assertSee('Matches')
+            ->assertSee('No matches yet.')
+            ->assertDontSeeHtml('placeholder="Search matches"');
     });
 
     it('renders the match competitors, referees, titles, and empty result', function (): void {
@@ -110,6 +127,7 @@ describe('rendering', function (): void {
 
         // Assert
         $component
+            ->assertSeeHtml('aria-label="More actions for match '.$editableMatch->match_number.'"')
             ->assertSeeHtml('data-test="match-edit-action"')
             ->assertSeeHtml('data-match-id="'.$editableMatch->id.'"')
             ->assertDontSeeHtml('data-match-id="'.$completedMatch->id.'"')
@@ -142,8 +160,100 @@ describe('rendering', function (): void {
     });
 });
 
+describe('deleting matches', function (): void {
+    it('offers removal to users who may delete matches', function (): void {
+        // Arrange
+        $event = Event::factory()->create();
+        $match = EventMatch::factory()->forEvent($event)->create();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml('data-test="match-delete-action"')
+            ->assertSeeHtml("wire:click=\"delete({$match->id})\"")
+            ->assertSeeHtml('aria-label="Remove Match '.$match->match_number.'"')
+            ->assertSeeHtml('wire:confirm="Remove match '.$match->match_number.'?"')
+            ->assertSee('Remove');
+    });
+
+    it('hides removal from promotion members without delete access', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        EventMatch::factory()->forEvent($event)->create();
+        actingInPromotion($promotion, MembershipRole::Member);
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSeeHtml('data-test="match-result-action"')
+            ->assertDontSeeHtml('aria-label="Match actions"')
+            ->assertDontSeeHtml('data-test="match-delete-action"');
+    });
+
+    it('offers removal to promotion managers', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        EventMatch::factory()->forEvent($event)->create();
+        actingInPromotion($promotion, MembershipRole::Manager);
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSeeHtml('data-test="match-delete-action"');
+    });
+
+    it('soft deletes a match and dispatches success feedback', function (): void {
+        // Arrange
+        $event = Event::factory()->create();
+        $match = EventMatch::factory()->forEvent($event)->create();
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $match);
+
+        // Assert
+        $component
+            ->assertHasNoErrors()
+            ->assertDispatched('flash-message', type: 'status', message: __('matches.actions.deleted'))
+            ->assertDontSeeHtml("wire:click=\"delete({$match->id})\"");
+
+        $transition = $match->lifecycleTransitions()->sole();
+
+        expect($match->refresh()->trashed())->toBeTrue()
+            ->and($transition->dimension)->toBe(LifecycleDimension::Deletion)
+            ->and($transition->transition)->toBe(LifecycleTransitionType::Deleted);
+    });
+
+    it('forbids members without delete access from deleting a match', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        $match = EventMatch::factory()->forEvent($event)->create();
+        actingInPromotion($promotion, MembershipRole::Member);
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $match);
+
+        // Assert
+        $component->assertForbidden();
+
+        expect($match->refresh()->trashed())->toBeFalse();
+    });
+});
+
 describe('search and event scoping', function (): void {
-    it('searches matches by type and clears the search', function (): void {
+    it('searches matches by type and clears the search', function (string $searchTerm): void {
         // Arrange
         $event = Event::factory()->create();
         EventMatch::factory()
@@ -157,7 +267,7 @@ describe('search and event scoping', function (): void {
         $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
 
         // Act
-        $component->set('search', 'Singles');
+        $component->set('search', $searchTerm);
 
         // Assert
         $component
@@ -171,7 +281,11 @@ describe('search and event scoping', function (): void {
         $component
             ->assertSee('Singles')
             ->assertSee('Tag Team');
-    });
+    })->with([
+        'capitalized' => ['Singles'],
+        'lowercase' => ['singles'],
+        'uppercase' => ['SINGLES'],
+    ]);
 
     it('renders only matches belonging to the selected event', function (): void {
         // Arrange

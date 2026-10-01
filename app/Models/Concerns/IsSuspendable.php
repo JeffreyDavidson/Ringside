@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
+use App\Lifecycle\LifecycleStateReader;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Suspension;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,19 @@ trait IsSuspendable
         LifecyclePeriodBuilder::constrainToOpen($relation->getQuery());
 
         return $relation;
+    }
+
+    /**
+     * Determine whether a current suspension exists, reusing the `withAvailabilityState`
+     * projection when the model was loaded with it.
+     */
+    public function isSuspended(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'availability_current_suspension_exists',
+            fn (): bool => $this->currentSuspension()->exists(),
+        );
     }
 
     /** @return MorphMany<Suspension, TModel> */

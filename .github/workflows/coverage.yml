@@ -36,7 +36,7 @@ jobs:
               run: php --ri pcov
 
             - name: Generate coverage report
-              run: php -d memory_limit=4G ./vendor/bin/pest --parallel --strict-coverage --coverage --min=44 --coverage-clover coverage.xml --testsuite "Feature","Integration","Unit"
+              run: php -d memory_limit=4G ./vendor/bin/pest --strict-coverage --coverage --min=100 --coverage-clover coverage.xml --testsuite "Feature","Integration","Unit"
 
             - name: Upload coverage artifact
               uses: actions/upload-artifact@v7

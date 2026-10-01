@@ -94,3 +94,42 @@ test('it transfers the current singles championship to the winning wrestler', fu
             ->where('won_match_id', $match->id)
             ->exists())->toBeTrue();
 });
+
+test('it keeps the existing championship changes when the same result is applied again', function (): void {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->forEvent($event)->create();
+    $title = Title::factory()->singles()->create();
+    $match->titles()->attach($title);
+    $champion = Wrestler::factory()->create();
+    $challenger = Wrestler::factory()->create();
+    $currentSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+    $match->competitors()->createMany([
+        [
+            'match_side_id' => $currentSide->id,
+            'competitor_type' => $champion->getMorphClass(),
+            'competitor_id' => $champion->id,
+        ],
+        [
+            'match_side_id' => $winningSide->id,
+            'competitor_type' => $challenger->getMorphClass(),
+            'competitor_id' => $challenger->id,
+        ],
+    ]);
+    $previousReign = TitleChampionship::factory()->forWrestler($champion)->current()->create([
+        'title_id' => $title->id,
+    ]);
+    $result = new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection);
+    $action = resolve(ApplyMatchTitleOutcomesAction::class);
+
+    $action->handle($match, $result, $match->competitors()->with('competitor')->get());
+    $newReign = TitleChampionship::query()->where('won_match_id', $match->id)->sole();
+
+    $action->handle($match, $result, $match->competitors()->with('competitor')->get());
+
+    expect(TitleChampionship::query()->where('title_id', $title->id)->count())->toBe(2)
+        ->and(TitleChampionship::query()->where('won_match_id', $match->id)->sole()->is($newReign))->toBeTrue()
+        ->and($newReign->refresh()->champion_id)->toBe($challenger->id)
+        ->and($newReign->lost_at)->toBeNull()
+        ->and($previousReign->refresh()->lost_match_id)->toBe($match->id);
+});

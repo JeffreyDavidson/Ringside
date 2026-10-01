@@ -21,7 +21,9 @@ class UnretireCurrentMembersAction
 
     public function handle(TagTeam $tagTeam, Carbon $unretirementDate): void
     {
-        $wrestlers = $tagTeam->currentWrestlers
+        $wrestlers = $tagTeam->currentWrestlers()
+            ->inLockOrder()
+            ->get()
             ->filter(fn (Wrestler $wrestler): bool => $wrestler->currentRetirement()->exists());
 
         foreach ($wrestlers as $wrestler) {
@@ -32,7 +34,9 @@ class UnretireCurrentMembersAction
             }
         }
 
-        $managers = $tagTeam->currentManagers
+        $managers = $tagTeam->currentManagers()
+            ->inLockOrder()
+            ->get()
             ->filter(fn (Manager $manager): bool => $manager->currentRetirement()->exists());
 
         foreach ($managers as $manager) {

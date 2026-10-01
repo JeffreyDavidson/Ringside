@@ -16,6 +16,7 @@ class EmployCurrentWrestlersAction
     public function handle(TagTeam $tagTeam, Carbon $employmentDate): void
     {
         $wrestlers = $tagTeam->currentWrestlers()
+            ->inLockOrder()
             ->get()
             ->filter(fn (Wrestler $wrestler): bool => ! $wrestler->currentEmployment()->exists() && ! $wrestler->futureEmployment()->exists());
 

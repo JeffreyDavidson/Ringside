@@ -38,10 +38,5 @@ return [
 
     'actions' => [
         'deleted' => 'Event successfully deleted.',
-        'restored' => 'Event successfully restored.',
-    ],
-
-    'validation' => [
-        'has_past_date' => 'This event has past and its date cannot be changed.',
     ],
 ];

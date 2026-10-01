@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\TagTeams\Tables\Main;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,39 +108,6 @@ describe('tag teams table', function (): void {
             ->assertDontSee('Original Tag Team');
     });
 
-    it('employs an unemployed tag team while preserving table state', function (): void {
-        // Arrange
-        $tagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Employment Tag Team']);
-        $component = livewire(Main::class)
-            ->set('search', 'Employment')
-            ->set('filterValues.status', EmploymentStatus::Unemployed->value);
-
-        // Act
-        $component->call('employ', $tagTeam);
-
-        // Assert
-        $component
-            ->assertSet('search', 'Employment')
-            ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
-            ->assertHasNoErrors();
-        expect(freshModel($tagTeam)->status)->toBe(EmploymentStatus::Employed);
-    });
-
-    it('restores a deleted tag team and redirects to the index', function (): void {
-        // Arrange
-        $tagTeam = TagTeam::factory()->trashed()->create();
-        $component = livewire(Main::class);
-
-        // Act
-        $component->call('restore', $tagTeam->id);
-
-        // Assert
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('tag-teams.index');
-        expect(TagTeam::find($tagTeam->id))->not->toBeNull();
-    });
-
     it('forbids users without tag team access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {
@@ -157,4 +125,20 @@ describe('tag teams table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+
+    it('labels suspended tag teams without changing their employment status', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->employed()->create();
+        Suspension::factory()->for($tagTeam, 'suspendable')->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSee('Employed');
+
+        expect($component->html())
+            ->toContain('data-test="availability-suspended"')
+            ->not->toContain('data-test="availability-injured"');
+    });
 });

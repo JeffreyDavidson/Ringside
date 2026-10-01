@@ -58,9 +58,5 @@ final class IndividualEmploymentEligibility
         if ($individual->futureEmployment()->exists()) {
             throw CannotBeReleasedException::hasFutureEmployment($individual);
         }
-
-        if ($individual->currentRetirement()->exists()) {
-            throw CannotBeReleasedException::retired($individual);
-        }
     }
 }

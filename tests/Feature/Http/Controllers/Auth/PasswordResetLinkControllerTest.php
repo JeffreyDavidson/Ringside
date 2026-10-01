@@ -95,6 +95,63 @@ test('password can be reset with a valid token', function (string $email) {
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
+test('registered and unregistered emails receive the same response', function (string $email): void {
+    // Arrange
+    Notification::fake();
+    config(['auth.passwords.users.throttle' => 90]);
+    $this->freezeTime();
+    User::factory()->create(['email' => 'promoter@example.com']);
+
+    // Act
+    $response = $this->from(route('password.request'))
+        ->post(route('password.email'), ['email' => $email]);
+
+    // Assert
+    $response->assertRedirect(route('password.request'))
+        ->assertSessionHasNoErrors()
+        ->assertSessionMissing('_old_input')
+        ->assertSessionHas('status', __('passwords.sent'))
+        ->assertSessionHas('recovery_email', $email)
+        ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
+})->with(['registered' => 'promoter@example.com', 'unregistered' => 'nobody@example.com']);
+
+test('only a registered email is sent a reset notification', function (): void {
+    // Arrange
+    Notification::fake();
+    $user = User::factory()->create(['email' => 'promoter@example.com']);
+
+    // Act
+    $this->post(route('password.email'), ['email' => 'nobody@example.com']);
+    $this->post(route('password.email'), ['email' => $user->email]);
+
+    // Assert
+    Notification::assertSentTimes(ResetPassword::class, 1);
+    Notification::assertSentTo($user, ResetPassword::class);
+});
+
+test('a throttled request looks the same as a sent one and sends nothing', function (): void {
+    // Arrange
+    Notification::fake();
+    config(['auth.passwords.users.throttle' => 90]);
+    $this->freezeTime();
+    $user = User::factory()->create();
+    $data = ['email' => $user->email];
+    $this->post(route('password.email'), $data);
+
+    // Act
+    $throttled = $this->from(route('password.request'))
+        ->post(route('password.email'), $data);
+
+    // Assert
+    $throttled->assertRedirect(route('password.request'))
+        ->assertSessionHasNoErrors()
+        ->assertSessionMissing('_old_input')
+        ->assertSessionHas('status', __('passwords.sent'))
+        ->assertSessionHas('recovery_email', $user->email)
+        ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
+    Notification::assertSentToTimes($user, ResetPassword::class, 1);
+});
+
 test('a reset link can be resent after the broker cooldown', function (): void {
     // Arrange
     Notification::fake();
@@ -102,25 +159,9 @@ test('a reset link can be resent after the broker cooldown', function (): void {
     $this->freezeTime();
     $user = User::factory()->create();
     $data = ['email' => $user->email];
-
-    // Act
-    $first = $this->from(route('password.request'))
-        ->post(route('password.email'), $data);
-
-    // Assert
-    $first->assertSessionHas('recovery_email', $user->email)
-        ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
-
-    // Act
-    $throttled = $this->post(route('password.email'), $data);
-
-    // Assert
-    $throttled->assertSessionHasErrors('email')
-        ->assertSessionHas('recovery_email', $user->email)
-        ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
+    $this->post(route('password.email'), $data);
+    $this->post(route('password.email'), $data);
     Notification::assertSentToTimes($user, ResetPassword::class, 1);
-
-    // Arrange
     $this->travel(91)->seconds();
 
     // Act

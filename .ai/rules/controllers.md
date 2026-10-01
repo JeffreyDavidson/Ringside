@@ -13,3 +13,6 @@ Keep controllers limited to response and view composition. Authorize controller 
 
 ## Form Request validation
 Validate controller input with dedicated Form Request classes and use only validated input in controller operations.
+
+## Do not reveal account existence
+Authentication recovery endpoints, such as forgot-password, must return the same response whether or not the email belongs to an account or the broker throttled the request. Never surface broker status or per-account errors to the client.

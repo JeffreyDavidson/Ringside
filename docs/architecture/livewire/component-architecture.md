@@ -47,7 +47,7 @@ Builder methods.
 
 ```text
 app/Livewire/{Domain}/
-├── Components/
+├── Components/          (Actions.php on detail pages; see livewire-standards.md)
 ├── Forms/
 │   └── CreateEditForm.php
 ├── Modals/
@@ -68,26 +68,44 @@ do not move into a base component merely because several screens invoke them.
 ### BaseForm
 
 `BaseForm` centralizes model hydration, locked model identity, create/edit state,
-modal-title display values, and validation hooks. It does not know a concrete model
+and validation hooks. It does not know a concrete model
 class and does not persist records.
 
 ### BaseModal
 
-`BaseModal` loads the model selected by a locked identifier, connects the model to
-the form, builds modal titles, and resets or restores form state.
+`BaseModal` loads the model selected by an identifier, connects the model to the
+form, and resets or restores form state. `getModalTitle()` resolves the model again
+from the form's locked `modelId` and builds the title from `core.modal.edit` or
+`core.modal.add`; it never caches a title on the component. Subclasses set
+`$modelTitleField` (default `name`) or override `getModalTitle()` with their own
+`<domain>.modal.*` keys.
 
 ### BaseFormModal
 
 `BaseFormModal` coordinates the shared submission lifecycle:
 
-1. initialize the concrete model type while Livewire initializes the typed form;
-2. mount create or edit state;
-3. delegate domain submission to `storeForm()`;
-4. dispatch table refresh and form-submitted events; and
-5. close the modal after a successful submission.
+1. mount create or edit state and authorize when the modal opens;
+2. authorize again on submit, then delegate to `storeForm()`, whose default
+   validates and calls the domain's `createForm()` or `updateForm()`;
+3. dispatch table refresh and form-submitted events; and
+4. close the modal after a successful submission.
 
-Each domain modal implements `storeForm()` because only the domain boundary knows
-which Actions and typed data belong to the operation.
+Domain modals implement `createForm()` and `updateForm()` (or override `storeForm()`)
+because only the domain boundary knows which Actions and typed data belong to the
+operation.
+
+### Detail-page components
+
+Detail pages render two kinds of shared Livewire component (details in
+[livewire-standards.md](../livewire-standards.md)):
+
+- `{Domain}\Components\Actions` exposes lifecycle transitions and `canPerform()`,
+  and dispatches `{entity}-updated` after each success.
+- `App\Livewire\Components\GeneralInfo` wraps the General Info card, listens for that
+  event, and re-queries the model so the card refreshes without a reload.
+
+`App\Support\ModelKey::of()` is the shared helper for reading a model's primary key
+as `int|string`.
 
 ## Mutation flow
 

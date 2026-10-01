@@ -387,3 +387,13 @@ test('it transitions from retired to employed seamlessly', function () {
     expect($tagTeam->currentEmployment)->not()->toBeNull();
     expect($tagTeam->currentRetirement)->toBeNull();
 });
+
+test('it rejects unretiring a tag team whose name is used by an employed tag team', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    $conflictingTagTeam = TagTeam::factory()->employed()->create(['name' => $tagTeam->name]);
+
+    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeUnretiredException::class, "name conflicts with existing tag team '{$conflictingTagTeam->name}'")
+        ->and($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
+});

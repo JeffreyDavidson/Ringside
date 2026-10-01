@@ -40,7 +40,7 @@ describe('authorized event form interactions', function () {
             ->assertSet('form.date', '')
             ->assertSet('form.venue_id', 0)
             ->assertSet('form.preview', '')
-            ->assertSee('Create Event');
+            ->assertSee('Add Event');
     });
 
     it('loads an existing event for editing', function () {
@@ -63,7 +63,7 @@ describe('authorized event form interactions', function () {
             ->assertSet('form.venue_id', $venue->id)
             ->assertSet('form.preview', 'A championship showcase.')
             ->assertSeeHtml('type="datetime-local"')
-            ->assertSee('Edit Event');
+            ->assertSee('Edit Summer Showcase');
     });
 
     it('propagates a missing event failure', function () {

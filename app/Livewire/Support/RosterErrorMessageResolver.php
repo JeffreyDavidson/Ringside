@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Support;
 
-use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterEntityType;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
@@ -23,125 +22,42 @@ use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeR
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
+use Illuminate\Support\Facades\Lang;
 
 final class RosterErrorMessageResolver
 {
     public static function translationKey(BaseBusinessException $exception, RosterEntityType $entityType): string
     {
-        $reason = $exception->reason();
+        $namespace = "{$entityType->translationNamespace()}.errors";
 
-        $key = match ($exception::class) {
+        $action = match ($exception::class) {
             CannotBeEmployedException::class,
-            TagTeamCannotBeEmployedException::class => self::employmentKey($reason, $entityType),
+            TagTeamCannotBeEmployedException::class => 'employ',
             CannotBeReleasedException::class,
-            TagTeamCannotBeReleasedException::class => self::releaseKey($reason, $entityType),
+            TagTeamCannotBeReleasedException::class => 'release',
             CannotBeRetiredException::class,
-            TagTeamCannotBeRetiredException::class => self::retirementKey($reason, $entityType),
+            TagTeamCannotBeRetiredException::class => 'retire',
             CannotBeUnretiredException::class,
-            TagTeamCannotBeUnretiredException::class => self::unretirementKey($reason),
+            TagTeamCannotBeUnretiredException::class => 'unretire',
             CannotBeSuspendedException::class,
-            TagTeamCannotBeSuspendedException::class => self::suspensionKey($reason, $entityType),
+            TagTeamCannotBeSuspendedException::class => 'suspend',
             CannotBeReinstatedException::class,
-            TagTeamCannotBeReinstatedException::class => self::reinstatementKey($reason),
-            CannotBeInjuredException::class => self::injuryKey($reason, $entityType),
-            CannotBeClearedFromInjuryException::class => self::injuryClearanceKey($reason),
+            TagTeamCannotBeReinstatedException::class => 'reinstate',
+            CannotBeInjuredException::class => 'injure',
+            CannotBeClearedFromInjuryException::class => 'clear_from_injury',
             CannotBeRestoredException::class,
-            TagTeamCannotBeRestoredException::class => self::restorationKey($reason),
-            default => 'general_error',
+            TagTeamCannotBeRestoredException::class => 'restore',
+            default => null,
         };
 
-        return "{$entityType->translationNamespace()}.errors.{$key}";
-    }
+        if ($action === null) {
+            return "{$namespace}.general";
+        }
 
-    private static function employmentKey(BusinessRuleReason $reason, RosterEntityType $entityType): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::AlreadyEmployed => 'already_employed',
-            BusinessRuleReason::Suspended => 'cannot_employ_suspended',
-            BusinessRuleReason::Retired => 'cannot_employ_retired',
-            BusinessRuleReason::Injured => $entityType === RosterEntityType::Manager ? 'cannot_employ_injured' : 'cannot_employ',
-            default => 'cannot_employ',
-        };
-    }
+        $reasonKey = "{$namespace}.{$action}.{$exception->reason()->value}";
 
-    private static function releaseKey(BusinessRuleReason $reason, RosterEntityType $entityType): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::Unemployed => 'not_employed',
-            BusinessRuleReason::Suspended => in_array($entityType, [RosterEntityType::Manager, RosterEntityType::TagTeam], true)
-                ? 'cannot_release_suspended'
-                : 'cannot_release',
-            default => 'cannot_release',
-        };
-    }
-
-    private static function retirementKey(BusinessRuleReason $reason, RosterEntityType $entityType): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::Unemployed => 'cannot_retire_unemployed',
-            BusinessRuleReason::AlreadyRetired => 'already_retired',
-            BusinessRuleReason::Suspended => in_array($entityType, [RosterEntityType::Manager, RosterEntityType::TagTeam], true)
-                ? 'cannot_retire_suspended'
-                : 'cannot_retire',
-            default => 'cannot_retire',
-        };
-    }
-
-    private static function unretirementKey(BusinessRuleReason $reason): string
-    {
-        return $reason === BusinessRuleReason::NotRetired
-            ? 'not_retired'
-            : 'cannot_unretire';
-    }
-
-    private static function suspensionKey(BusinessRuleReason $reason, RosterEntityType $entityType): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::AlreadySuspended => 'already_suspended',
-            BusinessRuleReason::Unemployed => match ($entityType) {
-                RosterEntityType::Manager, RosterEntityType::TagTeam => 'not_employed_suspend',
-                RosterEntityType::Referee => 'cannot_suspend_unemployed',
-                default => 'cannot_suspend',
-            },
-            BusinessRuleReason::Injured => $entityType === RosterEntityType::Manager ? 'cannot_suspend_injured' : 'cannot_suspend',
-            default => 'cannot_suspend',
-        };
-    }
-
-    private static function reinstatementKey(BusinessRuleReason $reason): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::NotSuspended => 'not_suspended',
-            BusinessRuleReason::Injured => 'cannot_reinstate_injured',
-            default => 'cannot_reinstate',
-        };
-    }
-
-    private static function injuryKey(BusinessRuleReason $reason, RosterEntityType $entityType): string
-    {
-        return match ($reason) {
-            BusinessRuleReason::AlreadyInjured => 'already_injured',
-            BusinessRuleReason::Unemployed => match ($entityType) {
-                RosterEntityType::Manager => 'not_employed_injure',
-                RosterEntityType::Referee => 'cannot_injure_unemployed',
-                default => 'cannot_injure',
-            },
-            BusinessRuleReason::Suspended => $entityType === RosterEntityType::Manager ? 'cannot_injure_suspended' : 'cannot_injure',
-            default => 'cannot_injure',
-        };
-    }
-
-    private static function injuryClearanceKey(BusinessRuleReason $reason): string
-    {
-        return $reason === BusinessRuleReason::NotInjured
-            ? 'not_injured'
-            : 'cannot_clear_from_injury';
-    }
-
-    private static function restorationKey(BusinessRuleReason $reason): string
-    {
-        return $reason === BusinessRuleReason::NotDeleted
-            ? 'not_deleted'
-            : 'cannot_restore';
+        return Lang::has($reasonKey)
+            ? $reasonKey
+            : "{$namespace}.{$action}.default";
     }
 }

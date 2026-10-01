@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
+use App\Support\ModelKey;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
-use LogicException;
 
 /**
  * @template TModel of Model
@@ -20,18 +20,15 @@ abstract class BaseForm extends Form
     /** @param TModel|null $formModel */
     public function setModel(?Model $formModel): void
     {
-        $modelId = $formModel?->getKey();
+        if (! $formModel instanceof Model) {
+            $this->modelId = null;
 
-        if (! is_int($modelId) && ! is_string($modelId) && $modelId !== null) {
-            throw new LogicException('Livewire forms require integer or string model keys.');
+            return;
         }
 
-        $this->modelId = $modelId;
-
-        if ($formModel instanceof Model) {
-            $this->fill($formModel->getAttributes());
-            $this->loadModelData($formModel);
-        }
+        $this->modelId = ModelKey::of($formModel);
+        $this->fill($formModel->getAttributes());
+        $this->loadModelData($formModel);
     }
 
     public function isCreating(): bool

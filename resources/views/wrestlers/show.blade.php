@@ -1,6 +1,7 @@
 <x-layouts.show-page :title="$wrestler->name">
     <x-slot:sidebar>
-        <x-wrestlers.show.general-info :$wrestler />
+        <livewire:components.general-info :model="$wrestler" />
+        <livewire:wrestlers.components.actions :wrestler="$wrestler" />
     </x-slot:sidebar>
 
     <livewire:wrestlers.tables.previous-title-championships :wrestlerId="$wrestler->id" defer.bundle />

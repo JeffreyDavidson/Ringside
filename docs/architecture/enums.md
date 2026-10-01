@@ -14,12 +14,9 @@ app/Enums/
 │   ├── LifecycleOwnerType.php
 │   └── LifecycleTransitionType.php
 ├── Shared/                 # Cross-domain enums
-│   ├── ActivationStatus.php
 │   └── EmploymentStatus.php
 ├── Events/                 # Event-specific enums
 ├── Stables/               # Stable-specific enums
-│   ├── StableMemberType.php
-│   ├── StableMembershipAction.php
 │   └── StableStatus.php
 ├── Titles/                # Title-specific enums
 │   ├── TitleStatus.php
@@ -40,24 +37,6 @@ app/Enums/
 ## Enum Categories
 
 ### Shared Enums
-
-#### ActivationStatus
-Used for entities that can be activated/deactivated (stables, titles).
-
-```php
-enum ActivationStatus: string
-{
-    case Unactivated = 'unactivated';      // Never been activated
-    case FutureActivation = 'future_activation'; // Scheduled activation
-    case Active = 'active';                 // Currently active
-    case Inactive = 'inactive';             // Temporarily inactive
-    case Retired = 'retired';               // Permanently retired
-}
-```
-
-**Usage:**
-- Stables: Activation lifecycle management
-- General activation patterns across domains
 
 #### EmploymentStatus
 Used for entities with employment relationships (wrestlers, managers, referees, tag teams).
@@ -93,7 +72,7 @@ enum TitleStatus: string
 }
 ```
 
-**Key Differences from ActivationStatus:**
+**Key Characteristics:**
 - Wrestling-specific terminology ("debuted" vs "activated")
 - Title-specific business logic
 - Championship-focused workflow states
@@ -152,7 +131,6 @@ use App\Enums\Users\Role;
 
 **Incorrect Usage:**
 ```php
-use App\Enums\ActivationStatus;  // ❌ Root-level enum removed
 use App\Enums\Role;              // ❌ Root-level enum removed
 ```
 
@@ -190,7 +168,6 @@ class WrestlerFactory extends Factory
 ```php
 <!-- Correct enum reference -->
 <x-tables.meta-data enum="\App\Enums\Titles\TitleStatus" />
-<x-tables.meta-data enum="\App\Enums\Shared\ActivationStatus" />
 ```
 
 ### Business Logic Methods
@@ -200,9 +177,6 @@ All enums provide standardized methods for presentation and logic:
 ```php
 // Label for display
 $status->label();  // "Currently Employed"
-
-// Color for UI styling  
-$status->color();  // "success"
 
 // Custom business logic
 $status->isActive();
@@ -239,11 +213,6 @@ test('employment status provides correct labels', function () {
     expect(EmploymentStatus::Employed->label())->toBe('Employed');
     expect(EmploymentStatus::Released->label())->toBe('Released');
 });
-
-test('title status color coding works', function () {
-    expect(TitleStatus::Active->color())->toBe('bg-green-600 text-white');
-    expect(TitleStatus::Inactive->color())->toBe('bg-yellow-500 text-black');
-});
 ```
 
 ### Integration Testing
@@ -262,7 +231,6 @@ During the enum cleanup process, all root-level enums were removed and replaced 
 
 ### Removed Enums
 - ✅ `App\Enums\TitleType` → `App\Enums\Titles\TitleType`
-- ✅ `App\Enums\ActivationStatus` → `App\Enums\Shared\ActivationStatus`
 - ✅ `App\Enums\EmploymentStatus` → `App\Enums\Shared\EmploymentStatus`
 - ✅ `App\Enums\Role` → `App\Enums\Users\Role`
 - ✅ `App\Enums\UserStatus` → `App\Enums\Users\UserStatus`

@@ -1,6 +1,7 @@
 <x-layouts.show-page :title="$tagTeam->name">
     <x-slot:sidebar>
-        <x-tag-teams.show.general-info :$tagTeam />
+        <livewire:components.general-info :model="$tagTeam" />
+        <livewire:tag-teams.components.actions :tagTeam="$tagTeam" />
     </x-slot:sidebar>
 
     <livewire:tag-teams.tables.previous-title-championships :tagTeamId="$tagTeam->id" defer.bundle />

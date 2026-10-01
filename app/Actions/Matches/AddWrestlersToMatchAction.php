@@ -62,9 +62,9 @@ class AddWrestlersToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
-            $lockedMatch = $eventMatch->refreshForUpdate();
+            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
             $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
-        });
+        }, attempts: 3);
     }
 
     /**

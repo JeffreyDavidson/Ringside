@@ -30,20 +30,18 @@ Quality workflow.
 ```php
 <?php
 
-use App\Models\Users\User;
+use function Pest\Laravel\actingAs;
 
 test('an administrator can reach the dashboard', function (): void {
-    $user = User::factory()->administrator()->create();
-
-    $this->actingAs($user);
+    actingAs(administrator());
 
     visit(route('dashboard'))
-        ->assertSee('Dashboard')
+        ->assertSee('Overview')
         ->assertNoJavascriptErrors();
 });
 ```
 
-Use named routes and model factories for setup. Keep each browser test focused
+Use named routes and the `administrator()` / `basicUser()` helpers from `tests/Pest.php` (or model factories) for setup. Keep each browser test focused
 on one user-visible behavior and assert that the page has no JavaScript errors.
 Prefer stable `data-test` attributes for controls that do not have a durable
 accessible label.
@@ -54,13 +52,20 @@ Interact with Livewire through the rendered page, not by calling component
 methods directly:
 
 ```php
-test('a user can submit a form in the browser', function (): void {
+// Adapted from tests/Browser/LoginTest.php (which imports App\Enums\Users\UserStatus
+// and App\Models\Users\User)
+test('a user can sign in through the browser', function (): void {
+    $admin = User::factory()->administrator()->create([
+        'password' => 'password',
+        'status' => UserStatus::Active,
+    ]);
+
     visit(route('login'))
-        ->fill('@email', 'administrator@example.com')
-        ->fill('@password', 'password')
+        ->type('@email', $admin->email)
+        ->type('@password', 'password')
         ->press('@sign-in')
-        ->assertPathIs('/dashboard')
-        ->assertNoJavascriptErrors();
+        ->assertScript('window.location.pathname === "/dashboard"')
+        ->assertSee('Overview');
 });
 ```
 

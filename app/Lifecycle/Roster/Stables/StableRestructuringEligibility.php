@@ -16,17 +16,6 @@ final readonly class StableRestructuringEligibility
 {
     public function __construct(private StableMembershipService $membershipService) {}
 
-    public function canSplit(Stable $stable): bool
-    {
-        try {
-            $this->ensureCanSplit($stable);
-
-            return true;
-        } catch (CannotBeSplitException) {
-            return false;
-        }
-    }
-
     public function ensureCanSplit(Stable $stable): void
     {
         if ($stable->currentRetirement()->exists()) {
@@ -42,17 +31,6 @@ final readonly class StableRestructuringEligibility
 
         if ($currentMemberCount < $minimumMemberCount) {
             throw CannotBeSplitException::insufficientMembers($stable, $currentMemberCount, $minimumMemberCount);
-        }
-    }
-
-    public function canMerge(Stable $primaryStable, Stable $secondaryStable): bool
-    {
-        try {
-            $this->ensureCanMerge($primaryStable, $secondaryStable);
-
-            return true;
-        } catch (CannotBeMergedException) {
-            return false;
         }
     }
 

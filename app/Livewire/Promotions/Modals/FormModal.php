@@ -47,13 +47,6 @@ class FormModal extends BaseFormModal
         $this->form->slug = Str::slug($this->form->name);
     }
 
-    public function getModalTitle(): string
-    {
-        return $this->form->isEditing()
-            ? __('promotions.edit_title')
-            : __('promotions.create_title');
-    }
-
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->promotion(), $this->form->toData());

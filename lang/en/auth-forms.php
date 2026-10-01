@@ -22,7 +22,6 @@ return [
     'hide_password_confirmation' => 'Hide password confirmation',
     'check_email' => 'Check your email',
     'reset_sent_to' => 'We sent a password reset link to',
-    'reset_requested_for' => 'A password reset link was recently requested for',
     'check_spam' => 'Check your inbox and spam folder. Follow the link in the email to choose a new password.',
     'resend_link' => 'Resend reset link',
     'resend_wait' => 'You can request another link in :seconds seconds.',

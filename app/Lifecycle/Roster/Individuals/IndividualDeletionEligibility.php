@@ -12,17 +12,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualDeletionEligibility
 {
-    public function canDelete(Wrestler|Manager|Referee $individual): bool
-    {
-        try {
-            $this->ensureCanDelete($individual);
-
-            return true;
-        } catch (CannotBeDeletedException) {
-            return false;
-        }
-    }
-
     public function ensureCanDelete(Wrestler|Manager|Referee $individual): void
     {
         if (! $individual->exists || $individual->trashed()) {
