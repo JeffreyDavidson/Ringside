@@ -11,6 +11,7 @@ use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Wrestler> */
 class CreateEditForm extends BaseForm
