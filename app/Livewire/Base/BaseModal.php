@@ -22,6 +22,11 @@ abstract class BaseModal extends ModalComponent
         return '4xl';
     }
 
+    public static function destroyOnClose(): bool
+    {
+        return true;
+    }
+
     /** @return class-string<TModelType> */
     abstract protected function getModelClass(): string;
 

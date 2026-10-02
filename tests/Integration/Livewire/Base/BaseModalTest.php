@@ -172,3 +172,17 @@ describe('localized modal titles', function (): void {
         'result recorded' => [MatchFinish::Stipulation, 'Correct Match Result'],
     ]);
 });
+
+describe('modal lifecycle', function (): void {
+    it('destroys modal component state when a modal closes', function (): void {
+        // Act
+        $destroyed = [
+            FormModal::destroyOnClose(),
+            WrestlerFormModal::destroyOnClose(),
+            MatchFormModal::destroyOnClose(),
+        ];
+
+        // Assert
+        expect($destroyed)->each->toBeTrue();
+    });
+});
