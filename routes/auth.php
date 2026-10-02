@@ -15,7 +15,7 @@ Route::get('register', [RegisteredUserController::class, 'create'])
     ->name('register');
 
 Route::post('register', [RegisteredUserController::class, 'store'])
-    ->middleware('guest');
+    ->middleware(['guest', 'throttle:6,1,register']);
 
 Route::get('login', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
@@ -29,7 +29,7 @@ Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
     ->name('password.request');
 
 Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-    ->middleware('guest')
+    ->middleware(['guest', 'throttle:6,1,forgot-password'])
     ->name('password.email');
 
 Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
@@ -37,7 +37,7 @@ Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
     ->name('password.reset');
 
 Route::post('reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')
+    ->middleware(['guest', 'throttle:6,1,reset-password'])
     ->name('password.update');
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
