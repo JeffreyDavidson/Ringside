@@ -51,8 +51,8 @@ class FormModal extends BaseFormModal
         $this->form->first_name = fake()->firstName();
         $this->form->last_name = fake()->lastName();
         $this->form->email = fake()->unique()->safeEmail();
-        $this->form->password = 'password123';
-        $this->form->password_confirmation = 'password123';
+        $this->form->password = 'password-12345';
+        $this->form->password_confirmation = 'password-12345';
         $this->form->role = 'basic';
     }
 

@@ -26,8 +26,8 @@ test('a user can register with their account details', function (string $email):
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
         'email' => $email,
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password-12345',
+        'password_confirmation' => 'password-12345',
     ];
 
     // Act
@@ -43,7 +43,7 @@ test('a user can register with their account details', function (string $email):
         ->last_name->toBe('Davidson')
         ->role->toBe(Role::Basic)
         ->status->toBe(UserStatus::Unverified)
-        ->and(Hash::check('password', $user->password))->toBeTrue();
+        ->and(Hash::check('password-12345', $user->password))->toBeTrue();
 
     assertGuest();
 })->with(['jeffrey@example.com', 'Jeffrey@Example.COM']);
@@ -98,8 +98,8 @@ test('registration rejects an email that only differs by case from an existing u
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
         'email' => 'JEFFREY@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password-12345',
+        'password_confirmation' => 'password-12345',
     ];
 
     // Act

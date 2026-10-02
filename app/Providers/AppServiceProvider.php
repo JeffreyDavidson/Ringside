@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
@@ -78,6 +79,8 @@ class AppServiceProvider extends ServiceProvider
             EnsureUserIsActive::class,
             EstablishPromotionContext::class,
         ]);
+
+        Password::defaults(fn (): Password => Password::min(12));
 
         if (config('app.force_https')) {
             URL::forceScheme('https');

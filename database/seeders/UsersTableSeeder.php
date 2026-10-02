@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class UsersTableSeeder extends Seeder
 {
@@ -19,6 +20,10 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new RuntimeException('Demo seeders create accounts with a known password and must not run in production.');
+        }
+
         User::factory()->administrator()->count(2)->sequence(fn (Sequence $sequence) => [
             'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Administrator->value),
             'last_name' => 'User',

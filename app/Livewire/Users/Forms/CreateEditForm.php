@@ -10,6 +10,7 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
 use App\Rules\Users\UniqueEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Password;
 
 /** @extends BaseForm<User> */
 class CreateEditForm extends BaseForm
@@ -63,10 +64,10 @@ class CreateEditForm extends BaseForm
         ];
 
         if ($this->isCreating()) {
-            $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
+            $rules['password'] = ['required', 'string', Password::defaults(), 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         } elseif (! empty($this->password)) {
-            $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
+            $rules['password'] = ['required', 'string', Password::defaults(), 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         }
 

@@ -17,7 +17,7 @@ return [
     'email_placeholder' => 'email@email.com',
     'password' => 'Password',
     'password_placeholder' => 'Enter Password',
-    'password_hint' => 'Use at least 8 characters.',
+    'password_hint' => 'Use at least 12 characters.',
     'show_password_confirmation' => 'Show password confirmation',
     'hide_password_confirmation' => 'Hide password confirmation',
     'check_email' => 'Check your email',
