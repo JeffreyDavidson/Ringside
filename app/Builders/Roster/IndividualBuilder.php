@@ -37,4 +37,16 @@ abstract class IndividualBuilder extends Builder
     {
         return $this->withExists(self::AVAILABILITY_STATE);
     }
+
+    /**
+     * Restrict to individuals RosterBookingEligibility would allow: currently
+     * employed, not retired, not suspended and not injured.
+     */
+    public function bookable(): static
+    {
+        return $this->whereHas('currentEmployment')
+            ->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentInjury');
+    }
 }

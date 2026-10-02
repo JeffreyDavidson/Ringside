@@ -72,11 +72,12 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertPropertyWired('form.matchType')
             ->assertPropertyWired('form.matchStipulationId')
-            ->assertPropertyWired('form.referees')
             ->assertPropertyWired('form.titles')
             ->assertPropertyWired('form.preview')
-            ->assertSee($wrestler->name)
-            ->assertSee($referee->full_name)
+            ->assertSeeHtml('data-field="form.competitors.0.wrestlers.0"')
+            ->assertSeeHtml('data-field="form.referees"')
+            ->assertDontSee($wrestler->name)
+            ->assertDontSee($referee->full_name)
             ->assertSee($title->name)
             ->assertSee($activeStipulation->name)
             ->assertDontSee($inactiveStipulation->name);
@@ -98,8 +99,8 @@ describe('authorized match form interactions', function (): void {
                 ['wrestlers' => [], 'tag_teams' => []],
             ])
             ->assertSee('Add Match')
-            ->assertPropertyWired('form.competitors.0.wrestlers.0')
-            ->assertPropertyWired('form.competitors.1.wrestlers.0');
+            ->assertSeeHtml('data-field="form.competitors.0.wrestlers.0"')
+            ->assertSeeHtml('data-field="form.competitors.1.wrestlers.0"');
     });
 
     it('prompts for a match type instead of implying one is selected', function (): void {
