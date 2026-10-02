@@ -91,6 +91,8 @@ it('gives the same generic outcome whenever no member is added', function (strin
 
     $email = match ($case) {
         'partial email' => 'secretive',
+        'percent wildcard' => '%@example.test',
+        'underscore wildcard' => 'secretive_person@example.test',
         'name search' => 'Secretive Person',
         'unknown email' => 'nobody@example.test',
         'inactive user' => $inactive->email,
@@ -108,7 +110,7 @@ it('gives the same generic outcome whenever no member is added', function (strin
 
     expect($promotion->memberships()->count())->toBe(1)
         ->and($promotion->hasActiveMember($active))->toBeFalse();
-})->with(['partial email', 'name search', 'unknown email', 'inactive user', 'already a member']);
+})->with(['partial email', 'percent wildcard', 'underscore wildcard', 'name search', 'unknown email', 'inactive user', 'already a member']);
 
 it('requires an email and a valid role to add a member', function (string $email, string $role, string $field) {
     $promotion = Promotion::factory()->create();

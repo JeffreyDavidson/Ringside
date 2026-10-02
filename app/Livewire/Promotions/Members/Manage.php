@@ -64,10 +64,15 @@ class Manage extends Component
             ],
         )->validate();
 
+        $email = mb_strtolower(trim($validated['email']));
+
+        // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
+        // `%` and `_` in the input can never widen the match.
         $user = User::query()
-            ->whereRaw('lower(email) = ?', [mb_strtolower(trim($validated['email']))])
+            ->whereLike('email', $email, caseSensitive: false)
             ->where('status', UserStatus::Active)
-            ->first();
+            ->get()
+            ->first(fn (User $candidate): bool => mb_strtolower($candidate->email) === $email);
 
         $role = MembershipRole::from($validated['role']);
 
