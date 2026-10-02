@@ -106,6 +106,22 @@ describe('authorized user form interactions', function () {
             ->assertSet('form.email', '');
     });
 
+    it('does not let the last active administrator be demoted', function () {
+        $administrator = User::query()->where('role', Role::Administrator)->firstOrFail();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $administrator->id);
+        $modal->set('form.role', Role::Basic->value);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors('form.role')
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('userUpdated');
+
+        expect($administrator->refresh()->role)->toBe(Role::Administrator);
+    });
+
     it('updates a user without changing an omitted password', function () {
         $user = User::factory()->basicUser()->create([
             'first_name' => 'Original',

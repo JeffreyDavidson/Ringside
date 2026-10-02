@@ -7,6 +7,7 @@ namespace App\Livewire\Users\Tables;
 use App\Actions\Users\ChangeStatusAction;
 use App\Builders\Users\UserBuilder;
 use App\Enums\Users\UserStatus;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Table\Column;
@@ -71,6 +72,8 @@ class Main extends BaseTable
 
     public function changeStatus(int $userId, string $status, ChangeStatusAction $changeStatusAction): void
     {
+        Gate::authorize('manageUsers', User::class);
+
         $targetStatus = UserStatus::tryFrom($status);
 
         if ($targetStatus === null) {
@@ -81,9 +84,13 @@ class Main extends BaseTable
 
         $user = User::query()->findOrFail($userId);
 
-        Gate::authorize('manageUsers', User::class);
+        try {
+            $changeStatusAction->handle($user, $targetStatus);
+        } catch (BaseBusinessException $exception) {
+            $this->dispatchActionFailure($exception->getMessage());
 
-        $changeStatusAction->handle($user, $targetStatus);
+            return;
+        }
 
         $this->dispatchActionSuccess("User account status changed to {$targetStatus->label()}.");
     }

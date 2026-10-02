@@ -10,10 +10,16 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
+    public function __construct(private readonly EnsureAnotherActiveAdministratorAction $ensureAnotherActiveAdministrator) {}
+
     public function handle(User $user, UserData $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
             $lockedUser = $user->refreshForUpdate();
+
+            if ($lockedUser->role->isAdministrator() && ! $data->role->isAdministrator()) {
+                $this->ensureAnotherActiveAdministrator->handle($lockedUser);
+            }
 
             $attributes = [
                 'first_name' => $data->firstName,

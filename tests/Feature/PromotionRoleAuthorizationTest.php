@@ -101,10 +101,11 @@ test('members can view their promotion data but cannot manage it', function () {
 
     Livewire::actingAs($user)
         ->test(Manage::class, ['promotionId' => $promotion->id])
-        ->assertDontSee('Add an existing user')
+        ->assertDontSee('Add a member by email')
         ->assertDontSee('Save role')
         ->assertSee('Member')
-        ->call('addMember', User::factory()->create(['status' => UserStatus::Active])->id)
+        ->set('email', User::factory()->create(['status' => UserStatus::Active])->email)
+        ->call('addMember')
         ->assertForbidden();
 });
 
@@ -126,7 +127,7 @@ test('managers can manage promotion data but cannot change promotion settings or
 
     Livewire::actingAs($user)
         ->test(Manage::class, ['promotionId' => $promotion->id])
-        ->assertDontSee('Add an existing user')
+        ->assertDontSee('Add a member by email')
         ->assertDontSee('Save role')
         ->assertSee('Manager')
         ->call('updateMemberStatus', User::factory()->create()->id, MembershipStatus::Suspended->value)
@@ -146,9 +147,10 @@ test('owners can update promotion settings and manage membership roles', functio
 
     Livewire::actingAs($user)
         ->test(Manage::class, ['promotionId' => $promotion->id])
-        ->assertSee('Add an existing user')
+        ->assertSee('Add a member by email')
         ->assertSee('Save role')
-        ->call('addMember', $newMember->id)
+        ->set('email', $newMember->email)
+        ->call('addMember')
         ->assertHasNoErrors();
 
     expect($promotion->hasActiveMember($newMember))->toBeTrue();

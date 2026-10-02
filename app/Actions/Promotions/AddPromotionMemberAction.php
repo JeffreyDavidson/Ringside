@@ -13,9 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 final class AddPromotionMemberAction
 {
-    public function handle(Promotion $promotion, User $user, MembershipRole $role): void
+    /** Returns false when the user is already a member. */
+    public function handle(Promotion $promotion, User $user, MembershipRole $role): bool
     {
-        DB::transaction(function () use ($promotion, $user, $role): void {
+        return DB::transaction(function () use ($promotion, $user, $role): bool {
             $lockedPromotion = Promotion::query()
                 ->whereKey($promotion->getKey())
                 ->lockForUpdate()
@@ -33,13 +34,15 @@ final class AddPromotionMemberAction
                 ->first();
 
             if ($membership !== null) {
-                return;
+                return false;
             }
 
             $lockedPromotion->users()->attach($activeUser->getKey(), [
                 'role' => $role,
                 'status' => MembershipStatus::Active,
             ]);
+
+            return true;
         });
     }
 }
