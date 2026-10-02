@@ -111,7 +111,7 @@ class ApplyMatchTitleOutcomesAction
      */
     private function championForTitle(Title $title, MatchCompetitorsCollection $winningCompetitors): Wrestler|TagTeam
     {
-        if ($winningCompetitors->contains(fn (MatchCompetitor $competitor): bool => $competitor->competitor()->doesntExist())) {
+        if ($winningCompetitors->contains(fn (MatchCompetitor $competitor): bool => $competitor->competitor()->withoutTrashed()->doesntExist())) {
             throw InvalidMatchOutcomeException::winnerDeleted();
         }
 

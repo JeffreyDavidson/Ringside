@@ -857,7 +857,8 @@ it('rejects a title change for a winner who is no longer eligible', function (Cl
         '[{name}] is no longer eligible to win a title.',
     ],
     'deleted' => [
-        fn (Wrestler $wrestler) => resolve(DeleteWrestlerAction::class)->handle($wrestler),
+        // The delete Action refuses booked wrestlers, so soft-delete directly to model a stale booking.
+        fn (Wrestler $wrestler) => $wrestler->delete(),
         'A deleted competitor cannot win a title.',
     ],
 ]);
