@@ -27,13 +27,4 @@ class TagTeamBuilder extends Builder
 
     /** Relationship existence projections read by isSuspended(). */
     public const array AVAILABILITY_STATE = ['currentSuspension as availability_current_suspension_exists'];
-
-    /**
-     * Project the current suspension state so availability badges render
-     * without per-row queries.
-     */
-    public function withAvailabilityState(): static
-    {
-        return $this->withExists(self::AVAILABILITY_STATE);
-    }
 }
