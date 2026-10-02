@@ -35,5 +35,8 @@ Use RosterResourceRouteResolver for Wrestler and TagTeam resource URLs shared by
 ## Resolve models from locked identifiers
 Livewire preserves public state between requests, not protected model properties. Keep the model identifier on the form as a locked public property and resolve the current Eloquent model from it whenever validation, authorization, modal titles, or submission behavior needs model context. Do not use protected model instances as cross-request state.
 
+## Project lifecycle status once, for the loaded rows only
+Show-page components load the status projection with their model query or loadExists() in render(); tables paginate first and project through DataTableComponent::projectRowState() for the page rows instead of adding with*State() to builder(). Do not read status, isInjured() or isSuspended() on models that were loaded without the projection in a loop or per render: each call falls back to its own exists query. Any table action that changes the counts must call forgetMetadata().
+
 ## Validate client-settable filter state before parsing
 Public Livewire filter state such as date ranges is client-controlled. Validate its shape before parsing it into dates or ids and ignore malformed values rather than letting the parser throw a 500.

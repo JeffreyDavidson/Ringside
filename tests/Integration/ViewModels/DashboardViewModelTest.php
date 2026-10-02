@@ -77,6 +77,26 @@ describe('current champions', function (): void {
     });
 });
 
+describe('champions list cap', function (): void {
+    it('lists at most twelve championed titles', function (): void {
+        // Arrange
+        foreach (range(1, 13) as $number) {
+            TitleChampionship::factory()
+                ->for(Title::factory()->active()->create(['name' => sprintf('Title %02d', $number)]))
+                ->forWrestler()
+                ->current()
+                ->create();
+        }
+
+        // Act
+        $titles = app(DashboardViewModel::class)->championedTitles();
+
+        // Assert
+        expect($titles)->toHaveCount(12)
+            ->and($titles->last()?->name)->toBe('Title 12');
+    });
+});
+
 describe('promotion scope', function (): void {
     it('only includes records from the active promotion', function (): void {
         // Arrange

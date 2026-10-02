@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
+use App\Lifecycle\LifecycleStateReader;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +56,45 @@ trait HasActivityPeriods
         LifecyclePeriodBuilder::constrainToScheduled($relation->getQuery());
 
         return $relation;
+    }
+
+    /**
+     * Determine whether a current activity period exists, reusing the `withActivityStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasCurrentActivityPeriod(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_current_activity_period_exists',
+            fn (): bool => $this->currentActivityPeriod()->exists(),
+        );
+    }
+
+    /**
+     * Determine whether a scheduled activity period exists, reusing the `withActivityStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasFutureActivityPeriod(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_future_activity_period_exists',
+            fn (): bool => $this->futureActivityPeriod()->exists(),
+        );
+    }
+
+    /**
+     * Determine whether any activity period exists, reusing the `withActivityStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasActivityHistory(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_activity_periods_exists',
+            fn (): bool => $this->activityPeriods()->exists(),
+        );
     }
 
     /**

@@ -17,6 +17,7 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Stable> */
@@ -40,10 +41,15 @@ class Main extends BaseTable
     public function builder(): StableBuilder
     {
         return Stable::query()
-            ->withActivityStatusState()
             ->withFirstActivityPeriod()
             ->with(['currentWrestlers', 'currentTagTeams'])
             ->oldest('name');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists(StableBuilder::ACTIVITY_STATUS_STATE);
     }
 
     protected function configure(): void
@@ -120,5 +126,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $stable): void {
             $deleteAction->handle($stable);
         }, __('stables.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

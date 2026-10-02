@@ -47,7 +47,7 @@ final readonly class StableActivityEligibility
             throw CannotBeEstablishedException::deleted($stable);
         }
 
-        if ($stable->activityPeriods()->exists()) {
+        if ($stable->hasActivityHistory()) {
             throw CannotBeEstablishedException::established($stable);
         }
 
@@ -70,15 +70,15 @@ final readonly class StableActivityEligibility
             throw CannotBeDisbandedException::deleted($stable);
         }
 
-        if (! $stable->activityPeriods()->exists()) {
+        if (! $stable->hasActivityHistory()) {
             throw CannotBeDisbandedException::unactivated($stable);
         }
 
-        if ($stable->futureActivityPeriod()->exists()) {
+        if ($stable->hasFutureActivityPeriod()) {
             throw CannotBeDisbandedException::hasFutureActivation($stable);
         }
 
-        if (! $stable->currentActivityPeriod()->exists()) {
+        if (! $stable->hasCurrentActivityPeriod()) {
             throw CannotBeDisbandedException::disbanded($stable);
         }
     }
@@ -89,15 +89,15 @@ final readonly class StableActivityEligibility
             throw CannotBeReunitedException::deleted($stable);
         }
 
-        if (! $stable->activityPeriods()->exists()) {
+        if (! $stable->hasActivityHistory()) {
             throw CannotBeReunitedException::neverActive($stable);
         }
 
-        if ($stable->currentActivityPeriod()->exists() || $stable->futureActivityPeriod()->exists()) {
+        if ($stable->hasCurrentActivityPeriod() || $stable->hasFutureActivityPeriod()) {
             throw CannotBeReunitedException::currentlyActive($stable);
         }
 
-        if ($stable->currentRetirement()->exists()) {
+        if ($stable->hasCurrentRetirement()) {
             throw CannotBeReunitedException::retired($stable);
         }
 

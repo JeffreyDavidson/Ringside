@@ -18,6 +18,7 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Title> */
@@ -41,10 +42,15 @@ class Main extends BaseTable
     public function builder(): TitleBuilder
     {
         return Title::query()
-            ->withActivityStatusState()
             ->withFirstActivityPeriod()
             ->with('currentChampionship.champion')
             ->oldest('name');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists(TitleBuilder::ACTIVITY_STATUS_STATE);
     }
 
     protected function configure(): void
@@ -125,5 +131,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $title): void {
             $deleteAction->handle($title);
         }, __('titles.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

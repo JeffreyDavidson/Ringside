@@ -30,11 +30,11 @@ final class IndividualRetirementEligibility
             throw CannotBeRetiredException::unemployed($individual);
         }
 
-        if ($individual->futureEmployment()->exists()) {
+        if ($individual->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment($individual);
         }
 
-        if ($individual->currentRetirement()->exists()) {
+        if ($individual->hasCurrentRetirement()) {
             throw CannotBeRetiredException::alreadyRetired($individual);
         }
     }
@@ -56,7 +56,7 @@ final class IndividualRetirementEligibility
             throw CannotBeUnretiredException::deleted($individual);
         }
 
-        if (! $individual->currentRetirement()->exists()) {
+        if (! $individual->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($individual);
         }
     }

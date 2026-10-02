@@ -87,6 +87,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->loadLifecycleState($this->manager);
+
         return view('livewire.managers.components.actions');
     }
 }

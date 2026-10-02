@@ -25,12 +25,6 @@ class TagTeamBuilder extends Builder
     use LoadsFirstEmployment;
     use OrdersByKeyForLocking;
 
-    /**
-     * Project the current suspension state so availability badges render
-     * without per-row queries.
-     */
-    public function withAvailabilityState(): static
-    {
-        return $this->withExists('currentSuspension as availability_current_suspension_exists');
-    }
+    /** Relationship existence projections read by isSuspended(). */
+    public const array AVAILABILITY_STATE = ['currentSuspension as availability_current_suspension_exists'];
 }

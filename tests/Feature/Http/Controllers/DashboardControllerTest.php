@@ -13,6 +13,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\ViewModels\DashboardViewModel;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -197,3 +198,26 @@ test('the dashboard pluralises the number of days a champion has held a title', 
     'one day' => [1, '1 day', '1 days'],
     'many days' => [12, '12 days', null],
 ]);
+
+/**
+ * @see DashboardController::__invoke()
+ */
+test('the dashboard issues the same number of queries however large the roster is', function () {
+    actingAs(administrator());
+    $countQueries = function (): int {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        get(route('dashboard'))->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
+    };
+    Wrestler::factory()->employed()->count(5)->create();
+    $queriesWithSmallRoster = $countQueries();
+
+    Wrestler::factory()->employed()->count(45)->create();
+    $queriesWithLargeRoster = $countQueries();
+
+    expect($queriesWithLargeRoster)->toBe($queriesWithSmallRoster);
+});
