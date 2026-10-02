@@ -13,7 +13,6 @@ use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<TagTeam> */
 class CreateEditForm extends BaseForm
@@ -69,12 +68,12 @@ class CreateEditForm extends BaseForm
         $tagTeam = $this->isEditing() ? $this->tagTeam() : null;
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->modelId)],
-            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->modelId)],
-            'wrestlerA' => ['bail', 'required', 'integer', 'exists:wrestlers,id', new CanJoinTagTeam($this->modelId)],
-            'wrestlerB' => ['bail', 'required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA', new CanJoinTagTeam($this->modelId)],
+            'name' => ['required', 'string', 'max:255', $this->uniqueInPromotion('tag_teams', 'name')],
+            'signature_move' => ['nullable', 'string', 'max:255', $this->uniqueInPromotion('tag_teams', 'signature_move')],
+            'wrestlerA' => ['bail', 'required', 'integer', $this->existsInPromotion('wrestlers'), new CanJoinTagTeam($this->modelId)],
+            'wrestlerB' => ['bail', 'required', 'integer', $this->existsInPromotion('wrestlers'), 'different:wrestlerA', new CanJoinTagTeam($this->modelId)],
             'managers' => ['array'],
-            'managers.*' => ['integer', 'exists:managers,id'],
+            'managers.*' => ['integer', $this->existsInPromotion('managers')],
             'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($tagTeam)],
         ];
     }

@@ -129,6 +129,17 @@ visible while its related event history is filtered by the active promotion.
 When promotion context is enforced, new promotion-owned models receive the
 active promotion during creation without exposing ownership columns to
 mass-assignment.
+Names are unique per promotion: wrestler and tag team `name` and
+`signature_move`, stable, title and event `name` (validated in the create/edit
+forms through `BaseForm::uniqueInPromotion()`, and in the restore eligibility
+checks), so another promotion's values neither collide nor are revealed.
+`exists` rules for promotion-owned records in those forms use
+`BaseForm::existsInPromotion()`. Promotion slugs and venue names stay global.
+At the database level, `stables_active_name_unique` is unique on
+`(promotion_id, name) WHERE deleted_at IS NULL`; because NULLs are distinct in
+unique indexes, a second filtered index
+`stables_active_unowned_name_unique` keeps active unowned stable names unique
+(SQLite and PostgreSQL; MySQL relies on form validation for unowned stables).
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Match data inherits ownership

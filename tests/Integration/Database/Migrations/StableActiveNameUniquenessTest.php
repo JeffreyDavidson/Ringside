@@ -25,6 +25,7 @@ test('a deleted and active stable may share a name', function () {
 
 test('the migration identifies existing duplicate active names', function () {
     DB::statement('DROP INDEX stables_active_name_unique');
+    DB::statement('DROP INDEX stables_active_unowned_name_unique');
     Stable::factory()->create(['name' => 'The Four Horsemen']);
     Stable::factory()->create(['name' => 'The Four Horsemen']);
 

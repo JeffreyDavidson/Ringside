@@ -17,7 +17,6 @@ use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Stable> */
 class CreateEditForm extends BaseForm
@@ -72,7 +71,7 @@ class CreateEditForm extends BaseForm
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('stables', 'name')->ignore($this->modelId)->withoutTrashed(),
+                $this->uniqueInPromotion('stables', 'name')->withoutTrashed(),
             ],
             'started_at' => [
                 'nullable',
@@ -88,7 +87,7 @@ class CreateEditForm extends BaseForm
             'wrestlers.*' => [
                 'bail',
                 'integer',
-                'exists:wrestlers,id',
+                $this->existsInPromotion('wrestlers'),
                 new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
                 new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
@@ -97,7 +96,7 @@ class CreateEditForm extends BaseForm
             'tag_teams.*' => [
                 'bail',
                 'integer',
-                'exists:tag_teams,id',
+                $this->existsInPromotion('tag_teams'),
                 new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
             ],
         ];

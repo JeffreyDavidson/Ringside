@@ -180,13 +180,13 @@ test('administrator can recover from a venue scheduling conflict in the event fo
         ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
         ->select('select[name="form.venue_id"]', (string) $venue->id)
         ->press('Save')
-        ->assertSee("Venue [{$venue->name}] is already booked at this event time.")
+        ->assertSee("Venue [{$venue->name}] is already booked on that day.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Add Event');
 
     expect(Event::query()->count())->toBe(1);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
@@ -220,7 +220,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
         ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
         ->press('Save')
-        ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+        ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Edit Original Browser Event');
 
@@ -228,7 +228,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->and($event->date?->toDateTimeString())->toBe($conflictingDate->toDateTimeString())
         ->and($event->venue_id)->toBe($originalVenue->id);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')

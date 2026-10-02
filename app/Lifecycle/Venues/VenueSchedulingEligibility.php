@@ -11,9 +11,17 @@ use Illuminate\Support\Carbon;
 
 final class VenueSchedulingEligibility
 {
+    /**
+     * Venues are shared by every promotion, so a venue may host only one event per calendar day (in the
+     * application timezone) across all promotions. Soft-deleted events do not hold a venue.
+     */
     public static function ensureAvailable(Venue $venue, Carbon $date, ?Event $except = null): void
     {
-        $events = $venue->events()->where('date', $date);
+        $day = $date->copy()->setTimezone(date_default_timezone_get());
+
+        $events = $venue->events()
+            ->withoutGlobalScope('promotion_context')
+            ->whereBetween('date', [$day->copy()->startOfDay(), $day->copy()->endOfDay()]);
 
         if ($except instanceof Event) {
             $events->whereKeyNot($except->getKey());
