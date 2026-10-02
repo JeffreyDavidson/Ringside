@@ -31,4 +31,10 @@ interface Employable
      * @return MorphOne<Employment, TModel>
      */
     public function futureEmployment(): MorphOne;
+
+    public function hasCurrentEmployment(): bool;
+
+    public function hasFutureEmployment(): bool;
+
+    public function hasEmploymentHistory(): bool;
 }

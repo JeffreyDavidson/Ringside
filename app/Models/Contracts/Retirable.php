@@ -22,4 +22,6 @@ interface Retirable
 
     /** @return MorphOne<Retirement, TModel> */
     public function currentRetirement(): MorphOne;
+
+    public function hasCurrentRetirement(): bool;
 }

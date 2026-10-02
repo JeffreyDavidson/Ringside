@@ -24,11 +24,11 @@ final class TagTeamRetirementEligibility
 
     public function ensureCanRetire(TagTeam $tagTeam): void
     {
-        if ($tagTeam->currentRetirement()->exists()) {
+        if ($tagTeam->hasCurrentRetirement()) {
             throw CannotBeRetiredException::alreadyRetired($tagTeam);
         }
 
-        if (! $tagTeam->currentEmployment()->exists()) {
+        if (! $tagTeam->hasCurrentEmployment()) {
             throw CannotBeRetiredException::notEmployed($tagTeam);
         }
     }
@@ -46,7 +46,7 @@ final class TagTeamRetirementEligibility
 
     public function ensureCanUnretire(TagTeam $tagTeam, bool $requireAvailablePartners = true): void
     {
-        if (! $tagTeam->currentRetirement()->exists()) {
+        if (! $tagTeam->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($tagTeam);
         }
 

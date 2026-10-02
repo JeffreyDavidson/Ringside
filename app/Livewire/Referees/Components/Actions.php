@@ -87,6 +87,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->loadLifecycleState($this->referee);
+
         return view('livewire.referees.components.actions');
     }
 }

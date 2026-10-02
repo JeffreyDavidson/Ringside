@@ -12,6 +12,7 @@ use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
 use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
@@ -95,6 +96,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->tagTeam->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
+
         return view('livewire.tag-teams.components.actions');
     }
 }

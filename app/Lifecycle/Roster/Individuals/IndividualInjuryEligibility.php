@@ -25,19 +25,19 @@ final class IndividualInjuryEligibility
 
     public function ensureCanInjure(Wrestler|Manager|Referee $individual): void
     {
-        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
+        if (! $individual->hasCurrentEmployment() && ! $individual->hasFutureEmployment()) {
             throw CannotBeInjuredException::unemployed($individual);
         }
 
-        if ($individual->futureEmployment()->exists()) {
+        if ($individual->hasFutureEmployment()) {
             throw CannotBeInjuredException::hasFutureEmployment($individual);
         }
 
-        if ($individual->currentSuspension()->exists()) {
+        if ($individual->isSuspended()) {
             throw CannotBeInjuredException::suspended($individual);
         }
 
-        if ($individual->currentInjury()->exists()) {
+        if ($individual->isInjured()) {
             throw CannotBeInjuredException::injured($individual);
         }
     }
@@ -55,7 +55,7 @@ final class IndividualInjuryEligibility
 
     public function ensureCanBeClearedFromInjury(Wrestler|Manager|Referee $individual): void
     {
-        if (! $individual->currentInjury()->exists()) {
+        if (! $individual->isInjured()) {
             throw CannotBeClearedFromInjuryException::notInjured($individual);
         }
     }

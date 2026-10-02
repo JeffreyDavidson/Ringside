@@ -87,6 +87,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->loadLifecycleState($this->wrestler);
+
         return view('livewire.wrestlers.components.actions');
     }
 }

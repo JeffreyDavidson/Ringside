@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Lifecycle\Roster;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Lifecycle\LifecycleStateReader;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Model;
@@ -25,30 +24,11 @@ final class EmploymentStatusResolver
             throw new LogicException('Employment status requires an employable, retirable model.');
         }
 
-        $state = LifecycleStateReader::readProjectedBooleans($model, [
-            'isRetired' => [
-                'attribute' => 'status_current_retirement_exists',
-                'fallback' => fn (): bool => $model->currentRetirement()->exists(),
-            ],
-            'isEmployed' => [
-                'attribute' => 'status_current_employment_exists',
-                'fallback' => fn (): bool => $model->currentEmployment()->exists(),
-            ],
-            'hasFutureEmployment' => [
-                'attribute' => 'status_future_employment_exists',
-                'fallback' => fn (): bool => $model->futureEmployment()->exists(),
-            ],
-            'hasEmploymentHistory' => [
-                'attribute' => 'status_employments_exists',
-                'fallback' => fn (): bool => $model->employments()->exists(),
-            ],
-        ]);
-
         return self::resolve(
-            isRetired: $state['isRetired'],
-            isEmployed: $state['isEmployed'],
-            hasFutureEmployment: $state['hasFutureEmployment'],
-            hasEmploymentHistory: $state['hasEmploymentHistory'],
+            isRetired: $model->hasCurrentRetirement(),
+            isEmployed: $model->hasCurrentEmployment(),
+            hasFutureEmployment: $model->hasFutureEmployment(),
+            hasEmploymentHistory: $model->hasEmploymentHistory(),
         );
     }
 

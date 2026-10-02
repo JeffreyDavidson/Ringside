@@ -34,19 +34,19 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::released($individual);
         }
 
-        if ($individual->currentRetirement()->exists()) {
+        if ($individual->hasCurrentRetirement()) {
             throw CannotBeSuspendedException::retired($individual);
         }
 
-        if ($individual->futureEmployment()->exists()) {
+        if ($individual->hasFutureEmployment()) {
             throw CannotBeSuspendedException::hasFutureEmployment($individual);
         }
 
-        if ($individual->currentInjury()->exists()) {
+        if ($individual->isInjured()) {
             throw CannotBeSuspendedException::injured($individual);
         }
 
-        if ($individual->currentSuspension()->exists()) {
+        if ($individual->isSuspended()) {
             throw CannotBeSuspendedException::suspended($individual);
         }
     }
@@ -64,11 +64,11 @@ final class IndividualSuspensionEligibility
 
     public function ensureCanReinstate(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->currentInjury()->exists()) {
+        if ($individual->isInjured()) {
             throw CannotBeReinstatedException::injured($individual);
         }
 
-        if (! $individual->currentSuspension()->exists()) {
+        if (! $individual->isSuspended()) {
             throw CannotBeReinstatedException::available($individual);
         }
     }

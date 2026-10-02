@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
+use App\Lifecycle\LifecycleStateReader;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,45 @@ trait IsEmployable
         LifecyclePeriodBuilder::constrainToScheduled($relation->getQuery());
 
         return $relation;
+    }
+
+    /**
+     * Determine whether a current employment exists, reusing the `withEmploymentStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasCurrentEmployment(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_current_employment_exists',
+            fn (): bool => $this->currentEmployment()->exists(),
+        );
+    }
+
+    /**
+     * Determine whether a scheduled employment exists, reusing the `withEmploymentStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasFutureEmployment(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_future_employment_exists',
+            fn (): bool => $this->futureEmployment()->exists(),
+        );
+    }
+
+    /**
+     * Determine whether any employment exists, reusing the `withEmploymentStatusState`
+     * projection when the model was loaded with it.
+     */
+    public function hasEmploymentHistory(): bool
+    {
+        return LifecycleStateReader::readProjectedBoolean(
+            $this,
+            'status_employments_exists',
+            fn (): bool => $this->employments()->exists(),
+        );
     }
 
     /** @return MorphMany<Employment, TModel> */
