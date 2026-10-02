@@ -40,3 +40,6 @@ Show-page components load the status projection with their model query or loadEx
 
 ## Validate client-settable filter state before parsing
 Public Livewire filter state such as date ranges is client-controlled. Validate its shape before parsing it into dates or ids and ignore malformed values rather than letting the parser throw a 500.
+
+## Search large rosters instead of embedding them
+Do not render every wrestler, tag team or referee as <option> markup in a Livewire view: it grows with the roster and is re-sent on every update. Use x-form.inputs.roster-combobox, which loads at most 20 bookable matches through a #[Renderless] search action backed by BookableRosterSearch. Resolve labels for ids that are already selected separately (including trashed and no longer bookable records), and keep the validation rules as the source of truth.

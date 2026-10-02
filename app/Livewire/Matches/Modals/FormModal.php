@@ -8,43 +8,39 @@ use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\UpdateMatchAction;
 use App\Enums\BusinessRuleReason;
 use App\Enums\MatchType;
+use App\Enums\Roster\BookableRosterKind;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
-use App\Livewire\Concerns\Data\PresentsRefereesList;
-use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsTitlesList;
-use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Forms\CreateEditForm;
+use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 
 /**
  * @extends BaseFormModal<CreateEditForm, EventMatch>
  *
  * @property-read array<string,string> $getMatchTypes
  * @property-read array<int|string,string|null> $getTitles
- * @property-read array<int|string,string|null> $getWrestlers
- * @property-read array<int|string,string|null> $getReferees
- * @property-read array<int|string,string|null> $getTagTeams
  * @property-read array<int, string> $getMatchStipulations
+ * @property-read array<string, array<int, array{id: int|string, name: string}>> $selectedRosterLabels
  * @property-read bool $matchTypeAllowsTagTeams
  * @property-read CompetitorSelectionLayout|null $competitorSelectionLayout
  */
 class FormModal extends BaseFormModal
 {
     use PresentsMatchTypesList;
-    use PresentsRefereesList;
-    use PresentsTagTeamsList;
     use PresentsTitlesList;
-    use PresentsWrestlersList;
 
     #[\Override]
     protected ?string $createdEventName = 'matchCreated';
@@ -132,6 +128,55 @@ class FormModal extends BaseFormModal
                 $stipulation->id => $stipulation->name,
             ])
             ->all();
+    }
+
+    /**
+     * Search bookable roster records by name for the form's searchable selects.
+     *
+     * The result is a convenience only; submission still validates every id server-side.
+     *
+     * @return array<int, array{id: int|string, name: string}>
+     */
+    #[Renderless]
+    public function searchRoster(string $kind, string $term): array
+    {
+        Gate::authorize('create', EventMatch::class);
+
+        $rosterKind = BookableRosterKind::tryFrom($kind);
+
+        if (! $rosterKind instanceof BookableRosterKind) {
+            return [];
+        }
+
+        return resolve(BookableRosterSearch::class)->search($rosterKind, $term);
+    }
+
+    /**
+     * Names for the ids already chosen in the form, so editing shows them even when they are
+     * no longer bookable or fall outside the first search results.
+     *
+     * @return array<string, array<int, array{id: int|string, name: string}>>
+     */
+    #[Computed]
+    public function selectedRosterLabels(): array
+    {
+        $search = resolve(BookableRosterSearch::class);
+        $sides = collect($this->form->competitors);
+
+        return [
+            BookableRosterKind::Wrestlers->value => $search->labels(
+                BookableRosterKind::Wrestlers,
+                $sides->pluck('wrestlers')->flatten()->all(),
+            ),
+            BookableRosterKind::TagTeams->value => $search->labels(
+                BookableRosterKind::TagTeams,
+                $sides->pluck('tag_teams')->flatten()->all(),
+            ),
+            BookableRosterKind::Referees->value => $search->labels(
+                BookableRosterKind::Referees,
+                $this->form->referees,
+            ),
+        ];
     }
 
     protected function populateDummyData(): void

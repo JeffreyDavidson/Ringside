@@ -27,6 +27,16 @@ The match system handles complex wrestling match scenarios with flexible competi
 - **Gauntlet**: Can be wrestlers, tag teams, or mixed
 - **Rationale**: These match types support flexible competitor configurations
 
+## Selecting Competitors and Referees in the Match Form
+
+The match form never embeds the roster. Wrestlers, tag teams and referees are chosen through a searchable select (`x-form.inputs.roster-combobox`, built on the Alpine UI combobox and `resources/js/roster-combobox.js`). The component keeps the chosen ids in the form (deferred, like `wire:model`) and calls the renderless `FormModal::searchRoster($kind, $term)` action as the user types. `BookableRosterSearch` answers it with at most 20 `{id, name}` options, ordered by name, from the promotion-scoped query (global scopes still apply), matching case-insensitively with `whereLike(..., caseSensitive: false)`. `%`, `_` and `\` are stripped from the term, so it can only ever match literally. An empty term returns the first 20 by name. Titles stay a plain select because there are few of them.
+
+Only bookable records are offered. `IndividualBuilder::bookable()` (wrestlers and referees) and `TagTeamBuilder::bookable()` project the same rules as `RosterBookingEligibility`: currently employed, not retired, not suspended and not injured; tag teams are employed, not retired and not suspended, have at least `TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS` current wrestlers, and every current wrestler is individually bookable. `BookableScopeParityTest` asserts `Model::query()->bookable()->whereKey($m)->exists()` equals `RosterBookingEligibility::allows($m)` for every roster state, so a change to either side fails the test. There are no known gaps.
+
+The dropdown is a convenience, not a security boundary. Submission still validates every id with the `IsBookable` rules (promotion-scoped `find` plus `RosterBookingEligibility`) and the assignment actions re-check availability under lock, so a forged id that was never offered is rejected exactly as before.
+
+When editing, ids already stored on the match are labelled by `FormModal::selectedRosterLabels`, one query per kind that includes soft-deleted rows and ignores bookability, so a competitor who has since retired or been deleted still shows by name. The rendered modal HTML therefore stays the same size for 5 or 5,000 wrestlers.
+
 ## Match Assignment Failures
 
 Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
