@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'name' => 'Title Name',
     'type' => 'Title Type',
+    'type_locked' => 'The type cannot be changed once the title has championship reigns or is booked in a match.',
     'current_champion' => 'Current Champion',
     'index_description' => 'Manage championships, title status, and current champions for your promotion.',
     'index_title' => 'Titles',

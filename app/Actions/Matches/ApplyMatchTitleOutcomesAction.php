@@ -8,6 +8,7 @@ use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchResultData;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -19,18 +20,22 @@ use App\Models\Titles\TitleChampionship;
 
 class ApplyMatchTitleOutcomesAction
 {
-    public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
+    public function __construct(
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly RosterBookingEligibility $bookingEligibility,
+    ) {}
 
     /** @param MatchCompetitorsCollection<int, MatchCompetitor> $competitors */
     public function handle(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): void
     {
-        $titleIds = $match->titles()->pluck((new Title)->qualifyColumn('id'));
+        $titleIds = $match->titles()->withTrashed()->pluck((new Title)->qualifyColumn('id'));
 
         if ($titleIds->isEmpty()) {
             return;
         }
 
         $titles = Title::query()
+            ->withTrashed()
             ->whereKey($titleIds)
             ->orderBy('id')
             ->lockForUpdate()
@@ -46,10 +51,21 @@ class ApplyMatchTitleOutcomesAction
         /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
         $desiredChampions = [];
 
+        if ($result->finish->allowsTitleChange() && $titles->contains(fn (Title $title): bool => $title->trashed())) {
+            throw InvalidMatchOutcomeException::titleDeleted();
+        }
+
+        $titles = $titles->reject(fn (Title $title): bool => $title->trashed());
+
         foreach ($titles as $title) {
-            $desiredChampions[$title->id] = $result->finish->allowsTitleChange()
+            $desiredChampion = $result->finish->allowsTitleChange()
                 ? $this->championForTitle($title, $winningCompetitors)
                 : null;
+            $desiredChampions[$title->id] = $desiredChampion;
+
+            if ($desiredChampion !== null && $this->championshipReigns->changesChampion($match, $title, $desiredChampion, $reigns)) {
+                $this->ensureTitleCanChangeHands($title, $desiredChampion);
+            }
 
             $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $desiredChampions[$title->id], $reigns);
         }
@@ -61,6 +77,17 @@ class ApplyMatchTitleOutcomesAction
                 $desiredChampions[$title->id],
                 $reigns,
             );
+        }
+    }
+
+    private function ensureTitleCanChangeHands(Title $title, Wrestler|TagTeam $winner): void
+    {
+        if (! $title->currentActivityPeriod()->exists()) {
+            throw InvalidMatchOutcomeException::titleNotActive($title);
+        }
+
+        if (! $this->bookingEligibility->allows($winner)) {
+            throw InvalidMatchOutcomeException::winnerNotEligible($winner);
         }
     }
 
@@ -84,6 +111,10 @@ class ApplyMatchTitleOutcomesAction
      */
     private function championForTitle(Title $title, MatchCompetitorsCollection $winningCompetitors): Wrestler|TagTeam
     {
+        if ($winningCompetitors->contains(fn (MatchCompetitor $competitor): bool => $competitor->competitor()->withoutTrashed()->doesntExist())) {
+            throw InvalidMatchOutcomeException::winnerDeleted();
+        }
+
         $eligibleCompetitors = match ($title->type) {
             TitleType::Singles => $winningCompetitors->wrestlers(),
             TitleType::TagTeam => $winningCompetitors->tagTeams(),

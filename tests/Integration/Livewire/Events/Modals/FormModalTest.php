@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -66,9 +65,10 @@ describe('authorized event form interactions', function () {
             ->assertSee('Edit Summer Showcase');
     });
 
-    it('propagates a missing event failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing event', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a scheduled event and closes the modal', function () {
@@ -187,13 +187,13 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasErrors(['form.venue_id'])
             ->assertSet('isModalOpen', true)
-            ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+            ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
             ->assertNotDispatched('closeModal');
         expect($event->refresh()->name)->toBe('Original Event')
             ->and($event->date?->toDateTimeString())->toBe($originalDate->toDateTimeString())
             ->and($event->venue_id)->toBe($originalVenue->id);
 
-        $availableDate = $conflictingDate->copy()->addHour();
+        $availableDate = $conflictingDate->copy()->addDay();
         $modal->set('form.date', $availableDate->format('Y-m-d\\TH:i'));
         $modal->call('save');
 
@@ -293,20 +293,18 @@ describe('authorized event form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the event form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the event form', function (string $actor, string $operation, int $status) {
     $event = $operation === 'update' ? Event::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $event?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $event?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);

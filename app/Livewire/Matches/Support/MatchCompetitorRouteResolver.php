@@ -14,6 +14,10 @@ final readonly class MatchCompetitorRouteResolver
 
     public function link(Wrestler|TagTeam $competitor): string
     {
+        if ($competitor->trashed()) {
+            return e($competitor->name);
+        }
+
         return '<a href="'.e($this->routeResolver->urlFor($competitor)).'">'.e($competitor->name).'</a>';
     }
 }

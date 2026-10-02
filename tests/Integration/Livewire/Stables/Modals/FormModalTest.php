@@ -7,7 +7,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -78,9 +77,10 @@ describe('authorized stable form interactions', function () {
             ->assertSee('Edit The Four Horsemen');
     });
 
-    it('propagates a missing stable failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing stable', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates an established stable with mixed membership', function () {
@@ -370,20 +370,18 @@ describe('authorized stable form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the stable form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the stable form', function (string $actor, string $operation, int $status) {
     $stable = $operation === 'update' ? Stable::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $stable?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $stable?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);

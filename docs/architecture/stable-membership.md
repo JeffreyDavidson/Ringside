@@ -23,6 +23,8 @@ Stable membership defines how wrestlers and tag teams can belong to stables.
 - **Minimum Size**: An active stable requires a headcount of at least three; an individual wrestler counts as one and a tag team counts as two
 - **Eligibility Boundary**: `StableMembershipData` calculates weighted headcount; `StableMembershipRequirements` owns the minimum-size decision shared by validation and lifecycle workflows
 - **Split Integrity**: A split moves only available current members, and both resulting active stables must meet the minimum size
+- **Ended Memberships Never Precede Their Start**: Ending current relationships (wrestler, tag team, or manager cascades) closes rows that already started on the effective date, and closes rows that start later (for example a stable established with a future start date) on their own start date, so `left_at`/`fired_at` is never earlier than `joined_at`/`hired_at`. History is kept; nothing is deleted. `OpenPeriodEnder` implements this
+- **Edit Form Cannot Reopen a Stable**: The stable edit form never writes a blank end date onto a closed first activity period, and never closes or moves an earlier period once later periods exist. A disbanded stable returns only through `ReuniteAction`; blanking the end date of a disbanded stable is a validation error. The debut-date rule compares against the first period, so reunited stables remain editable
 - **Merge Integrity**: A merge rejects unavailable secondary members, preserves their membership history, and ends the secondary stable's activity period before soft deletion
 
 ### Membership Management

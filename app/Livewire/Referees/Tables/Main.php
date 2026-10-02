@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Tables;
 
 use App\Actions\Referees\DeleteAction;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -16,6 +17,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Referee> */
@@ -39,10 +41,14 @@ class Main extends BaseTable
     public function builder(): RefereeBuilder
     {
         return Referee::query()
-            ->withEmploymentStatusState()
-            ->withAvailabilityState()
             ->withFirstEmployment()
             ->oldest('last_name');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
     }
 
     protected function configure(): void
@@ -111,5 +117,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $referee): void {
             $deleteAction->handle($referee);
         }, __('referees.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

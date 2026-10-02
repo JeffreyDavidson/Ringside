@@ -29,7 +29,7 @@ class PreviousManagers extends BasePreviousManagersTable
     {
         $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
-        return StableManagerHistoryQuery::previousManagersForStableId($stableId);
+        return StableManagerHistoryQuery::previousManagersForStableId($stableId)->withEmploymentStatusState();
     }
 
     /**

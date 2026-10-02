@@ -48,7 +48,7 @@ class CreateEditForm extends BaseForm
         $title = $this->isEditing() ? $this->title() : null;
 
         return [
-            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->modelId)],
+            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', $this->uniqueInPromotion('titles', 'name')],
             'type' => ['required', Rule::enum(TitleType::class)],
             'start_date' => ['nullable', 'date', new CanChangeDebutDate($title)],
         ];

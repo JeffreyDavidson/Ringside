@@ -102,7 +102,13 @@ clear `email_verified_at`. Only active users are eligible for promotion
 membership and authentication. New registrations remain unverified until a
 platform administrator activates them. Inactive accounts cannot sign in, and
 existing sessions are ended on their next web or Livewire request. Email
-verification remains independent of account activation.
+verification remains independent of account activation. User emails are
+case-insensitive: they are stored trimmed and lowercase, uniqueness is checked
+ignoring case (including soft-deleted users) and enforced by a unique index on
+`lower(email)`, and sign-in and password reset look users up ignoring case so
+legacy rows stored with mixed case keep working. The migration refuses to run
+(listing the user ids) when existing emails collide ignoring case; it never
+rewrites stored emails.
 
 ## Promotion Context and Membership
 
@@ -126,17 +132,46 @@ events and titles now have nullable explicit promotion ownership. Venues are
 global shared resources that can host events for multiple promotions. Venue
 routes remain outside the promotion context middleware; a venue is globally
 visible while its related event history is filtered by the active promotion.
+
+`PromotionGate::before()` runs on every Gate check, so membership is resolved
+once per request: `PromotionContextService` memoises the user's active role per
+user and promotion (seeded from the pivot row of the promotion selected by
+`EstablishPromotionContext` or `SwitchActivePromotionAction`, otherwise read with
+one query) and memoises the user's active promotions for the middleware and the
+promotion switcher. The memo is dropped when a request starts and whenever the
+member Actions add a member or change a role or status
+(`PromotionContextService::forgetMemberships()`). Any new code that writes
+`promotion_user` must call it.
 When promotion context is enforced, new promotion-owned models receive the
 active promotion during creation without exposing ownership columns to
 mass-assignment.
+Names are unique per promotion: wrestler and tag team `name` and
+`signature_move`, stable, title and event `name` (validated in the create/edit
+forms through `BaseForm::uniqueInPromotion()`, and in the restore eligibility
+checks), so another promotion's values neither collide nor are revealed.
+`exists` rules for promotion-owned records in those forms use
+`BaseForm::existsInPromotion()`. Promotion slugs and venue names stay global.
+At the database level, `stables_active_name_unique` is unique on
+`(promotion_id, name) WHERE deleted_at IS NULL`; because NULLs are distinct in
+unique indexes, a second filtered index
+`stables_active_unowned_name_unique` keeps active unowned stable names unique
+(SQLite and PostgreSQL; MySQL relies on form validation for unowned stables).
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
-`promotions:backfill-event-title-ownership`. Match data inherits ownership
+`promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the first active
 membership when none is selected. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
-selected membership as a deliberate global-platform exception. Lifecycle and
+selected membership as a deliberate global-platform exception. The scope fails
+closed: when no context is enforced, an authenticated non-administrator matches
+no promotion-owned records (`PromotionContextService::failsClosed()`), while
+administrators, console, queue and guest contexts stay unscoped. The dashboard
+runs inside the `promotion.context` group, and users without an active
+membership get a 403 "you are not a member of a promotion yet" page. Modals
+authorize on mount (`create` on the model class, or `update` on the loaded
+record), and `EstablishPromotionContext` runs before route model binding so
+bindings resolve inside the promotion scope. Lifecycle and
 history tables still require their own staged migrations, so this is not yet
 fully isolated tenancy behavior.
 

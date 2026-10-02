@@ -8,6 +8,7 @@ use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
+use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableActivityTransition;
 use App\Enums\Stables\StableLifecycleAction;
 use App\Lifecycle\Roster\Stables\StableActivityEligibility;
@@ -67,6 +68,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->stable->loadExists(StableBuilder::ACTIVITY_STATUS_STATE);
+
         return view('livewire.stables.components.actions');
     }
 

@@ -18,12 +18,16 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Policies\PromotionGate;
 use App\Services\Promotions\PromotionContextService;
+use App\Support\Auth\CaseInsensitiveEmailUserProvider;
 use App\View\Composers\PromotionSwitcherComposer;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,7 +41,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(PromotionContextService::class);
 
         $this->registerLegacyRosterModelAliases();
+        $this->registerCaseInsensitiveUserProvider();
+    }
 
+    private function registerCaseInsensitiveUserProvider(): void
+    {
+        Auth::provider('eloquent-email', fn (Application $app, array $config): CaseInsensitiveEmailUserProvider => new CaseInsensitiveEmailUserProvider(
+            $app->make('hash'),
+            $config['model'],
+        ));
     }
 
     /** Merged migrations import the old model class names and must never be edited, so keep these aliases. */
@@ -67,6 +79,8 @@ class AppServiceProvider extends ServiceProvider
             EnsureUserIsActive::class,
             EstablishPromotionContext::class,
         ]);
+
+        Password::defaults(fn (): Password => Password::min(12));
 
         if (config('app.force_https')) {
             URL::forceScheme('https');

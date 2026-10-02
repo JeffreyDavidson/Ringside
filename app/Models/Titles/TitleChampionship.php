@@ -48,10 +48,7 @@ use Illuminate\Support\Carbon;
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forTitleId(int $titleId)
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forWrestlerId(int $wrestlerId)
  * @method static TitleChampionshipBuilder<static>|TitleChampionship mostRecentlyLostFirst()
- * @method static TitleChampionshipBuilder<static>|TitleChampionship newModelQuery()
- * @method static TitleChampionshipBuilder<static>|TitleChampionship newQuery()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship previous()
- * @method static TitleChampionshipBuilder<static>|TitleChampionship query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withoutTrashed()
@@ -100,7 +97,7 @@ class TitleChampionship extends Model
      */
     public function champion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id')->withTrashed();
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
+use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesBusinessActions;
@@ -153,6 +154,8 @@ class Actions extends Component
 
     public function render(): View
     {
+        $this->title->loadExists(TitleBuilder::ACTIVITY_STATUS_STATE);
+
         return view('livewire.titles.components.actions');
     }
 }

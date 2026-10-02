@@ -9,6 +9,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -207,6 +208,43 @@ describe('PreviousManagers rendering', function (): void {
     });
 });
 
+describe('PreviousManagers query count', function (): void {
+    it('runs the same number of queries regardless of how many managers it lists', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $this->stable->wrestlers()->attach($wrestler, [
+            'joined_at' => Date::now()->subYears(2),
+            'left_at' => Date::now()->subYear(),
+        ]);
+        $attachManagers = function (int $count) use ($wrestler): void {
+            Manager::factory()->employed()->count($count)->create()->each(
+                fn (Manager $manager) => $wrestler->managers()->attach($manager, [
+                    'hired_at' => Date::now()->subMonths(18),
+                    'fired_at' => Date::now()->subMonths(15),
+                ])
+            );
+        };
+        $countQueries = function (): int {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            livewire(PreviousManagers::class, ['stableId' => $this->stable->id])->assertSee('Employed');
+            $count = count(DB::getQueryLog());
+            DB::disableQueryLog();
+
+            return $count;
+        };
+        $attachManagers(1);
+        $queriesWithOneManager = $countQueries();
+
+        // Act
+        $attachManagers(9);
+        $queriesWithTenManagers = $countQueries();
+
+        // Assert
+        expect($queriesWithTenManagers)->toBe($queriesWithOneManager);
+    });
+});
+
 describe('PreviousManagers authorization', function (): void {
     it('allows administrators to view stable manager history', function (): void {
         // Act
@@ -216,7 +254,7 @@ describe('PreviousManagers authorization', function (): void {
         $table->assertSuccessful();
     });
 
-    it('forbids users without access to the stable', function (string $actor): void {
+    it('forbids users without access to the stable', function (string $actor, int $status): void {
         // Arrange
         if ($actor === 'guest') {
             Auth::logout();
@@ -228,9 +266,9 @@ describe('PreviousManagers authorization', function (): void {
         $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
 
         // Assert
-        $table->assertForbidden();
+        $table->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });

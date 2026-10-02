@@ -34,6 +34,8 @@ class ResultModal extends ModalComponent
     {
         $this->matchId = $matchId;
 
+        Gate::authorize('update', $this->match);
+
         $this->form->fillFrom($this->match);
     }
 

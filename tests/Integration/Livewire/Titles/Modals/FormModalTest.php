@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Titles\TitleChampionship;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -57,9 +57,10 @@ describe('authorized title form interactions', function () {
             ->assertSee('Edit World Championship Title');
     });
 
-    it('propagates a missing title failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing title', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates and debuts a singles title', function () {
@@ -281,20 +282,67 @@ describe('authorized title form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the title form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the title form', function (string $actor, string $operation, int $status) {
     $title = $operation === 'update' ? Title::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $title?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $title?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);
+
+describe('title type locking', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('locks the type of a title with a championship reign', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+        TitleChampionship::factory()->for($title)->current()->create();
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal
+            ->assertSee(__('titles.type_locked'))
+            ->assertSeeHtml('disabled');
+    });
+
+    it('keeps the type editable for a title without reigns or bookings', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal->assertDontSee(__('titles.type_locked'));
+    });
+
+    it('does not lock the type while creating a title', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+
+        $modal->assertDontSee(__('titles.type_locked'));
+    });
+
+    it('reports a forced type change as a type error and keeps the title unchanged', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles, 'name' => 'World Title']);
+        TitleChampionship::factory()->for($title)->current()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal->set('form.type', TitleType::TagTeam->value);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.type'])
+            ->assertNotDispatched('form-submitted');
+        expect($title->refresh()->type)->toBe(TitleType::Singles);
+    });
+});

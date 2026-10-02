@@ -296,7 +296,7 @@ test('registration explains passwords and focuses rejected input', function (): 
     $page = visit(route('register'));
 
     // Assert
-    $page->assertSee('Use at least 8 characters.')
+    $page->assertSee('Use at least 12 characters.')
         ->assertAttribute('#password', 'aria-describedby', 'password-hint')
         ->assertAttribute('button[aria-controls="password_confirmation"]', 'aria-label', 'Show password confirmation');
 
@@ -317,7 +317,7 @@ test('registration explains passwords and focuses rejected input', function (): 
         ->press('button[type="submit"]');
 
     // Assert
-    $page->assertSee('The password field must be at least 8 characters')
+    $page->assertSee('The password field must be at least 12 characters')
         ->assertScript('document.activeElement.id === "password"')
         ->assertAttribute('#password', 'aria-describedby', 'password-hint password-error')
         ->assertAttribute('#email', 'value', 'Taylor@Example.com')

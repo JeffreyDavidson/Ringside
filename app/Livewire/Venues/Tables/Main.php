@@ -81,5 +81,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $venue): void {
             $deleteAction->handle($venue);
         }, __('venues.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

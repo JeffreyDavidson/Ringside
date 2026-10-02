@@ -39,44 +39,44 @@ final class TitleLifecycleEligibility
 
     private function ensureCanDebut(Title $title): void
     {
-        if ($title->activityPeriods()->exists()) {
+        if ($title->hasActivityHistory()) {
             throw CannotBeDebutedException::alreadyDebuted($title);
         }
     }
 
     private function ensureCanReinstate(Title $title): void
     {
-        if (! $title->activityPeriods()->exists()) {
+        if (! $title->hasActivityHistory()) {
             throw CannotBeReinstatedException::neverActivated($title);
         }
 
-        if ($title->currentActivityPeriod()->exists()) {
+        if ($title->hasCurrentActivityPeriod()) {
             throw CannotBeReinstatedException::active($title);
         }
 
-        if ($title->currentRetirement()->exists()) {
+        if ($title->hasCurrentRetirement()) {
             throw CannotBeReinstatedException::retired($title);
         }
     }
 
     private function ensureCanPull(Title $title): void
     {
-        if (! $title->currentActivityPeriod()->exists()) {
+        if (! $title->hasCurrentActivityPeriod()) {
             throw CannotBePulledException::notActive($title);
         }
     }
 
     private function ensureCanRetire(Title $title): void
     {
-        if ($title->currentRetirement()->exists()) {
+        if ($title->hasCurrentRetirement()) {
             throw CannotBeRetiredException::alreadyRetired($title);
         }
 
-        if (! $title->activityPeriods()->exists()) {
+        if (! $title->hasActivityHistory()) {
             throw CannotBeRetiredException::unactivated($title);
         }
 
-        if ($title->futureActivityPeriod()->exists()) {
+        if ($title->hasFutureActivityPeriod()) {
             throw CannotBeRetiredException::hasFutureDebut($title);
         }
     }
@@ -87,7 +87,7 @@ final class TitleLifecycleEligibility
             throw CannotBeUnretiredException::deleted($title);
         }
 
-        if (! $title->currentRetirement()->exists()) {
+        if (! $title->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($title);
         }
     }

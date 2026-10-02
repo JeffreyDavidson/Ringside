@@ -13,13 +13,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use LogicException;
 
-/**
- * @template TMember of Model&CanBeAStableMember&Employable&Suspendable
- */
 class CanJoinStable implements ValidationRule
 {
     /**
-     * @param  class-string<TMember>  $memberClass
+     * @param  class-string<Model>  $memberClass
      */
     public function __construct(
         private readonly string $memberClass,

@@ -8,6 +8,14 @@ use App\Enums\Shared\EmploymentStatus;
 
 trait FiltersByEmploymentStatus
 {
+    /** Relationship existence projections read by EmploymentStatusResolver. */
+    public const array EMPLOYMENT_STATUS_STATE = [
+        'currentRetirement as status_current_retirement_exists',
+        'currentEmployment as status_current_employment_exists',
+        'futureEmployment as status_future_employment_exists',
+        'employments as status_employments_exists',
+    ];
+
     abstract public function retired(): static;
 
     public function whereEmploymentStatus(EmploymentStatus $status): static
@@ -23,12 +31,7 @@ trait FiltersByEmploymentStatus
 
     public function withEmploymentStatusState(): static
     {
-        return $this->withExists([
-            'currentRetirement as status_current_retirement_exists',
-            'currentEmployment as status_current_employment_exists',
-            'futureEmployment as status_future_employment_exists',
-            'employments as status_employments_exists',
-        ]);
+        return $this->withExists(self::EMPLOYMENT_STATUS_STATE);
     }
 
     public function unemployed(): static

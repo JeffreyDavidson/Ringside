@@ -17,7 +17,6 @@ use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Stable> */
 class CreateEditForm extends BaseForm
@@ -72,7 +71,7 @@ class CreateEditForm extends BaseForm
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('stables', 'name')->ignore($this->modelId)->withoutTrashed(),
+                $this->uniqueInPromotion('stables', 'name')->withoutTrashed(),
             ],
             'started_at' => [
                 'nullable',
@@ -88,7 +87,7 @@ class CreateEditForm extends BaseForm
             'wrestlers.*' => [
                 'bail',
                 'integer',
-                'exists:wrestlers,id',
+                $this->existsInPromotion('wrestlers'),
                 new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
                 new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
@@ -97,10 +96,14 @@ class CreateEditForm extends BaseForm
             'tag_teams.*' => [
                 'bail',
                 'integer',
-                'exists:tag_teams,id',
+                $this->existsInPromotion('tag_teams'),
                 new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
             ],
         ];
+
+        if ($stable?->firstActivityPeriod?->ended_at !== null) {
+            $rules['ended_at'] = ['required', 'date'];
+        }
 
         if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
             $rules['ended_at'][] = 'after:started_at';
@@ -132,6 +135,14 @@ class CreateEditForm extends BaseForm
     private function stableId(): ?int
     {
         return $this->modelId === null ? null : (int) $this->modelId;
+    }
+
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        return [
+            'ended_at.required' => 'A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.',
+        ];
     }
 
     #[\Override]

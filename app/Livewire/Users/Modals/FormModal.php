@@ -6,6 +6,7 @@ namespace App\Livewire\Users\Modals;
 
 use App\Actions\Users\CreateAction;
 use App\Actions\Users\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
@@ -50,8 +51,8 @@ class FormModal extends BaseFormModal
         $this->form->first_name = fake()->firstName();
         $this->form->last_name = fake()->lastName();
         $this->form->email = fake()->unique()->safeEmail();
-        $this->form->password = 'password123';
-        $this->form->password_confirmation = 'password123';
+        $this->form->password = 'password-12345';
+        $this->form->password_confirmation = 'password-12345';
         $this->form->role = 'basic';
     }
 
@@ -63,6 +64,18 @@ class FormModal extends BaseFormModal
     protected function createForm(): void
     {
         $this->createAction->handle($this->form->toData());
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.role', $exception->getMessage());
+
+            return false;
+        }
     }
 
     #[\Override]

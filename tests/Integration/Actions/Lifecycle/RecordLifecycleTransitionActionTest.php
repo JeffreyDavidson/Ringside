@@ -11,7 +11,7 @@ use App\Models\Users\User;
 use function Pest\Laravel\actingAs;
 
 test('it records an attributed lifecycle transition for its subject', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->administrator()->create();
     $title = Title::factory()->create();
     $effectiveAt = now()->subDay();
 

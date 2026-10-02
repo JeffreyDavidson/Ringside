@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Referees\Modals\FormModal;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -59,9 +58,10 @@ describe('authorized referee form interactions', function () {
             ->assertSee('Edit Earl Hebner');
     });
 
-    it('propagates a missing referee failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing referee', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates an employed referee', function () {
@@ -257,20 +257,18 @@ describe('authorized referee form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the referee form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the referee form', function (string $actor, string $operation, int $status) {
     $referee = $operation === 'update' ? Referee::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $referee?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $referee?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);

@@ -1,3 +1,5 @@
+@use('App\Enums\Roster\BookableRosterKind')
+
 <x-form-modal>
     <x-form.error name="form.configuration" />
 
@@ -38,15 +40,17 @@
                             class="match-competitors-grid grid grid-cols-1 gap-4 sm:grid-cols-2"
                             data-test="match-competitors-grid"
                         >
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 1"
                                 wire:model="form.competitors.0.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 2"
                                 wire:model="form.competitors.1.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                         </div>
                     </x-form-modal.modal-input>
@@ -60,30 +64,36 @@
                         >
                             <div class="space-y-3">
                                 <p class="text-ringside-ink text-sm font-semibold">Team A</p>
-                                <x-form.inputs.select
+                                <x-form.inputs.roster-combobox
                                     label="Wrestlers"
                                     wire:model="form.competitors.0.wrestlers"
-                                    :options="$this->getWrestlers"
+                                    :kind="BookableRosterKind::Wrestlers"
+                                    :labels="$this->selectedRosterLabels['wrestlers']"
                                     multiple
                                 />
-                                <x-form.inputs.select
+                                <x-form.inputs.roster-combobox
                                     label="Tag Teams"
                                     wire:model="form.competitors.0.tag_teams"
-                                    :options="$this->getTagTeams"
+                                    :kind="BookableRosterKind::TagTeams"
+                                    :labels="$this->selectedRosterLabels['tag_teams']"
+                                    multiple
                                 />
                             </div>
                             <div class="space-y-3">
                                 <p class="text-ringside-ink text-sm font-semibold">Team B</p>
-                                <x-form.inputs.select
+                                <x-form.inputs.roster-combobox
                                     label="Wrestlers"
                                     wire:model="form.competitors.1.wrestlers"
-                                    :options="$this->getWrestlers"
+                                    :kind="BookableRosterKind::Wrestlers"
+                                    :labels="$this->selectedRosterLabels['wrestlers']"
                                     multiple
                                 />
-                                <x-form.inputs.select
+                                <x-form.inputs.roster-combobox
                                     label="Tag Teams"
                                     wire:model="form.competitors.1.tag_teams"
-                                    :options="$this->getTagTeams"
+                                    :kind="BookableRosterKind::TagTeams"
+                                    :labels="$this->selectedRosterLabels['tag_teams']"
+                                    multiple
                                 />
                             </div>
                         </div>
@@ -96,20 +106,23 @@
                             class="match-competitors-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                             data-test="match-competitors-grid"
                         >
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 1"
                                 wire:model="form.competitors.0.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 2"
                                 wire:model="form.competitors.1.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 3"
                                 wire:model="form.competitors.2.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                         </div>
                     </x-form-modal.modal-input>
@@ -121,25 +134,29 @@
                             class="match-competitors-grid grid grid-cols-1 gap-4 sm:grid-cols-2"
                             data-test="match-competitors-grid"
                         >
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 1"
                                 wire:model="form.competitors.0.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 2"
                                 wire:model="form.competitors.1.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 3"
                                 wire:model="form.competitors.2.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
-                            <x-form.inputs.select
+                            <x-form.inputs.roster-combobox
                                 label="Competitor 4"
                                 wire:model="form.competitors.3.wrestlers.0"
-                                :options="$this->getWrestlers"
+                                :kind="BookableRosterKind::Wrestlers"
+                                :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                         </div>
                     </x-form-modal.modal-input>
@@ -147,10 +164,11 @@
                 @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::BattleRoyal)
                     {{-- Battle Royal: Multiple individual wrestlers --}}
                     <x-form-modal.modal-input>
-                        <x-form.inputs.select
+                        <x-form.inputs.roster-combobox
                             label="Competitors (Select Multiple)"
                             wire:model="form.competitors.0.wrestlers"
-                            :options="$this->getWrestlers"
+                            :kind="BookableRosterKind::Wrestlers"
+                            :labels="$this->selectedRosterLabels['wrestlers']"
                             multiple
                         />
                         <p class="text-ringside-muted mt-1 text-sm">Select all wrestlers participating in this match</p>
@@ -165,18 +183,20 @@
                             @foreach ($form->competitors as $sideIndex => $competitors)
                                 <div wire:key="competitor-side-{{ $sideIndex }}" class="space-y-3">
                                     <p class="text-ringside-ink text-sm font-semibold">Side {{ $loop->iteration }}</p>
-                                    <x-form.inputs.select
+                                    <x-form.inputs.roster-combobox
                                         label="Wrestlers"
                                         wire:model="form.competitors.{{ $sideIndex }}.wrestlers"
-                                        :options="$this->getWrestlers"
+                                        :kind="BookableRosterKind::Wrestlers"
+                                        :labels="$this->selectedRosterLabels['wrestlers']"
                                         multiple
                                     />
 
                                     @if ($this->matchTypeAllowsTagTeams)
-                                        <x-form.inputs.select
+                                        <x-form.inputs.roster-combobox
                                             label="Tag Teams"
                                             wire:model="form.competitors.{{ $sideIndex }}.tag_teams"
-                                            :options="$this->getTagTeams"
+                                            :kind="BookableRosterKind::TagTeams"
+                                            :labels="$this->selectedRosterLabels['tag_teams']"
                                             multiple
                                         />
                                     @endif
@@ -199,7 +219,13 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-officials-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.select label="Referees" wire:model="form.referees" :options="$this->getReferees" multiple />
+            <x-form.inputs.roster-combobox
+                label="Referees"
+                wire:model="form.referees"
+                :kind="BookableRosterKind::Referees"
+                :labels="$this->selectedRosterLabels['referees']"
+                multiple
+            />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>

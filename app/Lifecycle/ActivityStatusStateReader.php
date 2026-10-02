@@ -25,30 +25,11 @@ final class ActivityStatusStateReader
             throw new LogicException('Activity status requires an active, retirable model.');
         }
 
-        $state = LifecycleStateReader::readProjectedBooleans($model, [
-            'isRetired' => [
-                'attribute' => 'status_current_retirement_exists',
-                'fallback' => fn (): bool => $model->currentRetirement()->exists(),
-            ],
-            'isCurrentlyActive' => [
-                'attribute' => 'status_current_activity_period_exists',
-                'fallback' => fn (): bool => $model->currentActivityPeriod()->exists(),
-            ],
-            'hasFutureActivity' => [
-                'attribute' => 'status_future_activity_period_exists',
-                'fallback' => fn (): bool => $model->futureActivityPeriod()->exists(),
-            ],
-            'hasActivityHistory' => [
-                'attribute' => 'status_activity_periods_exists',
-                'fallback' => fn (): bool => $model->activityPeriods()->exists(),
-            ],
-        ]);
-
         return [
-            'isRetired' => $state['isRetired'],
-            'isCurrentlyActive' => $state['isCurrentlyActive'],
-            'hasFutureActivity' => $state['hasFutureActivity'],
-            'hasActivityHistory' => $state['hasActivityHistory'],
+            'isRetired' => $model->hasCurrentRetirement(),
+            'isCurrentlyActive' => $model->hasCurrentActivityPeriod(),
+            'hasFutureActivity' => $model->hasFutureActivityPeriod(),
+            'hasActivityHistory' => $model->hasActivityHistory(),
         ];
     }
 }

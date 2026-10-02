@@ -11,6 +11,9 @@ Store PHP enum values in string columns rather than database enum columns.
 ## Model-backed foreign keys
 Define application model-backed foreign keys with foreignIdFor(Model::class), supplying a custom column name when necessary. Use foreignId() only when no application model represents the referenced table.
 
+## Index foreign keys, history sides and tenant columns
+Index foreign key and pivot columns that queries filter on and no existing index leads with. The partial unique indexes that enforce one open period only serve current rows, so history queries need their own index. Check existing indexes (including partial ones that already lead with the column) before adding one, and use plain Schema::table indexes: they do not rebuild SQLite tables.
+
 ## Forward-only migrations
 Write forward-only migrations with an up() method and no down() method. Correct deployed schema changes with a new migration.
 

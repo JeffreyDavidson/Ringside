@@ -25,6 +25,6 @@ final class SchedulingConflictException extends BaseBusinessException
 
     public static function venueAlreadyBooked(string $venueName): static
     {
-        return new self("Venue [{$venueName}] is already booked at this event time.");
+        return new self("Venue [{$venueName}] is already booked on that day.");
     }
 }

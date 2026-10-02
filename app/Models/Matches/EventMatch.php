@@ -67,10 +67,7 @@ use Illuminate\Support\Carbon;
  * @method static EventMatchBuilder<static>|EventMatch forRefereeId(int $refereeId)
  * @method static EventMatchBuilder<static>|EventMatch forWrestlerId(int $wrestlerId)
  * @method static EventMatchBuilder<static>|EventMatch latestEventFirst()
- * @method static EventMatchBuilder<static>|EventMatch newModelQuery()
- * @method static EventMatchBuilder<static>|EventMatch newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch onlyTrashed()
- * @method static EventMatchBuilder<static>|EventMatch query()
  * @method static EventMatchBuilder<static>|EventMatch withAnyRefereeIds(\Illuminate\Support\Collection<int, int> $refereeIds)
  * @method static EventMatchBuilder<static>|EventMatch withAnyTitleIds(\Illuminate\Support\Collection<int, int> $titleIds)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withTrashed()
@@ -88,6 +85,12 @@ class EventMatch extends Model implements SoftDeletable
     {
         static::addGlobalScope('promotion_context', function (Builder $builder): void {
             $context = app(PromotionContextService::class);
+
+            if ($context->failsClosed()) {
+                $builder->whereRaw('0 = 1');
+
+                return;
+            }
 
             if (! $context->isEnforced()) {
                 return;

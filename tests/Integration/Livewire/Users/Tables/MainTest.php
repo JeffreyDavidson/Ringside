@@ -80,6 +80,35 @@ describe('users table', function (): void {
         expect($user->refresh()->status)->toBe(UserStatus::Active);
     });
 
+    it('authorizes before looking up the user', function (): void {
+        $component = livewire(Main::class);
+        actingAs(basicUser());
+
+        $component
+            ->call('changeStatus', PHP_INT_MAX, UserStatus::Inactive->value)
+            ->assertForbidden();
+    });
+
+    it('does not let the last active administrator be deactivated', function (): void {
+        $administrator = User::query()->where('role', Role::Administrator)->firstOrFail();
+
+        livewire(Main::class)
+            ->call('changeStatus', $administrator->id, UserStatus::Inactive->value)
+            ->assertDispatched('flash-message', type: 'error', message: 'The platform must keep at least one active administrator. Make another user an active administrator first.');
+
+        expect($administrator->refresh()->status)->toBe(UserStatus::Active);
+    });
+
+    it('lets an administrator be deactivated when another active administrator remains', function (): void {
+        $other = User::factory()->administrator()->create(['status' => UserStatus::Active]);
+
+        livewire(Main::class)
+            ->call('changeStatus', $other->id, UserStatus::Inactive->value)
+            ->assertDispatched('flash-message', type: 'status', message: 'User account status changed to Inactive.');
+
+        expect($other->refresh()->status)->toBe(UserStatus::Inactive);
+    });
+
     it('rejects invalid user status values', function (): void {
         $user = User::factory()->create(['status' => UserStatus::Active]);
 

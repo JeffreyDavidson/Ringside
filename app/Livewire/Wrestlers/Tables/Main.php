@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Actions\Wrestlers\DeleteAction;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -16,6 +17,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Wrestler> */
@@ -39,9 +41,15 @@ class Main extends BaseTable
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->withEmploymentStatusState()
-            ->withAvailabilityState()
-            ->withFirstEmployment();
+            ->withFirstEmployment()
+            ->oldest('name')
+            ->oldest('id');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
     }
 
     protected function configure(): void
@@ -103,6 +111,8 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $wrestler): void {
             $deleteAction->handle($wrestler);
         }, __('wrestlers.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 
     protected function getDefaultActionColumn(): Column

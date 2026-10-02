@@ -244,11 +244,11 @@ Matches integrate seamlessly with event scheduling:
 
 An event's nullable `date` remains the authoritative scheduling value. `EventStatus::fromDate()` translates that persisted value into `Unscheduled`, `Scheduled`, or `Past`; the `Event` model exposes the result through its computed `status` attribute instead of carrying separate scheduling predicates.
 
-Events may have a date without a venue while planning or preserving historical records. A venue is optional event metadata; when one is selected for a dated event, it is reserved exclusively at that date and time.
+Events may have a date without a venue while planning or preserving historical records. A venue is optional event metadata; when one is selected for a dated event, it is reserved exclusively for that calendar day.
 
 Event dates become immutable once the event has occurred. `EventSchedulingEligibility` owns that rule, while both Livewire validation and `Events\UpdateAction` enforce it so non-UI callers cannot bypass the invariant. Other event details may still be corrected without changing the historical date.
 
-A venue may host only one event at a given date and time. Event creation and updates lock the selected venue row before `VenueSchedulingEligibility` checks its event relationship, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue time.
+A venue may host only one event per calendar day (in the application timezone) across all promotions: venues are shared, so `VenueSchedulingEligibility` queries the venue's events without the promotion scope, ignores soft-deleted events and the event being edited, and reports only `Venue [name] is already booked on that day.`, never another promotion's event details. Event creation and updates lock the selected venue row before that check, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue day.
 
 Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot. It also takes the date-slot lock and rejects the restore with a scheduling conflict when a wrestler, tag team, referee, or title booked on the event's matches is booked in another event at that date and time (see the canonical lock order in `match-system.md`).
 

@@ -15,7 +15,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use JMac\Testing\Double;
 use LivewireUI\Modal\Modal;
 
@@ -73,11 +72,12 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertPropertyWired('form.matchType')
             ->assertPropertyWired('form.matchStipulationId')
-            ->assertPropertyWired('form.referees')
             ->assertPropertyWired('form.titles')
             ->assertPropertyWired('form.preview')
-            ->assertSee($wrestler->name)
-            ->assertSee($referee->full_name)
+            ->assertSeeHtml('data-field="form.competitors.0.wrestlers.0"')
+            ->assertSeeHtml('data-field="form.referees"')
+            ->assertDontSee($wrestler->name)
+            ->assertDontSee($referee->full_name)
             ->assertSee($title->name)
             ->assertSee($activeStipulation->name)
             ->assertDontSee($inactiveStipulation->name);
@@ -99,8 +99,8 @@ describe('authorized match form interactions', function (): void {
                 ['wrestlers' => [], 'tag_teams' => []],
             ])
             ->assertSee('Add Match')
-            ->assertPropertyWired('form.competitors.0.wrestlers.0')
-            ->assertPropertyWired('form.competitors.1.wrestlers.0');
+            ->assertSeeHtml('data-field="form.competitors.0.wrestlers.0"')
+            ->assertSeeHtml('data-field="form.competitors.1.wrestlers.0"');
     });
 
     it('prompts for a match type instead of implying one is selected', function (): void {
@@ -168,13 +168,15 @@ describe('authorized match form interactions', function (): void {
             ->assertSee('Edit Match');
     });
 
-    it('propagates a missing match failure', function (): void {
+    it('responds not found when opening a missing match', function (): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        // Act / Assert
-        expect(fn () => $modal->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+        // Act
+        $modal->call('openModal', PHP_INT_MAX);
+
+        // Assert
+        $modal->assertNotFound();
     });
 
     it('creates a singles match with its complete configuration', function (): void {
@@ -639,7 +641,7 @@ describe('authorized match form interactions', function (): void {
     });
 });
 
-it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing): void {
+it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing, int $status): void {
     // Arrange
     $event = Event::factory()->create();
     $match = $editing
@@ -650,16 +652,14 @@ it('forbids :dataset from opening the match form', function (bool $authenticated
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class, ['eventId' => $event->id]);
-
     // Act
-    $modal->call('openModal', $match?->id);
+    $modal = livewire(FormModal::class, ['eventId' => $event->id, 'modelId' => $match?->id]);
 
     // Assert
-    $modal->assertForbidden();
+    $modal->assertStatus($status);
 })->with([
-    'a guest creating' => [false, false],
-    'a basic user creating' => [true, false],
-    'a guest editing' => [false, true],
-    'a basic user editing' => [true, true],
+    'a guest creating' => [false, false, 403],
+    'a basic user creating' => [true, false, 403],
+    'a guest editing' => [false, true, 403],
+    'a basic user editing' => [true, true, 404],
 ]);

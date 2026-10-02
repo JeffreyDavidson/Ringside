@@ -31,11 +31,11 @@ final readonly class StableRetirementEligibility
             throw CannotBeRetiredException::deleted($stable);
         }
 
-        if ($stable->currentRetirement()->exists()) {
+        if ($stable->hasCurrentRetirement()) {
             throw CannotBeRetiredException::alreadyRetired($stable);
         }
 
-        if (! $stable->activityPeriods()->exists() || (! $stable->currentActivityPeriod()->exists() && $stable->futureActivityPeriod()->exists())) {
+        if (! $stable->hasActivityHistory() || (! $stable->hasCurrentActivityPeriod() && $stable->hasFutureActivityPeriod())) {
             throw CannotBeRetiredException::notActive($stable);
         }
     }
@@ -57,7 +57,7 @@ final readonly class StableRetirementEligibility
             throw CannotBeUnretiredException::deleted($stable);
         }
 
-        if (! $stable->currentRetirement()->exists()) {
+        if (! $stable->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($stable);
         }
 

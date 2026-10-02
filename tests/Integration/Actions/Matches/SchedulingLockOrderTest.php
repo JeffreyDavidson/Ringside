@@ -26,6 +26,8 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\travel;
+
 /**
  * Each scenario returns [the event the action works on, a closure running the action].
  *
@@ -107,7 +109,11 @@ dataset('scheduling lock scenarios', [
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
         $result = new MatchResultData(finish: MatchFinish::NoDecision, winningSide: null, eliminations: collect());
 
-        return [$event, fn () => resolve(RecordResultAction::class)->handle($match, $result)];
+        return [$event, function () use ($match, $result): EventMatch {
+            travel(2)->weeks();
+
+            return resolve(RecordResultAction::class)->handle($match, $result);
+        }];
     }],
 ]);
 

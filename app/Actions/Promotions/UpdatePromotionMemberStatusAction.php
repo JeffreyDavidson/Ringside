@@ -7,10 +7,13 @@ namespace App\Actions\Promotions;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
-final class UpdatePromotionMemberStatusAction
+final readonly class UpdatePromotionMemberStatusAction
 {
+    public function __construct(private EnsureAnotherActiveOwnerAction $ensureAnotherActiveOwner) {}
+
     public function handle(Promotion $promotion, User $user, MembershipStatus $status): void
     {
         DB::transaction(function () use ($promotion, $user, $status): void {
@@ -19,14 +22,20 @@ final class UpdatePromotionMemberStatusAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $lockedPromotion->memberships()
+            $membership = $lockedPromotion->memberships()
                 ->where('user_id', $user->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            if ($status !== MembershipStatus::Active) {
+                $this->ensureAnotherActiveOwner->handle($lockedPromotion, $membership);
+            }
+
             $lockedPromotion->users()->updateExistingPivot($user->getKey(), [
                 'status' => $status,
             ]);
+
+            app(PromotionContextService::class)->forgetMemberships();
         });
     }
 }

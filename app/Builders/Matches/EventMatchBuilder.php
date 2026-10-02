@@ -10,7 +10,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -60,9 +59,7 @@ class EventMatchBuilder extends Builder
     }
 
     /**
-     * @template TRelatedModel of Model
-     *
-     * @param  Builder<TRelatedModel>  $query
+     * @param  Builder<EventMatch>  $query
      */
     public static function constrainToPastEvents(Builder $query): void
     {
@@ -102,6 +99,19 @@ class EventMatchBuilder extends Builder
                 },
             );
         })->with('competitors');
+
+        return $this;
+    }
+
+    /**
+     * Limit to matches that are still live: no recorded result, or an event that has not yet happened.
+     */
+    public function upcomingOrUnresulted(): static
+    {
+        $this->where(function (Builder $query): void {
+            $query->whereNull('match_finish')
+                ->orWhereRelation('event', 'date', '>=', now());
+        });
 
         return $this;
     }

@@ -93,14 +93,14 @@
             @if ($activePromotion)
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = ! open"
-                    :aria-expanded="open"
-                    aria-controls="promotion-menu"
-                    class="border-ringside-line hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-ringside-ink flex min-h-[68px] w-full items-center gap-3 border px-3 text-start focus-visible:outline-2 focus-visible:outline-offset-4"
-                >
-                    <span
-                        class="border-ringside-line font-display grid size-9 shrink-0 place-items-center border text-lg leading-none"
-                        aria-hidden="true"
-                    >{{ str($activePromotion->name)->substr(0, 2)->upper() }}</span>
+                        :aria-expanded="open"
+                        aria-controls="promotion-menu"
+                        class="border-ringside-line hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-ringside-ink flex min-h-[68px] w-full items-center gap-3 border px-3 text-start focus-visible:outline-2 focus-visible:outline-offset-4"
+                    >
+                        <span
+                            class="border-ringside-line font-display grid size-9 shrink-0 place-items-center border text-lg leading-none"
+                            aria-hidden="true"
+                        >{{ str($activePromotion->name)->substr(0, 2)->upper() }}</span>
                         <span x-show="expanded" class="min-w-0 flex-1"
                             ><span class="block truncate text-sm font-semibold">{{ $activePromotion->name }}</span
                             ><span class="text-ringside-muted mt-1 block text-xs">Promotion workspace</span></span>
@@ -155,18 +155,18 @@
             @if ($user instanceof \App\Models\Users\User)
                 <div x-data="{ open: false }" class="border-ringside-line relative mt-4 border-t pt-3">
                     <button @click="open = ! open"
-                    :aria-expanded="open"
-                    aria-controls="account-menu"
-                    aria-label="Account menu"
-                    :title="expanded ? 'Account menu' : null"
-                    data-sidebar-tooltip
-                    data-tooltip="Account menu"
-                    data-test="profile-menu"
-                    class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start transition-[background-color,color,padding] duration-300 ease-out group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0"
-                >
-                    <span
-                        class="bg-ringside-surface-hover grid size-8 shrink-0 place-items-center text-xs font-semibold"
-                    >{{ str($user->full_name)->explode(' ')->filter()->map(fn ($part) => str($part)->substr(0, 1))->join('') }}</span>
+                        :aria-expanded="open"
+                        aria-controls="account-menu"
+                        aria-label="Account menu"
+                        :title="expanded ? 'Account menu' : null"
+                        data-sidebar-tooltip
+                        data-tooltip="Account menu"
+                        data-test="profile-menu"
+                        class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start transition-[background-color,color,padding] duration-300 ease-out group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0"
+                    >
+                        <span
+                            class="bg-ringside-surface-hover grid size-8 shrink-0 place-items-center text-xs font-semibold"
+                        >{{ str($user->full_name)->explode(' ')->filter()->map(fn ($part) => str($part)->substr(0, 1))->join('') }}</span>
                         <span x-show="expanded" class="min-w-0 flex-1"
                             ><span class="block truncate text-sm font-semibold">{{ $user->full_name }}</span
                             ><span

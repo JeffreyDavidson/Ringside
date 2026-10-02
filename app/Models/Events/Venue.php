@@ -34,10 +34,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Event> $events
  *
  * @method static \Database\Factories\Events\VenueFactory factory($count = null, $state = [])
- * @method static VenueBuilder<static>|Venue newModelQuery()
- * @method static VenueBuilder<static>|Venue newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue onlyTrashed()
- * @method static VenueBuilder<static>|Venue query()
  * @method static VenueBuilder<static>|Venue alphabetical()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withoutTrashed()

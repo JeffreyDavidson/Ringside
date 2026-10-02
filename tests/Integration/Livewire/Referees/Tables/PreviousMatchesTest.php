@@ -146,7 +146,7 @@ describe('PreviousMatches authorization', function (): void {
         $table->assertSuccessful();
     });
 
-    it('forbids users without access to the referee', function (string $actor): void {
+    it('forbids users without access to the referee', function (string $actor, int $status): void {
         // Arrange
         if ($actor === 'guest') {
             Auth::logout();
@@ -158,9 +158,9 @@ describe('PreviousMatches authorization', function (): void {
         $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
 
         // Assert
-        $table->assertForbidden();
+        $table->assertStatus($status);
     })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
+        'guest' => ['guest', 403],
+        'basic user' => ['basic user', 404],
     ]);
 });

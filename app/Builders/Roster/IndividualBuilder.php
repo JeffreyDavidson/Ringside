@@ -23,15 +23,30 @@ abstract class IndividualBuilder extends Builder
     use LoadsFirstEmployment;
     use OrdersByKeyForLocking;
 
+    /** Relationship existence projections read by isInjured() and isSuspended(). */
+    public const array AVAILABILITY_STATE = [
+        'currentInjury as availability_current_injury_exists',
+        'currentSuspension as availability_current_suspension_exists',
+    ];
+
     /**
      * Project the current injury and suspension state so availability badges
      * render without per-row queries.
      */
     public function withAvailabilityState(): static
     {
-        return $this->withExists([
-            'currentInjury as availability_current_injury_exists',
-            'currentSuspension as availability_current_suspension_exists',
-        ]);
+        return $this->withExists(self::AVAILABILITY_STATE);
+    }
+
+    /**
+     * Restrict to individuals RosterBookingEligibility would allow: currently
+     * employed, not retired, not suspended and not injured.
+     */
+    public function bookable(): static
+    {
+        return $this->whereHas('currentEmployment')
+            ->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentInjury');
     }
 }

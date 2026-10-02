@@ -39,4 +39,10 @@ interface HasActivityPeriods
      * @return MorphOne<ActivityPeriod, TDeclaringModel>
      */
     public function futureActivityPeriod(): MorphOne;
+
+    public function hasCurrentActivityPeriod(): bool;
+
+    public function hasFutureActivityPeriod(): bool;
+
+    public function hasActivityHistory(): bool;
 }

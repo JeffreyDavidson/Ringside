@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -48,9 +50,6 @@ use Illuminate\Support\Carbon;
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  *
  * @method static \Database\Factories\Users\UserFactory factory($count = null, $state = [])
- * @method static UserBuilder<static>|User newModelQuery()
- * @method static UserBuilder<static>|User newQuery()
- * @method static UserBuilder<static>|User query()
  *
  * @mixin \Eloquent
  */
@@ -76,6 +75,16 @@ class User extends Authenticatable
     public function promotionMemberships(): HasMany
     {
         return $this->hasMany(PromotionMembership::class);
+    }
+
+    /**
+     * Emails are stored trimmed and lowercase so uniqueness and lookups never depend on case.
+     *
+     * @return Attribute<string, string>
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::set(fn (string $value): string => Str::lower(mb_trim($value)));
     }
 
     /**

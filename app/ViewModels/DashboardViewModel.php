@@ -11,14 +11,18 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Data for the promotion Overview page: what is coming up, who can be booked,
- * and who holds the titles. Queries respect the active promotion scope.
+ * and who holds the titles. Queries respect the active promotion scope; the dashboard route runs inside the
+ * `promotion.context` middleware, so users without an active membership never reach this class.
  */
 final readonly class DashboardViewModel
 {
     private const int UPCOMING_EVENT_LIMIT = 3;
+
+    private const int CHAMPION_LIMIT = 12;
 
     public function __construct(private RosterResourceRouteResolver $routeResolver) {}
 
@@ -43,20 +47,30 @@ final readonly class DashboardViewModel
      */
     public function rosterAvailability(): array
     {
+        $counts = DB::query()
+            ->fromSub(
+                Wrestler::query()->employed()->withExists([
+                    'currentInjury as injured',
+                    'currentSuspension as suspended',
+                ]),
+                'employed_wrestlers',
+            )
+            ->selectRaw('count(*) as employed')
+            ->selectRaw('count(*) filter (where not injured and not suspended) as available')
+            ->selectRaw('count(*) filter (where injured) as injured')
+            ->selectRaw('count(*) filter (where suspended) as suspended')
+            ->sole();
+
         return [
-            'employed' => Wrestler::query()->employed()->count(),
-            'available' => Wrestler::query()
-                ->employed()
-                ->whereDoesntHave('currentInjury')
-                ->whereDoesntHave('currentSuspension')
-                ->count(),
-            'injured' => Wrestler::query()->employed()->whereHas('currentInjury')->count(),
-            'suspended' => Wrestler::query()->employed()->whereHas('currentSuspension')->count(),
+            'employed' => (int) $counts->employed,
+            'available' => (int) $counts->available,
+            'injured' => (int) $counts->injured,
+            'suspended' => (int) $counts->suspended,
         ];
     }
 
     /**
-     * Active titles that currently have a champion, with that reign loaded.
+     * The first titles by name that are active and currently have a champion, with that reign loaded.
      *
      * @return Collection<int, Title>
      */
@@ -67,6 +81,7 @@ final readonly class DashboardViewModel
             ->whereHas('currentChampionship')
             ->with('currentChampionship.champion')
             ->orderBy('name')
+            ->limit(self::CHAMPION_LIMIT)
             ->get();
     }
 

@@ -68,7 +68,9 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
                 ->location(function (TitleChampionship $row): ?string {
                     $champion = $row->previousChampionship?->champion;
 
-                    return $champion === null ? null : $this->routeResolver->urlFor($champion);
+                    return $champion === null || $champion->trashed()
+                        ? null
+                        : $this->routeResolver->urlFor($champion);
                 }),
             DateColumn::make(__('championships.dates_held'), 'won_at')
                 ->outputFormat('Y-m-d'),

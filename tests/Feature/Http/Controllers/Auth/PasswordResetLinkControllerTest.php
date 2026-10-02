@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Users\User;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 
@@ -171,4 +172,17 @@ test('a reset link can be resent after the broker cooldown', function (): void {
     $resent->assertSessionHas('recovery_email', $user->email)
         ->assertSessionHas('status', __('passwords.sent'));
     Notification::assertSentToTimes($user, ResetPassword::class, 2);
+});
+
+test('password reset works for a legacy user stored with a mixed-case email', function () {
+    // Arrange
+    Notification::fake();
+    $user = User::factory()->create();
+    DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
+
+    // Act
+    $this->post(route('password.email'), ['email' => 'legacy.promoter@example.com']);
+
+    // Assert
+    Notification::assertSentTo($user->refresh(), ResetPassword::class);
 });

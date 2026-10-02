@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class UpdateAction
                 if ($activityPeriod) {
                     $activityPeriod->update([
                         'started_at' => $stableData->start_date,
-                        'ended_at' => $stableData->end_date,
+                        'ended_at' => $this->endDateFor($lockedStable, $activityPeriod, $stableData),
                     ]);
                 } else {
                     $this->establishAction->handle(
@@ -75,5 +76,22 @@ class UpdateAction
 
             return $lockedStable;
         });
+    }
+
+    /**
+     * An ended first period never reopens through the edit form: a disbanded stable returns only
+     * through ReuniteAction, and an earlier period cannot be closed or moved once later periods exist.
+     */
+    private function endDateFor(Stable $stable, ActivityPeriod $firstPeriod, StableData $stableData): ?Carbon
+    {
+        if ($firstPeriod->ended_at === null) {
+            return $stableData->end_date;
+        }
+
+        if (! $stableData->end_date instanceof Carbon || $stable->activityPeriods()->whereKeyNot($firstPeriod->getKey())->exists()) {
+            return $firstPeriod->ended_at;
+        }
+
+        return $stableData->end_date;
     }
 }

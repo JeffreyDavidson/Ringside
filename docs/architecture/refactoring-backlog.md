@@ -256,6 +256,24 @@ unreachable lifecycle methods. Open follow-ups verified against the code:
 - Matches can be deleted from the event matches table, but `DeleteAction` does
   not renumber; deleted numbers leave gaps by design.
 
+### Promotion member invitations
+
+**Priority:** Low  
+**Status:** Deferred feature.
+
+Owners add promotion members by typing the exact email of an existing active
+account; the member is attached immediately and no message is sent. The Manage
+component answers every non-match (unknown, inactive, partial, already a member)
+with one generic message so it does not confirm which accounts exist. A real
+invitation flow (an invitation record, an email, and an accept page, using the
+existing `MembershipStatus::Invited` state) is deferred.
+
+Business rules enforced in the membership and user Actions: a promotion always
+keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the
+platform always keeps at least one active administrator
+(`EnsureAnotherActiveAdministratorAction`). Global administrators may still
+repair a promotion that has no owner.
+
 ### Branch protection observation
 
 **Priority:** Low  
@@ -265,6 +283,31 @@ unreachable lifecycle methods. Open follow-ups verified against the code:
 GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
+
+## Deferred from audit round 2
+
+- **Database backstops.** CHECK and unique constraints for: one open reign per title, unique match numbers per
+  event, unique referee and title per match, and date-order checks. Each needs a pre-flight migration that finds
+  and repairs existing violating rows before the constraint is added.
+- **Tag team availability badge.** It should reflect injured or suspended members.
+- **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
+- **Searchable booking selects.** Planned as a separate PR.
+- **Not-yet-started members.** Removing a member who has not started yet through the stable, tag team or manager
+  forms can still set `left_at` before `joined_at`.
+- **Production hardening (operator task, not code).** Confirm `SESSION_SECURE_COOKIE`, trusted proxies and HTTP
+  security headers in the production environment.
+
+The real invitation flow is tracked under "Promotion member invitations" above.
+
+## Blocked dependency upgrades
+
+Dependabot proposed these in October 2026; they are deferred on purpose, not forgotten.
+
+- **ESLint 10 with `@eslint/js` 10.** `@eslint/js` 10 declares `eslint ^10` as a peer, while the project is on
+  ESLint 9. Upgrade both together, including the flat config, and not `@eslint/js` alone.
+- **Vite 8 with `laravel-vite-plugin` 3.** `laravel-vite-plugin` 3 requires `vite ^8`, and the project is on
+  Vite 7 (Tailwind's Vite plugin already supports 8). Vite 8 switches the bundler to Rolldown, so treat it as a
+  planned upgrade with a full build and browser-suite check, and not a lockfile bump.
 
 ## Considered and rejected
 

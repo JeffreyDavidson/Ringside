@@ -6,6 +6,8 @@ namespace App\Exceptions\Matches;
 
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
 final class InvalidMatchOutcomeException extends BaseBusinessException
@@ -98,5 +100,30 @@ final class InvalidMatchOutcomeException extends BaseBusinessException
     public static function titleResultOutOfDateOrder(Title $title): self
     {
         return new self("Title [{$title->name}] already has a result recorded after this event; record results in date order.");
+    }
+
+    public static function eventNotHeld(): self
+    {
+        return new self('A result cannot be recorded for an event that has not taken place yet.');
+    }
+
+    public static function titleNotActive(Title $title): self
+    {
+        return new self("Title [{$title->name}] is no longer active and cannot change hands.");
+    }
+
+    public static function titleDeleted(): self
+    {
+        return new self('A deleted title cannot change hands.');
+    }
+
+    public static function winnerNotEligible(Wrestler|TagTeam $winner): self
+    {
+        return new self("[{$winner->name}] is no longer eligible to win a title.");
+    }
+
+    public static function winnerDeleted(): self
+    {
+        return new self('A deleted competitor cannot win a title.');
     }
 }

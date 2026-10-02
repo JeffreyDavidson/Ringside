@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -59,9 +58,10 @@ describe('authorized manager form interactions', function () {
             ->assertSee('Edit Bobby Heenan');
     });
 
-    it('propagates a missing manager failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing manager', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates an employed manager', function () {
@@ -218,20 +218,18 @@ describe('authorized manager form interactions', function () {
     });
 });
 
-it('forbids users without administrative access from opening the manager form', function (string $actor, string $operation) {
+it('forbids users without administrative access from opening the manager form', function (string $actor, string $operation, int $status) {
     $manager = $operation === 'update' ? Manager::factory()->create() : null;
 
     if ($actor === 'basic user') {
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $manager?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $manager?->id])
+        ->assertStatus($status);
 })->with([
-    'guest creating' => ['guest', 'create'],
-    'basic user creating' => ['basic user', 'create'],
-    'guest updating' => ['guest', 'update'],
-    'basic user updating' => ['basic user', 'update'],
+    'guest creating' => ['guest', 'create', 403],
+    'basic user creating' => ['basic user', 'create', 403],
+    'guest updating' => ['guest', 'update', 403],
+    'basic user updating' => ['basic user', 'update', 404],
 ]);

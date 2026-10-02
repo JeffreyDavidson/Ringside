@@ -41,6 +41,41 @@ describe('wrestlers table', function (): void {
             ->assertSee('Test City, TX');
     });
 
+    it('paginates wrestlers in a stable order with disjoint pages', function (): void {
+        // Arrange
+        foreach (range(1, 25) as $number) {
+            Wrestler::factory()->create(['name' => sprintf('Wrestler %02d', $number)]);
+        }
+        DB::enableQueryLog();
+
+        // Act
+        $component = livewire(Main::class)->set('perPage', 10);
+        $pageQueries = array_filter(
+            array_column(DB::getQueryLog(), 'query'),
+            fn (string $query): bool => str_contains($query, 'limit 10'),
+        );
+        $orderedPageQueries = array_filter(
+            $pageQueries,
+            fn (string $query): bool => str_contains($query, 'order by'),
+        );
+
+        // Assert
+        expect($pageQueries)->not->toBeEmpty()
+            ->and($orderedPageQueries)->toBe($pageQueries);
+        $component
+            ->assertSeeInOrder(['Wrestler 01', 'Wrestler 02', 'Wrestler 10'])
+            ->assertDontSee('Wrestler 11');
+
+        // Act
+        $component->call('setPage', 2);
+
+        // Assert
+        $component
+            ->assertSeeInOrder(['Wrestler 11', 'Wrestler 12', 'Wrestler 20'])
+            ->assertDontSee('Wrestler 10')
+            ->assertDontSee('Wrestler 21');
+    });
+
     it('filters wrestlers by name and clears the search', function (): void {
         // Arrange
         Wrestler::factory()->create(['name' => 'John Cena']);

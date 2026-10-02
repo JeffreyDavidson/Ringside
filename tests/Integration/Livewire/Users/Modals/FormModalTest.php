@@ -5,8 +5,9 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Livewire\Users\Modals\FormModal;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Rules\Users\UniqueEmail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -71,9 +72,10 @@ describe('authorized user form interactions', function () {
             ->assertSee('Edit Jane Smith');
     });
 
-    it('propagates a missing user failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
+    it('responds not found when opening a missing user', function () {
+        livewire(FormModal::class)
+            ->call('openModal', PHP_INT_MAX)
+            ->assertNotFound();
     });
 
     it('creates a user with its credentials and role', function () {
@@ -85,8 +87,8 @@ describe('authorized user form interactions', function () {
             'form.last_name' => 'Doe',
             'form.email' => 'john@example.com',
             'form.role' => Role::Administrator->value,
-            'form.password' => 'password123',
-            'form.password_confirmation' => 'password123',
+            'form.password' => 'password-12345',
+            'form.password_confirmation' => 'password-12345',
         ]);
         $modal->call('save');
 
@@ -94,7 +96,7 @@ describe('authorized user form interactions', function () {
         expect($user->first_name)->toBe('John')
             ->and($user->last_name)->toBe('Doe')
             ->and($user->role)->toBe(Role::Administrator)
-            ->and(Hash::check('password123', $user->password))->toBeTrue();
+            ->and(Hash::check('password-12345', $user->password))->toBeTrue();
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
@@ -104,6 +106,22 @@ describe('authorized user form interactions', function () {
             ->assertSet('isModalOpen', false)
             ->assertSet('form.first_name', '')
             ->assertSet('form.email', '');
+    });
+
+    it('does not let the last active administrator be demoted', function () {
+        $administrator = User::query()->where('role', Role::Administrator)->firstOrFail();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $administrator->id);
+        $modal->set('form.role', Role::Basic->value);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors('form.role')
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('userUpdated');
+
+        expect($administrator->refresh()->role)->toBe(Role::Administrator);
     });
 
     it('updates a user without changing an omitted password', function () {
@@ -188,9 +206,9 @@ describe('authorized user form interactions', function () {
             'long first name' => ['form.first_name', str_repeat('a', 256), 'form.first_name', 'max'],
             'long last name' => ['form.last_name', str_repeat('a', 256), 'form.last_name', 'max'],
             'invalid email' => ['form.email', 'not-an-email', 'form.email', 'email'],
-            'duplicate email' => ['form.email', 'existing@example.com', 'form.email', 'unique'],
+            'duplicate email' => ['form.email', 'existing@example.com', 'form.email', UniqueEmail::class],
             'invalid role' => ['form.role', 'owner', 'form.role', 'in'],
-            'short password' => ['form.password', 'short', 'form.password', 'min'],
+            'short password' => ['form.password', 'short', 'form.password', Password::class],
             'unconfirmed password' => ['form.password_confirmation', 'different-password', 'form.password', 'confirmed'],
             default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
         };
@@ -202,8 +220,8 @@ describe('authorized user form interactions', function () {
             'form.last_name' => 'User',
             'form.email' => 'valid@example.com',
             'form.role' => Role::Basic->value,
-            'form.password' => 'password123',
-            'form.password_confirmation' => 'password123',
+            'form.password' => 'password-12345',
+            'form.password_confirmation' => 'password-12345',
         ]);
         $modal->set($field, $value);
         $modal->call('save');
@@ -229,7 +247,7 @@ describe('authorized user form interactions', function () {
         $modal->set('form.email', 'existing@example.com');
         $modal->call('save');
 
-        $modal->assertHasErrors(['form.email' => 'unique']);
+        $modal->assertHasErrors(['form.email' => UniqueEmail::class]);
         expect($user->refresh()->email)->toBe('current@example.com');
     });
 
@@ -285,10 +303,8 @@ it('forbids users without administrative access from opening the user form', fun
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal', $user?->id);
-
-    $modal->assertForbidden();
+    livewire(FormModal::class, ['modelId' => $user?->id])
+        ->assertStatus(403);
 })->with([
     'guest creating' => ['guest', 'create'],
     'basic user creating' => ['basic user', 'create'],

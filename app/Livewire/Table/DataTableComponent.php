@@ -8,8 +8,10 @@ use App\Livewire\Table\Filters\SelectFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -83,10 +85,27 @@ abstract class DataTableComponent extends Component
     }
 
     /**
+     * Status counts and total, computed once and reused by every later request of this component
+     * (searching, filtering and paging cannot change them). Mutations that can change them forget it.
+     *
+     * @var array{total: int, statuses: list<array{value: string, label: string, count: int}>}|null
+     */
+    #[Locked]
+    public ?array $metadataSnapshot = null;
+
+    /**
      * @return array{total: int, statuses: list<array{value: string, label: string, count: int}>}
      */
     #[Computed]
     public function metadata(): array
+    {
+        return $this->metadataSnapshot ??= $this->buildMetadata();
+    }
+
+    /**
+     * @return array{total: int, statuses: list<array{value: string, label: string, count: int}>}
+     */
+    private function buildMetadata(): array
     {
         $statusFilter = collect($this->filters())
             ->first(fn (Filter $filter): bool => $filter instanceof SelectFilter && $filter->getKey() === 'status');
@@ -175,7 +194,20 @@ abstract class DataTableComponent extends Component
     }
 
     #[On('refreshDatatable')]
-    public function refreshDatatable(): void {}
+    public function refreshDatatable(): void
+    {
+        $this->forgetMetadata();
+    }
+
+    /**
+     * Discard the remembered status counts after a change that can alter them.
+     */
+    protected function forgetMetadata(): void
+    {
+        $this->metadataSnapshot = null;
+
+        unset($this->metadata);
+    }
 
     public function render(): View
     {
@@ -262,8 +294,19 @@ abstract class DataTableComponent extends Component
         $this->applyFilters($query);
         $this->applySorting($query);
 
-        return $query->paginate($this->perPage);
+        $rows = $query->paginate($this->perPage);
+
+        $this->projectRowState($query->getModel()->newCollection($rows->items()));
+
+        return $rows;
     }
+
+    /**
+     * Project per-row state, such as lifecycle status, for the rows of the current page only.
+     *
+     * @param  Collection<int, TModel>  $rows
+     */
+    protected function projectRowState(Collection $rows): void {}
 
     /**
      * @param  Builder<TModel>  $query
@@ -309,7 +352,9 @@ abstract class DataTableComponent extends Component
         if ($this->sortField !== '' && $this->isSortableField($this->sortField)) {
             $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-            $query->orderBy($this->sortField, $direction);
+            $query->reorder()
+                ->orderBy($this->sortField, $direction)
+                ->orderBy($query->getModel()->getQualifiedKeyName());
         }
     }
 

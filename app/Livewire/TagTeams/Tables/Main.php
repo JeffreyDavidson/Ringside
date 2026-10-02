@@ -16,6 +16,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<TagTeam> */
@@ -39,11 +40,15 @@ class Main extends BaseTable
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()
-            ->withEmploymentStatusState()
-            ->withAvailabilityState()
             ->withFirstEmployment()
             ->with('currentWrestlers')
             ->oldest('name');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
     }
 
     protected function configure(): void
@@ -113,5 +118,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $tagTeam): void {
             $deleteAction->handle($tagTeam);
         }, __('tag-teams.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

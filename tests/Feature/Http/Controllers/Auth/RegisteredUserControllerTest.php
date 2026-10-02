@@ -26,8 +26,8 @@ test('a user can register with their account details', function (string $email):
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
         'email' => $email,
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password-12345',
+        'password_confirmation' => 'password-12345',
     ];
 
     // Act
@@ -43,7 +43,7 @@ test('a user can register with their account details', function (string $email):
         ->last_name->toBe('Davidson')
         ->role->toBe(Role::Basic)
         ->status->toBe(UserStatus::Unverified)
-        ->and(Hash::check('password', $user->password))->toBeTrue();
+        ->and(Hash::check('password-12345', $user->password))->toBeTrue();
 
     assertGuest();
 })->with(['jeffrey@example.com', 'Jeffrey@Example.COM']);
@@ -88,5 +88,25 @@ test('registration checks uniqueness after normalizing email', function (): void
     // Assert
     $response->assertSessionHasErrors(['email' => __('validation.unique', ['attribute' => 'email'])])
         ->assertSessionHasInput('email', 'Existing@Example.COM');
+    expect(User::query()->count())->toBe(1);
+});
+
+test('registration rejects an email that only differs by case from an existing user', function () {
+    // Arrange
+    User::factory()->create(['email' => 'jeffrey@example.com']);
+    $registrationData = [
+        'first_name' => 'Jeffrey',
+        'last_name' => 'Davidson',
+        'email' => 'JEFFREY@example.com',
+        'password' => 'password-12345',
+        'password_confirmation' => 'password-12345',
+    ];
+
+    // Act
+    $response = $this->from(route('register'))
+        ->post(route('register'), $registrationData);
+
+    // Assert
+    $response->assertSessionHasErrors('email');
     expect(User::query()->count())->toBe(1);
 });

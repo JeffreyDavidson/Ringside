@@ -11,9 +11,9 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 test('administrator can book a singles match through the event page', function (): void {
     $event = Event::factory()->scheduled()->withVenue()->create();
-    $referee = Referee::factory()->bookable()->create();
-    $firstWrestler = Wrestler::factory()->bookable()->create(['name' => 'First Browser Competitor']);
-    $secondWrestler = Wrestler::factory()->bookable()->create(['name' => 'Second Browser Competitor']);
+    Referee::factory()->bookable()->create(['first_name' => 'Rowdy', 'last_name' => 'Official']);
+    Wrestler::factory()->bookable()->create(['name' => 'First Browser Competitor']);
+    Wrestler::factory()->bookable()->create(['name' => 'Second Browser Competitor']);
 
     $this->actingAs(administrator());
 
@@ -25,9 +25,15 @@ test('administrator can book a singles match through the event page', function (
     $page
         ->waitForText('Add Match')
         ->select('select[name="form.matchType"]', MatchType::Singles->value)
-        ->select('select[name="form.competitors.0.wrestlers.0"]', (string) $firstWrestler->id)
-        ->select('select[name="form.competitors.1.wrestlers.0"]', (string) $secondWrestler->id)
-        ->select('select[name="form.referees[]"]', [(string) $referee->id])
+        ->typeSlowly('input[data-field="form.competitors.0.wrestlers.0"]', 'First Browser', 20)
+        ->click('[role="option"]:has-text("First Browser Competitor")')
+        ->wait(0.3)
+        ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'second browser', 20)
+        ->click('[role="option"]:has-text("Second Browser Competitor")')
+        ->wait(0.3)
+        ->typeSlowly('input[data-field="form.referees"]', 'Rowdy', 20)
+        ->click('[role="option"]:has-text("Rowdy Official")')
+        ->assertSeeIn('[data-roster-combobox="form.referees"] [data-test="selected-chips"]', 'Rowdy Official')
         ->press('Save')
         ->waitForText('First Browser Competitor')
         ->assertSee('Second Browser Competitor')
@@ -63,7 +69,10 @@ test('administrator can edit an unresulted match from the event page', function 
         ->assertSee('Edit Match')
         ->click('[data-test="match-edit-action"]')
         ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
-        ->select('select[name="form.competitors.1.wrestlers.0"]', (string) $replacementOpponent->id)
+        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent')
+        ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement', 20)
+        ->click('[role="option"]:has-text("Replacement Edit Opponent")')
+        ->wait(0.3)
         ->fill('textarea[name="form.preview"]', 'The challenger steps into the spotlight.')
         ->press('Save')
         ->assertSee('Replacement Edit Opponent')
@@ -101,6 +110,7 @@ test('administrator can remove a match from the event page', function (): void {
 
 test('match form layouts adapt to narrow screens and keep multiple selections usable', function (): void {
     $event = Event::factory()->scheduled()->withVenue()->create();
+    Wrestler::factory()->bookable()->create(['name' => 'Responsive Multi Competitor']);
 
     $this->actingAs(administrator());
 
@@ -121,7 +131,12 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
         ->assertScript('getComputedStyle(document.querySelector("[data-test=match-competitors-grid]")).gridTemplateColumns.split(" ").length === 3')
         ->select('select[name="form.matchType"]', MatchType::TagTeam->value)
         ->waitForText('Team A')
-        ->assertScript('document.querySelector("select[name=\"form.competitors.0.wrestlers[]\"]").getBoundingClientRect().height >= 112')
+        ->typeSlowly('input[data-field="form.competitors.0.wrestlers"]', 'Responsive', 20)
+        ->click('[role="option"]:has-text("Responsive Multi Competitor")')
+        ->assertSeeIn('[data-roster-combobox="form.competitors.0.wrestlers"] [data-test="selected-chips"]', 'Responsive Multi Competitor')
+        ->assertVisible('input[data-field="form.competitors.0.wrestlers"]')
+        ->assertVisible('input[data-field="form.competitors.0.tag_teams"]')
+        ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
         ->assertNoJavascriptErrors();
 });
 
@@ -180,13 +195,13 @@ test('administrator can recover from a venue scheduling conflict in the event fo
         ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
         ->select('select[name="form.venue_id"]', (string) $venue->id)
         ->press('Save')
-        ->assertSee("Venue [{$venue->name}] is already booked at this event time.")
+        ->assertSee("Venue [{$venue->name}] is already booked on that day.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Add Event');
 
     expect(Event::query()->count())->toBe(1);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
@@ -220,7 +235,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
         ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
         ->press('Save')
-        ->assertSee("Venue [{$conflictingVenue->name}] is already booked at this event time.")
+        ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Edit Original Browser Event');
 
@@ -228,7 +243,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->and($event->date?->toDateTimeString())->toBe($conflictingDate->toDateTimeString())
         ->and($event->venue_id)->toBe($originalVenue->id);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')

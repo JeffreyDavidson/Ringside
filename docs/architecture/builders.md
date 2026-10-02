@@ -34,6 +34,15 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 - `FiltersByRetirementStatus` provides the shared `retired()` filter for individual roster members and tag teams.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
 
+## Status Projections
+
+`withEmploymentStatusState()`, `withAvailabilityState()` and `withActivityStatusState()` project the existence facts behind lifecycle status (`status_*_exists`, `availability_*_exists`) onto loaded models. The relationship lists live in the `EMPLOYMENT_STATUS_STATE`, `ACTIVITY_STATUS_STATE` and `AVAILABILITY_STATE` constants so a model that is already loaded can project them with one `loadExists()` call. The model accessors `hasCurrentEmployment()`, `hasFutureEmployment()`, `hasEmploymentHistory()`, `hasCurrentRetirement()`, `hasCurrentActivityPeriod()`, `hasFutureActivityPeriod()`, `hasActivityHistory()`, `isInjured()` and `isSuspended()` read the projection when it is present and fall back to an `exists` query otherwise; status resolvers and the lifecycle eligibility classes read facts only through them. A projection is a read-time snapshot: Actions refresh locked models (which drops projected attributes) before checking eligibility.
+
+- Show pages: `GeneralInfo` adds the projection to its single `findOrFail` query, and each lifecycle `Actions` component calls `loadExists()` in `render()`, so rendering costs one query instead of four to seven `exists` fallbacks per model.
+- Index tables: `DataTableComponent::getRows()` paginates first and then calls `projectRowState()` for the page rows only; the main roster tables implement it with `loadExists()` rather than projecting in `builder()`, which PostgreSQL would plan as hashed subplans over every tenant's lifecycle rows. `whereEmploymentStatus()` and the other filters stay WHERE clauses on `builder()`.
+- History tables that display status (for example stable previous managers) add the projection to their query.
+- Table status counts and the total (`DataTableComponent::metadata()`) are remembered in the locked `metadataSnapshot` property, because searching, filtering and paging cannot change them. `refreshDatatable` and the table `delete()` methods call `forgetMetadata()`. The paginator still runs its own count so a change made by another user can never corrupt page links.
+
 `EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and deterministic ordering by event date, card, and match number. Competitor and referee history relationships reuse its persisted past-event constraint rather than defining their own date comparisons. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
 
 `TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.

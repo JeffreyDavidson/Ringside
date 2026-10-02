@@ -10,6 +10,7 @@ use App\Actions\Promotions\UpdatePromotionMemberStatusAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
+use App\Exceptions\BaseBusinessException;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
@@ -28,7 +29,7 @@ class Manage extends Component
     #[Locked]
     public int $promotionId;
 
-    public string $search = '';
+    public string $email = '';
 
     public string $newMemberRole = MembershipRole::Member->value;
 
@@ -50,36 +51,39 @@ class Manage extends Component
             ->all();
     }
 
-    public function addMember(int $userId): void
+    public function addMember(): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
 
-        Validator::make(
-            ['userId' => $userId, 'role' => $this->newMemberRole],
+        $validated = Validator::make(
+            ['email' => $this->email, 'role' => $this->newMemberRole],
             [
-                'userId' => [
-                    'required',
-                    'integer',
-                    Rule::exists('users', 'id')
-                        ->where('status', UserStatus::Active->value)
-                        ->whereNull('deleted_at'),
-                ],
+                'email' => ['required', 'string', 'max:255'],
                 'role' => ['required', Rule::enum(MembershipRole::class)],
             ],
         )->validate();
 
-        $user = User::query()->whereKey($userId)->firstOrFail();
-        $role = MembershipRole::from($this->newMemberRole);
+        $email = mb_strtolower(trim($validated['email']));
 
-        app(AddPromotionMemberAction::class)->handle(
-            $promotion,
-            $user,
-            $role,
-        );
+        // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
+        // `%` and `_` in the input can never widen the match.
+        $user = User::query()
+            ->whereLike('email', $email, caseSensitive: false)
+            ->where('status', UserStatus::Active)
+            ->get()
+            ->first(fn (User $candidate): bool => mb_strtolower($candidate->email) === $email);
+
+        $role = MembershipRole::from($validated['role']);
+
+        if ($user === null || ! app(AddPromotionMemberAction::class)->handle($promotion, $user, $role)) {
+            $this->addError('email', __('promotions.member_not_added'));
+
+            return;
+        }
 
         $this->memberRoles[$user->id] = $role->value;
-        $this->reset('search');
+        $this->reset('email');
     }
 
     public function updateMemberRole(int $userId): void
@@ -95,11 +99,16 @@ class Manage extends Component
 
         $role = MembershipRole::from($this->memberRoles[$userId]);
 
-        app(UpdatePromotionMemberRoleAction::class)->handle(
-            $promotion,
-            $user,
-            $role,
-        );
+        try {
+            app(UpdatePromotionMemberRoleAction::class)->handle(
+                $promotion,
+                $user,
+                $role,
+            );
+        } catch (BaseBusinessException $exception) {
+            $this->memberRoles[$userId] = $this->currentRole($promotion, $userId);
+            $this->addError('member', $exception->getMessage());
+        }
     }
 
     public function updateMemberStatus(int $userId, string $status): void
@@ -116,11 +125,15 @@ class Manage extends Component
             ])]],
         )->validate();
 
-        app(UpdatePromotionMemberStatusAction::class)->handle(
-            $promotion,
-            $user,
-            MembershipStatus::from($status),
-        );
+        try {
+            app(UpdatePromotionMemberStatusAction::class)->handle(
+                $promotion,
+                $user,
+                MembershipStatus::from($status),
+            );
+        } catch (BaseBusinessException $exception) {
+            $this->addError('member', $exception->getMessage());
+        }
     }
 
     public function render(): View
@@ -135,29 +148,9 @@ class Manage extends Component
             ->get();
 
         $canManageMembers = Gate::allows('manageMembers', $promotion);
-        $availableUsers = collect();
-        $search = trim($this->search);
-
-        if ($canManageMembers && mb_strlen($search) >= 2) {
-            $availableUsers = User::query()
-                ->where('status', UserStatus::Active)
-                ->whereDoesntHave('promotions', function (Builder $query) use ($promotion): void {
-                    $query->whereKey($promotion->getKey());
-                })
-                ->where(function (Builder $query) use ($search): void {
-                    $searchPattern = "%{$search}%";
-
-                    $query->whereLike('full_name', $searchPattern)
-                        ->orWhereLike('email', $searchPattern);
-                })
-                ->orderBy('full_name')
-                ->limit(8)
-                ->get();
-        }
 
         return view('livewire.promotions.members.manage', [
             'members' => $members,
-            'availableUsers' => $availableUsers,
             'canManageMembers' => $canManageMembers,
             'roles' => MembershipRole::cases(),
             'activeStatus' => MembershipStatus::Active,
@@ -174,6 +167,15 @@ class Manage extends Component
     private function promotion(): Promotion
     {
         return Promotion::query()->findOrFail($this->promotionId);
+    }
+
+    private function currentRole(Promotion $promotion, int $userId): string
+    {
+        return $promotion->memberships()
+            ->where('user_id', $userId)
+            ->firstOrFail()
+            ->role
+            ->value;
     }
 
     private function memberUser(Promotion $promotion, int $userId): User
