@@ -14,6 +14,21 @@ has its own prefix, so exhausting one does not block the others.
 
 Requests over the limit receive `429`. The password broker keeps its own per-user resend throttle.
 
+## Reverse proxy and client IP
+
+Production is served through Cloudflare, so the TCP peer of every request is a Cloudflare edge address. The rate limits
+above and the authentication log key on `request()->ip()`, which is only the real visitor when the proxy is trusted.
+
+- `config/trustedproxy.php` lists the trusted proxies. The default is Cloudflare's published IPv4 and IPv6 ranges; set
+  `TRUSTED_PROXIES` to override it with a comma-separated list or `*`. Use `*` only when the origin accepts traffic from
+  the proxy alone, otherwise a visitor could spoof the client address.
+- `bootstrap/app.php` trusts only `X-Forwarded-For`, `X-Forwarded-Port` and `X-Forwarded-Proto`. `X-Forwarded-Host`
+  and `X-Forwarded-Prefix` are deliberately not trusted: Cloudflare forwards client-supplied headers, so trusting them
+  would let a visitor choose the host used to build links such as password reset URLs.
+- Forwarded headers from any peer outside the trusted list are ignored.
+- Refresh the default ranges from https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 when
+  Cloudflare announces a change. `tests/Feature/Http/Middleware/TrustedProxiesTest.php` covers the behaviour.
+
 ## Password policy
 
 `AppServiceProvider::boot()` sets `Password::defaults()` to a 12 character minimum in every environment. Every place
