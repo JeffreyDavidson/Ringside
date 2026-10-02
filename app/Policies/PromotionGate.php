@@ -8,7 +8,6 @@ use App\Enums\Promotions\MembershipRole;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
@@ -52,15 +51,15 @@ class PromotionGate
     /** Members act on the promotion itself according to their active membership. */
     private function authorizePromotionSubject(User $user, string $ability, Promotion $promotion): bool
     {
-        $membership = $this->activeMembership($user, $promotion);
+        $role = $this->context->membershipRole($user, $promotion);
 
-        if (! $membership instanceof PromotionMembership) {
+        if (! $role instanceof MembershipRole) {
             return false;
         }
 
         return match ($ability) {
             'view' => true,
-            'manageMembers', 'update' => $membership->role === MembershipRole::Owner,
+            'manageMembers', 'update' => $role === MembershipRole::Owner,
             default => false,
         };
     }
@@ -86,7 +85,7 @@ class PromotionGate
             return false;
         }
 
-        return $this->activeMembership($user, $promotion)?->role->allows($ability) ?? false;
+        return $this->context->membershipRole($user, $promotion)?->allows($ability) ?? false;
     }
 
     /** Determine whether the model or class string belongs to a promotion. */
@@ -99,13 +98,5 @@ class PromotionGate
         return $subject instanceof EventMatch
             || $subject === EventMatch::class
             || in_array(BelongsToPromotion::class, class_uses_recursive($subject), true);
-    }
-
-    private function activeMembership(User $user, Promotion $promotion): ?PromotionMembership
-    {
-        return $promotion->memberships()
-            ->forUser($user)
-            ->active()
-            ->first();
     }
 }

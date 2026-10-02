@@ -126,6 +126,16 @@ events and titles now have nullable explicit promotion ownership. Venues are
 global shared resources that can host events for multiple promotions. Venue
 routes remain outside the promotion context middleware; a venue is globally
 visible while its related event history is filtered by the active promotion.
+
+`PromotionGate::before()` runs on every Gate check, so membership is resolved
+once per request: `PromotionContextService` memoises the user's active role per
+user and promotion (seeded from the pivot row of the promotion selected by
+`EstablishPromotionContext` or `SwitchActivePromotionAction`, otherwise read with
+one query) and memoises the user's active promotions for the middleware and the
+promotion switcher. The memo is dropped when a request starts and whenever the
+member Actions add a member or change a role or status
+(`PromotionContextService::forgetMemberships()`). Any new code that writes
+`promotion_user` must call it.
 When promotion context is enforced, new promotion-owned models receive the
 active promotion during creation without exposing ownership columns to
 mass-assignment.

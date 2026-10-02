@@ -7,6 +7,7 @@ namespace App\Actions\Promotions;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
 final readonly class UpdatePromotionMemberStatusAction
@@ -33,6 +34,8 @@ final readonly class UpdatePromotionMemberStatusAction
             $lockedPromotion->users()->updateExistingPivot($user->getKey(), [
                 'status' => $status,
             ]);
+
+            app(PromotionContextService::class)->forgetMemberships();
         });
     }
 }
