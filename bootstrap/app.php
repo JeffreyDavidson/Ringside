@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [EnsureUserIsActive::class]);
+        $middleware->authenticateSessions();
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/dashboard');
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EstablishPromotionContext::class);
