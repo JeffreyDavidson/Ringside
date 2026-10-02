@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support\Auth;
 
+use App\Models\Users\User;
 use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
@@ -18,12 +20,20 @@ class CaseInsensitiveEmailUserProvider extends EloquentUserProvider
     #[\Override]
     public function retrieveByCredentials(#[\SensitiveParameter] array $credentials)
     {
-        if (isset($credentials['email']) && is_string($credentials['email'])) {
-            $email = Str::lower(mb_trim($credentials['email']));
-
-            $credentials['email'] = fn (Builder $query): Builder => $query->whereRaw('lower(email) = ?', [$email]);
+        if (! isset($credentials['email']) || ! is_string($credentials['email'])) {
+            return parent::retrieveByCredentials($credentials);
         }
 
-        return parent::retrieveByCredentials($credentials);
+        $email = Str::lower(mb_trim($credentials['email']));
+
+        // whereLike only narrows the candidates case-insensitively; the exact comparison happens in PHP so
+        // `%` and `_` in the input can never widen the match.
+        $user = $this->newModelQuery()
+            ->where(Arr::except($credentials, ['email', 'password']))
+            ->whereLike('email', $email, caseSensitive: false)
+            ->get()
+            ->first(fn (Model $candidate): bool => $candidate instanceof User && Str::lower($candidate->email) === $email);
+
+        return $user instanceof User ? $user : null;
     }
 }

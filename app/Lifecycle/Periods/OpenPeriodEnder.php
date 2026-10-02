@@ -7,7 +7,6 @@ namespace App\Lifecycle\Periods;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 final class OpenPeriodEnder
 {
@@ -31,6 +30,11 @@ final class OpenPeriodEnder
         (clone $query)
             ->whereNull($endColumn)
             ->where($startColumn, '>', $date)
-            ->update([$endColumn => DB::raw($startColumn)]);
+            ->distinct()
+            ->pluck($startColumn)
+            ->each(fn (mixed $start): mixed => (clone $query)
+                ->whereNull($endColumn)
+                ->where($startColumn, $start)
+                ->update([$endColumn => $start]));
     }
 }

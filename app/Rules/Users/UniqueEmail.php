@@ -23,11 +23,16 @@ class UniqueEmail implements ValidationRule
             return;
         }
 
+        $email = Str::lower(mb_trim($value));
+
+        // whereLike only narrows the candidates case-insensitively; the exact comparison happens in PHP so
+        // `%` and `_` in the input can never widen the match.
         $taken = User::query()
             ->withTrashed()
-            ->whereRaw('lower(email) = ?', [Str::lower(mb_trim($value))])
+            ->whereLike('email', $email, caseSensitive: false)
             ->when($this->ignoreUserId !== null, fn ($query) => $query->whereKeyNot($this->ignoreUserId))
-            ->exists();
+            ->pluck('email')
+            ->contains(fn (string $existing): bool => Str::lower($existing) === $email);
 
         if ($taken) {
             $fail('validation.unique')->translate();

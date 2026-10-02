@@ -32,28 +32,21 @@ return new class extends Migration
      */
     private function ensureNoEmailDiffersOnlyByCase(): void
     {
-        $duplicateEmails = DB::table('users')
-            ->selectRaw('lower(email) as normalized_email')
-            ->groupByRaw('lower(email)')
-            ->havingRaw('count(*) > 1')
-            ->orderBy('normalized_email')
-            ->pluck('normalized_email');
-
-        if ($duplicateEmails->isEmpty()) {
-            return;
-        }
-
         $conflicts = DB::table('users')
-            ->whereIn(DB::raw('lower(email)'), $duplicateEmails->all())
             ->orderBy('id')
             ->get(['id', 'email'])
             ->groupBy(fn (object $user): string => mb_strtolower($user->email))
+            ->filter(fn ($users): bool => $users->count() > 1)
             ->map(fn ($users, string $email): string => sprintf(
                 'email %s is used by user ids %s',
                 $email,
                 $users->pluck('id')->implode(', '),
             ))
             ->implode('; ');
+
+        if ($conflicts === '') {
+            return;
+        }
 
         throw new RuntimeException(
             "Cannot enforce case-insensitive unique user emails: {$conflicts}. "
