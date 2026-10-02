@@ -9,6 +9,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -204,6 +205,43 @@ describe('PreviousManagers rendering', function (): void {
             ->assertSee('Previous managers')
             ->assertSee('No previous managers yet.')
             ->assertDontSeeHtml('placeholder="Search managers"');
+    });
+});
+
+describe('PreviousManagers query count', function (): void {
+    it('runs the same number of queries regardless of how many managers it lists', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $this->stable->wrestlers()->attach($wrestler, [
+            'joined_at' => Date::now()->subYears(2),
+            'left_at' => Date::now()->subYear(),
+        ]);
+        $attachManagers = function (int $count) use ($wrestler): void {
+            Manager::factory()->employed()->count($count)->create()->each(
+                fn (Manager $manager) => $wrestler->managers()->attach($manager, [
+                    'hired_at' => Date::now()->subMonths(18),
+                    'fired_at' => Date::now()->subMonths(15),
+                ])
+            );
+        };
+        $countQueries = function (): int {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            livewire(PreviousManagers::class, ['stableId' => $this->stable->id])->assertSee('Employed');
+            $count = count(DB::getQueryLog());
+            DB::disableQueryLog();
+
+            return $count;
+        };
+        $attachManagers(1);
+        $queriesWithOneManager = $countQueries();
+
+        // Act
+        $attachManagers(9);
+        $queriesWithTenManagers = $countQueries();
+
+        // Assert
+        expect($queriesWithTenManagers)->toBe($queriesWithOneManager);
     });
 });
 

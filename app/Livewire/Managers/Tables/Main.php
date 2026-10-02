@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Actions\Managers\DeleteAction;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -16,6 +17,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Manager> */
@@ -41,10 +43,14 @@ class Main extends BaseTable
     public function builder(): ManagerBuilder
     {
         return Manager::query()
-            ->withEmploymentStatusState()
-            ->withAvailabilityState()
             ->withFirstEmployment()
             ->oldest('last_name');
+    }
+
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $rows->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
     }
 
     protected function configure(): void
@@ -117,5 +123,7 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($deleteAction, $manager): void {
             $deleteAction->handle($manager);
         }, __('managers.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }
