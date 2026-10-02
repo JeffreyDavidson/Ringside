@@ -186,7 +186,7 @@ test('administrator can recover from a venue scheduling conflict in the event fo
 
     expect(Event::query()->count())->toBe(1);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
@@ -228,7 +228,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->and($event->date?->toDateTimeString())->toBe($conflictingDate->toDateTimeString())
         ->and($event->venue_id)->toBe($originalVenue->id);
 
-    $availableDate = $conflictingDate->copy()->addHour();
+    $availableDate = $conflictingDate->copy()->addDay();
     $page
         ->fill('input[name="form.date"]', $availableDate->format('Y-m-d\\TH:i'))
         ->press('Save')
