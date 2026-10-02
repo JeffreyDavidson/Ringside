@@ -9,6 +9,7 @@ use App\Lifecycle\Periods\EmploymentPeriodManager;
 use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Periods\SuspensionPeriodManager;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ class RetireAction
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly TagTeamRetirementEligibility $eligibility,
         private readonly RetireCurrentMembersAction $retireCurrentMembers,
+        private readonly ChampionshipReignManager $championshipReigns,
     ) {}
 
     /**
@@ -44,6 +46,7 @@ class RetireAction
             }
 
             $this->retirementPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Retired);
+            $this->championshipReigns->endCurrentReignsForChampion($lockedTagTeam, $effectiveDate);
 
             if ($retireMembers) {
                 $this->retireCurrentMembers->handle($lockedTagTeam, $effectiveDate);

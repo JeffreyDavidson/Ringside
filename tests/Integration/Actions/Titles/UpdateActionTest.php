@@ -5,7 +5,10 @@ declare(strict_types=1);
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
+use App\Exceptions\Titles\CannotChangeTypeException;
+use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -69,4 +72,46 @@ test('it updates a title with future activation but does not create new debut si
         ->and($title->type)->toBe(TitleType::Singles);
     // Should not create new activation since title already has debuted
     expect($title->activityPeriods)->toHaveCount($originalActivityPeriodCount);
+});
+
+test('it rejects changing the type of a title that has a championship reign', function () {
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->current()->create();
+
+    $update = fn () => resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', TitleType::TagTeam, null));
+
+    expect($update)->toThrow(CannotChangeTypeException::class)
+        ->and($title->refresh()->type)->toBe(TitleType::Singles)
+        ->and($title->name)->not->toBe('Renamed Title');
+});
+
+test('it rejects changing the type of a title that is booked in a match', function () {
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    EventMatch::factory()->create()->titles()->attach($title);
+
+    $update = fn () => resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', TitleType::TagTeam, null));
+
+    expect($update)->toThrow(CannotChangeTypeException::class)
+        ->and($title->refresh()->type)->toBe(TitleType::Singles);
+});
+
+test('it still renames a title with reigns and bookings when the type is unchanged', function () {
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->current()->create();
+    EventMatch::factory()->create()->titles()->attach($title);
+
+    resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', TitleType::Singles, null));
+
+    expect($title->refresh()->name)->toBe('Renamed Title');
+});
+
+test('it allows changing the type once the only booking was deleted and no reign exists', function () {
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $match = EventMatch::factory()->create();
+    $match->titles()->attach($title);
+    $match->delete();
+
+    resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', TitleType::TagTeam, null));
+
+    expect($title->refresh()->type)->toBe(TitleType::TagTeam);
 });

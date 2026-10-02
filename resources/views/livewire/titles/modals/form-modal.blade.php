@@ -4,7 +4,13 @@
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.select :label="__('titles.type')" wire:model="form.type" :options="$this->getTitleTypes" />
+        <x-form.inputs.select
+            :label="__('titles.type')"
+            :description="$this->isTypeLocked ? __('titles.type_locked') : null"
+            :disabled="$this->isTypeLocked"
+            wire:model="form.type"
+            :options="$this->getTitleTypes"
+        />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>

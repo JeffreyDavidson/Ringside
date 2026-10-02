@@ -100,7 +100,7 @@
                                 >{{ $championship->champion->name }}</a>
                                 <span class="text-ringside-muted text-sm">
                                     {{
-                                        __('dashboard.champion_since', [
+                                        trans_choice('dashboard.champion_since', $dashboard->reignLengthInDays($championship), [
                                             'date' => $championship->won_at->format('M j, Y'),
                                             'days' => $dashboard->reignLengthInDays($championship),
                                         ])

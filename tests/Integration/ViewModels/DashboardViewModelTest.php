@@ -119,3 +119,20 @@ describe('champion display helpers', function (): void {
             ->and($days)->toBe(30);
     });
 });
+
+describe('champion reign length defence', function (): void {
+    it('never reports a negative reign length', function (): void {
+        // Arrange
+        $championship = TitleChampionship::factory()
+            ->for(Title::factory()->active())
+            ->forWrestler(Wrestler::factory()->create())
+            ->current()
+            ->create(['won_at' => now()->addDays(10)]);
+
+        // Act
+        $days = app(DashboardViewModel::class)->reignLengthInDays($championship);
+
+        // Assert
+        expect($days)->toBe(0);
+    });
+});

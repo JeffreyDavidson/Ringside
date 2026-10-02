@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Titles;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Matches\EventMatch;
@@ -31,6 +32,10 @@ final class ChampionshipReignManager
             throw InvalidMatchOutcomeException::titleLineageHasAdvanced();
         }
 
+        if ($this->reignBelongsTo($reignWonAtMatch, $desiredChampion)) {
+            return;
+        }
+
         $eventDate = $match->event->date;
 
         if (! $eventDate instanceof Carbon || ($reignWonAtMatch === null && $desiredChampion === null)) {
@@ -42,9 +47,44 @@ final class ChampionshipReignManager
                 && $reign->won_at->greaterThan($eventDate),
         );
 
-        if ($laterReignExists) {
+        $vacatedReignContainsDate = $desiredChampion !== null && $activeReigns->contains(
+            fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
+                && $reign->lost_at !== null
+                && $reign->won_at->lessThanOrEqualTo($eventDate)
+                && $reign->lost_at->greaterThan($eventDate),
+        );
+
+        if ($laterReignExists || $vacatedReignContainsDate) {
             throw InvalidMatchOutcomeException::titleResultOutOfDateOrder($title);
         }
+    }
+
+    /**
+     * Determine whether recording the desired champion would put someone other than the current holder on the title.
+     *
+     * @param  Collection<int, TitleChampionship>  $reigns
+     */
+    public function changesChampion(
+        EventMatch $match,
+        Title $title,
+        Wrestler|TagTeam|null $desiredChampion,
+        Collection $reigns,
+    ): bool {
+        if ($desiredChampion === null) {
+            return false;
+        }
+
+        $activeReigns = $this->activeReignsForTitle($title, $reigns);
+        $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
+
+        if ($reignWonAtMatch !== null) {
+            return ! $this->reignBelongsTo($reignWonAtMatch, $desiredChampion);
+        }
+
+        return ! $this->reignBelongsTo(
+            $activeReigns->whereNull('lost_at')->sortByDesc('won_at')->first(),
+            $desiredChampion,
+        );
     }
 
     /** @param Collection<int, TitleChampionship> $reigns */
@@ -68,7 +108,7 @@ final class ChampionshipReignManager
         if ($reignWonAtMatch !== null) {
             $reignWonAtMatch->delete();
 
-            $currentReign = $activeReigns->firstWhere('lost_match_id', $match->id);
+            $currentReign = $this->reopenablePredecessor($title, $activeReigns->firstWhere('lost_match_id', $match->id));
             $currentReign?->update([
                 'lost_match_id' => null,
                 'lost_at' => null,
@@ -101,12 +141,13 @@ final class ChampionshipReignManager
 
     public function endCurrentReign(Title $title, Carbon $endedAt): void
     {
-        TitleChampionship::query()
+        $reign = TitleChampionship::query()
             ->whereBelongsTo($title)
             ->current()
             ->lockForUpdate()
-            ->first()
-            ?->update(['lost_at' => $endedAt]);
+            ->first();
+
+        $reign?->update(['lost_at' => $this->reignEnd($reign, $endedAt)]);
     }
 
     /** @param Model&CanBeChampion<*> $champion */
@@ -116,7 +157,9 @@ final class ChampionshipReignManager
             ->inLockOrder()
             ->lockForUpdate()
             ->get()
-            ->each->update(['lost_at' => $endedAt]);
+            ->each(fn (TitleChampionship $reign): bool => $reign->update([
+                'lost_at' => $this->reignEnd($reign, $endedAt),
+            ]));
     }
 
     /**
@@ -128,6 +171,26 @@ final class ChampionshipReignManager
         return $reigns
             ->where('title_id', $title->id)
             ->filter(fn (TitleChampionship $reign): bool => $reign->deleted_at === null);
+    }
+
+    /** A reign never ends before it began, even when the end date predates a future-dated win. */
+    private function reignEnd(TitleChampionship $reign, Carbon $endedAt): Carbon
+    {
+        return $endedAt->lessThan($reign->won_at) ? $reign->won_at : $endedAt;
+    }
+
+    /** A reign is only reopened for a champion who can still hold the title; otherwise the title stays vacant. */
+    private function reopenablePredecessor(Title $title, ?TitleChampionship $predecessor): ?TitleChampionship
+    {
+        if (! $predecessor instanceof TitleChampionship || ! $title->currentActivityPeriod()->exists()) {
+            return null;
+        }
+
+        $champion = $predecessor->champion()->first();
+        $isAvailable = ($champion instanceof Wrestler || $champion instanceof TagTeam)
+            && $champion->status === EmploymentStatus::Employed;
+
+        return $isAvailable ? $predecessor : null;
     }
 
     private function reignBelongsTo(

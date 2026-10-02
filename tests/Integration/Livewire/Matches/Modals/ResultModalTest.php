@@ -26,7 +26,7 @@ function createMatchWithResultCompetitors(MatchType $type = MatchType::Singles, 
 
     foreach (range(1, $count) as $position) {
         $side = MatchSide::factory()->for($match, 'match')->create(['position' => $position]);
-        $wrestler = Wrestler::factory()->create(['name' => "Competitor {$position}"]);
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Competitor {$position}"]);
         $competitors[] = MatchCompetitor::factory()->create([
             'match_id' => $match->id,
             'match_side_id' => $side->id,
@@ -184,7 +184,7 @@ describe('authorized result recording', function (): void {
         // Arrange
         [$match, $competitors] = createMatchWithResultCompetitors();
         $match->event->update(['date' => now()->subDays(10)]);
-        $title = Title::factory()->create(['type' => TitleType::Singles]);
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
         $match->titles()->attach($title);
         TitleChampionship::factory()
             ->for($title)

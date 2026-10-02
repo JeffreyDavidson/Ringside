@@ -169,3 +169,31 @@ test('administrators without a membership still see every promotion on the dashb
         ->assertOk()
         ->assertSee('Platform Event');
 });
+
+/**
+ * @see DashboardController::__invoke()
+ */
+test('the dashboard pluralises the number of days a champion has held a title', function (int $days, string $expected, ?string $unexpected) {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->employed()->create())
+        ->current()
+        ->create(['won_at' => now()->subDays($days)]);
+
+    // Act
+    $response = actingAs(administrator())
+        ->get(route('dashboard'));
+
+    // Assert
+    $response->assertOk()->assertSee($expected);
+
+    if ($unexpected !== null) {
+        $response->assertDontSee($unexpected);
+    }
+})->with([
+    'no days' => [0, '0 days', null],
+    'one day' => [1, '1 day', '1 days'],
+    'many days' => [12, '12 days', null],
+]);

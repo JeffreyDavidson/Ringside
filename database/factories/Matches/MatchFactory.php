@@ -36,7 +36,7 @@ class MatchFactory extends Factory
     public function definition(): array
     {
         return [
-            'event_id' => Event::factory(),
+            'event_id' => Event::factory()->past(),
             'match_number' => fake()->randomDigitNotZero(),
             'match_type' => MatchType::Singles,
             'preview' => null,

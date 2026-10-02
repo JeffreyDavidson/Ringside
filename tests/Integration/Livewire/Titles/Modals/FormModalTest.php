@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -296,3 +297,52 @@ it('forbids users without administrative access from opening the title form', fu
     'guest updating' => ['guest', 'update', 403],
     'basic user updating' => ['basic user', 'update', 404],
 ]);
+
+describe('title type locking', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('locks the type of a title with a championship reign', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+        TitleChampionship::factory()->for($title)->current()->create();
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal
+            ->assertSee(__('titles.type_locked'))
+            ->assertSeeHtml('disabled');
+    });
+
+    it('keeps the type editable for a title without reigns or bookings', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal->assertDontSee(__('titles.type_locked'));
+    });
+
+    it('does not lock the type while creating a title', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+
+        $modal->assertDontSee(__('titles.type_locked'));
+    });
+
+    it('reports a forced type change as a type error and keeps the title unchanged', function () {
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles, 'name' => 'World Title']);
+        TitleChampionship::factory()->for($title)->current()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $title->id);
+
+        $modal->set('form.type', TitleType::TagTeam->value);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.type'])
+            ->assertNotDispatched('form-submitted');
+        expect($title->refresh()->type)->toBe(TitleType::Singles);
+    });
+});

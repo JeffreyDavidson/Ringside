@@ -65,7 +65,7 @@ final class TitleChampionshipQuery
     {
         $reignEnd = $championship->lost_at ?? ($asOf ?? now());
 
-        return (int) $championship->won_at->diffInDays($reignEnd);
+        return max(0, (int) $championship->won_at->diffInDays($reignEnd));
     }
 
     public static function longestChampion(Title $title, ?Carbon $asOf = null): Wrestler|TagTeam|null

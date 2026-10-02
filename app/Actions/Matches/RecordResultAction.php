@@ -6,12 +6,14 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
+use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Services\Matches\MatchAssignmentConflictService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RecordResultAction
@@ -27,6 +29,13 @@ class RecordResultAction
         return DB::transaction(function () use ($match, $result): EventMatch {
             $lockedMatch = $this->conflictService->lockMatchWithEventSet($match);
             $lockedMatch->setRelation('event', Event::query()->findOrFail($lockedMatch->event_id));
+
+            $eventDate = $lockedMatch->event->date;
+
+            if (! $eventDate instanceof Carbon || $eventDate->isFuture()) {
+                throw InvalidMatchOutcomeException::eventNotHeld();
+            }
+
             $lockedWinningSide = $result->winningSide instanceof MatchSide
                 ? $result->winningSide->refreshForUpdate()
                 : null;
