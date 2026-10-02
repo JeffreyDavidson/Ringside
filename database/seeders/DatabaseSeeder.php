@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,8 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(MatchTypesTableSeeder::class);
-        $this->call(MatchDecisionsTableSeeder::class);
+        if (app()->isProduction()) {
+            throw new RuntimeException('Demo seeders create accounts with a known password and must not run in production.');
+        }
+
         $this->call(VenuesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(TitlesTableSeeder::class);
