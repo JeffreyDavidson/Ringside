@@ -10,7 +10,7 @@ use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 beforeEach(function () {
-    $this->event = Event::factory()->create();
+    $this->event = Event::factory()->past()->create();
     $this->match = EventMatch::factory()->for($this->event)->create();
     $firstWrestler = Wrestler::factory()->create(['name' => 'First Competitor']);
     $secondWrestler = Wrestler::factory()->create(['name' => 'Second Competitor']);
