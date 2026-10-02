@@ -80,3 +80,21 @@ test('it rejects reconciling a title change for an event without a date', functi
 
     expect($reconcile)->toThrow(InvalidMatchOutcomeException::class, 'A title change cannot be recorded for an event without a date.');
 });
+
+test('a result with no winner never changes the champion', function () {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    $match = EventMatch::factory()->create();
+    TitleChampionship::factory()->for($title)->forWrestler(Wrestler::factory()->create())->current()->create();
+
+    // Act
+    $changes = resolve(ChampionshipReignManager::class)->changesChampion(
+        $match,
+        $title,
+        null,
+        $title->championships()->get(),
+    );
+
+    // Assert
+    expect($changes)->toBeFalse();
+});

@@ -175,14 +175,14 @@ test('retiring a champion of two titles while a multi-title result is recorded n
                 ->for($title)
                 ->forWrestler($champion)
                 ->current()
-                ->create());
+                ->create(['won_at' => now()->subMonths(2)]));
 
             // Rewriting the first reign moves its live tuple behind the second, so a sequential scan returns them out of id order.
             $firstReign = $reigns->firstOrFail();
             DB::update('update titles_championships set updated_at = now() where id = ?', [$firstReign->id]);
 
             $match = EventMatch::factory()
-                ->forEvent(Event::factory()->create(['date' => now()->addWeeks($run)]))
+                ->forEvent(Event::factory()->create(['date' => now()->subWeeks($run)]))
                 ->create(['match_type' => MatchType::Singles]);
             $championSide = MatchSide::factory()->create(['match_id' => $match->id, 'position' => 1]);
             $challengerSide = MatchSide::factory()->create(['match_id' => $match->id, 'position' => 2]);
