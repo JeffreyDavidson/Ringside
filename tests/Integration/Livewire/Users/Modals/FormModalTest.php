@@ -7,6 +7,7 @@ use App\Livewire\Users\Modals\FormModal;
 use App\Models\Users\User;
 use App\Rules\Users\UniqueEmail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -86,8 +87,8 @@ describe('authorized user form interactions', function () {
             'form.last_name' => 'Doe',
             'form.email' => 'john@example.com',
             'form.role' => Role::Administrator->value,
-            'form.password' => 'password123',
-            'form.password_confirmation' => 'password123',
+            'form.password' => 'password-12345',
+            'form.password_confirmation' => 'password-12345',
         ]);
         $modal->call('save');
 
@@ -95,7 +96,7 @@ describe('authorized user form interactions', function () {
         expect($user->first_name)->toBe('John')
             ->and($user->last_name)->toBe('Doe')
             ->and($user->role)->toBe(Role::Administrator)
-            ->and(Hash::check('password123', $user->password))->toBeTrue();
+            ->and(Hash::check('password-12345', $user->password))->toBeTrue();
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
@@ -207,7 +208,7 @@ describe('authorized user form interactions', function () {
             'invalid email' => ['form.email', 'not-an-email', 'form.email', 'email'],
             'duplicate email' => ['form.email', 'existing@example.com', 'form.email', UniqueEmail::class],
             'invalid role' => ['form.role', 'owner', 'form.role', 'in'],
-            'short password' => ['form.password', 'short', 'form.password', 'min'],
+            'short password' => ['form.password', 'short', 'form.password', Password::class],
             'unconfirmed password' => ['form.password_confirmation', 'different-password', 'form.password', 'confirmed'],
             default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
         };
@@ -219,8 +220,8 @@ describe('authorized user form interactions', function () {
             'form.last_name' => 'User',
             'form.email' => 'valid@example.com',
             'form.role' => Role::Basic->value,
-            'form.password' => 'password123',
-            'form.password_confirmation' => 'password123',
+            'form.password' => 'password-12345',
+            'form.password_confirmation' => 'password-12345',
         ]);
         $modal->set($field, $value);
         $modal->call('save');
