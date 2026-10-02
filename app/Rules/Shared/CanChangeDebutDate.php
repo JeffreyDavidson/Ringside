@@ -34,7 +34,9 @@ class CanChangeDebutDate implements ValidationRule
 
         $targetDate = Carbon::parse($value);
 
-        if (! $currentActivityPeriod->started_at->isSameDay($targetDate)) {
+        $debutDate = ($this->model->firstActivityPeriod ?? $currentActivityPeriod)->started_at;
+
+        if (! $debutDate->isSameDay($targetDate)) {
             $fail("The debut date cannot be changed while {$this->model->name} is currently active.");
         }
     }

@@ -107,3 +107,51 @@ test('it never combines a row lock with a grouped query when updating an existin
     expect($lockedSql)->not->toBeEmpty()
         ->and($lockedSql->filter(fn (string $sql): bool => str_contains($sql, 'group by')))->toBeEmpty();
 });
+
+test('it never reopens a disbanded stable when the end date is blank', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $period = $stable->firstActivityPeriod()->firstOrFail();
+
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: $period->started_at,
+        members: new StableMembershipData,
+        end_date: null,
+    ));
+
+    expect($stable->activityPeriods()->whereNull('ended_at')->exists())->toBeFalse()
+        ->and($period->refresh()->ended_at)->not->toBeNull();
+});
+
+test('it does not touch the end of an earlier period when a later period is open', function () {
+    $stable = Stable::factory()->active()->create();
+    $first = $stable->firstActivityPeriod()->firstOrFail();
+    $firstEnd = $first->started_at->copy()->addDay()->startOfSecond();
+    $first->update(['ended_at' => $firstEnd]);
+    $stable->activityPeriods()->create(['started_at' => now()->subHours(2)]);
+
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: $first->started_at,
+        members: new StableMembershipData,
+        end_date: null,
+    ));
+
+    expect($first->refresh()->ended_at?->toDateTimeString())->toBe($firstEnd->toDateTimeString())
+        ->and($stable->activityPeriods()->whereNull('ended_at')->count())->toBe(1);
+});
+
+test('it can still move the end date of a disbanded stable with a single period', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $period = $stable->firstActivityPeriod()->firstOrFail();
+    $newEnd = $period->started_at->copy()->addHour()->startOfSecond();
+
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: $period->started_at,
+        members: new StableMembershipData,
+        end_date: $newEnd,
+    ));
+
+    expect($period->refresh()->ended_at?->toDateTimeString())->toBe($newEnd->toDateTimeString());
+});

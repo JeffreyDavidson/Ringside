@@ -31,3 +31,6 @@ EstablishPromotionContext (and EnsureUserIsActive before it) is placed ahead of 
 
 ## No orphaned docblocks
 A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.
+
+## Compare user emails case-insensitively
+User emails are stored trimmed and lowercase (User::email mutator) and are unique on lower(email). Validate with App\Rules\Users\UniqueEmail rather than the unique rule, and look users up by email through lower(email) (the eloquent-email auth provider already does for sign-in and password reset); legacy rows may still be mixed case.

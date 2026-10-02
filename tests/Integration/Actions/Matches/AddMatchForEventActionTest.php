@@ -8,9 +8,11 @@ use App\Enums\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -168,4 +170,34 @@ test('it rolls back a title match when the current champion is absent', function
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
         ->toThrow(InvalidMatchConfigurationException::class)
         ->and(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+});
+
+test('it rejects booking a tag team member individually on the same card', function () {
+    $event = Event::factory()->create(['date' => now()->addDays(3)]);
+    $member = Wrestler::factory()->bookable()->create();
+    $partner = Wrestler::factory()->bookable()->create();
+    $tagTeam = TagTeam::factory()->bookable()->withCurrentWrestlers([$member, $partner])->create();
+    $tagTeamMatch = new EventMatchData(
+        MatchType::TripleThreat,
+        Referee::factory()->bookable()->count(1)->create(),
+        Title::query()->whereKey([])->get(),
+        collect([
+            1 => ['tag_teams' => [$tagTeam]],
+            2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
+            3 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
+        ]),
+        null,
+    );
+    $singlesMatch = new EventMatchData(
+        MatchType::Singles,
+        Referee::factory()->bookable()->count(1)->create(),
+        Title::query()->whereKey([])->get(),
+        collect([1 => ['wrestlers' => [$member]], 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]]]),
+        null,
+    );
+    resolve(AddMatchForEventAction::class)->handle($event, $tagTeamMatch);
+
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $singlesMatch))
+        ->toThrow(SchedulingConflictException::class, "Wrestler [{$member->name}] is already booked at this event time.")
+        ->and(EventMatch::query()->count())->toBe(1);
 });

@@ -96,3 +96,25 @@ test('rejects an invalid debut date value for an active model', function () {
 
     expect($message)->toBe('The debut date must be a valid date.');
 });
+
+test('compares a reunited model against its first period rather than the current one', function (string $modelClass) {
+    $debut = now()->subMonths(3);
+    $model = $modelClass::factory()->create();
+    $model->activityPeriods()->create(['started_at' => $debut, 'ended_at' => now()->subMonths(2)]);
+    $model->activityPeriods()->create(['started_at' => now()->subMonth()]);
+    $model->refresh();
+    $failed = false;
+
+    new CanChangeDebutDate($model)->validate(
+        'debut_date',
+        $debut->toDateString(),
+        validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }),
+    );
+
+    expect($failed)->toBeFalse();
+})->with([
+    'stable' => Stable::class,
+    'title' => Title::class,
+]);

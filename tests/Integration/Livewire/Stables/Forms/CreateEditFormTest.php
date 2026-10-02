@@ -117,3 +117,19 @@ describe('stable create and edit form', function (): void {
             ->and($otherStableMemberErrors)->toBe(['form.wrestlers.0']);
     });
 });
+
+describe('stable form activity end date', function (): void {
+    it('requires an end date for a disbanded stable instead of reopening it', function (): void {
+        // Arrange
+        $stable = Stable::factory()->inactive()->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($stable);
+        $form->ended_at = '';
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toContain('form.ended_at');
+    });
+});

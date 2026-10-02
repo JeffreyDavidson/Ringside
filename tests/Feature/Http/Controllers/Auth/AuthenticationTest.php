@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
@@ -176,3 +177,19 @@ test('users can log in again once the throttle window has passed', function () {
     $response->assertRedirect(route('dashboard', absolute: false));
     assertAuthenticated();
 });
+
+test('a legacy user stored with a mixed-case email can still sign in', function (string $typedEmail) {
+    // Arrange
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
+
+    // Act
+    $response = post(route('login'), ['email' => $typedEmail, 'password' => 'secret']);
+
+    // Assert
+    $response->assertRedirect(route('dashboard', absolute: false));
+    assertAuthenticated();
+})->with([
+    'lowercase' => 'legacy.promoter@example.com',
+    'exact stored case' => 'Legacy.Promoter@Example.com',
+]);

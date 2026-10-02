@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Livewire\Users\Modals\FormModal;
 use App\Models\Users\User;
+use App\Rules\Users\UniqueEmail;
 use Illuminate\Support\Facades\Hash;
 
 use function Pest\Laravel\actingAs;
@@ -204,7 +205,7 @@ describe('authorized user form interactions', function () {
             'long first name' => ['form.first_name', str_repeat('a', 256), 'form.first_name', 'max'],
             'long last name' => ['form.last_name', str_repeat('a', 256), 'form.last_name', 'max'],
             'invalid email' => ['form.email', 'not-an-email', 'form.email', 'email'],
-            'duplicate email' => ['form.email', 'existing@example.com', 'form.email', 'unique'],
+            'duplicate email' => ['form.email', 'existing@example.com', 'form.email', UniqueEmail::class],
             'invalid role' => ['form.role', 'owner', 'form.role', 'in'],
             'short password' => ['form.password', 'short', 'form.password', 'min'],
             'unconfirmed password' => ['form.password_confirmation', 'different-password', 'form.password', 'confirmed'],
@@ -245,7 +246,7 @@ describe('authorized user form interactions', function () {
         $modal->set('form.email', 'existing@example.com');
         $modal->call('save');
 
-        $modal->assertHasErrors(['form.email' => 'unique']);
+        $modal->assertHasErrors(['form.email' => UniqueEmail::class]);
         expect($user->refresh()->email)->toBe('current@example.com');
     });
 

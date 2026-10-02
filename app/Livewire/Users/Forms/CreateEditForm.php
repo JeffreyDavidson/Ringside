@@ -8,8 +8,8 @@ use App\Data\Users\UserData;
 use App\Enums\Users\Role;
 use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
+use App\Rules\Users\UniqueEmail;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<User> */
 class CreateEditForm extends BaseForm
@@ -57,7 +57,7 @@ class CreateEditForm extends BaseForm
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($this->modelId),
+                new UniqueEmail($this->modelId),
             ],
             'role' => ['required', 'string', 'in:administrator,basic'],
         ];

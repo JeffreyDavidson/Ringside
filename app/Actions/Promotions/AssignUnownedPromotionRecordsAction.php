@@ -7,6 +7,7 @@ namespace App\Actions\Promotions;
 use App\Models\Promotions\Promotion;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 final class AssignUnownedPromotionRecordsAction
 {
@@ -15,13 +16,14 @@ final class AssignUnownedPromotionRecordsAction
      */
     public function handle(Promotion $promotion, string $modelClass, bool $dryRun): int
     {
-        $unassignedCount = $modelClass::query()->whereNull('promotion_id')->count();
+        $unassignedCount = $modelClass::query()->withoutGlobalScope(SoftDeletingScope::class)->whereNull('promotion_id')->count();
 
         if ($dryRun || $unassignedCount === 0) {
             return $unassignedCount;
         }
 
         $modelClass::query()
+            ->withoutGlobalScope(SoftDeletingScope::class)
             ->whereNull('promotion_id')
             ->chunkById(200, function (Collection $records) use ($promotion): void {
                 $records->each(function (Model $record) use ($promotion): void {
