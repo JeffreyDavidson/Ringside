@@ -284,6 +284,21 @@ GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
 
+## Deferred from audit round 2
+
+- **Database backstops.** CHECK and unique constraints for: one open reign per title, unique match numbers per
+  event, unique referee and title per match, and date-order checks. Each needs a pre-flight migration that finds
+  and repairs existing violating rows before the constraint is added.
+- **Tag team availability badge.** It should reflect injured or suspended members.
+- **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
+- **Searchable booking selects.** Planned as a separate PR.
+- **Not-yet-started members.** Removing a member who has not started yet through the stable, tag team or manager
+  forms can still set `left_at` before `joined_at`.
+- **Production hardening (operator task, not code).** Confirm `SESSION_SECURE_COOKIE`, trusted proxies and HTTP
+  security headers in the production environment.
+
+The real invitation flow is tracked under "Promotion member invitations" above.
+
 ## Blocked dependency upgrades
 
 Dependabot proposed these in October 2026; they are deferred on purpose, not forgotten.
