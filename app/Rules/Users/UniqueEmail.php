@@ -7,6 +7,7 @@ namespace App\Rules\Users;
 use App\Models\Users\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class UniqueEmail implements ValidationRule
@@ -30,7 +31,7 @@ class UniqueEmail implements ValidationRule
         $taken = User::query()
             ->withTrashed()
             ->whereLike('email', $email, caseSensitive: false)
-            ->when($this->ignoreUserId !== null, fn ($query) => $query->whereKeyNot($this->ignoreUserId))
+            ->when($this->ignoreUserId !== null, fn (Builder $query): Builder => $query->whereKeyNot($this->ignoreUserId))
             ->pluck('email')
             ->contains(fn (string $existing): bool => Str::lower($existing) === $email);
 

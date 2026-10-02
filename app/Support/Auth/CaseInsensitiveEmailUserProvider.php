@@ -6,6 +6,7 @@ namespace App\Support\Auth;
 
 use App\Models\Users\User;
 use Illuminate\Auth\EloquentUserProvider;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ class CaseInsensitiveEmailUserProvider extends EloquentUserProvider
 {
     /** @param  array<string, mixed>  $credentials */
     #[\Override]
-    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials)
+    public function retrieveByCredentials(#[\SensitiveParameter] array $credentials): ?Authenticatable
     {
         if (! isset($credentials['email']) || ! is_string($credentials['email'])) {
             return parent::retrieveByCredentials($credentials);
