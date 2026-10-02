@@ -321,11 +321,12 @@ it('paginates rendered matches using the selected page size', function (): void 
             MatchType::Triangle,
             MatchType::Fatal4Way,
             MatchType::BattleRoyal,
-        ] as $matchType
+        ] as $index => $matchType
     ) {
         EventMatch::factory()
             ->forEvent($event)
             ->withMatchType($matchType)
+            ->withMatchNumber($index + 1)
             ->create();
     }
     $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
@@ -349,6 +350,20 @@ it('paginates rendered matches using the selected page size', function (): void 
     $component
         ->assertSee('Battle Royal')
         ->assertDontSee('Singles');
+});
+
+it('lists matches in card order whatever order they were created in', function (): void {
+    // Arrange
+    $event = Event::factory()->create();
+    EventMatch::factory()->forEvent($event)->withMatchType(MatchType::BattleRoyal)->create(['match_number' => 3]);
+    EventMatch::factory()->forEvent($event)->withMatchType(MatchType::Singles)->create(['match_number' => 1]);
+    EventMatch::factory()->forEvent($event)->withMatchType(MatchType::TagTeam)->create(['match_number' => 2]);
+
+    // Act
+    $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+    // Assert
+    $component->assertSeeInOrder(['Singles', 'Tag Team', 'Battle Royal']);
 });
 
 it('forbids users without administrative access', function (string $actor, int $status): void {
