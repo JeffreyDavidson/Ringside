@@ -22,7 +22,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
- * @param  class-string  $component
  * @return array<string, Element> The rendered lifecycle buttons keyed by the Livewire method they call.
  */
 function renderedLifecycleButtons(string $component, string $property, Model $model): array

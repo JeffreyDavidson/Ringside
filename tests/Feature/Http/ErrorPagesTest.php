@@ -24,8 +24,8 @@ describe('branded error pages', function (): void {
         $response->assertNotFound()
             ->assertSee(__('errors.not_found_title'))
             ->assertSee(__('errors.not_found_description'))
-            ->assertSee(route('login'), false)
-            ->assertDontSee(route('logout'), false);
+            ->assertSeeHtml(route('login'))
+            ->assertDontSeeHtml(route('logout'));
     });
 
     test('a signed-in member who opens a missing record gets a way back to the dashboard and a log out button', function (): void {
@@ -41,8 +41,8 @@ describe('branded error pages', function (): void {
         // Assert
         $response->assertNotFound()
             ->assertSee(__('errors.not_found_title'))
-            ->assertSee(route('dashboard'), false)
-            ->assertSee(route('logout'), false)
+            ->assertSeeHtml(route('dashboard'))
+            ->assertSeeHtml(route('logout'))
             ->assertSee(__('auth-forms.log_out'));
     });
 
@@ -60,8 +60,8 @@ describe('branded error pages', function (): void {
         $response->assertForbidden()
             ->assertSee(__('errors.forbidden_title'))
             ->assertSee(__('errors.forbidden_description'))
-            ->assertSee(route('dashboard'), false)
-            ->assertSee(route('logout'), false);
+            ->assertSeeHtml(route('dashboard'))
+            ->assertSeeHtml(route('logout'));
     });
 
     test('an expired form gets the branded page expired page', function (): void {
@@ -72,7 +72,7 @@ describe('branded error pages', function (): void {
         $response->assertStatus(419)
             ->assertSee(__('errors.page_expired_title'))
             ->assertSee(__('errors.page_expired_description'))
-            ->assertSee(route('login'), false);
+            ->assertSeeHtml(route('login'));
     });
 
     test('an unexpected failure gets the branded server error page without the failure details', function (): void {

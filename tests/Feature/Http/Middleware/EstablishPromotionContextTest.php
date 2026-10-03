@@ -106,11 +106,11 @@ test('the no-membership page offers a log out instead of promotion navigation th
     $response->assertForbidden()
         ->assertSee(__('promotions.no_membership_title'))
         ->assertSee(__('promotions.no_membership_description'))
-        ->assertSee(route('logout'), false)
+        ->assertSeeHtml(route('logout'))
         ->assertSee(__('auth-forms.log_out'))
-        ->assertDontSee(route('wrestlers.index'), false)
-        ->assertDontSee(route('events.index'), false)
-        ->assertDontSee(route('dashboard'), false);
+        ->assertDontSeeHtml(route('wrestlers.index'))
+        ->assertDontSeeHtml(route('events.index'))
+        ->assertDontSeeHtml(route('dashboard'));
 });
 
 test('the first active promotion is used when none has been selected', function () {

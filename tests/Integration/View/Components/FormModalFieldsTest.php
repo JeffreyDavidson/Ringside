@@ -20,7 +20,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
- * @param  class-string  $modal
  * @param  array<string, mixed>  $parameters
  */
 function renderedFormModal(string $modal, array $parameters = []): HTMLDocument
