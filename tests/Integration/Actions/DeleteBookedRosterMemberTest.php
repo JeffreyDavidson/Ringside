@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Actions\Referees\DeleteAction as DeleteRefereeAction;
 use App\Actions\TagTeams\DeleteAction as DeleteTagTeamAction;
 use App\Actions\Wrestlers\DeleteAction as DeleteWrestlerAction;
 use App\Enums\MatchFinish;
-use App\Exceptions\Roster\Individuals\CannotBeDeletedException as WrestlerCannotBeDeletedException;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException as IndividualCannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException as TagTeamCannotBeDeletedException;
 use App\Livewire\Matches\Modals\ResultModal;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
@@ -28,7 +30,7 @@ describe('deleting a booked wrestler', function (): void {
 
         // Act & Assert
         expect(fn () => resolve(DeleteWrestlerAction::class)->handle($wrestler))
-            ->toThrow(WrestlerCannotBeDeletedException::class);
+            ->toThrow(IndividualCannotBeDeletedException::class);
         expect($wrestler->refresh()->trashed())->toBeFalse();
     });
 
@@ -53,6 +55,28 @@ describe('deleting a booked wrestler', function (): void {
         livewire(ResultModal::class, ['matchId' => $match->id])
             ->assertSuccessful()
             ->assertSee('Retired Legend');
+    });
+});
+
+describe('deleting a booked referee', function (): void {
+    it('is rejected while the referee is booked on an upcoming card', function (): void {
+        // Arrange
+        $referee = Referee::factory()->create(['first_name' => 'Earl', 'last_name' => 'Hebner']);
+        EventMatch::factory()
+            ->forEvent(Event::factory()->scheduled()->create())
+            ->create()
+            ->referees()
+            ->attach($referee);
+
+        // Act
+        $delete = fn () => resolve(DeleteRefereeAction::class)->handle($referee);
+
+        // Assert
+        expect($delete)->toThrow(
+            IndividualCannotBeDeletedException::class,
+            'cannot be deleted because it is booked in a match that is upcoming or has no result',
+        )
+            ->and($referee->refresh()->trashed())->toBeFalse();
     });
 });
 
