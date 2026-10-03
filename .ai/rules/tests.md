@@ -28,3 +28,6 @@ Do not let random Faker output choose a branch or supply a search term. Use fixe
 
 ## Keep expected dates on the frozen clock
 Tests must not compute expected dates or times outside the frozen clock: freeze time in the test and never evaluate now()/today()/Carbon in dataset definitions, so a run crossing midnight UTC cannot flip results. Integration and Feature tests are frozen by default in tests/Pest.php; use travel() to move the clock instead of sleep().
+
+## Run on every database engine
+The suite runs on SQLite, PostgreSQL and MySQL in CI. Assert generated SQL through recordStatements() or normalizedSql(), which turn MySQL backtick quoting into double quotes. A test that only applies to some engines is skipped with ->skip(fn (): bool => runsOnDriver(...), <reason>), never silently. MySQL commits the test transaction on any DDL (DROP INDEX, Schema::create), so a test that changes the schema inside RefreshDatabase is skipped there with MYSQL_IMPLICIT_COMMIT or runs outside the test transaction and rebuilds the schema afterwards.

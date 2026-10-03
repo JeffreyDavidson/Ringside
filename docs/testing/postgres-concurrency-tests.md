@@ -9,6 +9,8 @@ SQLite ignores row locks (`lockForUpdate()`), so the normal suite can only asser
 
 The tests belong to the `postgres-concurrency` group and are skipped unless `DB_CONNECTION=pgsql` and `RUN_CONCURRENCY_TESTS=1` are both set in the real environment, so normal and coverage runs never execute them.
 
+Production runs MySQL 8, but this harness is PostgreSQL-only (it reads `pg_stat_database` for the deadlock counter and recognizes SQLSTATE 40P01), and the CI `MySQL tests` job does not run the group. The locks themselves are plain query builder row locks and upserts that behave the same way on MySQL at READ COMMITTED (set in `config/database.php`), but no real-process MySQL concurrency run proves it yet.
+
 ## Running them
 
 Use a scratch database. The test commits its data so the child processes can see it and rebuilds the schema with `migrate:fresh` afterwards.

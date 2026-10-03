@@ -59,12 +59,16 @@ directly in `package.json`.
 
 ## Database
 
-Local development uses PostgreSQL so application behavior matches the intended
-shared relational database. Automated tests continue to use SQLite in memory
-for fast isolated runs.
+Production runs MySQL 8. The application supports MySQL, PostgreSQL, and
+SQLite, and CI runs the test suite on all three (see
+[CI/CD](../workflows/ci-cd.md)). Local development defaults to PostgreSQL
+(`.env.example`); set `DB_CONNECTION=mysql` and the matching `DB_*` values to
+develop against the production engine. Automated tests use SQLite in memory by
+default for fast isolated runs.
 
-On macOS with Homebrew, install and start PostgreSQL, create the application
-database, and set `DB_USERNAME` in `.env` to the local PostgreSQL role:
+To use PostgreSQL on macOS with Homebrew, install and start it, create the
+application database, and set `DB_USERNAME` in `.env` to the local PostgreSQL
+role:
 
 ```bash
 brew install postgresql@17
