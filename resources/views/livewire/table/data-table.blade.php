@@ -70,23 +70,32 @@
                         <thead>
                             <tr>
                                 @foreach ($columns as $column)
+                                    @php
+                                        $columnSort = match (true) {
+                                            ! $column->isSortable() => null,
+                                            $sortField !== $column->getField() => 'none',
+                                            $sortDirection === 'asc' => 'ascending',
+                                            default => 'descending',
+                                        };
+                                    @endphp
                                     <th
+                                        scope="col"
+                                        @if ($columnSort) aria-sort="{{ $columnSort }}" @endif
                                         class="border-ringside-line bg-ringside-surface-panel text-ringside-muted px-4 py-3 align-middle text-xs font-semibold tracking-[0.08em] uppercase
                                 {{ !$loop->last ? 'border-e' : '' }}
                                 {{ $column->getTitle() === __('core.actions') ? 'w-[60px]' : '' }}"
                                     >
                                         @if ($column->isSortable())
                                             <button
+                                                type="button"
                                                 wire:click="sort('{{ $column->getField() }}')"
-                                                class="text-ringside-muted hover:text-ringside-ink flex items-center gap-1"
+                                                class="text-ringside-muted hover:text-ringside-ink focus-visible:outline-ringside-ink flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2"
                                             >
                                                 {{ $column->getTitle() }}
-                                                @if ($sortField === $column->getField())
-                                                    @if ($sortDirection === 'asc')
-                                                        <x-heroicon-s-chevron-up class="size-3" />
-                                                    @else
-                                                        <x-heroicon-s-chevron-down class="size-3" />
-                                                    @endif
+                                                @if ($columnSort === 'ascending')
+                                                    <x-heroicon-s-chevron-up class="size-3" aria-hidden="true" />
+                                                @elseif ($columnSort === 'descending')
+                                                    <x-heroicon-s-chevron-down class="size-3" aria-hidden="true" />
                                                 @endif
                                             </button>
                                         @else
@@ -161,8 +170,10 @@
 
     <div
         wire:loading.delay
+        role="status"
+        data-test="table-updating-status"
         class="border-ringside-line bg-ringside-surface-header text-ringside-muted fixed end-4 bottom-4 z-50 border px-4 py-3 text-sm shadow-xl"
     >
-        Updating…
+        {{ __('core.updating') }}
     </div>
 </div>
