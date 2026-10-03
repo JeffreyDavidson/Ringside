@@ -11,6 +11,10 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Starts each request from an empty promotion context, then selects the session's promotion while the user
+ * still has an active membership of it, otherwise their first active promotion.
+ */
 class EstablishPromotionContext
 {
     public function __construct(private readonly PromotionContextService $context) {}
@@ -23,25 +27,18 @@ class EstablishPromotionContext
             abort(401);
         }
 
-        $this->context->forgetMemberships();
+        $this->context->clear();
 
         $promotions = $this->context->activePromotionsFor($user);
+        $promotion = $promotions->firstWhere('id', $request->session()->get('active_promotion_id'))
+            ?? $promotions->first();
 
-        if ($promotions->isEmpty()) {
+        if (! $promotion instanceof Promotion) {
             if ($user->role->isAdministrator()) {
                 return $next($request);
             }
 
             throw new HttpResponseException(response()->view('promotions.no-membership', [], 403));
-        }
-
-        $selectedPromotionId = $request->session()->get('active_promotion_id');
-        $promotion = $selectedPromotionId === null
-            ? $promotions->first()
-            : $promotions->firstWhere('id', $selectedPromotionId);
-
-        if (! $promotion instanceof Promotion) {
-            abort(403, 'The selected promotion membership is not active.');
         }
 
         $request->session()->put('active_promotion_id', $promotion->getKey());

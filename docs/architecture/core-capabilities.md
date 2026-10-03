@@ -138,7 +138,11 @@ once per request: `PromotionContextService` memoises the user's active role per
 user and promotion (seeded from the pivot row of the promotion selected by
 `EstablishPromotionContext` or `SwitchActivePromotionAction`, otherwise read with
 one query) and memoises the user's active promotions for the middleware and the
-promotion switcher. The memo is dropped when a request starts and whenever the
+promotion switcher. `EstablishPromotionContext` resets the whole context
+(`PromotionContextService::clear()`: promotion, enforcement and memo) when a
+request starts, so nothing carries over from an earlier request that reused the
+scoped instance (several requests in one test, or a long-lived worker). The
+memo is also dropped whenever the
 member Actions add a member or change a role or status
 (`PromotionContextService::forgetMemberships()`). Any new code that writes
 `promotion_user` must call it.
@@ -161,7 +165,9 @@ Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the first active
-membership when none is selected. Promotion-owned model queries are then
+membership (lowest promotion id) when none is selected or the selected one is
+no longer usable (suspended, invited, removed or deleted); the session is then
+rewritten to the promotion actually used. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
 selected membership as a deliberate global-platform exception. The scope fails
 closed: when no context is enforced, an authenticated non-administrator matches
