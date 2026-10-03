@@ -46,6 +46,14 @@ updates:
       labels:
           - dependencies
       groups:
+          # laravel-vite-plugin declares the Vite major it supports as a peer dependency (2.x needs Vite 7, 3.x needs
+          # Vite 8), so a lone bump of either one fails `npm ci`. Group them, major updates included, so they arrive as
+          # one pull request. Dependabot assigns a dependency to the first group that matches, so this group stays above
+          # npm-minor-and-patch.
+          vite-toolchain:
+              patterns:
+                  - 'vite'
+                  - 'laravel-vite-plugin'
           npm-minor-and-patch:
               update-types:
                   - minor

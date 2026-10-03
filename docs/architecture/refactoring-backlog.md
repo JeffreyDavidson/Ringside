@@ -377,8 +377,6 @@ These items were deliberately left open.
 - Several ordering tie-breaks (Managers, Referees, TagTeams, Titles and Events tables) and the roster search id
   tie-break are caught only under `REVERSE_UNORDERED_SELECTS=1` or on PostgreSQL, because plain SQLite returns ties in
   id order. A nightly job running the suite with that flag would keep them honest.
-- `vite` and `laravel-vite-plugin` must move together (the plugin's 2.x line supports only Vite 7). Group them in
-  `.github/dependabot.yml` so Dependabot proposes them as one pull request.
 - The PostgreSQL CI job runs the full suite and then the concurrency group inside a 15 minute limit; check its
   headroom as the suite grows.
 
@@ -393,7 +391,8 @@ Dependabot proposed these in October 2026; they are deferred on purpose, not for
 
 Resolved: ESLint 10 with `@eslint/js` 10 (#1791, #1800), Vite 8 with `laravel-vite-plugin` 3 (#1794), and the Pest 5.3
 update (#1793). Vite and `laravel-vite-plugin` must move together because the plugin's 2.x line only supports Vite 7,
-which is why the standalone Vite Dependabot PR failed on npm peer resolution.
+which is why the standalone Vite Dependabot PR failed on npm peer resolution. The two are now grouped in
+`.github/dependabot.yml`, so they arrive as one pull request.
 
 ## Considered and rejected
 
