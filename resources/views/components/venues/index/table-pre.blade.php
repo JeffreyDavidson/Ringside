@@ -1,4 +1,4 @@
-<x-layouts.table-header title="Venues" :subtitle="__('venues.index_description')">
+<x-layouts.table-header :title="__('venues.index_title')" :subtitle="__('venues.index_description')">
     <x-slot:actions>
         @can('create', \App\Models\Events\Venue::class)
             <x-button
