@@ -18,7 +18,7 @@ return [
     'member_not_added' => 'No active user could be added with that email address.',
     'members' => 'Members',
     'no_membership_title' => 'You are not a member of a promotion yet',
-    'no_membership_description' => 'Ask a promotion owner to add you, and your overview will appear here.',
+    'no_membership_description' => 'Your account does not have access to a promotion. Ask a promotion owner to add your email address to their promotion, then reload this page.',
     'created' => 'Created',
     'search' => 'Search promotions',
     'index_description' => 'Every promotion on the Ringside platform.',
