@@ -12,18 +12,20 @@ use App\Models\Users\User;
 final class EnsureAnotherActiveAdministratorAction
 {
     /**
-     * Call inside the caller's transaction. Locks every active administrator row so concurrent
-     * changes are serialized, then rejects when the given user is the only one left.
+     * Call inside the caller's transaction before locking the user's own row. Locks every active administrator
+     * row in ascending id order so concurrent changes are serialized (two administrators removing each other
+     * queue instead of deadlocking), then rejects when the given user is the only one left.
      */
-    public function handle(User $lockedUser): void
+    public function handle(User $user): void
     {
         $activeAdministratorIds = User::query()
             ->where('role', Role::Administrator)
             ->where('status', UserStatus::Active)
+            ->orderBy('id')
             ->lockForUpdate()
             ->pluck('id');
 
-        if (! $activeAdministratorIds->contains($lockedUser->getKey())) {
+        if (! $activeAdministratorIds->contains($user->getKey())) {
             return;
         }
 

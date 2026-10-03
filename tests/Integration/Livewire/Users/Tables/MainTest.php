@@ -80,6 +80,22 @@ describe('users table', function (): void {
         expect($user->refresh()->status)->toBe(UserStatus::Active);
     });
 
+    it('recomputes the remembered status counts after a status change', function (): void {
+        // Arrange
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->call('changeStatus', $user->id, UserStatus::Inactive->value);
+
+        // Assert
+        expect($component->get('metadataSnapshot.statuses'))->toContain([
+            'value' => UserStatus::Inactive->value,
+            'label' => UserStatus::Inactive->label(),
+            'count' => 1,
+        ]);
+    });
+
     it('authorizes before looking up the user', function (): void {
         $component = livewire(Main::class);
         actingAs(basicUser());

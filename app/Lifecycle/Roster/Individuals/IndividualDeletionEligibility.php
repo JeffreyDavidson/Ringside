@@ -19,16 +19,21 @@ final class IndividualDeletionEligibility
             throw CannotBeDeletedException::alreadyDeleted($individual);
         }
 
-        if ($individual instanceof Wrestler && $this->isBookedInLiveMatch($individual)) {
+        if (! $individual instanceof Manager && $this->isBookedInLiveMatch($individual)) {
             throw CannotBeDeletedException::bookedInUpcomingMatch($individual);
         }
     }
 
-    private function isBookedInLiveMatch(Wrestler $wrestler): bool
+    /** Wrestlers are booked as competitors and referees through the match referee assignments. */
+    private function isBookedInLiveMatch(Wrestler|Referee $individual): bool
     {
-        return EventMatch::query()
-            ->withoutGlobalScope('promotion_context')
-            ->forWrestlerId($wrestler->id)
+        $matches = EventMatch::query()->withoutGlobalScope('promotion_context');
+
+        $bookedMatches = $individual instanceof Wrestler
+            ? $matches->forWrestlerId($individual->id)
+            : $matches->forRefereeId($individual->id);
+
+        return $bookedMatches
             ->upcomingOrUnresulted()
             ->exists();
     }

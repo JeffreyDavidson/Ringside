@@ -102,7 +102,12 @@ clear `email_verified_at`. Only active users are eligible for promotion
 membership and authentication. New registrations remain unverified until a
 platform administrator activates them. Inactive accounts cannot sign in, and
 existing sessions are ended on their next web or Livewire request. Email
-verification remains independent of account activation. User emails are
+verification remains independent of account activation. The platform keeps at
+least one active administrator: deactivating or demoting the last one is
+rejected (`EnsureAnotherActiveAdministratorAction`). Every change that could
+remove an administrator locks the active administrator rows in ascending id
+order before the target user's row, so two administrators deactivating or
+demoting each other at the same time queue instead of deadlocking. User emails are
 case-insensitive: they are stored trimmed and lowercase, uniqueness is checked
 ignoring case (including soft-deleted users) and enforced by a unique index on
 `lower(email)`, and sign-in and password reset look users up ignoring case so
@@ -121,7 +126,13 @@ Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
 membership roles. Owners have the manager capabilities and can also update
-promotion settings and manage that promotion's memberships. Platform
+promotion settings and manage that promotion's memberships. Every promotion
+keeps at least one active owner: an owner counts only when both the membership
+and the owner's user account are active (`EnsureAnotherActiveOwnerAction`).
+Demoting or suspending the last such owner is rejected, and so is deactivating
+(or marking unverified) a user account that is the last active owner of any
+promotion (`Users\ChangeStatusAction`, `CannotRemoveLastOwnerException`, which
+names the promotion). Platform
 administrators retain their global access, subject to the active-context
 ownership guard. Promotion directory management, global users, and shared
 venues remain outside promotion-member permissions.

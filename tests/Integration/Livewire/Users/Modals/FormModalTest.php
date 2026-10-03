@@ -170,6 +170,43 @@ describe('authorized user form interactions', function () {
         $modal->assertHasNoErrors();
     });
 
+    it('keeps the signed-in administrator unchanged when another user is updated', function () {
+        // Arrange
+        $administrator = auth()->user();
+        $user = User::factory()->create(['password' => 'original-password']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $user->id);
+        $modal->set([
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        $modal->call('save');
+
+        // Assert
+        expect(auth()->user())->toBe($administrator);
+    });
+
+    it('signs the administrator in with their updated account after editing themselves', function () {
+        // Arrange
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', auth()->id());
+        $modal->set([
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $persistedPassword = User::query()->findOrFail(auth()->id())->password;
+
+        expect(auth()->user()?->getAuthPassword())->toBe($persistedPassword)
+            ->and(Hash::check('replacement-password', $persistedPassword))->toBeTrue();
+    });
+
     it('allows a user to retain their current email address', function () {
         $user = User::factory()->create(['email' => 'current@example.com']);
         $modal = livewire(FormModal::class);

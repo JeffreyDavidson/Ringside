@@ -29,7 +29,7 @@ class DeleteAction
      * - Preserves referee employment history for administrative records
      *
      * MATCH OFFICIATING IMPACT:
-     * - Removes referee from active match assignments
+     * - Rejected while the referee is booked in a match that is upcoming or has no result
      * - Preserves historical match officiating records
      * - No impact on past match results or statistics
      *

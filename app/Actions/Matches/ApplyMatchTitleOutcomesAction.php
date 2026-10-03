@@ -17,6 +17,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Database\Eloquent\Collection;
 
 class ApplyMatchTitleOutcomesAction
 {
@@ -51,9 +52,7 @@ class ApplyMatchTitleOutcomesAction
         /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
         $desiredChampions = [];
 
-        if ($result->finish->allowsTitleChange() && $titles->contains(fn (Title $title): bool => $title->trashed())) {
-            throw InvalidMatchOutcomeException::titleDeleted();
-        }
+        $this->ensureDeletedTitlesKeepTheirChampion($match, $result, $titles, $winningCompetitors, $reigns);
 
         $titles = $titles->reject(fn (Title $title): bool => $title->trashed());
 
@@ -77,6 +76,33 @@ class ApplyMatchTitleOutcomesAction
                 $desiredChampions[$title->id],
                 $reigns,
             );
+        }
+    }
+
+    /**
+     * A deleted title is skipped unless the result would change its champion, which is rejected.
+     *
+     * @param  Collection<int, Title>  $titles
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $winningCompetitors
+     * @param  Collection<int, TitleChampionship>  $reigns
+     */
+    private function ensureDeletedTitlesKeepTheirChampion(
+        EventMatch $match,
+        MatchResultData $result,
+        Collection $titles,
+        MatchCompetitorsCollection $winningCompetitors,
+        Collection $reigns,
+    ): void {
+        if (! $result->finish->allowsTitleChange()) {
+            return;
+        }
+
+        foreach ($titles->filter(fn (Title $title): bool => $title->trashed()) as $deletedTitle) {
+            $desiredChampion = $this->championForTitle($deletedTitle, $winningCompetitors);
+
+            if ($this->championshipReigns->changesChampion($match, $deletedTitle, $desiredChampion, $reigns)) {
+                throw InvalidMatchOutcomeException::titleDeleted();
+            }
         }
     }
 
