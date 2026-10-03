@@ -36,6 +36,14 @@ return [
         'suspend' => 'Suspend',
         'unretire' => 'Unretire',
     ],
+    'lifecycle_confirmations' => [
+        'deactivate' => 'Deactivate :name?',
+        'disband' => 'Disband :name?',
+        'injure' => 'Mark :name as injured?',
+        'release' => 'Release :name?',
+        'retire' => 'Retire :name?',
+        'suspend' => 'Suspend :name?',
+    ],
     'loading_form' => 'Loading form…',
     'loading_table' => 'Loading table data…',
     'models' => [

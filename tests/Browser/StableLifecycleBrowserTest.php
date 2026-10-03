@@ -21,6 +21,7 @@ test('administrator can disband and retire a stable from the detail page', funct
     // Act / Assert
     $statusCell = 'Array.from(document.querySelectorAll("tr")).find(row => row.firstElementChild.textContent.trim() === "Status:").lastElementChild.textContent.trim()';
     $page = visit(route('stables.show', $stable));
+    $page->script('window.confirm = () => true');
     $page
         ->assertSee($stable->name)
         ->assertPresent('button:has-text("Disband")')
