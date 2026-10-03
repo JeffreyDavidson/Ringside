@@ -138,7 +138,11 @@ once per request: `PromotionContextService` memoises the user's active role per
 user and promotion (seeded from the pivot row of the promotion selected by
 `EstablishPromotionContext` or `SwitchActivePromotionAction`, otherwise read with
 one query) and memoises the user's active promotions for the middleware and the
-promotion switcher. The memo is dropped when a request starts and whenever the
+promotion switcher. `EstablishPromotionContext` resets the whole context
+(`PromotionContextService::clear()`: promotion, enforcement and memo) when a
+request starts, so nothing carries over from an earlier request that reused the
+scoped instance (several requests in one test, or a long-lived worker). The
+memo is also dropped whenever the
 member Actions add a member or change a role or status
 (`PromotionContextService::forgetMemberships()`). Any new code that writes
 `promotion_user` must call it.

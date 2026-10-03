@@ -12,8 +12,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Selects the session's promotion while the user still has an active membership of it, otherwise their first
- * active promotion.
+ * Starts each request from an empty promotion context, then selects the session's promotion while the user
+ * still has an active membership of it, otherwise their first active promotion.
  */
 class EstablishPromotionContext
 {
@@ -27,7 +27,7 @@ class EstablishPromotionContext
             abort(401);
         }
 
-        $this->context->forgetMemberships();
+        $this->context->clear();
 
         $promotions = $this->context->activePromotionsFor($user);
         $promotion = $promotions->firstWhere('id', $request->session()->get('active_promotion_id'))

@@ -10,6 +10,7 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\flushSession;
 use function Pest\Laravel\get;
 use function Pest\Laravel\withSession;
 
@@ -107,4 +108,28 @@ test('the first active promotion is used when none has been selected', function 
     // Assert
     $response->assertSuccessful();
     $response->assertSessionHas('active_promotion_id', $firstPromotion->id);
+});
+
+test('each request starts without the previous request promotion context', function () {
+    // Arrange
+    $member = basicUser();
+    attachPromotionMembership($member, Promotion::factory()->create(), MembershipStatus::Active);
+    $administrator = administrator();
+    Route::middleware(['web', 'promotion.context'])->get('/promotion-context-probe', function () {
+        $context = resolve(PromotionContextService::class);
+
+        return response()->json([
+            'enforced' => $context->isEnforced(),
+            'promotion_id' => $context->current()?->id,
+        ]);
+    });
+    actingAs($member)->get('/promotion-context-probe')->assertJson(['enforced' => true]);
+    flushSession();
+
+    // Act
+    $response = actingAs($administrator)->get('/promotion-context-probe');
+
+    // Assert
+    $response->assertOk();
+    $response->assertExactJson(['enforced' => false, 'promotion_id' => null]);
 });
