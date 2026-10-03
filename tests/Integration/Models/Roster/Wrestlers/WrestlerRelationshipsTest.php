@@ -17,8 +17,8 @@ it('defines manager assignment relationships', function () {
         ->and($managers->getTable())->toBe((new WrestlerManager)->getTable())
         ->and($managers->getPivotClass())->toBe(WrestlerManager::class)
         ->and($managers->getPivotColumns())->toContain('hired_at', 'fired_at', 'created_at', 'updated_at')
-        ->and($wrestler->currentManagers()->toRawSql())->toContain('"fired_at" is null')
-        ->and($wrestler->previousManagers()->toRawSql())->toContain('"fired_at" is not null');
+        ->and(normalizedSql($wrestler->currentManagers()->toRawSql()))->toContain('"fired_at" is null')
+        ->and(normalizedSql($wrestler->previousManagers()->toRawSql()))->toContain('"fired_at" is not null');
 });
 
 it('defines stable membership relationships', function () {
@@ -33,6 +33,6 @@ it('defines stable membership relationships', function () {
         ->and($stables->getForeignPivotKeyName())->toBe('wrestler_id')
         ->and($stables->getPivotClass())->toBe(StableWrestler::class)
         ->and($stables->getPivotColumns())->toContain('joined_at', 'left_at', 'created_at', 'updated_at')
-        ->and($currentStable->toRawSql())->toContain('"stables_wrestlers"."left_at" is null')
-        ->and($wrestler->previousStables()->toRawSql())->toContain('"left_at" is not null');
+        ->and(normalizedSql($currentStable->toRawSql()))->toContain('"stables_wrestlers"."left_at" is null')
+        ->and(normalizedSql($wrestler->previousStables()->toRawSql()))->toContain('"left_at" is not null');
 });

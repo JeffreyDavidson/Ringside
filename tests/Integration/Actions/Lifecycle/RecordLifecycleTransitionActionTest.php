@@ -7,6 +7,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 
@@ -33,6 +34,25 @@ test('it records an attributed lifecycle transition for its subject', function (
         ->and($transition->context)->toBe(['notes' => 'Introduced at the season premiere.'])
         ->and($title->lifecycleTransitions()->sole()->is($transition))->toBeTrue();
 });
+
+test('it records a transition dated outside the unix timestamp range', function (string $effectiveAt) {
+    // Arrange
+    $title = Title::factory()->create();
+
+    // Act
+    $transition = resolve(RecordLifecycleTransitionAction::class)->handle(
+        $title,
+        LifecycleDimension::Activity,
+        LifecycleTransitionType::Debuted,
+        Carbon::parse($effectiveAt),
+    );
+
+    // Assert
+    expect($transition->refresh()->effective_at->toDateTimeString())->toBe($effectiveAt);
+})->with([
+    'before 1970' => ['1965-03-14 20:00:00'],
+    'after 2038' => ['2040-06-01 19:30:00'],
+]);
 
 test('it records system transitions without an authenticated user', function () {
     $title = Title::factory()->create();

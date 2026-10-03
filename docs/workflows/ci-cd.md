@@ -8,7 +8,9 @@ The project uses four automated workflows:
 **Trigger**: Pushes to `develop` or `main`, and pull requests targeting `develop` or `main`. Pushing a feature branch on its own does **not** run this workflow; open a pull request to get CI feedback. A newer run for the same pull request or ref cancels the one in progress.
 **Purpose**: Comprehensive testing and static analysis
 
-**Jobs** (all ten run independently in parallel on `ubuntu-latest`; none uses `needs`):
+**Jobs** (all eleven run independently in parallel on `ubuntu-latest`; none uses `needs`):
+
+Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQLite, and CI runs the non-browser suite on all three: in-memory SQLite (`application-tests`, `coverage`), PostgreSQL 17 (`postgres-tests`), and MySQL 8.0 (`mysql-tests`). SQLite ignores row locks (`lockForUpdate()`), has no case-insensitive collation, and is not the production engine, so the two server jobs are the ones that prove locking SQL, generated-column indexes, and engine-specific migration branches.
 
 | Job | Check name | What it runs |
 | --- | --- | --- |
@@ -19,7 +21,8 @@ The project uses four automated workflows:
 | `type-coverage` | Pest type coverage | `composer test:type-coverage` (100% minimum) |
 | `frontend-verification` | Frontend verification | `npm run lint`, `npm run build` |
 | `application-tests` | `CI - PHP-8.5 - Laravel-13.*` | Pest with the `Browser` suite excluded (Feature, Integration, and Unit run), in parallel |
-| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. Production runs PostgreSQL while the other test jobs use in-memory SQLite, which ignores row locks (`lockForUpdate()`) and case-sensitive `LIKE` differences. A second step runs the opt-in `postgres-concurrency` group (`RUN_CONCURRENCY_TESTS=1`), which books matches from two real processes to prove there are no lock-order deadlocks; see `docs/testing/postgres-concurrency-tests.md` |
+| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. A second step runs the opt-in `postgres-concurrency` group (`RUN_CONCURRENCY_TESTS=1`), which books matches from two real processes to prove there are no lock-order deadlocks; see `docs/testing/postgres-concurrency-tests.md` |
+| `mysql-tests` | MySQL tests | The same non-browser suite, non-parallel and without coverage, against a `mysql:8.0` service container (the production engine), with job-level `DB_*` variables selecting it. Tests that only apply to another engine are skipped with an explicit reason. The concurrency group is not run here: its harness is PostgreSQL-only |
 | `coverage` | Coverage (100%) | `composer test:coverage`: non-parallel Pest run with PCOV, Browser suite excluded, fails below 100% |
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 
@@ -30,7 +33,7 @@ The project uses four automated workflows:
 - **Memory Limit**: 4G for PHP (`memory_limit=4G` in the setup action, `-d memory_limit=4G` for Pest, `--memory-limit=4G` for PHPStan)
 - **Dependency Caching**: The Composer download cache (keyed on `composer.lock`) and the npm cache (keyed on `package-lock.json`). PHPStan result caches are **not** cached between CI runs.
 - **Browser Tests**: Not gated. `browser-tests` runs on every trigger above, and failure screenshots are uploaded as the `pest-browser-screenshots` artifact for 7 days
-- **Test Environment**: `type-coverage`, `application-tests`, `postgres-tests`, `coverage`, and `browser-tests` (as well as the Coverage and TIA Baseline workflows) run `cp .env.testing .env`, `php artisan key:generate`, and `php artisan config:cache` on the disposable runner
+- **Test Environment**: `type-coverage`, `application-tests`, `postgres-tests`, `mysql-tests`, `coverage`, and `browser-tests` (as well as the Coverage and TIA Baseline workflows) run `cp .env.testing .env`, `php artisan key:generate`, and `php artisan config:cache` on the disposable runner
 
 ### 2. **Security Scan** (`.github/workflows/security-scan.yml`, workflow name "Security")
 **Trigger**: Pull requests targeting `develop` or `main`, a weekly schedule (Mondays 09:00 UTC), and manual dispatch. It does not run on pushes.

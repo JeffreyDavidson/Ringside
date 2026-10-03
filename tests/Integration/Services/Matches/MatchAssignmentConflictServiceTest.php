@@ -79,11 +79,11 @@ test('it locks the set again when the event was rescheduled after its date was r
     $setQueries = 0;
     $rescheduled = false;
     DB::listen(function (QueryExecuted $query) use (&$setQueries, &$rescheduled, $event, $newDate): void {
-        if (str_contains($query->sql, 'order by "id"')) {
+        if (str_contains(normalizedSql($query->sql), 'order by "id"')) {
             $setQueries++;
         }
 
-        if (! $rescheduled && str_contains($query->sql, 'select "id", "date" from "events"')) {
+        if (! $rescheduled && str_contains(normalizedSql($query->sql), 'select "id", "date" from "events"')) {
             $rescheduled = true;
             DB::table('events')->where('id', $event->id)->update(['date' => $newDate]);
         }
@@ -120,11 +120,11 @@ test('it locks the new event set when the match moved events after its event was
     $setQueries = 0;
     $moved = false;
     DB::listen(function (QueryExecuted $query) use (&$setQueries, &$moved, $match, $newEvent): void {
-        if (str_contains($query->sql, 'order by "id"')) {
+        if (str_contains(normalizedSql($query->sql), 'order by "id"')) {
             $setQueries++;
         }
 
-        if (! $moved && str_contains($query->sql, 'select "id", "event_id" from "events_matches"')) {
+        if (! $moved && str_contains(normalizedSql($query->sql), 'select "id", "event_id" from "events_matches"')) {
             $moved = true;
             DB::table('events_matches')->where('id', $match->id)->update(['event_id' => $newEvent->id]);
         }

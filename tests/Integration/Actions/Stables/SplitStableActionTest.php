@@ -419,7 +419,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $this->membersForNewStable,
                 $splitDate
             ))->toThrow(Exception::class);
-        });
+        })->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_UNOWNED_STABLE_NAMES);
     });
 
     describe('transaction integrity', function () {

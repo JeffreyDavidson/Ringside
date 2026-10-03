@@ -36,4 +36,7 @@ EstablishPromotionContext calls PromotionContextService::clear() first, because 
 A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.
 
 ## Compare user emails case-insensitively
-User emails are stored trimmed and lowercase (User::email mutator) and are unique on lower(email). Validate with App\Rules\Users\UniqueEmail rather than the unique rule, and look users up by email through lower(email) (the eloquent-email auth provider already does for sign-in and password reset); legacy rows may still be mixed case.
+User emails are stored trimmed and lowercase (User::email mutator) and are unique on lower(email) (on MySQL through the case-insensitive column collation of users_email_unique). Validate with App\Rules\Users\UniqueEmail rather than the unique rule, and look users up by email through lower(email) (the eloquent-email auth provider already does for sign-in and password reset); legacy rows may still be mixed case.
+
+## Support every database engine
+Production runs MySQL 8; CI runs the suite on SQLite, PostgreSQL and MySQL. Every database-specific code path (raw SQL fragments, driver checks, locking, conflict or deadlock handling) must work on mysql, pgsql and sqlite, preferably through one query builder call that each grammar compiles. Never add PostgreSQL-only SQL such as count(*) filter (where ...), ilike, ::casts, RETURNING or advisory locks, and never throw for an unhandled driver at runtime. The scheduling and lifecycle locks assume READ COMMITTED, which config/database.php sets for MySQL.

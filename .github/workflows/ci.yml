@@ -308,6 +308,52 @@ jobs:
                   RUN_CONCURRENCY_TESTS: 1
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --group=postgres-concurrency --no-coverage
 
+    mysql-tests:
+        name: MySQL tests
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        env:
+            DB_CONNECTION: mysql
+            DB_HOST: 127.0.0.1
+            DB_PORT: 3306
+            DB_DATABASE: ringside_test
+            DB_USERNAME: ringside
+            DB_PASSWORD: ringside
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_DATABASE: ringside_test
+                    MYSQL_USER: ringside
+                    MYSQL_PASSWORD: ringside
+                    MYSQL_ROOT_PASSWORD: ringside-root
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd "mysqladmin ping -h 127.0.0.1 -u ringside -pringside"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 10
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Prepare Laravel
+              run: |
+                  cp .env.testing .env
+                  php artisan key:generate
+                  php artisan config:cache
+
+            - name: Run application tests against MySQL
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage
+
     coverage:
         name: Coverage (100%)
         runs-on: ubuntu-latest

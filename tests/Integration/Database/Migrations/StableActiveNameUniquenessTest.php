@@ -11,7 +11,7 @@ test('active stables must have unique names', function () {
 
     expect(fn () => Stable::factory()->create(['name' => 'The Four Horsemen']))
         ->toThrow(QueryException::class);
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_UNOWNED_STABLE_NAMES);
 
 test('a deleted and active stable may share a name', function () {
     $deletedStable = Stable::factory()->create(['name' => 'The Four Horsemen']);
@@ -37,4 +37,4 @@ test('the migration identifies existing duplicate active names', function () {
             RuntimeException::class,
             'Cannot enforce unique active stable names. Resolve duplicate active names first: The Four Horsemen'
         );
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);

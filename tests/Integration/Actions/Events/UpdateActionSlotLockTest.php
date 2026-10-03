@@ -8,21 +8,14 @@ use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Matches\SchedulingSlotLockService;
-use Illuminate\Support\Facades\DB;
 
 /**
- * Run the update against a slot lock that believes it is on PostgreSQL. Every advisory lock it would take
- * is issued as a marker statement, so the recorded statements show where it sits among the row locks.
+ * Run the update and record its statements, so the slot lock upserts show where they sit among the row locks.
  *
  * @return array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>
  */
 function recordUpdateWithSlotLock(Event $event, EventData $data): array
 {
-    app()->instance(SchedulingSlotLockService::class, postgresSlotLock(
-        fn (string $sql, array $bindings): array => DB::select('select ? as slot_lock_key', [$bindings[1]]),
-    ));
-
     return recordStatements(fn () => resolve(UpdateAction::class)->handle($event, $data));
 }
 
@@ -32,7 +25,7 @@ function recordUpdateWithSlotLock(Event $event, EventData $data): array
  */
 function slotLockPositions(array $statements): array
 {
-    return array_keys(array_filter($statements, fn (array $statement): bool => str_contains($statement['sql'], 'slot_lock_key')));
+    return array_keys(array_filter($statements, fn (array $statement): bool => str_contains($statement['sql'], 'scheduling_slot_locks')));
 }
 
 describe('event reschedule slot locking', function (): void {
@@ -67,8 +60,7 @@ describe('event reschedule slot locking', function (): void {
         );
         $expectedKeys = collect([$oldWeeks, $newWeeks])
             ->sort()
-            ->map(fn (int $weeks): int => (int) crc32((string) now()->addWeeks($weeks)->getTimestamp()))
-            ->map(fn (int $hash): int => $hash >= 0x80000000 ? $hash - 0x100000000 : $hash)
+            ->map(fn (int $weeks): int => now()->addWeeks($weeks)->getTimestamp())
             ->values()
             ->all();
 
