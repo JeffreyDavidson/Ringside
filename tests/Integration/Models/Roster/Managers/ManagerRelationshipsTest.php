@@ -12,8 +12,8 @@ test('manager defines typed wrestler relationships', function () {
 
     expect($manager->wrestlers())->toBeInstanceOf(BelongsToMany::class)
         ->and($manager->wrestlers()->getPivotClass())->toBe(WrestlerManager::class)
-        ->and($manager->currentWrestlers()->toRawSql())->toContain('"fired_at" is null')
-        ->and($manager->previousWrestlers()->toRawSql())->toContain('"fired_at" is not null');
+        ->and(normalizedSql($manager->currentWrestlers()->toRawSql()))->toContain('"fired_at" is null')
+        ->and(normalizedSql($manager->previousWrestlers()->toRawSql()))->toContain('"fired_at" is not null');
 });
 
 test('manager defines typed tag team relationships', function () {
@@ -21,6 +21,6 @@ test('manager defines typed tag team relationships', function () {
 
     expect($manager->tagTeams())->toBeInstanceOf(BelongsToMany::class)
         ->and($manager->tagTeams()->getPivotClass())->toBe(TagTeamManager::class)
-        ->and($manager->currentTagTeams()->toRawSql())->toContain('"fired_at" is null')
-        ->and($manager->previousTagTeams()->toRawSql())->toContain('"fired_at" is not null');
+        ->and(normalizedSql($manager->currentTagTeams()->toRawSql()))->toContain('"fired_at" is null')
+        ->and(normalizedSql($manager->previousTagTeams()->toRawSql()))->toContain('"fired_at" is not null');
 });

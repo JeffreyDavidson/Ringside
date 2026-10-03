@@ -11,14 +11,10 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Services\Matches\SchedulingSlotLockService;
-use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use JMac\Testing\Double;
-use JMac\Testing\DoubleInterface;
 
 /**
  * Test helper functions for common testing scenarios.
@@ -423,7 +419,8 @@ function wrestlingTimePeriod(string $type = 'employment'): array
  * Record every SQL statement issued while the callback runs, flagging row-locking statements.
  *
  * SQLite discards row-lock clauses, so its grammar is swapped for one that renders the lock as a
- * visible comment. PostgreSQL already emits the real clause. The original grammar is always restored.
+ * visible comment. PostgreSQL and MySQL already emit the real clause. The original grammar is always restored.
+ * The SQL is normalized with normalizedSql(), so the same assertions hold on every engine.
  *
  * @return array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>
  */
@@ -444,7 +441,7 @@ function recordStatements(Closure $callback): array
 
     $statements = [];
     DB::listen(function ($query) use (&$statements): void {
-        $sql = mb_strtolower($query->sql);
+        $sql = normalizedSql($query->sql);
         $statements[] = [
             'sql' => $sql,
             'bindings' => $query->bindings,
@@ -513,37 +510,29 @@ function updatedRowIds(array $statements, string $table): array
 }
 
 /**
- * A connection double that reports the given database driver, so the SQLite test database can exercise the
- * driver specific branches of collaborators that would otherwise only run on a server such as PostgreSQL.
+ * SQL in one spelling for every engine: lower case, with MySQL's backtick identifier quotes turned into the double
+ * quotes SQLite and PostgreSQL use, so assertions about generated statements hold on all three.
  */
-function driverConnection(string $driver): Connection&DoubleInterface
+function normalizedSql(string $sql): string
 {
-    $connection = Double::for(Connection::class);
-    $connection->expects('getDriverName')->returns($driver)->times(minimum: 0);
-
-    return $connection;
+    return str_replace('`', '"', mb_strtolower($sql));
 }
 
 /**
- * A scheduling slot lock that runs its PostgreSQL branch. The advisory lock statement cannot run on SQLite,
- * so it is handed to the observer instead of being sent to the database.
- *
- * @param  Closure(string, array<mixed>): mixed  $onStatement  Receives the SQL and its bindings
+ * Whether the suite runs on the given database driver, for skipping a test that only applies to other engines with an
+ * explicit reason.
  */
-function postgresSlotLock(Closure $onStatement): SchedulingSlotLockService
+function runsOnDriver(string $driver): bool
 {
-    $connection = driverConnection('pgsql');
-    $connection->expects('select')
-        ->resolves(function (mixed ...$arguments) use ($onStatement): array {
-            [$sql, $bindings] = $arguments;
-
-            is_string($sql) && is_array($bindings) || throw new LogicException('Expected the SQL and its bindings.');
-
-            $onStatement($sql, $bindings);
-
-            return [];
-        })
-        ->times(minimum: 0);
-
-    return new SchedulingSlotLockService($connection);
+    return DB::connection()->getDriverName() === $driver;
 }
+
+/**
+ * The reason a test that drops or creates schema objects inside the test transaction is skipped on MySQL.
+ */
+const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the schema change and the test data would leak into later tests.';
+
+/**
+ * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
+ */
+const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation is the guard there (migration 2026_10_01_190000).';

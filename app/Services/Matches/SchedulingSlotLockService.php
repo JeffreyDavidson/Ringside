@@ -7,7 +7,6 @@ namespace App\Services\Matches;
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Carbon;
-use LogicException;
 
 /**
  * Serializes schedule changes into the same date and time slot, even while no event exists there yet.
@@ -17,15 +16,12 @@ use LogicException;
  * date takes this lock first, before any event row lock, and the existing row-locked conflict checks then
  * observe the other transaction's committed move.
  *
- * The lock only coordinates transactions; it reads and writes no domain data.
+ * The lock is a row of the scheduling_slot_locks table, so it works the same way on MySQL, PostgreSQL and
+ * SQLite. The rows only coordinate transactions; they hold no domain data and nothing reads them.
  */
 final readonly class SchedulingSlotLockService
 {
-    /**
-     * First key of the two-integer advisory lock form (ASCII "SLOT"). PostgreSQL keeps the two-integer
-     * keyspace separate from the single-bigint one, so these locks cannot collide with other advisory locks.
-     */
-    private const int NAMESPACE_KEY = 0x534C4F54;
+    private const string TABLE = 'scheduling_slot_locks';
 
     public function __construct(#[DB] private Connection $connection) {}
 
@@ -34,12 +30,12 @@ final readonly class SchedulingSlotLockService
      * same slots always queue in the same order and can never deadlock on each other. Null dates and
      * repeated dates take nothing extra.
      *
-     * On PostgreSQL this is a transaction-scoped advisory lock: it is released automatically at commit or
-     * rollback and, unlike a session lock, is safe behind PgBouncer transaction pooling. It must be called
-     * inside the transaction it should live for. SQLite serializes all writers, so it takes nothing.
-     * Any other driver is rejected instead of silently running unprotected.
-     *
-     * @throws LogicException When the database driver has no slot locking strategy
+     * Each slot is one upsert of its row, keyed by the exact unix timestamp. The upsert holds an exclusive lock
+     * on that row until the surrounding transaction commits or rolls back, so it must be called inside the
+     * transaction it should live for: MySQL's ON DUPLICATE KEY UPDATE takes an exclusive record lock on an
+     * existing key (never the shared lock a plain insert takes, which lets two waiters deadlock), PostgreSQL's
+     * ON CONFLICT DO UPDATE locks the conflicting row, and a concurrent insert of the same new key waits for the
+     * first transaction on both. SQLite serializes all writers, so the row lock there is the write itself.
      */
     public function lock(?Carbon ...$slots): void
     {
@@ -47,26 +43,10 @@ final readonly class SchedulingSlotLockService
             ->filter()
             ->map(fn (Carbon $slot): int => $slot->getTimestamp())
             ->unique()
-            ->sort()
-            ->values();
+            ->sort();
 
         foreach ($timestamps as $timestamp) {
-            match ($this->connection->getDriverName()) {
-                'pgsql' => $this->connection->select('select pg_advisory_xact_lock(?, ?)', [self::NAMESPACE_KEY, $this->keyFor($timestamp)]),
-                'sqlite' => null,
-                default => throw new LogicException('The database driver does not support scheduling slot locks.'),
-            };
+            $this->connection->table(self::TABLE)->upsert(['slot' => $timestamp], ['slot'], ['slot']);
         }
-    }
-
-    /**
-     * The second advisory key: a stable 32-bit hash of the exact slot timestamp, mapped to the signed range
-     * PostgreSQL integers use. Two slots may share a key; that only serializes them needlessly.
-     */
-    private function keyFor(int $timestamp): int
-    {
-        $hash = crc32((string) $timestamp);
-
-        return $hash >= 0x80000000 ? $hash - 0x100000000 : $hash;
     }
 }

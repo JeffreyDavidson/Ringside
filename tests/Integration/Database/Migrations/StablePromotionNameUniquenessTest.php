@@ -30,7 +30,7 @@ test('active unowned stables must have unique names', function () {
 
     expect(fn () => Stable::factory()->create(['name' => 'The Four Horsemen']))
         ->toThrow(QueryException::class);
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_UNOWNED_STABLE_NAMES);
 
 test('a deleted and an active stable of one promotion may share a name', function () {
     $promotion = Promotion::factory()->create();
@@ -57,4 +57,4 @@ test('the migration lists the stables that duplicate a name within a promotion b
             RuntimeException::class,
             "\"The Four Horsemen\" in promotion {$promotion->id} (stable ids {$first->id}, {$second->id})",
         );
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);

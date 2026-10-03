@@ -8,6 +8,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PHPUnit\Framework\Assert;
 
 const CURRENT_TAG_TEAM_MEMBERSHIP_INDEX = 'tag_teams_wrestlers_one_current_membership_unique';
 
@@ -64,6 +65,10 @@ test('a wrestler cannot have multiple current tag team memberships', function ()
 
 describe('the current tag team membership migration', function () {
     beforeEach(function () {
+        if (runsOnDriver('mysql')) {
+            Assert::markTestSkipped(MYSQL_IMPLICIT_COMMIT);
+        }
+
         DB::statement('drop index '.CURRENT_TAG_TEAM_MEMBERSHIP_INDEX);
     });
 
