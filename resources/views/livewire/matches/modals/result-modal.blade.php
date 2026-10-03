@@ -68,7 +68,7 @@
                                             size="sm"
                                             :id="$orderInputId"
                                             :name="$orderField"
-                                            wire:model="{{ $orderField }}"
+                                            wire:model="form.eliminations.{{ $competitor->id }}.order"
                                             :aria-label="'Elimination order for '.$competitor->competitor->name"
                                         />
                                         @error($orderField)
