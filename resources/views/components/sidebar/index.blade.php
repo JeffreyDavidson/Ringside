@@ -38,6 +38,12 @@
     @mouseout="hideMenuTooltip($event)"
     @focusin="showMenuTooltip($event)"
     @focusout="hideMenuTooltip($event)"
+    @keydown.escape="$store.sidebar && $store.sidebar.closeMobile()"
+    x-trap.noreturn="$store.sidebar && $store.sidebar.mobileOpen"
+    :role="$store.sidebar && $store.sidebar.mobileOpen ? 'dialog' : null"
+    :aria-modal="$store.sidebar && $store.sidebar.mobileOpen ? 'true' : null"
+    :aria-label="$store.sidebar && $store.sidebar.mobileOpen ? 'Main navigation' : null"
+    data-test="mobile-navigation"
 >
     <div
         x-show="$store.sidebar && $store.sidebar.mobileOpen"
@@ -50,13 +56,18 @@
     <aside
         @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
         @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
-        :class="[$store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']"
+        :class="[
+            $store.sidebar && $store.sidebar.mobileOpen
+                ? 'translate-x-0'
+                : '-translate-x-full max-lg:invisible lg:translate-x-0',
+        ]"
         :data-collapsed="! expanded"
         style="--sidebar-width: var(--sidebar-initial-width, var(--sidebar-default-width))"
         :style="expanded
             ? '--sidebar-width: var(--sidebar-default-width)'
             : '--sidebar-width: var(--sidebar-collapsed-width)'"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
+        id="app-sidebar"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform,visibility] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">

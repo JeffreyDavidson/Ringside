@@ -31,8 +31,12 @@
     data-test="app-shell-header"
 >
     <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">
-        <button @click="$store.sidebar && $store.sidebar.openMobile()"
+        <button @click="$store.sidebar && $store.sidebar.openMobile($el)"
+            type="button"
             aria-label="Open navigation"
+            aria-controls="app-sidebar"
+            aria-expanded="false"
+            :aria-expanded="$store.sidebar && $store.sidebar.mobileOpen ? 'true' : 'false'"
             class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink inline-flex size-11 items-center justify-center lg:hidden"
         >
             <x-heroicon-o-bars-3 class="size-5" />
