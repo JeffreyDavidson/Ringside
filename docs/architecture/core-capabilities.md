@@ -161,7 +161,9 @@ Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the first active
-membership when none is selected. Promotion-owned model queries are then
+membership (lowest promotion id) when none is selected or the selected one is
+no longer usable (suspended, invited, removed or deleted); the session is then
+rewritten to the promotion actually used. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
 selected membership as a deliberate global-platform exception. The scope fails
 closed: when no context is enforced, an authenticated non-administrator matches

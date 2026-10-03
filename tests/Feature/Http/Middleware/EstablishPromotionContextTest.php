@@ -34,35 +34,38 @@ test('unauthenticated requests are rejected with a 401', function () {
     $response->assertUnauthorized();
 });
 
-test('a remembered promotion the user cannot access is rejected with a 403', function (?MembershipStatus $otherMembership) {
+test('a remembered promotion the user can no longer use falls back to the first active promotion', function (?MembershipStatus $rememberedMembership) {
     // Arrange
     $user = basicUser();
-    $memberPromotion = Promotion::factory()->create();
-    $otherPromotion = Promotion::factory()->create();
-    attachPromotionMembership($user, $memberPromotion, MembershipStatus::Active);
+    $rememberedPromotion = Promotion::factory()->create();
+    $activePromotion = Promotion::factory()->create();
+    attachPromotionMembership($user, $activePromotion, MembershipStatus::Active);
 
-    if ($otherMembership instanceof MembershipStatus) {
-        attachPromotionMembership($user, $otherPromotion, $otherMembership);
+    if ($rememberedMembership instanceof MembershipStatus) {
+        attachPromotionMembership($user, $rememberedPromotion, $rememberedMembership);
     }
 
     actingAs($user);
-    withSession(['active_promotion_id' => $otherPromotion->id]);
+    withSession(['active_promotion_id' => $rememberedPromotion->id]);
 
     // Act
-    $response = get(route('wrestlers.index'));
+    $response = get(route('dashboard'));
 
     // Assert
-    $response->assertForbidden();
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $activePromotion->id);
+    expect(resolve(PromotionContextService::class)->required()->id)->toBe($activePromotion->id);
 })->with([
     'no membership' => [null],
     'suspended membership' => [MembershipStatus::Suspended],
     'invited membership' => [MembershipStatus::Invited],
 ]);
 
-test('a remembered promotion that no longer exists is rejected with a 403', function () {
+test('a remembered promotion that no longer exists falls back to the first active promotion', function () {
     // Arrange
     $user = basicUser();
-    attachPromotionMembership($user, Promotion::factory()->create(), MembershipStatus::Active);
+    $activePromotion = Promotion::factory()->create();
+    attachPromotionMembership($user, $activePromotion, MembershipStatus::Active);
     actingAs($user);
     withSession(['active_promotion_id' => 999_999]);
 
@@ -70,20 +73,24 @@ test('a remembered promotion that no longer exists is rejected with a 403', func
     $response = get(route('wrestlers.index'));
 
     // Assert
-    $response->assertForbidden();
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $activePromotion->id);
 });
 
-test('users with no active promotion membership are rejected with a 403', function () {
+test('users with no active promotion membership get the no-membership page', function () {
     // Arrange
     $user = basicUser();
-    attachPromotionMembership($user, Promotion::factory()->create(), MembershipStatus::Suspended);
+    $suspendedPromotion = Promotion::factory()->create();
+    attachPromotionMembership($user, $suspendedPromotion, MembershipStatus::Suspended);
     actingAs($user);
+    withSession(['active_promotion_id' => $suspendedPromotion->id]);
 
     // Act
-    $response = get(route('wrestlers.index'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response->assertForbidden();
+    $response->assertViewIs('promotions.no-membership');
 });
 
 test('the first active promotion is used when none has been selected', function () {
