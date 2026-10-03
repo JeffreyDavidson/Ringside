@@ -10,6 +10,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Roster\TagTeams\TagTeamWrestlerFactory;
 use Illuminate\Support\Carbon;
 
+use function Pest\Laravel\travelTo;
+
 /**
  * Integration tests for TagTeamWrestlerFactory data generation and state management.
  *
@@ -48,6 +50,21 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
             expect($tagTeamWrestler->joined_at->isPast() || $tagTeamWrestler->joined_at->isToday())->toBeTrue()
                 ->and($tagTeamWrestler->joined_at->greaterThan(now()->subYears(2)->subDay()))->toBeTrue();
         });
+    });
+
+    test('dates memberships from the application clock rather than the real one', function () {
+        // Arrange
+        travelTo(Carbon::parse('2040-06-01 12:00:00'));
+
+        // Act
+        $default = TagTeamWrestler::factory()->make();
+        $current = TagTeamWrestler::factory()->current()->make();
+        $ended = TagTeamWrestler::factory()->ended()->make();
+
+        // Assert
+        expect($default->joined_at->between(now()->subYears(2)->subDay(), now()))->toBeTrue()
+            ->and($current->joined_at->between(now()->subYear()->subDay(), now()))->toBeTrue()
+            ->and($ended->left_at?->between($ended->joined_at, now()))->toBeTrue();
     });
 
     describe('factory state methods', function () {
