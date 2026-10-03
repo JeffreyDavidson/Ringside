@@ -34,7 +34,7 @@ it('groups competitor models by ordered side position', function () {
 
     // Assert
     expect($competitorsBySide->keys()->all())->toBe([1, 2])
-        ->and($competitorsBySide->get(1)?->pluck('id')->all())->toBe($partners->pluck('id')->all())
+        ->and($competitorsBySide->get(1)?->pluck('id')->all())->toEqualCanonicalizing($partners->pluck('id')->all())
         ->and($competitorsBySide->get(2)?->pluck('id')->all())->toBe([$opponent->id]);
 });
 

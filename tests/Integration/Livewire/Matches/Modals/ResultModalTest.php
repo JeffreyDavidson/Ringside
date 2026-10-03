@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Matches\Modals\ResultModal;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -272,6 +276,31 @@ describe('authorized result recording', function (): void {
         expect($match->refresh()->match_finish)->toBeNull();
     });
 });
+
+it('refuses to save a result after the manager was :dataset since opening the modal', function (MembershipRole $role, MembershipStatus $status): void {
+    // Arrange
+    [$match, $competitors] = createMatchWithResultCompetitors();
+    $promotion = Promotion::factory()->create();
+    Event::query()->whereKey($match->event_id)->update(['promotion_id' => $promotion->id]);
+    Wrestler::query()->update(['promotion_id' => $promotion->id]);
+    $manager = actingAsPromotionMember($promotion, MembershipRole::Manager);
+    $modal = livewire(ResultModal::class, ['matchId' => $match->id])
+        ->set('form.finish', MatchFinish::Pinfall->value)
+        ->set('form.winningSideId', $competitors[0]->match_side_id);
+    changePromotionMembership($promotion, $manager, $role, $status);
+
+    // Act
+    $modal->call('save');
+
+    // Assert
+    $modal->assertForbidden();
+
+    expect($match->refresh()->match_finish)->toBeNull()
+        ->and($match->winning_side_id)->toBeNull();
+})->with([
+    'demoted to member' => [MembershipRole::Member, MembershipStatus::Active],
+    'suspended' => [MembershipRole::Manager, MembershipStatus::Suspended],
+]);
 
 it('requires an administrator to open the result modal', function (bool $authenticated, int $status): void {
     // Arrange

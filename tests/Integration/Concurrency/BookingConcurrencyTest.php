@@ -2,11 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
+use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +32,8 @@ use Symfony\Component\Process\Process;
 
 /**
  * Run one worker per spec with a start barrier, in real PHP processes: each books a match in an event
- * or, with a reschedule_date, moves an event to that date, or, with a restore_event_id, restores that deleted event.
+ * or, with a reschedule_date, moves an event to that date, or, with a restore_event_id, restores that deleted event,
+ * or, with a create_event_at_venue_id, creates an event at that venue, or, with a demote_user_id, demotes that owner.
  *
  * @param  array<int, array<string, int|string>>  $bookings
  * @return array<int, array<mixed>>
@@ -326,6 +334,58 @@ test('restoring an event while its wrestler is booked in another event at the sa
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($liveEventsBookingTheWrestler)->toBe(1);
+        }
+    });
+})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
+    ->group('postgres-concurrency');
+
+test('concurrent events at the same venue on the same day admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 10) as $run) {
+            // Arrange
+            $venue = Venue::factory()->create();
+            $date = now()->addWeeks($run)->setTime(19, 0);
+            $deadlocksBefore = deadlocksResolved();
+
+            // Act
+            $results = bookConcurrently([
+                ['create_event_at_venue_id' => $venue->id, 'date' => $date->toDateTimeString()],
+                ['create_event_at_venue_id' => $venue->id, 'date' => $date->copy()->addHour()->toDateTimeString()],
+            ]);
+
+            // Assert
+            expect(deadlocksResolved())->toBe($deadlocksBefore)
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
+                ->and(collect($results)->where('ok', true))->toHaveCount(1)
+                ->and(Event::query()->whereBelongsTo($venue)->count())->toBe(1);
+        }
+    });
+})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
+    ->group('postgres-concurrency');
+
+test('two owners demoting each other at once always leave one owner', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 10) as $run) {
+            // Arrange
+            $promotion = Promotion::factory()->create();
+            $owners = User::factory()->count(2)->create(['status' => UserStatus::Active]);
+            $owners->each(fn (User $owner) => $promotion->users()->attach($owner, [
+                'role' => MembershipRole::Owner,
+                'status' => MembershipStatus::Active,
+            ]));
+            $deadlocksBefore = deadlocksResolved();
+
+            // Act
+            $results = bookConcurrently($owners->map(fn (User $owner): array => [
+                'promotion_id' => $promotion->id,
+                'demote_user_id' => $owner->id,
+            ])->all());
+
+            // Assert
+            expect(deadlocksResolved())->toBe($deadlocksBefore)
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotRemoveLastOwnerException::class])
+                ->and(collect($results)->where('ok', true))->toHaveCount(1)
+                ->and($promotion->memberships()->withRole(MembershipRole::Owner)->count())->toBe(1);
         }
     });
 })->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')

@@ -32,6 +32,27 @@ test('it ends only the current championship reign', function () {
         ->and($previousReign->refresh()->lost_at)->not->toEqual($endedAt);
 });
 
+test('it locks the current reign before ending it', function () {
+    // Arrange
+    $title = Title::factory()->create();
+    TitleChampionship::factory()->for($title)->current()->create();
+
+    // Act
+    $statements = recordStatements(fn () => DB::transaction(
+        fn () => resolve(ChampionshipReignManager::class)->endCurrentReign($title, now())
+    ));
+
+    // Assert
+    $reignLock = statementPosition(
+        $statements,
+        fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "titles_championships"'),
+    );
+    $reignUpdate = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "titles_championships"'));
+
+    expect($statements[$reignLock]['bindings'][0] ?? null)->toBe($title->id)
+        ->and($reignLock)->toBeLessThan($reignUpdate);
+});
+
 test('ending a vacant championship is a no-op', function () {
     $title = Title::factory()->create();
 

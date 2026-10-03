@@ -6,6 +6,10 @@ SQLite ignores row locks (`lockForUpdate()`), so the normal suite can only asser
 
 - Two bookings on different events at the same date and time that share a wrestler never surface a deadlock (SQLSTATE 40P01): exactly one succeeds and the other raises `SchedulingConflictException`, and the wrestler ends up on one card only.
 - Two bookings on those events without any shared resource both succeed.
+- Two events created at the same venue on the same day at once: the venue row lock in `Events\CreateAction` admits exactly one, and the other raises `SchedulingConflictException`.
+- Two owners of a promotion demoted to member at once (each the other's last fellow owner): the promotion row lock in `UpdatePromotionMemberRoleAction` serializes them, so exactly one succeeds, the other raises `CannotRemoveLastOwnerException`, and the promotion keeps one owner.
+
+Both of the last two fail when their row lock is removed, which a single process cannot show because SQLite ignores row locks.
 
 The tests belong to the `postgres-concurrency` group and are skipped unless `DB_CONNECTION=pgsql` and `RUN_CONCURRENCY_TESTS=1` are both set in the real environment, so normal and coverage runs never execute them.
 

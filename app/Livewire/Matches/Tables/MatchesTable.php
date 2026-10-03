@@ -54,7 +54,7 @@ class MatchesTable extends DataTableComponent
             ->forEventId($eventId)
             ->orderBy('events_matches.match_number')
             ->orderBy('events_matches.id')
-            ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
+            ->withDisplayRelations();
     }
 
     protected function configure(): void

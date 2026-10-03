@@ -31,3 +31,9 @@ Tests must not compute expected dates or times outside the frozen clock: freeze 
 
 ## Run on every database engine
 The suite runs on SQLite, PostgreSQL and MySQL in CI. Assert generated SQL through recordStatements() or normalizedSql(), which turn MySQL backtick quoting into double quotes. A test that only applies to some engines is skipped with ->skip(fn (): bool => runsOnDriver(...), <reason>), never silently. MySQL commits the test transaction on any DDL (DROP INDEX, Schema::create), so a test that changes the schema inside RefreshDatabase is skipped there with MYSQL_IMPLICIT_COMMIT or runs outside the test transaction and rebuilds the schema afterwards.
+
+## Never rely on row order the query did not ask for
+A query without ORDER BY returns rows in whatever order the engine picks: SQLite and MySQL usually return primary key order, PostgreSQL may not. Only assert an order the code under test sets with an explicit ORDER BY (with an id tie-break when the sort column can repeat), and insert the test data out of that order so the assertion fails without it. When the order is not part of the contract, compare with toEqualCanonicalizing(). Run REVERSE_UNORDERED_SELECTS=1 composer test:application after changing list queries (see docs/workflows/ci-cd.md).
+
+## Make guard tests fail when the guard is removed
+A test for an authorization check, lock, filter or escape must fail if that one line is deleted. Pair every allowed case with a refused one that reaches the guarded line (a view-only member calling a delete action, a membership downgraded between opening a form and saving it), assert the refusal and that nothing was written, and pick data that only the guard tells apart (a search term whose wildcard would match, a stored email that a LIKE pattern would match). Assert locks with recordStatements(): which row is locked, in which order, and before which write.

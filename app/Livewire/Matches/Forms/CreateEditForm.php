@@ -22,6 +22,7 @@ use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use App\Rules\Titles\MatchesCompetitorType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use LogicException;
@@ -71,14 +72,18 @@ class CreateEditForm extends BaseForm
         $this->matchType = $model->match_type;
         $this->matchStipulationId = $model->match_stipulation_id;
 
-        $this->referees = $model->referees
+        $this->referees = $model->referees()
+            ->orderBy('referees.id')
+            ->get()
             ->map(fn (Referee $referee): int => $referee->id)
             ->all();
-        $this->titles = $model->titles
+        $this->titles = $model->titles()
+            ->orderBy('titles.id')
+            ->get()
             ->map(fn (Title $title): int => $title->id)
             ->all();
         $sides = $model->sides()
-            ->with('competitors.competitor')
+            ->with(['competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('id'), 'competitors.competitor'])
             ->get();
         $this->competitors = $this->competitorStateMapper->fromSides(
             $sides,
@@ -110,15 +115,15 @@ class CreateEditForm extends BaseForm
                 ->values()
                 ->mapWithKeys(fn (array $side, int $index): array => [
                     $index + 1 => [
-                        'wrestlers' => Wrestler::query()->whereKey($side['wrestlers'] ?? [])->get()->all(),
-                        'tag_teams' => TagTeam::query()->whereKey($side['tag_teams'] ?? [])->get()->all(),
+                        'wrestlers' => Wrestler::query()->whereKey($side['wrestlers'] ?? [])->orderBy('id')->get()->all(),
+                        'tag_teams' => TagTeam::query()->whereKey($side['tag_teams'] ?? [])->orderBy('id')->get()->all(),
                     ],
                 ]);
 
         return new EventMatchData(
             matchType: $matchType,
-            referees: Referee::query()->whereKey($this->referees)->get(),
-            titles: Title::query()->whereKey($this->titles)->get(),
+            referees: Referee::query()->whereKey($this->referees)->orderBy('id')->get(),
+            titles: Title::query()->whereKey($this->titles)->orderBy('id')->get(),
             sides: $sides,
             preview: $this->preview,
             matchStipulation: $this->matchStipulationId === null
