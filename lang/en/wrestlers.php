@@ -45,6 +45,13 @@ return [
         'restored' => 'Wrestler has been restored.',
     ],
 
+    'validation' => [
+        'height_feet' => 'Enter the feet as a whole number from 0 to 7.',
+        'height_inches' => 'Enter the inches as a whole number from 0 to 11.',
+        'height_minimum' => 'Enter a height of at least 1 inch, with the inches from 0 to 11.',
+        'weight' => 'Enter the weight in pounds as a 3-digit number, from 100 to 999.',
+    ],
+
     'errors' => [
         'employ' => [
             'default' => 'Unable to hire this wrestler at this time.',

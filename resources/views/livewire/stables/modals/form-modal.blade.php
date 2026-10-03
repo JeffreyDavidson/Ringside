@@ -1,6 +1,6 @@
 <x-form-modal>
     <x-form-modal.modal-input>
-        <x-form.inputs.text :label="__('stables.name')" wire:model="form.name" />
+        <x-form.inputs.text :label="__('stables.name')" wire:model="form.name" required autofocus />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>

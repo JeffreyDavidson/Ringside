@@ -71,6 +71,7 @@
         :variant="$variant"
         :name="$fieldName"
         :id="$inputId"
+        :required="(bool) $attributes->get('required', false)"
     >
         @if ($type === 'password')
             <div class="relative" x-data="{ showPassword: false }">

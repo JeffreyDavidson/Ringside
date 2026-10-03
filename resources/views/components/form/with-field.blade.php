@@ -4,6 +4,7 @@
     'variant' => 'block',
     'name' => null,
     'id' => null,
+    'required' => false,
 ])
 
 @php
@@ -23,7 +24,7 @@
 <div {{ $attributes->merge(['class' => $classes]) }} data-form-field>
     {{-- Label Section --}}
     @if ($label)
-        <x-form.label :for="$id" data-form-label>{{ $label }}</x-form.label>
+        <x-form.label :for="$id" :required="$required" data-form-label>{{ $label }}</x-form.label>
     @endif
 
     {{-- Form Control Section --}}
