@@ -6,6 +6,7 @@ namespace App\Builders\Promotions;
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,12 @@ class PromotionMembershipBuilder extends Builder
     public function active(): static
     {
         return $this->where('status', MembershipStatus::Active->value);
+    }
+
+    /** Limit to memberships whose user account is itself active (not inactive or unverified). */
+    public function withActiveUser(): static
+    {
+        return $this->whereRelation('user', 'status', UserStatus::Active->value);
     }
 
     public function withRole(MembershipRole ...$roles): static
