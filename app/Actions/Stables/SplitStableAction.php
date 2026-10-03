@@ -33,6 +33,8 @@ class SplitStableAction
      *
      * Creates a new stable and transfers specified members from the original
      * stable to the new stable, leaving the remaining members in the original.
+     * The new stable belongs to the original stable's promotion, and its name
+     * must not be used by another active stable of that promotion.
      *
      * @param  Stable  $originalStable  The stable to split
      * @param  string  $newStableName  Name for the new stable
@@ -40,7 +42,7 @@ class SplitStableAction
      * @param  Carbon  $date  The date when the split operation occurs
      * @return Stable The newly created stable
      *
-     * @throws CannotBeSplitException When the stable or selected members cannot be split
+     * @throws CannotBeSplitException When the stable, selected members or new name cannot be used for the split
      */
     public function handle(
         Stable $originalStable,
@@ -61,9 +63,11 @@ class SplitStableAction
                 members: $membersForNewStable
             );
 
+            $this->eligibility->ensureSplitNameAvailable($lockedStable, $stableData->getTrimmedName());
+
             $this->removeStableMembersAction->handle($lockedStable, $membersForNewStable, $date);
 
-            return $this->createAction->handle($stableData);
+            return $this->createAction->handle($stableData, $lockedStable->promotion_id);
         });
     }
 
