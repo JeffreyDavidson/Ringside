@@ -29,7 +29,7 @@
             <select
                 id="{{ $statusId }}"
                 wire:model.live="filterValues.status"
-                class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2"
+                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2"
             >
                 @foreach ($options as $option)
                     <option value="{{ $option['value'] }}">{{ $option['label'] }} ({{ $option['count'] }})</option>

@@ -38,7 +38,7 @@
                             <select
                                 id="table-filter-{{ $filter->getKey() }}"
                                 wire:model.live="filterValues.{{ $filter->getKey() }}"
-                                class="border-ringside-line bg-ringside-surface text-ringside-muted focus:border-ringside-ink min-h-11 appearance-none border px-3 text-sm focus:ring-0"
+                                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 appearance-none border px-3 text-sm focus-visible:outline-2"
                             >
                                 @foreach ($filter->getOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
