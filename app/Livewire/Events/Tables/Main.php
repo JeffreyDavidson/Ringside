@@ -50,6 +50,7 @@ class Main extends BaseTable
     {
         return Event::query()
             ->latestDatedFirst()
+            ->orderBy('events.id')
             ->with(['venue']);
     }
 

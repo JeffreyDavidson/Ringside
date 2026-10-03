@@ -51,7 +51,7 @@ describe('match create and edit form', function (): void {
             'wrestlers' => $wrestlers->modelKeys(),
             'tag_teams' => [],
         ]];
-        $form->referees = $referees->modelKeys();
+        $form->referees = array_reverse($referees->modelKeys());
         $form->titles = [$title->id];
         $form->preview = 'Every competitor enters for themselves.';
 
@@ -75,6 +75,33 @@ describe('match create and edit form', function (): void {
             ->and($data->sides->every(fn (array $side): bool => count($side['wrestlers'] ?? []) === 1))->toBeTrue()
             ->and($data->preview)->toBe('Every competitor enters for themselves.')
             ->and($data->matchStipulation?->is($stipulation))->toBeTrue();
+    });
+});
+
+describe('match form side order', function (): void {
+    it('maps each side\'s selected wrestlers in id order whatever order they were picked in', function (): void {
+        // Arrange
+        [$first, $second, $third, $fourth] = Wrestler::factory()->count(4)->create()->all();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->matchType = MatchType::TagTeam;
+        $form->competitors = [
+            ['wrestlers' => [$second->id, $first->id], 'tag_teams' => []],
+            ['wrestlers' => [$fourth->id, $third->id], 'tag_teams' => []],
+        ];
+        $form->referees = [Referee::factory()->create()->id];
+
+        // Act
+        $data = $form->toData();
+
+        // Assert
+        $sideWrestlerIds = $data->sides
+            ->map(fn (array $side): array => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers'] ?? []))
+            ->all();
+
+        expect($sideWrestlerIds)->toBe([
+            1 => [$first->id, $second->id],
+            2 => [$third->id, $fourth->id],
+        ]);
     });
 });
 

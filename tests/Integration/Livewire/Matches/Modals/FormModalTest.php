@@ -14,6 +14,8 @@ use App\Livewire\Matches\Modals\FormModal;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
@@ -173,6 +175,35 @@ describe('authorized match form interactions', function (): void {
             ])
             ->assertSet('form.preview', 'Original preview.')
             ->assertSee('Edit Match');
+    });
+
+    it('loads the referees, titles and side members of a booked match in id order whatever order they were added in', function (): void {
+        // Arrange
+        [$firstReferee, $secondReferee] = Referee::factory()->count(2)->bookable()->create()->all();
+        [$firstTitle, $secondTitle] = Title::factory()->count(2)->active()->tagTeam()->create()->all();
+        [$firstWrestler, $secondWrestler, $opponent, $opponentPartner] = Wrestler::factory()->count(4)->bookable()->create()->all();
+        $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::TagTeam]);
+        $sides = MatchSide::factory()->for($match, 'match')->count(2)->sequence(['position' => 1], ['position' => 2])->create();
+        foreach ([[9002, $sides[0], $secondWrestler], [9001, $sides[0], $firstWrestler], [9004, $sides[1], $opponentPartner], [9003, $sides[1], $opponent]] as [$id, $side, $wrestler]) {
+            MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($wrestler, 'competitor')->create(['id' => $id]);
+        }
+        $match->referees()->attach($secondReferee);
+        $match->referees()->attach($firstReferee);
+        $match->titles()->attach($secondTitle);
+        $match->titles()->attach($firstTitle);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal', $match->id);
+
+        // Assert
+        $modal
+            ->assertSet('form.referees', [$firstReferee->id, $secondReferee->id])
+            ->assertSet('form.titles', [$firstTitle->id, $secondTitle->id])
+            ->assertSet('form.competitors', [
+                ['wrestlers' => [$firstWrestler->id, $secondWrestler->id], 'tag_teams' => []],
+                ['wrestlers' => [$opponent->id, $opponentPartner->id], 'tag_teams' => []],
+            ]);
     });
 
     it('responds not found when opening a missing match', function (): void {

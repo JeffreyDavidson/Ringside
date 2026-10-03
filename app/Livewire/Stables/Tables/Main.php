@@ -43,7 +43,8 @@ class Main extends BaseTable
         return Stable::query()
             ->withFirstActivityPeriod()
             ->with(['currentWrestlers', 'currentTagTeams'])
-            ->oldest('name');
+            ->oldest('name')
+            ->orderBy('stables.id');
     }
 
     #[\Override]
