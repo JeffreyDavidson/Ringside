@@ -9,7 +9,7 @@ use function Pest\Laravel\travelTo;
 
 test('dates transitions from the application clock rather than the real one', function () {
     // Arrange
-    travelTo(Carbon::parse('2040-06-01 12:00:00'));
+    travelTo(Carbon::parse('2030-06-01 12:00:00'));
 
     // Act
     $transition = LifecycleTransition::factory()->make();
