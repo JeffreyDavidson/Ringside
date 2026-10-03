@@ -37,7 +37,7 @@ class CreateEditForm extends BaseForm
             $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
         }
 
-        $currentWrestlers = $model->currentWrestlers;
+        $currentWrestlers = $model->currentWrestlers->sortBy('id')->values();
         $this->wrestlerA = $currentWrestlers->first()?->id;
         $this->wrestlerB = $currentWrestlers->skip(1)->first()?->id;
 
