@@ -5,8 +5,11 @@ declare(strict_types=1);
 use Illuminate\Bus\Batch;
 use Illuminate\Queue\Failed\FailedJobProviderInterface;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+
+use function Pest\Laravel\assertDatabaseHas;
 
 test('the queue tables have Laravel\'s standard columns', function (string $table, array $columns) {
     // Act
@@ -30,10 +33,14 @@ test('a failed job is recorded instead of throwing', function () {
     $failer->log('database', 'default', $payload, new RuntimeException('Probe failure'));
 
     // Assert
-    $recorded = $failer->find($uuid);
-    expect($recorded)->not->toBeNull()
-        ->and($recorded->queue)->toBe('default')
-        ->and($recorded->exception)->toContain('Probe failure');
+    assertDatabaseHas('failed_jobs', [
+        'uuid' => $uuid,
+        'connection' => 'database',
+        'queue' => 'default',
+    ]);
+    expect(DB::table('failed_jobs')->where('uuid', $uuid)->value('exception'))
+        ->toBeString()
+        ->toContain('Probe failure');
 });
 
 test('a job batch is stored and can be found again', function () {
