@@ -260,8 +260,12 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 
 Owners add promotion members by typing the exact email of an existing active
 account; the member is attached immediately and no message is sent. The Manage
-component answers every non-match (unknown, inactive, partial, already a member)
-with one generic message so it does not confirm which accounts exist. A real
+component answers every non-match (unknown, inactive, partial) with one generic
+message so it does not confirm which accounts exist. An account that is already
+a member gets its own message: the owner already sees every member in the list
+on that page, so naming the case reveals nothing new. Adding a member, saving a
+role, and suspending or reactivating a member confirm the change through the
+shared flash message. A real
 invitation flow (an invitation record, an email, and an accept page, using the
 existing `MembershipStatus::Invited` state) is deferred.
 

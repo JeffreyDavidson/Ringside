@@ -63,6 +63,24 @@ expose row actions such as delete but no lifecycle methods.
   `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
   a rejected action shows the domain exception's message. Merge, split and reunite remain
   unwired.
+- Destructive transitions (Release, Suspend, Injure, Retire, Disband, and Deactivate for
+  titles) ask for confirmation with `wire:confirm`, using a `core.lifecycle_confirmations.*`
+  message that names the record. Bind it as `:wire:confirm="__(...)"` so names with
+  apostrophes are escaped once. Every action button also carries
+  `wire:loading.attr="disabled"` and a `wire:target` for its own method, so a second click
+  cannot queue the transition again while it runs.
+
+## Form Modals
+
+`x-form-modal` renders the shared `x-form.footer`. Its Save, Clear and Auto fill buttons
+are disabled while `save`, `clear` or `fillDummyFields` runs. The footer stores the form
+as it was when the modal opened, and Clear only asks for confirmation when the form has
+changed since then (typed, auto-filled, or kept after a failed save).
+
+Fields that the form's rules require take a `required` attribute; the form components
+pass it to the control and show the label's `*` marker. The first field of each modal
+has `autofocus`, which the modal script focuses after the dialog opens. Numeric text
+fields (height, weight, zip code) use `inputmode="numeric"`.
 
 ## General Info Card
 
