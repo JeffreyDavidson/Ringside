@@ -25,7 +25,7 @@
     @if ($canManageMembers)
         <form
             wire:submit="addMember"
-            class="border-ringside-line grid gap-4 border-b px-5 py-5 lg:grid-cols-[minmax(0,1fr)_12rem_auto] lg:items-end lg:px-6"
+            class="border-ringside-line grid gap-4 border-b px-5 py-5 lg:grid-cols-[minmax(0,1fr)_12rem_auto] lg:items-start lg:px-6"
         >
             <div>
                 <label for="promotion-member-email" class="text-ringside-ink mb-2 block text-sm font-semibold">
@@ -45,7 +45,9 @@
                 </p>
 
                 @error('email')
-                    <p class="text-ringside-signal-soft mt-2 text-sm" role="alert">{{ $message }}</p>
+                    <p id="promotion-member-email-error" class="text-ringside-signal-soft mt-2 text-sm" role="alert">
+                        {{ $message }}
+                    </p>
                 @enderror
             </div>
 
@@ -59,12 +61,19 @@
                     class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-white min-h-14 w-full border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     @foreach ($roles as $role)
-                        <option value="{{ $role->value }}">{{ str($role->value)->headline() }}</option>
+                        <option value="{{ $role->value }}">{{ $role->label() }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <x-button variant="ringside" type="submit" wire:loading.attr="disabled" wire:target="addMember">
+            {{-- The top margin matches the field labels so the button stays level with the inputs when help or error text wraps. --}}
+            <x-button
+                variant="ringside"
+                type="submit"
+                class="lg:mt-7 lg:min-h-14"
+                wire:loading.attr="disabled"
+                wire:target="addMember"
+            >
                 {{ __('promotions.add') }}
             </x-button>
         </form>
@@ -126,13 +135,15 @@
                                                         value="{{ $role->value }}"
                                                         @selected($role === $membership->role)
                                                     >
-                                                        {{ str($role->value)->headline() }}
+                                                        {{ $role->label() }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                             <button
                                                 type="submit"
-                                                class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-white min-h-10 px-2 text-xs underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+                                                wire:loading.attr="disabled"
+                                                wire:target="updateMemberRole"
+                                                class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-white min-h-10 px-2 text-xs whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.save_role') }}
                                             </button>
@@ -143,14 +154,12 @@
                                             </p>
                                         @enderror
                                     @else
-                                        <span class="text-ringside-muted">
-                                            {{ str($membership->role->value)->headline() }}
-                                        </span>
+                                        <span class="text-ringside-muted">{{ $membership->role->label() }}</span>
                                     @endif
                                 </td>
                                 <td class="text-ringside-muted px-4 py-4">
                                     <span class="border-ringside-outline inline-flex min-h-7 items-center border px-2 text-xs">
-                                        {{ str($membership->status->value)->headline() }}
+                                        {{ $membership->status->label() }}
                                     </span>
                                 </td>
                                 @if ($canManageMembers)
@@ -160,7 +169,9 @@
                                                 type="button"
                                                 wire:click="updateMemberStatus({{ $membership->user_id }}, '{{ $suspendedStatus->value }}')"
                                                 wire:confirm="{{ __('promotions.confirm_suspend', ['name' => $membership->user->full_name]) }}"
-                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+                                                wire:loading.attr="disabled"
+                                                wire:target="updateMemberStatus"
+                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.suspend') }}
                                             </button>
@@ -168,7 +179,9 @@
                                             <button
                                                 type="button"
                                                 wire:click="updateMemberStatus({{ $membership->user_id }}, '{{ $activeStatus->value }}')"
-                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+                                                wire:loading.attr="disabled"
+                                                wire:target="updateMemberStatus"
+                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-white min-h-10 px-2 text-sm whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.reactivate') }}
                                             </button>
