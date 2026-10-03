@@ -20,7 +20,7 @@ test('administrator can employ and retire a wrestler from the detail page', func
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));
-    $page->script('window.confirm = () => true');
+    $page->script('void (window.confirm = () => true)');
     $page
         ->assertSee($wrestler->name)
         ->assertPresent('button:has-text("Employ")')
@@ -57,13 +57,13 @@ test('retiring a wrestler waits for the administrator to confirm it', function (
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));
-    $page->script('window.confirm = (message) => { window.confirmedMessage = message; return false; }');
+    $page->script('void (window.confirm = (message) => { window.confirmedMessage = message; return false; })');
     $page
         ->click('button:has-text("Retire")')
         ->assertScript('window.confirmedMessage', "Retire Ann D'Arcy?")
         ->assertSeeIn('tr:has-text("Status:")', 'Employed')
         ->assertPresent('button:has-text("Retire")');
-    $page->script('window.confirm = () => true');
+    $page->script('void (window.confirm = () => true)');
     $page
         ->click('button:has-text("Retire")')
         ->assertSee('Wrestler has been retired.')
