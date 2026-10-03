@@ -11,6 +11,7 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -200,4 +201,47 @@ test('it rejects booking a tag team member individually on the same card', funct
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $singlesMatch))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$member->name}] is already booked at this event time.")
         ->and(EventMatch::query()->count())->toBe(1);
+});
+
+describe('promotion ownership', function (): void {
+    it('rejects booking :dataset of another promotion on the event', function (Closure $matchData, string $entityType): void {
+        // Arrange
+        [$home, $foreign] = Promotion::factory()->count(2)->create()->all();
+        $event = Event::factory()->for($home, 'promotion')->create();
+        $data = $matchData($home, $foreign);
+
+        // Act
+        $book = fn (): EventMatch => resolve(AddMatchForEventAction::class)->handle($event, $data);
+
+        // Assert
+        expect($book)->toThrow(
+            InvalidMatchConfigurationException::class,
+            "Selected {$entityType} must all belong to the event's promotion.",
+        );
+        expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
+
+    it('books participants that belong to the event promotion', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        $data = new EventMatchData(
+            MatchType::Singles,
+            Referee::factory()->bookable()->for($promotion, 'promotion')->count(1)->create(),
+            Title::factory()->active()->singles()->for($promotion, 'promotion')->count(1)->create(),
+            collect([
+                1 => ['wrestlers' => [Wrestler::factory()->bookable()->for($promotion, 'promotion')->create()]],
+                2 => ['wrestlers' => [Wrestler::factory()->bookable()->for($promotion, 'promotion')->create()]],
+            ]),
+            null,
+        );
+
+        // Act
+        $match = resolve(AddMatchForEventAction::class)->handle($event, $data);
+
+        // Assert
+        expect($match->event_id)->toBe($event->id)
+            ->and($match->wrestlers()->count())->toBe(2)
+            ->and($match->titles()->count())->toBe(1);
+    });
 });

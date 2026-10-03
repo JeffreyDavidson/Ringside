@@ -9,9 +9,11 @@ use App\Enums\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -159,4 +161,26 @@ test('it rejects reconfiguring a match after its result is recorded', function (
             InvalidMatchConfigurationException::class,
             'A match cannot be reconfigured after its result has been recorded.',
         );
+});
+
+describe('promotion ownership', function (): void {
+    it('rejects re-booking the match with :dataset of another promotion', function (Closure $matchData, string $entityType): void {
+        // Arrange
+        [$home, $foreign] = Promotion::factory()->count(2)->create()->all();
+        $match = EventMatch::factory()
+            ->for(Event::factory()->for($home, 'promotion'))
+            ->create(['match_type' => MatchType::Singles, 'preview' => 'Original preview']);
+        $data = $matchData($home, $foreign);
+
+        // Act
+        $update = fn (): EventMatch => resolve(UpdateMatchAction::class)->handle($match, $data);
+
+        // Assert
+        expect($update)->toThrow(
+            InvalidMatchConfigurationException::class,
+            "Selected {$entityType} must all belong to the event's promotion.",
+        );
+        expect($match->refresh()->preview)->toBe('Original preview')
+            ->and($match->competitors()->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
 });
