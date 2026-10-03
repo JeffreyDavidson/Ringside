@@ -30,6 +30,28 @@ above and the authentication log key on `request()->ip()`, which is only the rea
 - Refresh the default ranges from https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 when
   Cloudflare announces a change. `tests/Feature/Http/Middleware/TrustedProxiesTest.php` covers the behaviour.
 
+## Security headers
+
+`App\Http\Middleware\SendSecurityHeaders` is prepended to the `web` group, so every page, redirect and Livewire update
+sends:
+
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` disabling camera, microphone, geolocation, payment, USB, display capture, MIDI, autoplay and the
+  motion sensors
+- `X-Content-Type-Options: nosniff`
+
+A header the response already carries is left as it is, so a route can choose its own value and nothing is sent twice
+from the application. The Forge nginx config also adds `X-Content-Type-Options`, `X-Frame-Options` and
+`X-XSS-Protection`; a repeated `nosniff` is harmless, and it can be removed from nginx now that the application sends it.
+
+Not set in code on purpose:
+
+- `Content-Security-Policy`: Livewire and Vite need nonces or hashes, which is a separate project.
+- `Strict-Transport-Security`: HSTS is configured at Cloudflare (see
+  [Production operations](../workflows/production-operations.md)).
+
+`tests/Feature/Http/Middleware/SendSecurityHeadersTest.php` covers the behaviour.
+
 ## Password policy
 
 `AppServiceProvider::boot()` sets `Password::defaults()` to a 12 character minimum in every environment. Every place

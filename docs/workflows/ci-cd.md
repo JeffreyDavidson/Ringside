@@ -27,7 +27,7 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 
 **Key Features:**
-- **Runtime**: PHP 8.5 (shared `.github/actions/setup-php-composer` action) and Node.js 24 for jobs that need it
+- **Runtime**: PHP 8.5 (shared `.github/actions/setup-php-composer` action) and Node.js 24 for jobs that need it. `package.json` declares `engines.node: ">=22.13"`, the lowest version the toolchain supports (Vite 8 and laravel-vite-plugin 3 need 22.12, ESLint 10 needs 22.13), so a server still on Node 22 deploys without `EBADENGINE` warnings; Node 24 remains the recommended version everywhere
 - **Impacted Tests First**: `application-tests` runs `pest --tia --baselined --filtered` and falls back to the full non-browser suite with a warning if TIA is unavailable or fails
 - **Parallel Test Execution**: `application-tests` uses `--parallel` for speed. The `coverage` job deliberately does not (see Coverage policy below)
 - **Memory Limit**: 4G for PHP (`memory_limit=4G` in the setup action, `-d memory_limit=4G` for Pest, `--memory-limit=4G` for PHPStan)
@@ -162,12 +162,14 @@ CACHE_STORE=array            # Array-based cache (fastest)
 SESSION_DRIVER=array         # Array-based sessions
 QUEUE_CONNECTION=sync        # Synchronous queue processing
 MAIL_MAILER=array           # Array mail driver (no emails sent)
+LOG_CHANNEL=null             # Discard log output
 ```
 
 **Why These Settings:**
 - **Memory DB**: Fastest database operations for tests
 - **Array Drivers**: Eliminate I/O operations for cache/sessions
 - **Sync Queue**: Immediate job processing in tests
+- **Null Log Channel**: Tests do not write `storage/logs/laravel.log` (it used to grow by about 4 MB per run). `phpunit.xml` sets it for local runs; `.env.testing` sets it too because CI caches config from a copy of that file, which `phpunit.xml` cannot override. No test asserts on log output; use `Log::spy()` or a fake in the test itself if one ever needs to
 - **Application Key**: `.env.testing` includes an `APP_KEY` for local test runs. CI copies the file and runs `php artisan key:generate`, so CI runs use a freshly generated key
 
 ## Workflow Best Practices
