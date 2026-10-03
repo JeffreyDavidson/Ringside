@@ -55,6 +55,31 @@ describe('users table', function (): void {
             ->assertDontSeeHtml('wire:click="delete(');
     });
 
+    it('offers each user a labelled row actions menu', function (UserStatus $status, string $statusAction): void {
+        // Arrange
+        $user = User::factory()->create([
+            'first_name' => 'Menu',
+            'last_name' => 'Owner',
+            'status' => $status,
+        ]);
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSeeHtml('aria-label="Actions for Menu Owner"')
+            ->assertSeeHtml('aria-label="User actions"')
+            ->assertSeeHtml('href="'.route('users.show', $user).'"')
+            ->assertSeeHtml("arguments: { modelId: {$user->id} }")
+            ->assertSeeHtml("wire:click=\"changeStatus({$user->id}, '")
+            ->assertSee($statusAction);
+    })->with([
+        'unverified' => [UserStatus::Unverified, 'Activate account'],
+        'active' => [UserStatus::Active, 'Deactivate account'],
+        'inactive' => [UserStatus::Inactive, 'Reactivate account'],
+    ]);
+
     it('lets an administrator activate an unverified user account', function (): void {
         $user = User::factory()->unverified()->create();
 

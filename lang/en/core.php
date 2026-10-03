@@ -73,6 +73,7 @@ return [
     'table_pages' => 'Table pages',
     'table_results_region' => 'Table results',
     'table_results' => ':first–:last of :total :resource',
+    'updating' => 'Updating…',
     'wrestlers' => 'Wrestlers',
     'tag-teams' => 'Tag Teams',
     'managers' => 'Managers',

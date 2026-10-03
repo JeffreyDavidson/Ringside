@@ -230,6 +230,11 @@ class Main extends BaseTable
 }
 ```
 
+`BaseTable` requires `getDefaultActionColumn()`. Each index table returns a column rendering a
+`components.tables.columns.{entity}-actions` view built on `<x-tables.row-actions-menu>`, which
+labels the trigger `Actions for {name}` and gates every entry with `@can`. Set
+`$showActionColumn = true` to append it after `columns()`.
+
 Relationship history tables on detail pages (for example
 `app/Livewire/Wrestlers/Tables/PreviousManagers.php`) extend a `BasePrevious*Table`, keep the
 parent id in a `#[Locked]` public property, and authorize `view` on the parent in `configure()`.

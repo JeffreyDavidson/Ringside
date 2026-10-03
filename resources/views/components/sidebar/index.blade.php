@@ -38,6 +38,12 @@
     @mouseout="hideMenuTooltip($event)"
     @focusin="showMenuTooltip($event)"
     @focusout="hideMenuTooltip($event)"
+    @keydown.escape="$store.sidebar && $store.sidebar.closeMobile()"
+    x-trap.noreturn="$store.sidebar && $store.sidebar.mobileOpen"
+    :role="$store.sidebar && $store.sidebar.mobileOpen ? 'dialog' : null"
+    :aria-modal="$store.sidebar && $store.sidebar.mobileOpen ? 'true' : null"
+    :aria-label="$store.sidebar && $store.sidebar.mobileOpen ? 'Main navigation' : null"
+    data-test="mobile-navigation"
 >
     <div
         x-show="$store.sidebar && $store.sidebar.mobileOpen"
@@ -50,12 +56,17 @@
     <aside
         @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
         @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
-        :class="[$store.sidebar && $store.sidebar.mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']"
+        :class="[
+            $store.sidebar && $store.sidebar.mobileOpen
+                ? 'translate-x-0'
+                : '-translate-x-full max-lg:invisible lg:translate-x-0',
+        ]"
         :data-collapsed="! expanded"
         style="--sidebar-width: var(--sidebar-initial-width, var(--sidebar-default-width))"
         :style="expanded
             ? '--sidebar-width: var(--sidebar-default-width)'
             : '--sidebar-width: var(--sidebar-collapsed-width)'"
+        id="app-sidebar"
         class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
@@ -141,17 +152,22 @@
         </div>
 
         <div class="shrink-0 px-3 pb-[max(12px,env(safe-area-inset-bottom))] group-data-[collapsed=true]:px-2">
-            <a
-                href="{{ route('users.index') }}"
-                aria-label="User management"
-                :title="expanded ? 'User management' : null"
-                data-sidebar-tooltip
-                data-tooltip="User management"
-                @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted transition-[background-color,color,padding] duration-300 ease-out hover:bg-ringside-surface hover:text-ringside-ink group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
-            >
-                <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" /><span x-show="expanded" class="truncate text-sm"
-                    >User management</span>
-            </a>
+            @can('viewAny', \App\Models\Users\User::class)
+                <a
+                    href="{{ route('users.index') }}"
+                    aria-label="User management"
+                    :title="expanded ? 'User management' : null"
+                    data-sidebar-tooltip
+                    data-tooltip="User management"
+                    @if (request()->routeIs('users.*')) aria-current="page" @endif
+                    @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted transition-[background-color,color,padding] duration-300 ease-out hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-ink group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
+                >
+                    <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" aria-hidden="true" /><span
+                        x-show="expanded"
+                        class="truncate text-sm"
+                        >User management</span>
+                </a>
+            @endcan
             @if ($user instanceof \App\Models\Users\User)
                 <div x-data="{ open: false }" class="border-ringside-line relative mt-4 border-t pt-3">
                     <button @click="open = ! open"
@@ -184,15 +200,6 @@
                         class="border-ringside-line bg-ringside-surface absolute start-0 bottom-[calc(100%+8px)] z-40 w-60 border p-2 shadow-xl"
                     >
                         <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">Your account</p>
-                        <a
-                            href="#profile"
-                            class="hover:bg-ringside-surface-hover flex min-h-11 items-center gap-3 px-3 text-sm"
-                        ><x-heroicon-o-user class="size-4" />Profile</a>
-                        <a
-                            href="#account-settings"
-                            class="hover:bg-ringside-surface-hover flex min-h-11 items-center gap-3 px-3 text-sm"
-                        ><x-heroicon-o-cog-6-tooth class="size-4" />Account settings</a>
-                        <div class="border-ringside-line my-2 border-t"></div>
                         <form action="{{ route('logout') }}" method="post">
                             @csrf
                             <button

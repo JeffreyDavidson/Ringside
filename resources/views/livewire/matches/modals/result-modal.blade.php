@@ -1,8 +1,15 @@
 <x-modal size="lg">
     <div class="space-y-6">
         @error('outcome')
-            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-                {{ $message }}
+            <div
+                class="border-ringside-signal-soft bg-ringside-surface text-ringside-ink flex items-start gap-3 border px-4 py-3 text-sm"
+                role="alert"
+            >
+                <x-heroicon-s-exclamation-circle
+                    class="text-ringside-signal-soft mt-0.5 size-4 shrink-0"
+                    aria-hidden="true"
+                />
+                <span>{{ $message }}</span>
             </div>
         @enderror
 
@@ -25,48 +32,58 @@
         </div>
 
         @if ($this->match->match_type->recordsIndividualEliminations())
-            <section class="space-y-3">
+            <section class="space-y-3" aria-labelledby="result-eliminations-heading">
                 <div>
-                    <h4 class="text-sm font-semibold text-gray-900">Eliminations</h4>
-                    <p class="text-xs text-gray-600">
+                    <h3 id="result-eliminations-heading" class="text-ringside-ink text-sm font-semibold">
+                        Eliminations
+                    </h3>
+                    <p class="text-ringside-muted text-xs">
                         Record each eliminated competitor in order. Leave the winner without an elimination order.
                     </p>
                 </div>
 
-                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <div class="border-ringside-line overflow-x-auto border">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-100 text-xs font-medium text-gray-600">
+                        <thead class="bg-ringside-surface text-ringside-muted text-xs font-medium">
                             <tr>
-                                <th class="px-4 py-2.5">Competitor</th>
-                                <th class="px-4 py-2.5">Order</th>
-                                <th class="px-4 py-2.5">Eliminated By</th>
+                                <th scope="col" class="px-4 py-2.5">Competitor</th>
+                                <th scope="col" class="px-4 py-2.5">Order</th>
+                                <th scope="col" class="px-4 py-2.5">Eliminated By</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="divide-ringside-line divide-y">
                             @foreach ($this->match->competitors as $competitor)
+                                @php
+                                    $orderInputId = "elimination-order-{$competitor->id}";
+                                    $orderField = "form.eliminations.{$competitor->id}.order";
+                                @endphp
                                 <tr wire:key="result-competitor-{{ $competitor->id }}">
-                                    <td class="px-4 py-3 font-medium text-gray-800">
+                                    <th scope="row" class="text-ringside-ink px-4 py-3 font-medium">
                                         {{ $competitor->competitor->name }}
-                                    </td>
-                                    <td class="w-28 px-4 py-3">
-                                        <input
+                                    </th>
+                                    <td class="w-28 px-4 py-3 align-top">
+                                        <x-form.input
                                             type="number"
                                             min="1"
+                                            size="sm"
+                                            :id="$orderInputId"
+                                            :name="$orderField"
                                             wire:model="form.eliminations.{{ $competitor->id }}.order"
-                                            class="block h-8.5 w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-gray-500 focus:ring-gray-500"
-                                            aria-label="Elimination order for {{ $competitor->competitor->name }}"
+                                            :aria-label="'Elimination order for '.$competitor->competitor->name"
                                         />
-                                        @error("form.eliminations.{$competitor->id}.order")
-                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @error($orderField)
+                                            <div id="{{ $orderInputId }}-error">
+                                                <x-form.error :name="$orderField" />
+                                            </div>
                                         @enderror
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 align-top">
                                         <x-form.inputs.select
                                             wire:model="form.eliminations.{{ $competitor->id }}.eliminatedById"
                                             :options="collect($this->competitorOptions)->except([$competitor->id])->all()"
                                             placeholder="Not recorded"
                                             size="sm"
-                                            aria-label="Eliminator for {{ $competitor->competitor->name }}"
+                                            :aria-label="'Eliminator for '.$competitor->competitor->name"
                                         />
                                     </td>
                                 </tr>
