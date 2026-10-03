@@ -183,10 +183,16 @@ describe('authorized match form interactions', function (): void {
         [$firstTitle, $secondTitle] = Title::factory()->count(2)->active()->tagTeam()->create()->all();
         [$firstWrestler, $secondWrestler, $opponent, $opponentPartner] = Wrestler::factory()->count(4)->bookable()->create()->all();
         $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::TagTeam]);
-        $sides = MatchSide::factory()->for($match, 'match')->count(2)->sequence(['position' => 1], ['position' => 2])->create();
-        foreach ([[9002, $sides[0], $secondWrestler], [9001, $sides[0], $firstWrestler], [9004, $sides[1], $opponentPartner], [9003, $sides[1], $opponent]] as [$id, $side, $wrestler]) {
-            MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($wrestler, 'competitor')->create(['id' => $id]);
-        }
+        [$firstSide, $secondSide] = MatchSide::factory()->for($match, 'match')->count(2)->sequence(['position' => 1], ['position' => 2])->create()->all();
+        $bookOnSide = fn (MatchSide $side, Wrestler $wrestler, int $id): MatchCompetitor => MatchCompetitor::factory()
+            ->for($match, 'eventMatch')
+            ->for($side, 'side')
+            ->for($wrestler, 'competitor')
+            ->create(['id' => $id]);
+        $bookOnSide($firstSide, $secondWrestler, 9002);
+        $bookOnSide($firstSide, $firstWrestler, 9001);
+        $bookOnSide($secondSide, $opponentPartner, 9004);
+        $bookOnSide($secondSide, $opponent, 9003);
         $match->referees()->attach($secondReferee);
         $match->referees()->attach($firstReferee);
         $match->titles()->attach($secondTitle);

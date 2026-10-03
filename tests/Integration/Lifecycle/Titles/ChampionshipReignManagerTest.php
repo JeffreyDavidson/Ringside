@@ -43,14 +43,13 @@ test('it locks the current reign before ending it', function () {
     ));
 
     // Assert
-    $reignLock = array_find_key(
+    $reignLock = statementPosition(
         $statements,
         fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "titles_championships"'),
     );
-    $reignUpdate = array_find_key($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "titles_championships"'));
+    $reignUpdate = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "titles_championships"'));
 
-    expect($reignLock)->not->toBeNull()
-        ->and($statements[$reignLock]['bindings'][0] ?? null)->toBe($title->id)
+    expect($statements[$reignLock]['bindings'][0] ?? null)->toBe($title->id)
         ->and($reignLock)->toBeLessThan($reignUpdate);
 });
 

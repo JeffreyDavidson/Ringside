@@ -30,8 +30,7 @@ function recordResultStatements(EventMatch $match, MatchSide $winningSide): arra
  */
 function resultWritePosition(array $statements): int
 {
-    return array_find_key($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "events_matches" '))
-        ?? throw new RuntimeException('Expected the result to be written to the match.');
+    return statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "events_matches" '));
 }
 
 describe('result recording locks', function (): void {
@@ -50,15 +49,14 @@ describe('result recording locks', function (): void {
         $statements = recordResultStatements($match, $winningSide);
 
         // Assert
-        $sideLock = array_find_key(
+        $sideLock = statementPosition(
             $statements,
             fn (array $statement): bool => $statement['locked']
                 && str_contains($statement['sql'], 'from "events_matches_sides"')
                 && boundKey($statement) === $winningSide->id,
         );
 
-        expect($sideLock)->not->toBeNull()
-            ->and($sideLock)->toBeLessThan(resultWritePosition($statements))
+        expect($sideLock)->toBeLessThan(resultWritePosition($statements))
             ->and(lockedRowIds($statements, 'events_matches_sides'))->not->toContain($losingSide->id);
     });
 
@@ -77,13 +75,12 @@ describe('result recording locks', function (): void {
         $statements = recordResultStatements($match, $firstSide);
 
         // Assert
-        $competitorLock = array_find_key(
+        $competitorLock = statementPosition(
             $statements,
             fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events_matches_competitors"'),
         );
 
-        expect($competitorLock)->not->toBeNull()
-            ->and($statements[$competitorLock]['sql'])->toContain('order by "id" asc')
+        expect($statements[$competitorLock]['sql'])->toContain('order by "id" asc')
             ->and($statements[$competitorLock]['bindings'])->toBe([$match->id])
             ->and($competitorLock)->toBeLessThan(resultWritePosition($statements));
     });

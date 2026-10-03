@@ -501,6 +501,17 @@ function recordStatements(Closure $callback): array
 }
 
 /**
+ * The position of the first recorded statement the callback matches, failing the test when none does.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @param  Closure(array{sql: string, bindings: array<int, mixed>, locked: bool}): bool  $matches
+ */
+function statementPosition(array $statements, Closure $matches): int
+{
+    return array_find_key($statements, $matches) ?? throw new RuntimeException('Expected a matching statement to be recorded.');
+}
+
+/**
  * The primary key a recorded statement was bound to: the first binding of a single-row lock, or the last binding of an
  * update that targets one row of a pivot table.
  *

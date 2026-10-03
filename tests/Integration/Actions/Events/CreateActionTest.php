@@ -48,9 +48,9 @@ test('it locks the venue row before checking the venue is free and creating the 
     $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
 
     // Assert
-    $venueLock = array_find_key($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "venues"'));
-    $availabilityCheck = array_find_key($statements, fn (array $statement): bool => str_contains($statement['sql'], 'from "events"'));
-    $insert = array_find_key($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "events"'));
+    $venueLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "venues"'));
+    $availabilityCheck = statementPosition($statements, fn (array $statement): bool => str_contains($statement['sql'], 'from "events"'));
+    $insert = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "events"'));
 
     expect(lockedRowIds($statements, 'venues'))->toBe([$venue->id])
         ->and($venueLock)->toBeLessThan($availabilityCheck)

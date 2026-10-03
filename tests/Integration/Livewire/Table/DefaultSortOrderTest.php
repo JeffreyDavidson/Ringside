@@ -18,6 +18,7 @@ use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 
 use function Pest\Laravel\actingAs;
@@ -37,6 +38,9 @@ beforeEach(function (): void {
 /**
  * The ids of the rows the table renders on its first page, in display order.
  *
+ * @template TComponent of Component
+ *
+ * @param  Testable<TComponent>  $table
  * @return array<int, mixed>
  */
 function renderedRowIds(Testable $table): array
@@ -57,7 +61,7 @@ function renderedRowIds(Testable $table): array
  * promotions (names are only unique within a promotion) inserted with descending ids.
  *
  * @param  Closure(string, array<string, mixed>): Model  $create
- * @return list<int|string> The ids in the expected display order
+ * @return array<int, mixed> The ids in the expected display order
  */
 function recordsSortedByName(Closure $create): array
 {
@@ -73,7 +77,7 @@ function recordsSortedByName(Closure $create): array
  * Create people that sort by last name, inserted the same way as recordsSortedByName().
  *
  * @param  Closure(array<string, mixed>): Model  $create
- * @return list<int|string> The ids in the expected display order
+ * @return array<int, mixed> The ids in the expected display order
  */
 function peopleSortedByLastName(Closure $create): array
 {
