@@ -22,9 +22,10 @@ above and the authentication log key on `request()->ip()`, which is only the rea
 - `config/trustedproxy.php` lists the trusted proxies. The default is Cloudflare's published IPv4 and IPv6 ranges; set
   `TRUSTED_PROXIES` to override it with a comma-separated list or `*`. Use `*` only when the origin accepts traffic from
   the proxy alone, otherwise a visitor could spoof the client address.
-- `bootstrap/app.php` trusts only `X-Forwarded-For`, `X-Forwarded-Port` and `X-Forwarded-Proto`. `X-Forwarded-Host`
+- `bootstrap/app.php` trusts only `X-Forwarded-For` and `X-Forwarded-Proto`. `X-Forwarded-Host`, `X-Forwarded-Port`
   and `X-Forwarded-Prefix` are deliberately not trusted: Cloudflare forwards client-supplied headers, so trusting them
-  would let a visitor choose the host used to build links such as password reset URLs.
+  would let a visitor choose the host or port used to build links such as password reset URLs (for example
+  `https://host:8443/...`). The port comes from the `Host` header, defaulting to 443 for HTTPS.
 - Forwarded headers from any peer outside the trusted list are ignored.
 - Refresh the default ranges from https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 when
   Cloudflare announces a change. `tests/Feature/Http/Middleware/TrustedProxiesTest.php` covers the behaviour.
