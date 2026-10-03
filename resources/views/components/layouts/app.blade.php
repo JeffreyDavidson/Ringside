@@ -45,6 +45,12 @@
         );
     </script>
 
+    <a
+        href="#main-content"
+        data-test="skip-link"
+        class="bg-ringside-surface-panel text-ringside-ink border-ringside-ink focus-visible:outline-ringside-white sr-only z-[80] border px-4 py-3 text-sm font-semibold focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+    >{{ __('navigation.skip_to_content') }}</a>
+
     <!-- Page -->
     <!-- Main -->
     <div class="flex h-dvh min-h-dvh grow overflow-hidden">
@@ -73,7 +79,9 @@
             <!-- End of Header -->
             <x-flash-messages />
             <!-- Content -->
-            <main class="min-h-0 min-w-0 grow overflow-y-auto p-4 lg:p-7">{{ $slot }}</main>
+            <main id="main-content" tabindex="-1" class="min-h-0 min-w-0 grow overflow-y-auto p-4 outline-none lg:p-7">
+                {{ $slot }}
+            </main>
             <!-- End of Content -->
             <!-- Footer -->
             @persist('page-footer')

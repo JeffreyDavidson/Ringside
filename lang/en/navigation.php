@@ -28,4 +28,5 @@ return [
         'venues' => 'Venues',
         'wrestlers' => 'Wrestlers',
     ],
+    'skip_to_content' => 'Skip to main content',
 ];
