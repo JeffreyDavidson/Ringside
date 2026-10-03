@@ -234,6 +234,19 @@ describe('deleting matches', function (): void {
             ->and($transition->transition)->toBe(LifecycleTransitionType::Deleted);
     });
 
+    it('recomputes the remembered match total after a match is deleted', function (): void {
+        // Arrange
+        $event = Event::factory()->create();
+        $matches = EventMatch::factory()->count(2)->forEvent($event)->create();
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $matches->first());
+
+        // Assert
+        expect($component->get('metadataSnapshot')['total'])->toBe(1);
+    });
+
     it('forbids members without delete access from deleting a match', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();

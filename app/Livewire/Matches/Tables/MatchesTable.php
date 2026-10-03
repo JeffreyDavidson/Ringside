@@ -112,5 +112,7 @@ class MatchesTable extends DataTableComponent
         $this->executeBusinessAction(function () use ($deleteAction, $eventMatch): void {
             $deleteAction->handle($eventMatch);
         }, __('matches.actions.deleted'));
+
+        $this->forgetMetadata();
     }
 }

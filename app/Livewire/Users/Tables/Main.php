@@ -92,6 +92,7 @@ class Main extends BaseTable
             return;
         }
 
+        $this->forgetMetadata();
         $this->dispatchActionSuccess("User account status changed to {$targetStatus->label()}.");
     }
 
