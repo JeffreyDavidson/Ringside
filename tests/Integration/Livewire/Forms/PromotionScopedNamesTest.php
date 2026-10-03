@@ -115,3 +115,86 @@ describe('tag team managers', function () {
         $component->assertHasNoErrors(['form.managers.0']);
     });
 });
+
+describe('a global administrator without a promotion context', function () {
+    it('rejects a value already used in the edited record promotion', function (string $modal, string $model, string $field, string $value) {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $model::factory()->for($promotion, 'promotion')->create([$field => $value]);
+        $record = $model::factory()->for($promotion, 'promotion')->create();
+        $component = livewire($modal, ['modelId' => $record->getKey()]);
+
+        // Act
+        $component
+            ->set("form.{$field}", $value)
+            ->call('save');
+
+        // Assert
+        $component->assertHasErrors(["form.{$field}"]);
+    })->with('unique promotion fields');
+
+    it('accepts a value used only in another promotion', function (string $modal, string $model, string $field, string $value) {
+        // Arrange
+        [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $model::factory()->for($otherPromotion, 'promotion')->create([$field => $value]);
+        $record = $model::factory()->for($promotion, 'promotion')->create();
+        $component = livewire($modal, ['modelId' => $record->getKey()]);
+
+        // Act
+        $component
+            ->set("form.{$field}", $value)
+            ->call('save');
+
+        // Assert
+        $component->assertHasNoErrors(["form.{$field}"]);
+    })->with('unique promotion fields');
+
+    it('compares a new record with the unowned records it joins', function (string $modal, string $model, string $field, string $value) {
+        // Arrange
+        $model::factory()->create([$field => $value]);
+        $component = livewire($modal);
+
+        // Act
+        $component
+            ->set("form.{$field}", $value)
+            ->call('save');
+
+        // Assert
+        $component->assertHasErrors(["form.{$field}"]);
+    })->with('unique promotion fields');
+
+    it('saves a promotion tag team unchanged', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $tagTeam = TagTeam::factory()
+            ->for($promotion, 'promotion')
+            ->withCurrentWrestlers(Wrestler::factory()->count(2)->for($promotion, 'promotion'))
+            ->create();
+        $component = livewire(TagTeamFormModal::class, ['modelId' => $tagTeam->id]);
+
+        // Act
+        $component->call('save');
+
+        // Assert
+        $component->assertHasNoErrors();
+    });
+
+    it('rejects a tag team partner from another promotion than the edited tag team', function () {
+        // Arrange
+        [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $tagTeam = TagTeam::factory()
+            ->for($promotion, 'promotion')
+            ->withCurrentWrestlers(Wrestler::factory()->count(2)->for($promotion, 'promotion'))
+            ->create();
+        $foreignWrestler = Wrestler::factory()->for($otherPromotion, 'promotion')->create();
+        $component = livewire(TagTeamFormModal::class, ['modelId' => $tagTeam->id]);
+
+        // Act
+        $component
+            ->set('form.wrestlerA', $foreignWrestler->id)
+            ->call('save');
+
+        // Assert
+        $component->assertHasErrors(['form.wrestlerA']);
+    });
+});

@@ -8,7 +8,7 @@ use App\Livewire\Matches\Support\MatchCompetitorRuleSet;
 describe('match competitor validation rules', function (): void {
     it('builds fixed individual-side rules for :dataset matches', function (MatchType $matchType, int $sideCount): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet($matchType);
+        $ruleSet = new MatchCompetitorRuleSet($matchType, null);
 
         // Act
         $rules = $ruleSet->rules();
@@ -27,7 +27,7 @@ describe('match competitor validation rules', function (): void {
 
     it('builds mutually exclusive mixed-competitor rules for :dataset matches', function (MatchType $matchType, int $sideCount): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet($matchType);
+        $ruleSet = new MatchCompetitorRuleSet($matchType, null);
 
         // Act
         $rules = $ruleSet->rules();
@@ -48,7 +48,7 @@ describe('match competitor validation rules', function (): void {
 
     it('builds tag team selection rules for :dataset matches', function (MatchType $matchType): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet($matchType);
+        $ruleSet = new MatchCompetitorRuleSet($matchType, null);
 
         // Act
         $rules = $ruleSet->rules();
@@ -71,7 +71,7 @@ describe('match competitor validation rules', function (): void {
 
     it('builds individual entrant limits for :dataset matches', function (MatchType $matchType, string $minimum, ?string $maximum): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet($matchType);
+        $ruleSet = new MatchCompetitorRuleSet($matchType, null);
 
         // Act
         $rules = $ruleSet->rules();
@@ -95,7 +95,7 @@ describe('match competitor validation rules', function (): void {
 
     it('uses permissive nested rules until a match type is selected', function (): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet(null);
+        $ruleSet = new MatchCompetitorRuleSet(null, null);
 
         // Act
         $rules = $ruleSet->rules();
@@ -112,7 +112,7 @@ describe('match competitor validation rules', function (): void {
 
     it('builds fixed mixed-competitor rules for :dataset matches', function (MatchType $matchType): void {
         // Arrange
-        $ruleSet = new MatchCompetitorRuleSet($matchType);
+        $ruleSet = new MatchCompetitorRuleSet($matchType, null);
 
         // Act
         $rules = $ruleSet->rules();

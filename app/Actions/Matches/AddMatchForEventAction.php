@@ -27,6 +27,7 @@ class AddMatchForEventAction
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {
         $this->requirements->ensureComplete($eventMatchData);
+        $this->requirements->ensureWithinEventPromotion($event, $eventMatchData);
 
         return DB::transaction(function () use ($event, $eventMatchData): EventMatch {
             $this->conflictService->lockEventSet($event->id);

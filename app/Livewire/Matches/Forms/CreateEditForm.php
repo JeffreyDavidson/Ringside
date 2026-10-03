@@ -9,6 +9,7 @@ use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Matches\Support\MatchCompetitorRuleSet;
 use App\Livewire\Matches\Support\MatchCompetitorStateMapper;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\Referees\Referee;
@@ -28,6 +29,9 @@ use LogicException;
 class CreateEditForm extends BaseForm
 {
     private MatchCompetitorStateMapper $competitorStateMapper;
+
+    /** The booked event's promotion, set by validateForEvent() for the current request only. */
+    private ?int $eventPromotionId = null;
 
     public ?string $preview = '';
 
@@ -81,6 +85,14 @@ class CreateEditForm extends BaseForm
         );
     }
 
+    /** Validate the selection against the booked event: only its promotion's roster and titles are accepted. */
+    public function validateForEvent(Event $event): void
+    {
+        $this->eventPromotionId = $event->promotion_id;
+
+        $this->validate();
+    }
+
     public function toData(): EventMatchData
     {
         $matchType = $this->requiredMatchType();
@@ -126,19 +138,26 @@ class CreateEditForm extends BaseForm
             ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['required', 'array', 'min:1'],
-            'referees.*' => ['bail', 'integer', 'exists:referees,id', new RefereeIsBookable],
+            'referees.*' => ['bail', 'integer', $this->existsInPromotion('referees'), new RefereeIsBookable],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
                 'bail',
                 'integer',
-                'exists:titles,id',
+                $this->existsInPromotion('titles'),
                 new IsActive,
                 new MatchesCompetitorType,
                 new CurrentChampionIsCompeting,
             ],
         ];
 
-        return array_merge($baseRules, new MatchCompetitorRuleSet($this->matchType)->rules());
+        return array_merge($baseRules, new MatchCompetitorRuleSet($this->matchType, $this->formPromotionId())->rules());
+    }
+
+    /** A match has no promotion of its own: it books the roster and titles of its event's promotion. */
+    #[\Override]
+    protected function formPromotionId(): ?int
+    {
+        return $this->eventPromotionId;
     }
 
     private function requiredMatchType(): MatchType

@@ -3,19 +3,26 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddMatchForEventAction;
+use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Livewire\Matches\Modals\FormModal;
+use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionContextService;
 use JMac\Testing\Double;
+use Livewire\Features\SupportTesting\Testable;
 use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
@@ -639,6 +646,121 @@ describe('authorized match form interactions', function (): void {
             ->assertSet('isModalOpen', false);
         expect(EventMatch::query()->whereBelongsTo($this->event)->count())->toBe(1);
     });
+});
+
+/**
+ * Fill the match form from match data the way a user would select it.
+ *
+ * @param  Testable<FormModal>  $modal
+ */
+function selectMatchDataInForm(Testable $modal, EventMatchData $data): void
+{
+    $modal->set('form.matchType', $data->matchType);
+    $modal->set([
+        'form.competitors' => $data->sides->values()->map(fn (array $side): array => array_filter([
+            'wrestlers' => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers'] ?? []),
+            'tag_teams' => array_map(fn (TagTeam $tagTeam): int => $tagTeam->id, $side['tag_teams'] ?? []),
+        ]))->all(),
+        'form.referees' => $data->referees->modelKeys(),
+        'form.titles' => $data->titles->modelKeys(),
+    ]);
+}
+
+describe('booking for a global administrator without a promotion context', function (): void {
+    beforeEach(function (): void {
+        actingAs(administrator());
+        [$this->promotion, $this->foreignPromotion] = Promotion::factory()->count(2)->create()->all();
+        $this->event = Event::factory()->for($this->promotion, 'promotion')->create();
+    });
+
+    afterEach(function (): void {
+        resolve(PromotionContextService::class)->clear();
+    });
+
+    it('rejects :dataset of another promotion', function (Closure $matchData, string $entityType, string $field): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors([$field]);
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
+
+    it('books the roster and titles of the event promotion', function (): void {
+        // Arrange
+        $wrestlers = Wrestler::factory()->bookable()->for($this->promotion, 'promotion')->count(2)->create();
+        $referee = Referee::factory()->bookable()->for($this->promotion, 'promotion')->create();
+        $title = Title::factory()->active()->singles()->for($this->promotion, 'promotion')->create();
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlers->modelKeys()[0]]],
+                ['wrestlers' => [$wrestlers->modelKeys()[1]]],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect(EventMatch::query()->whereBelongsTo($this->event)->sole()->titles()->pluck('titles.id')->all())
+            ->toBe([$title->id]);
+    });
+
+    it('validates an edited match against the promotion of its own event', function (): void {
+        // Arrange
+        $foreignEvent = Event::factory()->for($this->foreignPromotion, 'promotion')->create();
+        $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::Singles]);
+        $foreignWrestlers = Wrestler::factory()->bookable()->for($this->foreignPromotion, 'promotion')->count(2)->create();
+        $foreignReferee = Referee::factory()->bookable()->for($this->foreignPromotion, 'promotion')->create();
+        $modal = livewire(FormModal::class, ['eventId' => $foreignEvent->id]);
+        $modal->call('openModal', $match->id);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$foreignWrestlers->modelKeys()[0]]],
+                ['wrestlers' => [$foreignWrestlers->modelKeys()[1]]],
+            ],
+            'form.referees' => [$foreignReferee->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.competitors.0.wrestlers.0', 'form.competitors.1.wrestlers.0', 'form.referees.0']);
+        expect($match->competitors()->exists())->toBeFalse();
+    });
+
+    it('leaves the card readable for the event promotion members after :dataset was refused', function (Closure $matchData): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
+        $modal->call('save');
+        $member = basicUser();
+        $this->promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        actingAs($member);
+        $context = resolve(PromotionContextService::class);
+        $context->set($this->promotion);
+        $context->enforce();
+
+        // Act
+        $table = livewire(MatchesTable::class, ['eventId' => $this->event->id]);
+
+        // Assert
+        $table->assertOk();
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
 });
 
 it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing, int $status): void {
