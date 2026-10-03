@@ -162,12 +162,14 @@ CACHE_STORE=array            # Array-based cache (fastest)
 SESSION_DRIVER=array         # Array-based sessions
 QUEUE_CONNECTION=sync        # Synchronous queue processing
 MAIL_MAILER=array           # Array mail driver (no emails sent)
+LOG_CHANNEL=null             # Discard log output
 ```
 
 **Why These Settings:**
 - **Memory DB**: Fastest database operations for tests
 - **Array Drivers**: Eliminate I/O operations for cache/sessions
 - **Sync Queue**: Immediate job processing in tests
+- **Null Log Channel**: Tests do not write `storage/logs/laravel.log` (it used to grow by about 4 MB per run). `phpunit.xml` sets it for local runs; `.env.testing` sets it too because CI caches config from a copy of that file, which `phpunit.xml` cannot override. No test asserts on log output; use `Log::spy()` or a fake in the test itself if one ever needs to
 - **Application Key**: `.env.testing` includes an `APP_KEY` for local test runs. CI copies the file and runs `php artisan key:generate`, so CI runs use a freshly generated key
 
 ## Workflow Best Practices
