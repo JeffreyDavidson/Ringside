@@ -90,7 +90,7 @@ Composer, npm, and GitHub Actions (the workflows and the local `setup-php-compos
 
 `npm install` runs `git config core.hooksPath .githooks` (the `prepare` script), which enables:
 - **`pre-commit`**: fast checks only. It runs `php -l` and Pint (`--blade --test`) on staged PHP files, and ESLint and Prettier on staged JavaScript files
-- **`pre-push`**: runs `composer test:push` (type coverage, Rector, lint, PHPStan, application tests, browser tests). Set `SKIP_PRE_PUSH_CHECKS=1` to skip it deliberately
+- **`pre-push`**: runs `composer test:push`. It first runs `composer test:static`, the four static checks (type coverage, Rector, lint and PHPStan) side by side through `concurrently`, failing if any of them fails and printing each check's output as one block. Then it runs the application tests, rebuilds the frontend assets with `npm run build` (a stale `public/build` has made browser tests fail for reasons unrelated to the change) and runs the browser tests. Set `SKIP_PRE_PUSH_CHECKS=1` to skip it deliberately
 
 ## Checking for Hidden Row-Order Assumptions
 
