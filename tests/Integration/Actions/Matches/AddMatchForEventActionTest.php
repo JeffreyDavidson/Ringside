@@ -105,6 +105,28 @@ test('it does not reuse match numbers from soft-deleted matches', function () {
     expect($match->match_number)->toBe(5);
 });
 
+test('it numbers a match past the range of a tiny integer', function () {
+    // Arrange
+    $event = Event::factory()->create();
+    EventMatch::factory()->for($event)->withMatchNumber(255)->create()->delete();
+    $matchData = new EventMatchData(
+        MatchType::Singles,
+        Referee::factory()->bookable()->count(1)->create(),
+        Title::query()->whereKey([])->get(),
+        collect([
+            1 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
+            2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
+        ]),
+        null,
+    );
+
+    // Act
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+
+    // Assert
+    expect($match->refresh()->match_number)->toBe(256);
+});
+
 test('it rolls back the match when a side contains no eligible competitors', function () {
     $event = Event::factory()->create();
     $referee = Referee::factory()->bookable()->create();

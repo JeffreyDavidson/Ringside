@@ -535,4 +535,4 @@ const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the
 /**
  * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
  */
-const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation is the guard there (migration 2026_10_01_190000).';
+const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation and the split eligibility check are the guard there (migration 2026_10_01_190000).';

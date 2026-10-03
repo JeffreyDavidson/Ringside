@@ -181,3 +181,42 @@ it('builds previous championship history with display relationships', function (
         ->and($history->firstOrFail()->previousChampionship?->is($firstChampionship))->toBeTrue()
         ->and($history->firstOrFail()->previousChampionship?->champion?->is($champion))->toBeTrue();
 });
+
+it('skips deleted reigns when finding the previous championship', function () {
+    // Arrange
+    $title = Title::factory()->singles()->create();
+    $firstChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->ended()
+        ->create([
+            'won_at' => now()->subYears(3),
+            'lost_at' => now()->subYears(2),
+        ]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->ended()
+        ->trashed()
+        ->create([
+            'won_at' => now()->subYears(2),
+            'lost_at' => now()->subYear(),
+        ]);
+    $latestChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->ended()
+        ->create([
+            'won_at' => now()->subYear(),
+            'lost_at' => now()->subMonth(),
+        ]);
+
+    // Act
+    $query = TitleChampionship::query();
+    $query->forTitleId($title->id);
+    $query->forPreviousHistory();
+    $history = $query->get();
+
+    // Assert
+    expect($history->modelKeys())->toBe([$latestChampionship->id, $firstChampionship->id])
+        ->and($history->firstOrFail()->previous_championship_id)->toBe($firstChampionship->id)
+        ->and($history->firstOrFail()->previousChampionship?->is($firstChampionship))->toBeTrue()
+        ->and($history->last()?->previous_championship_id)->toBeNull();
+});

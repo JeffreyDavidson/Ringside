@@ -52,6 +52,11 @@ final class CannotBeSplitException extends BaseBusinessException
         return new self('Cannot split stable: these selected members are unavailable: '.implode(', ', $memberNames).'.');
     }
 
+    public static function nameTaken(string $name): static
+    {
+        return new self("Cannot split stable: an active stable named '{$name}' already exists in this promotion.");
+    }
+
     public static function resultingStableBelowMinimum(string $stable, int $memberCount, int $minimumRequired): static
     {
         return new self("Cannot split stable: the {$stable} stable would have {$memberCount} members but requires at least {$minimumRequired}.");

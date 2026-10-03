@@ -34,6 +34,24 @@ final readonly class StableRestructuringEligibility
         }
     }
 
+    /**
+     * The new stable joins the original stable's promotion, so its name must be free among that promotion's active
+     * stables (or among the active stables without a promotion). The database enforces the same rule except for
+     * stables without a promotion on MySQL, which has no partial index, so it is checked here on every engine.
+     */
+    public function ensureSplitNameAvailable(Stable $stable, string $name): void
+    {
+        $nameTaken = Stable::query()
+            ->withoutGlobalScope('promotion_context')
+            ->where('promotion_id', $stable->promotion_id)
+            ->where('name', $name)
+            ->exists();
+
+        if ($nameTaken) {
+            throw CannotBeSplitException::nameTaken($name);
+        }
+    }
+
     public function ensureCanMerge(Stable $primaryStable, Stable $secondaryStable): void
     {
         if ($primaryStable->is($secondaryStable)) {
