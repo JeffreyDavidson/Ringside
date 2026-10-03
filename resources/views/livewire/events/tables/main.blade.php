@@ -28,7 +28,7 @@
                     id="events-venue"
                     data-test="events-venue-filter"
                     wire:model.live="filterValues.venue"
-                    class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2 sm:w-auto"
+                    class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2 sm:w-auto"
                 >
                     <option value="">{{ __('events.all_venues') }}</option>
                     @foreach ($this->getVenues as $venueId => $venueName)

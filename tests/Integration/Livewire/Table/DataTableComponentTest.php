@@ -6,6 +6,7 @@ namespace Tests\Integration\Livewire\Table;
 
 use App\Enums\Users\Role;
 use App\Models\Users\User;
+use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 
 use function Pest\Livewire\livewire;
@@ -52,6 +53,50 @@ describe('data table component', function (): void {
         $component
             ->assertSet('sortDirection', 'desc')
             ->assertSeeInOrder(['Zulu', 'Alpha']);
+    });
+
+    test('sortable headers announce their sort state', function (): void {
+        // Arrange
+        User::factory()->create();
+        $component = livewire(TestDataTableComponent::class);
+        $headers = function () use ($component): array {
+            $document = HTMLDocument::createFromString("<!DOCTYPE html><body>{$component->html()}</body>", LIBXML_NOERROR);
+            $nameHeader = $document->querySelector('th[aria-sort]');
+
+            return [
+                'sort' => $nameHeader?->getAttribute('aria-sort'),
+                'buttonType' => $nameHeader?->querySelector('button')?->getAttribute('type'),
+                'decorativeIcons' => count($nameHeader?->querySelectorAll('svg:not([aria-hidden="true"])') ?? []),
+                'sortableHeaders' => count($document->querySelectorAll('th[aria-sort]')),
+            ];
+        };
+
+        // Assert
+        expect($headers())->toBe(['sort' => 'none', 'buttonType' => 'button', 'decorativeIcons' => 0, 'sortableHeaders' => 1]);
+
+        // Act
+        $component->call('sort', 'first_name');
+
+        // Assert
+        expect($headers())->toBe(['sort' => 'ascending', 'buttonType' => 'button', 'decorativeIcons' => 0, 'sortableHeaders' => 1]);
+
+        // Act
+        $component->call('sort', 'first_name');
+
+        // Assert
+        expect($headers())->toBe(['sort' => 'descending', 'buttonType' => 'button', 'decorativeIcons' => 0, 'sortableHeaders' => 1]);
+    });
+
+    test('the loading toast is a translated status message', function (): void {
+        // Act
+        $component = livewire(TestDataTableComponent::class);
+
+        // Assert
+        $document = HTMLDocument::createFromString("<!DOCTYPE html><body>{$component->html()}</body>", LIBXML_NOERROR);
+        $toast = $document->querySelector('[data-test=table-updating-status]');
+
+        expect($toast?->getAttribute('role'))->toBe('status')
+            ->and(trim((string) $toast?->textContent))->toBe(__('core.updating'));
     });
 
     test('hydrated sorting state is normalized before querying', function (): void {

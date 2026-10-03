@@ -9,7 +9,7 @@
                 id="{{ $idPrefix }}-date-from"
                 type="date"
                 wire:model.live="filterValues.{{ $filterKey }}.minDate"
-                class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
+                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
             />
         </div>
         <div class="grid gap-1">
@@ -18,7 +18,7 @@
                 id="{{ $idPrefix }}-date-to"
                 type="date"
                 wire:model.live="filterValues.{{ $filterKey }}.maxDate"
-                class="border-ringside-line bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
+                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
             />
         </div>
     </div>

@@ -19,6 +19,6 @@
     @endif
 
     @if ($required)
-        <span class="text-ringside-signal-soft ml-1">*</span>
+        <span class="text-ringside-signal-soft ml-1" aria-hidden="true">*</span>
     @endif
 </label>

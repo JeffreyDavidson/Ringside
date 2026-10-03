@@ -83,6 +83,14 @@ Foreign and missing roster IDs both return `404`: `EstablishPromotionContext` ru
 promotion scopes fail closed. `tests/Feature/Http/Controllers/RosterRecordExistenceTest.php` covers every roster
 show route for Owner and Member roles.
 
+## Error pages
+
+`resources/views/errors/{403,404,419,500}.blade.php` render through `x-errors.page`, which uses the guest (`auth`)
+layout because an error can occur before the session, the user or the promotion context exists. It reads
+`auth()->hasUser()`, which only reports a user that was already resolved, so an error page never queries the database
+(a 500 may come from the database itself). A signed-in user gets a link back to the dashboard and a Log out button;
+anyone else gets a Sign in link. The 500 page shows a generic message, never the exception.
+
 ## Modal state
 
 `BaseModal::destroyOnClose()` returns `true`, so wire-elements-modal removes a modal component's state when it closes

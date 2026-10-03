@@ -1,7 +1,7 @@
 <x-form-modal>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="tag-team-details-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('tag-teams.name')" wire:model="form.name" />
+            <x-form.inputs.text :label="__('tag-teams.name')" wire:model="form.name" required initial-focus />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
@@ -16,6 +16,7 @@
                 wire:model="form.wrestlerA"
                 :options="$this->getWrestlers"
                 selected="form.wrestlerA"
+                required
             />
         </x-form-modal.modal-input>
 
@@ -25,6 +26,7 @@
                 wire:model="form.wrestlerB"
                 :options="$this->getWrestlers"
                 selected="form.wrestlerB"
+                required
             />
         </x-form-modal.modal-input>
     </div>

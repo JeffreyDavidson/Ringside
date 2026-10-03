@@ -1,4 +1,4 @@
-<x-layouts.show-page>
+<x-layouts.show-page :title="$user->full_name">
     <x-slot:sidebar>
         <x-users.show.general-info :$user />
     </x-slot:sidebar>

@@ -55,7 +55,7 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-black/70 transition-opacity"
+                class="fixed inset-0 bg-black/70 transition-opacity motion-reduce:transition-none"
                 aria-hidden="true"
             ></div>
 
@@ -68,7 +68,7 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-bind:class="modalWidth"
-                class="relative inline-flex w-full align-middle text-left"
+                class="relative inline-flex w-full align-middle text-left motion-reduce:transition-none"
                 id="modal-container"
                 role="dialog"
                 aria-modal="true"

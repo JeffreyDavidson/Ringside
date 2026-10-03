@@ -8,6 +8,7 @@ use App\Enums\Users\UserStatus;
 use App\Livewire\Promotions\Members\Manage;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use Dom\HTMLDocument;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -110,7 +111,82 @@ it('gives the same generic outcome whenever no member is added', function (strin
 
     expect($promotion->memberships()->count())->toBe(1)
         ->and($promotion->hasActiveMember($active))->toBeFalse();
-})->with(['partial email', 'percent wildcard', 'underscore wildcard', 'name search', 'unknown email', 'inactive user', 'already a member']);
+})->with(['partial email', 'percent wildcard', 'underscore wildcard', 'name search', 'unknown email', 'inactive user']);
+
+it('tells the owner when the account is already a member of the promotion', function (MembershipStatus $status) {
+    $promotion = Promotion::factory()->create();
+    $existing = User::factory()->create(['email' => 'existing.member@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($existing, [
+        'role' => MembershipRole::Member,
+        'status' => $status,
+    ]);
+
+    Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'Existing.Member@example.test'])
+        ->call('addMember')
+        ->assertHasErrors(['email'])
+        ->assertSee(__('promotions.member_already_added'))
+        ->assertDontSee(__('promotions.member_not_added'))
+        ->assertNotDispatched('flash-message');
+
+    expect($promotion->memberships()->count())->toBe(1);
+})->with([
+    'active member' => [MembershipStatus::Active],
+    'suspended member' => [MembershipStatus::Suspended],
+]);
+
+it('confirms an added member and clears an earlier email error', function () {
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy", 'status' => UserStatus::Active]);
+
+    Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'nobody@example.test'])
+        ->call('addMember')
+        ->assertHasErrors(['email'])
+        ->set('email', $user->email)
+        ->set('newMemberRole', MembershipRole::Manager->value)
+        ->call('addMember')
+        ->assertHasNoErrors()
+        ->assertDispatched('flash-message', type: 'status', message: "Ann D'Arcy was added to this promotion as Manager.");
+});
+
+it('links the email error to the email input', function () {
+    $promotion = Promotion::factory()->create();
+
+    $html = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'nobody@example.test'])
+        ->call('addMember')
+        ->html();
+
+    $document = HTMLDocument::createFromString($html, LIBXML_NOERROR);
+    $input = $document->getElementById('promotion-member-email');
+    $error = $document->getElementById('promotion-member-email-error');
+
+    expect($input?->getAttribute('aria-describedby'))->toBe('promotion-member-email-help promotion-member-email-error')
+        ->and($input?->getAttribute('aria-invalid'))->toBe('true')
+        ->and($error?->textContent)->toContain(__('promotions.member_not_added'));
+});
+
+it('labels roles and membership statuses with their enum labels', function () {
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Manager,
+        'status' => MembershipStatus::Suspended,
+    ]);
+
+    Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id])
+        ->assertSeeHtmlInOrder([
+            '<option value="owner">',
+            MembershipRole::Owner->label(),
+            '<option value="manager">',
+            MembershipRole::Manager->label(),
+            '<option value="member"',
+            MembershipRole::Member->label(),
+        ])
+        ->assertSee(MembershipStatus::Suspended->label());
+});
 
 it('requires an email and a valid role to add a member', function (string $email, string $role, string $field) {
     $promotion = Promotion::factory()->create();
@@ -169,7 +245,8 @@ it('updates a member role without changing membership in another promotion', fun
         ->test(Manage::class, ['promotionId' => $promotion->id])
         ->set("memberRoles.{$user->id}", MembershipRole::Owner->value)
         ->call('updateMemberRole', $user->id)
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('flash-message', type: 'status', message: "{$user->refresh()->full_name}’s promotion role is now Owner.");
 
     expect($promotion->memberships()->where('user_id', $user->id)->firstOrFail()->role)
         ->toBe(MembershipRole::Owner)
@@ -277,4 +354,40 @@ it('allows demoting an owner when another active owner remains', function () {
 
     expect($promotion->memberships()->where('user_id', $owner->id)->firstOrFail()->role)
         ->toBe(MembershipRole::Manager);
+});
+
+it('clears an earlier email error once a role is saved', function () {
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Member,
+        'status' => MembershipStatus::Active,
+    ]);
+
+    Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'nobody@example.test'])
+        ->call('addMember')
+        ->assertHasErrors(['email'])
+        ->set("memberRoles.{$user->id}", MembershipRole::Manager->value)
+        ->call('updateMemberRole', $user->id)
+        ->assertHasNoErrors()
+        ->assertDontSee(__('promotions.member_not_added'));
+});
+
+it('confirms suspending and reactivating a member', function () {
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy", 'status' => UserStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Member,
+        'status' => MembershipStatus::Active,
+    ]);
+
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+    $component->call('updateMemberStatus', $user->id, MembershipStatus::Suspended->value)
+        ->assertDispatched('flash-message', type: 'status', message: "Ann D'Arcy can no longer access this promotion.");
+
+    $component->call('updateMemberStatus', $user->id, MembershipStatus::Active->value)
+        ->assertDispatched('flash-message', type: 'status', message: "Ann D'Arcy can access this promotion again.");
 });

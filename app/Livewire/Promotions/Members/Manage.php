@@ -11,6 +11,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
@@ -26,6 +27,8 @@ use Livewire\Component;
 /** @property-read Collection<int, PromotionMembership> $members */
 class Manage extends Component
 {
+    use DispatchesActionFeedback;
+
     #[Locked]
     public int $promotionId;
 
@@ -56,6 +59,8 @@ class Manage extends Component
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
 
+        $this->resetErrorBag('email');
+
         $validated = Validator::make(
             ['email' => $this->email, 'role' => $this->newMemberRole],
             [
@@ -76,14 +81,23 @@ class Manage extends Component
 
         $role = MembershipRole::from($validated['role']);
 
-        if ($user === null || ! app(AddPromotionMemberAction::class)->handle($promotion, $user, $role)) {
+        // Unknown, inactive and partial input share one message so the form cannot be used to discover accounts.
+        if ($user === null) {
             $this->addError('email', __('promotions.member_not_added'));
+
+            return;
+        }
+
+        // The owner already sees every member of the promotion, so naming this case reveals nothing new.
+        if (! app(AddPromotionMemberAction::class)->handle($promotion, $user, $role)) {
+            $this->addError('email', __('promotions.member_already_added'));
 
             return;
         }
 
         $this->memberRoles[$user->id] = $role->value;
         $this->reset('email');
+        $this->dispatchActionSuccess(__('promotions.member_added', ['name' => $user->full_name, 'role' => $role->label()]));
     }
 
     public function updateMemberRole(int $userId): void
@@ -108,7 +122,12 @@ class Manage extends Component
         } catch (BaseBusinessException $exception) {
             $this->memberRoles[$userId] = $this->currentRole($promotion, $userId);
             $this->addError('member', $exception->getMessage());
+
+            return;
         }
+
+        $this->resetErrorBag(['email', 'member']);
+        $this->dispatchActionSuccess(__('promotions.member_role_updated', ['name' => $user->full_name, 'role' => $role->label()]));
     }
 
     public function updateMemberStatus(int $userId, string $status): void
@@ -125,15 +144,27 @@ class Manage extends Component
             ])]],
         )->validate();
 
+        $membershipStatus = MembershipStatus::from($status);
+
         try {
             app(UpdatePromotionMemberStatusAction::class)->handle(
                 $promotion,
                 $user,
-                MembershipStatus::from($status),
+                $membershipStatus,
             );
         } catch (BaseBusinessException $exception) {
             $this->addError('member', $exception->getMessage());
+
+            return;
         }
+
+        $this->resetErrorBag(['email', 'member']);
+        $this->dispatchActionSuccess(__(
+            $membershipStatus === MembershipStatus::Suspended
+                ? 'promotions.member_suspended'
+                : 'promotions.member_reactivated',
+            ['name' => $user->full_name],
+        ));
     }
 
     public function render(): View

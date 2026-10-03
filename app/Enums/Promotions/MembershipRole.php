@@ -36,6 +36,15 @@ enum MembershipRole: string
         'deactivate',
     ];
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::Owner => 'Owner',
+            self::Manager => 'Manager',
+            self::Member => 'Member',
+        };
+    }
+
     public function allows(string $ability): bool
     {
         return match ($this) {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Dom\HTMLDocument;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
@@ -96,3 +97,16 @@ it('renders standalone errors as a visible alert with an icon', function (): voi
         ->toContain('<svg')
         ->toContain('This wrestler is not available for booking.');
 });
+
+it('marks required fields on the control and its label', function (string $component, bool $required): void {
+    view()->share('errors', new ViewErrorBag);
+
+    $html = Blade::render('<x-'.$component.' wire:model="form.name" label="Name" :required="$required" />', ['required' => $required]);
+    $document = HTMLDocument::createFromString($html, LIBXML_NOERROR);
+
+    expect($document->getElementById('form.name')?->hasAttribute('required'))->toBe($required)
+        ->and($document->querySelector('label [aria-hidden="true"]')?->textContent)->toBe($required ? '*' : null);
+})->with(['form.input', 'form.inputs.textarea', 'form.inputs.select'])->with([
+    'required' => [true],
+    'optional' => [false],
+]);
