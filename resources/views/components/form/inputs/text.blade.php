@@ -1,3 +1,3 @@
-@props(['label' => null])
+@props(['label' => null, 'initialFocus' => false])
 
-<x-form.input type="text" :$label {{ $attributes }}>{{ $slot }}</x-form.input>
+<x-form.input type="text" :$label :$initialFocus {{ $attributes }}>{{ $slot }}</x-form.input>

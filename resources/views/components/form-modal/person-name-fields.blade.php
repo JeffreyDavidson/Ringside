@@ -2,7 +2,7 @@
 
 <x-layouts.form-grid :columns="2">
     <x-form-modal.modal-input>
-        <x-form.inputs.text :label="$firstNameLabel" wire:model="form.first_name" required autofocus />
+        <x-form.inputs.text :label="$firstNameLabel" wire:model="form.first_name" required initial-focus />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>

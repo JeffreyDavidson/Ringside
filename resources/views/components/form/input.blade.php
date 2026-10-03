@@ -6,6 +6,7 @@
     'appearance' => 'default',
     'type' => 'text',
     'size' => 'md',               // 'sm', 'md' (default), 'lg'
+    'initialFocus' => false,
 ])
 
 @php
@@ -44,6 +45,16 @@
 
     // Forward all attributes except field-specific ones
     $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name', 'size', 'appearance', 'aria-describedby', 'aria-invalid']);
+
+    // Focus the field once a modal has opened (the dialog first focuses its close button), unless the user has
+    // already moved into another field.
+    if ($initialFocus) {
+        $inputAttributes = $inputAttributes->merge([
+            'data-initial-focus' => true,
+            'x-data' => '',
+            'x-init' => "setTimeout(() => document.activeElement?.matches('input, select, textarea') || \$el.focus(), 50)",
+        ]);
+    }
 @endphp
 
 @if ($appearance === 'ringside' && $type === 'password')

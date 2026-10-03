@@ -74,13 +74,17 @@ expose row actions such as delete but no lifecycle methods.
 
 `x-form-modal` renders the shared `x-form.footer`. Its Save, Clear and Auto fill buttons
 are disabled while `save`, `clear` or `fillDummyFields` runs. The footer stores the form
-as it was when the modal opened, and Clear only asks for confirmation when the form has
-changed since then (typed, auto-filled, or kept after a failed save).
+as it was when the modal opened. Clear does nothing while the form is unchanged and asks
+for confirmation before it discards changes (typed, auto-filled, or kept after a failed
+save).
 
 Fields that the form's rules require take a `required` attribute; the form components
 pass it to the control and show the label's `*` marker. The first field of each modal
-has `autofocus`, which the modal script focuses after the dialog opens. Numeric text
-fields (height, weight, zip code) use `inputmode="numeric"`.
+takes `initial-focus`: once the dialog has opened (and focused its close button), the
+field focuses itself unless the user has already moved into another field. The vendor
+`autofocus` handling is not used because it moves focus unconditionally after a delay,
+which can pull typing into the wrong field. Numeric text fields (height, weight, zip
+code) use `inputmode="numeric"`.
 
 ## General Info Card
 

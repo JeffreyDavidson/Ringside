@@ -1,6 +1,6 @@
 {{--
-    The form is captured when the modal opens, so Clear only asks for confirmation once something has been typed,
-    auto-filled or kept after a failed save.
+    The form is captured when the modal opens. Clear has nothing to do while the form is unchanged, and asks before it
+    discards anything that was typed, auto-filled or kept after a failed save.
 --}}
 <div
     data-form-footer
@@ -28,7 +28,7 @@
             class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !h-9 !rounded-none !border !bg-transparent"
             :data-confirm-message="__('core.form.confirm_clear')"
             x-on:click="
-                if (JSON.stringify($wire.form) === initialForm || confirm($el.dataset.confirmMessage)) $wire.clear();
+                if (JSON.stringify($wire.form) !== initialForm && confirm($el.dataset.confirmMessage)) $wire.clear();
             "
             wire:loading.attr="disabled"
             wire:target="save, clear, fillDummyFields"

@@ -100,7 +100,7 @@ describe('form modal fields', function (): void {
         // Assert
         $focused = array_map(
             fn (Element $element): string => (string) $element->getAttribute('id'),
-            iterator_to_array($document->querySelectorAll('[autofocus]')),
+            iterator_to_array($document->querySelectorAll('[data-initial-focus]')),
         );
 
         expect($focused)->toBe([$firstField]);

@@ -7,7 +7,7 @@
                     appearance="ringside"
                     wire:model="form.name"
                     required
-                    autofocus
+                    initial-focus
                 />
 
                 <x-form.inputs.text

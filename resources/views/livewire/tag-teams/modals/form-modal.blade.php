@@ -1,7 +1,7 @@
 <x-form-modal>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="tag-team-details-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('tag-teams.name')" wire:model="form.name" required autofocus />
+            <x-form.inputs.text :label="__('tag-teams.name')" wire:model="form.name" required initial-focus />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
