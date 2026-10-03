@@ -813,6 +813,43 @@ it('rejects a title change on a deleted title', function (): void {
         ->and(TitleChampionship::withTrashed()->count())->toBe(0);
 });
 
+it('rejects a correction that would change the champion of a title deleted since', function (): void {
+    // Arrange
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    [$match, $winningSide] = titleMatchOn(now()->subDays(2), $title, Wrestler::factory()->bookable()->create());
+    $otherSide = $match->sides()->whereKeyNot($winningSide->id)->sole();
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+    resolve(DeleteTitleAction::class)->handle($title);
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $otherSide),
+    );
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class, 'A deleted title cannot change hands.')
+        ->and($match->refresh()->winning_side_id)->toBe($winningSide->id);
+});
+
+it('records a title-changing finish that keeps the champion of a title deleted since', function (): void {
+    // Arrange
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    [$match, $winningSide] = titleMatchOn(now()->subDays(2), $title, Wrestler::factory()->bookable()->create());
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+    resolve(DeleteTitleAction::class)->handle($title);
+
+    // Act
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Submission, $winningSide));
+
+    // Assert
+    $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
+
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::Submission)
+        ->and($reign->won_match_id)->toBe($match->id)
+        ->and($reign->lost_at)->not->toBeNull();
+});
+
 it('still records a result that does not change a deleted or inactive title', function (Closure $deactivate): void {
     // Arrange
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
