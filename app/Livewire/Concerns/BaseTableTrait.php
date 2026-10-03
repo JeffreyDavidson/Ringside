@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
-use App\Livewire\Concerns\Columns\HasActionColumn;
 use App\Livewire\Table\Column;
 
 trait BaseTableTrait
 {
-    use HasActionColumn;
-
     protected bool $showActionColumn = false;
 
     protected string $databaseTableName = '';
@@ -27,6 +24,11 @@ trait BaseTableTrait
             'before-wrapper' => $this->routeBasePath.'.index.table-pre',
         ]);
     }
+
+    /**
+     * Build the row actions column shown when the table enables it.
+     */
+    abstract protected function getDefaultActionColumn(): Column;
 
     /** @return array<int, Column> */
     protected function additionalColumns(): array

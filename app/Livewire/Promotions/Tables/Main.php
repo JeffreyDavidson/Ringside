@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Gate;
 class Main extends BaseTable
 {
     #[\Override]
+    protected bool $showActionColumn = true;
+
+    #[\Override]
     protected string $databaseTableName = 'promotions';
 
     #[\Override]
@@ -58,12 +61,16 @@ class Main extends BaseTable
                 ->label(fn (Promotion $promotion): string => (string) $promotion->users_count),
             Column::make(__('promotions.created'), 'created_at')
                 ->label(fn (Promotion $promotion): string => $promotion->created_at?->toFormattedDateString() ?? '—'),
-            Column::make(__('promotions.actions'))
-                ->label(fn (Promotion $promotion) => view('components.tables.columns.promotion-actions', [
-                    'promotion' => $promotion,
-                ])->render())
-                ->html()
-                ->excludeFromColumnSelect(),
         ];
+    }
+
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('promotions.actions'))
+            ->label(fn (Promotion $promotion) => view('components.tables.columns.promotion-actions', [
+                'promotion' => $promotion,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 }
