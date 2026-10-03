@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EstablishPromotionContext;
+use App\Http\Middleware\SendSecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO);
-        $middleware->web(append: [EnsureUserIsActive::class]);
+        $middleware->web(prepend: [SendSecurityHeaders::class], append: [EnsureUserIsActive::class]);
         $middleware->authenticateSessions();
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/dashboard');

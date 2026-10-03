@@ -10,6 +10,7 @@
  */
 export default function rosterCombobox({ path, kind, multiple, labels, limit, messages }) {
     let root = null;
+    let stopWatchingFocus = () => {};
 
     return {
         selected: multiple ? [] : null,
@@ -23,6 +24,7 @@ export default function rosterCombobox({ path, kind, multiple, labels, limit, me
 
         init() {
             root = this.$el;
+            this.guardAgainstLateRefocus();
             this.selected = this.readLivewireValue();
 
             this.$watch('selected', value => this.writeLivewireValue(value));
@@ -31,6 +33,50 @@ export default function rosterCombobox({ path, kind, multiple, labels, limit, me
                     this.selected = this.readLivewireValue();
                 }
             });
+        },
+
+        /**
+         * Alpine UI refocuses the search box a frame or two after an option is chosen. If focus has
+         * already moved to another field by then (the user clicked or tabbed on, or a test typed
+         * into the next field), that late refocus steals it back and the next keystrokes land in
+         * this box, which in single mode also wipes the chosen name. Programmatic focus is ignored
+         * while focus sits outside this combobox, unless the user pressed inside it since then
+         * (clicking its label still focuses it).
+         */
+        guardAgainstLateRefocus() {
+            // Alpine UI adds role="combobox" after this component initialises, so select by the rendered attribute.
+            const input = root.querySelector('input[data-field]');
+            const focus = input.focus.bind(input);
+            let focusLeftAt = 0;
+            let pressedInsideAt = 0;
+
+            stopWatchingFocus = (() => {
+                const noteFocusLeft = event => {
+                    if (!root.contains(event.target)) {
+                        focusLeftAt = window.performance.now();
+                    }
+                };
+
+                document.addEventListener('focusin', noteFocusLeft, true);
+
+                return () => document.removeEventListener('focusin', noteFocusLeft, true);
+            })();
+            root.addEventListener('pointerdown', () => (pressedInsideAt = window.performance.now()), true);
+
+            input.focus = options => {
+                const active = document.activeElement;
+                const focusIsElsewhere = active !== null && active !== document.body && !root.contains(active);
+
+                if (focusIsElsewhere && focusLeftAt > pressedInsideAt) {
+                    return;
+                }
+
+                focus(options);
+            };
+        },
+
+        destroy() {
+            stopWatchingFocus();
         },
 
         emptyValue() {
