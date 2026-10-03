@@ -76,6 +76,11 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
         return new self('A match must have at least one referee assigned.');
     }
 
+    public static function outsideEventPromotion(string $entityType): static
+    {
+        return new self("Selected {$entityType} must all belong to the event's promotion.");
+    }
+
     public static function resultAlreadyRecorded(): static
     {
         return new self('A match cannot be reconfigured after its result has been recorded.');

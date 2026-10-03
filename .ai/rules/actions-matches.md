@@ -12,7 +12,7 @@ RecordResultAction must apply match result metadata and all attached title outco
 Lock order for scheduling: the complete same-date event set (ascending id, including the action's own event) is locked first, then the match, then competitors/resources in ascending id; never lock an event or match row before the event set.
 
 ## Lock date slots before rescheduling
-Schedule changes that move an event to a date (including Events RestoreAction, for the event's own date) take the date-slot lock(s), ascending, before any event row lock; the slot lock is a transaction-scoped advisory lock on PostgreSQL and a no-op on SQLite.
+Schedule changes that move an event to a date (including Events RestoreAction, for the event's own date) take the date-slot lock(s), ascending, before any event row lock; the slot lock is an upsert of the slot's row in scheduling_slot_locks, which holds that row's lock until the transaction ends on MySQL, PostgreSQL and SQLite alike.
 
 ## Record title results in date order
 Title results are recorded in date order: a result that would create or change a reign earlier than the title's latest recorded reign, or inside the closed interval of an earlier vacated reign, is rejected with a domain exception, never written. A correction that leaves the champion unchanged is not rejected.

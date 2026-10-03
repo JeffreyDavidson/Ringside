@@ -8,6 +8,8 @@ The championship system manages title matches and ensures proper competitor vali
 
 `Title` owns only the championship relationships. Current, previous, first, longest, vacancy, reign-count, and reign-length reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
 
+The previous-championship history tables show, for each ended reign, the reign it followed: `TitleChampionshipBuilder::withPreviousChampionshipId()` selects the latest non-deleted reign of the same title won before it. Its subquery aliases the table as `previous_championships`, and Eloquent qualifies the soft-delete constraint with that alias, so a deleted reign (for example one removed by a result correction) is never reported as the previous champion.
+
 Models expose their explicit persisted naming fields: `name` for wrestlers and titles, and the database-generated `full_name` for managers and referees. They do not infer or append a generic `display_name` attribute through a shared model contract.
 
 ## Title Type Matching
@@ -42,7 +44,7 @@ The date-order check also rejects a result that would create a reign when the ev
 
 ### Result preconditions
 
-`RecordResultAction` rejects every result, title or not, unless the event has already happened (`date <= now`; a future or unscheduled event fails with `InvalidMatchOutcomeException::eventNotHeld()`), so a reign can never be dated in the future. Inside the same locked transaction, a result that would put a different champion on a title re-checks current state before writing: the title must not be soft deleted (`titleDeleted()`) and must still be active (`titleNotActive()`, so a pulled or retired title never gains a reign), and the winner must still exist (`winnerDeleted()`) and pass `RosterBookingEligibility` (`winnerNotEligible()`; retired, released, unemployed, injured, and suspended winners are rejected). Results that do not change the champion (draws, disqualifications, a champion's own defence, corrections to the same winner) are not blocked by these checks, and a deleted title is skipped for them.
+`RecordResultAction` rejects every result, title or not, unless the event has already happened (`date <= now`; a future or unscheduled event fails with `InvalidMatchOutcomeException::eventNotHeld()`), so a reign can never be dated in the future. Inside the same locked transaction, a result that would put a different champion on a title re-checks current state before writing: the title must not be soft deleted (`titleDeleted()`) and must still be active (`titleNotActive()`, so a pulled or retired title never gains a reign), and the winner must still exist (`winnerDeleted()`) and pass `RosterBookingEligibility` (`winnerNotEligible()`; retired, released, unemployed, injured, and suspended winners are rejected). Results that do not change the champion (draws, disqualifications, a champion's own defence, corrections to the same winner) are not blocked by these checks, and a deleted title is skipped for them: `ApplyMatchTitleOutcomesAction` throws `titleDeleted()` only when `ChampionshipReignManager::changesChampion()` says the result would change that title's champion, so re-recording a deleted title's match with a different title-changing finish for the same winner still succeeds and leaves its reigns untouched.
 
 ### Reign dates
 

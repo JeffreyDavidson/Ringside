@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
@@ -73,19 +74,31 @@ function openModalFromPage(string $routeName, string $component, array $argument
 
 /**
  * @param  array<int, array{method: string, params?: array<int, mixed>}>  $calls
+ * @param  array<string, mixed>  $updates
  * @return TestResponse<Response>
  */
-function postLivewireUpdate(string $snapshot, array $calls): TestResponse
+function postLivewireUpdate(string $snapshot, array $calls, array $updates = []): TestResponse
 {
+    // Start each update like a fresh request: Livewire otherwise skips the persistent middleware
+    // (and so the promotion context) for a route it already handled earlier in the test.
     app()->forgetScopedInstances();
+    app('livewire')->flushState();
 
     return withHeaders(['X-Livewire' => 'true'])->postJson(route('default-livewire.update'), [
         'components' => [[
             'snapshot' => $snapshot,
-            'updates' => [],
+            'updates' => $updates,
             'calls' => array_map(fn (array $call): array => ['path' => '', 'method' => $call['method'], 'params' => $call['params'] ?? []], $calls),
         ]],
     ]);
+}
+
+/** @param  TestResponse<Response>  $response */
+function jsonString(TestResponse $response, string $key): string
+{
+    $value = $response->json($key);
+
+    return is_string($value) ? $value : '';
 }
 
 function snapshotOf(string $html, string $component): string
@@ -105,6 +118,7 @@ dataset('promotionOwnedModals', [
     'stable' => ['stables.modals.form-modal', 'stable', 'modelId'],
     'title' => ['titles.modals.form-modal', 'title', 'modelId'],
     'event' => ['events.modals.form-modal', 'event', 'modelId'],
+    'match' => ['matches.modals.form-modal', 'match', 'modelId'],
     'match result' => ['matches.modals.result-modal', 'match', 'matchId'],
 ]);
 
@@ -153,6 +167,55 @@ describe('promotion-owned modals', function (): void {
         'tag team' => 'tag-teams.modals.form-modal',
         'stable' => 'stables.modals.form-modal',
     ]);
+
+    it('books the match form only onto :dataset', function (bool $ownEvent, array $statuses, int $addedMatches): void {
+        // Arrange
+        $world = createIsolatedPromotions();
+        actingAs($world['outsider']);
+        $event = $ownEvent
+            ? Event::factory()->for($world['attacker'], 'promotion')->scheduled()->create()
+            : $world['records']['event'];
+        $matchCount = EventMatch::withoutGlobalScopes()->where('event_id', $event->getKey())->count();
+        $wrestlers = Wrestler::factory()->for($world['attacker'], 'promotion')->bookable()->count(2)->create();
+        $referee = Referee::factory()->for($world['attacker'], 'promotion')->bookable()->create();
+        $opened = openModalFromPage('dashboard', 'matches.modals.form-modal', ['eventId' => $event->getKey()]);
+        $formModal = snapshotOf(jsonString($opened, 'components.0.effects.html'), 'matches.modals.form-modal');
+        $typed = postLivewireUpdate($formModal, [], ['form.matchType' => MatchType::Singles->value]);
+
+        // Act
+        $response = postLivewireUpdate(jsonString($typed, 'components.0.snapshot'), [['method' => 'save']], [
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlers->modelKeys()[0]]],
+                ['wrestlers' => [$wrestlers->modelKeys()[1]]],
+            ],
+            'form.referees' => [$referee->id],
+        ]);
+
+        // Assert
+        expect($response->getStatusCode())->toBeIn($statuses);
+        expect(EventMatch::withoutGlobalScopes()->where('event_id', $event->getKey())->count())->toBe($matchCount + $addedMatches);
+    })->with([
+        'an event of the active promotion' => [true, [200], 1],
+        'another promotion event passed when opening it' => [false, [403, 404], 0],
+    ]);
+
+    it('does not let the event of an opened match form be swapped for another promotion event', function (): void {
+        // Arrange
+        $world = createIsolatedPromotions();
+        actingAs($world['outsider']);
+        $ownEvent = Event::factory()->for($world['attacker'], 'promotion')->scheduled()->create();
+        $victimEvent = $world['records']['event'];
+        $opened = openModalFromPage('dashboard', 'matches.modals.form-modal', ['eventId' => $ownEvent->id]);
+        $formModal = snapshotOf(jsonString($opened, 'components.0.effects.html'), 'matches.modals.form-modal');
+
+        // Act
+        $response = postLivewireUpdate($formModal, [['method' => 'save']], ['eventId' => $victimEvent->getKey()]);
+
+        // Assert
+        // Livewire rejects the locked property: 419 in production, the exception page (500) in debug mode.
+        expect($response->getStatusCode())->toBeIn([419, 500]);
+        expect(EventMatch::withoutGlobalScopes()->where('event_id', $victimEvent->getKey())->count())->toBe(1);
+    });
 
     it('does not let an administrator who belongs to another promotion open the record', function (): void {
         // Arrange

@@ -56,9 +56,18 @@ class FormModal extends BaseFormModal
         $this->form->role = 'basic';
     }
 
+    /**
+     * AuthenticateSession stores the signed-in user's password hash in the session at the end of the request, so
+     * when administrators edit their own account the guard must hold the updated user. Otherwise a changed password
+     * would sign them out of this session too, not only their other sessions.
+     */
     protected function updateForm(): void
     {
-        $this->updateAction->handle($this->form->user(), $this->form->toData());
+        $updatedUser = $this->updateAction->handle($this->form->user(), $this->form->toData());
+
+        if ($updatedUser->is(auth()->user())) {
+            auth()->guard()->setUser($updatedUser);
+        }
     }
 
     protected function createForm(): void

@@ -11,6 +11,8 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -234,6 +236,19 @@ describe('deleting matches', function (): void {
             ->and($transition->transition)->toBe(LifecycleTransitionType::Deleted);
     });
 
+    it('recomputes the remembered match total after a match is deleted', function (): void {
+        // Arrange
+        $event = Event::factory()->create();
+        $matches = EventMatch::factory()->count(2)->forEvent($event)->create();
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $matches->first());
+
+        // Assert
+        expect($component->get('metadataSnapshot')['total'])->toBe(1);
+    });
+
     it('forbids members without delete access from deleting a match', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
@@ -364,6 +379,31 @@ it('lists matches in card order whatever order they were created in', function (
 
     // Assert
     $component->assertSeeInOrder(['Singles', 'Tag Team', 'Battle Royal']);
+});
+
+it('lists a match\'s referees, titles and teammates in id order whatever order they were added in', function (): void {
+    // Arrange
+    $event = Event::factory()->create();
+    [$firstReferee, $secondReferee] = Referee::factory()->count(2)->sequence(['last_name' => 'Firstref'], ['last_name' => 'Secondref'])->create()->all();
+    [$firstTitle, $secondTitle] = Title::factory()->count(2)->tagTeam()->sequence(['name' => 'First Belt'], ['name' => 'Second Belt'])->create()->all();
+    [$firstWrestler, $secondWrestler] = Wrestler::factory()->count(2)->sequence(['name' => 'First Partner'], ['name' => 'Second Partner'])->create()->all();
+    $match = EventMatch::factory()->forEvent($event)->withMatchType(MatchType::TagTeam)->create();
+    $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($secondWrestler, 'competitor')->create(['id' => 9002]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($firstWrestler, 'competitor')->create(['id' => 9001]);
+    $match->referees()->attach($secondReferee);
+    $match->referees()->attach($firstReferee);
+    $match->titles()->attach($secondTitle);
+    $match->titles()->attach($firstTitle);
+
+    // Act
+    $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+    // Assert
+    $component
+        ->assertSeeInOrder(['First Partner', 'Second Partner'])
+        ->assertSeeInOrder(['Firstref', 'Secondref'])
+        ->assertSeeInOrder(['First Belt', 'Second Belt']);
 });
 
 it('forbids users without administrative access', function (string $actor, int $status): void {

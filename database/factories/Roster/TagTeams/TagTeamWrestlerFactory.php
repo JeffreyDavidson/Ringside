@@ -22,7 +22,7 @@ class TagTeamWrestlerFactory extends Factory
      */
     public function definition(): array
     {
-        $joinedAt = fake()->dateTimeBetween('-2 years', 'now');
+        $joinedAt = now()->subDays(fake()->numberBetween(0, 730));
 
         return [
             'tag_team_id' => TagTeam::factory(),
@@ -38,7 +38,7 @@ class TagTeamWrestlerFactory extends Factory
     public function current(): static
     {
         return $this->state([
-            'joined_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'joined_at' => now()->subDays(fake()->numberBetween(0, 365)),
             'left_at' => null,
         ]);
     }
@@ -52,7 +52,7 @@ class TagTeamWrestlerFactory extends Factory
             $joinedAt = Carbon::parse($attributes['joined_at']);
 
             return [
-                'left_at' => fake()->dateTimeBetween($joinedAt, 'now'),
+                'left_at' => $joinedAt->copy()->addDays(fake()->numberBetween(0, (int) $joinedAt->diffInDays(now()))),
             ];
         });
     }

@@ -27,7 +27,7 @@ class LifecycleTransitionFactory extends Factory
             'subject_id' => Title::factory(),
             'dimension' => LifecycleDimension::Activity,
             'transition' => LifecycleTransitionType::Debuted,
-            'effective_at' => fake()->dateTimeBetween('-1 year'),
+            'effective_at' => now()->subDays(fake()->numberBetween(0, 365)),
             'user_id' => null,
             'context' => null,
         ];

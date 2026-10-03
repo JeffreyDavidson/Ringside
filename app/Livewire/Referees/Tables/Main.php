@@ -42,7 +42,8 @@ class Main extends BaseTable
     {
         return Referee::query()
             ->withFirstEmployment()
-            ->oldest('last_name');
+            ->oldest('last_name')
+            ->orderBy('referees.id');
     }
 
     #[\Override]

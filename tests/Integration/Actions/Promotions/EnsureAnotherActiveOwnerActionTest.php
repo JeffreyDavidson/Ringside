@@ -6,13 +6,18 @@ use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Promotions\UpdatePromotionMemberStatusAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 
-function attachMember(Promotion $promotion, MembershipRole $role, MembershipStatus $status = MembershipStatus::Active): User
-{
-    $user = User::factory()->create();
+function attachMember(
+    Promotion $promotion,
+    MembershipRole $role,
+    MembershipStatus $status = MembershipStatus::Active,
+    UserStatus $userStatus = UserStatus::Active,
+): User {
+    $user = User::factory()->create(['status' => $userStatus]);
     $promotion->users()->attach($user, ['role' => $role, 'status' => $status]);
 
     return $user;
@@ -42,6 +47,22 @@ test('a suspended second owner does not count as another active owner', function
 
     expect(fn () => $change($promotion, $owner))->toThrow(CannotRemoveLastOwnerException::class);
 })->with('owner-removing changes');
+
+test('an owner whose user account is not active does not count as another active owner', function (UserStatus $userStatus, Closure $change): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $owner = attachMember($promotion, MembershipRole::Owner);
+    attachMember($promotion, MembershipRole::Owner, userStatus: $userStatus);
+
+    // Act
+    $attempt = fn () => $change($promotion, $owner);
+
+    // Assert
+    expect($attempt)->toThrow(CannotRemoveLastOwnerException::class, "{$promotion->name} must keep at least one active owner.");
+})->with([
+    'inactive account' => UserStatus::Inactive,
+    'unverified account' => UserStatus::Unverified,
+])->with('owner-removing changes');
 
 test('an owner can be demoted or suspended while another active owner remains', function (Closure $change): void {
     $promotion = Promotion::factory()->create();

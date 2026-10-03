@@ -14,6 +14,8 @@ beforeEach(function (): void {
         'ip' => $request->ip(),
         'secure' => $request->isSecure(),
         'host' => $request->getHost(),
+        'port' => $request->getPort(),
+        'reset_link' => route('password.request'),
     ]);
 });
 
@@ -89,6 +91,23 @@ test('a forwarded host header is never trusted, even from Cloudflare', function 
 
     // Assert
     $response->assertJsonPath('host', fn (string $host): bool => $host !== 'evil.example');
+});
+
+test('a forwarded port header is never trusted, even from Cloudflare', function (): void {
+    // Arrange
+    $headers = [
+        'X-Forwarded-Proto' => 'https',
+        'X-Forwarded-Port' => '8443',
+    ];
+
+    // Act
+    $response = probeFrom('173.245.48.10', $headers);
+
+    // Assert
+    $response
+        ->assertJsonPath('secure', true)
+        ->assertJsonPath('port', 443)
+        ->assertJsonPath('reset_link', fn (string $link): bool => str_starts_with($link, 'https://') && ! str_contains($link, ':8443'));
 });
 
 test('visitors behind the same Cloudflare address are throttled separately', function (): void {

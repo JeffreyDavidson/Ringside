@@ -12,9 +12,27 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
+
 afterEach(function (): void {
     resolve(PromotionContextService::class)->clear();
 });
+
+/**
+ * Bookable wrestlers inserted out of order: distinct names in reverse, then two namesakes with descending ids, so only
+ * an ORDER BY on the name and then the id yields the returned ids.
+ *
+ * @return list<int> The wrestler ids in name, then id, order
+ */
+function bookableWrestlersOutOfOrder(): array
+{
+    $last = Wrestler::factory()->bookable()->create(['name' => 'Zack Ryder']);
+    $first = Wrestler::factory()->bookable()->create(['name' => 'Adam Cole']);
+    $secondNamesake = Wrestler::factory()->bookable()->create(['id' => 9002, 'name' => 'Matt Hardy']);
+    $firstNamesake = Wrestler::factory()->bookable()->create(['id' => 9001, 'name' => 'Matt Hardy']);
+
+    return [$first->id, $firstNamesake->id, $secondNamesake->id, $last->id];
+}
 
 describe('search', function (): void {
     it('offers at most twenty bookable records ordered by name when the term is empty', function (): void {
@@ -24,7 +42,7 @@ describe('search', function (): void {
         }
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '', null);
 
         // Assert
         expect($options)->toHaveCount(20)
@@ -34,13 +52,24 @@ describe('search', function (): void {
             ));
     });
 
+    it('orders matches by name and then by id whatever order they were added in', function (): void {
+        // Arrange
+        $expectedIds = bookableWrestlersOutOfOrder();
+
+        // Act
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'a', null);
+
+        // Assert
+        expect(array_column($options, 'id'))->toBe($expectedIds);
+    });
+
     it('matches names case-insensitively anywhere in the name', function (): void {
         // Arrange
         Wrestler::factory()->bookable()->create(['name' => 'Ricky Steamboat']);
         Wrestler::factory()->bookable()->create(['name' => 'Randy Savage']);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '  STEAM ');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '  STEAM ', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Ricky Steamboat']);
@@ -52,7 +81,7 @@ describe('search', function (): void {
         Wrestler::factory()->{$unbookableState}()->create(['name' => 'Unbookable Wrestler']);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'Wrestler');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'Wrestler', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Bookable Wrestler']);
@@ -65,7 +94,7 @@ describe('search', function (): void {
         TagTeam::factory()->bookable()->create(['name' => 'The Rockers']);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::TagTeams, 'hart');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::TagTeams, 'hart', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['The Hart Foundation']);
@@ -78,7 +107,7 @@ describe('search', function (): void {
         Referee::factory()->bookable()->create(['first_name' => 'Mike', 'last_name' => 'Chioda']);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Referees, 'earl');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Referees, 'earl', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Earl Hebner']);
@@ -94,11 +123,36 @@ describe('search', function (): void {
         $context->enforce();
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'Wrestler');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'Wrestler', $promotion->id);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Our Wrestler']);
     });
+
+    it('offers only the requested promotion roster to :dataset without a promotion context', function (Closure $actor, ?string $promotionName, array $expectedNames): void {
+        // Arrange
+        $actor();
+        $promotions = [
+            'Ours' => Promotion::factory()->create(),
+            'Theirs' => Promotion::factory()->create(),
+        ];
+        Wrestler::factory()->for($promotions['Ours'], 'promotion')->bookable()->create(['name' => 'Our Wrestler']);
+        Wrestler::factory()->for($promotions['Theirs'], 'promotion')->bookable()->create(['name' => 'Their Wrestler']);
+        Wrestler::factory()->bookable()->create(['name' => 'Unowned Wrestler']);
+        $promotionId = $promotionName === null ? null : $promotions[$promotionName]->id;
+
+        // Act
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, 'Wrestler', $promotionId);
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe($expectedNames);
+    })->with([
+        'a global administrator' => [fn () => actingAs(administrator())],
+        'the console' => [fn () => null],
+    ])->with([
+        'for a promotion' => ['Ours', ['Our Wrestler']],
+        'for unowned records' => [null, ['Unowned Wrestler']],
+    ]);
 
     it('treats wildcard and quote characters in the term as plain text', function (string $term): void {
         // Arrange
@@ -106,7 +160,7 @@ describe('search', function (): void {
         Wrestler::factory()->bookable()->create(['name' => "Dan O'Brien"]);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, $term);
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, $term, null);
 
         // Assert
         expect(array_column($options, 'name'))->toBeEmpty();
@@ -118,12 +172,41 @@ describe('search', function (): void {
         'semicolon injection' => ['x"; DROP TABLE wrestlers; --zzz'],
     ]);
 
+    it('drops wildcard characters from the term instead of letting them match any character', function (string $term): void {
+        // Arrange
+        Wrestler::factory()->bookable()->create(['name' => 'Ricky Steamboat']);
+
+        // Act
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, $term, null);
+
+        // Assert
+        expect($options)->toBeEmpty();
+    })->with([
+        'underscore standing in for one letter' => ['R_cky'],
+        'percent standing in for one letter' => ['Ri%ky'],
+        'percent standing in for several letters' => ['R%boat'],
+    ]);
+
+    it('still finds the name once the wildcard characters are dropped from the term', function (string $term): void {
+        // Arrange
+        Wrestler::factory()->bookable()->create(['name' => 'Ricky Steamboat']);
+
+        // Act
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, $term, null);
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Ricky Steamboat']);
+    })->with([
+        'stray underscore' => ['Ric_ky'],
+        'stray percent' => ['Ric%ky'],
+    ]);
+
     it('lists the first twenty records when the term only contains wildcards', function (): void {
         // Arrange
         Wrestler::factory()->bookable()->create(['name' => 'Ricky Steamboat']);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '%_');
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '%_', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Ricky Steamboat']);
@@ -134,7 +217,7 @@ describe('search', function (): void {
         Wrestler::factory()->bookable()->create(['name' => "Dan O'Brien"]);
 
         // Act
-        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, "O'Br");
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, "O'Br", null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(["Dan O'Brien"]);
@@ -159,6 +242,17 @@ describe('labels', function (): void {
         // Assert
         expect(array_column($labels, 'name'))->toBe(['Bookable Wrestler', 'Retired Wrestler', 'Trashed Wrestler'])
             ->and(array_column($labels, 'id'))->not->toContain($unselected->id);
+    });
+
+    it('orders labels by name and then by id whatever order the ids were selected in', function (): void {
+        // Arrange
+        $expectedIds = bookableWrestlersOutOfOrder();
+
+        // Act
+        $labels = resolve(BookableRosterSearch::class)->labels(BookableRosterKind::Wrestlers, array_reverse($expectedIds));
+
+        // Assert
+        expect(array_column($labels, 'id'))->toBe($expectedIds);
     });
 
     it('resolves tag team and referee names', function (): void {

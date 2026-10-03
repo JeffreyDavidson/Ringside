@@ -14,7 +14,8 @@ final class EnsureAnotherActiveOwnerAction
 {
     /**
      * Call inside the caller's transaction after locking the promotion. Rejects when the given
-     * membership is the promotion's only active owner.
+     * membership is the promotion's only active owner. Another owner counts only when both the
+     * membership and that owner's user account are active.
      */
     public function handle(Promotion $lockedPromotion, PromotionMembership $lockedMembership): void
     {
@@ -23,13 +24,14 @@ final class EnsureAnotherActiveOwnerAction
         }
 
         $hasAnotherActiveOwner = $lockedPromotion->memberships()
-            ->where('role', MembershipRole::Owner)
-            ->where('status', MembershipStatus::Active)
+            ->withRole(MembershipRole::Owner)
+            ->active()
+            ->withActiveUser()
             ->where('user_id', '!=', $lockedMembership->user_id)
             ->exists();
 
         if (! $hasAnotherActiveOwner) {
-            throw CannotRemoveLastOwnerException::lastActiveOwner();
+            throw CannotRemoveLastOwnerException::lastActiveOwner($lockedPromotion);
         }
     }
 }

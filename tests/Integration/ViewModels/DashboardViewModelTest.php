@@ -52,6 +52,22 @@ describe('roster availability', function (): void {
             'suspended' => 2,
         ]);
     });
+
+    it('reports zero for every count when nobody is under contract', function (): void {
+        // Arrange
+        Wrestler::factory()->unemployed()->create();
+
+        // Act
+        $availability = app(DashboardViewModel::class)->rosterAvailability();
+
+        // Assert
+        expect($availability)->toBe([
+            'employed' => 0,
+            'available' => 0,
+            'injured' => 0,
+            'suspended' => 0,
+        ]);
+    });
 });
 
 describe('current champions', function (): void {

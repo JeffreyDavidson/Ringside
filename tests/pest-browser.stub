@@ -17,17 +17,21 @@ function visit(array|string $url, array $options = []) {}
 
 namespace Pest\Browser\Api {
 
+use Pest\Browser\Playwright\Page;
+
 /**
  * AwaitableWebpage maps fluent Webpage results back to its own wrapper.
  *
  * @mixin Webpage
  * @method AwaitableWebpage wait(int|float|null $seconds = null)
+ * @method Page page()
  */
 final readonly class AwaitableWebpage {}
 
 /**
  * @mixin Webpage|AwaitableWebpage
  * @method AwaitableWebpage wait(int|float|null $seconds = null)
+ * @method Page page()
  */
 final class PendingAwaitablePage {}
 
@@ -40,5 +44,11 @@ final readonly class On {}
 final readonly class Webpage {}
 
 final class ArrayablePendingAwaitablePage {}
+
+}
+
+namespace Pest\Browser\Playwright {
+
+final class Page {}
 
 }

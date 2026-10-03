@@ -7,8 +7,13 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\travelTo;
+
 test('administrator can employ and retire a wrestler from the detail page', function (): void {
     // Arrange
+    // The browser server runs in this process, so a fixed clock just before midnight proves the start date
+    // shown after employing cannot roll over to the next day mid-test.
+    travelTo(now()->setDate(2031, 7, 14)->setTime(23, 59, 30));
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
     $promotion->users()->attach($administrator, [
@@ -20,6 +25,7 @@ test('administrator can employ and retire a wrestler from the detail page', func
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));
+    $page->script('void (window.confirm = () => true)');
     $page
         ->assertSee($wrestler->name)
         ->assertPresent('button:has-text("Employ")')
@@ -41,4 +47,33 @@ test('administrator can employ and retire a wrestler from the detail page', func
         ->assertNoJavascriptErrors();
 
     expect($wrestler->refresh()->currentRetirement()->exists())->toBeTrue();
+});
+
+test('retiring a wrestler waits for the administrator to confirm it', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy", 'promotion_id' => $promotion->id]);
+    $this->actingAs($administrator);
+
+    // Act / Assert
+    $page = visit(route('wrestlers.show', $wrestler));
+    $page->script('void (window.confirm = (message) => { window.confirmedMessage = message; return false; })');
+    $page
+        ->click('button:has-text("Retire")')
+        ->assertScript('window.confirmedMessage', "Retire Ann D'Arcy?")
+        ->assertSeeIn('tr:has-text("Status:")', 'Employed')
+        ->assertPresent('button:has-text("Retire")');
+    $page->script('void (window.confirm = () => true)');
+    $page
+        ->click('button:has-text("Retire")')
+        ->assertSee('Wrestler has been retired.')
+        ->assertSeeIn('tr:has-text("Status:")', 'Retired')
+        ->assertNoJavascriptErrors();
+
+    expect($wrestler->refresh()->retirements()->count())->toBe(1);
 });

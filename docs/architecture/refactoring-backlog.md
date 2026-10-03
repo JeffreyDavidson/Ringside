@@ -260,8 +260,12 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 
 Owners add promotion members by typing the exact email of an existing active
 account; the member is attached immediately and no message is sent. The Manage
-component answers every non-match (unknown, inactive, partial, already a member)
-with one generic message so it does not confirm which accounts exist. A real
+component answers every non-match (unknown, inactive, partial) with one generic
+message so it does not confirm which accounts exist. An account that is already
+a member gets its own message: the owner already sees every member in the list
+on that page, so naming the case reveals nothing new. Adding a member, saving a
+role, and suspending or reactivating a member confirm the change through the
+shared flash message. A real
 invitation flow (an invitation record, an email, and an accept page, using the
 existing `MembershipStatus::Invited` state) is deferred.
 
@@ -306,9 +310,9 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
   exception, like the other delete messages, and not a translation key.
 - **Duplicate authorization in `BaseFormModal`.** `openModal` and `submitForm` authorize again now that
   `BaseModal::mount()` authorizes. Harmless, but one of them could go.
-- **Browser test timing.** Responsive-layout tests hit intermittent 5000 ms Playwright timeouts under load, and the
-  roster combobox needs a short wait between steps because Alpine UI refocuses the input on the next tick. If the
-  timeouts keep blocking pushes, raise the Playwright timeout deliberately.
+- **Browser test timing.** Responsive-layout tests hit intermittent 5000 ms Playwright timeouts under load. If the
+  timeouts keep blocking pushes, raise the Playwright timeout deliberately. The match form tests wait for page
+  conditions with `waitForScript()` (tests/Pest.php) instead of fixed sleeps; use it for new browser waits.
 - **Production hardening (operator task, not code).** Set `APP_URL` to `https://`, set `SESSION_SECURE_COOKIE=true`
   explicitly (the cookie is already sent as `secure`), and add HSTS in Cloudflare. A Content-Security-Policy and a
   Referrer-Policy are separate projects.

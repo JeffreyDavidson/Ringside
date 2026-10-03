@@ -1,6 +1,6 @@
 <x-form-modal>
     <x-form-modal.modal-input>
-        <x-form.inputs.text :label="__('events.name')" wire:model="form.name" />
+        <x-form.inputs.text :label="__('events.name')" wire:model="form.name" required initial-focus />
     </x-form-modal.modal-input>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="event-schedule-grid">

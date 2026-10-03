@@ -74,6 +74,20 @@ test('an unused email and a non-string value pass the rule itself', function () 
         ->and($nonString)->toBeTrue();
 });
 
+test('LIKE wildcards in the typed email never match a different stored email', function (string $stored, string $typed) {
+    // Arrange
+    User::factory()->create(['email' => $stored]);
+
+    // Act
+    $passes = emailValidationPasses($typed);
+
+    // Assert
+    expect($passes)->toBeTrue();
+})->with([
+    'underscore against any one character' => ['fooXbar@example.com', 'foo_bar@example.com'],
+    'percent against any run of characters' => ['foo.long.name@example.com', 'foo%@example.com'],
+]);
+
 test('the failure message uses the standard unique wording', function () {
     // Arrange
     User::factory()->create(['email' => 'foo@example.com']);

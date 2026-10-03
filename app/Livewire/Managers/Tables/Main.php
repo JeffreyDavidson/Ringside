@@ -44,7 +44,8 @@ class Main extends BaseTable
     {
         return Manager::query()
             ->withFirstEmployment()
-            ->oldest('last_name');
+            ->oldest('last_name')
+            ->orderBy('managers.id');
     }
 
     #[\Override]

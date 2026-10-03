@@ -1,4 +1,4 @@
-<x-layouts.app title="Wrestlers">
+<x-layouts.app :title="__('wrestlers.index_title')">
     <x-layouts.workspace-canvas class="min-w-0">
         <livewire:wrestlers.tables.main defer />
     </x-layouts.workspace-canvas>

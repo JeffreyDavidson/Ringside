@@ -1,6 +1,6 @@
 @props(['id', 'model', 'value' => '', 'label', 'placeholder', 'clearLabel'])
 
-<div class="border-ringside-line focus-within:border-ringside-ink relative flex min-h-11 w-full items-center gap-2 border px-3 sm:max-w-sm">
+<div class="border-ringside-outline focus-within:outline-ringside-ink relative flex min-h-11 w-full items-center gap-2 border px-3 focus-within:outline-2 focus-within:outline-offset-2 sm:max-w-sm">
     <x-heroicon-o-magnifying-glass class="text-ringside-muted size-4 shrink-0" aria-hidden="true" />
     <label for="{{ $id }}" class="sr-only">{{ $label }}</label>
     <input

@@ -17,7 +17,7 @@ final class VenueSchedulingEligibility
      */
     public static function ensureAvailable(Venue $venue, Carbon $date, ?Event $except = null): void
     {
-        $day = $date->copy()->setTimezone(date_default_timezone_get());
+        $day = self::calendarDay($date);
 
         $events = $venue->events()
             ->withoutGlobalScope('promotion_context')
@@ -30,5 +30,23 @@ final class VenueSchedulingEligibility
         if ($events->exists()) {
             throw SchedulingConflictException::venueAlreadyBooked($venue->name);
         }
+    }
+
+    /**
+     * An event that keeps its venue and calendar day takes no new booking, so an update re-checks the venue only
+     * when one of them changes. Events that already share a venue day therefore stay editable.
+     */
+    public static function isBookingChanging(Event $event, Venue $venue, Carbon $date): bool
+    {
+        if (! $event->venue()->is($venue) || $event->date === null) {
+            return true;
+        }
+
+        return self::calendarDay($event->date)->toDateString() !== self::calendarDay($date)->toDateString();
+    }
+
+    private static function calendarDay(Carbon $date): Carbon
+    {
+        return $date->copy()->setTimezone(date_default_timezone_get());
     }
 }

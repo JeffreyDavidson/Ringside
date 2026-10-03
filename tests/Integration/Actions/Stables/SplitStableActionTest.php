@@ -10,6 +10,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
@@ -406,19 +407,75 @@ describe('SplitStableAction Integration Tests', function () {
                 ->and($activityPeriod->ended_at)->toBeNull();
         });
 
-        test('split validates new stable name uniqueness', function () {
-            $splitDate = Carbon::now();
-
-            // Create stable with same name
+        test('split rejects a name an active stable without a promotion already uses', function () {
+            // Arrange
             Stable::factory()->create(['name' => $this->newStableName]);
 
-            // Try to split with duplicate name
-            expect(fn () => resolve(SplitStableAction::class)->handle(
+            // Act
+            $split = fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                "  {$this->newStableName}  ",
+                $this->membersForNewStable,
+                now(),
+            );
+
+            // Assert
+            expect($split)->toThrow(CannotBeSplitException::class, "an active stable named '{$this->newStableName}' already exists")
+                ->and(Stable::query()->where('name', $this->newStableName)->count())->toBe(1)
+                ->and(freshModel($this->originalStable)->currentWrestlers()->count())->toBe($this->wrestlers->count());
+        });
+
+        test('split rejects a name an active stable of the same promotion already uses', function () {
+            // Arrange
+            $promotion = Promotion::factory()->create();
+            $this->originalStable->forceFill(['promotion_id' => $promotion->id])->save();
+            Stable::factory()->for($promotion, 'promotion')->create(['name' => $this->newStableName]);
+
+            // Act
+            $split = fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
-                $splitDate
-            ))->toThrow(Exception::class);
+                now(),
+            );
+
+            // Assert
+            expect($split)->toThrow(CannotBeSplitException::class, "an active stable named '{$this->newStableName}' already exists");
+        });
+
+        test('split creates the new stable in the original stable promotion', function () {
+            // Arrange
+            $promotion = Promotion::factory()->create();
+            $this->originalStable->forceFill(['promotion_id' => $promotion->id])->save();
+
+            // Act
+            $newStable = resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                now(),
+            );
+
+            // Assert
+            expect($newStable->refresh()->promotion_id)->toBe($promotion->id);
+        });
+
+        test('split allows a name only a deleted stable or another promotion uses', function () {
+            // Arrange
+            Stable::factory()->create(['name' => $this->newStableName])->delete();
+            Stable::factory()->for(Promotion::factory(), 'promotion')->create(['name' => $this->newStableName]);
+
+            // Act
+            $newStable = resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                now(),
+            );
+
+            // Assert
+            expect($newStable->name)->toBe($this->newStableName)
+                ->and($newStable->promotion_id)->toBeNull();
         });
     });
 

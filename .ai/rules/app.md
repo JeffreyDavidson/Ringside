@@ -29,8 +29,14 @@ Middleware that establishes request-scoped context, such as EstablishPromotionCo
 ## Establish promotion context before route model binding
 EstablishPromotionContext (and EnsureUserIsActive before it) is placed ahead of SubstituteBindings in the middleware priority list in bootstrap/app.php. Promotion scopes fail closed for non-administrators without an enforced context, so bindings resolved earlier would 404 for every member.
 
+## Start every request from an empty promotion context
+EstablishPromotionContext calls PromotionContextService::clear() first, because the scoped service is reused across requests in one test (and in long-lived workers). A remembered promotion the user can no longer use (suspended, invited, removed, deleted) falls back to their first active promotion and the session is rewritten; only a user with no active promotion gets the no-membership page (administrators continue globally).
+
 ## No orphaned docblocks
 A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.
 
 ## Compare user emails case-insensitively
-User emails are stored trimmed and lowercase (User::email mutator) and are unique on lower(email). Validate with App\Rules\Users\UniqueEmail rather than the unique rule, and look users up by email through lower(email) (the eloquent-email auth provider already does for sign-in and password reset); legacy rows may still be mixed case.
+User emails are stored trimmed and lowercase (User::email mutator) and are unique on lower(email) (on MySQL through the case-insensitive column collation of users_email_unique). Validate with App\Rules\Users\UniqueEmail rather than the unique rule, and look users up by email through lower(email) (the eloquent-email auth provider already does for sign-in and password reset); legacy rows may still be mixed case.
+
+## Support every database engine
+Production runs MySQL 8; CI runs the suite on SQLite, PostgreSQL and MySQL. Every database-specific code path (raw SQL fragments, driver checks, locking, conflict or deadlock handling) must work on mysql, pgsql and sqlite, preferably through one query builder call that each grammar compiles. Never add PostgreSQL-only SQL such as count(*) filter (where ...), ilike, ::casts, RETURNING or advisory locks, and never throw for an unhandled driver at runtime. The scheduling and lifecycle locks assume READ COMMITTED, which config/database.php sets for MySQL.

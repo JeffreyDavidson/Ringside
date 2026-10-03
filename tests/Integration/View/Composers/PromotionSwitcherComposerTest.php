@@ -43,7 +43,6 @@ it('provides no promotions to a guest', function (string $viewName) {
     expect($view->getData()['promotionSwitcherPromotions'])->toBeEmpty()
         ->and($view->getData()['activePromotionId'])->toBeNull();
 })->with([
-    'topbar profile' => 'components.topbar.profile',
     'sidebar index' => 'components.sidebar.index',
     'layout header' => 'components.layouts.partials.header',
 ]);
@@ -56,7 +55,7 @@ it('lists only the active memberships of the user ordered by name', function () 
     Promotion::factory()->create(['name' => 'Delta Wrestling']);
     actingAs($user);
 
-    $view = composePromotionSwitcher('components.topbar.profile');
+    $view = composePromotionSwitcher('components.sidebar.index');
 
     expect($view->getData()['promotionSwitcherPromotions']->pluck('id')->all())
         ->toBe([$first->id, $second->id]);
@@ -70,7 +69,7 @@ it('marks the promotion from the context as active', function () {
     app(PromotionContextService::class)->set($current);
     actingAs($user)->withSession(['active_promotion_id' => 999]);
 
-    $view = composePromotionSwitcher('components.topbar.profile');
+    $view = composePromotionSwitcher('components.sidebar.index');
 
     expect($view->getData()['activePromotionId'])->toBe($current->id);
 });
@@ -81,7 +80,7 @@ it('marks the promotion remembered in the session as active', function () {
     $remembered = joinPromotion($user, 'Beta Wrestling');
     actingAs($user)->withSession(['active_promotion_id' => (string) $remembered->id]);
 
-    $view = composePromotionSwitcher('components.topbar.profile');
+    $view = composePromotionSwitcher('components.sidebar.index');
 
     expect($view->getData()['activePromotionId'])->toBe($remembered->id);
 });
@@ -92,7 +91,7 @@ it('falls back to the first promotion when nothing valid is remembered', functio
     joinPromotion($user, 'Beta Wrestling');
     actingAs($user)->withSession(['active_promotion_id' => $remembered]);
 
-    $view = composePromotionSwitcher('components.topbar.profile');
+    $view = composePromotionSwitcher('components.sidebar.index');
 
     expect($view->getData()['activePromotionId'])->toBe($first->id);
 })->with([
@@ -104,7 +103,7 @@ it('has no active promotion for a user without memberships', function () {
     $user = User::factory()->create();
     actingAs($user);
 
-    $view = composePromotionSwitcher('components.topbar.profile');
+    $view = composePromotionSwitcher('components.sidebar.index');
 
     expect($view->getData()['promotionSwitcherPromotions'])->toBeEmpty()
         ->and($view->getData()['activePromotionId'])->toBeNull();

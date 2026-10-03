@@ -42,6 +42,7 @@ class PromotionContextService
         }
     }
 
+    /** Reset the whole context, including the membership memo; EstablishPromotionContext calls it as each request starts. */
     public function clear(): void
     {
         $this->promotion = null;
@@ -49,7 +50,7 @@ class PromotionContextService
         $this->forgetMemberships();
     }
 
-    /** Drop everything memoised from membership rows; call whenever a membership changes or a request starts. */
+    /** Drop everything memoised from membership rows; call whenever a membership changes. */
     public function forgetMemberships(): void
     {
         $this->roles = [];

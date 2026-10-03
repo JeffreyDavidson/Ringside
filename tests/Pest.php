@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
+use Pest\Browser\Api\AwaitableWebpage;
+use Pest\Browser\Api\PendingAwaitablePage;
 
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\withoutVite;
@@ -38,7 +41,9 @@ pest()
     ->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
+        withoutVite();
         freezeTime();
+        reverseUnorderedSelectsWhenRequested();
     })
     ->in('Integration');
 
@@ -57,6 +62,7 @@ pest()
     ->beforeEach(function () {
         withoutVite();
         freezeTime();
+        reverseUnorderedSelectsWhenRequested();
     })
     ->in('Feature');
 
@@ -104,6 +110,20 @@ function validationFailureCallback(Closure $observer): Closure
 
         return new PotentiallyTranslatedString($message, app(Translator::class));
     };
+}
+
+/**
+ * Opt-in guard against tests that depend on the order of rows a query never ordered: with REVERSE_UNORDERED_SELECTS=1
+ * SQLite returns every unordered result in reverse, so such a test fails instead of passing by accident. See
+ * docs/workflows/ci-cd.md.
+ */
+function reverseUnorderedSelectsWhenRequested(): void
+{
+    if (getenv('REVERSE_UNORDERED_SELECTS') !== '1' || ! runsOnDriver('sqlite')) {
+        return;
+    }
+
+    DB::statement('PRAGMA reverse_unordered_selects = ON');
 }
 
 /**
@@ -155,6 +175,37 @@ function freshModel(?Model $model): Model
 function requiredReflectionType(?ReflectionType $type): ReflectionType
 {
     return $type ?? throw new RuntimeException('Expected the reflected declaration to have a type.');
+}
+
+/**
+ * Wait until a JavaScript condition holds in the browser (at most five seconds), then assert it.
+ *
+ * Use this instead of fixed sleeps so a browser test waits exactly as long as the page needs.
+ */
+function waitForScript(AwaitableWebpage|PendingAwaitablePage $page, string $condition): void
+{
+    $page->assertScript(<<<JS
+        () => new Promise((resolve) => {
+            const deadline = Date.now() + 5000;
+            const holds = () => {
+                try {
+                    return Boolean({$condition});
+                } catch {
+                    return false;
+                }
+            };
+            const check = () => {
+                if (holds()) {
+                    resolve(true);
+                } else if (Date.now() > deadline) {
+                    resolve(false);
+                } else {
+                    setTimeout(check, 20);
+                }
+            };
+            check();
+        })
+        JS);
 }
 
 /*

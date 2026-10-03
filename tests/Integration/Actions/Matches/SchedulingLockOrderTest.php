@@ -158,26 +158,25 @@ final class DeadlockTracker
 }
 
 /**
- * Fail the first N event-set lock queries the way PostgreSQL reports a lost deadlock.
+ * Fail the first N event-set lock queries with the given driver error, by default the way PostgreSQL reports a lost
+ * deadlock.
  */
-function failEventSetLocksWithDeadlock(int $failures): DeadlockTracker
+function failEventSetLocksWithDeadlock(int $failures, ?PDOException $error = null): DeadlockTracker
 {
     $tracker = new DeadlockTracker;
+    $error ??= new PDOException('SQLSTATE[40P01]: Deadlock detected: 7 ERROR: deadlock detected');
 
-    DB::listen(function (QueryExecuted $query) use ($tracker, $failures): void {
-        if (! str_contains($query->sql, 'order by "id"') || ! str_contains($query->sql, 'from "events"')) {
+    DB::listen(function (QueryExecuted $query) use ($tracker, $failures, $error): void {
+        $sql = normalizedSql($query->sql);
+
+        if (! str_contains($sql, 'order by "id"') || ! str_contains($sql, 'from "events"')) {
             return;
         }
 
         $tracker->lockQueries++;
 
         if ($tracker->lockQueries <= $failures) {
-            throw new QueryException(
-                'pgsql',
-                $query->sql,
-                $query->bindings,
-                new PDOException('SQLSTATE[40P01]: Deadlock detected: 7 ERROR: deadlock detected'),
-            );
+            throw new QueryException($query->connectionName, $query->sql, $query->bindings, $error);
         }
     });
 
@@ -215,6 +214,24 @@ test('it retries the whole booking transaction after a deadlock', function (Clos
     expect($tracker->lockQueries)->toBeGreaterThan(1)
         ->and($transactionLevel)->toBe(0);
 })->with('booking scenarios');
+
+test('it retries a booking after a lost lock as each supported engine reports it', function (Closure $scenario, PDOException $error) {
+    // Arrange
+    [, $act] = $scenario(Event::factory()->create(['date' => now()->addWeek()]));
+
+    $tracker = failEventSetLocksWithDeadlock(1, $error);
+
+    // Act
+    $transactionLevel = runOutsideTestTransaction($act);
+
+    // Assert
+    expect($tracker->lockQueries)->toBeGreaterThan(1)
+        ->and($transactionLevel)->toBe(0);
+})->with(['add match for event' => [$bookingScenarios['add match for event'][0]]])->with([
+    'postgresql deadlock' => fn (): PDOException => new PDOException('SQLSTATE[40P01]: Deadlock detected: 7 ERROR: deadlock detected'),
+    'mysql deadlock' => fn (): PDOException => new PDOException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', 40001),
+    'mysql lock wait timeout' => fn (): PDOException => new PDOException('SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction'),
+]);
 
 test('it gives up after three deadlocked booking attempts', function (Closure $scenario) {
     // Arrange

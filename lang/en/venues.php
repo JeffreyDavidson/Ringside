@@ -8,6 +8,7 @@ return [
     'city' => 'City',
     'state' => 'State',
     'zipcode' => 'Zip Code',
+    'index_title' => 'Venues',
     'index_description' => 'Manage shared venues available to every promotion and their event history.',
     'empty_description' => 'Venues added to the shared directory will appear here.',
     'empty_title' => 'No venues yet',

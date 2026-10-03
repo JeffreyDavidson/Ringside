@@ -43,6 +43,10 @@ final readonly class DashboardViewModel
     /**
      * Wrestlers under contract, split by whether they can currently be booked.
      *
+     * The conditional counts use count(case ... end) rather than PostgreSQL's count(*) filter (where ...), which
+     * MySQL does not support. The injured and suspended flags are booleans on PostgreSQL and 0/1 on MySQL and
+     * SQLite; a bare flag in a CASE condition reads correctly on all three.
+     *
      * @return array{employed: int, available: int, injured: int, suspended: int}
      */
     public function rosterAvailability(): array
@@ -56,9 +60,9 @@ final readonly class DashboardViewModel
                 'employed_wrestlers',
             )
             ->selectRaw('count(*) as employed')
-            ->selectRaw('count(*) filter (where not injured and not suspended) as available')
-            ->selectRaw('count(*) filter (where injured) as injured')
-            ->selectRaw('count(*) filter (where suspended) as suspended')
+            ->selectRaw('count(case when not injured and not suspended then 1 end) as available')
+            ->selectRaw('count(case when injured then 1 end) as injured')
+            ->selectRaw('count(case when suspended then 1 end) as suspended')
             ->sole();
 
         return [

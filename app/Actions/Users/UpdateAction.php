@@ -15,11 +15,12 @@ class UpdateAction
     public function handle(User $user, UserData $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
-            $lockedUser = $user->refreshForUpdate();
-
-            if ($lockedUser->role->isAdministrator() && ! $data->role->isAdministrator()) {
-                $this->ensureAnotherActiveAdministrator->handle($lockedUser);
+            // Lock order: active administrators (ascending id), then the user.
+            if (! $data->role->isAdministrator()) {
+                $this->ensureAnotherActiveAdministrator->handle($user);
             }
+
+            $lockedUser = $user->refreshForUpdate();
 
             $attributes = [
                 'first_name' => $data->firstName,

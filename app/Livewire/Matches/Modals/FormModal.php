@@ -90,14 +90,15 @@ class FormModal extends BaseFormModal
     #[\Override]
     protected function storeForm(): bool
     {
-        $this->form->validate();
+        $event = $this->bookedEvent();
+
+        $this->form->validateForEvent($event);
 
         try {
             if ($this->form->isEditing()) {
                 $match = EventMatch::query()->findOrFail($this->form->modelId);
                 $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
             } else {
-                $event = Event::query()->findOrFail($this->eventId);
                 $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
             }
         } catch (BaseBusinessException $exception) {
@@ -148,7 +149,20 @@ class FormModal extends BaseFormModal
             return [];
         }
 
-        return resolve(BookableRosterSearch::class)->search($rosterKind, $term);
+        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $this->bookedEvent()->promotion_id);
+    }
+
+    /**
+     * The event the match is booked on: an edited match's own event, otherwise the modal's event. Its
+     * promotion, not the request's promotion context, decides whose roster and titles may be booked.
+     */
+    private function bookedEvent(): Event
+    {
+        if ($this->form->isEditing()) {
+            return EventMatch::query()->findOrFail($this->form->modelId)->event()->firstOrFail();
+        }
+
+        return Event::query()->findOrFail($this->eventId);
     }
 
     /**

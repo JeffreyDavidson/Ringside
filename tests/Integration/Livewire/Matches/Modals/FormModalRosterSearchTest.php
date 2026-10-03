@@ -73,14 +73,46 @@ describe('searching the roster from the match form', function (): void {
 
     it('does not let another promotions roster leak into the results', function (): void {
         // Arrange
-        $event = Event::factory()->create();
         [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
         Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Our Wrestler']);
         Wrestler::factory()->for($otherPromotion, 'promotion')->bookable()->create(['name' => 'Their Wrestler']);
         $context = resolve(PromotionContextService::class);
         $context->set($promotion);
         $context->enforce();
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $options = $modal->instance()->searchRoster('wrestlers', 'Wrestler');
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Our Wrestler']);
+    });
+
+    it('offers a global administrator only the roster of the event promotion', function (): void {
+        // Arrange
+        [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
+        Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Our Wrestler']);
+        Wrestler::factory()->for($otherPromotion, 'promotion')->bookable()->create(['name' => 'Their Wrestler']);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $options = $modal->instance()->searchRoster('wrestlers', 'Wrestler');
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Our Wrestler']);
+    });
+
+    it('searches the roster of the edited match event whatever event the modal was given', function (): void {
+        // Arrange
+        [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $match = EventMatch::factory()->for(Event::factory()->for($promotion, 'promotion'))->create();
+        $otherEvent = Event::factory()->for($otherPromotion, 'promotion')->create();
+        Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Our Wrestler']);
+        Wrestler::factory()->for($otherPromotion, 'promotion')->bookable()->create(['name' => 'Their Wrestler']);
+        $modal = livewire(FormModal::class, ['eventId' => $otherEvent->id]);
+        $modal->call('openModal', $match->id);
 
         // Act
         $options = $modal->instance()->searchRoster('wrestlers', 'Wrestler');
@@ -169,7 +201,7 @@ describe('rendering the selected records', function (): void {
 
         // Assert
         expect(substr_count($largeHtml, '<option'))->toBe(substr_count($smallHtml, '<option'))
-            ->and($largeHtml)->toHaveLength(strlen($smallHtml));
+            ->and($largeHtml)->toHaveLength(mb_strlen($smallHtml));
     });
 });
 
@@ -197,8 +229,8 @@ describe('server-side validation stays the authority', function (): void {
 
     it('rejects a forged id that belongs to another promotion', function (): void {
         // Arrange
-        $event = Event::factory()->create();
         [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+        $event = Event::factory()->for($promotion, 'promotion')->create();
         $ours = Wrestler::factory()->for($promotion, 'promotion')->bookable()->create();
         $theirs = Wrestler::factory()->for($otherPromotion, 'promotion')->bookable()->create();
         $referee = Referee::factory()->for($promotion, 'promotion')->bookable()->create();

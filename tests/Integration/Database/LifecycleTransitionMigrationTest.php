@@ -61,4 +61,4 @@ test('legacy stable and title status history is preserved as lifecycle transitio
 
     expect(Schema::hasTable('titles_status_changes'))->toBeFalse()
         ->and(Schema::hasTable('stables_status_changes'))->toBeFalse();
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);

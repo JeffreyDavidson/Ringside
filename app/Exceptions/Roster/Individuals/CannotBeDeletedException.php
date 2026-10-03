@@ -19,9 +19,9 @@ final class CannotBeDeletedException extends BaseBusinessException
         return new self("{$context} cannot be deleted because it is already deleted.");
     }
 
-    public static function bookedInUpcomingMatch(Wrestler $wrestler): static
+    public static function bookedInUpcomingMatch(Wrestler|Referee $individual): static
     {
-        $context = self::formatModelContext($wrestler);
+        $context = self::formatModelContext($individual);
 
         return self::forReason(
             BusinessRuleReason::BookedInMatch,

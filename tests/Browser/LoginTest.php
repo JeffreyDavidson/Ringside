@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
+use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
@@ -180,6 +183,10 @@ test('user can logout successfully', function () {
 
 test('authenticated users are redirected away from login page', function () {
     $user = User::factory()->create(['status' => UserStatus::Active]);
+    Promotion::factory()->create()->users()->attach($user, [
+        'role' => MembershipRole::Member->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
 
     $this->actingAs($user);
 

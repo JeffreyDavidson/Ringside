@@ -38,3 +38,21 @@ test('it assigns the active promotion when promotion context is enforced', funct
     expect($event->promotion_id)->toBe($promotion->id)
         ->and(Event::query()->findOrFail($event->id)->is($event))->toBeTrue();
 });
+
+test('it locks the venue row before checking the venue is free and creating the event', function (): void {
+    // Arrange
+    $venue = Venue::factory()->create();
+    $data = new EventData('Locked Venue Event', now()->addWeek()->setTime(19, 0), $venue, null);
+
+    // Act
+    $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+
+    // Assert
+    $venueLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "venues"'));
+    $availabilityCheck = statementPosition($statements, fn (array $statement): bool => str_contains($statement['sql'], 'from "events"'));
+    $insert = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "events"'));
+
+    expect(lockedRowIds($statements, 'venues'))->toBe([$venue->id])
+        ->and($venueLock)->toBeLessThan($availabilityCheck)
+        ->and($availabilityCheck)->toBeLessThan($insert);
+});

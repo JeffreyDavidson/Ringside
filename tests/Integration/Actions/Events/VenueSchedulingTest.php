@@ -78,6 +78,42 @@ test('it permits updating an event without changing its venue schedule', functio
         ->venue_id->toBe($venue->id);
 });
 
+describe('events that already share a venue day', function () {
+    it('permits editing the details and time of one without moving it to another day or venue', function () {
+        // Arrange
+        $venue = Venue::factory()->create();
+        $day = now()->addWeek()->startOfDay();
+        $matinee = Event::factory()->for($venue)->create(['name' => 'Matinee', 'date' => $day->copy()->setTime(13, 0)]);
+        Event::factory()->for($venue)->create(['name' => 'Evening', 'date' => $day->copy()->setTime(20, 0)]);
+        $data = new EventData('Matinee Renamed', $day->copy()->setTime(14, 0), $venue, 'Updated preview');
+
+        // Act
+        $updated = resolve(UpdateAction::class)->handle($matinee, $data);
+
+        // Assert
+        expect($updated)
+            ->name->toBe('Matinee Renamed')
+            ->preview->toBe('Updated preview')
+            ->and($updated->date?->toDateTimeString())->toBe($day->copy()->setTime(14, 0)->toDateTimeString());
+    });
+
+    it('still rejects scheduling an unscheduled event at the venue onto a booked day', function () {
+        // Arrange
+        $venue = Venue::factory()->create();
+        $date = now()->addWeek();
+        $event = Event::factory()->unscheduled()->for($venue)->create();
+        Event::factory()->for($venue)->create(['date' => $date]);
+        $data = new EventData('Scheduled Event', $date->copy()->addHour(), $venue, null);
+
+        // Act
+        $attempt = fn () => resolve(UpdateAction::class)->handle($event, $data);
+
+        // Assert
+        expect($attempt)->toThrow(SchedulingConflictException::class)
+            ->and($event->refresh()->date)->toBeNull();
+    });
+});
+
 test('it rejects restoring an event into a venue scheduling conflict', function () {
     $date = now()->addWeek();
     $venue = Venue::factory()->create();

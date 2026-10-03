@@ -14,15 +14,19 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Backs the match form's searchable selects.
  *
- * Search only ever offers bookable records, but it is a convenience: the IsBookable validation
- * rules and RosterBookingEligibility remain the authority on what can actually be booked.
+ * Search only ever offers bookable records of the booked event's promotion, but it is a convenience:
+ * the match form's validation rules and the match actions remain the authority on what can be booked.
  */
 final class BookableRosterSearch
 {
     public const int LIMIT = 20;
 
-    /** @return array<int, array{id: int|string, name: string}> */
-    public function search(BookableRosterKind $kind, string $term): array
+    /**
+     * Search the bookable roster of one promotion (null for unowned records) by name.
+     *
+     * @return array<int, array{id: int|string, name: string}>
+     */
+    public function search(BookableRosterKind $kind, string $term, ?int $promotionId): array
     {
         $column = $this->nameColumn($kind);
         // Names never contain LIKE wildcards, so drop them rather than depend on database-specific escaping.
@@ -36,6 +40,7 @@ final class BookableRosterSearch
 
         return $this->options(
             $query
+                ->where($query->qualifyColumn('promotion_id'), $promotionId)
                 ->when($needle !== '', fn (Builder $builder): Builder => $builder->whereLike($column, "%{$needle}%", caseSensitive: false))
                 ->orderBy($column)
                 ->orderBy('id')

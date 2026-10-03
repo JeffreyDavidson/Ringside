@@ -223,8 +223,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             ])->create();
 
             // Assert
-            $firstCompetitor = $match->competitors->firstOrFail();
-            expect($match->winning_side_id)->toBe($firstCompetitor->match_side_id);
+            expect($match->winning_side_id)->toBe($match->sides->firstOrFail()->id);
         });
 
         test('generates match with last competitor side as winner', function () {
@@ -235,8 +234,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             ])->create();
 
             // Assert
-            $lastCompetitor = $match->competitors->reverse()->firstOrFail();
-            expect($match->winning_side_id)->toBe($lastCompetitor->match_side_id);
+            expect($match->winning_side_id)->toBe($match->sides->reverse()->firstOrFail()->id);
         });
 
         test('rejects a multiple competitor winner strategy because winners are sides', function () {

@@ -10,94 +10,40 @@ use Illuminate\Support\Facades\Artisan;
 /**
  * Integration tests for TagTeamsTableSeeder data seeding and validation.
  *
- * INTEGRATION TEST SCOPE:
- * - Seeder execution and database population
- * - Tag team record creation and validation
- * - Data consistency and count verification
- * - Tag team attribute validation
- *
- * These tests verify that the TagTeamsTableSeeder correctly populates
- * the database with tag team records for development and testing purposes.
+ * Seeding takes over a second, so every assertion about one seeded data set shares a single run instead of each
+ * test seeding again.
  *
  * @see TagTeamsTableSeeder
  */
 describe('TagTeamsTableSeeder Integration Tests', function () {
-    describe('seeder execution', function () {
-        test('successfully runs without errors', function () {
-            // Act & Assert - Should not throw any exceptions
-            expect(fn () => Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']))
-                ->not()->toThrow(Exception::class);
-        });
+    test('seeds tag teams with complete, realistic and unique records', function () {
+        // Act
+        $exitCode = Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
 
-        test('creates tag teams in database', function () {
-            // Arrange & Act
-            Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
+        // Assert
+        $tagTeams = TagTeam::all();
 
-            // Assert - Should create multiple tag teams
-            expect(TagTeam::count())->toBeGreaterThan(0);
-        });
+        expect($exitCode)->toBe(0)
+            ->and($tagTeams)->not->toBeEmpty()
+            ->and($tagTeams->pluck('name')->unique())->toHaveCount($tagTeams->count());
+
+        foreach ($tagTeams as $tagTeam) {
+            expect($tagTeam->name)->toBeString()->not->toBeEmpty()
+                ->and(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2)
+                ->and($tagTeam->name)->not->toContain('Test')
+                ->and($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
+        }
     });
 
-    describe('tag team attributes', function () {
-        beforeEach(function () {
-            Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
-        });
+    test('seeding again keeps the existing tag teams', function () {
+        // Arrange
+        Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
+        $initialCount = TagTeam::count();
 
-        test('tag teams have required attributes', function () {
-            // Arrange
-            $tagTeams = TagTeam::take(10)->get();
+        // Act
+        Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
 
-            // Assert
-            foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->name)->toBeString()->not->toBeEmpty()
-                    ->and($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
-            }
-        });
-
-        test('tag teams have realistic names', function () {
-            // Arrange
-            $tagTeams = TagTeam::take(5)->get();
-
-            // Assert
-            foreach ($tagTeams as $tagTeam) {
-                expect(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2)
-                    ->and($tagTeam->name)->not->toContain('Test');
-            }
-        });
-    });
-
-    describe('data consistency', function () {
-        beforeEach(function () {
-            Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
-        });
-
-        test('all tag teams have unique names', function () {
-            // Arrange
-            $tagTeams = TagTeam::all();
-
-            // Assert
-            expect($tagTeams->pluck('name')->unique())->toHaveCount($tagTeams->count());
-        });
-
-        test('tag teams have valid employment status', function () {
-            // Arrange
-            $tagTeams = TagTeam::take(10)->get();
-
-            // Assert
-            foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
-            }
-        });
-
-        test('seeder creates consistent data', function () {
-            // Arrange
-            $initialCount = TagTeam::count();
-
-            // Act
-            Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
-
-            // Assert - Should maintain or increase count
-            expect(TagTeam::count())->toBeGreaterThanOrEqual($initialCount);
-        });
+        // Assert
+        expect(TagTeam::count())->toBeGreaterThanOrEqual($initialCount);
     });
 });

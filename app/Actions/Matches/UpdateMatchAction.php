@@ -32,6 +32,8 @@ class UpdateMatchAction
                 throw InvalidMatchConfigurationException::resultAlreadyRecorded();
             }
 
+            $this->requirements->ensureWithinEventPromotion($lockedMatch->event()->firstOrFail(), $data);
+
             $lockedMatch->update([
                 'match_type' => $data->matchType,
                 'match_stipulation_id' => $data->matchStipulation?->id,

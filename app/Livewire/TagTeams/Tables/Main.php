@@ -42,7 +42,8 @@ class Main extends BaseTable
         return TagTeam::query()
             ->withFirstEmployment()
             ->with('currentWrestlers')
-            ->oldest('name');
+            ->oldest('name')
+            ->orderBy('tag_teams.id');
     }
 
     #[\Override]

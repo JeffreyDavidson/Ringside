@@ -3,19 +3,28 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddMatchForEventAction;
+use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Livewire\Matches\Modals\FormModal;
+use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Matches\MatchStipulation;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionContextService;
 use JMac\Testing\Double;
+use Livewire\Features\SupportTesting\Testable;
 use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
@@ -166,6 +175,41 @@ describe('authorized match form interactions', function (): void {
             ])
             ->assertSet('form.preview', 'Original preview.')
             ->assertSee('Edit Match');
+    });
+
+    it('loads the referees, titles and side members of a booked match in id order whatever order they were added in', function (): void {
+        // Arrange
+        [$firstReferee, $secondReferee] = Referee::factory()->count(2)->bookable()->create()->all();
+        [$firstTitle, $secondTitle] = Title::factory()->count(2)->active()->tagTeam()->create()->all();
+        [$firstWrestler, $secondWrestler, $opponent, $opponentPartner] = Wrestler::factory()->count(4)->bookable()->create()->all();
+        $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::TagTeam]);
+        [$firstSide, $secondSide] = MatchSide::factory()->for($match, 'match')->count(2)->sequence(['position' => 1], ['position' => 2])->create()->all();
+        $bookOnSide = fn (MatchSide $side, Wrestler $wrestler, int $id): MatchCompetitor => MatchCompetitor::factory()
+            ->for($match, 'eventMatch')
+            ->for($side, 'side')
+            ->for($wrestler, 'competitor')
+            ->create(['id' => $id]);
+        $bookOnSide($firstSide, $secondWrestler, 9002);
+        $bookOnSide($firstSide, $firstWrestler, 9001);
+        $bookOnSide($secondSide, $opponentPartner, 9004);
+        $bookOnSide($secondSide, $opponent, 9003);
+        $match->referees()->attach($secondReferee);
+        $match->referees()->attach($firstReferee);
+        $match->titles()->attach($secondTitle);
+        $match->titles()->attach($firstTitle);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->call('openModal', $match->id);
+
+        // Assert
+        $modal
+            ->assertSet('form.referees', [$firstReferee->id, $secondReferee->id])
+            ->assertSet('form.titles', [$firstTitle->id, $secondTitle->id])
+            ->assertSet('form.competitors', [
+                ['wrestlers' => [$firstWrestler->id, $secondWrestler->id], 'tag_teams' => []],
+                ['wrestlers' => [$opponent->id, $opponentPartner->id], 'tag_teams' => []],
+            ]);
     });
 
     it('responds not found when opening a missing match', function (): void {
@@ -639,6 +683,121 @@ describe('authorized match form interactions', function (): void {
             ->assertSet('isModalOpen', false);
         expect(EventMatch::query()->whereBelongsTo($this->event)->count())->toBe(1);
     });
+});
+
+/**
+ * Fill the match form from match data the way a user would select it.
+ *
+ * @param  Testable<FormModal>  $modal
+ */
+function selectMatchDataInForm(Testable $modal, EventMatchData $data): void
+{
+    $modal->set('form.matchType', $data->matchType);
+    $modal->set([
+        'form.competitors' => $data->sides->values()->map(fn (array $side): array => array_filter([
+            'wrestlers' => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers'] ?? []),
+            'tag_teams' => array_map(fn (TagTeam $tagTeam): int => $tagTeam->id, $side['tag_teams'] ?? []),
+        ]))->all(),
+        'form.referees' => $data->referees->modelKeys(),
+        'form.titles' => $data->titles->modelKeys(),
+    ]);
+}
+
+describe('booking for a global administrator without a promotion context', function (): void {
+    beforeEach(function (): void {
+        actingAs(administrator());
+        [$this->promotion, $this->foreignPromotion] = Promotion::factory()->count(2)->create()->all();
+        $this->event = Event::factory()->for($this->promotion, 'promotion')->create();
+    });
+
+    afterEach(function (): void {
+        resolve(PromotionContextService::class)->clear();
+    });
+
+    it('rejects :dataset of another promotion', function (Closure $matchData, string $entityType, string $field): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors([$field]);
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
+
+    it('books the roster and titles of the event promotion', function (): void {
+        // Arrange
+        $wrestlers = Wrestler::factory()->bookable()->for($this->promotion, 'promotion')->count(2)->create();
+        $referee = Referee::factory()->bookable()->for($this->promotion, 'promotion')->create();
+        $title = Title::factory()->active()->singles()->for($this->promotion, 'promotion')->create();
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlers->modelKeys()[0]]],
+                ['wrestlers' => [$wrestlers->modelKeys()[1]]],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect(EventMatch::query()->whereBelongsTo($this->event)->sole()->titles()->pluck('titles.id')->all())
+            ->toBe([$title->id]);
+    });
+
+    it('validates an edited match against the promotion of its own event', function (): void {
+        // Arrange
+        $foreignEvent = Event::factory()->for($this->foreignPromotion, 'promotion')->create();
+        $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::Singles]);
+        $foreignWrestlers = Wrestler::factory()->bookable()->for($this->foreignPromotion, 'promotion')->count(2)->create();
+        $foreignReferee = Referee::factory()->bookable()->for($this->foreignPromotion, 'promotion')->create();
+        $modal = livewire(FormModal::class, ['eventId' => $foreignEvent->id]);
+        $modal->call('openModal', $match->id);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$foreignWrestlers->modelKeys()[0]]],
+                ['wrestlers' => [$foreignWrestlers->modelKeys()[1]]],
+            ],
+            'form.referees' => [$foreignReferee->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.competitors.0.wrestlers.0', 'form.competitors.1.wrestlers.0', 'form.referees.0']);
+        expect($match->competitors()->exists())->toBeFalse();
+    });
+
+    it('leaves the card readable for the event promotion members after :dataset was refused', function (Closure $matchData): void {
+        // Arrange
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
+        $modal->call('save');
+        $member = basicUser();
+        $this->promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        actingAs($member);
+        $context = resolve(PromotionContextService::class);
+        $context->set($this->promotion);
+        $context->enforce();
+
+        // Act
+        $table = livewire(MatchesTable::class, ['eventId' => $this->event->id]);
+
+        // Assert
+        $table->assertOk();
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
+    })->with('cross promotion match bookings');
 });
 
 it('forbids :dataset from opening the match form', function (bool $authenticated, bool $editing, int $status): void {

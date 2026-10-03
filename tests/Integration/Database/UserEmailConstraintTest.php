@@ -60,8 +60,8 @@ test('the migration lists the users that share an email ignoring case before cha
             "Cannot enforce case-insensitive unique user emails: email foo@example.com is used by user ids {$ids}. No changes were made."
         )
         ->and(collect(Schema::getIndexes('users'))->contains('name', 'users_email_lower_unique'))->toBeFalse()
-        ->and(DB::table('users')->pluck('email')->all())->toBe(['Foo@Example.com', 'foo@example.com']);
-});
+        ->and(DB::table('users')->pluck('email')->all())->toEqualCanonicalizing(['Foo@Example.com', 'foo@example.com']);
+})->skip(fn (): bool => runsOnDriver('mysql'), 'MySQL has no lower(email) index to drop and its case-insensitive collation rejects the duplicate itself.');
 
 test('the migration recreates the index when the data is clean', function () {
     DB::statement('DROP INDEX users_email_lower_unique');
@@ -71,4 +71,4 @@ test('the migration recreates the index when the data is clean', function () {
     $migration->up();
 
     expect(collect(Schema::getIndexes('users'))->contains('name', 'users_email_lower_unique'))->toBeTrue();
-});
+})->skip(fn (): bool => runsOnDriver('mysql'), 'MySQL enforces case-insensitive email uniqueness through the column collation, so the migration creates no index there.');

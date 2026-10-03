@@ -154,3 +154,73 @@ describe('dynamic match type UI', function (): void {
             ->toThrow(ValueError::class);
     });
 });
+
+describe('accessible competitor fields', function (): void {
+    it('describes each roster search box with its usage hint', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+
+        // Act
+        $component->set('form.matchType', MatchType::Singles);
+
+        // Assert
+        $component
+            ->assertSeeHtml('aria-describedby="form.competitors.0.wrestlers.0-hint"')
+            ->assertSeeHtml('id="form.competitors.0.wrestlers.0-hint"')
+            ->assertSeeHtml('aria-describedby="form.referees-hint"')
+            ->assertDontSeeHtml('form.competitors.0.wrestlers.0-error');
+    });
+
+    it('links a single competitor error to its search box', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+        $component->set('form.matchType', MatchType::Singles);
+
+        // Act
+        $component->call('save');
+
+        // Assert
+        $component
+            ->assertSeeHtml('aria-describedby="form.competitors.0.wrestlers.0-hint form.competitors.0.wrestlers.0-error"')
+            ->assertSeeHtml('id="form.competitors.0.wrestlers.0-error"')
+            ->assertSee('Choose a wrestler for Competitor 1.')
+            ->assertSeeHtml('aria-describedby="form.referees-hint form.referees-error"');
+    });
+
+    it('groups each tag team side under its own name', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+        $component->set('form.matchType', MatchType::TagTeam);
+
+        // Act
+        $component->call('save');
+
+        // Assert
+        $component
+            ->assertSeeHtmlInOrder(['<fieldset', 'aria-describedby="form.competitors.0-error"', '<legend', 'Team A'])
+            ->assertSeeHtmlInOrder(['<fieldset', 'aria-describedby="form.competitors.1-error"', '<legend', 'Team B'])
+            ->assertSeeHtml('id="form.competitors.0-error"')
+            ->assertSee('Add wrestlers or a tag team to Team A.')
+            ->assertSeeHtml('<span class="sr-only">Team B</span>');
+    });
+
+    it('names each side of a :dataset match', function (MatchType $matchType, array $legends): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component->call('openModal');
+
+        // Act
+        $component->set('form.matchType', $matchType);
+
+        // Assert
+        foreach ($legends as $legend) {
+            $component->assertSeeHtmlInOrder(['<legend', $legend, '<span class="sr-only">'.$legend.'</span>']);
+        }
+    })->with([
+        'two on one handicap' => [MatchType::TwoOnOneHandicap, ['Side 1', 'Side 2']],
+        'gauntlet' => [MatchType::Gauntlet, ['Side 1', 'Side 2']],
+    ]);
+});

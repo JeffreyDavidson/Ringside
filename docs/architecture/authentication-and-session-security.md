@@ -22,12 +22,35 @@ above and the authentication log key on `request()->ip()`, which is only the rea
 - `config/trustedproxy.php` lists the trusted proxies. The default is Cloudflare's published IPv4 and IPv6 ranges; set
   `TRUSTED_PROXIES` to override it with a comma-separated list or `*`. Use `*` only when the origin accepts traffic from
   the proxy alone, otherwise a visitor could spoof the client address.
-- `bootstrap/app.php` trusts only `X-Forwarded-For`, `X-Forwarded-Port` and `X-Forwarded-Proto`. `X-Forwarded-Host`
+- `bootstrap/app.php` trusts only `X-Forwarded-For` and `X-Forwarded-Proto`. `X-Forwarded-Host`, `X-Forwarded-Port`
   and `X-Forwarded-Prefix` are deliberately not trusted: Cloudflare forwards client-supplied headers, so trusting them
-  would let a visitor choose the host used to build links such as password reset URLs.
+  would let a visitor choose the host or port used to build links such as password reset URLs (for example
+  `https://host:8443/...`). The port comes from the `Host` header, defaulting to 443 for HTTPS.
 - Forwarded headers from any peer outside the trusted list are ignored.
 - Refresh the default ranges from https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 when
   Cloudflare announces a change. `tests/Feature/Http/Middleware/TrustedProxiesTest.php` covers the behaviour.
+
+## Security headers
+
+`App\Http\Middleware\SendSecurityHeaders` is prepended to the `web` group, so every page, redirect and Livewire update
+sends:
+
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` disabling camera, microphone, geolocation, payment, USB, display capture, MIDI, autoplay and the
+  motion sensors
+- `X-Content-Type-Options: nosniff`
+
+A header the response already carries is left as it is, so a route can choose its own value and nothing is sent twice
+from the application. The Forge nginx config also adds `X-Content-Type-Options`, `X-Frame-Options` and
+`X-XSS-Protection`; a repeated `nosniff` is harmless, and it can be removed from nginx now that the application sends it.
+
+Not set in code on purpose:
+
+- `Content-Security-Policy`: Livewire and Vite need nonces or hashes, which is a separate project.
+- `Strict-Transport-Security`: HSTS is configured at Cloudflare (see
+  [Production operations](../workflows/production-operations.md)).
+
+`tests/Feature/Http/Middleware/SendSecurityHeadersTest.php` covers the behaviour.
 
 ## Password policy
 
@@ -42,6 +65,14 @@ that accepts a new password uses the defaults: registration, password reset and 
 other session and "remember me" cookie on its next request. Sessions that predate the change store the hash on their
 next request and keep working.
 
+The middleware writes the hash of the guard's user at the end of each request. When administrators change their own
+password in the user form, `Users\Modals\FormModal::updateForm()` puts the updated user on the guard, so the session
+that made the change stores the new hash and stays signed in while every other session still ends. A "remember me"
+cookie issued before the change still carries the old hash, so once this session expires the administrator signs in
+again with the new password.
+`tests/Feature/Http/Middleware/AuthenticateSessionTest.php` drives the real Livewire update request through the
+middleware.
+
 The middleware priority list from the promotion context work is unchanged: `AuthenticatesSessions`, then
 `EnsureUserIsActive`, then `EstablishPromotionContext`, then `SubstituteBindings`. Livewire update requests go through
 the `web` group, so they are covered as well.
@@ -51,6 +82,14 @@ the `web` group, so they are covered as well.
 Foreign and missing roster IDs both return `404`: `EstablishPromotionContext` runs before route model binding, and
 promotion scopes fail closed. `tests/Feature/Http/Controllers/RosterRecordExistenceTest.php` covers every roster
 show route for Owner and Member roles.
+
+## Error pages
+
+`resources/views/errors/{403,404,419,500}.blade.php` render through `x-errors.page`, which uses the guest (`auth`)
+layout because an error can occur before the session, the user or the promotion context exists. It reads
+`auth()->hasUser()`, which only reports a user that was already resolved, so an error page never queries the database
+(a 500 may come from the database itself). A signed-in user gets a link back to the dashboard and a Log out button;
+anyone else gets a Sign in link. The 500 page shows a generic message, never the exception.
 
 ## Modal state
 

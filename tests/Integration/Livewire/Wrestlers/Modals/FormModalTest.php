@@ -106,19 +106,39 @@ describe('FormModal Form Integration', function () {
         $component->assertSuccessful(); // Modal should stay open on validation errors
     });
 
-    it('uses height field names in validation messages', function () {
+    it('explains the allowed height and weight ranges in validation messages', function (
+        int $feet,
+        int $inches,
+        int $weight,
+        array $errors,
+    ) {
         livewire(FormModal::class)
             ->set('form.name', 'Test Wrestler')
             ->set('form.hometown', 'Test City, TX')
-            ->set('form.height_feet', 8)
-            ->set('form.height_inches', 12)
-            ->set('form.weight', 220)
+            ->set('form.height_feet', $feet)
+            ->set('form.height_inches', $inches)
+            ->set('form.weight', $weight)
             ->call('submitForm')
-            ->assertHasErrors([
-                'form.height_feet' => 'The height in feet field must not be greater than 7.',
-                'form.height_inches' => 'The height in inches field must not be greater than 11.',
-            ]);
-    });
+            ->assertHasErrors($errors);
+    })->with([
+        'too tall' => [8, 12, 220, [
+            'form.height_feet' => 'Enter the feet as a whole number from 0 to 7.',
+            'form.height_inches' => 'Enter the inches as a whole number from 0 to 11.',
+        ]],
+        'negative' => [-1, -1, 220, [
+            'form.height_feet' => 'Enter the feet as a whole number from 0 to 7.',
+            'form.height_inches' => 'Enter a height of at least 1 inch, with the inches from 0 to 11.',
+        ]],
+        'no height' => [0, 0, 220, [
+            'form.height_inches' => 'Enter a height of at least 1 inch, with the inches from 0 to 11.',
+        ]],
+        'two digit weight' => [6, 2, 95, [
+            'form.weight' => 'Enter the weight in pounds as a 3-digit number, from 100 to 999.',
+        ]],
+        'four digit weight' => [6, 2, 1000, [
+            'form.weight' => 'Enter the weight in pounds as a 3-digit number, from 100 to 999.',
+        ]],
+    ]);
 
     it('rejects a zero height with a field error instead of failing', function () {
         livewire(FormModal::class)

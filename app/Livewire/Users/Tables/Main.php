@@ -14,7 +14,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -48,26 +47,27 @@ class Main extends BaseTable
         Gate::authorize('viewAny', User::class);
     }
 
-    /**
-     * @param  User  $row
-     * @return array<string, mixed>
-     */
-    #[\Override]
-    protected function getActionColumnViewData(Model $row): array
+    protected function getDefaultActionColumn(): Column
     {
-        $viewData = parent::getActionColumnViewData($row);
+        return Column::make(__('core.actions'))
+            ->label(fn (User $row) => view('components.tables.columns.user-actions', [
+                'user' => $row,
+                'statusAction' => $this->statusActionFor($row),
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
+    }
 
-        $statusAction = match ($row->status) {
+    /**
+     * @return array{label: string, status: UserStatus}
+     */
+    private function statusActionFor(User $user): array
+    {
+        return match ($user->status) {
             UserStatus::Unverified => ['label' => 'Activate account', 'status' => UserStatus::Active],
             UserStatus::Active => ['label' => 'Deactivate account', 'status' => UserStatus::Inactive],
             UserStatus::Inactive => ['label' => 'Reactivate account', 'status' => UserStatus::Active],
         };
-
-        return [
-            ...$viewData,
-            'additionalActionsView' => 'components.tables.columns.user-status-action',
-            'statusAction' => $statusAction,
-        ];
     }
 
     public function changeStatus(int $userId, string $status, ChangeStatusAction $changeStatusAction): void
@@ -92,6 +92,7 @@ class Main extends BaseTable
             return;
         }
 
+        $this->forgetMetadata();
         $this->dispatchActionSuccess("User account status changed to {$targetStatus->label()}.");
     }
 

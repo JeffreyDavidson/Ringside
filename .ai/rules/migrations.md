@@ -19,3 +19,6 @@ Write forward-only migrations with an up() method and no down() method. Correct 
 
 ## Enforce exclusive open periods in the database
 For lifecycle history where an owner may have only one open period, enforce that invariant with a database unique index in addition to Action-level locking. Use a filtered unique index on the owner key where ended_at is null; for MySQL or MariaDB, use a generated nullable owner key with a unique index.
+
+## Cover every database engine
+Every driver match or raw statement in a migration must handle mysql, pgsql and sqlite (production is MySQL 8, CI runs all three). MySQL has no partial or expression indexes: use a STORED generated column with a plain unique index, never put a CASCADE or SET NULL foreign key on a base column of a stored generated column, and drop indexes with DROP INDEX name ON table or the schema builder.

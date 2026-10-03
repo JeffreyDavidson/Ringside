@@ -10,6 +10,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 /**
@@ -48,14 +49,28 @@ class EventMatchBuilder extends Builder
     {
         return $this
             ->forPastEvents()
-            ->with([
-                'referees',
-                'titles',
-                'competitors.competitor',
-                'competitors.side',
-                'winningSide.competitors.competitor',
-            ])
+            ->withDisplayRelations()
             ->latestEventFirst();
+    }
+
+    /**
+     * Eager load everything a match row lists (referees, titles, competitors and winners), each in id order so the
+     * names always appear in the same sequence.
+     */
+    public function withDisplayRelations(): static
+    {
+        $this->with([
+            'event',
+            'referees' => fn (Relation $referees): Relation => $referees->orderBy('referees.id'),
+            'titles' => fn (Relation $titles): Relation => $titles->orderBy('titles.id'),
+            'competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
+            'competitors.competitor',
+            'competitors.side',
+            'winningSide.competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
+            'winningSide.competitors.competitor',
+        ]);
+
+        return $this;
     }
 
     /**

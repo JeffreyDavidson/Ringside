@@ -37,7 +37,11 @@ class UpdateAction
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
             $venue = $eventData->venue?->refreshForUpdate();
 
-            if ($venue !== null && $eventData->date instanceof Carbon) {
+            if (
+                $venue !== null
+                && $eventData->date instanceof Carbon
+                && VenueSchedulingEligibility::isBookingChanging($lockedEvent, $venue, $eventData->date)
+            ) {
                 VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date, $lockedEvent);
             }
 

@@ -29,14 +29,16 @@ class CreateAction
      * - Makes the stable available for storylines and championship opportunities
      *
      * @param  StableData  $stableData  The data transfer object containing stable information
+     * @param  int|null  $promotionId  The promotion of the stable this one is split from; null leaves it to the promotion context, as for a stable created through the form
      * @return Stable The newly created stable with all members
      */
-    public function handle(StableData $stableData): Stable
+    public function handle(StableData $stableData, ?int $promotionId = null): Stable
     {
-        return DB::transaction(function () use ($stableData): Stable {
-            $stable = Stable::query()->create([
-                'name' => $stableData->getTrimmedName(),
-            ]);
+        return DB::transaction(function () use ($stableData, $promotionId): Stable {
+            $stable = Stable::query()
+                ->make(['name' => $stableData->getTrimmedName()])
+                ->forceFill(['promotion_id' => $promotionId]);
+            $stable->save();
 
             // Use enhanced DTO methods
             $joinDate = $stableData->getJoinDate();
