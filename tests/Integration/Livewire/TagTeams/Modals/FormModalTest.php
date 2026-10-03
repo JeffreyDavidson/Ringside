@@ -83,6 +83,20 @@ describe('authorized tag team form interactions', function () {
             ->assertSee('Edit The Midnight Express');
     });
 
+    it('fills the wrestlers by id whatever order they joined in', function () {
+        $first = Wrestler::factory()->create();
+        $second = Wrestler::factory()->create();
+        $tagTeam = TagTeam::factory()->create();
+        $tagTeam->wrestlers()->attach([$second->id, $first->id], ['joined_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $tagTeam->id);
+
+        $modal
+            ->assertSet('form.wrestlerA', $first->id)
+            ->assertSet('form.wrestlerB', $second->id);
+    });
+
     it('responds not found when opening a missing tag team', function () {
         livewire(FormModal::class)
             ->call('openModal', PHP_INT_MAX)
