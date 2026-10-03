@@ -201,7 +201,7 @@ describe('rendering the selected records', function (): void {
 
         // Assert
         expect(substr_count($largeHtml, '<option'))->toBe(substr_count($smallHtml, '<option'))
-            ->and($largeHtml)->toHaveLength(strlen($smallHtml));
+            ->and($largeHtml)->toHaveLength(mb_strlen($smallHtml));
     });
 });
 

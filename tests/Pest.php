@@ -11,6 +11,8 @@ use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
+use Pest\Browser\Api\AwaitableWebpage;
+use Pest\Browser\Api\PendingAwaitablePage;
 
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\withoutVite;
@@ -155,6 +157,37 @@ function freshModel(?Model $model): Model
 function requiredReflectionType(?ReflectionType $type): ReflectionType
 {
     return $type ?? throw new RuntimeException('Expected the reflected declaration to have a type.');
+}
+
+/**
+ * Wait until a JavaScript condition holds in the browser (at most five seconds), then assert it.
+ *
+ * Use this instead of fixed sleeps so a browser test waits exactly as long as the page needs.
+ */
+function waitForScript(AwaitableWebpage|PendingAwaitablePage $page, string $condition): void
+{
+    $page->assertScript(<<<JS
+        () => new Promise((resolve) => {
+            const deadline = Date.now() + 5000;
+            const holds = () => {
+                try {
+                    return Boolean({$condition});
+                } catch {
+                    return false;
+                }
+            };
+            const check = () => {
+                if (holds()) {
+                    resolve(true);
+                } else if (Date.now() > deadline) {
+                    resolve(false);
+                } else {
+                    setTimeout(check, 20);
+                }
+            };
+            check();
+        })
+        JS);
 }
 
 /*
