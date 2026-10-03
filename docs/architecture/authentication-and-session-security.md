@@ -42,6 +42,14 @@ that accepts a new password uses the defaults: registration, password reset and 
 other session and "remember me" cookie on its next request. Sessions that predate the change store the hash on their
 next request and keep working.
 
+The middleware writes the hash of the guard's user at the end of each request. When administrators change their own
+password in the user form, `Users\Modals\FormModal::updateForm()` puts the updated user on the guard, so the session
+that made the change stores the new hash and stays signed in while every other session still ends. A "remember me"
+cookie issued before the change still carries the old hash, so once this session expires the administrator signs in
+again with the new password.
+`tests/Feature/Http/Middleware/AuthenticateSessionTest.php` drives the real Livewire update request through the
+middleware.
+
 The middleware priority list from the promotion context work is unchanged: `AuthenticatesSessions`, then
 `EnsureUserIsActive`, then `EstablishPromotionContext`, then `SubstituteBindings`. Livewire update requests go through
 the `web` group, so they are covered as well.
