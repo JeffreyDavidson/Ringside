@@ -92,6 +92,16 @@ Composer, npm, and GitHub Actions (the workflows and the local `setup-php-compos
 - **`pre-commit`**: fast checks only. It runs `php -l` and Pint (`--blade --test`) on staged PHP files, and ESLint and Prettier on staged JavaScript files
 - **`pre-push`**: runs `composer test:push` (type coverage, Rector, lint, PHPStan, application tests, browser tests). Set `SKIP_PRE_PUSH_CHECKS=1` to skip it deliberately
 
+## Checking for Hidden Row-Order Assumptions
+
+A query without `ORDER BY` returns rows in whatever order the engine finds convenient. SQLite and MySQL usually return primary key order, so a test that relies on it passes locally and in CI, while PostgreSQL may return another order. Run the suite once with SQLite's `reverse_unordered_selects` pragma to expose these assumptions:
+
+```bash
+REVERSE_UNORDERED_SELECTS=1 composer test:application
+```
+
+`tests/Pest.php` turns the pragma on for every Feature and Integration test when the variable is `1` and the suite runs on SQLite (it is ignored on PostgreSQL and MySQL). Every unordered result then comes back reversed, so a test that depended on it fails. The fix is an explicit `ORDER BY` in the application when the order is shown to users or drives locking, or `toEqualCanonicalizing()` in the test when the order is not part of the contract. The run is opt-in and is not part of CI; run it after changing queries that return lists.
+
 ## Troubleshooting Common Issues
 
 ### **CI Workflow Failures**
