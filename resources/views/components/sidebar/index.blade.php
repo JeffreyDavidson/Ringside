@@ -67,7 +67,7 @@
             ? '--sidebar-width: var(--sidebar-default-width)'
             : '--sidebar-width: var(--sidebar-collapsed-width)'"
         id="app-sidebar"
-        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform,visibility] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
+        class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
         :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
