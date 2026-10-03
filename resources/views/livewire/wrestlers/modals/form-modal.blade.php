@@ -1,25 +1,35 @@
 <x-form-modal>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="wrestler-profile-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('wrestlers.name')" wire:model="form.name" />
+            <x-form.inputs.text :label="__('wrestlers.name')" wire:model="form.name" required initial-focus />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('wrestlers.hometown')" wire:model="form.hometown" />
+            <x-form.inputs.text :label="__('wrestlers.hometown')" wire:model="form.hometown" required />
         </x-form-modal.modal-input>
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3" data-test="wrestler-physical-details-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('wrestlers.feet')" wire:model="form.height_feet" />
+            <x-form.inputs.text
+                :label="__('wrestlers.feet')"
+                wire:model="form.height_feet"
+                inputmode="numeric"
+                required
+            />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('wrestlers.inches')" wire:model="form.height_inches" />
+            <x-form.inputs.text
+                :label="__('wrestlers.inches')"
+                wire:model="form.height_inches"
+                inputmode="numeric"
+                required
+            />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.text :label="__('wrestlers.weight')" wire:model="form.weight" />
+            <x-form.inputs.text :label="__('wrestlers.weight')" wire:model="form.weight" inputmode="numeric" required />
         </x-form-modal.modal-input>
     </div>
 

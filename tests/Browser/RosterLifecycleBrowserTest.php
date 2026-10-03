@@ -20,6 +20,7 @@ test('administrator can employ and retire a wrestler from the detail page', func
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));
+    $page->script('void (window.confirm = () => true)');
     $page
         ->assertSee($wrestler->name)
         ->assertPresent('button:has-text("Employ")')
@@ -41,4 +42,33 @@ test('administrator can employ and retire a wrestler from the detail page', func
         ->assertNoJavascriptErrors();
 
     expect($wrestler->refresh()->currentRetirement()->exists())->toBeTrue();
+});
+
+test('retiring a wrestler waits for the administrator to confirm it', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $administrator = administrator();
+    $promotion->users()->attach($administrator, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy", 'promotion_id' => $promotion->id]);
+    $this->actingAs($administrator);
+
+    // Act / Assert
+    $page = visit(route('wrestlers.show', $wrestler));
+    $page->script('void (window.confirm = (message) => { window.confirmedMessage = message; return false; })');
+    $page
+        ->click('button:has-text("Retire")')
+        ->assertScript('window.confirmedMessage', "Retire Ann D'Arcy?")
+        ->assertSeeIn('tr:has-text("Status:")', 'Employed')
+        ->assertPresent('button:has-text("Retire")');
+    $page->script('void (window.confirm = () => true)');
+    $page
+        ->click('button:has-text("Retire")')
+        ->assertSee('Wrestler has been retired.')
+        ->assertSeeIn('tr:has-text("Status:")', 'Retired')
+        ->assertNoJavascriptErrors();
+
+    expect($wrestler->refresh()->retirements()->count())->toBe(1);
 });

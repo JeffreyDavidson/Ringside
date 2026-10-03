@@ -34,6 +34,7 @@
         :variant="$variant"
         :name="$fieldName"
         :id="$inputId"
+        :required="(bool) $attributes->get('required', false)"
     >
         <textarea
             {{

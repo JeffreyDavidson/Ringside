@@ -36,6 +36,21 @@ return [
         'suspend' => 'Suspend',
         'unretire' => 'Unretire',
     ],
+    'lifecycle_confirmations' => [
+        'deactivate' => 'Deactivate :name?',
+        'disband' => 'Disband :name?',
+        'injure' => 'Mark :name as injured?',
+        'release' => 'Release :name?',
+        'retire' => 'Retire :name?',
+        'suspend' => 'Suspend :name?',
+    ],
+    'form' => [
+        'auto_fill' => 'Auto fill',
+        'cancel' => 'Cancel',
+        'clear' => 'Clear',
+        'confirm_clear' => 'Clear the changes you made to this form?',
+        'save' => 'Save',
+    ],
     'loading_form' => 'Loading form…',
     'loading_table' => 'Loading table data…',
     'models' => [

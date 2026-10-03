@@ -8,4 +8,8 @@ return [
     'email' => 'Email Address',
     'phone' => 'Phone Number',
     'role' => 'Role',
+    'first_name' => 'First Name',
+    'last_name' => 'Last Name',
+    'password' => 'Password',
+    'password_confirmation' => 'Confirm Password',
 ];

@@ -37,6 +37,7 @@ return [
     'reset_password' => 'Reset password',
     'reset_intro' => 'Choose a new password for your account.',
     'back_to_login' => 'Back to sign in',
+    'log_out' => 'Log out',
     'show_password' => 'Show password',
     'hide_password' => 'Hide password',
     'home' => 'Ringside home',

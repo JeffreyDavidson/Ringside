@@ -194,7 +194,9 @@ closed: when no context is enforced, an authenticated non-administrator matches
 no promotion-owned records (`PromotionContextService::failsClosed()`), while
 administrators, console, queue and guest contexts stay unscoped. The dashboard
 runs inside the `promotion.context` group, and users without an active
-membership get a 403 "you are not a member of a promotion yet" page. Modals
+membership get a 403 "you are not a member of a promotion yet" page. That page
+uses the guest layout with a Log out button and no promotion navigation, because
+every promotion link would lead back to it. Modals
 authorize on mount (`create` on the model class, or `update` on the loaded
 record), and `EstablishPromotionContext` runs before route model binding so
 bindings resolve inside the promotion scope. Lifecycle and

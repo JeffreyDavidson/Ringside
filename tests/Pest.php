@@ -40,6 +40,7 @@ pest()
     ->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
+        withoutVite();
         freezeTime();
     })
     ->in('Integration');

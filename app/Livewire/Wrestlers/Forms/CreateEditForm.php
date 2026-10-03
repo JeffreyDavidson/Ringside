@@ -71,6 +71,18 @@ class CreateEditForm extends BaseForm
         ];
     }
 
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        return [
+            'height_feet.min' => __('wrestlers.validation.height_feet'),
+            'height_feet.max' => __('wrestlers.validation.height_feet'),
+            'height_inches.min' => __('wrestlers.validation.height_minimum'),
+            'height_inches.max' => __('wrestlers.validation.height_inches'),
+            'weight.digits' => __('wrestlers.validation.weight'),
+        ];
+    }
+
     #[\Override]
     protected function validationAttributes(): array
     {

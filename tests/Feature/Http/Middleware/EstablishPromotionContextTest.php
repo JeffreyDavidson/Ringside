@@ -94,6 +94,25 @@ test('users with no active promotion membership get the no-membership page', fun
     $response->assertViewIs('promotions.no-membership');
 });
 
+test('the no-membership page offers a log out instead of promotion navigation that loops back to it', function () {
+    // Arrange
+    $user = basicUser();
+    actingAs($user);
+
+    // Act
+    $response = get(route('dashboard'));
+
+    // Assert
+    $response->assertForbidden()
+        ->assertSee(__('promotions.no_membership_title'))
+        ->assertSee(__('promotions.no_membership_description'))
+        ->assertSeeHtml(route('logout'))
+        ->assertSee(__('auth-forms.log_out'))
+        ->assertDontSeeHtml(route('wrestlers.index'))
+        ->assertDontSeeHtml(route('events.index'))
+        ->assertDontSeeHtml(route('dashboard'));
+});
+
 test('the first active promotion is used when none has been selected', function () {
     // Arrange
     $user = basicUser();
