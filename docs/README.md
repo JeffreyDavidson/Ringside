@@ -54,6 +54,7 @@ Development process documentation:
 - Git workflow requirements
 - CI/CD pipeline configuration
 - Branch protection enforcement
+- [Production operations](workflows/production-operations.md) checklist for operator-owned settings
 
 ### `/examples/`
 Livewire component examples.
