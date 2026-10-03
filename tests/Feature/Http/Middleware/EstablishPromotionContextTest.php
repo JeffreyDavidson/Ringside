@@ -129,6 +129,22 @@ test('the first active promotion is used when none has been selected', function 
     $response->assertSessionHas('active_promotion_id', $firstPromotion->id);
 });
 
+test('the fallback is the lowest-numbered active promotion whatever order the user joined them in', function () {
+    // Arrange
+    $user = basicUser();
+    [$lowerPromotion, $higherPromotion] = Promotion::factory()->count(2)->create()->all();
+    attachPromotionMembership($user, $higherPromotion, MembershipStatus::Active);
+    attachPromotionMembership($user, $lowerPromotion, MembershipStatus::Active);
+    actingAs($user);
+
+    // Act
+    $response = get(route('wrestlers.index'));
+
+    // Assert
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $lowerPromotion->id);
+});
+
 test('each request starts without the previous request promotion context', function () {
     // Arrange
     $member = basicUser();

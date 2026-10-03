@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
 use Pest\Browser\Api\AwaitableWebpage;
@@ -42,6 +43,7 @@ pest()
     ->beforeEach(function () {
         withoutVite();
         freezeTime();
+        reverseUnorderedSelectsWhenRequested();
     })
     ->in('Integration');
 
@@ -60,6 +62,7 @@ pest()
     ->beforeEach(function () {
         withoutVite();
         freezeTime();
+        reverseUnorderedSelectsWhenRequested();
     })
     ->in('Feature');
 
@@ -107,6 +110,20 @@ function validationFailureCallback(Closure $observer): Closure
 
         return new PotentiallyTranslatedString($message, app(Translator::class));
     };
+}
+
+/**
+ * Opt-in guard against tests that depend on the order of rows a query never ordered: with REVERSE_UNORDERED_SELECTS=1
+ * SQLite returns every unordered result in reverse, so such a test fails instead of passing by accident. See
+ * docs/workflows/ci-cd.md.
+ */
+function reverseUnorderedSelectsWhenRequested(): void
+{
+    if (getenv('REVERSE_UNORDERED_SELECTS') !== '1' || ! runsOnDriver('sqlite')) {
+        return;
+    }
+
+    DB::statement('PRAGMA reverse_unordered_selects = ON');
 }
 
 /**

@@ -35,7 +35,7 @@ describe('stable create and edit form', function (): void {
         $form->name = 'The Four Horsemen';
         $form->started_at = $startDate->toDateString();
         $form->ended_at = $endDate->toDateString();
-        $form->wrestlers = $wrestlers->modelKeys();
+        $form->wrestlers = array_reverse($wrestlers->modelKeys());
         $form->tag_teams = [$tagTeam->id];
 
         // Act

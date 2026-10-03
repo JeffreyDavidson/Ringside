@@ -543,7 +543,13 @@ class MatchFactory extends Factory
      */
     private function createFullMatchOutcome(EventMatch $eventMatch, array $config): void
     {
-        $competitors = $eventMatch->competitors;
+        // Ordered by side position so the 'first' and 'last' winner strategies pick a predictable side.
+        $competitors = $eventMatch->competitors()
+            ->select('events_matches_competitors.*')
+            ->join('events_matches_sides', 'events_matches_sides.id', '=', 'events_matches_competitors.match_side_id')
+            ->orderBy('events_matches_sides.position')
+            ->orderBy('events_matches_competitors.id')
+            ->get();
 
         if ($competitors->isEmpty()) {
             return;

@@ -2,19 +2,27 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+
+use function Pest\Laravel\actingAs;
 
 /**
  * Test helper functions for common testing scenarios.
@@ -416,6 +424,40 @@ function wrestlingTimePeriod(string $type = 'employment'): array
 }
 
 /**
+ * Sign in a new active user who holds an active membership of the promotion with the given role, and enforce that
+ * promotion as the context, the way EstablishPromotionContext does at the start of a request.
+ */
+function actingAsPromotionMember(Promotion $promotion, MembershipRole $role): User
+{
+    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+    actingAs($user);
+
+    $context = resolve(PromotionContextService::class);
+    $context->clear();
+    $context->set($promotion);
+    $context->enforce();
+
+    return $user;
+}
+
+/**
+ * Change a signed-in member's role or status mid-session, as another request would, and drop the memoised membership
+ * so the next authorization check reads the new row.
+ */
+function changePromotionMembership(Promotion $promotion, User $user, MembershipRole $role, MembershipStatus $status = MembershipStatus::Active): void
+{
+    $promotion->users()->updateExistingPivot($user->id, [
+        'role' => $role,
+        'status' => $status,
+    ]);
+    resolve(PromotionContextService::class)->forgetMemberships();
+}
+
+/**
  * Record every SQL statement issued while the callback runs, flagging row-locking statements.
  *
  * SQLite discards row-lock clauses, so its grammar is swapped for one that renders the lock as a
@@ -456,6 +498,17 @@ function recordStatements(Closure $callback): array
     }
 
     return $statements;
+}
+
+/**
+ * The position of the first recorded statement the callback matches, failing the test when none does.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @param  Closure(array{sql: string, bindings: array<int, mixed>, locked: bool}): bool  $matches
+ */
+function statementPosition(array $statements, Closure $matches): int
+{
+    return array_find_key($statements, $matches) ?? throw new RuntimeException('Expected a matching statement to be recorded.');
 }
 
 /**

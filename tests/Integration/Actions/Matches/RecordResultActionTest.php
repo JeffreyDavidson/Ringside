@@ -986,6 +986,27 @@ it('rejects a title change dated inside a reign that was vacated later', functio
         ->and($title->championships()->count())->toBe(1);
 });
 
+it('rejects a title change dated at the instant a later vacated reign began', function (): void {
+    // Arrange
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->forWrestler(Wrestler::factory()->bookable()->create())->create([
+        'won_at' => now()->subDays(20),
+        'lost_at' => now()->subDays(5),
+    ]);
+    [$match, $winningSide] = titleMatchOn(now()->subDays(20), $title, Wrestler::factory()->bookable()->create());
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    );
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class, "Title [{$title->name}] already has a result recorded after this event")
+        ->and($match->refresh()->match_finish)->toBeNull()
+        ->and($title->championships()->count())->toBe(1);
+});
+
 it('allows a title change at the instant a vacated reign ended', function (): void {
     // Arrange
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);

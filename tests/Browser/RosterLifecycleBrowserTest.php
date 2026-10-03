@@ -7,8 +7,13 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\travelTo;
+
 test('administrator can employ and retire a wrestler from the detail page', function (): void {
     // Arrange
+    // The browser server runs in this process, so a fixed clock just before midnight proves the start date
+    // shown after employing cannot roll over to the next day mid-test.
+    travelTo(now()->setDate(2031, 7, 14)->setTime(23, 59, 30));
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
     $promotion->users()->attach($administrator, [

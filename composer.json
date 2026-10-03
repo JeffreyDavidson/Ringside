@@ -128,12 +128,14 @@
         "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser",
         "test:coverage": "php -d memory_limit=4G -d pcov.enabled=1 -d pcov.directory=./app ./vendor/bin/pest --colors=always --exclude-testsuite Browser --coverage --min=100",
         "test:type-coverage": "php -d memory_limit=4G ./vendor/bin/pest --type-coverage --min=100",
+        "test:static": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently --group --success all --names type-coverage,rector,lint,types \"composer test:type-coverage\" \"composer test:rector\" \"composer test:lint\" \"composer test:types\""
+        ],
         "test:push": [
-            "@test:type-coverage",
-            "@test:rector",
-            "@test:lint",
-            "@test:types",
+            "@test:static",
             "@test:application",
+            "npm run build",
             "@test:browser"
         ],
         "test": [

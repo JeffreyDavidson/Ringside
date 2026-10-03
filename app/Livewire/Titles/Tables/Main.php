@@ -44,7 +44,8 @@ class Main extends BaseTable
         return Title::query()
             ->withFirstActivityPeriod()
             ->with('currentChampionship.champion')
-            ->oldest('name');
+            ->oldest('name')
+            ->orderBy('titles.id');
     }
 
     #[\Override]

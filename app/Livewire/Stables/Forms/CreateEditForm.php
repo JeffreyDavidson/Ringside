@@ -118,8 +118,8 @@ class CreateEditForm extends BaseForm
     private function selectedMembers(): StableMembershipData
     {
         return new StableMembershipData(
-            wrestlers: Wrestler::query()->whereKey($this->wrestlers)->get(),
-            tagTeams: TagTeam::query()->whereKey($this->tag_teams)->get(),
+            wrestlers: Wrestler::query()->whereKey($this->wrestlers)->orderBy('id')->get(),
+            tagTeams: TagTeam::query()->whereKey($this->tag_teams)->orderBy('id')->get(),
         );
     }
 

@@ -435,8 +435,8 @@ describe('TitleChampionship Model', function () {
             $championships = TitleChampionship::with('champion')->get();
 
             expect($championships)->toHaveCount(2)
-                ->and($championships->firstOrFail()->champion)->toBeInstanceOf(Wrestler::class)
-                ->and($championships->reverse()->firstOrFail()->champion)->toBeInstanceOf(TagTeam::class);
+                ->and($championships->map(fn (TitleChampionship $championship): string => $championship->champion::class)->all())
+                ->toEqualCanonicalizing([Wrestler::class, TagTeam::class]);
         });
     });
 

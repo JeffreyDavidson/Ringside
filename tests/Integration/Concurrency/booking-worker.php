@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 /*
  * Child process for BookingConcurrencyTest: books one match through AddMatchForEventAction, or, when the spec
- * carries a reschedule_date, moves an event to that date through Events\UpdateAction.
+ * carries a reschedule_date, moves an event to that date through Events\UpdateAction. A spec with a
+ * create_event_at_venue_id creates an event at that venue through Events\CreateAction, and one with a
+ * demote_user_id makes that owner a plain member of the promotion through UpdatePromotionMemberRoleAction.
  *
  * Usage: php booking-worker.php '<json spec>'
  *
@@ -14,17 +16,23 @@ declare(strict_types=1);
  * other worker's transaction. It prints a single RESULT line as JSON.
  */
 
+use App\Actions\Events\CreateAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Actions\Matches\AddMatchForEventAction;
+use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
+use App\Enums\Promotions\MembershipRole;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Users\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
@@ -43,7 +51,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -58,7 +66,17 @@ while (microtime(true) < $startAt) {
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
 try {
-    if (isset($spec['restore_event_id'])) {
+    if (isset($spec['create_event_at_venue_id'])) {
+        resolve(CreateAction::class)->handle(
+            new EventData('Concurrent Venue Event', Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),
+        );
+    } elseif (isset($spec['demote_user_id'])) {
+        resolve(UpdatePromotionMemberRoleAction::class)->handle(
+            Promotion::query()->findOrFail($spec['promotion_id']),
+            User::query()->findOrFail($spec['demote_user_id']),
+            MembershipRole::Member,
+        );
+    } elseif (isset($spec['restore_event_id'])) {
         resolve(RestoreAction::class)->handle(Event::withTrashed()->findOrFail($spec['restore_event_id']));
     } elseif (isset($spec['reschedule_date'])) {
         $event = Event::query()->findOrFail($spec['event_id']);
