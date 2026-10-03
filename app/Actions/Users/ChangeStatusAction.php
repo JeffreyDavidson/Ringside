@@ -22,16 +22,17 @@ final readonly class ChangeStatusAction
     public function handle(User $user, UserStatus $status): User
     {
         return DB::transaction(function () use ($user, $status): User {
+            // Lock order: active administrators (ascending id), then the user, then the promotions they own.
+            if ($status !== UserStatus::Active) {
+                $this->ensureAnotherActiveAdministrator->handle($user);
+            }
+
             $lockedUser = User::query()
                 ->whereKey($user->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
             if ($lockedUser->status !== $status) {
-                if ($status !== UserStatus::Active && $lockedUser->role->isAdministrator()) {
-                    $this->ensureAnotherActiveAdministrator->handle($lockedUser);
-                }
-
                 if ($lockedUser->status === UserStatus::Active) {
                     $this->ensureNotSoleActiveOwner($lockedUser);
                 }

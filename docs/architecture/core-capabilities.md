@@ -102,7 +102,12 @@ clear `email_verified_at`. Only active users are eligible for promotion
 membership and authentication. New registrations remain unverified until a
 platform administrator activates them. Inactive accounts cannot sign in, and
 existing sessions are ended on their next web or Livewire request. Email
-verification remains independent of account activation. User emails are
+verification remains independent of account activation. The platform keeps at
+least one active administrator: deactivating or demoting the last one is
+rejected (`EnsureAnotherActiveAdministratorAction`). Every change that could
+remove an administrator locks the active administrator rows in ascending id
+order before the target user's row, so two administrators deactivating or
+demoting each other at the same time queue instead of deadlocking. User emails are
 case-insensitive: they are stored trimmed and lowercase, uniqueness is checked
 ignoring case (including soft-deleted users) and enforced by a unique index on
 `lower(email)`, and sign-in and password reset look users up ignoring case so
