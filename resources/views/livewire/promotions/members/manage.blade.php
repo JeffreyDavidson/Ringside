@@ -171,7 +171,7 @@
                                                 wire:confirm="{{ __('promotions.confirm_suspend', ['name' => $membership->user->full_name]) }}"
                                                 wire:loading.attr="disabled"
                                                 wire:target="updateMemberStatus"
-                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.suspend') }}
                                             </button>
@@ -181,7 +181,7 @@
                                                 wire:click="updateMemberStatus({{ $membership->user_id }}, '{{ $activeStatus->value }}')"
                                                 wire:loading.attr="disabled"
                                                 wire:target="updateMemberStatus"
-                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-white min-h-10 px-2 text-sm whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.reactivate') }}
                                             </button>
