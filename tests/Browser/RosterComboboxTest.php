@@ -337,3 +337,22 @@ describe('roster combobox keyboard and pointer use', function (): void {
                 JS);
     });
 });
+
+test('typing into the next field right after choosing an option stays in that field', function () {
+    // Arrange
+    $event = Event::factory()->future()->create();
+    Wrestler::factory()->bookable()->create(['name' => 'Focus Opponent']);
+    Referee::factory()->bookable()->create(['first_name' => 'Rowdy', 'last_name' => 'Focus']);
+    $this->actingAs(administrator());
+    $page = openRosterMatchForm($event, MatchType::Singles);
+
+    // Act
+    $page->typeSlowly(rosterInput('form.competitors.1.wrestlers.0'), 'Focus Opp', 20)
+        ->click(rosterOption('form.competitors.1.wrestlers.0', 'Focus Opponent'))
+        ->typeSlowly(rosterInput('form.referees'), 'Rowdy', 20);
+
+    // Assert
+    $page->assertValue(rosterInput('form.referees'), 'Rowdy')
+        ->assertValue(rosterInput('form.competitors.1.wrestlers.0'), 'Focus Opponent')
+        ->assertNoJavascriptErrors();
+});
