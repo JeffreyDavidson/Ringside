@@ -8,6 +8,8 @@ The championship system manages title matches and ensures proper competitor vali
 
 `Title` owns only the championship relationships. Current, previous, first, longest, vacancy, reign-count, and reign-length reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
 
+The previous-championship history tables show, for each ended reign, the reign it followed: `TitleChampionshipBuilder::withPreviousChampionshipId()` selects the latest non-deleted reign of the same title won before it. Its subquery aliases the table as `previous_championships`, and Eloquent qualifies the soft-delete constraint with that alias, so a deleted reign (for example one removed by a result correction) is never reported as the previous champion.
+
 Models expose their explicit persisted naming fields: `name` for wrestlers and titles, and the database-generated `full_name` for managers and referees. They do not infer or append a generic `display_name` attribute through a shared model contract.
 
 ## Title Type Matching
