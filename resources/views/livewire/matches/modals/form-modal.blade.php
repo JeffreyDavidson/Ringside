@@ -41,14 +41,16 @@
                             data-test="match-competitors-grid"
                         >
                             <x-form.inputs.roster-combobox
-                                label="Competitor 1"
+                                :label="$form->sideLabel(0)"
                                 wire:model="form.competitors.0.wrestlers.0"
+                                error-name="form.competitors.0.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 2"
+                                :label="$form->sideLabel(1)"
                                 wire:model="form.competitors.1.wrestlers.0"
+                                error-name="form.competitors.1.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
@@ -62,40 +64,37 @@
                             class="match-competitors-grid grid grid-cols-1 gap-4 sm:grid-cols-2"
                             data-test="match-competitors-grid"
                         >
-                            <div class="space-y-3">
-                                <p class="text-ringside-ink text-sm font-semibold">Team A</p>
-                                <x-form.inputs.roster-combobox
-                                    label="Wrestlers"
-                                    wire:model="form.competitors.0.wrestlers"
-                                    :kind="BookableRosterKind::Wrestlers"
-                                    :labels="$this->selectedRosterLabels['wrestlers']"
-                                    multiple
-                                />
-                                <x-form.inputs.roster-combobox
-                                    label="Tag Teams"
-                                    wire:model="form.competitors.0.tag_teams"
-                                    :kind="BookableRosterKind::TagTeams"
-                                    :labels="$this->selectedRosterLabels['tag_teams']"
-                                    multiple
-                                />
-                            </div>
-                            <div class="space-y-3">
-                                <p class="text-ringside-ink text-sm font-semibold">Team B</p>
-                                <x-form.inputs.roster-combobox
-                                    label="Wrestlers"
-                                    wire:model="form.competitors.1.wrestlers"
-                                    :kind="BookableRosterKind::Wrestlers"
-                                    :labels="$this->selectedRosterLabels['wrestlers']"
-                                    multiple
-                                />
-                                <x-form.inputs.roster-combobox
-                                    label="Tag Teams"
-                                    wire:model="form.competitors.1.tag_teams"
-                                    :kind="BookableRosterKind::TagTeams"
-                                    :labels="$this->selectedRosterLabels['tag_teams']"
-                                    multiple
-                                />
-                            </div>
+                            @foreach ([0, 1] as $sideIndex)
+                                <fieldset
+                                    wire:key="tag-team-side-{{ $sideIndex }}"
+                                    class="min-w-0 space-y-3"
+                                    @error("form.competitors.{$sideIndex}") aria-describedby="form.competitors.{{ $sideIndex }}-error" @enderror
+                                >
+                                    <legend class="text-ringside-ink mb-3 text-sm font-semibold">
+                                        {{ $form->sideLabel($sideIndex) }}
+                                    </legend>
+                                    <x-form.error
+                                        :name="'form.competitors.'.$sideIndex"
+                                        :id="'form.competitors.'.$sideIndex.'-error'"
+                                    />
+                                    <x-form.inputs.roster-combobox
+                                        :label="__('matches.form.wrestlers')"
+                                        :group="$form->sideLabel($sideIndex)"
+                                        wire:model="form.competitors.{{ $sideIndex }}.wrestlers"
+                                        :kind="BookableRosterKind::Wrestlers"
+                                        :labels="$this->selectedRosterLabels['wrestlers']"
+                                        multiple
+                                    />
+                                    <x-form.inputs.roster-combobox
+                                        :label="__('matches.form.tag_teams')"
+                                        :group="$form->sideLabel($sideIndex)"
+                                        wire:model="form.competitors.{{ $sideIndex }}.tag_teams"
+                                        :kind="BookableRosterKind::TagTeams"
+                                        :labels="$this->selectedRosterLabels['tag_teams']"
+                                        multiple
+                                    />
+                                </fieldset>
+                            @endforeach
                         </div>
                     </x-form-modal.modal-input>
                     @break
@@ -107,20 +106,23 @@
                             data-test="match-competitors-grid"
                         >
                             <x-form.inputs.roster-combobox
-                                label="Competitor 1"
+                                :label="$form->sideLabel(0)"
                                 wire:model="form.competitors.0.wrestlers.0"
+                                error-name="form.competitors.0.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 2"
+                                :label="$form->sideLabel(1)"
                                 wire:model="form.competitors.1.wrestlers.0"
+                                error-name="form.competitors.1.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 3"
+                                :label="$form->sideLabel(2)"
                                 wire:model="form.competitors.2.wrestlers.0"
+                                error-name="form.competitors.2.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
@@ -135,26 +137,30 @@
                             data-test="match-competitors-grid"
                         >
                             <x-form.inputs.roster-combobox
-                                label="Competitor 1"
+                                :label="$form->sideLabel(0)"
                                 wire:model="form.competitors.0.wrestlers.0"
+                                error-name="form.competitors.0.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 2"
+                                :label="$form->sideLabel(1)"
                                 wire:model="form.competitors.1.wrestlers.0"
+                                error-name="form.competitors.1.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 3"
+                                :label="$form->sideLabel(2)"
                                 wire:model="form.competitors.2.wrestlers.0"
+                                error-name="form.competitors.2.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
                             <x-form.inputs.roster-combobox
-                                label="Competitor 4"
+                                :label="$form->sideLabel(3)"
                                 wire:model="form.competitors.3.wrestlers.0"
+                                error-name="form.competitors.3.wrestlers"
                                 :kind="BookableRosterKind::Wrestlers"
                                 :labels="$this->selectedRosterLabels['wrestlers']"
                             />
@@ -181,10 +187,13 @@
                             data-test="match-competitors-grid"
                         >
                             @foreach ($form->competitors as $sideIndex => $competitors)
-                                <div wire:key="competitor-side-{{ $sideIndex }}" class="space-y-3">
-                                    <p class="text-ringside-ink text-sm font-semibold">Side {{ $loop->iteration }}</p>
+                                <fieldset wire:key="competitor-side-{{ $sideIndex }}" class="min-w-0 space-y-3">
+                                    <legend class="text-ringside-ink mb-3 text-sm font-semibold">
+                                        {{ $form->sideLabel($loop->index) }}
+                                    </legend>
                                     <x-form.inputs.roster-combobox
-                                        label="Wrestlers"
+                                        :label="__('matches.form.wrestlers')"
+                                        :group="$form->sideLabel($loop->index)"
                                         wire:model="form.competitors.{{ $sideIndex }}.wrestlers"
                                         :kind="BookableRosterKind::Wrestlers"
                                         :labels="$this->selectedRosterLabels['wrestlers']"
@@ -193,14 +202,15 @@
 
                                     @if ($this->matchTypeAllowsTagTeams)
                                         <x-form.inputs.roster-combobox
-                                            label="Tag Teams"
+                                            :label="__('matches.form.tag_teams')"
+                                            :group="$form->sideLabel($loop->index)"
                                             wire:model="form.competitors.{{ $sideIndex }}.tag_teams"
                                             :kind="BookableRosterKind::TagTeams"
                                             :labels="$this->selectedRosterLabels['tag_teams']"
                                             multiple
                                         />
                                     @endif
-                                </div>
+                                </fieldset>
                             @endforeach
                         </div>
                     </x-form-modal.modal-input>

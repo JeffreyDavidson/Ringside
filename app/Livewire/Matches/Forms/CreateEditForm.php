@@ -7,6 +7,7 @@ namespace App\Livewire\Matches\Forms;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
+use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Support\MatchCompetitorRuleSet;
 use App\Livewire\Matches\Support\MatchCompetitorStateMapper;
 use App\Models\Events\Event;
@@ -166,16 +167,96 @@ class CreateEditForm extends BaseForm
             ?? throw new LogicException('A match type is required before building match data.');
     }
 
+    /**
+     * The name the form shows for a competitor side, and uses for it in validation messages.
+     */
+    public function sideLabel(int $index): string
+    {
+        return match ($this->competitorSelectionLayout()) {
+            CompetitorSelectionLayout::TagTeam => __('matches.form.team', ['team' => mb_chr(ord('A') + $index)]),
+            CompetitorSelectionLayout::BattleRoyal => __('matches.competitors'),
+            CompetitorSelectionLayout::Generic, null => __('matches.form.side', ['number' => $index + 1]),
+            default => __('matches.form.competitor', ['number' => $index + 1]),
+        };
+    }
+
+    /**
+     * An empty pick list means nothing of that kind was chosen. The roster comboboxes always send
+     * both lists, so without this a tag team side would also be asked for wrestlers and vice versa.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function prepareForValidation(mixed $attributes): array
+    {
+        $attributes['competitors'] = array_map(
+            fn (array $side): array => array_filter($side, fn (array $ids): bool => $ids !== []),
+            $this->competitors,
+        );
+
+        return $attributes;
+    }
+
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        $competitorMessages = match ($this->competitorSelectionLayout()) {
+            CompetitorSelectionLayout::TagTeam => [
+                'competitors.*.required' => __('matches.validation.side_required'),
+                'competitors.*.wrestlers.min' => __('matches.validation.tag_team_side_min'),
+            ],
+            CompetitorSelectionLayout::BattleRoyal => [
+                'competitors.0.wrestlers.required' => __('matches.validation.entrants_required'),
+                'competitors.0.wrestlers.min' => __('matches.validation.entrants_min'),
+                'competitors.0.wrestlers.max' => __('matches.validation.entrants_max'),
+            ],
+            CompetitorSelectionLayout::Generic => [
+                'competitors.*.wrestlers.required_without' => __('matches.validation.side_required'),
+            ],
+            default => [
+                'competitors.*.wrestlers.required' => __('matches.validation.competitor_required'),
+                'competitors.*.wrestlers.required_without' => __('matches.validation.competitor_required'),
+            ],
+        };
+
+        return [
+            ...$competitorMessages,
+            'competitors.*.wrestlers.*.distinct' => __('matches.validation.wrestler_distinct'),
+            'competitors.*.tag_teams.*.distinct' => __('matches.validation.tag_team_distinct'),
+        ];
+    }
+
     #[\Override]
     protected function validationAttributes(): array
     {
-        return [
+        $attributes = [
             'preview' => 'match preview',
             'matchType' => 'match type',
             'matchStipulationId' => 'match stipulation',
             'competitors' => 'competitors',
+            'competitors.*.wrestlers.*' => __('matches.validation.attributes.wrestler'),
+            'competitors.*.tag_teams.*' => __('matches.validation.attributes.tag_team'),
             'referees' => 'referees',
+            'referees.*' => __('matches.validation.attributes.referee'),
             'titles' => 'championship titles',
+            'titles.*' => __('matches.validation.attributes.title'),
         ];
+
+        foreach (array_keys(array_values($this->competitors)) as $index) {
+            $side = $this->sideLabel($index);
+            $attributes["competitors.{$index}"] = $side;
+            $attributes["competitors.{$index}.wrestlers"] = $side;
+            $attributes["competitors.{$index}.tag_teams"] = $side;
+        }
+
+        return $attributes;
+    }
+
+    private function competitorSelectionLayout(): ?CompetitorSelectionLayout
+    {
+        return $this->matchType instanceof MatchType
+            ? CompetitorSelectionLayout::forMatchType($this->matchType)
+            : null;
     }
 }

@@ -26,19 +26,19 @@ test('administrator can book a singles match through the event page', function (
         ->waitForText('Add Match')
         ->select('select[name="form.matchType"]', MatchType::Singles->value)
         ->typeSlowly('input[data-field="form.competitors.0.wrestlers.0"]', 'First Browser', 20)
-        ->click('[role="option"]:has-text("First Browser Competitor")')
-        ->wait(0.3)
+        ->click('[data-roster-combobox="form.competitors.0.wrestlers.0"] [role="option"]:has-text("First Browser Competitor")')
+        ->assertValue('input[data-field="form.competitors.0.wrestlers.0"]', 'First Browser Competitor')
         ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'second browser', 20)
-        ->click('[role="option"]:has-text("Second Browser Competitor")')
-        ->wait(0.3)
+        ->click('[data-roster-combobox="form.competitors.1.wrestlers.0"] [role="option"]:has-text("Second Browser Competitor")')
+        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Second Browser Competitor')
         ->typeSlowly('input[data-field="form.referees"]', 'Rowdy', 20)
-        ->click('[role="option"]:has-text("Rowdy Official")')
-        ->assertSeeIn('[data-roster-combobox="form.referees"] [data-test="selected-chips"]', 'Rowdy Official')
-        ->press('Save')
-        ->waitForText('First Browser Competitor')
+        ->click('[data-roster-combobox="form.referees"] [role="option"]:has-text("Rowdy Official")');
+    waitForScript($page, 'document.querySelector(\'[data-roster-combobox="form.referees"] [data-test="selected-chips"]\').textContent.includes("Rowdy Official")');
+    $page->press('Save');
+    waitForScript($page, '! document.querySelector("#modal-container").checkVisibility() && document.getAnimations().length === 0');
+    $page
+        ->assertSee('First Browser Competitor')
         ->assertSee('Second Browser Competitor')
-        ->assertScript('!document.querySelector("#modal-container").checkVisibility()')
-        ->wait(0.35)
         ->assertNoJavascriptErrors();
 
     expect($event->matches()->count())->toBe(1);
@@ -71,10 +71,12 @@ test('administrator can edit an unresulted match from the event page', function 
         ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
         ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent')
         ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement', 20)
-        ->click('[role="option"]:has-text("Replacement Edit Opponent")')
-        ->wait(0.3)
+        ->click('[data-roster-combobox="form.competitors.1.wrestlers.0"] [role="option"]:has-text("Replacement Edit Opponent")')
+        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement Edit Opponent')
         ->fill('textarea[name="form.preview"]', 'The challenger steps into the spotlight.')
-        ->press('Save')
+        ->press('Save');
+    waitForScript($page, '! document.querySelector("#modal-container").checkVisibility()');
+    $page
         ->assertSee('Replacement Edit Opponent')
         ->assertNoJavascriptErrors();
 
@@ -132,7 +134,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
         ->select('select[name="form.matchType"]', MatchType::TagTeam->value)
         ->waitForText('Team A')
         ->typeSlowly('input[data-field="form.competitors.0.wrestlers"]', 'Responsive', 20)
-        ->click('[role="option"]:has-text("Responsive Multi Competitor")')
+        ->click('[data-roster-combobox="form.competitors.0.wrestlers"] [role="option"]:has-text("Responsive Multi Competitor")')
         ->assertSeeIn('[data-roster-combobox="form.competitors.0.wrestlers"] [data-test="selected-chips"]', 'Responsive Multi Competitor')
         ->assertVisible('input[data-field="form.competitors.0.wrestlers"]')
         ->assertVisible('input[data-field="form.competitors.0.tag_teams"]')
@@ -159,7 +161,7 @@ test('administrator can create and edit an event with a showtime', function (): 
         ->assertSee('Night of Champions')
         ->assertNoJavascriptErrors();
 
-    $page->wait(0.35);
+    waitForScript($page, '! document.querySelector("#modal-container").checkVisibility() && document.getAnimations().length === 0');
 
     $event = Event::query()->whereName('Night of Champions')->firstOrFail();
     expect($event->date?->toDateTimeString())->toBe($eventDate->toDateTimeString());
