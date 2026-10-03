@@ -154,7 +154,16 @@ Names are unique per promotion: wrestler and tag team `name` and
 forms through `BaseForm::uniqueInPromotion()`, and in the restore eligibility
 checks), so another promotion's values neither collide nor are revealed.
 `exists` rules for promotion-owned records in those forms use
-`BaseForm::existsInPromotion()`. Promotion slugs and venue names stay global.
+`BaseForm::existsInPromotion()`. Both helpers scope to the record's own
+promotion when editing (`BaseForm::$modelPromotionId`, locked) and, when
+creating, to the promotion the creating hook will assign (the enforced
+context), never to whatever context the request happens to have: a global
+administrator without a membership has none, and comparing against
+`promotion_id IS NULL` let edits pass duplicate names or reject a record's own
+values. An administrator creating without a context creates unowned records,
+so the rules then compare against unowned records. The match form scopes its
+rules to the booked event's promotion instead (see
+[Match System](match-system.md)). Promotion slugs and venue names stay global.
 At the database level, `stables_active_name_unique` is unique on
 `(promotion_id, name) WHERE deleted_at IS NULL`; because NULLs are distinct in
 unique indexes, a second filtered index
