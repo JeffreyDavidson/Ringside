@@ -2,7 +2,21 @@
 
 declare(strict_types=1);
 
+use Pest\Browser\Api\PendingAwaitablePage;
+
 const OPEN_NAVIGATION = 'button[aria-label="Open navigation"]';
+
+/**
+ * Resize to a phone and wait for the header and sidebar to finish animating.
+ *
+ * The browser plugin retries an action in one second attempts. The hamburger is a toggle, so if a slow first click
+ * lands but still times out, the retry clicks again behind the open drawer and the test fails at five seconds.
+ */
+function resizeToPhone(PendingAwaitablePage $page): void
+{
+    $page->resize(375, 812);
+    waitForScript($page, 'document.getAnimations().length === 0');
+}
 
 beforeEach(function (): void {
     $this->actingAs(administrator());
@@ -26,7 +40,7 @@ test('the closed mobile navigation stays out of the tab order', function (): voi
 test('the open mobile navigation is a modal dialog that traps focus and closes with escape', function (): void {
     // Arrange
     $page = visit(route('wrestlers.index'));
-    $page->resize(375, 812);
+    resizeToPhone($page);
 
     // Act
     $page->click(OPEN_NAVIGATION)
@@ -58,7 +72,7 @@ test('the open mobile navigation is a modal dialog that traps focus and closes w
 test('widening the window closes the mobile navigation', function (): void {
     // Arrange
     $page = visit(route('wrestlers.index'));
-    $page->resize(375, 812);
+    resizeToPhone($page);
     $page->click(OPEN_NAVIGATION)
         ->wait(0.2);
 
