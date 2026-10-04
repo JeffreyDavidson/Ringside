@@ -127,6 +127,9 @@ consistency by dispatching after commit when a job depends on newly persisted
 state, and require idempotency, retry behavior, and failure handling for every
 queued operation.
 
+The database queue is configured and its `jobs`, `failed_jobs` and `job_batches` tables exist, so the first queued
+job that fails will be recorded instead of throwing. The application has no queued jobs yet.
+
 ### Configuration and localization boundaries
 
 **Priority:** Low
@@ -283,7 +286,8 @@ repair a promotion that has no owner.
 `main` reported required checks and signed commits when last queried through the
 GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
-`docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there.
+`docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. The `MySQL tests` job (production runs
+MySQL 8) is not yet a required check on either branch; add it with the other required checks.
 
 ## Deferred from audit round 2
 
@@ -308,16 +312,73 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
   paginator still runs its own total count because reusing the remembered total could break page links.
 - **Delete rejection wording.** The "cannot be deleted because it is booked in a match" message is plain text in the
   exception, like the other delete messages, and not a translation key.
-- **Duplicate authorization in `BaseFormModal`.** `openModal` and `submitForm` authorize again now that
-  `BaseModal::mount()` authorizes. Harmless, but one of them could go.
-- **Browser test timing.** Responsive-layout tests hit intermittent 5000 ms Playwright timeouts under load. If the
-  timeouts keep blocking pushes, raise the Playwright timeout deliberately. The match form tests wait for page
-  conditions with `waitForScript()` (tests/Pest.php) instead of fixed sleeps; use it for new browser waits.
-- **Production hardening (operator task, not code).** Set `APP_URL` to `https://`, set `SESSION_SECURE_COOKIE=true`
-  explicitly (the cookie is already sent as `secure`), and add HSTS in Cloudflare. A Content-Security-Policy and a
-  Referrer-Policy are separate projects.
+- **Browser test timing.** The intermittent 5000 ms Playwright timeouts had two causes, both fixed: the app layout
+  loaded a render-blocking Google Fonts stylesheet (Inter is now self-hosted and a test asserts no request leaves the
+  app host), and Alpine UI's combobox refocused its search box a frame after an option was chosen, which stole
+  keystrokes from the next field (#1807). Wait on page conditions with `waitForScript()` (tests/Pest.php), never fixed
+  sleeps. If responsive-layout tests start timing out again under load, raise the Playwright timeout deliberately.
+- **Production hardening (operator task, not code).** Referrer-Policy and Permissions-Policy are sent since v0.7.0.
+  Still open: set `APP_URL` to `https://`, set `SESSION_SECURE_COOKIE=true` explicitly (the cookie is already sent as
+  `secure`), add HSTS and a TLS 1.2 minimum in Cloudflare, and drop the duplicate `X-Content-Type-Options` line from
+  the Forge nginx config. A Content-Security-Policy is a separate project because Livewire and Vite need nonces or
+  hashes. The full operator checklist is `docs/workflows/production-operations.md`.
 
 The real invitation flow is tracked under "Promotion member invitations" above.
+
+## Deferred from audit round 3
+
+Round 3 (shipped in v0.7.0) made the application work on production's MySQL 8 and closed the findings of four audits.
+These items were deliberately left open.
+
+**MySQL**
+
+- **No MySQL concurrency test.** The `postgres-concurrency` group uses PostgreSQL-only harness code. The slot lock is
+  one code path on every engine (an upsert that takes a row lock) and is proven under real concurrency on PostgreSQL,
+  but MySQL row locking across processes is verified only by reading its semantics. A MySQL variant of the harness
+  would close it.
+- **Concurrent stable splits on MySQL.** Two splits at the same instant can still pick the same unowned stable name,
+  because a generated-column unique index cannot cover rows without a promotion and there is no row to lock.
+- **MySQL collation.** MySQL's default collation is case- and accent-insensitive, so "Foo" and "foo", or "Café" and
+  "Cafe", count as duplicates and surface as a validation error. This is expected and unlike PostgreSQL and SQLite.
+- **Design note.** `SchedulingSlotLockService` now writes coordination rows, while `.ai/rules/services.md` says services
+  are read-only. Move it under `app/Lifecycle` if the rule should stay strict.
+
+**Domain rules (decision D)**
+
+- **Booking rules are checked against today, not the event date.** A winner who is injured after the event cannot be
+  recorded as the new champion, and a title that was pulled later rejects an earlier result.
+- **"Event not held" compares wall-clock time with UTC.** Event dates are `datetime-local` wall-clock values stored as
+  UTC, so users east of UTC may wait hours before they can record a live result. Decide whether events should carry a
+  time zone before changing either rule.
+
+**Booking form**
+
+- The match form's title dropdown still lists every promotion's titles to an administrator without a membership. A
+  foreign title is rejected by validation and by the action, so this is a convenience issue only.
+- The standalone `Add*ToMatchAction::handle()` entry points do not repeat the promotion check. Nothing in the
+  application calls them directly; the check lives in `AddMatchForEventAction` and `UpdateMatchAction`.
+- Unknown combobox labels show a neutral "Selected record" and are not resolved server-side. A forged non-array
+  competitor side throws a `TypeError` instead of a validation error, like a tampered match type throws `ValueError`.
+- The roster combobox opens on click or typing, not on focus. Opening on focus brought back the focus-stealing problem.
+- Hardcoded English remains in the table delete confirmations ("Remove X?"), the modal header's "Close dialog" and some
+  labels in the match form modal.
+- `BaseFormModal` authorizes when the modal mounts, opens and saves. The save-time check is deliberate and tested: a
+  member who is downgraded or suspended after opening a form cannot save it.
+
+**Accounts**
+
+- An administrator who changes their own password stays signed in for the current session, but a "remember me" cookie
+  issued before the change still carries the old hash, so they sign in again when that session ends.
+- Every demote or deactivate request locks the (few) active administrator rows, even when the target is not an
+  administrator, so the "keep an active administrator" decision never relies on a stale copy of the user.
+
+**Tests and tooling**
+
+- Several ordering tie-breaks (Managers, Referees, TagTeams, Titles and Events tables) and the roster search id
+  tie-break are caught only under `REVERSE_UNORDERED_SELECTS=1` or on PostgreSQL, because plain SQLite returns ties in
+  id order. A nightly job running the suite with that flag would keep them honest.
+- The PostgreSQL CI job runs the full suite and then the concurrency group inside a 15 minute limit; check its
+  headroom as the suite grows.
 
 ## Blocked dependency upgrades
 
@@ -327,12 +388,11 @@ Dependabot proposed these in October 2026; they are deferred on purpose, not for
   `guzzlehttp/psr7` 2 to 3 and `brick/math` 0.19 to 1.0 arrived inside a dev-dependency Dependabot group PR (#1777,
   closed). They are production packages with major versions, so review each on its own, with the HTTP client and any
   big-number usage checked, and not as a side effect of a tooling bump.
-- **`@eslint/js` 10.** Unblocked: ESLint 10 is installed (#1791) and `@eslint/js` 10 requires `eslint ^10`. The
-  project is still on `@eslint/js` 9.39.5, which works with ESLint 10 but should be moved up to match.
 
-Resolved: ESLint 10 (#1791), Vite 8 with `laravel-vite-plugin` 3 (#1794), and the Pest 5.3 update (#1793). Vite and
-`laravel-vite-plugin` must move together because the plugin's 2.x line only supports Vite 7, which is why the
-standalone Vite Dependabot PR failed on npm peer resolution. Consider grouping the two in `.github/dependabot.yml`.
+Resolved: ESLint 10 with `@eslint/js` 10 (#1791, #1800), Vite 8 with `laravel-vite-plugin` 3 (#1794), and the Pest 5.3
+update (#1793). Vite and `laravel-vite-plugin` must move together because the plugin's 2.x line only supports Vite 7,
+which is why the standalone Vite Dependabot PR failed on npm peer resolution. The two are now grouped in
+`.github/dependabot.yml`, so they arrive as one pull request.
 
 ## Considered and rejected
 
