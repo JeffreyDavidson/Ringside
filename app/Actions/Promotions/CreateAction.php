@@ -14,6 +14,7 @@ class CreateAction
         return Promotion::query()->create([
             'name' => $data->name,
             'slug' => $data->slug,
+            'timezone' => $data->timezone,
         ]);
     }
 }

@@ -104,7 +104,7 @@
                                     class="text-ringside-ink focus-visible:outline-ringside-ink font-semibold wrap-break-word underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                 >{{ $row->name }}</a>
                                 <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 tabular-nums sm:hidden">
-                                    {{ $row->date?->format('M j, Y') ?? __('events.no_date') }}
+                                    {{ $row->local_date?->format('M j, Y') ?? __('events.no_date') }}
                                 </p>
                                 <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 lg:hidden">
                                     @if ($row->venue)
@@ -121,7 +121,7 @@
                                 <div class="mt-2 md:hidden"><x-tables.event-status :status="$row->status" /></div>
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums sm:table-cell">
-                                {{ $row->date?->format('M j, Y') ?? __('events.no_date') }}
+                                {{ $row->local_date?->format('M j, Y') ?? __('events.no_date') }}
                             </td>
                             <td class="hidden px-4 py-4 align-top text-xs leading-5 lg:table-cell">
                                 @if ($row->venue)

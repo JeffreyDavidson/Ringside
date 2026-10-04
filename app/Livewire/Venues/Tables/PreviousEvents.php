@@ -57,7 +57,7 @@ class PreviousEvents extends DataTableComponent
                 ->searchable()
                 ->title(fn (Event $row) => $row->name)
                 ->location(fn (Event $row): string => route('events.show', $row)),
-            DateColumn::make(__('events.date'), 'date')
+            DateColumn::make(__('events.date'), 'local_date')
                 ->outputFormat('Y-m-d'),
         ];
     }

@@ -16,6 +16,12 @@
                     wire:model="form.slug"
                     required
                 />
+
+                <x-form.inputs.select
+                    :label="__('promotions.timezone')"
+                    wire:model="form.timezone"
+                    :options="$timezones"
+                />
             </div>
         </x-modal.body>
 

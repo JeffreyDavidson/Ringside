@@ -100,7 +100,7 @@ describe('events that already share a venue day', function () {
     it('still rejects scheduling an unscheduled event at the venue onto a booked day', function () {
         // Arrange
         $venue = Venue::factory()->create();
-        $date = now()->addWeek();
+        $date = now()->addWeek()->startOfDay()->setTime(12, 0);
         $event = Event::factory()->unscheduled()->for($venue)->create();
         Event::factory()->for($venue)->create(['date' => $date]);
         $data = new EventData('Scheduled Event', $date->copy()->addHour(), $venue, null);
