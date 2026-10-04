@@ -343,14 +343,6 @@ These items were deliberately left open.
 - **Design note.** `SchedulingSlotLockService` now writes coordination rows, while `.ai/rules/services.md` says services
   are read-only. Move it under `app/Lifecycle` if the rule should stay strict.
 
-**Domain rules (decision D)**
-
-- **Booking rules are checked against today, not the event date.** A winner who is injured after the event cannot be
-  recorded as the new champion, and a title that was pulled later rejects an earlier result.
-- **"Event not held" compares wall-clock time with UTC.** Event dates are `datetime-local` wall-clock values stored as
-  UTC, so users east of UTC may wait hours before they can record a live result. Decide whether events should carry a
-  time zone before changing either rule.
-
 **Booking form**
 
 - The match form's title dropdown still lists every promotion's titles to an administrator without a membership. A
