@@ -53,9 +53,9 @@
                             <li @class(['border-ringside-line flex items-center gap-5 px-5 py-4', 'border-t' => ! $loop->first])>
                                 <div class="border-ringside-line flex w-14 shrink-0 flex-col items-center border-e pe-5 text-center">
                                     <span class="text-ringside-signal-soft text-xs font-bold tracking-[0.08em] uppercase">
-                                        {{ $event->date?->format('M') }}
+                                        {{ $event->local_date?->format('M') }}
                                     </span>
-                                    <span class="font-display text-ringside-ink text-3xl leading-none">{{ $event->date?->format('j') }}</span>
+                                    <span class="font-display text-ringside-ink text-3xl leading-none">{{ $event->local_date?->format('j') }}</span>
                                 </div>
                                 <div class="flex min-w-0 flex-col gap-1">
                                     <a
@@ -63,7 +63,7 @@
                                         class="text-ringside-ink decoration-ringside-line-bright hover:decoration-ringside-signal focus-visible:outline-ringside-white truncate font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                     >{{ $event->name }}</a>
                                     <span class="text-ringside-muted text-sm">
-                                        {{ $event->date?->format('D, M j · g:i A') }} · {{ $event->venue->name ?? __('dashboard.no_venue') }}
+                                        {{ $event->local_date?->format('D, M j · g:i A') }} · {{ $event->venue->name ?? __('dashboard.no_venue') }}
                                     </span>
                                 </div>
                                 <span class="text-ringside-muted ms-auto shrink-0 text-sm">

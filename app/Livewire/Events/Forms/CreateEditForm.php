@@ -9,9 +9,10 @@ use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Event> */
@@ -29,7 +30,7 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
-        $this->date = $model->date?->format('Y-m-d\\TH:i');
+        $this->date = $model->local_date?->format('Y-m-d\\TH:i');
         $this->venue_id = $model->venue_id;
     }
 
@@ -37,10 +38,22 @@ class CreateEditForm extends BaseForm
     {
         return new EventData(
             name: $this->name,
-            date: $this->date ? Carbon::parse($this->date) : null,
+            date: $this->date ? Promotion::parseLocalTime($this->promotion(), $this->date) : null,
             venue: $this->venue_id ? Venue::query()->findOrFail($this->venue_id) : null,
             preview: $this->preview ?: null,
         );
+    }
+
+    /** The promotion whose time zone the entered date is read in: the event's own, or the current one for a new event. */
+    private function promotion(): ?Promotion
+    {
+        if ($this->isEditing()) {
+            return $this->event()->promotion;
+        }
+
+        $context = app(PromotionContextService::class);
+
+        return $context->isEnforced() ? $context->current() : null;
     }
 
     public function event(): Event

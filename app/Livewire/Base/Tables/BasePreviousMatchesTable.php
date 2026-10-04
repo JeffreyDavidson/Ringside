@@ -61,7 +61,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 })
                 ->title(fn (EventMatch $row) => $row->event->name)
                 ->location(fn (EventMatch $row): string => route('events.show', $row->event)),
-            DateColumn::make(__('events.date'), 'event.date')
+            DateColumn::make(__('events.date'), 'event.local_date')
                 ->inputFormat('Y-m-d H:i:s')
                 ->outputFormat('Y-m-d')
                 ->emptyValue('N/A'),

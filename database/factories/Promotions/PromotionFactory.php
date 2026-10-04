@@ -25,6 +25,7 @@ class PromotionFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'timezone' => 'UTC',
         ];
     }
 }
