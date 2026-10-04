@@ -51,7 +51,7 @@ class Main extends BaseTable
         return Event::query()
             ->latestDatedFirst()
             ->orderBy('events.id')
-            ->with(['venue']);
+            ->with(['venue', 'promotion']);
     }
 
     protected function configure(): void

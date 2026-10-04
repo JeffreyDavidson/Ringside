@@ -37,6 +37,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property-read EventStatus $status
+ * @property-read Carbon|null $local_date
  * @property-read Venue|null $venue
  * @property-read Promotion|null $promotion
  * @property-read Collection<int, EventMatch> $matches
@@ -94,6 +95,20 @@ class Event extends Model implements SoftDeletable
     public function matches(): HasMany
     {
         return $this->hasMany(EventMatch::class);
+    }
+
+    /**
+     * The event date as wall-clock time in its promotion's time zone, for display and form prefill.
+     *
+     * @return Attribute<Carbon|null, never>
+     */
+    protected function localDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?Carbon => $this->date instanceof Carbon
+                ? Promotion::toLocalTime($this->promotion, $this->date)
+                : null
+        );
     }
 
     /**

@@ -85,6 +85,36 @@ describe('promotion form interactions', function () {
         'spaces' => ['not a slug', 'alpha_dash'],
     ]);
 
+    it('saves the selected time zone', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Tokyo Pro',
+            'form.slug' => 'tokyo-pro',
+            'form.timezone' => 'Asia/Tokyo',
+        ]);
+        $modal->call('save');
+
+        $modal->assertHasNoErrors();
+        expect(Promotion::query()->where('slug', 'tokyo-pro')->firstOrFail()->timezone)->toBe('Asia/Tokyo');
+    });
+
+    it('rejects a time zone that does not exist', function (string $timezone) {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Promotion',
+            'form.slug' => 'valid-promotion',
+            'form.timezone' => $timezone,
+        ]);
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.timezone' => 'in']);
+    })->with([
+        'unknown zone' => ['Mars/Olympus'],
+        'abbreviation' => ['EST'],
+    ]);
+
     it('fills dummy data with a name and its matching slug that can create a promotion', function () {
         $modal = livewire(FormModal::class);
         $modal->call('openModal');

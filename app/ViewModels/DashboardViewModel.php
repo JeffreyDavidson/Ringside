@@ -34,7 +34,7 @@ final readonly class DashboardViewModel
         return Event::query()
             ->scheduled()
             ->orderBy('date')
-            ->with('venue')
+            ->with(['venue', 'promotion'])
             ->withCount('matches')
             ->limit(self::UPCOMING_EVENT_LIMIT)
             ->get();

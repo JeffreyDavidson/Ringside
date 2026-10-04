@@ -66,6 +66,8 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view('livewire.promotions.modals.form-modal');
+        return view('livewire.promotions.modals.form-modal', [
+            'timezones' => array_combine(timezone_identifiers_list(), timezone_identifiers_list()),
+        ]);
     }
 }

@@ -17,10 +17,13 @@ class CreateEditForm extends BaseForm
 
     public string $slug = '';
 
+    public string $timezone = 'UTC';
+
     protected function loadModelData(Model $model): void
     {
         $this->name = $model->name;
         $this->slug = $model->slug;
+        $this->timezone = $model->timezone;
     }
 
     public function toData(): PromotionData
@@ -28,6 +31,7 @@ class CreateEditForm extends BaseForm
         return new PromotionData(
             name: $this->name,
             slug: $this->slug,
+            timezone: $this->timezone,
         );
     }
 
@@ -47,6 +51,7 @@ class CreateEditForm extends BaseForm
                 'alpha_dash:ascii',
                 Rule::unique('promotions', 'slug')->ignore($this->modelId),
             ],
+            'timezone' => ['required', 'string', Rule::in(timezone_identifiers_list())],
         ];
     }
 }

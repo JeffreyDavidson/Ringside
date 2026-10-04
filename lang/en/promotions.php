@@ -40,6 +40,7 @@ return [
     'save_role' => 'Save role',
     'slug' => 'Slug',
     'suspend' => 'Suspend access',
+    'timezone' => 'Time zone',
     'switch' => 'Switch promotion',
     'switched' => 'Promotion switched.',
     'user' => 'User',

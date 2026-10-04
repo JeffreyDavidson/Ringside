@@ -207,6 +207,25 @@ Custom domains, subdomains, and physical tenant databases are deferred. The
 initial boundary is a central platform with one database and explicit logical
 promotion ownership.
 
+## Promotion Time Zones and Event Dates
+
+Each promotion has a `timezone` (an IANA identifier, `UTC` by default, so existing
+promotions behave as before). It is edited on the promotion form and validated with
+`Rule::in(timezone_identifiers_list())`.
+
+`events.date` is always stored in UTC. People enter and read event dates in the
+promotion's zone: the event form reads the `datetime-local` value as that zone and stores
+the UTC instant (`Promotion::parseLocalTime()`), and shows the stored value back in it
+(`Event::local_date`, backed by `Promotion::toLocalTime()`). For a new event the zone is the
+enforced promotion context, the same promotion the creating hook assigns; an event with no
+promotion uses the application time zone. The reschedule validation rule (`DateCanBeChanged`)
+converts the entered value the same way, so it compares real instants.
+
+Because the stored value is the true instant, comparisons such as the "event not held" gate
+in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
+Event dates shown on the dashboard, events table and event page use `local_date`. Venue
+day booking and the events date-range filter still use the UTC date.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)

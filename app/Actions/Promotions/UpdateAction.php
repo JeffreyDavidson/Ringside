@@ -17,6 +17,7 @@ class UpdateAction
             $lockedPromotion->update([
                 'name' => $data->name,
                 'slug' => $data->slug,
+                'timezone' => $data->timezone,
             ]);
 
             return $lockedPromotion;
