@@ -774,7 +774,7 @@ it('accepts a result for an event happening right now', function (): void {
 it('rejects a title change on a title that is no longer active', function (Closure $deactivate): void {
     // Arrange
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
-    [$match, $winningSide] = titleMatchOn(now()->subDay(), $title, Wrestler::factory()->bookable()->create());
+    [$match, $winningSide] = titleMatchOn(now(), $title, Wrestler::factory()->bookable()->create());
     $deactivate($title);
 
     // Act
@@ -871,7 +871,7 @@ it('rejects a title change for a winner who is no longer eligible', function (Cl
     // Arrange
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $winner = Wrestler::factory()->bookable()->create();
-    [$match, $winningSide] = titleMatchOn(now()->subDay(), $title, $winner);
+    [$match, $winningSide] = titleMatchOn(now(), $title, $winner);
     $change($winner);
 
     // Act
