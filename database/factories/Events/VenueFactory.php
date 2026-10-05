@@ -29,6 +29,7 @@ class VenueFactory extends Factory
             'city' => fake()->city(),
             'state' => fake()->randomElement(UnitedStatesState::cases())->value,
             'zipcode' => str(fake()->postcode())->substr(0, 5)->value(),
+            'timezone' => 'UTC',
         ];
     }
 

@@ -39,6 +39,7 @@ describe('Venue Model Integration Tests', function () {
                 'state',
                 'zipcode',
                 'address',
+                'timezone',
             ]);
         });
 

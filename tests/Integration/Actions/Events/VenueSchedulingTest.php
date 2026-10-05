@@ -8,10 +8,12 @@ use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Data\Events\EventData;
 use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Carbon;
 
 test('it rejects creating events at the same venue and time', function () {
     $date = now()->addWeek();
@@ -221,4 +223,61 @@ describe('venue booking across promotions', function () {
         expect(fn () => resolve(RestoreAction::class)->handle($deleted))
             ->toThrow(SchedulingConflictException::class);
     });
+});
+
+describe('venue day in the venue time zone', function () {
+    // New York is UTC-4 in June, so its 10 June runs from 04:00 UTC on 10 June to 03:59 UTC on 11 June.
+    it('conflicts for the same venue day even though the UTC dates differ', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'America/New_York']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2030-06-11 03:00:00', 'UTC')]);
+        $date = Carbon::parse('2030-06-10 14:00:00', 'UTC');
+
+        // Act
+        $attempt = fn () => VenueSchedulingEligibility::ensureAvailable($venue, $date);
+
+        // Assert
+        expect($attempt)->toThrow(SchedulingConflictException::class);
+    });
+
+    it('permits different venue days that share a UTC date', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'America/New_York']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2030-06-10 02:00:00', 'UTC')]);
+        $date = Carbon::parse('2030-06-10 12:00:00', 'UTC');
+
+        // Act
+        VenueSchedulingEligibility::ensureAvailable($venue, $date);
+
+        // Assert
+        expect($venue->events()->count())->toBe(1);
+    });
+
+    it('judges a UTC venue by its UTC date', function () {
+        // Arrange
+        $venue = Venue::factory()->create();
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2030-06-10 02:00:00', 'UTC')]);
+        $date = Carbon::parse('2030-06-10 23:00:00', 'UTC');
+
+        // Act
+        $attempt = fn () => VenueSchedulingEligibility::ensureAvailable($venue, $date);
+
+        // Assert
+        expect($attempt)->toThrow(SchedulingConflictException::class);
+    });
+
+    it('treats a move across the venue local midnight as a new booking', function (string $newDate, bool $changing) {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'America/New_York']);
+        $event = Event::factory()->for($venue)->create(['date' => Carbon::parse('2030-06-11 03:30:00', 'UTC')]);
+
+        // Act
+        $result = VenueSchedulingEligibility::isBookingChanging($event, $venue, Carbon::parse($newDate, 'UTC'));
+
+        // Assert
+        expect($result)->toBe($changing);
+    })->with([
+        'past local midnight on the same UTC date' => ['2030-06-11 04:30:00', true],
+        'earlier on the same local day across the UTC date' => ['2030-06-10 20:00:00', false],
+    ]);
 });

@@ -20,4 +20,8 @@
             <x-form.inputs.text :label="__('venues.zipcode')" wire:model="form.zipcode" inputmode="numeric" required />
         </x-form-modal.modal-input>
     </x-layouts.form-grid>
+
+    <x-form-modal.modal-input>
+        <x-form.inputs.select :label="__('venues.timezone')" wire:model="form.timezone" :options="$timezones" />
+    </x-form-modal.modal-input>
 </x-form-modal>

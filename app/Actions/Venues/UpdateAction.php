@@ -30,6 +30,7 @@ class UpdateAction
             $lockedVenue->update([
                 'name' => $venueData->name,
                 'address' => $venueData->address,
+                'timezone' => $venueData->timezone,
             ]);
 
             return $lockedVenue;
