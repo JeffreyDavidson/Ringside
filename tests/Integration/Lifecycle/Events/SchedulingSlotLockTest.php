@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Services\Matches\SchedulingSlotLockService;
+use App\Lifecycle\Events\SchedulingSlotLock;
 use Illuminate\Database\Connection;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\PostgresConnection;
@@ -29,11 +29,11 @@ function pretendSlotLock(string $driver, ?Carbon ...$slots): array
 
     return array_map(
         fn (array $statement): array => ['query' => $statement['query'], 'bindings' => $statement['bindings']],
-        $connection->pretend(fn (Connection $pretended) => new SchedulingSlotLockService($pretended)->lock(...$slots)),
+        $connection->pretend(fn (Connection $pretended) => new SchedulingSlotLock($pretended)->lock(...$slots)),
     );
 }
 
-describe('scheduling slot lock service', function (): void {
+describe('scheduling slot lock', function (): void {
     test('it locks a slot with an upsert that row-locks the slot on every engine', function (string $driver, string $sql): void {
         // Arrange
         $slot = Carbon::createFromTimestamp(1_000_000_002);
@@ -78,7 +78,7 @@ describe('scheduling slot lock service', function (): void {
 
     test('it keeps one lock row per slot however often the slot is locked', function (): void {
         // Arrange
-        $lock = resolve(SchedulingSlotLockService::class);
+        $lock = resolve(SchedulingSlotLock::class);
         $earlier = Carbon::createFromTimestamp(1_000_000_000);
         $later = Carbon::createFromTimestamp(1_000_000_002);
 
