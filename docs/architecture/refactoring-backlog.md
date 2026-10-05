@@ -340,8 +340,6 @@ These items were deliberately left open.
   because a generated-column unique index cannot cover rows without a promotion and there is no row to lock.
 - **MySQL collation.** MySQL's default collation is case- and accent-insensitive, so "Foo" and "foo", or "Café" and
   "Cafe", count as duplicates and surface as a validation error. This is expected and unlike PostgreSQL and SQLite.
-- **Design note.** `SchedulingSlotLockService` now writes coordination rows, while `.ai/rules/services.md` says services
-  are read-only. Move it under `app/Lifecycle` if the rule should stay strict.
 
 **Booking form**
 

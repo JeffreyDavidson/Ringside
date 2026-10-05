@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Matches;
+namespace App\Lifecycle\Events;
 
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Database\Connection;
@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * The lock is a row of the scheduling_slot_locks table, so it works the same way on MySQL, PostgreSQL and
  * SQLite. The rows only coordinate transactions; they hold no domain data and nothing reads them.
  */
-final readonly class SchedulingSlotLockService
+final readonly class SchedulingSlotLock
 {
     private const string TABLE = 'scheduling_slot_locks';
 

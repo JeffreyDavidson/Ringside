@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Services\Matches\MatchAssignmentConflictService;
-use App\Services\Matches\SchedulingSlotLockService;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
@@ -16,7 +16,7 @@ class RestoreAction
     public function __construct(
         private readonly DeletionStateManager $deletionState,
         private readonly MatchAssignmentConflictService $assignmentConflicts,
-        private readonly SchedulingSlotLockService $slotLockService,
+        private readonly SchedulingSlotLock $slotLock,
     ) {}
 
     /**
@@ -40,7 +40,7 @@ class RestoreAction
         DB::transaction(function () use ($event): void {
             // The slot lock comes before every event row lock, exactly as in Events\UpdateAction, so the restore
             // queues with concurrent reschedules and restores into the same slot. Bookings never wait for it.
-            $this->slotLockService->lock($event->date);
+            $this->slotLock->lock($event->date);
 
             $lockedEvent = $event->refreshForUpdate();
             $venue = $lockedEvent->venue?->refreshForUpdate();
