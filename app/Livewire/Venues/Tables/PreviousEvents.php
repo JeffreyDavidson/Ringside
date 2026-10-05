@@ -37,6 +37,7 @@ class PreviousEvents extends DataTableComponent
 
         return Event::query()
             ->forVenueId($venueId)
+            ->with('promotion')
             ->latestDatedFirst();
     }
 

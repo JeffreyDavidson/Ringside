@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -252,6 +254,31 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
         'guest' => ['guest', 403],
         'basic user' => ['basic user', 404],
     ]);
+});
+
+describe('PreviousTitleChampionshipsTable Reign Dates', function () {
+    it('shows reign dates as the day in the title promotion time zone', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        TitleChampionship::factory()
+            ->for(Title::factory()->for($promotion, 'promotion'))
+            ->forWrestler($wrestler)
+            ->create([
+                'won_at' => Date::parse('2026-03-02 03:00:00', 'UTC'),
+                'lost_at' => Date::parse('2026-06-11 02:00:00', 'UTC'),
+            ]);
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSee('2026-03-01')
+            ->assertSee('2026-06-10')
+            ->assertDontSee('2026-03-02')
+            ->assertDontSee('2026-06-11');
+    });
 });
 
 describe('PreviousTitleChampionshipsTable Deleted Titles', function () {

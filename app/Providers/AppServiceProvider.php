@@ -21,6 +21,7 @@ use App\Services\Promotions\PromotionContextService;
 use App\Support\Auth\CaseInsensitiveEmailUserProvider;
 use App\View\Composers\PromotionSwitcherComposer;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -79,6 +80,8 @@ class AppServiceProvider extends ServiceProvider
             EnsureUserIsActive::class,
             EstablishPromotionContext::class,
         ]);
+
+        Model::preventLazyLoading(! app()->isProduction());
 
         Password::defaults(fn (): Password => Password::min(12));
 

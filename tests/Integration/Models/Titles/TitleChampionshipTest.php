@@ -8,6 +8,7 @@ use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -663,5 +664,55 @@ describe('TitleChampionship Model', function () {
             expect(freshModel($title)->currentChampionship)->not()->toBeNull();
             expect($title->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($wrestler->id);
         });
+    });
+});
+
+describe('TitleChampionship local reign dates', function () {
+    it('shows when a reign began and ended in the title promotion time zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $championship = TitleChampionship::factory()
+            ->for(Title::factory()->for($promotion, 'promotion'), 'title')
+            ->create([
+                'won_at' => Carbon::parse('2026-03-02 03:00:00', 'UTC'),
+                'lost_at' => Carbon::parse('2026-06-11 02:00:00', 'UTC'),
+            ]);
+
+        // Act
+        $championship = TitleChampionship::query()->with('title.promotion')->findOrFail($championship->id);
+
+        // Assert
+        expect($championship->local_won_at->toDateTimeString())->toBe('2026-03-01 19:00:00')
+            ->and($championship->local_won_at->getTimezone()->getName())->toBe('America/Los_Angeles')
+            ->and($championship->local_lost_at?->toDateTimeString())->toBe('2026-06-10 19:00:00')
+            ->and($championship->won_at->toDateTimeString())->toBe('2026-03-02 03:00:00');
+    });
+
+    it('has no local end date while the reign continues', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $championship = TitleChampionship::factory()
+            ->for(Title::factory()->for($promotion, 'promotion'), 'title')
+            ->current()
+            ->create(['won_at' => Carbon::parse('2026-03-02 03:00:00', 'UTC')]);
+
+        // Act
+        $championship = TitleChampionship::query()->with('title.promotion')->findOrFail($championship->id);
+
+        // Assert
+        expect($championship->local_lost_at)->toBeNull();
+    });
+
+    it('uses the application time zone when the title has no promotion', function () {
+        // Arrange
+        $championship = TitleChampionship::factory()
+            ->for(Title::factory()->state(['promotion_id' => null]), 'title')
+            ->create(['won_at' => Carbon::parse('2026-03-02 03:00:00', 'UTC')]);
+
+        // Act
+        $championship = TitleChampionship::query()->with('title.promotion')->findOrFail($championship->id);
+
+        // Assert
+        expect($championship->local_won_at->toDateTimeString())->toBe('2026-03-02 03:00:00');
     });
 });
