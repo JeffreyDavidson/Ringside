@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\UpdateAction;
+use App\Data\Stables\StableData;
+use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Livewire\Stables\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
@@ -87,14 +90,12 @@ describe('authorized stable form interactions', function () {
         $wrestler = Wrestler::factory()->bookable()->create();
         $tagTeam = TagTeam::factory()->employed()->create();
         $startedAt = now()->toDateString();
-        $endedAt = now()->addYear()->toDateString();
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal');
         $modal->set([
             'form.name' => 'The Dangerous Alliance',
             'form.started_at' => $startedAt,
-            'form.ended_at' => $endedAt,
             'form.wrestlers' => [$wrestler->id],
             'form.tag_teams' => [$tagTeam->id],
         ]);
@@ -103,7 +104,7 @@ describe('authorized stable form interactions', function () {
         $stable = Stable::query()->whereName('The Dangerous Alliance')->firstOrFail();
         $activityPeriod = $stable->firstActivityPeriod()->firstOrFail();
         expect($activityPeriod->started_at->toDateString())->toBe($startedAt)
-            ->and($activityPeriod->ended_at?->toDateString())->toBe($endedAt)
+            ->and($activityPeriod->ended_at)->toBeNull()
             ->and($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$wrestler->id])
             ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())->toBe([$tagTeam->id]);
         $modal
@@ -173,6 +174,172 @@ describe('authorized stable form interactions', function () {
         $modal
             ->assertHasErrors(['form.started_at'])
             ->assertSet('isModalOpen', true);
+    });
+
+    it('rejects an end date when creating a stable', function () {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Ended Before It Began',
+            'form.started_at' => '2024-01-01',
+            'form.ended_at' => '2024-06-01',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.ended_at' => 'prohibited'])
+            ->assertSet('isModalOpen', true);
+        expect(Stable::query()->whereName('Ended Before It Began')->doesntExist())->toBeTrue()
+            ->and($wrestlers->firstOrFail()->stables()->doesntExist())->toBeTrue();
+    });
+
+    it('rejects an end date that would close an active stable without disbanding it', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Active Stable']);
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $stable->activityPeriods()->create(['started_at' => '2024-01-15']);
+        $stable->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.ended_at', '2024-06-01');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.ended_at' => 'prohibited'])
+            ->assertSet('isModalOpen', true);
+        expect($stable->activityPeriods()->sole()->ended_at)->toBeNull()
+            ->and($stable->currentWrestlers()->count())->toBe(3);
+    });
+
+    it('rejects an end date when establishing an unformed stable by editing it', function () {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $stable = Stable::factory()->create(['name' => 'Unformed Stable']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set([
+            'form.started_at' => '2024-01-01',
+            'form.ended_at' => '2024-06-01',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.ended_at' => 'prohibited']);
+        expect($stable->activityPeriods()->doesntExist())->toBeTrue()
+            ->and($stable->currentWrestlers()->doesntExist())->toBeTrue();
+    });
+
+    it('rejects a new start date for a disbanded stable with several activity periods without a server error', function (string $newStart) {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Reunited Stable']);
+        $first = $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
+        $second = $stable->activityPeriods()->create(['started_at' => '2022-01-01', 'ended_at' => '2023-01-01']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.started_at', $newStart);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertOk();
+        $modal
+            ->assertHasErrors(['form.started_at'])
+            ->assertSet('isModalOpen', true);
+        expect($first->refresh()->started_at->toDateString())->toBe('2020-01-01')
+            ->and($first->ended_at?->toDateString())->toBe('2021-01-01')
+            ->and($second->refresh()->started_at->toDateString())->toBe('2022-01-01')
+            ->and($second->ended_at?->toDateString())->toBe('2023-01-01');
+    })->with([
+        'after the first period ends' => ['2021-06-01'],
+        'within the first period' => ['2020-06-01'],
+    ]);
+
+    it('renames a disbanded stable without requiring members', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Disbanded Stable']);
+        $period = $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.name', 'Renamed Disbanded Stable');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false);
+        expect($stable->refresh()->name)->toBe('Renamed Disbanded Stable')
+            ->and($period->refresh()->ended_at?->toDateString())->toBe('2021-01-01')
+            ->and($stable->currentWrestlers()->doesntExist())->toBeTrue()
+            ->and($stable->currentTagTeams()->doesntExist())->toBeTrue();
+    });
+
+    it('does not attach members to a disbanded stable', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Disbanded Stable']);
+        $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set([
+            'form.name' => 'Renamed Disbanded Stable',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+            'form.tag_teams' => [$tagTeam->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.wrestlers' => 'prohibited', 'form.tag_teams' => 'prohibited'])
+            ->assertSet('isModalOpen', true);
+        expect($stable->refresh()->name)->toBe('Disbanded Stable')
+            ->and($stable->currentWrestlers()->doesntExist())->toBeTrue()
+            ->and($stable->currentTagTeams()->doesntExist())->toBeTrue();
+    });
+
+    it('shows a form error and keeps the modal open when the update action rejects the data', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Original Stable']);
+        $failure = CannotBeUpdatedException::startDateLocked($stable);
+        app()->instance(UpdateAction::class, new class($failure) extends UpdateAction
+        {
+            public function __construct(private readonly CannotBeUpdatedException $failure) {}
+
+            #[Override]
+            public function handle(Stable $stable, StableData $stableData): never
+            {
+                throw $this->failure;
+            }
+        });
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.name', 'Renamed Stable');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.started_at'])
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('form-submitted');
     });
 
     it('requires a stable name', function () {

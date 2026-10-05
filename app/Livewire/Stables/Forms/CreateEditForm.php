@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Forms;
 
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -65,6 +66,7 @@ class CreateEditForm extends BaseForm
         $stableStartDate = $this->parseStartDate();
         $members = $this->selectedMembers();
         $stable = $this->isEditing() ? $this->stable() : null;
+        $canHaveMembers = ! $stable instanceof Stable || app(StableActivityEligibility::class)->canHaveMembers($stable);
 
         $rules = [
             'name' => [
@@ -77,12 +79,8 @@ class CreateEditForm extends BaseForm
                 'nullable',
                 'date',
                 new CanChangeDebutDate($stable),
-                new HasMinimumMembers(
-                    $members->wrestlers ?? collect(),
-                    $members->tagTeams ?? collect(),
-                ),
             ],
-            'ended_at' => ['nullable', 'date'],
+            'ended_at' => ['nullable', 'date', 'prohibited'],
             'wrestlers' => ['nullable', 'array'],
             'wrestlers.*' => [
                 'bail',
@@ -100,6 +98,16 @@ class CreateEditForm extends BaseForm
                 new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
             ],
         ];
+
+        if ($canHaveMembers) {
+            $rules['started_at'][] = new HasMinimumMembers(
+                $members->wrestlers ?? collect(),
+                $members->tagTeams ?? collect(),
+            );
+        } else {
+            $rules['wrestlers'][] = 'prohibited';
+            $rules['tag_teams'][] = 'prohibited';
+        }
 
         if ($stable?->firstActivityPeriod?->ended_at !== null) {
             $rules['ended_at'] = ['required', 'date'];
@@ -142,6 +150,9 @@ class CreateEditForm extends BaseForm
     {
         return [
             'ended_at.required' => 'A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.',
+            'ended_at.prohibited' => 'An end date cannot be entered here. Establish the stable, then use disband to end it.',
+            'wrestlers.prohibited' => 'A disbanded stable cannot have members. Use reunite instead.',
+            'tag_teams.prohibited' => 'A disbanded stable cannot have members. Use reunite instead.',
         ];
     }
 

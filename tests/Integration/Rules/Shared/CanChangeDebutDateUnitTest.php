@@ -118,3 +118,27 @@ test('compares a reunited model against its first period rather than the current
     'stable' => Stable::class,
     'title' => Title::class,
 ]);
+
+test('rejects changing the start date of a disbanded stable with several periods but allows keeping it', function (string $target, bool $fails) {
+    // Arrange
+    $stable = Stable::factory()->create(['name' => 'Reunited Stable']);
+    $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
+    $stable->activityPeriods()->create(['started_at' => '2022-01-01', 'ended_at' => '2023-01-01']);
+    $message = null;
+
+    // Act
+    new CanChangeDebutDate($stable)->validate(
+        'started_at',
+        $target,
+        validationFailureCallback(function (string $failure) use (&$message): void {
+            $message = $failure;
+        }),
+    );
+
+    // Assert
+    expect($message)->toBe($fails ? 'The debut date cannot be changed because Reunited Stable has been active in more than one period.' : null);
+})->with([
+    'a date after the first period ends' => ['2021-06-01', true],
+    'a date within the first period' => ['2020-06-01', true],
+    'the existing start date' => ['2020-01-01', false],
+]);
