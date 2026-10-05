@@ -7,15 +7,13 @@ use Pest\Browser\Api\PendingAwaitablePage;
 const OPEN_NAVIGATION = 'button[aria-label="Open navigation"]';
 
 /**
- * Resize to a phone and wait for the header and sidebar to finish animating.
- *
- * The browser plugin retries an action in one second attempts. The hamburger is a toggle, so if a slow first click
- * lands but still times out, the retry clicks again behind the open drawer and the test fails at five seconds.
+ * Wait until the hamburger reports the drawer as open or closed and its transition has finished.
  */
-function resizeToPhone(PendingAwaitablePage $page): void
+function waitForNavigationState(PendingAwaitablePage $page, bool $open): void
 {
-    $page->resize(375, 812);
-    waitForScript($page, 'document.getAnimations().length === 0');
+    $expanded = $open ? 'true' : 'false';
+
+    waitForSettledScript($page, 'document.querySelector(\''.OPEN_NAVIGATION.'\').getAttribute("aria-expanded") === "'.$expanded.'"');
 }
 
 beforeEach(function (): void {
@@ -40,11 +38,11 @@ test('the closed mobile navigation stays out of the tab order', function (): voi
 test('the open mobile navigation is a modal dialog that traps focus and closes with escape', function (): void {
     // Arrange
     $page = visit(route('wrestlers.index'));
-    resizeToPhone($page);
+    resizeAndSettle($page, 375, 812);
 
     // Act
-    $page->click(OPEN_NAVIGATION)
-        ->wait(0.2);
+    $page->click(OPEN_NAVIGATION);
+    waitForNavigationState($page, true);
 
     // Assert
     $page->assertAttribute(OPEN_NAVIGATION, 'aria-expanded', 'true')
@@ -58,8 +56,8 @@ test('the open mobile navigation is a modal dialog that traps focus and closes w
         ->assertNoAccessibilityIssues();
 
     // Act
-    $page->keys('aside a[aria-label="Wrestlers"]', 'Escape')
-        ->wait(0.2);
+    $page->keys('aside a[aria-label="Wrestlers"]', 'Escape');
+    waitForNavigationState($page, false);
 
     // Assert
     $page->assertAttribute(OPEN_NAVIGATION, 'aria-expanded', 'false')
@@ -72,13 +70,12 @@ test('the open mobile navigation is a modal dialog that traps focus and closes w
 test('widening the window closes the mobile navigation', function (): void {
     // Arrange
     $page = visit(route('wrestlers.index'));
-    resizeToPhone($page);
-    $page->click(OPEN_NAVIGATION)
-        ->wait(0.2);
+    resizeAndSettle($page, 375, 812);
+    $page->click(OPEN_NAVIGATION);
+    waitForNavigationState($page, true);
 
     // Act
-    $page->resize(1440, 900)
-        ->wait(0.2);
+    resizeAndSettle($page, 1440, 900);
 
     // Assert
     $page->assertScript('document.querySelector("[data-test=mobile-navigation]").hasAttribute("role") === false')

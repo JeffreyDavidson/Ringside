@@ -11,12 +11,15 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
+    // The hard-coded event dates below must stay in the future, so pin the clock instead of using the real one.
+    travelTo(Carbon::parse('2026-06-01 12:00:00'));
     actingAs(administrator());
 });
 
