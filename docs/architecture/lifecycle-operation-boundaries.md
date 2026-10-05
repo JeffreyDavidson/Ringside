@@ -239,6 +239,12 @@ The following generalized classes were confirmed to have no production, configur
 
 Related-entity cascades use typed Actions and collaborators. Classes under `App\Models\Validation\Strategies` must be reviewed within their individual lifecycle dimensions and retained only when they provide an independently useful boundary.
 
+## Date-order constraints
+
+The database rejects a period whose end is before its start on `employments`, `injuries`, `suspensions`, `retirements`, `activity_periods` (`started_at`/`ended_at`), `stables_wrestlers`, `stables_tag_teams`, `tag_teams_wrestlers` (`joined_at`/`left_at`) and `wrestlers_managers`, `tag_teams_managers` (`hired_at`/`fired_at`). A NULL on either side and an end equal to the start are allowed. PostgreSQL and MySQL use a `<table>_dates_ordered` CHECK constraint; SQLite cannot add a constraint to an existing table, so it uses `<table>_dates_ordered_insert` and `<table>_dates_ordered_update` triggers that raise an abort.
+
+SQLite rule: never `->change()` or otherwise rebuild these tables without recreating the triggers (a rebuild drops them). The triggers compare `datetime()` of both sides, so sub-second differences are ignored.
+
 ## Migration Sequence
 
 The migration must remain behavior-preserving and proceed in small pull requests:

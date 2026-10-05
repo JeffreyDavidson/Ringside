@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Integration tests for WrestlerManager pivot model functionality.
@@ -291,21 +293,14 @@ describe('WrestlerManager Pivot Model', function () {
             expect($overlap['overlap_detected'])->toBeTrue();
         });
 
-        test('hire date must be before leave date when both are set', function () {
+        test('hire date cannot be after leave date', function () {
             $hiredDate = Carbon::now()->subMonths(3);
             $firedDate = Carbon::now()->subMonths(6); // Earlier than hired date (invalid)
 
-            createManagementRelationship($this->wrestler, $this->manager, [
+            expect(fn () => DB::transaction(fn () => createManagementRelationship($this->wrestler, $this->manager, [
                 'hired_at' => $hiredDate,
                 'fired_at' => $firedDate,
-            ]);
-
-            $pivotRecord = WrestlerManager::where('wrestler_id', $this->wrestler->id)
-                ->where('manager_id', $this->manager->id)
-                ->firstOrFail();
-
-            // Data is stored as-is; validation should happen in business logic
-            expect($pivotRecord->hired_at->greaterThan(requiredDate($pivotRecord->fired_at)))->toBeTrue();
+            ])))->toThrow(QueryException::class);
         });
     });
 
