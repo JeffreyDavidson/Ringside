@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\DeleteAction;
 use App\Builders\Events\EventBuilder;
+use App\Builders\Events\VenueBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
@@ -17,6 +18,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
@@ -54,6 +56,17 @@ class Main extends BaseTable
             ->latestDatedFirst()
             ->orderBy('events.id')
             ->with(['venue', 'promotion']);
+    }
+
+    /**
+     * The filter only offers venues this promotion's events use: venues are shared across promotions, so listing all
+     * of them would grow with every tenant.
+     *
+     * @return VenueBuilder<Venue>
+     */
+    protected function venuesQuery(): VenueBuilder
+    {
+        return Venue::query()->whereIn('id', Event::query()->select('venue_id'));
     }
 
     protected function configure(): void

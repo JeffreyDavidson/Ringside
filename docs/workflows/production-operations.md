@@ -19,6 +19,15 @@ checklist: record what to set, never the secret values.
       by the `create_failed_jobs_and_job_batches_tables` migration. Run a queue worker as soon as the app dispatches
       queued jobs (it does not yet).
 
+## Scheduler
+
+- [ ] Forge runs the Laravel scheduler: a scheduled job (Forge > Scheduler) runs `php artisan schedule:run` every
+      minute. Without it nothing in `routes/console.php` ever runs. Today that is `activitylog:clean`, scheduled daily
+      with `--force` (the command asks for confirmation in production), which deletes activity log rows older than the
+      package default of 365 days (`clean_after_days` in `spatie/laravel-activitylog`; the app has no published
+      `config/activitylog.php`, so publish it to change the retention). Without the scheduler the `activity_log` table
+      grows without bound.
+
 ## Database
 
 - [ ] The app connects with a dedicated MySQL user that only has privileges on the Ringside database (no `root`, no

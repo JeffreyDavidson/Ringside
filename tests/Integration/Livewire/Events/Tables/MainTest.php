@@ -135,6 +135,44 @@ describe('events table', function (): void {
             ->assertDontSee('No Venue Event');
     });
 
+    it('lists only the venues this promotion\'s events use in the venue filter', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $otherPromotion = Promotion::factory()->create();
+        $sharedVenue = Venue::factory()->create(['name' => 'Shared Arena']);
+        $ownVenue = Venue::factory()->create(['name' => 'Own Arena']);
+        $otherPromotionVenue = Venue::factory()->create(['name' => 'Other Promotion Arena']);
+        Venue::factory()->create(['name' => 'Unused Arena']);
+        $deletedEventVenue = Venue::factory()->create(['name' => 'Deleted Event Arena']);
+        Event::factory()->for($promotion, 'promotion')->atVenue($sharedVenue)->create();
+        Event::factory()->for($promotion, 'promotion')->atVenue($sharedVenue)->create();
+        Event::factory()->for($promotion, 'promotion')->atVenue($ownVenue)->create();
+        Event::factory()->for($promotion, 'promotion')->create(['venue_id' => null]);
+        Event::factory()->for($promotion, 'promotion')->atVenue($deletedEventVenue)->create()->delete();
+        Event::factory()->for($otherPromotion, 'promotion')->atVenue($sharedVenue)->create();
+        Event::factory()->for($otherPromotion, 'promotion')->atVenue($otherPromotionVenue)->create();
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        expect($component->instance()->getVenues())->toBe([
+            $ownVenue->id => 'Own Arena',
+            $sharedVenue->id => 'Shared Arena',
+        ]);
+        $component
+            ->assertSee('Own Arena')
+            ->assertSee('Shared Arena')
+            ->assertDontSee('Other Promotion Arena')
+            ->assertDontSee('Unused Arena')
+            ->assertDontSee('Deleted Event Arena');
+
+        $context->clear();
+    });
+
     it('filters events within an inclusive date range', function (): void {
         // Arrange
         Event::factory()->scheduledOn('2026-05-31 23:59:59')->create(['name' => 'Before Range']);

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,7 @@ use Illuminate\Foundation\Inspiring;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->describe('Display an inspiring quote');
+
+// Every write to nine models is logged, so prune the log daily. --force is required because the command asks for
+// confirmation in production and a scheduled run cannot answer. Retention is the package's clean_after_days (365).
+Schedule::command('activitylog:clean', ['--force'])->daily();

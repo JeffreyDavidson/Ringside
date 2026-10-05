@@ -39,7 +39,8 @@ class Main extends BaseTable
     {
         return User::query()
             ->select('*')
-            ->oldest('last_name');
+            ->oldest('last_name')
+            ->oldest('id');
     }
 
     protected function configure(): void
