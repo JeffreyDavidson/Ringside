@@ -21,6 +21,7 @@ test('administrator can book a singles match through the event page', function (
 
     $page->assertSee('Add Event Match');
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
+    waitForModalFocus($page);
 
     $page
         ->waitForText('Add Match')
@@ -69,7 +70,9 @@ test('administrator can edit an unresulted match from the event page', function 
         ->assertSee('Edit Match')
         ->click('[data-test="match-edit-action"]')
         ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
-        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent')
+        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent');
+    waitForModalFocus($page);
+    $page
         ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement', 20)
         ->click('[data-roster-combobox="form.competitors.1.wrestlers.0"] [role="option"]:has-text("Replacement Edit Opponent")')
         ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement Edit Opponent')
@@ -120,6 +123,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
 
     $page->resize(390, 844);
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
+    waitForModalFocus($page);
 
     $page
         ->waitForText('Add Match')
