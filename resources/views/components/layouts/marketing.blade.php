@@ -16,9 +16,9 @@
     <link rel="canonical" href="{{ route('home') }}" />
     <link
         rel="preload"
-        href="{{ \Illuminate\Support\Facades\Vite::asset('resources/fonts/anton/anton-regular.ttf') }}"
+        href="{{ \Illuminate\Support\Facades\Vite::asset('resources/fonts/anton/anton-regular.woff2') }}"
         as="font"
-        type="font/ttf"
+        type="font/woff2"
         crossorigin
     />
     <title>{{ __('marketing.title') }}</title>
