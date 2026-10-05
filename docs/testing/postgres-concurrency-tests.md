@@ -8,8 +8,9 @@ SQLite ignores row locks (`lockForUpdate()`), so the normal suite can only asser
 - Two bookings on those events without any shared resource both succeed.
 - Two events created at the same venue on the same day at once: the venue row lock in `Events\CreateAction` admits exactly one, and the other raises `SchedulingConflictException`.
 - Two owners of a promotion demoted to member at once (each the other's last fellow owner): the promotion row lock in `UpdatePromotionMemberRoleAction` serializes them, so exactly one succeeds, the other raises `CannotRemoveLastOwnerException`, and the promotion keeps one owner.
+- MySQL only: two stables without a promotion split to the same new name at once. MySQL has no unique index over active stables without a promotion, so `StableNameLock` (a row of `stable_name_locks` taken first in `SplitStableAction`) is what admits exactly one; the other raises `CannotBeSplitException::nameTaken()` and one active stable with that name exists. It skips itself on PostgreSQL and SQLite, where the partial unique index would make the loser fail with a `QueryException` and the test could not tell the lock from the index.
 
-Both of the last two fail when their row lock is removed, which a single process cannot show because SQLite ignores row locks.
+Both of the venue and owner tests fail when their row lock is removed, which a single process cannot show because SQLite ignores row locks.
 
 The tests belong to the `concurrency` group (they also keep the older `postgres-concurrency` group name) and are skipped unless `DB_CONNECTION` is `pgsql` or `mysql` and `RUN_CONCURRENCY_TESTS=1` is set in the real environment (`concurrencyTestsEnabled()` in `tests/Helpers/TestHelpers.php`), so normal and coverage runs never execute them.
 

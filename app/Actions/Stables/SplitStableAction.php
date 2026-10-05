@@ -8,6 +8,7 @@ use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
+use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -26,6 +27,7 @@ class SplitStableAction
         protected StableMembershipService $membershipService,
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected StableRestructuringEligibility $eligibility,
+        protected StableNameLock $nameLock,
     ) {}
 
     /**
@@ -34,7 +36,9 @@ class SplitStableAction
      * Creates a new stable and transfers specified members from the original
      * stable to the new stable, leaving the remaining members in the original.
      * The new stable belongs to the original stable's promotion, and its name
-     * must not be used by another active stable of that promotion.
+     * must not be used by another active stable of that promotion. A stable
+     * without a promotion has no database-level name guard on MySQL, so its
+     * split first takes the name lock, before the original stable's row lock.
      *
      * @param  Stable  $originalStable  The stable to split
      * @param  string  $newStableName  Name for the new stable
@@ -51,6 +55,10 @@ class SplitStableAction
         Carbon $date
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
+            if ($originalStable->promotion_id === null) {
+                $this->nameLock->lock($newStableName);
+            }
+
             $lockedStable = $originalStable->refreshForUpdate();
 
             $this->eligibility->ensureCanSplit($lockedStable);

@@ -6,12 +6,14 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
+use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
@@ -377,3 +379,42 @@ test('two owners demoting each other at once always leave one owner', function (
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
     ->group('concurrency', 'postgres-concurrency');
+
+/**
+ * An active stable without a promotion whose six wrestlers are all available, as a split needs.
+ *
+ * @return array{split_stable_id: int, wrestler_ids: string}
+ */
+function splittableUnownedStable(): array
+{
+    $stable = Stable::factory()->create();
+    $stable->activityPeriods()->create(['started_at' => now()->subDay()]);
+    $wrestlers = Wrestler::factory()->bookable()->count(6)->create();
+    $stable->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => now()->subDay()]);
+
+    return ['split_stable_id' => $stable->id, 'wrestler_ids' => $wrestlers->take(3)->pluck('id')->implode(',')];
+}
+
+test('two stables without a promotion split to the same new name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $newName = "Concurrent Split {$run}";
+            $deadlocksBefore = resolvedDeadlocks();
+
+            // Act
+            $results = bookConcurrently([
+                [...splittableUnownedStable(), 'new_name' => $newName],
+                [...splittableUnownedStable(), 'new_name' => $newName],
+            ]);
+
+            // Assert
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
+                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotBeSplitException::class])
+                ->and(collect($results)->where('ok', true))->toHaveCount(1)
+                ->and(Stable::query()->where('name', $newName)->count())->toBe(1);
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
+    ->group('concurrency');

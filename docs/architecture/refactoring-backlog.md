@@ -324,8 +324,6 @@ These items were deliberately left open.
 
 **MySQL**
 
-- **Concurrent stable splits on MySQL.** Two splits at the same instant can still pick the same unowned stable name,
-  because a generated-column unique index cannot cover rows without a promotion and there is no row to lock.
 - **MySQL collation.** MySQL's default collation is case- and accent-insensitive, so "Foo" and "foo", or "Café" and
   "Cafe", count as duplicates and surface as a validation error. This is expected and unlike PostgreSQL and SQLite.
 
