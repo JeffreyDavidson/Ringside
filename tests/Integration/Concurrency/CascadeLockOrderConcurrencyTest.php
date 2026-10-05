@@ -247,7 +247,7 @@ test('concurrent tag team membership writes leave a wrestler on exactly one curr
         $results = runBehindGate('select id from wrestlers where id = ? for update', [$shared->id], $workers($shared, $free->modelKeys(), $teamOne, $teamTwo));
 
         // Assert
-        expect(collect($results)->pluck('message')->filter()->values()->all())->toBe([])
+        expect(collect($results)->pluck('message')->filter()->values()->all())->toBeEmpty()
             ->and(collect($results)->pluck('exception')->sort()->values()->all())->toBe([null, CannotBeEstablishedException::class])
             ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $shared->id)->count())->toBe(1);
     });
