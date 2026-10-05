@@ -70,6 +70,8 @@ Locking the own event first and the rest of its date afterwards let two bookings
 
 Actions that start from an existing match (`UpdateMatchAction`, `RecordResultAction`, and the standalone `Add*ToMatchAction::handle` entry points) cannot lock the match first, because another booking holds the event set and then wants that match. They read the match's event without a lock, lock that event's set, then lock the match and confirm it still belongs to that event (repeating once if it moved). The event date is verified the same way, so an event rescheduled between the read and the lock has its new set locked instead. The `handleWithinTransaction` variants run inside the caller's transaction and only re-issue the same ordered set statement.
 
+Unique indexes back the match invariants: `events_matches_event_id_match_number_unique` on `(event_id, match_number)` includes soft-deleted matches because numbers are never reused, and `events_matches_referees_match_referee_unique` and `events_matches_titles_match_title_unique` allow each referee and title once per match. Each migration first aborts, without changing data, and lists the offending ids when existing rows would violate its index.
+
 `AddMatchForEventAction`, `UpdateMatchAction`, and the standalone assignment actions run their outermost transaction with `attempts: 3`, matching `Events\UpdateAction`, as a backstop: Laravel re-runs a transaction that lost a deadlock only when it is the outermost one. Its concurrency error detector recognizes PostgreSQL deadlocks (40P01), MySQL deadlocks (1213, SQLSTATE 40001) and MySQL lock wait timeouts (1205), so the retry needs no engine-specific code. Their closures only write to the database, so a retry is safe.
 
 ### Date-slot lock for reschedules and restores

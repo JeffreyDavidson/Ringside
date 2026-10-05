@@ -6,19 +6,19 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-setup-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.select
-                label="Match Type"
+                :label="__('matches.match_type')"
                 wire:model.live="form.matchType"
                 :options="$this->getMatchTypes"
-                placeholder="Select a match type"
+                :placeholder="__('matches.form.match_type_placeholder')"
             />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
             <x-form.inputs.select
-                label="Match Stipulation"
+                :label="__('matches.form.match_stipulation')"
                 wire:model="form.matchStipulationId"
                 :options="$this->getMatchStipulations"
-                placeholder="Standard match"
+                :placeholder="__('matches.form.standard_match')"
             />
         </x-form-modal.modal-input>
     </div>
@@ -30,7 +30,7 @@
                 id="match-competitors-heading"
                 class="border-ringside-outline text-ringside-ink border-b pb-2 text-sm font-semibold"
             >
-                Competitors
+                {{ __('matches.competitors') }}
             </h3>
             @switch ($this->competitorSelectionLayout)
                 @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::Singles)
@@ -171,13 +171,15 @@
                     {{-- Battle Royal: Multiple individual wrestlers --}}
                     <x-form-modal.modal-input>
                         <x-form.inputs.roster-combobox
-                            label="Competitors (Select Multiple)"
+                            :label="__('matches.form.competitors_multiple')"
                             wire:model="form.competitors.0.wrestlers"
                             :kind="BookableRosterKind::Wrestlers"
                             :labels="$this->selectedRosterLabels['wrestlers']"
                             multiple
                         />
-                        <p class="text-ringside-muted mt-1 text-sm">Select all wrestlers participating in this match</p>
+                        <p class="text-ringside-muted mt-1 text-sm">
+                            {{ __('matches.form.competitors_multiple_hint') }}
+                        </p>
                     </x-form-modal.modal-input>
                     @break
                 @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::Generic)
@@ -222,7 +224,7 @@
         {{-- No match type selected - show helper text --}}
         <x-form-modal.modal-input>
             <div class="text-ringside-muted py-8 text-center">
-                <p class="text-sm">Select a match type to configure competitors</p>
+                <p class="text-sm">{{ __('matches.form.select_match_type_helper') }}</p>
             </div>
         </x-form-modal.modal-input>
     @endif
@@ -230,7 +232,7 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-officials-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.roster-combobox
-                label="Referees"
+                :label="__('matches.form.referees')"
                 wire:model="form.referees"
                 :kind="BookableRosterKind::Referees"
                 :labels="$this->selectedRosterLabels['referees']"
@@ -239,11 +241,16 @@
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.select label="Titles" wire:model="form.titles" :options="$this->getTitles" multiple />
+            <x-form.inputs.select
+                :label="__('matches.titles')"
+                wire:model="form.titles"
+                :options="$this->getTitles"
+                multiple
+            />
         </x-form-modal.modal-input>
     </div>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.textarea label="Preview" wire:model="form.preview" />
+        <x-form.inputs.textarea :label="__('matches.form.preview')" wire:model="form.preview" />
     </x-form-modal.modal-input>
 </x-form-modal>

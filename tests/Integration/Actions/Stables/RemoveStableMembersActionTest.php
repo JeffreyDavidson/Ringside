@@ -6,7 +6,9 @@ use App\Actions\Stables\RemoveStableMembersAction;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -47,4 +49,34 @@ test('it ends current stable memberships on the removal date', function () {
 
     expect($membership->left_at)->not->toBeNull()
         ->and($membership->left_at?->equalTo($removalDate))->toBeTrue();
+});
+
+test('it ends not-yet-started stable memberships on their own start date', function () {
+    $stable = Stable::factory()->create();
+    $startedWrestler = Wrestler::factory()->create();
+    $futureWrestler = Wrestler::factory()->create();
+    $futureTagTeam = TagTeam::factory()->create();
+    $start = today()->addWeek();
+    $stable->wrestlers()->attach($startedWrestler, ['joined_at' => today()->subDay()]);
+    $stable->wrestlers()->attach($futureWrestler, ['joined_at' => $start]);
+    $stable->tagTeams()->attach($futureTagTeam, ['joined_at' => $start]);
+    $members = new StableMembershipData(
+        new Collection([$startedWrestler, $futureWrestler]),
+        new Collection([$futureTagTeam]),
+    );
+    $removalDate = today();
+
+    resolve(RemoveStableMembersAction::class)->handle(
+        $stable,
+        $members,
+        $removalDate,
+    );
+
+    $started = StableWrestler::query()->whereBelongsTo($startedWrestler)->firstOrFail();
+    $futureMembership = StableWrestler::query()->whereBelongsTo($futureWrestler)->firstOrFail();
+    $futureTeamMembership = StableTagTeam::query()->whereBelongsTo($futureTagTeam)->firstOrFail();
+
+    expect($started->left_at?->equalTo($removalDate))->toBeTrue()
+        ->and($futureMembership->left_at?->equalTo($start))->toBeTrue()
+        ->and($futureTeamMembership->left_at?->equalTo($start))->toBeTrue();
 });

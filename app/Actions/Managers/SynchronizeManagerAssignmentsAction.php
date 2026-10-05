@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Models\Contracts\Manageable;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,9 +27,12 @@ class SynchronizeManagerAssignmentsAction
         $currentManagers = $manageable->currentManagers()->inLockOrder()->get();
 
         foreach ($currentManagers->diff($managers) as $manager) {
-            $manageable->managers()->newPivotStatementForId($manager->getKey())
-                ->whereNull('fired_at')
-                ->update(['fired_at' => $date]);
+            OpenPeriodEnder::end(
+                $manageable->managers()->newPivotStatementForId($manager->getKey()),
+                'hired_at',
+                'fired_at',
+                $date,
+            );
         }
 
         $this->assignManagersAction->handle($manageable, $managers->diff($currentManagers), $date);

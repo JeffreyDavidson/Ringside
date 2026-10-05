@@ -59,7 +59,8 @@ class FormModal extends BaseFormModal
     /**
      * AuthenticateSession stores the signed-in user's password hash in the session at the end of the request, so
      * when administrators edit their own account the guard must hold the updated user. Otherwise a changed password
-     * would sign them out of this session too, not only their other sessions.
+     * would sign them out of this session too, not only their other sessions. Changing the password also re-issues
+     * the "remember me" cookie, which would otherwise keep the old password hash, and signs out other devices.
      */
     protected function updateForm(): void
     {
@@ -67,6 +68,10 @@ class FormModal extends BaseFormModal
 
         if ($updatedUser->is(auth()->user())) {
             auth()->guard()->setUser($updatedUser);
+
+            if ($this->form->password !== '') {
+                auth()->guard()->logoutOtherDevices($this->form->password);
+            }
         }
     }
 

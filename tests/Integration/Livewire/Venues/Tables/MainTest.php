@@ -38,6 +38,7 @@ describe('venues table', function (): void {
             ->assertSee('Add Venue')
             ->assertSeeHtml('placeholder="Search venues"')
             ->assertSeeHtml('aria-label="Actions for Madison Square Garden"')
+            ->assertSeeHtml('wire:confirm="Remove Madison Square Garden?"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Madison Square Garden')
             ->assertSee('4 Pennsylvania Plaza')
