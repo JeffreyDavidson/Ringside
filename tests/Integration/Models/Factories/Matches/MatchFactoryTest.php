@@ -297,6 +297,8 @@ describe('MatchFactory', function () {
                 1 => $wrestler2,
             ])->create();
 
+            $eventMatch->load('competitors.side');
+
             expect($eventMatch->competitors)->toHaveCount(2);
 
             $competitor1 = $eventMatch->competitors->where('competitor_id', $wrestler1->id)->firstOrFail();
