@@ -294,9 +294,12 @@ MySQL 8) is not yet a required check on either branch; add it with the other req
 Shipped from the original list: searchable booking selects (v0.6.0, #1788) and trusted proxies for Cloudflare
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
-- **Database backstops.** CHECK and unique constraints for: one open reign per title, unique match numbers per
-  event, unique referee and title per match, and date-order checks. Each needs a pre-flight migration that finds
-  and repairs existing violating rows before the constraint is added.
+- **Date-order CHECK constraints.** Still open: a CHECK that an end date is not before its start date. SQLite
+  cannot add a CHECK to an existing table without triggers or a table rebuild, and one app path must be hardened
+  first so it never writes inverted dates: `LifecyclePeriodWriter::end` with caller-supplied dates
+  (`RemoveStableMembersAction` was fixed in #1828). One open reign per title, unique match numbers per event
+  and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
+  `match-system.md`).
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
 - **Booked members can still be retired or released.** Deleting a wrestler or tag team booked in an upcoming or
   unresulted match is blocked, but retiring or releasing one leaves them on the card. Decide whether that should be

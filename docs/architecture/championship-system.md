@@ -32,6 +32,8 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 
 Assign match competitors before attaching championship stakes. The match form applies the data-aware `CurrentChampionIsCompeting` rule to each selected title so invalid title defenses receive field-level validation before data construction. `AddTitlesToMatchAction` repeats the invariant authoritatively and rejects any non-vacant title whose current wrestler or tag-team champion is not already assigned as a competitor; vacant titles do not require a defending champion.
 
+The database backs the one-current-reign rule: the partial unique index `titles_championships_one_open_reign_unique` on `titles_championships (title_id) WHERE lost_at IS NULL AND deleted_at IS NULL` (a stored generated `open_reign_title_id` column plus unique index on MySQL/MariaDB). Soft-deleted open reigns do not count, which is why reconciliation soft deletes before it reopens or creates a reign.
+
 A champion defense leaves the current reign open. A compatible challenger winning by a title-changing finish closes the current reign with the match and event date, then creates the challenger's reign with the same match and date. A vacant title creates only the new reign. Winner-take-all matches apply that transition independently to every attached title inside the same transaction.
 
 Correcting a result soft deletes a reign incorrectly created by that match and reopens the preceding reign before applying the corrected outcome. Corrections are rejected after a later reign has been recorded because rewriting that earlier result would invalidate dependent lineage.

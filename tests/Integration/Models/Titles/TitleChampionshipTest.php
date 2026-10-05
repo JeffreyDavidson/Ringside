@@ -12,7 +12,9 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Integration tests for TitleChampionship model functionality.
@@ -293,20 +295,12 @@ describe('TitleChampionship Model', function () {
                 ->current()
                 ->create();
 
-            // Attempt to create concurrent championship (business logic should prevent this)
-            TitleChampionship::factory()
+            // The database refuses a second open reign for the same title
+            expect(fn () => DB::transaction(fn () => TitleChampionship::factory()
                 ->for($this->title, 'title')
                 ->for($this->secondWrestler, 'champion')
                 ->current()
-                ->create();
-
-            // Verify only one current championship exists (this would be enforced by business logic)
-            $currentChampionships = TitleChampionship::where('title_id', $this->title->id)
-                ->whereNull('lost_at')
-                ->count();
-
-            // Note: This test shows the need for business rule validation
-            expect($currentChampionships)->toBeGreaterThan(1); // Shows validation is needed
+                ->create()))->toThrow(QueryException::class);
         });
 
         test('won date must be before lost date when both are set', function () {

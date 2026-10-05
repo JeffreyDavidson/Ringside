@@ -37,10 +37,29 @@ class MatchFactory extends Factory
     {
         return [
             'event_id' => Event::factory()->past(),
-            'match_number' => fake()->randomDigitNotZero(),
+            'match_number' => null,
             'match_type' => MatchType::Singles,
             'preview' => null,
         ];
+    }
+
+    /**
+     * Number each match without an explicit match_number after the last one of its event, deleted matches included.
+     *
+     * The number is resolved while saving, one model at a time, so a batch made with count() gets 1, 2, 3.
+     *
+     * @param  Collection<int, EventMatch>  $results
+     */
+    protected function store(Collection $results): void
+    {
+        $results->each(function (EventMatch $eventMatch): void {
+            $eventMatch->match_number ??= EventMatch::query()
+                ->withTrashed()
+                ->where('event_id', $eventMatch->event_id)
+                ->max('match_number') + 1;
+
+            parent::store(new Collection([$eventMatch]));
+        });
     }
 
     /**

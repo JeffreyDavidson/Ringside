@@ -42,16 +42,18 @@ describe('MatchFactory', function () {
             expect($eventMatch->match_number)->toBeBetween(1, 10);
         });
 
-        test('maintains consistent match number generation', function () {
-            // Arrange & Act
-            $matches = collect(range(1, 5))->map(fn () => EventMatch::factory()->make());
+        test('numbers the matches of an event one after another', function () {
+            // Arrange
+            $event = Event::factory()->create();
+
+            // Act
+            EventMatch::factory()->count(3)->forEvent($event)->create();
+            EventMatch::factory()->forEvent($event)->create()->delete();
+            EventMatch::factory()->forEvent($event)->create();
 
             // Assert
-            foreach ($matches as $match) {
-                expect($match->match_number)->toBeInt()
-                    ->toBeGreaterThan(0)
-                    ->toBeBetween(1, 10);
-            }
+            expect(EventMatch::withTrashed()->where('event_id', $event->id)->orderBy('id')->pluck('match_number')->all())
+                ->toBe([1, 2, 3, 4, 5]);
         });
 
         test('creates complete match with competitors and results', function () {
