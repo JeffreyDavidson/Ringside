@@ -21,6 +21,9 @@ return [
         'show_options' => 'Show :label',
         'unknown' => 'Selected record',
     ],
+    'delete_rejections' => [
+        'booked_in_match' => ':context cannot be deleted because it is booked in a match that is upcoming or has no result. Remove it from the match or record the result first.',
+    ],
     'lifecycle_actions' => [
         'clear_from_injury' => 'Clear from injury',
         'deactivate' => 'Deactivate',

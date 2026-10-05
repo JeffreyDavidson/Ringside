@@ -310,8 +310,6 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
 - **Table status counts are remembered, not live.** `DataTableComponent` keeps the status counts in a locked
   property and clears them on refresh and delete, so another user's changes show after the next refresh. The
   paginator still runs its own total count because reusing the remembered total could break page links.
-- **Delete rejection wording.** The "cannot be deleted because it is booked in a match" message is plain text in the
-  exception, like the other delete messages, and not a translation key.
 - **Browser test timing.** The intermittent 5000 ms Playwright timeouts had two causes, both fixed: the app layout
   loaded a render-blocking Google Fonts stylesheet (Inter is now self-hosted and a test asserts no request leaves the
   app host), and Alpine UI's combobox refocused its search box a frame after an option was chosen, which stole
@@ -347,8 +345,6 @@ These items were deliberately left open.
 
 - The match form's title dropdown still lists every promotion's titles to an administrator without a membership. A
   foreign title is rejected by validation and by the action, so this is a convenience issue only.
-- The standalone `Add*ToMatchAction::handle()` entry points do not repeat the promotion check. Nothing in the
-  application calls them directly; the check lives in `AddMatchForEventAction` and `UpdateMatchAction`.
 - Unknown combobox labels show a neutral "Selected record" and are not resolved server-side. A forged non-array
   competitor side throws a `TypeError` instead of a validation error, like a tampered match type throws `ValueError`.
 - The roster combobox opens on click or typing, not on focus. Opening on focus brought back the focus-stealing problem.
