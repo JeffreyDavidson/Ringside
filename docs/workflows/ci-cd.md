@@ -2,7 +2,7 @@
 
 ## Current Workflow Configuration
 
-The project uses four automated workflows:
+The project uses five automated workflows:
 
 ### 1. **CI Pipeline** (`.github/workflows/ci.yml`, workflow name "Application Quality")
 **Trigger**: Pushes to `develop` or `main`, and pull requests targeting `develop` or `main`. Pushing a feature branch on its own does **not** run this workflow; open a pull request to get CI feedback. A newer run for the same pull request or ref cancels the one in progress.
@@ -46,6 +46,10 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 ### 4. **Coverage Testing** (`.github/workflows/coverage.yml`, workflow name "Code Coverage")
 **Trigger**: Manual dispatch only
 **Purpose**: Generate PCOV coverage for the Feature, Integration, and Unit suites (`--min=100`, non-parallel), upload `coverage.xml` as the `pest-coverage-report` artifact for 14 days, and upload it to Codecov (the run fails if the Codecov upload fails)
+
+### 5. **Unordered Selects** (`.github/workflows/unordered-selects.yml`, workflow name "Unordered Selects")
+**Trigger**: A daily schedule (03:30 UTC, after the TIA baseline) and manual dispatch; it checks out `develop` explicitly because scheduled runs start on the default branch
+**Purpose**: Run the full application suite (Browser excluded, SQLite, `--parallel`) with `REVERSE_UNORDERED_SELECTS=1` so hidden row-order assumptions fail. A red run emails the repository's default GitHub notification; there is no other alert.
 
 ### Coverage policy (100%)
 The `coverage` job in `ci.yml` runs `composer test:coverage` on every pull request and push to `develop`/`main`. `phpunit.xml` has no `<source><exclude>` entries, so all of `app/` (Livewire, Console, and `AppServiceProvider` included) must be fully covered. The Browser suite is excluded from the gate because ordinary tests already cover what it reaches.
@@ -100,7 +104,7 @@ A query without `ORDER BY` returns rows in whatever order the engine finds conve
 REVERSE_UNORDERED_SELECTS=1 composer test:application
 ```
 
-`tests/Pest.php` turns the pragma on for every Feature and Integration test when the variable is `1` and the suite runs on SQLite (it is ignored on PostgreSQL and MySQL). Every unordered result then comes back reversed, so a test that depended on it fails. The fix is an explicit `ORDER BY` in the application when the order is shown to users or drives locking, or `toEqualCanonicalizing()` in the test when the order is not part of the contract. The run is opt-in and is not part of CI; run it after changing queries that return lists.
+`tests/Pest.php` turns the pragma on for every Feature and Integration test when the variable is `1` and the suite runs on SQLite (it is ignored on PostgreSQL and MySQL). Every unordered result then comes back reversed, so a test that depended on it fails. The fix is an explicit `ORDER BY` in the application when the order is shown to users or drives locking, or `toEqualCanonicalizing()` in the test when the order is not part of the contract. The pull request pipeline does not run it, but the Unordered Selects workflow (`unordered-selects.yml`) runs it nightly against `develop`; run it locally after changing queries that return lists.
 
 ## Troubleshooting Common Issues
 
