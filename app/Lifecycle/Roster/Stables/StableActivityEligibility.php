@@ -32,6 +32,17 @@ final readonly class StableActivityEligibility
         }
     }
 
+    /**
+     * A stable holds current members while it is active or scheduled, and while it has never been
+     * established and is still being assembled; a disbanded or retired stable holds none.
+     */
+    public function canHaveMembers(Stable $stable): bool
+    {
+        return ! $stable->hasActivityHistory()
+            || $stable->hasCurrentActivityPeriod()
+            || $stable->hasFutureActivityPeriod();
+    }
+
     public function ensureAllowed(Stable $stable, StableActivityTransition $transition): void
     {
         match ($transition) {

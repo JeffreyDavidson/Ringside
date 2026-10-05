@@ -316,6 +316,46 @@ describe('users table', function (): void {
         expect(User::query()->whereKey($user)->exists())->toBeTrue();
     });
 
+    it('pages users with the same last name in a stable order by id', function (): void {
+        // Arrange
+        Auth::user()?->update(['last_name' => 'Zzz']);
+        collect(range(11, 0))->each(fn (int $number) => User::factory()->create([
+            'first_name' => sprintf('Member %02d', $number),
+            'last_name' => 'Samename',
+        ]));
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('perPage', 5);
+
+        // Assert
+        $component
+            ->assertSeeInOrder(['Member 11', 'Member 10', 'Member 09', 'Member 08', 'Member 07'])
+            ->assertDontSee('Member 06');
+
+        // Act
+        $component->call('setPage', 2);
+
+        // Assert
+        $component
+            ->assertSeeInOrder(['Member 06', 'Member 05', 'Member 04', 'Member 03', 'Member 02'])
+            ->assertDontSee('Member 07')
+            ->assertDontSee('Member 01');
+    });
+
+    it('breaks last name ties by id in the query', function (): void {
+        // Arrange
+        $component = livewire(Main::class);
+
+        // Act
+        $statements = recordStatements(fn () => $component->call('setPage', 1));
+
+        // Assert
+        $listing = collect($statements)->first(fn (array $statement): bool => str_contains($statement['sql'], 'order by "last_name" asc'));
+        expect($listing)->not->toBeNull()
+            ->and($listing['sql'] ?? '')->toContain('order by "last_name" asc, "id" asc');
+    });
+
     it('forbids users without administrative access', function (string $actor): void {
         // Arrange
         if ($actor === 'guest') {

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Roster\Stables\Stable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -24,7 +26,8 @@ class CreateAction
      * This handles the complete stable creation workflow:
      * - Creates the stable record with name and description
      * - Adds wrestlers, tag teams, and managers as founding members
-     * - Establishes the stable with official debut if debut_date provided
+     * - Establishes the stable with official debut if debut_date provided; an end date is rejected,
+     *   because a stable that starts already ended would keep its founding members (DisbandAction ends a stable)
      * - Creates proper membership tracking with join dates
      * - Makes the stable available for storylines and championship opportunities
      *
@@ -38,6 +41,11 @@ class CreateAction
             $stable = Stable::query()
                 ->make(['name' => $stableData->getTrimmedName()])
                 ->forceFill(['promotion_id' => $promotionId]);
+
+            if ($stableData->end_date instanceof Carbon) {
+                throw CannotBeEstablishedException::withEndDate($stable);
+            }
+
             $stable->save();
 
             // Use enhanced DTO methods
@@ -50,7 +58,6 @@ class CreateAction
                 $this->establishAction->handle(
                     $stable,
                     $stableData->start_date,
-                    $stableData->end_date,
                 );
             }
 

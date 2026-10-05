@@ -12,6 +12,9 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+
+use function Pest\Laravel\travelTo;
 
 /**
  * Books a wrestler, tag team or referee in a new match on the given event.
@@ -39,6 +42,9 @@ dataset('rosterMembers', [
 ]);
 
 describe('upcoming bookings', function (): void {
+    // The hard-coded event dates below must stay in the future, so pin the clock instead of using the real one.
+    beforeEach(fn () => travelTo(Carbon::parse('2026-06-01 12:00:00')));
+
     it('lists the events a roster member is booked in ordered by date', function (Closure $makeMember): void {
         // Arrange
         $member = $makeMember();
@@ -120,4 +126,72 @@ describe('upcoming bookings', function (): void {
         expect($exists)->toBeTrue()
             ->and($events->pluck('name')->all())->toBe(['Other Show']);
     })->with('rosterMembers');
+});
+
+describe('bookings broken through a relationship', function (): void {
+    it('lists the bookings of a tag team current wrestlers but not of a former member', function (): void {
+        // Arrange
+        [$current, $former, $partner] = Wrestler::factory()->count(3)->create()->all();
+        $tagTeam = TagTeam::factory()->create();
+        $tagTeam->wrestlers()->attach($current, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        $tagTeam->wrestlers()->attach($former, ['joined_at' => '2025-01-01 00:00:00', 'left_at' => '2025-06-01 00:00:00']);
+        bookOn($tagTeam, Event::factory()->scheduledOn('2026-12-01 19:00:00')->create(['name' => 'Team Show']));
+        bookOn($current, Event::factory()->scheduledOn('2026-11-01 19:00:00')->create(['name' => 'Singles Show']));
+        bookOn($former, Event::factory()->scheduledOn('2026-10-20 19:00:00')->create(['name' => 'Former Member Show']));
+        bookOn($partner, Event::factory()->scheduledOn('2026-10-21 19:00:00')->create(['name' => 'Unrelated Show']));
+
+        // Act
+        $events = resolve(UpcomingBookings::class)->events($tagTeam);
+
+        // Assert
+        expect($events->pluck('name')->all())->toBe(['Singles Show', 'Team Show']);
+    });
+
+    it('lists the bookings of the current tag team of a wrestler but not of a former one', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $currentTeam = TagTeam::factory()->create();
+        $formerTeam = TagTeam::factory()->create();
+        $currentTeam->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        $formerTeam->wrestlers()->attach($wrestler, ['joined_at' => '2025-01-01 00:00:00', 'left_at' => '2025-06-01 00:00:00']);
+        bookOn($wrestler, Event::factory()->scheduledOn('2026-11-01 19:00:00')->create(['name' => 'Singles Show']));
+        bookOn($currentTeam, Event::factory()->scheduledOn('2026-12-01 19:00:00')->create(['name' => 'Team Show']));
+        bookOn($formerTeam, Event::factory()->scheduledOn('2026-10-20 19:00:00')->create(['name' => 'Former Team Show']));
+
+        // Act
+        $events = resolve(UpcomingBookings::class)->events($wrestler);
+
+        // Assert
+        expect($events->pluck('name')->all())->toBe(['Singles Show', 'Team Show']);
+    });
+
+    it('lists an event once when the member and a related member share its card', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $tagTeam = TagTeam::factory()->create();
+        $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        $event = Event::factory()->scheduledOn('2026-12-01 19:00:00')->create(['name' => 'Shared Show']);
+        bookOn($wrestler, $event);
+        bookOn($tagTeam, $event);
+
+        // Act
+        $events = resolve(UpcomingBookings::class)->events($tagTeam);
+
+        // Assert
+        expect($events->pluck('name')->all())->toBe(['Shared Show']);
+    });
+
+    it('does not widen the existence check used by deletion', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $tagTeam = TagTeam::factory()->create();
+        $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        bookOn($tagTeam, Event::factory()->scheduledOn('2026-12-01 19:00:00')->create());
+
+        // Act
+        $exists = resolve(UpcomingBookings::class)->exist($wrestler);
+
+        // Assert
+        expect($exists)->toBeFalse();
+    });
 });

@@ -187,7 +187,7 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasErrors(['form.venue_id'])
             ->assertSet('isModalOpen', true)
-            ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
+            ->assertSee("Venue [{$conflictingVenue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
             ->assertNotDispatched('closeModal');
         expect($event->refresh()->name)->toBe('Original Event')
             ->and($event->date?->toDateTimeString())->toBe($originalDate->toDateTimeString())

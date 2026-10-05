@@ -7,7 +7,6 @@ namespace App\Rules\Events;
 use App\Exceptions\Events\CannotBeRescheduledException;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Models\Events\Event;
-use App\Models\Promotions\Promotion;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -28,7 +27,7 @@ class DateCanBeChanged implements ValidationRule
         try {
             EventSchedulingEligibility::ensureDateCanChange(
                 $this->event,
-                $value === null ? null : Promotion::parseLocalTime($this->event->promotion, $value),
+                $value === null ? null : $this->event->parseLocalDate($value),
             );
         } catch (CannotBeRescheduledException $exception) {
             $fail($exception->getMessage());

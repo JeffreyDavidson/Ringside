@@ -6,6 +6,7 @@ namespace App\Livewire\Managers\Modals;
 
 use App\Actions\Managers\CreateAction;
 use App\Actions\Managers\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Roster\Managers\Manager;
@@ -41,6 +42,18 @@ class FormModal extends BaseFormModal
         $this->form->first_name = fake()->firstName();
         $this->form->last_name = fake()->lastName();
         $this->form->employment_date = $this->generateOptionalEmploymentDate();
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.first_name', $exception->getMessage());
+
+            return false;
+        }
     }
 
     protected function updateForm(): void

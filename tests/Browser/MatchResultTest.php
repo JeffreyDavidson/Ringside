@@ -61,9 +61,9 @@ test('administrator can correct a match result', function () {
         ->select('#finish', MatchFinish::TimeLimitDraw->value)
         ->press('@save-result')
         ->waitForText('Time Limit Draw')
-        ->assertScript('!document.querySelector("#modal-container").checkVisibility()')
-        ->wait(0.35)
-        ->assertNoJavascriptErrors();
+        ->assertScript('!document.querySelector("#modal-container").checkVisibility()');
+    waitForModalToClose($page);
+    $page->assertNoJavascriptErrors();
 
     expect($this->match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
         ->and($this->match->winning_side_id)->toBeNull();

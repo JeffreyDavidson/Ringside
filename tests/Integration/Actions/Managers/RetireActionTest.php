@@ -263,3 +263,23 @@ test('it preserves management history during retirement', function () {
 
     expect(requiredDate($currentRelationship->fired_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
+
+test('it ends employment and an open suspension or injury on their own start dates when retired before they began', function (string $relation) {
+    // Arrange
+    $manager = Manager::factory()->create();
+    $employmentStartedAt = now()->subDays(10)->startOfSecond();
+    $periodStartedAt = now()->subDays(2)->startOfSecond();
+    $employment = $manager->employments()->create(['started_at' => $employmentStartedAt]);
+    $period = $manager->{$relation}()->create(['started_at' => $periodStartedAt]);
+
+    // Act
+    resolve(RetireAction::class)->handle($manager, now()->subDays(20));
+
+    // Assert
+    expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($employmentStartedAt->toDateTimeString())
+        ->and($period->refresh()->ended_at?->toDateTimeString())->toBe($periodStartedAt->toDateTimeString())
+        ->and($manager->currentRetirement()->exists())->toBeTrue();
+})->with([
+    'suspension' => 'suspensions',
+    'injury' => 'injuries',
+]);

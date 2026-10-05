@@ -53,6 +53,20 @@ describe('roster availability', function (): void {
         ]);
     });
 
+    it('counts availability in one query that carries ids and flags instead of every wrestler column', function (): void {
+        // Arrange
+        Wrestler::factory()->employed()->count(2)->create();
+        Wrestler::factory()->injured()->create();
+        $viewModel = app(DashboardViewModel::class);
+
+        // Act
+        $statements = recordStatements(fn (): array => $viewModel->rosterAvailability());
+
+        // Assert
+        expect($statements)->toHaveCount(1)
+            ->and($statements[0]['sql'])->not->toContain('"wrestlers".*');
+    });
+
     it('reports zero for every count when nobody is under contract', function (): void {
         // Arrange
         Wrestler::factory()->unemployed()->create();

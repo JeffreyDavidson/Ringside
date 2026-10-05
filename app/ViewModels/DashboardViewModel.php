@@ -45,7 +45,8 @@ final readonly class DashboardViewModel
      *
      * The conditional counts use count(case ... end) rather than PostgreSQL's count(*) filter (where ...), which
      * MySQL does not support. The injured and suspended flags are booleans on PostgreSQL and 0/1 on MySQL and
-     * SQLite; a bare flag in a CASE condition reads correctly on all three.
+     * SQLite; a bare flag in a CASE condition reads correctly on all three. The derived table selects only the id
+     * and the two flags, so the outer query does not carry every wrestler column through.
      *
      * @return array{employed: int, available: int, injured: int, suspended: int}
      */
@@ -53,7 +54,7 @@ final readonly class DashboardViewModel
     {
         $counts = DB::query()
             ->fromSub(
-                Wrestler::query()->employed()->withExists([
+                Wrestler::query()->select('wrestlers.id')->employed()->withExists([
                     'currentInjury as injured',
                     'currentSuspension as suspended',
                 ]),
@@ -83,7 +84,7 @@ final readonly class DashboardViewModel
         return Title::query()
             ->active()
             ->whereHas('currentChampionship')
-            ->with('currentChampionship.champion')
+            ->with(['currentChampionship.champion', 'currentChampionship.title.promotion'])
             ->orderBy('name')
             ->limit(self::CHAMPION_LIMIT)
             ->get();

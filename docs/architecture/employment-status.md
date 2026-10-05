@@ -30,6 +30,7 @@ Employment status tracks the working relationship between entities and the promo
 - **Shared Persistence**: Store every employment period in `employments` through the polymorphic `employable` owner
 - **Supported Owners**: Wrestlers, managers, referees, and tag teams
 - **Database Enforcement**: Each employable entity may have only one open employment period while retaining unlimited ended periods
+- **Edit Forms**: The wrestler, manager, referee and tag team `UpdateAction`s employ from the form's employment date only when the record has no employment history at all (as `Titles\UpdateAction` debuts only a title that has never been active), so renaming a released, retired or future-employed record never re-employs it or throws; the individual forms also hide the date field once history exists (re-employment goes through the explicit employ action), and their modals show any remaining `BaseBusinessException` as a form error
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

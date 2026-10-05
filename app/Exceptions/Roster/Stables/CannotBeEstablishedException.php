@@ -29,4 +29,11 @@ final class CannotBeEstablishedException extends BaseBusinessException
 
         return new self("{$context} has {$currentMembers} members but requires at least {$minimumMembers} members to be established.");
     }
+
+    public static function withEndDate(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self("{$context} cannot be established with an end date. Establish it, then disband it when it ends.");
+    }
 }

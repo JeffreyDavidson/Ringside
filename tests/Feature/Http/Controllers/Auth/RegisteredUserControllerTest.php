@@ -71,42 +71,72 @@ test('registration requires valid account details', function () {
         ->assertSessionMissing('_old_input.password_confirmation');
 });
 
-test('registration checks uniqueness after normalizing email', function (): void {
+test('registration answers the same for a taken and an unknown email', function (string $takenEmail): void {
+    // Arrange
+    User::factory()->create(['email' => 'existing@example.com']);
+    $registration = fn (string $email): array => [
+        'first_name' => 'Taylor',
+        'last_name' => 'Promoter',
+        'email' => $email,
+        'password' => 'test-password-123',
+        'password_confirmation' => 'test-password-123',
+    ];
+
+    // Act
+    $taken = $this->from(route('register'))
+        ->post(route('register'), $registration($takenEmail));
+    $unknown = $this->from(route('register'))
+        ->post(route('register'), $registration('unknown@example.com'));
+
+    // Assert
+    $taken->assertRedirect(route('login'))
+        ->assertSessionHas('status', __('auth-forms.account_pending'))
+        ->assertSessionHasNoErrors();
+    $unknown->assertRedirect(route('login'))
+        ->assertSessionHas('status', __('auth-forms.account_pending'))
+        ->assertSessionHasNoErrors();
+    expect(User::query()->count())->toBe(2)
+        ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
+})->with([
+    'the same email' => 'existing@example.com',
+    'an email that differs by case' => 'Existing@Example.COM',
+]);
+
+test('registration creates nothing for the email of a deleted user', function (): void {
+    // Arrange
+    User::factory()->create(['email' => 'gone@example.com'])->delete();
+
+    // Act
+    $response = $this->post(route('register'), [
+        'first_name' => 'Taylor',
+        'last_name' => 'Promoter',
+        'email' => 'gone@example.com',
+        'password' => 'test-password-123',
+        'password_confirmation' => 'test-password-123',
+    ]);
+
+    // Assert
+    $response->assertRedirect(route('login'))
+        ->assertSessionHas('status', __('auth-forms.account_pending'));
+    expect(User::query()->withTrashed()->count())->toBe(1);
+});
+
+test('registration still validates the other fields for a taken email', function (): void {
     // Arrange
     User::factory()->create(['email' => 'existing@example.com']);
 
     // Act
     $response = $this->from(route('register'))
         ->post(route('register'), [
-            'first_name' => 'Taylor',
+            'first_name' => '',
             'last_name' => 'Promoter',
-            'email' => 'Existing@Example.COM',
-            'password' => 'test-password',
-            'password_confirmation' => 'test-password',
+            'email' => 'existing@example.com',
+            'password' => 'short',
+            'password_confirmation' => 'short',
         ]);
 
     // Assert
-    $response->assertSessionHasErrors(['email' => __('validation.unique', ['attribute' => 'email'])])
-        ->assertSessionHasInput('email', 'Existing@Example.COM');
-    expect(User::query()->count())->toBe(1);
-});
-
-test('registration rejects an email that only differs by case from an existing user', function () {
-    // Arrange
-    User::factory()->create(['email' => 'jeffrey@example.com']);
-    $registrationData = [
-        'first_name' => 'Jeffrey',
-        'last_name' => 'Davidson',
-        'email' => 'JEFFREY@example.com',
-        'password' => 'password-12345',
-        'password_confirmation' => 'password-12345',
-    ];
-
-    // Act
-    $response = $this->from(route('register'))
-        ->post(route('register'), $registrationData);
-
-    // Assert
-    $response->assertSessionHasErrors('email');
-    expect(User::query()->count())->toBe(1);
+    $response->assertRedirect(route('register'))
+        ->assertSessionHasErrors(['first_name', 'password'])
+        ->assertSessionDoesntHaveErrors('email');
 });

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Validator;
@@ -73,6 +74,26 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
                 },
             ));
 
+            expect($failCalled)->toBeFalse();
+        });
+
+        test('validation passes when a past event keeps its date entered in the promotion time zone', function () {
+            // Arrange
+            $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+            $eventDate = now()->subWeek()->startOfMinute();
+            $pastEvent = Event::factory()->for($promotion)->make(['date' => $eventDate]);
+            $rule = new DateCanBeChanged($pastEvent);
+            $failCalled = false;
+            $localDate = Promotion::toLocalTime($promotion, $eventDate)->format('Y-m-d\TH:i');
+
+            // Act
+            $rule->validate('date', $localDate, validationFailureCallback(
+                function () use (&$failCalled): void {
+                    $failCalled = true;
+                },
+            ));
+
+            // Assert
             expect($failCalled)->toBeFalse();
         });
     });

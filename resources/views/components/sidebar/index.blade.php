@@ -116,6 +116,13 @@
                             ><span class="block truncate text-sm font-semibold">{{ $activePromotion->name }}</span
                             ><span class="text-ringside-muted mt-1 block text-xs">Promotion workspace</span></span>
                         <x-heroicon-o-chevron-down x-show="expanded" class="text-ringside-muted size-4 shrink-0" />
+                        @if ($promotionInvitations->isNotEmpty())
+                            <span
+                                class="bg-ringside-signal absolute end-2 top-2 size-2"
+                                data-test="invitation-indicator"
+                            ></span>
+                            <span class="sr-only">{{ __('promotions.invitations_pending') }}</span>
+                        @endif
                     </button>
                     <div
                         x-cloak
@@ -141,6 +148,10 @@
                                 </button>
                             </form>
                         @endforeach
+                        <x-promotions.invitations
+                            :invitations="$promotionInvitations"
+                            class="border-ringside-line mt-2 border-t px-3 pt-3"
+                        />
                         <p class="text-ringside-muted px-3 pt-3 pb-1 text-xs">
                             Memberships determine available workspaces.
                         </p>

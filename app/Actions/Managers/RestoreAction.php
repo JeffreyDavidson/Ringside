@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
@@ -40,7 +41,7 @@ class RestoreAction
             $this->eligibility->ensureCanRestore($lockedManager);
             $this->deletionState->restore($lockedManager, $effectiveDate);
 
-            $lockedManager->employments()->whereNull('ended_at')->update(['ended_at' => $effectiveDate]);
+            OpenPeriodEnder::end($lockedManager->employments()->getQuery(), 'started_at', 'ended_at', $effectiveDate);
             $this->endManagerAssignmentsAction->handle($lockedManager, $effectiveDate);
         });
     }

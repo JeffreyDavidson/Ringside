@@ -122,6 +122,29 @@ stored in the `promotion_user` membership table, where role and membership
 status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
+A membership has a status: `Invited`, `Active` or `Suspended`. Only `Active`
+grants anything. An owner adds a member by typing the exact email of an active
+account (`Promotions\Members\Manage`, `InvitePromotionMemberAction`), which
+creates the membership as `Invited` with the role the owner chose; nobody joins
+without consent. The owner's form answers every email (known, unknown, inactive,
+partial) with one message that never names the account, and the owner's list
+shows a pending invitation by the typed email, role and "Invitation pending",
+never by name (an owner can cancel it; role and status cannot be changed while
+it is pending, so an owner cannot activate it behind the account's back). The
+invited user sees their invitations as a section of the promotion switcher (or
+on the no-membership page when they have no active promotion) with Accept and
+Decline, which post to `promotions.invitation.accept` / `.decline` (outside the
+promotion context, because a user with no active membership must reach them).
+`AcceptPromotionInvitationAction` makes the signed-in user's own `Invited`
+membership `Active` with the invited role; `RemovePromotionInvitationAction`
+deletes an `Invited` membership (the owner cancelling or the user declining).
+Both find the membership through the signed-in user, never through a request
+id, and only ever touch `Invited` rows. The middleware, the promotion switcher,
+`SwitchActivePromotionAction` and `PromotionGate` read active memberships only,
+so an invitation gives no context and no access until it is accepted. The
+last-owner guards count active owners only. No email is sent: the invitation is
+visible in the application only.
+
 Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
@@ -141,8 +164,12 @@ The application resolves an active promotion through the scoped
 `PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
 events and titles now have nullable explicit promotion ownership. Venues are
 global shared resources that can host events for multiple promotions. Venue
-routes remain outside the promotion context middleware; a venue is globally
-visible while its related event history is filtered by the active promotion.
+routes, the promotions pages and user management run inside the
+`promotion.context` group like the rest of the app, so a modal opened from them
+cannot reach another promotion's records (Livewire only re-runs the context
+middleware for routes that have it); only `promotions.switch` stays outside. A
+venue is globally visible while its related event history is filtered by the
+active promotion.
 
 `PromotionGate::before()` runs on every Gate check, so membership is resolved
 once per request: `PromotionContextService` memoises the user's active role per
@@ -153,8 +180,8 @@ promotion switcher. `EstablishPromotionContext` resets the whole context
 (`PromotionContextService::clear()`: promotion, enforcement and memo) when a
 request starts, so nothing carries over from an earlier request that reused the
 scoped instance (several requests in one test, or a long-lived worker). The
-memo is also dropped whenever the
-member Actions add a member or change a role or status
+memo (active and invited promotions, read in one query) is also dropped whenever
+the member Actions invite, accept, remove or change a role or status
 (`PromotionContextService::forgetMemberships()`). Any new code that writes
 `promotion_user` must call it.
 When promotion context is enforced, new promotion-owned models receive the
@@ -185,9 +212,11 @@ Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
-session's selected active membership, defaulting to the first active
-membership (lowest promotion id) when none is selected or the selected one is
-no longer usable (suspended, invited, removed or deleted); the session is then
+session's selected active membership, defaulting to the user's oldest active
+membership (`promotion_user.created_at`, the lower promotion id breaking ties)
+when none is selected or the selected one is no longer usable (suspended,
+invited, removed or deleted), so a promotion joined later never becomes the
+default; the session is then
 rewritten to the promotion actually used. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
 selected membership as a deliberate global-platform exception. The scope fails
@@ -226,7 +255,35 @@ Because the stored value is the true instant, comparisons such as the "event not
 in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
 Event dates shown on the dashboard, events table and event page use `local_date`, and the
 events table's date-range filter reads the chosen first and last day in the same zone. Venue
-day booking is judged in the venue's own time zone.
+day booking is judged in the venue's own time zone, and the venue conflict message names that
+venue-local date (for example "on Oct 6, 2026 (venue time)"), which can differ from the
+promotion's day.
+
+Changing a promotion's time zone does not rebase anything: stored event instants keep their
+moment in time, so every existing event is shown at a different wall-clock time (and a late
+event can land on another local day) in the new zone. The promotion form says so under the
+time zone select when an existing promotion has events; nothing else is moved automatically.
+
+Clock changes are handled at the form boundary. A wall-clock time that the zone skips when
+clocks move forward (for example `2026-03-08T02:30` in America/New_York) is rejected by the
+`LocalTimeExists` rule with a translated message instead of being silently shifted
+(`Promotion::localTimeExists()`; `parseLocalTime()` itself still just parses). In the repeated
+hour when clocks move back, a typed time reads as the first occurrence, but an edit that
+leaves the date as prefilled keeps the event's stored instant (`Event::parseLocalDate()`), so
+renaming an event in the second occurrence neither moves it an hour nor trips the
+"already occurred" check.
+
+Reign dates (`titles_championships.won_at` and `lost_at`) are also stored in UTC and shown in the
+title's promotion zone through `TitleChampionship::local_won_at` and `local_lost_at`, so a 7 pm Los
+Angeles title change shows that evening's date. Every list that prints them eager-loads
+`title.promotion`.
+
+## Lazy Loading
+
+Lazy loading is prevented outside production (`Model::preventLazyLoading(! app()->isProduction())` in
+`AppServiceProvider`): a relationship read that was not eager-loaded throws, in tests and local
+development, instead of becoming a hidden N+1. Load relationships explicitly with `with()` or
+`load()`; do not disable the guard.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

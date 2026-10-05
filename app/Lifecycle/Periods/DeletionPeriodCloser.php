@@ -14,20 +14,23 @@ use Illuminate\Support\Carbon;
 final readonly class DeletionPeriodCloser
 {
     public function __construct(
-        private EmploymentPeriodManager $employmentPeriods,
         private InjuryPeriodManager $injuryPeriods,
         private RetirementPeriodManager $retirementPeriods,
         private SuspensionPeriodManager $suspensionPeriods,
     ) {}
 
     /**
+     * Close every open lifecycle period on the deletion date.
+     *
+     * Employment closes through OpenPeriodEnder so a scheduled employment (one that starts after the
+     * date) is not left open on the deleted record: it ends on its own start date, never before it.
+     * Restoring the record would otherwise have to close it later and could end it before it began.
+     *
      * @param  Model&Employable<*>&Injurable<*>&Retirable<*>&Suspendable<*>  $subject
      */
     public function close(Model&Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
     {
-        if ($subject->currentEmployment()->exists()) {
-            $this->employmentPeriods->end($subject, $date, clampToStart: true);
-        }
+        OpenPeriodEnder::end($subject->employments()->getQuery(), 'started_at', 'ended_at', $date);
 
         if ($subject->currentRetirement()->exists()) {
             $this->retirementPeriods->end($subject, $date, clampToStart: true);

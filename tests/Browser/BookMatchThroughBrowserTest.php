@@ -21,21 +21,25 @@ test('administrator can book a singles match through the event page', function (
 
     $page->assertSee('Add Event Match');
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
+    waitForModalReady($page);
 
     $page
         ->waitForText('Add Match')
         ->select('select[name="form.matchType"]', MatchType::Singles->value)
+        ->click('input[data-field="form.competitors.0.wrestlers.0"]')
         ->typeSlowly('input[data-field="form.competitors.0.wrestlers.0"]', 'First Browser', 20)
         ->click('[data-roster-combobox="form.competitors.0.wrestlers.0"] [role="option"]:has-text("First Browser Competitor")')
         ->assertValue('input[data-field="form.competitors.0.wrestlers.0"]', 'First Browser Competitor')
+        ->click('input[data-field="form.competitors.1.wrestlers.0"]')
         ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'second browser', 20)
         ->click('[data-roster-combobox="form.competitors.1.wrestlers.0"] [role="option"]:has-text("Second Browser Competitor")')
         ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Second Browser Competitor')
+        ->click('input[data-field="form.referees"]')
         ->typeSlowly('input[data-field="form.referees"]', 'Rowdy', 20)
         ->click('[data-roster-combobox="form.referees"] [role="option"]:has-text("Rowdy Official")');
     waitForScript($page, 'document.querySelector(\'[data-roster-combobox="form.referees"] [data-test="selected-chips"]\').textContent.includes("Rowdy Official")');
     $page->press('Save');
-    waitForScript($page, '! document.querySelector("#modal-container").checkVisibility() && document.getAnimations().length === 0');
+    waitForModalToClose($page);
     $page
         ->assertSee('First Browser Competitor')
         ->assertSee('Second Browser Competitor')
@@ -69,7 +73,10 @@ test('administrator can edit an unresulted match from the event page', function 
         ->assertSee('Edit Match')
         ->click('[data-test="match-edit-action"]')
         ->assertValue('select[name="form.matchType"]', MatchType::Singles->value)
-        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent')
+        ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Original Edit Opponent');
+    waitForModalReady($page);
+    $page
+        ->click('input[data-field="form.competitors.1.wrestlers.0"]')
         ->typeSlowly('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement', 20)
         ->click('[data-roster-combobox="form.competitors.1.wrestlers.0"] [role="option"]:has-text("Replacement Edit Opponent")')
         ->assertValue('input[data-field="form.competitors.1.wrestlers.0"]', 'Replacement Edit Opponent')
@@ -120,6 +127,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
 
     $page->resize(390, 844);
     $page->script("Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {$event->id} } })");
+    waitForModalReady($page);
 
     $page
         ->waitForText('Add Match')
@@ -133,6 +141,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
         ->assertScript('getComputedStyle(document.querySelector("[data-test=match-competitors-grid]")).gridTemplateColumns.split(" ").length === 3')
         ->select('select[name="form.matchType"]', MatchType::TagTeam->value)
         ->waitForText('Team A')
+        ->click('input[data-field="form.competitors.0.wrestlers"]')
         ->typeSlowly('input[data-field="form.competitors.0.wrestlers"]', 'Responsive', 20)
         ->click('[data-roster-combobox="form.competitors.0.wrestlers"] [role="option"]:has-text("Responsive Multi Competitor")')
         ->assertSeeIn('[data-roster-combobox="form.competitors.0.wrestlers"] [data-test="selected-chips"]', 'Responsive Multi Competitor')
@@ -161,7 +170,7 @@ test('administrator can create and edit an event with a showtime', function (): 
         ->assertSee('Night of Champions')
         ->assertNoJavascriptErrors();
 
-    waitForScript($page, '! document.querySelector("#modal-container").checkVisibility() && document.getAnimations().length === 0');
+    waitForModalToClose($page);
 
     $event = Event::query()->whereName('Night of Champions')->firstOrFail();
     expect($event->date?->toDateTimeString())->toBe($eventDate->toDateTimeString());
@@ -197,7 +206,7 @@ test('administrator can recover from a venue scheduling conflict in the event fo
         ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
         ->select('select[name="form.venue_id"]', (string) $venue->id)
         ->press('Save')
-        ->assertSee("Venue [{$venue->name}] is already booked on that day.")
+        ->assertSee("Venue [{$venue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Add Event');
 
@@ -237,7 +246,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
         ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
         ->press('Save')
-        ->assertSee("Venue [{$conflictingVenue->name}] is already booked on that day.")
+        ->assertSee("Venue [{$conflictingVenue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
         ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Edit Original Browser Event');
 

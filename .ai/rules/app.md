@@ -8,6 +8,9 @@ paths:
 ## Explicit query eager loading
 Eager-load relationships explicitly on queries that need them with with(); do not add model-level $with defaults.
 
+## Lazy loading is prevented outside production
+AppServiceProvider calls Model::preventLazyLoading(! app()->isProduction()), so a relationship read that was not eager-loaded throws in tests and local development. Fix a violation by eager loading (with() on the query, or load()/loadMissing() after a refresh drops nested relations); never disable the guard or loosen it per test.
+
 ## Synchronous domain orchestration
 Compose domain workflows directly through Actions and Services. Do not add an application event/listener layer unless a workflow specifically requires event fan-out.
 
@@ -30,7 +33,7 @@ Middleware that establishes request-scoped context, such as EstablishPromotionCo
 EstablishPromotionContext (and EnsureUserIsActive before it) is placed ahead of SubstituteBindings in the middleware priority list in bootstrap/app.php. Promotion scopes fail closed for non-administrators without an enforced context, so bindings resolved earlier would 404 for every member.
 
 ## Start every request from an empty promotion context
-EstablishPromotionContext calls PromotionContextService::clear() first, because the scoped service is reused across requests in one test (and in long-lived workers). A remembered promotion the user can no longer use (suspended, invited, removed, deleted) falls back to their first active promotion and the session is rewritten; only a user with no active promotion gets the no-membership page (administrators continue globally).
+EstablishPromotionContext calls PromotionContextService::clear() first, because the scoped service is reused across requests in one test (and in long-lived workers). A remembered promotion the user can no longer use (suspended, invited, removed, deleted) falls back to the promotion of their oldest active membership (promotion_user.created_at, then promotion id) and the session is rewritten; only a user with no active promotion gets the no-membership page (administrators continue globally).
 
 ## No orphaned docblocks
 A docblock must sit directly above the declaration it documents, and prose that only restates a typed signature should be omitted. The DocblockArchitectureTest architecture test fails on orphaned docblocks.

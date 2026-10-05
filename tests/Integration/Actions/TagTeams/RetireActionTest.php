@@ -296,3 +296,20 @@ test('it keeps the reign open when retiring the tag team fails', function () {
     expect(fn () => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class)
         ->and($reign->refresh()->lost_at)->toBeNull();
 });
+
+test('it ends employment and an open suspension on their own start dates when retired before they began', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->create();
+    $employmentStartedAt = now()->subDays(10)->startOfSecond();
+    $suspensionStartedAt = now()->subDays(2)->startOfSecond();
+    $employment = $tagTeam->employments()->create(['started_at' => $employmentStartedAt]);
+    $suspension = $tagTeam->suspensions()->create(['started_at' => $suspensionStartedAt]);
+
+    // Act
+    resolve(RetireAction::class)->handle($tagTeam, now()->subDays(20), retireMembers: false);
+
+    // Assert
+    expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($employmentStartedAt->toDateTimeString())
+        ->and($suspension->refresh()->ended_at?->toDateTimeString())->toBe($suspensionStartedAt->toDateTimeString())
+        ->and($tagTeam->currentRetirement()->exists())->toBeTrue();
+});

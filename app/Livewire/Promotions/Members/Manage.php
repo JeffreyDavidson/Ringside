@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Promotions\Members;
 
-use App\Actions\Promotions\AddPromotionMemberAction;
+use App\Actions\Promotions\InvitePromotionMemberAction;
+use App\Actions\Promotions\RemovePromotionInvitationAction;
 use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Promotions\UpdatePromotionMemberStatusAction;
 use App\Enums\Promotions\MembershipRole;
@@ -16,7 +17,6 @@ use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -24,7 +24,6 @@ use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-/** @property-read Collection<int, PromotionMembership> $members */
 class Manage extends Component
 {
     use DispatchesActionFeedback;
@@ -47,6 +46,7 @@ class Manage extends Component
 
         $this->memberRoles = PromotionMembership::query()
             ->where('promotion_id', $this->promotionId)
+            ->joined()
             ->get(['user_id', 'role'])
             ->mapWithKeys(fn (PromotionMembership $membership): array => [
                 $membership->user_id => $membership->role->value,
@@ -81,23 +81,37 @@ class Manage extends Component
 
         $role = MembershipRole::from($validated['role']);
 
-        // Unknown, inactive and partial input share one message so the form cannot be used to discover accounts.
-        if ($user === null) {
-            $this->addError('email', __('promotions.member_not_added'));
-
-            return;
-        }
-
         // The owner already sees every member of the promotion, so naming this case reveals nothing new.
-        if (! app(AddPromotionMemberAction::class)->handle($promotion, $user, $role)) {
+        if ($user instanceof User && ! app(InvitePromotionMemberAction::class)->handle($promotion, $user, $role)) {
             $this->addError('email', __('promotions.member_already_added'));
 
             return;
         }
 
-        $this->memberRoles[$user->id] = $role->value;
+        // Unknown, inactive and invited emails share one message, and it never names the account, so the
+        // message cannot be used to discover accounts. (The pending row that appears in the list for a real
+        // account is the one remaining signal; see "Promotion member invitations" in the refactoring backlog.)
         $this->reset('email');
-        $this->dispatchActionSuccess(__('promotions.member_added', ['name' => $user->full_name, 'role' => $role->label()]));
+        $this->dispatchActionSuccess(__('promotions.invitation_sent', ['role' => $role->label()]));
+    }
+
+    public function cancelInvitation(int $userId): void
+    {
+        $promotion = $this->promotion();
+        Gate::authorize('manageMembers', $promotion);
+
+        $invitee = User::query()
+            ->whereHas('promotionMemberships', function (Builder $query) use ($promotion): void {
+                $query->where('promotion_id', $promotion->getKey())
+                    ->where('status', MembershipStatus::Invited);
+            })
+            ->whereKey($userId)
+            ->firstOrFail();
+
+        app(RemovePromotionInvitationAction::class)->handle($promotion, $invitee);
+
+        $this->resetErrorBag(['email', 'member']);
+        $this->dispatchActionSuccess(__('promotions.invitation_cancelled'));
     }
 
     public function updateMemberRole(int $userId): void
@@ -172,16 +186,21 @@ class Manage extends Component
         $promotion = $this->promotion();
         Gate::authorize('view', $promotion);
 
-        $members = PromotionMembership::query()
+        $memberships = PromotionMembership::query()
             ->where('promotion_id', $promotion->getKey())
             ->with('user')
             ->orderBy('created_at')
             ->get();
 
+        [$invitations, $members] = $memberships->partition(
+            fn (PromotionMembership $membership): bool => $membership->status === MembershipStatus::Invited,
+        );
+
         $canManageMembers = Gate::allows('manageMembers', $promotion);
 
         return view('livewire.promotions.members.manage', [
             'members' => $members,
+            'invitations' => $invitations,
             'canManageMembers' => $canManageMembers,
             'roles' => MembershipRole::cases(),
             'activeStatus' => MembershipStatus::Active,
@@ -213,7 +232,8 @@ class Manage extends Component
     {
         return User::query()
             ->whereHas('promotionMemberships', function (Builder $query) use ($promotion): void {
-                $query->where('promotion_id', $promotion->getKey());
+                $query->where('promotion_id', $promotion->getKey())
+                    ->where('status', '!=', MembershipStatus::Invited);
             })
             ->whereKey($userId)
             ->firstOrFail();

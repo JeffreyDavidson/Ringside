@@ -145,8 +145,8 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->fill('input[name="form.weight"]', '245')
         ->press('Save')
         ->assertScript('!document.querySelector("#modal-container").checkVisibility()')
-        ->assertSee('Browser Test Wrestler')
-        ->wait(0.35);
+        ->assertSee('Browser Test Wrestler');
+    waitForModalToClose($page);
 
     $createdWrestler = Wrestler::query()
         ->withoutGlobalScope('promotion_context')
@@ -234,8 +234,9 @@ test('mobile wrestler roster keeps long names actions and empty-state recovery i
         ->assertScript('document.documentElement.scrollWidth <= innerWidth')
         ->resize(768, 1024)
         ->assertScript('document.querySelector("[data-test=roster-table]").getBoundingClientRect().right <= innerWidth')
-        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
-        ->resize(390, 844)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth');
+    resizeAndSettle($page, 390, 844);
+    $page
         ->click('button[aria-label="Actions for '.$name.'"]')
         ->assertVisible('[data-row-actions-panel]')
         ->assertScript('Array.from(document.querySelectorAll("[data-row-actions-panel]")).filter(panel => panel.checkVisibility()).every(panel => { const rect = panel.getBoundingClientRect(); return rect.left >= 0 && rect.right <= innerWidth; })')
@@ -301,9 +302,8 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->assertScript('document.documentElement.scrollWidth <= innerWidth')
         ->resize(768, 1024)
         ->assertScript('document.querySelector("[data-test=tag-team-table]").getBoundingClientRect().right <= innerWidth')
-        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
-        ->resize(1440, 900)
-        ->wait(0.35);
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth');
+    resizeAndSettle($page, 1440, 900);
 
     $createdTagTeam = TagTeam::query()->whereName('Browser Test Tag Team')->firstOrFail();
 
@@ -356,9 +356,9 @@ test('administrator can create and edit a venue from the venue directory', funct
         ->assertSee('Scroll horizontally to view all columns')
         ->assertScript('document.documentElement.scrollWidth <= innerWidth')
         ->resize(768, 1024)
-        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
-        ->resize(1440, 900)
-        ->wait(0.35)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth');
+    resizeAndSettle($page, 1440, 900);
+    $page
         ->click('button[aria-label="Actions for Browser Test Arena"]')
         ->click('tr:has-text("Browser Test Arena") [data-row-actions-panel] button:has-text("Edit")')
         ->assertPathIs('/venues')
@@ -390,8 +390,9 @@ test('administrator can create and edit a manager from the roster page', functio
         ->fill('input[name="form.first_name"]', 'Browser Test')
         ->fill('input[name="form.last_name"]', 'Manager')
         ->press('Save')
-        ->assertSee('Browser Test Manager')
-        ->wait(0.35)
+        ->assertSee('Browser Test Manager');
+    waitForModalToClose($page);
+    $page
         ->click('button[aria-label="Actions for Browser Test Manager"]')
         ->click('tr:has-text("Browser Test Manager") [data-row-actions-panel] button:has-text("Edit")')
         ->assertPathIs('/roster/managers')
@@ -421,7 +422,7 @@ test('administrator can create and edit a referee from the roster page', functio
     $page->assertPathIs('/roster/referees');
     $page->assertNoJavascriptErrors();
     $page->assertVisible('input[name="form.first_name"]');
-    $page->wait(0.35);
+    waitForModalReady($page);
     $page->assertSee('Add Referee');
 
     $page
@@ -432,7 +433,7 @@ test('administrator can create and edit a referee from the roster page', functio
 
     $page->press('Save');
     $page->assertSee('Browser Test Referee');
-    $page->wait(0.35);
+    waitForModalToClose($page);
 
     $page->click('button[aria-label="Actions for Browser Test Referee"]');
     $page->assertVisible('tr:has-text("Browser Test Referee") [data-row-actions-panel] button:has-text("Edit")');
@@ -467,8 +468,9 @@ test('administrator can create and edit a stable from the roster page', function
         ->assertSeeIn('#modal-title', 'Add Stable')
         ->fill('input[name="form.name"]', 'Browser Test Stable')
         ->press('Save')
-        ->assertSee('Browser Test Stable')
-        ->wait(0.35)
+        ->assertSee('Browser Test Stable');
+    waitForModalToClose($page);
+    $page
         ->click('button[aria-label="Actions for Browser Test Stable"]')
         ->click('tr:has-text("Browser Test Stable") [data-row-actions-panel] button:has-text("Edit")')
         ->assertPathIs('/roster/stables')
@@ -513,9 +515,9 @@ test('administrator can create and edit a title from the title directory', funct
         ->assertScript('document.documentElement.scrollWidth <= innerWidth')
         ->resize(768, 1024)
         ->assertScript('document.querySelector("[data-test=titles-table]").getBoundingClientRect().right <= innerWidth')
-        ->assertScript('document.documentElement.scrollWidth <= innerWidth')
-        ->resize(1440, 900)
-        ->wait(0.35)
+        ->assertScript('document.documentElement.scrollWidth <= innerWidth');
+    resizeAndSettle($page, 1440, 900);
+    $page
         ->click('button[aria-label="Actions for Browser Test Championship Title"]')
         ->click('tr:has-text("Browser Test Championship Title") [data-row-actions-panel] button:has-text("Edit")')
         ->assertPathIs('/titles')

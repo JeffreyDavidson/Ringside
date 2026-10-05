@@ -10,6 +10,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Locked;
 
 /** @extends BaseForm<Manager> */
 class CreateEditForm extends BaseForm
@@ -20,9 +21,14 @@ class CreateEditForm extends BaseForm
 
     public ?string $employment_date = null;
 
+    /** Set when editing someone who has been employed before: their history is kept, so the date field is not offered. */
+    #[Locked]
+    public bool $hasEmploymentHistory = false;
+
     protected function loadModelData(Model $model): void
     {
-        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
+        $this->hasEmploymentHistory = $model->employments()->exists();
+        $this->employment_date = null;
     }
 
     public function toData(): ManagerData

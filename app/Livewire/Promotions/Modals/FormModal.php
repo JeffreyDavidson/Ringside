@@ -8,6 +8,7 @@ use App\Actions\Promotions\CreateAction;
 use App\Actions\Promotions\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Promotions\Forms\CreateEditForm;
+use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -68,6 +69,17 @@ class FormModal extends BaseFormModal
     {
         return view('livewire.promotions.modals.form-modal', [
             'timezones' => array_combine(timezone_identifiers_list(), timezone_identifiers_list()),
+            'timezoneHint' => $this->hasExistingEvents() ? __('promotions.timezone_change_hint') : null,
         ]);
+    }
+
+    /** Changing the zone of a promotion with events re-displays their stored instants, so the form says so. */
+    private function hasExistingEvents(): bool
+    {
+        return $this->form->isEditing()
+            && Event::query()
+                ->withoutGlobalScope('promotion_context')
+                ->where('promotion_id', $this->form->modelId)
+                ->exists();
     }
 }

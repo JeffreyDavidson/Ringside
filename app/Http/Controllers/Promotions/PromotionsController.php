@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Promotions;
 
+use App\Enums\Promotions\MembershipStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Promotions\Promotion;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 
 class PromotionsController extends Controller
 {
@@ -21,7 +23,9 @@ class PromotionsController extends Controller
     public function show(Promotion $promotion): View
     {
         return view('promotions.show', [
-            'promotion' => $promotion->loadCount('memberships'),
+            'promotion' => $promotion->loadCount([
+                'memberships' => fn (Builder $query): Builder => $query->where('status', '!=', MembershipStatus::Invited),
+            ]),
         ]);
     }
 }

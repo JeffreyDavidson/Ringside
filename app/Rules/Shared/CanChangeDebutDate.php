@@ -22,7 +22,9 @@ class CanChangeDebutDate implements ValidationRule
         }
 
         $currentActivityPeriod = $this->model->currentActivityPeriod;
-        if (! $currentActivityPeriod) {
+        $hasSeveralStablePeriods = $this->model instanceof Stable && $this->model->activityPeriods()->count() > 1;
+
+        if (! $currentActivityPeriod && ! $hasSeveralStablePeriods) {
             return;
         }
 
@@ -34,10 +36,18 @@ class CanChangeDebutDate implements ValidationRule
 
         $targetDate = Carbon::parse($value);
 
-        $debutDate = ($this->model->firstActivityPeriod ?? $currentActivityPeriod)->started_at;
+        $debutDate = ($this->model->firstActivityPeriod ?? $currentActivityPeriod)?->started_at;
 
-        if (! $debutDate->isSameDay($targetDate)) {
-            $fail("The debut date cannot be changed while {$this->model->name} is currently active.");
+        if ($debutDate === null || $debutDate->isSameDay($targetDate)) {
+            return;
         }
+
+        if ($hasSeveralStablePeriods) {
+            $fail("The debut date cannot be changed because {$this->model->name} has been active in more than one period.");
+
+            return;
+        }
+
+        $fail("The debut date cannot be changed while {$this->model->name} is currently active.");
     }
 }

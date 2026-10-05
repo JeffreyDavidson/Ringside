@@ -112,6 +112,20 @@ class Event extends Model implements SoftDeletable
     }
 
     /**
+     * Read a form date entered in the promotion's time zone as the instant to store. The value the form was prefilled
+     * with keeps the stored instant: in the repeated hour of a clock change it would otherwise read as the first
+     * occurrence and silently move an event that sits in the second.
+     */
+    public function parseLocalDate(string $value): Carbon
+    {
+        if ($this->date instanceof Carbon && $this->local_date?->format('Y-m-d\\TH:i') === $value) {
+            return $this->date;
+        }
+
+        return Promotion::parseLocalTime($this->promotion, $value);
+    }
+
+    /**
      * Get the computed status of the event based on its date.
      *
      * @return Attribute<EventStatus, never>

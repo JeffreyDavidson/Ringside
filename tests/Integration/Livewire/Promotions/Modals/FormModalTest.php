@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Promotions\Modals\FormModal;
+use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Illuminate\Support\Str;
@@ -97,6 +98,32 @@ describe('promotion form interactions', function () {
 
         $modal->assertHasNoErrors();
         expect(Promotion::query()->where('slug', 'tokyo-pro')->firstOrFail()->timezone)->toBe('Asia/Tokyo');
+    });
+
+    it('warns under the time zone when editing a promotion that has events', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Event::factory()->for($promotion, 'promotion')->create();
+
+        // Act
+        $modal = livewire(FormModal::class)->call('openModal', $promotion->id);
+
+        // Assert
+        $modal->assertSee('Existing event times keep their moment in time and will be shown in the new time zone.');
+    });
+
+    it('does not warn about the time zone for a new promotion or one without events', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Event::factory()->for(Promotion::factory()->create(), 'promotion')->create();
+
+        // Act
+        $creating = livewire(FormModal::class)->call('openModal');
+        $editing = livewire(FormModal::class)->call('openModal', $promotion->id);
+
+        // Assert
+        $creating->assertDontSee('Existing event times keep their moment in time');
+        $editing->assertDontSee('Existing event times keep their moment in time');
     });
 
     it('rejects a time zone that does not exist', function (string $timezone) {

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\flushSession;
 use function Pest\Laravel\get;
+use function Pest\Laravel\travel;
 use function Pest\Laravel\withSession;
 
 function attachPromotionMembership(User $user, Promotion $promotion, MembershipStatus $status): void
@@ -129,7 +130,41 @@ test('the first active promotion is used when none has been selected', function 
     $response->assertSessionHas('active_promotion_id', $firstPromotion->id);
 });
 
-test('the fallback is the lowest-numbered active promotion whatever order the user joined them in', function () {
+test('the fallback is the promotion of the oldest active membership, not the lowest promotion id', function () {
+    // Arrange
+    $user = basicUser();
+    [$lowerPromotion, $higherPromotion] = Promotion::factory()->count(2)->create()->all();
+    attachPromotionMembership($user, $higherPromotion, MembershipStatus::Active);
+    travel(1)->day();
+    attachPromotionMembership($user, $lowerPromotion, MembershipStatus::Active);
+    actingAs($user);
+
+    // Act
+    $response = get(route('wrestlers.index'));
+
+    // Assert
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $higherPromotion->id);
+});
+
+test('a promotion that invited the user earlier never becomes the default once they join another', function () {
+    // Arrange
+    $user = basicUser();
+    [$invitingPromotion, $ownPromotion] = Promotion::factory()->count(2)->create()->all();
+    attachPromotionMembership($user, $invitingPromotion, MembershipStatus::Invited);
+    travel(1)->day();
+    attachPromotionMembership($user, $ownPromotion, MembershipStatus::Active);
+    actingAs($user);
+
+    // Act
+    $response = get(route('wrestlers.index'));
+
+    // Assert
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $ownPromotion->id);
+});
+
+test('memberships created at the same moment fall back to the lowest promotion id', function () {
     // Arrange
     $user = basicUser();
     [$lowerPromotion, $higherPromotion] = Promotion::factory()->count(2)->create()->all();

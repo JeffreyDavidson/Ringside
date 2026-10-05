@@ -21,8 +21,10 @@ use App\Models\Titles\Title;
 use Dom\Element;
 use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 /**
@@ -135,6 +137,9 @@ describe('lifecycle action buttons', function (): void {
 });
 
 describe('booked members', function (): void {
+    // The hard-coded event dates below must stay in the future, so pin the clock instead of using the real one.
+    beforeEach(fn () => travelTo(Carbon::parse('2026-06-01 12:00:00')));
+
     test('it lists the upcoming events in the release and retire confirmations of a booked member', function (
         string $component,
         string $property,
@@ -161,12 +166,12 @@ describe('booked members', function (): void {
         expect($buttons)->toHaveKey($method)
             ->and($buttons[$method]->getAttribute('wire:confirm'))->toBe($message);
     })->with([
-        'wrestler release' => [WrestlerActions::class, 'wrestler', fn (): Model => Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]), 'release', "Release Ann D'Arcy? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
-        'wrestler retire' => [WrestlerActions::class, 'wrestler', fn (): Model => Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]), 'retire', "Retire Ann D'Arcy? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
-        'referee release' => [RefereeActions::class, 'referee', fn (): Model => Referee::factory()->bookable()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy"])->refresh(), 'release', "Release Ann D'Arcy? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
-        'referee retire' => [RefereeActions::class, 'referee', fn (): Model => Referee::factory()->bookable()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy"])->refresh(), 'retire', "Retire Ann D'Arcy? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
-        'tag team release' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'release', "Release The D'Arcys? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
-        'tag team retire' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'retire', "Retire The D'Arcys? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
+        'wrestler release' => [WrestlerActions::class, 'wrestler', fn (): Model => Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]), 'release', "Release Ann D'Arcy? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
+        'wrestler retire' => [WrestlerActions::class, 'wrestler', fn (): Model => Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]), 'retire', "Retire Ann D'Arcy? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
+        'referee release' => [RefereeActions::class, 'referee', fn (): Model => Referee::factory()->bookable()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy"])->refresh(), 'release', "Release Ann D'Arcy? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
+        'referee retire' => [RefereeActions::class, 'referee', fn (): Model => Referee::factory()->bookable()->create(['first_name' => 'Ann', 'last_name' => "D'Arcy"])->refresh(), 'retire', "Retire Ann D'Arcy? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
+        'tag team release' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'release', "Release The D'Arcys? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
+        'tag team retire' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'retire', "Retire The D'Arcys? Booked in upcoming or unresulted events: Winter Brawl (Dec 1, 2026)."],
     ]);
 
     test('it names the booked event on its day in the promotion time zone', function (): void {
@@ -183,7 +188,7 @@ describe('booked members', function (): void {
         $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
 
         // Assert
-        expect($buttons['retire']->getAttribute('wire:confirm'))->toBe("Retire Ann D'Arcy? Booked in upcoming events: Late Show (Mar 5, 2030).");
+        expect($buttons['retire']->getAttribute('wire:confirm'))->toBe("Retire Ann D'Arcy? Booked in upcoming or unresulted events: Late Show (Mar 5, 2030).");
     });
 
     test('it keeps the plain confirmation when the member only has resulted past bookings', function (): void {
@@ -201,5 +206,104 @@ describe('booked members', function (): void {
         // Assert
         expect($buttons['retire']->getAttribute('wire:confirm'))->toBe("Retire Ann D'Arcy?")
             ->and($buttons['release']->getAttribute('wire:confirm'))->toBe("Release Ann D'Arcy?");
+    });
+
+    test('it also lists the bookings of the current wrestlers when retiring a tag team', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $tagTeam = TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]);
+        $member = Wrestler::factory()->bookable()->create();
+        $tagTeam->wrestlers()->attach($member, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        EventMatch::factory()
+            ->forEvent(Event::factory()->scheduledOn('2026-12-01 19:00:00')->create(['name' => 'Singles Night']))
+            ->withCompetitors([$member, Wrestler::factory()->create()])
+            ->create();
+
+        // Act
+        $buttons = renderedLifecycleButtons(TagTeamActions::class, 'tagTeam', $tagTeam);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))
+            ->toBe("Retire The D'Arcys? Booked in upcoming or unresulted events: Singles Night (Dec 1, 2026).");
+    });
+
+    test('it also lists the bookings of the current tag team when retiring or releasing a wrestler', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]);
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-01 00:00:00', 'left_at' => null]);
+        EventMatch::factory()
+            ->forEvent(Event::factory()->scheduledOn('2026-12-01 19:00:00')->create(['name' => 'Team Night']))
+            ->withCompetitors([$tagTeam, TagTeam::factory()->create()])
+            ->create();
+
+        // Act
+        $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))
+            ->toBe("Retire Ann D'Arcy? Booked in upcoming or unresulted events: Team Night (Dec 1, 2026).")
+            ->and($buttons['release']->getAttribute('wire:confirm'))
+            ->toBe("Release Ann D'Arcy? Booked in upcoming or unresulted events: Team Night (Dec 1, 2026).");
+    });
+
+    test('it shows an unscheduled booked event as Unscheduled', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]);
+        EventMatch::factory()
+            ->forEvent(Event::factory()->unscheduled()->create(['name' => 'Mystery Show']))
+            ->withCompetitors([$wrestler, Wrestler::factory()->create()])
+            ->create();
+
+        // Act
+        $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))
+            ->toBe("Retire Ann D'Arcy? Booked in upcoming or unresulted events: Mystery Show (Unscheduled).");
+    });
+
+    test('it lists the first five booked events and counts the rest', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]);
+
+        foreach (range(1, 7) as $day) {
+            EventMatch::factory()
+                ->forEvent(Event::factory()->scheduledOn("2026-12-0{$day} 19:00:00")->create(['name' => "Show {$day}"]))
+                ->withCompetitors([$wrestler, Wrestler::factory()->create()])
+                ->create();
+        }
+
+        // Act
+        $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))->toBe(
+            "Retire Ann D'Arcy? Booked in upcoming or unresulted events: Show 1 (Dec 1, 2026), Show 2 (Dec 2, 2026), Show 3 (Dec 3, 2026), Show 4 (Dec 4, 2026), Show 5 (Dec 5, 2026) and 2 more.",
+        );
+    });
+
+    test('it lists all five without a count when exactly five are booked', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]);
+
+        foreach (range(1, 5) as $day) {
+            EventMatch::factory()
+                ->forEvent(Event::factory()->scheduledOn("2026-12-0{$day} 19:00:00")->create(['name' => "Show {$day}"]))
+                ->withCompetitors([$wrestler, Wrestler::factory()->create()])
+                ->create();
+        }
+
+        // Act
+        $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))->toBe(
+            "Retire Ann D'Arcy? Booked in upcoming or unresulted events: Show 1 (Dec 1, 2026), Show 2 (Dec 2, 2026), Show 3 (Dec 3, 2026), Show 4 (Dec 4, 2026), Show 5 (Dec 5, 2026).",
+        );
     });
 });

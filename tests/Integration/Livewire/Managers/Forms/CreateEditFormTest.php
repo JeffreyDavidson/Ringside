@@ -59,7 +59,8 @@ describe('manager create and edit form', function (): void {
         expect($form->modelId)->toBe($manager->id)
             ->and($form->first_name)->toBe('Bobby')
             ->and($form->last_name)->toBe('Heenan')
-            ->and($form->employment_date)->toBe('2024-01-15')
+            ->and($form->employment_date)->toBeNull()
+            ->and($form->hasEmploymentHistory)->toBeTrue()
             ->and($selectedManager->is($manager))->toBeTrue();
     });
 });

@@ -22,7 +22,7 @@ Route::get('login', [AuthenticatedSessionController::class, 'create'])
     ->name('login');
 
 Route::post('login', [AuthenticatedSessionController::class, 'store'])
-    ->middleware('guest');
+    ->middleware(['guest', 'throttle:20,1,login']);
 
 Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
     ->middleware('guest')
