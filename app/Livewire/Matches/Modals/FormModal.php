@@ -165,9 +165,10 @@ class FormModal extends BaseFormModal
         return Event::query()->findOrFail($this->eventId);
     }
 
+    /** An event hidden from the user has no promotion to offer titles from; saving is rejected separately. */
     protected function titlesPromotionId(): ?int
     {
-        return $this->bookedEvent()->promotion_id;
+        return Event::query()->find($this->eventId)?->promotion_id;
     }
 
     /** @return array<int, mixed> */
