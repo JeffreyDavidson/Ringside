@@ -36,7 +36,7 @@ test('it releases an employed referee', function () {
 test('it releases referee with specific release date', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
-    $releaseDate = now()->subDays(4);
+    $releaseDate = now()->startOfDay();
 
     resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 
@@ -54,7 +54,7 @@ test('it releases referee with specific release date', function () {
 
 test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
-    $releaseDate = now()->subDays(6);
+    $releaseDate = now()->startOfDay();
 
     resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 

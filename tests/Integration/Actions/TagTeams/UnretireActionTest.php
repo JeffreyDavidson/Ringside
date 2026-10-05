@@ -122,7 +122,7 @@ test('it can unretire the tag team without unretiring or employing its members',
 
 test('it unretires tag team with specific unretirement date', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
-    $unretirementDate = now()->subDays(4);
+    $unretirementDate = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($tagTeam, $unretirementDate);
 
@@ -264,7 +264,7 @@ test('it creates new employment period', function () {
 
 test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
-    $customUnretirementDate = now()->subDays(2)->startOfDay();
+    $customUnretirementDate = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($tagTeam, $customUnretirementDate);
 

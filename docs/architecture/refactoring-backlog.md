@@ -295,9 +295,9 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
 - **Date-order CHECK constraints.** Still open: a CHECK that an end date is not before its start date. SQLite
-  cannot add a CHECK to an existing table without triggers or a table rebuild, and one app path must be hardened
-  first so it never writes inverted dates: `LifecyclePeriodWriter::end` with caller-supplied dates
-  (`RemoveStableMembersAction` was fixed in #1828). One open reign per title, unique match numbers per event
+  cannot add a CHECK to an existing table without triggers or a table rebuild. The application paths are now
+  hardened so they never write inverted dates (`LifecyclePeriodWriter::end`, title deletion, stable edits and
+  `RemoveStableMembersAction` in #1828); the CHECK constraints themselves are the remaining step. One open reign per title, unique match numbers per event
   and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
   `match-system.md`).
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.

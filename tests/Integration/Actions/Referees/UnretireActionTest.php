@@ -40,7 +40,7 @@ test('it unretires a retired referee', function () {
 test('it unretires referee with specific unretirement date', function () {
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
-    $unretiredDate = now()->subDays(3);
+    $unretiredDate = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($referee, $unretiredDate);
 
@@ -79,7 +79,7 @@ test('it persists the unretirement lifecycle', function () {
 
 test('it uses the provided date', function () {
     $referee = Referee::factory()->retired()->create();
-    $unretiredDate = now()->subDays(5);
+    $unretiredDate = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($referee, $unretiredDate);
 

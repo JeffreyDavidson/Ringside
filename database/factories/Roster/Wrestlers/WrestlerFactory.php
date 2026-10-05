@@ -113,7 +113,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->has(Employment::factory()->started($start), 'employments')
-            ->has(Injury::factory()->started($now), 'injuries');
+            ->has(Injury::factory()->started($now->copy()->subDay()), 'injuries');
     }
 
     /**

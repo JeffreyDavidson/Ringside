@@ -52,13 +52,13 @@ class RetireAction
             $this->eligibility->ensureCanRetire($lockedManager);
 
             if ($lockedManager->currentEmployment()->exists()) {
-                $this->employmentPeriods->end($lockedManager, $effectiveDate);
+                $this->employmentPeriods->end($lockedManager, $effectiveDate, clampToStart: true);
             }
 
             if ($lockedManager->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedManager, $effectiveDate);
+                $this->suspensionPeriods->end($lockedManager, $effectiveDate, clampToStart: true);
             } elseif ($lockedManager->currentInjury()->exists()) {
-                $this->injuryPeriods->end($lockedManager, $effectiveDate);
+                $this->injuryPeriods->end($lockedManager, $effectiveDate, clampToStart: true);
             }
 
             $this->retirementPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Retired);

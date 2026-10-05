@@ -31,7 +31,7 @@ test('it clears an injured wrestler', function () {
 
 test('it clears wrestler from injury with specific recovery date', function () {
     $wrestler = Wrestler::factory()->injured()->create();
-    $recoveryDate = now()->subDays(5);
+    $recoveryDate = now()->startOfDay();
 
     resolve(ClearFromInjuryAction::class)->handle($wrestler, $recoveryDate);
 

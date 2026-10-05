@@ -38,11 +38,11 @@ class RetireAction
             $this->eligibility->ensureCanRetire($lockedTagTeam);
 
             if ($lockedTagTeam->currentEmployment()->exists()) {
-                $this->employmentPeriods->end($lockedTagTeam, $effectiveDate);
+                $this->employmentPeriods->end($lockedTagTeam, $effectiveDate, clampToStart: true);
             }
 
             if ($lockedTagTeam->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate);
+                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate, clampToStart: true);
             }
 
             $this->retirementPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Retired);

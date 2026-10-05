@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -30,6 +31,7 @@ class DeleteAction
      * STATUS IMPACT:
      * - Ends active/debut status if currently active
      * - Ends retirement if currently retired
+     * - A period that starts after the deletion date ends on its own start date
      * - Preserves status history for administrative records
      *
      * OTHER CLEANUP:
@@ -48,9 +50,9 @@ class DeleteAction
             $lockedTitle = $title->refreshForUpdate();
 
             if ($lockedTitle->currentActivityPeriod()->exists()) {
-                $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $date]);
+                OpenPeriodEnder::end($lockedTitle->activityPeriods()->getQuery(), 'started_at', 'ended_at', $date);
             } elseif ($lockedTitle->currentRetirement()->exists()) {
-                $lockedTitle->retirements()->whereNull('ended_at')->update(['ended_at' => $date]);
+                OpenPeriodEnder::end($lockedTitle->retirements()->getQuery(), 'started_at', 'ended_at', $date);
             }
 
             $this->championshipReigns->endCurrentReign($lockedTitle, $date);

@@ -69,7 +69,7 @@ test('it reinstates referee with specific reinstatement date', function () {
 
 test('it uses the provided date', function () {
     $referee = Referee::factory()->suspended()->create();
-    $reinstatementDate = now()->subDays(2);
+    $reinstatementDate = now()->startOfDay();
 
     resolve(ReinstateAction::class)->handle($referee, $reinstatementDate);
 

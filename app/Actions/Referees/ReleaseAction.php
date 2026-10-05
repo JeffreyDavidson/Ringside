@@ -37,9 +37,9 @@ class ReleaseAction
             $this->employmentPeriods->end($lockedReferee, $effectiveDate, LifecycleTransitionType::Released);
 
             if ($lockedReferee->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedReferee, $effectiveDate);
+                $this->suspensionPeriods->end($lockedReferee, $effectiveDate, clampToStart: true);
             } elseif ($lockedReferee->currentInjury()->exists()) {
-                $this->injuryPeriods->end($lockedReferee, $effectiveDate);
+                $this->injuryPeriods->end($lockedReferee, $effectiveDate, clampToStart: true);
             }
         });
     }
