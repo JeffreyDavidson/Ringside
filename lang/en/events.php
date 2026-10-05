@@ -6,6 +6,7 @@ return [
     'name' => 'Event Name',
     'date' => 'Date',
     'date_time' => 'Date and time',
+    'date_does_not_exist' => 'That time does not exist in :timezone because the clocks move forward then. Choose a different time.',
     'venue' => 'Venue',
     'preview' => 'Preview',
     'index_description' => 'Manage event schedules, venues, and promotion cards in one place.',

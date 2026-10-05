@@ -12,14 +12,31 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 trait DescribesUpcomingBookings
 {
+    private const int BOOKING_SUMMARY_LIMIT = 5;
+
     /**
-     * The upcoming events a roster member is booked in as a comma-separated list, or an empty string.
+     * The upcoming or unresulted events a roster member is booked in (the first five, then a count of the rest) as a
+     * comma-separated list, or an empty string.
      */
     protected function upcomingBookingSummary(Wrestler|Referee|TagTeam $rosterMember): string
     {
-        return app(UpcomingBookings::class)
-            ->events($rosterMember)
-            ->map(fn (Event $event): string => "{$event->name} ({$event->local_date?->format('M j, Y')})")
+        $events = app(UpcomingBookings::class)->events($rosterMember);
+
+        $summary = $events
+            ->take(self::BOOKING_SUMMARY_LIMIT)
+            ->map(fn (Event $event): string => sprintf(
+                '%s (%s)',
+                $event->name,
+                $event->local_date?->format('M j, Y') ?? __('core.lifecycle_confirmations.booked_unscheduled'),
+            ))
             ->implode(', ');
+
+        $remaining = $events->count() - self::BOOKING_SUMMARY_LIMIT;
+
+        if ($remaining <= 0) {
+            return $summary;
+        }
+
+        return "{$summary} ".__('core.lifecycle_confirmations.booked_and_more', ['count' => $remaining]);
     }
 }

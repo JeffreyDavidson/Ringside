@@ -24,7 +24,7 @@ test('it rejects creating events at the same venue and time', function () {
     expect(fn () => resolve(CreateAction::class)->handle($data))
         ->toThrow(
             SchedulingConflictException::class,
-            "Venue [{$venue->name}] is already booked on that day.",
+            "Venue [{$venue->name}] is already booked on {$date->format('M j, Y')} (venue time).",
         )
         ->and(Event::query()->where('name', 'Conflicting Event')->exists())->toBeFalse();
 });
@@ -127,7 +127,7 @@ test('it rejects restoring an event into a venue scheduling conflict', function 
     expect(fn () => resolve(RestoreAction::class)->handle($deletedEvent))
         ->toThrow(
             SchedulingConflictException::class,
-            "Venue [{$venue->name}] is already booked on that day.",
+            "Venue [{$venue->name}] is already booked on {$date->format('M j, Y')} (venue time).",
         )
         ->and(Event::onlyTrashed()->whereKey($deletedEvent->getKey())->exists())->toBeTrue();
 });
@@ -157,7 +157,7 @@ describe('venue booking across promotions', function () {
 
         expect($attempt)->toThrow(
             SchedulingConflictException::class,
-            sprintf('Venue [%s] is already booked on that day.', $venue->name),
+            sprintf('Venue [%s] is already booked on %s (venue time).', $venue->name, $day->copy()->setTime(9, 0)->format('M j, Y')),
         );
         try {
             $attempt();
@@ -238,6 +238,22 @@ describe('venue day in the venue time zone', function () {
 
         // Assert
         expect($attempt)->toThrow(SchedulingConflictException::class);
+    });
+
+    it('names the venue local day, not the UTC day, in the conflict message', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'America/New_York']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2030-06-11 03:00:00', 'UTC')]);
+        $date = Carbon::parse('2030-06-10 14:00:00', 'UTC');
+
+        // Act
+        $attempt = fn () => VenueSchedulingEligibility::ensureAvailable($venue, $date);
+
+        // Assert
+        expect($attempt)->toThrow(
+            SchedulingConflictException::class,
+            "Venue [{$venue->name}] is already booked on Jun 10, 2030 (venue time).",
+        );
     });
 
     it('permits different venue days that share a UTC date', function () {

@@ -44,7 +44,15 @@ class Promotion extends Model
         return Date::parse($value, self::zoneOf($promotion))->utc();
     }
 
-    private static function zoneOf(?self $promotion): string
+    /** Whether a wall-clock time exists in the promotion's zone; the hour skipped when clocks move forward does not. */
+    public static function localTimeExists(?self $promotion, string $value): bool
+    {
+        $format = 'Y-m-d H:i:s';
+
+        return Date::parse($value, self::zoneOf($promotion))->format($format) === Date::parse($value, 'UTC')->format($format);
+    }
+
+    public static function zoneOf(?self $promotion): string
     {
         return $promotion instanceof self ? $promotion->timezone : config()->string('app.timezone');
     }

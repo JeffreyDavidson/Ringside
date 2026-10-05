@@ -230,7 +230,23 @@ Because the stored value is the true instant, comparisons such as the "event not
 in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
 Event dates shown on the dashboard, events table and event page use `local_date`, and the
 events table's date-range filter reads the chosen first and last day in the same zone. Venue
-day booking is judged in the venue's own time zone.
+day booking is judged in the venue's own time zone, and the venue conflict message names that
+venue-local date (for example "on Oct 6, 2026 (venue time)"), which can differ from the
+promotion's day.
+
+Changing a promotion's time zone does not rebase anything: stored event instants keep their
+moment in time, so every existing event is shown at a different wall-clock time (and a late
+event can land on another local day) in the new zone. The promotion form says so under the
+time zone select when an existing promotion has events; nothing else is moved automatically.
+
+Clock changes are handled at the form boundary. A wall-clock time that the zone skips when
+clocks move forward (for example `2026-03-08T02:30` in America/New_York) is rejected by the
+`LocalTimeExists` rule with a translated message instead of being silently shifted
+(`Promotion::localTimeExists()`; `parseLocalTime()` itself still just parses). In the repeated
+hour when clocks move back, a typed time reads as the first occurrence, but an edit that
+leaves the date as prefilled keeps the event's stored instant (`Event::parseLocalDate()`), so
+renaming an event in the second occurrence neither moves it an hour nor trips the
+"already occurred" check.
 
 Reign dates (`titles_championships.won_at` and `lost_at`) are also stored in UTC and shown in the
 title's promotion zone through `TitleChampionship::local_won_at` and `local_lost_at`, so a 7 pm Los

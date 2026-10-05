@@ -170,3 +170,124 @@ it('opens the result gate at the local start time of the event', function () {
     // Assert
     expect($match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw);
 });
+
+describe('clock changes', function () {
+    beforeEach(function () {
+        travelTo('2026-09-01 12:00:00');
+    });
+
+    it('detects a local time that the spring change skips', function (string $entered, bool $exists) {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+
+        // Act
+        $result = Promotion::localTimeExists($promotion, $entered);
+
+        // Assert
+        expect($result)->toBe($exists);
+    })->with([
+        'inside the skipped hour' => ['2026-03-08T02:30', false],
+        'start of the skipped hour' => ['2026-03-08T02:00', false],
+        'just before the skipped hour' => ['2026-03-08T01:59', true],
+        'first minute after the skipped hour' => ['2026-03-08T03:00', true],
+        'repeated autumn hour' => ['2026-11-01T01:30', true],
+        'with seconds' => ['2026-03-08T02:30:00', false],
+    ]);
+
+    it('rejects creating an event at a time the promotion zone skips', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        // Act
+        $modal = livewire(FormModal::class)
+            ->call('openModal')
+            ->set([
+                'form.name' => 'Spring Forward Show',
+                'form.date' => '2027-03-14T02:30',
+                'form.venue_id' => null,
+            ])
+            ->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.date'])
+            ->assertSee('That time does not exist in America/New_York because the clocks move forward then. Choose a different time.');
+        expect(Event::query()->whereName('Spring Forward Show')->exists())->toBeFalse();
+    });
+
+    it('rejects rescheduling an event to a time the promotion zone skips', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        $event = Event::factory()->for($promotion, 'promotion')->create([
+            'date' => Promotion::parseLocalTime($promotion, '2027-03-07T20:00'),
+        ]);
+
+        // Act
+        $modal = livewire(FormModal::class)
+            ->call('openModal', $event->id)
+            ->set('form.date', '2027-03-14T02:30')
+            ->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.date']);
+        expect($event->refresh()->date?->toDateTimeString())->toBe('2027-03-08 01:00:00');
+    });
+
+    it('keeps the stored instant when a name-only edit hits the second occurrence of a repeated hour', function () {
+        // Arrange: 06:30 UTC is 01:30 EST, the second time the New York clock shows 01:30 on 1 November 2026.
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        $event = Event::factory()->for($promotion, 'promotion')->create([
+            'name' => 'Fall Back Show',
+            'date' => '2026-11-01 06:30:00',
+        ]);
+
+        // Act
+        livewire(FormModal::class)
+            ->call('openModal', $event->id)
+            ->assertSet('form.date', '2026-11-01T01:30')
+            ->set('form.name', 'Fall Back Spectacular')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        // Assert
+        $event->refresh();
+        expect($event->name)->toBe('Fall Back Spectacular')
+            ->and($event->date?->toDateTimeString())->toBe('2026-11-01 06:30:00');
+    });
+
+    it('lets a name-only edit of a past event in the repeated hour pass the reschedule check', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        $event = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-11-01 06:30:00']);
+        travelTo('2026-12-01 12:00:00');
+
+        // Act
+        livewire(FormModal::class)
+            ->call('openModal', $event->id)
+            ->set('form.name', 'Renamed After The Fact')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        // Assert
+        expect($event->refresh()->name)->toBe('Renamed After The Fact')
+            ->and($event->date?->toDateTimeString())->toBe('2026-11-01 06:30:00');
+    });
+
+    it('reads a changed date in the repeated hour as the first occurrence', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        $event = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-11-01 15:00:00']);
+
+        // Act
+        livewire(FormModal::class)
+            ->call('openModal', $event->id)
+            ->set('form.date', '2026-11-01T01:30')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        // Assert
+        expect($event->refresh()->date?->toDateTimeString())->toBe('2026-11-01 05:30:00');
+    });
+});
