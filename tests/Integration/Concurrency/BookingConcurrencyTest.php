@@ -21,11 +21,11 @@ use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 
 /*
- * Opt-in PostgreSQL concurrency checks. SQLite ignores row locks, so lock ordering can only be
+ * Opt-in PostgreSQL and MySQL concurrency checks. SQLite ignores row locks, so lock ordering can only be
  * proven against a real server with real, concurrent processes. Run with:
  *
- *   DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_DATABASE=<scratch database> DB_USERNAME=... DB_PASSWORD=... \
- *   RUN_CONCURRENCY_TESTS=1 vendor/bin/pest --group=postgres-concurrency --no-coverage
+ *   DB_CONNECTION=pgsql|mysql DB_HOST=127.0.0.1 DB_DATABASE=<scratch database> DB_USERNAME=... DB_PASSWORD=... \
+ *   RUN_CONCURRENCY_TESTS=1 vendor/bin/pest --group=concurrency --no-coverage
  *
  * The scratch database is rebuilt with migrate:fresh afterwards; never point this at real data.
  */
@@ -43,7 +43,7 @@ function bookConcurrently(array $bookings): array
     $processes = [];
     $inputs = [];
 
-    // The workers inherit the real environment, including the DB_* settings that selected PostgreSQL.
+    // The workers inherit the real environment, including the DB_* settings that selected the engine.
     foreach ($bookings as $key => $booking) {
         $inputs[$key] = new InputStream;
         $processes[$key] = new Process([PHP_BINARY, __DIR__.'/booking-worker.php', json_encode($booking, JSON_THROW_ON_ERROR)]);
@@ -96,17 +96,6 @@ function bookConcurrently(array $bookings): array
 }
 
 /**
- * PostgreSQL's own count of deadlocks it has resolved in this database. Laravel retries a deadlocked
- * booking, so the outcome alone cannot show that a deadlock never happened.
- */
-function deadlocksResolved(): int
-{
-    $deadlocks = DB::scalar('select deadlocks from pg_stat_database where datname = current_database()');
-
-    return is_int($deadlocks) ? $deadlocks : throw new RuntimeException('Unable to read the PostgreSQL deadlock counter.');
-}
-
-/**
  * @return array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}
  */
 function bookingFor(Event $event, Wrestler $firstWrestler): array
@@ -134,8 +123,6 @@ function withCommittedData(Closure $callback): void
     }
 }
 
-$enabled = getenv('DB_CONNECTION') === 'pgsql' && getenv('RUN_CONCURRENCY_TESTS') === '1';
-
 test('concurrent bookings on different events at the same time never deadlock', function () {
     withCommittedData(function (): void {
         foreach (range(1, 10) as $run) {
@@ -145,7 +132,7 @@ test('concurrent bookings on different events at the same time never deadlock', 
             $secondEvent = Event::factory()->create(['date' => $date]);
             $sharedWrestler = Wrestler::factory()->bookable()->create();
 
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently([
@@ -161,15 +148,15 @@ test('concurrent bookings on different events at the same time never deadlock', 
                 ->distinct()
                 ->count('events_matches.event_id');
 
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and($exceptions->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
-                ->and($eventsBookingTheWrestler)->toBe(1);
+                ->and($eventsBookingTheWrestler)->toBe(1)
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('concurrent bookings without a real conflict both succeed', function () {
     withCommittedData(function (): void {
@@ -179,7 +166,7 @@ test('concurrent bookings without a real conflict both succeed', function () {
             $firstEvent = Event::factory()->create(['date' => $date]);
             $secondEvent = Event::factory()->create(['date' => $date]);
 
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently([
@@ -188,14 +175,14 @@ test('concurrent bookings without a real conflict both succeed', function () {
             ]);
 
             // Assert
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
-                ->and(collect($results)->where('ok', true))->toHaveCount(2);
+                ->and(collect($results)->where('ok', true))->toHaveCount(2)
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 /**
  * Move two events, each already booking the given wrestlers, to the same date at once.
@@ -224,7 +211,7 @@ test('concurrent reschedules of events sharing a wrestler into the same empty da
         foreach (range(1, 10) as $run) {
             // Arrange
             $sharedWrestler = Wrestler::factory()->bookable()->create();
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             [$results, , , $target] = rescheduleTwoEventsIntoTheSameEmptyDate($run, [$sharedWrestler, $sharedWrestler]);
@@ -238,21 +225,21 @@ test('concurrent reschedules of events sharing a wrestler into the same empty da
                 ->distinct()
                 ->count('events.id');
 
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($eventsBookingTheWrestlerAtTheTarget)->toBe(1);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('concurrent reschedules into the same empty date without a real conflict both succeed', function () {
     withCommittedData(function (): void {
         foreach (range(1, 5) as $run) {
             // Arrange
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             [$results, $firstEvent, $secondEvent, $target] = rescheduleTwoEventsIntoTheSameEmptyDate($run, [
@@ -261,7 +248,7 @@ test('concurrent reschedules into the same empty date without a real conflict bo
             ]);
 
             // Assert
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
@@ -269,8 +256,8 @@ test('concurrent reschedules into the same empty date without a real conflict bo
                 ->and($secondEvent->refresh()->date?->toDateTimeString())->toBe($target->toDateTimeString());
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('two events swapping dates at once never deadlock', function () {
     withCommittedData(function (): void {
@@ -280,7 +267,7 @@ test('two events swapping dates at once never deadlock', function () {
             $secondDate = $firstDate->copy()->addDay();
             $firstEvent = Event::factory()->create(['date' => $firstDate]);
             $secondEvent = Event::factory()->create(['date' => $secondDate]);
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently([
@@ -289,15 +276,15 @@ test('two events swapping dates at once never deadlock', function () {
             ]);
 
             // Assert
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and($firstEvent->refresh()->date?->toDateTimeString())->toBe($secondDate->toDateTimeString())
                 ->and($secondEvent->refresh()->date?->toDateTimeString())->toBe($firstDate->toDateTimeString());
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('restoring an event while its wrestler is booked in another event at the same time admits only one', function () {
     withCommittedData(function (): void {
@@ -311,7 +298,7 @@ test('restoring an event while its wrestler is booked in another event at the sa
             $sharedWrestler = Wrestler::factory()->bookable()->create();
             EventMatch::factory()->forEvent($deletedEvent)->withCompetitors([$sharedWrestler])->create();
             $deletedEvent->delete();
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently([
@@ -329,15 +316,15 @@ test('restoring an event while its wrestler is booked in another event at the sa
                 ->distinct()
                 ->count('events.id');
 
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
-                ->and($liveEventsBookingTheWrestler)->toBe(1);
+                ->and($liveEventsBookingTheWrestler)->toBe(1)
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('concurrent events at the same venue on the same day admit only one', function () {
     withCommittedData(function (): void {
@@ -345,7 +332,7 @@ test('concurrent events at the same venue on the same day admit only one', funct
             // Arrange
             $venue = Venue::factory()->create();
             $date = now()->addWeeks($run)->setTime(19, 0);
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently([
@@ -354,14 +341,14 @@ test('concurrent events at the same venue on the same day admit only one', funct
             ]);
 
             // Assert
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and(Event::query()->whereBelongsTo($venue)->count())->toBe(1);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('two owners demoting each other at once always leave one owner', function () {
     withCommittedData(function (): void {
@@ -373,7 +360,7 @@ test('two owners demoting each other at once always leave one owner', function (
                 'role' => MembershipRole::Owner,
                 'status' => MembershipStatus::Active,
             ]));
-            $deadlocksBefore = deadlocksResolved();
+            $deadlocksBefore = resolvedDeadlocks();
 
             // Act
             $results = bookConcurrently($owners->map(fn (User $owner): array => [
@@ -382,11 +369,11 @@ test('two owners demoting each other at once always leave one owner', function (
             ])->all());
 
             // Assert
-            expect(deadlocksResolved())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotRemoveLastOwnerException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($promotion->memberships()->withRole(MembershipRole::Owner)->count())->toBe(1);
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');

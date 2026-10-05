@@ -324,10 +324,6 @@ These items were deliberately left open.
 
 **MySQL**
 
-- **No MySQL concurrency test.** The `postgres-concurrency` group uses PostgreSQL-only harness code. The slot lock is
-  one code path on every engine (an upsert that takes a row lock) and is proven under real concurrency on PostgreSQL,
-  but MySQL row locking across processes is verified only by reading its semantics. A MySQL variant of the harness
-  would close it.
 - **Concurrent stable splits on MySQL.** Two splits at the same instant can still pick the same unowned stable name,
   because a generated-column unique index cannot cover rows without a promotion and there is no row to lock.
 - **MySQL collation.** MySQL's default collation is case- and accent-insensitive, so "Foo" and "foo", or "Café" and

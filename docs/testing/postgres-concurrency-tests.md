@@ -1,19 +1,27 @@
-# PostgreSQL Concurrency Tests
+# Concurrency Tests (PostgreSQL and MySQL)
 
-SQLite ignores row locks (`lockForUpdate()`), so the normal suite can only assert *which* locks an Action takes and in *what order* (see `tests/Integration/Actions/Matches/SchedulingLockOrderTest.php`, which renders the lock as a visible SQL comment). Whether that order really prevents deadlocks can only be proven against PostgreSQL with real, concurrent processes.
+SQLite ignores row locks (`lockForUpdate()`), so the normal suite can only assert *which* locks an Action takes and in *what order* (see `tests/Integration/Actions/Matches/SchedulingLockOrderTest.php`, which renders the lock as a visible SQL comment). Whether that order really prevents deadlocks can only be proven against a real server (PostgreSQL or MySQL) with real, concurrent processes.
 
 `tests/Integration/Concurrency/BookingConcurrencyTest.php` does that for match booking. It spawns two real PHP processes (`booking-worker.php`), waits until both have booted and opened their connection, releases them together, and asserts:
 
-- Two bookings on different events at the same date and time that share a wrestler never surface a deadlock (SQLSTATE 40P01): exactly one succeeds and the other raises `SchedulingConflictException`, and the wrestler ends up on one card only.
+- Two bookings on different events at the same date and time that share a wrestler never surface a deadlock (PostgreSQL SQLSTATE 40P01, MySQL error 1213): exactly one succeeds and the other raises `SchedulingConflictException`, and the wrestler ends up on one card only.
 - Two bookings on those events without any shared resource both succeed.
 - Two events created at the same venue on the same day at once: the venue row lock in `Events\CreateAction` admits exactly one, and the other raises `SchedulingConflictException`.
 - Two owners of a promotion demoted to member at once (each the other's last fellow owner): the promotion row lock in `UpdatePromotionMemberRoleAction` serializes them, so exactly one succeeds, the other raises `CannotRemoveLastOwnerException`, and the promotion keeps one owner.
 
 Both of the last two fail when their row lock is removed, which a single process cannot show because SQLite ignores row locks.
 
-The tests belong to the `postgres-concurrency` group and are skipped unless `DB_CONNECTION=pgsql` and `RUN_CONCURRENCY_TESTS=1` are both set in the real environment, so normal and coverage runs never execute them.
+The tests belong to the `concurrency` group (they also keep the older `postgres-concurrency` group name) and are skipped unless `DB_CONNECTION` is `pgsql` or `mysql` and `RUN_CONCURRENCY_TESTS=1` is set in the real environment (`concurrencyTestsEnabled()` in `tests/Helpers/TestHelpers.php`), so normal and coverage runs never execute them.
 
-Production runs MySQL 8, but this harness is PostgreSQL-only (it reads `pg_stat_database` for the deadlock counter and recognizes SQLSTATE 40P01), and the CI `MySQL tests` job does not run the group. The locks themselves are plain query builder row locks and upserts that behave the same way on MySQL at READ COMMITTED (set in `config/database.php`), but no real-process MySQL concurrency run proves it yet.
+The harness is engine-aware. Production runs MySQL 8, so the CI `MySQL tests` job runs the group too, at READ COMMITTED as configured in `config/database.php`:
+
+| Need | PostgreSQL | MySQL |
+| --- | --- | --- |
+| Deadlock counter (before/after each run) | `pg_stat_database.deadlocks` | `information_schema.INNODB_METRICS` `lock_deadlocks` (needs `PROCESS` and the metric enabled) |
+| Sessions blocked on a lock | `pg_stat_activity` `wait_event_type = 'Lock'` | `information_schema.INNODB_TRX` `trx_state = 'LOCK WAIT'` (needs `PROCESS`) |
+| Deadlock victim in a worker | SQLSTATE 40P01 | SQLSTATE 40001 with driver code 1213 (`isDeadlock()` in `worker-support.php`) |
+
+The two `CascadeLockOrderConcurrencyTest` cases that force PostgreSQL planner plans (`enable_hashjoin`, sequential scans, a 20,000-row `generate_series` padding) prove physical-row-order locking that does not apply to InnoDB, so they are PostgreSQL-only and skip themselves elsewhere.
 
 ## Running them
 
@@ -23,8 +31,10 @@ Use a scratch database. The test commits its data so the child processes can see
 createdb ringside_pg_concurrency
 DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=5432 DB_DATABASE=ringside_pg_concurrency \
 DB_USERNAME="$(whoami)" DB_PASSWORD= RUN_CONCURRENCY_TESTS=1 \
-  vendor/bin/pest --group=postgres-concurrency --no-coverage
+  vendor/bin/pest --group=concurrency --no-coverage
 dropdb ringside_pg_concurrency
 ```
 
-The CI `Postgres tests` job runs the same group as a separate step. Because the workers are released by a barrier rather than a fixed delay, a slow runner can only make the race window smaller (the loser then fails with a normal scheduling conflict); it cannot make the assertions fail. A regression to the old lock order shows up as a `deadlock detected` failure.
+For MySQL, point `DB_CONNECTION=mysql` and the `DB_*` variables at a scratch database whose user has the `PROCESS` privilege and `SELECT` on `performance_schema` (the CI job grants both), and make sure `SET GLOBAL innodb_monitor_enable = 'lock_deadlocks'` is in effect if the metric is disabled.
+
+The CI `Postgres tests` and `MySQL tests` jobs run the same group as a separate step. Because the workers are released by a barrier rather than a fixed delay, a slow runner can only make the race window smaller (the loser then fails with a normal scheduling conflict); it cannot make the assertions fail. A regression to the old lock order shows up as a `deadlock detected` failure.

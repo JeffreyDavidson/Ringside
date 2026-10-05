@@ -590,3 +590,80 @@ const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the
  * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
  */
 const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation and the split eligibility check are the guard there (migration 2026_10_01_190000).';
+
+/**
+ * The reason the real-process concurrency tests are skipped.
+ */
+const CONCURRENCY_TESTS_SKIPPED = 'Set DB_CONNECTION=pgsql or mysql and RUN_CONCURRENCY_TESTS=1 to run the concurrency tests.';
+
+/**
+ * The reason a concurrency test about PostgreSQL's physical row order is skipped on other engines.
+ */
+const POSTGRES_PLANNER_ORDER = 'The test forces PostgreSQL planner plans (hash joins off, sequential scans) and padding that InnoDB does not share.';
+
+/**
+ * Whether the real-process concurrency tests are switched on. SQLite ignores row locks, so they need a server engine,
+ * and they commit their data and rebuild the schema, so they only run when asked for in the real environment.
+ */
+function concurrencyTestsEnabled(): bool
+{
+    return in_array(getenv('DB_CONNECTION'), ['pgsql', 'mysql'], true) && getenv('RUN_CONCURRENCY_TESTS') === '1';
+}
+
+/**
+ * The server's own cumulative count of deadlocks it has resolved. Laravel retries a deadlocked transaction, so an
+ * outcome alone cannot show that a deadlock never happened; compare the count before and after.
+ */
+function resolvedDeadlocks(): int
+{
+    $deadlocks = match (DB::connection()->getDriverName()) {
+        'mysql' => DB::scalar("select `count` from information_schema.INNODB_METRICS where name = 'lock_deadlocks' and status = 'enabled'"),
+        default => DB::scalar('select deadlocks from pg_stat_database where datname = current_database()'),
+    };
+
+    return is_numeric($deadlocks) ? (int) $deadlocks : throw new RuntimeException('Unable to read the deadlock counter (on MySQL the lock_deadlocks InnoDB metric must be enabled and the user needs the PROCESS privilege).');
+}
+
+/**
+ * Deadlocks the database resolved since $before was read with resolvedDeadlocks().
+ *
+ * PostgreSQL must resolve none: lock ordering is meant to rule them out. MySQL (InnoDB) can still pick a victim when
+ * two transactions race on a new row of the slot lock table; Laravel retries the victim transparently, so the
+ * outcome assertions in each test (and the workers' own deadlock flag) are what prove no deadlock reaches a caller,
+ * and the counter is not asserted there.
+ */
+function deadlocksResolvedSince(int $before): int
+{
+    return runsOnDriver('mysql') ? 0 : resolvedDeadlocks() - $before;
+}
+
+/** What the database says about lock waits right now, for failure messages when blocked workers are not seen. */
+function lockWaitDiagnostics(): string
+{
+    if (! runsOnDriver('mysql')) {
+        return 'not mysql';
+    }
+
+    return json_encode([
+        'user' => DB::scalar('select current_user()'),
+        'trx' => DB::select('select trx_id, trx_state, trx_mysql_thread_id, substr(trx_query, 1, 120) as q from information_schema.INNODB_TRX'),
+        'data_lock_waits' => DB::scalar('select count(*) from performance_schema.data_lock_waits'),
+        'processlist' => DB::select('select id, user, command, state, substr(info, 1, 100) as info from information_schema.PROCESSLIST'),
+    ], JSON_THROW_ON_ERROR);
+}
+
+/**
+ * How many sessions are currently waiting for a lock held by another one.
+ *
+ * On MySQL the waiting sessions come from performance_schema.data_lock_waits: a worker blocked on its first locking
+ * read does not show as LOCK WAIT in information_schema.INNODB_TRX.
+ */
+function workersBlockedOnLocks(): int
+{
+    $blocked = match (DB::connection()->getDriverName()) {
+        'mysql' => DB::scalar('select count(distinct REQUESTING_ENGINE_TRANSACTION_ID) from performance_schema.data_lock_waits'),
+        default => DB::scalar("select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'"),
+    };
+
+    return is_numeric($blocked) ? (int) $blocked : throw new RuntimeException('Unable to count the workers blocked on locks.');
+}
