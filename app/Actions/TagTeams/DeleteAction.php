@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
@@ -31,6 +32,7 @@ class DeleteAction
      *
      * EMPLOYMENT IMPACT:
      * - Deletion validation rejects employed or suspended tag teams
+     * - A scheduled (not yet started) employment ends on its own start date
      * - Retired tag teams remain retired (no artificial status changes)
      * - Does not affect individual member employment (they continue careers)
      * - Preserves tag team employment history for administrative records
@@ -59,6 +61,7 @@ class DeleteAction
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedTagTeam);
+            OpenPeriodEnder::end($lockedTagTeam->employments()->getQuery(), 'started_at', 'ended_at', $effectiveDate);
             $this->endCurrentRelationships->handle($lockedTagTeam, $effectiveDate);
             $this->deletionState->delete($lockedTagTeam, $effectiveDate);
         });
