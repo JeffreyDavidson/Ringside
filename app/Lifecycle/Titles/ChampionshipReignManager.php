@@ -42,6 +42,10 @@ final class ChampionshipReignManager
             return;
         }
 
+        if ($this->isDefenceOfReignHeldOnEventDate($match, $reignWonAtMatch, $desiredChampion, $activeReigns)) {
+            return;
+        }
+
         $laterReignExists = $activeReigns->contains(
             fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
                 && $reign->won_at->greaterThan($eventDate),
@@ -81,6 +85,10 @@ final class ChampionshipReignManager
             return ! $this->reignBelongsTo($reignWonAtMatch, $desiredChampion);
         }
 
+        if ($this->isDefenceOfReignHeldOnEventDate($match, null, $desiredChampion, $activeReigns)) {
+            return false;
+        }
+
         return ! $this->reignBelongsTo(
             $activeReigns->whereNull('lost_at')->sortByDesc('won_at')->first(),
             $desiredChampion,
@@ -102,6 +110,10 @@ final class ChampionshipReignManager
             ->first();
 
         if ($reignWonAtMatch !== null && $this->reignBelongsTo($reignWonAtMatch, $desiredChampion)) {
+            return;
+        }
+
+        if ($this->isDefenceOfReignHeldOnEventDate($match, $reignWonAtMatch, $desiredChampion, $activeReigns)) {
             return;
         }
 
@@ -171,6 +183,33 @@ final class ChampionshipReignManager
         return $reigns
             ->where('title_id', $title->id)
             ->filter(fn (TitleChampionship $reign): bool => $reign->deleted_at === null);
+    }
+
+    /**
+     * A win by the champion who held the title on the event date is a defence, even when the title has since moved on
+     * or been vacated, so recording it never touches the lineage. Only matches that created no reign can be defences.
+     *
+     * @param  Collection<int, TitleChampionship>  $activeReigns
+     */
+    private function isDefenceOfReignHeldOnEventDate(
+        EventMatch $match,
+        ?TitleChampionship $reignWonAtMatch,
+        Wrestler|TagTeam|null $desiredChampion,
+        Collection $activeReigns,
+    ): bool {
+        $eventDate = $match->event->date;
+
+        if ($reignWonAtMatch instanceof TitleChampionship || $desiredChampion === null || ! $eventDate instanceof Carbon) {
+            return false;
+        }
+
+        return $this->reignBelongsTo(
+            $activeReigns->first(
+                fn (TitleChampionship $reign): bool => $reign->won_at->lessThanOrEqualTo($eventDate)
+                    && ($reign->lost_at === null || $reign->lost_at->greaterThan($eventDate)),
+            ),
+            $desiredChampion,
+        );
     }
 
     /** A reign never ends before it began, even when the end date predates a future-dated win. */
