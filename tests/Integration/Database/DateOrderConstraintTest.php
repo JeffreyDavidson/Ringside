@@ -6,6 +6,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,7 @@ function periodRowColumns(string $table): array
         'tag_teams_wrestlers' => ['tag_team_id' => TagTeam::factory()->create()->id, 'wrestler_id' => Wrestler::factory()->create()->id],
         'wrestlers_managers' => ['wrestler_id' => Wrestler::factory()->create()->id, 'manager_id' => Manager::factory()->create()->id],
         'tag_teams_managers' => ['tag_team_id' => TagTeam::factory()->create()->id, 'manager_id' => Manager::factory()->create()->id],
+        'titles_championships' => ['title_id' => Title::factory()->create()->id, 'champion_type' => 'wrestler', 'champion_id' => Wrestler::factory()->create()->id],
         default => throw new InvalidArgumentException("Unknown period table {$table}"),
     };
 }
@@ -64,6 +66,7 @@ function periodTableDataset(): array
         'tag_teams_wrestlers' => ['tag_teams_wrestlers', 'joined_at', 'left_at'],
         'wrestlers_managers' => ['wrestlers_managers', 'hired_at', 'fired_at'],
         'tag_teams_managers' => ['tag_teams_managers', 'hired_at', 'fired_at'],
+        'titles_championships' => ['titles_championships', 'won_at', 'lost_at'],
     ];
 }
 
@@ -118,6 +121,41 @@ test('a membership without a start date may still have an end date', function ()
 
     expect(DB::table('tag_teams_wrestlers')->count())->toBe(1);
 });
+
+test('a soft-deleted reign ending before it was won is rejected too', function () {
+    $columns = periodRowColumns('titles_championships');
+
+    expect(fn () => DB::transaction(fn () => DB::table('titles_championships')->insert([
+        ...$columns,
+        'won_at' => '2026-03-10 12:00:00',
+        'lost_at' => '2026-03-09 12:00:00',
+        'deleted_at' => '2026-03-11 12:00:00',
+    ])))->toThrow(QueryException::class);
+});
+
+test('the reign migration lists the titles with inverted reigns, deleted ones included, before changing anything', function () {
+    dropDateOrderConstraints();
+    $firstTitle = Title::factory()->create();
+    $secondTitle = Title::factory()->create();
+    $champion = ['champion_type' => 'wrestler', 'champion_id' => Wrestler::factory()->create()->id];
+    $firstColumns = ['title_id' => $firstTitle->id, ...$champion];
+    $secondColumns = ['title_id' => $secondTitle->id, ...$champion];
+    $first = DB::table('titles_championships')->insertGetId([...$firstColumns, 'won_at' => '2026-03-10 12:00:00', 'lost_at' => '2026-03-09 12:00:00']);
+    DB::table('titles_championships')->insert([...$firstColumns, 'won_at' => '2026-03-10 12:00:00', 'lost_at' => '2026-03-10 12:00:00']);
+    $second = DB::table('titles_championships')->insertGetId([...$firstColumns, 'won_at' => '2026-03-10 12:00:00', 'lost_at' => '2026-03-08 12:00:00', 'deleted_at' => '2026-03-11 12:00:00']);
+    $third = DB::table('titles_championships')->insertGetId([...$secondColumns, 'won_at' => '2026-03-10 12:00:00', 'lost_at' => '2026-03-01 12:00:00']);
+    $migration = require database_path('migrations/2026_10_05_160946_enforce_date_order_for_title_reigns.php');
+    $up = new ReflectionMethod($migration, 'up');
+
+    expect(fn () => $up->invoke($migration))
+        ->toThrow(
+            RuntimeException::class,
+            "title {$firstTitle->id} has reign ids {$first}, {$second}; title {$secondTitle->id} has reign ids {$third}. No changes were made.",
+        );
+
+    $invertedReign = fn (): bool => DB::table('titles_championships')->insert([...periodRowColumns('titles_championships'), 'won_at' => '2026-03-10 12:00:00', 'lost_at' => '2026-03-09 12:00:00']);
+    expect($invertedReign())->toBeTrue();
+})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
 
 test('the migration lists every row that ends before it starts before changing anything', function () {
     dropDateOrderConstraints();

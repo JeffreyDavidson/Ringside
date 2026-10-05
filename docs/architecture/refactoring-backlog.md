@@ -294,12 +294,6 @@ MySQL 8) is not yet a required check on either branch; add it with the other req
 Shipped from the original list: searchable booking selects (v0.6.0, #1788) and trusted proxies for Cloudflare
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
-- **Date-order CHECK constraints.** The lifecycle and membership tables (`employments`, `injuries`,
-  `suspensions`, `retirements`, `activity_periods`, `stables_wrestlers`, `stables_tag_teams`,
-  `tag_teams_wrestlers`, `wrestlers_managers`, `tag_teams_managers`) are enforced (see
-  `lifecycle-operation-boundaries.md`). Only `titles_championships` (`won_at`, `lost_at`) remains; a later PR adds it.
-  One open reign per title, unique match numbers per event and unique referee and title per match are enforced by
-  database constraints (see `championship-system.md` and `match-system.md`).
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
 - **Booked members can still be retired or released.** Retiring or releasing a booked wrestler, referee or tag team is
   allowed, and the confirmation now lists the upcoming events they are booked in. Still open: mark booked competitors

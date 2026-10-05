@@ -303,21 +303,17 @@ describe('TitleChampionship Model', function () {
                 ->create()))->toThrow(QueryException::class);
         });
 
-        test('won date must be before lost date when both are set', function () {
+        test('the database rejects a lost date before the won date', function () {
             $wonDate = Carbon::now()->subMonths(3);
-            $lostDate = Carbon::now()->subMonths(6); // Earlier than won date (invalid)
+            $lostDate = Carbon::now()->subMonths(6);
 
-            // This should be caught by application validation, not database
-            $championship = TitleChampionship::factory()
+            expect(fn () => DB::transaction(fn () => TitleChampionship::factory()
                 ->for($this->title, 'title')
                 ->for($this->wrestler, 'champion')
                 ->create([
                     'won_at' => $wonDate,
                     'lost_at' => $lostDate,
-                ]);
-
-            // Data is stored as-is; validation should happen in business logic
-            expect($championship->won_at->greaterThan(requiredDate($championship->lost_at)))->toBeTrue();
+                ])))->toThrow(QueryException::class);
         });
     });
 
