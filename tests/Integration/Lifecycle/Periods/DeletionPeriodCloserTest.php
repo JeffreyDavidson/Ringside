@@ -63,29 +63,34 @@ test('it participates in the coordinating transaction', function () {
 });
 
 test('it closes periods that start after the deletion date on their own start date', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
     $startedAt = now()->addDays(10)->startOfSecond();
-
     $retirement = $wrestler->retirements()->create(['started_at' => $startedAt]);
     $suspension = $wrestler->suspensions()->create(['started_at' => $startedAt]);
     $injury = $wrestler->injuries()->create(['started_at' => $startedAt]);
 
+    // Act
     resolve(DeletionPeriodCloser::class)
         ->close($wrestler, now());
 
+    // Assert
     expect($retirement->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
         ->and($suspension->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
         ->and($injury->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
 
 test('it closes an employment that started after a back-dated deletion on its own start date', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
     $startedAt = now()->subDays(10)->startOfSecond();
     $employment = $wrestler->employments()->create(['started_at' => $startedAt]);
 
+    // Act
     resolve(DeletionPeriodCloser::class)
         ->close($wrestler, now()->subDays(20));
 
+    // Assert
     expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
 

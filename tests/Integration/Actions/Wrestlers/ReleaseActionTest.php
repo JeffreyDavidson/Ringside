@@ -212,3 +212,21 @@ test('it maintains employment history integrity', function () {
     // Should have exactly 2 employment records
     expect($wrestler->employments()->count())->toBe(2);
 });
+
+test('it ends an open suspension or injury on its own start date when released before it began', function (string $relation) {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $wrestler->employments()->create(['started_at' => now()->subDays(10)]);
+    $startedAt = now()->subDays(2)->startOfSecond();
+    $period = $wrestler->{$relation}()->create(['started_at' => $startedAt]);
+
+    // Act
+    resolve(ReleaseAction::class)->handle($wrestler, $startedAt->copy()->subSecond());
+
+    // Assert
+    expect($period->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse();
+})->with([
+    'suspension' => 'suspensions',
+    'injury' => 'injuries',
+]);

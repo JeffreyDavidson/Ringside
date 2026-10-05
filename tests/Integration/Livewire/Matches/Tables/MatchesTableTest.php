@@ -307,6 +307,25 @@ describe('unbookable booked members', function (): void {
             ->assertSeeHtml("Retired Referee</a>{$marker}");
     });
 
+    it('marks only the unbookable referee when a bookable competitor shares its id', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Healthy Wrestler']);
+        $referee = Referee::factory()->injured()->create(['id' => $wrestler->id, 'first_name' => 'Injured', 'last_name' => 'Referee']);
+        $match = EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler])->create();
+        $match->referees()->attach($referee);
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        expect($wrestler->id)->toBe($referee->id);
+        $component
+            ->assertSeeHtml("Injured Referee</a>{$marker}")
+            ->assertDontSeeHtml("Healthy Wrestler</a>{$marker}");
+    });
+
     it('marks unbookable members for promotion scoped users', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
