@@ -19,6 +19,7 @@ readonly class VenueData
         public string $city,
         public string $state,
         public string $zipcode,
+        public string $timezone = 'UTC',
     ) {
         $this->address = Address::fromAttributes([
             'street_address' => $street_address,

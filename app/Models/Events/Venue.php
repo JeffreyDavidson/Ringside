@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property string $state
  * @property string $zipcode
  * @property Address $address
+ * @property string $timezone
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -41,7 +42,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('name', 'street_address', 'city', 'state', 'zipcode', 'address')]
+#[Fillable('name', 'street_address', 'city', 'state', 'zipcode', 'address', 'timezone')]
 #[UseFactory(VenueFactory::class)]
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model implements SoftDeletable

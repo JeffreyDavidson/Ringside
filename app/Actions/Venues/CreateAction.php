@@ -25,6 +25,7 @@ class CreateAction
         return Venue::query()->create([
             'name' => $venueData->name,
             'address' => $venueData->address,
+            'timezone' => $venueData->timezone,
         ]);
     }
 }

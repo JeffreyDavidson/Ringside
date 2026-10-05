@@ -24,7 +24,8 @@ describe('authorized venue form interactions', function () {
             ->assertPropertyWired('form.street_address')
             ->assertPropertyWired('form.city')
             ->assertPropertyWired('form.state')
-            ->assertPropertyWired('form.zipcode');
+            ->assertPropertyWired('form.zipcode')
+            ->assertPropertyWired('form.timezone');
     });
 
     it('opens an empty form for creating a venue', function () {
@@ -58,6 +59,7 @@ describe('authorized venue form interactions', function () {
             'city' => 'New York',
             'state' => 'New York',
             'zipcode' => '10001',
+            'timezone' => 'America/New_York',
         ]);
 
         $modal = livewire(FormModal::class);
@@ -71,6 +73,7 @@ describe('authorized venue form interactions', function () {
             ->assertSet('form.city', 'New York')
             ->assertSet('form.state', 'New York')
             ->assertSet('form.zipcode', '10001')
+            ->assertSet('form.timezone', 'America/New_York')
             ->assertSee('Edit Madison Square Garden');
     });
 
@@ -89,6 +92,7 @@ describe('authorized venue form interactions', function () {
             'form.city' => 'Sacramento',
             'form.state' => 'California',
             'form.zipcode' => '95814',
+            'form.timezone' => 'America/Los_Angeles',
         ]);
         $modal->call('save');
 
@@ -96,7 +100,8 @@ describe('authorized venue form interactions', function () {
         expect($venue->street_address)->toBe('789 Wrestling Way')
             ->and($venue->city)->toBe('Sacramento')
             ->and($venue->state)->toBe('California')
-            ->and($venue->zipcode)->toBe('95814');
+            ->and($venue->zipcode)->toBe('95814')
+            ->and($venue->timezone)->toBe('America/Los_Angeles');
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('venueCreated')
@@ -119,6 +124,7 @@ describe('authorized venue form interactions', function () {
             'form.city' => 'San Francisco',
             'form.state' => 'California',
             'form.zipcode' => '94102',
+            'form.timezone' => 'Asia/Tokyo',
         ]);
         $modal->call('save');
 
@@ -126,7 +132,8 @@ describe('authorized venue form interactions', function () {
         expect($venue->name)->toBe('Updated Arena')
             ->and($venue->street_address)->toBe('456 Oak Avenue')
             ->and($venue->city)->toBe('San Francisco')
-            ->and($venue->zipcode)->toBe('94102');
+            ->and($venue->zipcode)->toBe('94102')
+            ->and($venue->timezone)->toBe('Asia/Tokyo');
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('venueUpdated')
@@ -169,6 +176,8 @@ describe('authorized venue form interactions', function () {
         'unsupported state' => ['form.state', 'Invalid State', Enum::class],
         'short zipcode' => ['form.zipcode', '123', 'digits'],
         'non-numeric zipcode' => ['form.zipcode', 'abcde', 'digits'],
+        'unknown time zone' => ['form.timezone', 'Mars/Olympus', 'in'],
+        'time zone abbreviation' => ['form.timezone', 'EST', 'in'],
     ]);
 
     it('rejects a duplicate venue name while editing the original name', function () {
