@@ -243,6 +243,8 @@ Related-entity cascades use typed Actions and collaborators. Classes under `App\
 
 The database rejects a period whose end is before its start on `employments`, `injuries`, `suspensions`, `retirements`, `activity_periods` (`started_at`/`ended_at`), `stables_wrestlers`, `stables_tag_teams`, `tag_teams_wrestlers` (`joined_at`/`left_at`) and `wrestlers_managers`, `tag_teams_managers` (`hired_at`/`fired_at`), and a championship reign on `titles_championships` (`won_at`/`lost_at`, soft-deleted reigns included). A NULL on either side and an end equal to the start are allowed. PostgreSQL and MySQL use a `<table>_dates_ordered` CHECK constraint; SQLite cannot add a constraint to an existing table, so it uses `<table>_dates_ordered_insert` and `<table>_dates_ordered_update` triggers that raise an abort.
 
+Ending open periods in bulk goes through `OpenPeriodEnder::end()` (started rows end on the effective date, rows that start later end on their own start date); never write the effective date onto every open row. `DeletionPeriodCloser` closes employment this way, so a wrestler, manager or referee deleted with a scheduled (future) employment has it closed on its own start date instead of left open, and `Managers\RestoreAction` ends any employment still open (for example one left open by an earlier deletion) the same way. A raw `whereNull('ended_at')->update(...)` would otherwise violate the constraint on restore.
+
 SQLite rule: never `->change()` or otherwise rebuild these tables without recreating the triggers (a rebuild drops them). The triggers compare `datetime()` of both sides, so sub-second differences are ignored.
 
 ## Migration Sequence

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -85,3 +88,23 @@ test('it closes an employment that started after a back-dated deletion on its ow
 
     expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
+
+test('it closes an employment that starts after the deletion date on its own start date', function (string $subjectClass) {
+    // Arrange
+    testTime()->freeze('2026-03-10 09:00:00');
+    $subject = $subjectClass::factory()->create();
+    $startedAt = Carbon::parse('2026-03-20 00:00:00');
+    $employment = $subject->employments()->create(['started_at' => $startedAt]);
+
+    // Act
+    resolve(DeletionPeriodCloser::class)
+        ->close($subject, now());
+
+    // Assert
+    expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
+        ->and($subject->employments()->whereNull('ended_at')->exists())->toBeFalse();
+})->with([
+    'wrestler' => [Wrestler::class],
+    'manager' => [Manager::class],
+    'referee' => [Referee::class],
+]);
