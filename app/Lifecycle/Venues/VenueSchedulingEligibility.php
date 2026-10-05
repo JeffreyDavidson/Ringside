@@ -31,7 +31,7 @@ final class VenueSchedulingEligibility
         }
 
         if ($events->exists()) {
-            throw SchedulingConflictException::venueAlreadyBooked($venue->name);
+            throw SchedulingConflictException::venueAlreadyBooked($venue->name, $day->format('M j, Y'));
         }
     }
 

@@ -19,6 +19,7 @@
 
                 <x-form.inputs.select
                     :label="__('promotions.timezone')"
+                    :description="$timezoneHint"
                     wire:model="form.timezone"
                     :options="$timezones"
                 />

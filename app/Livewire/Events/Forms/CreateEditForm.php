@@ -11,8 +11,10 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
+use App\Rules\Events\LocalTimeExists;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Event> */
@@ -38,10 +40,20 @@ class CreateEditForm extends BaseForm
     {
         return new EventData(
             name: $this->name,
-            date: $this->date ? Promotion::parseLocalTime($this->promotion(), $this->date) : null,
+            date: $this->date ? $this->parseDate($this->date) : null,
             venue: $this->venue_id ? Venue::query()->findOrFail($this->venue_id) : null,
             preview: $this->preview ?: null,
         );
+    }
+
+    /** An edited event keeps its stored instant when the date is the one the form was prefilled with (see Event::parseLocalDate()). */
+    private function parseDate(string $value): Carbon
+    {
+        if ($this->isEditing()) {
+            return $this->event()->parseLocalDate($value);
+        }
+
+        return Promotion::parseLocalTime($this->promotion(), $value);
     }
 
     /** The promotion whose time zone the entered date is read in: the event's own, or the current one for a new event. */
@@ -66,7 +78,7 @@ class CreateEditForm extends BaseForm
     {
         return [
             'name' => ['required', 'string', 'max:255', $this->uniqueInPromotion('events', 'name')],
-            'date' => ['bail', 'nullable', 'date', new DateCanBeChanged($this->isEditing() ? $this->event() : null)],
+            'date' => ['bail', 'nullable', 'date', new LocalTimeExists($this->promotion()), new DateCanBeChanged($this->isEditing() ? $this->event() : null)],
             'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];

@@ -40,14 +40,16 @@ return [
         'unretire' => 'Unretire',
     ],
     'lifecycle_confirmations' => [
+        'booked_and_more' => 'and :count more',
+        'booked_unscheduled' => 'Unscheduled',
         'deactivate' => 'Deactivate :name?',
         'disband' => 'Disband :name?',
         'injure' => 'Mark :name as injured?',
         'release' => 'Release :name?',
-        'release_booked' => 'Release :name? Booked in upcoming events: :events.',
+        'release_booked' => 'Release :name? Booked in upcoming or unresulted events: :events.',
         'remove' => 'Remove :name?',
         'retire' => 'Retire :name?',
-        'retire_booked' => 'Retire :name? Booked in upcoming events: :events.',
+        'retire_booked' => 'Retire :name? Booked in upcoming or unresulted events: :events.',
         'suspend' => 'Suspend :name?',
     ],
     'form' => [

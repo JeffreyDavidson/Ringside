@@ -41,6 +41,7 @@ return [
     'slug' => 'Slug',
     'suspend' => 'Suspend access',
     'timezone' => 'Time zone',
+    'timezone_change_hint' => 'Existing event times keep their moment in time and will be shown in the new time zone.',
     'switch' => 'Switch promotion',
     'switched' => 'Promotion switched.',
     'user' => 'User',
