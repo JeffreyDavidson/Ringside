@@ -7,9 +7,13 @@ use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 test('it rejects an activity end date before the start date', function () {
@@ -30,30 +34,46 @@ test('it rejects an activity end date before the start date', function () {
         ->and($originalPeriod->refresh()->started_at->toDateTimeString())->toBe($originalPeriod->started_at->toDateTimeString());
 });
 
-test('it establishes a stable that has no activity period when a start date is given', function (?int $daysUntilEnd) {
+test('it establishes a stable that has no activity period when a start date is given', function () {
     $stable = Stable::factory()->withEmployedDefaultMembers()->create(['name' => 'Original Name']);
     $startedAt = now()->subMonth()->startOfSecond();
-    $endedAt = $daysUntilEnd === null ? null : $startedAt->copy()->addDays($daysUntilEnd);
 
     $updatedStable = resolve(UpdateAction::class)->handle($stable, new StableData(
         name: '  Renamed Stable  ',
         start_date: $startedAt,
         members: new StableMembershipData,
-        end_date: $endedAt,
     ));
 
     $activityPeriod = $updatedStable->activityPeriods()->sole();
 
     expect($updatedStable->name)->toBe('Renamed Stable')
         ->and($activityPeriod->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString())
-        ->and($activityPeriod->ended_at?->toDateTimeString())->toBe($endedAt?->toDateTimeString())
+        ->and($activityPeriod->ended_at)->toBeNull()
         ->and($updatedStable->lifecycleTransitions()
             ->where('transition', LifecycleTransitionType::Established)
             ->exists())->toBeTrue();
-})->with([
-    'open-ended activity' => [null],
-    'activity with an end date' => [10],
-]);
+});
+
+test('it rejects an end date while establishing a stable that has no activity period', function () {
+    // Arrange
+    $stable = Stable::factory()->withEmployedDefaultMembers()->create(['name' => 'Original Name']);
+    $startedAt = now()->subMonth()->startOfSecond();
+    $data = new StableData(
+        name: 'Renamed Stable',
+        start_date: $startedAt,
+        members: new StableMembershipData,
+        end_date: $startedAt->copy()->addDays(10),
+    );
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeEstablishedException::class)
+        ->and($stable->refresh()->name)->toBe('Original Name')
+        ->and($stable->activityPeriods()->exists())->toBeFalse()
+        ->and($stable->currentWrestlers()->exists())->toBeTrue();
+});
 
 test('it does not create an activity period when no start date is given', function () {
     $stable = Stable::factory()->unactivated()->create(['name' => 'Original Name']);
@@ -156,23 +176,16 @@ test('it can still move the end date of a disbanded stable with a single period'
     expect($period->refresh()->ended_at?->toDateTimeString())->toBe($newEnd->toDateTimeString());
 });
 
-test('it rejects a new start date after the existing end of the activity period', function (bool $hasLaterPeriod, ?int $formEndOffsetDays) {
+test('it rejects a new start date after the existing end of the only activity period', function () {
     $stable = Stable::factory()->inactive()->create(['name' => 'Original Name']);
     $originalPeriod = $stable->firstActivityPeriod()->firstOrFail();
     $originalStart = $originalPeriod->started_at->toDateTimeString();
     $originalEnd = $originalPeriod->ended_at?->toDateTimeString();
 
-    if ($hasLaterPeriod) {
-        $stable->activityPeriods()->create(['started_at' => now()->addDays(5)]);
-    }
-
-    $startedAt = now()->subHours(12);
-
     $data = new StableData(
         name: 'Updated Name',
-        start_date: $startedAt,
+        start_date: now()->subHours(12),
         members: new StableMembershipData,
-        end_date: $formEndOffsetDays === null ? null : now()->addDays($formEndOffsetDays),
     );
 
     expect(fn () => resolve(UpdateAction::class)->handle($stable, $data))
@@ -180,7 +193,109 @@ test('it rejects a new start date after the existing end of the activity period'
         ->and($stable->refresh()->name)->toBe('Original Name')
         ->and($originalPeriod->refresh()->started_at->toDateTimeString())->toBe($originalStart)
         ->and($originalPeriod->ended_at?->toDateTimeString())->toBe($originalEnd);
+});
+
+test('it rejects moving the start date of a stable with several activity periods', function (string $newStart) {
+    // Arrange
+    $stable = Stable::factory()->unactivated()->create(['name' => 'Original Name']);
+    $first = $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
+    $second = $stable->activityPeriods()->create(['started_at' => '2022-01-01', 'ended_at' => '2023-01-01']);
+    $data = new StableData(
+        name: 'Updated Name',
+        start_date: Date::parse($newStart),
+        members: new StableMembershipData,
+    );
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeUpdatedException::class)
+        ->and($stable->refresh()->name)->toBe('Original Name')
+        ->and($first->refresh()->started_at->toDateString())->toBe('2020-01-01')
+        ->and($first->ended_at?->toDateString())->toBe('2021-01-01')
+        ->and($second->refresh()->started_at->toDateString())->toBe('2022-01-01')
+        ->and($second->ended_at?->toDateString())->toBe('2023-01-01');
 })->with([
-    'ended stable, form end omitted' => [false, null],
-    'ended stable with a later period, form end given' => [true, 1],
+    'after the first period ends' => ['2021-06-01'],
+    'within the first period' => ['2020-06-01'],
 ]);
+
+test('it leaves every period untouched when a stable with several periods keeps its start date', function () {
+    // Arrange
+    $stable = Stable::factory()->unactivated()->create();
+    $first = $stable->activityPeriods()->create(['started_at' => '2020-01-01 13:30:00', 'ended_at' => '2021-01-01']);
+    $second = $stable->activityPeriods()->create(['started_at' => '2022-01-01', 'ended_at' => '2023-01-01']);
+
+    // Act
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: 'Renamed Stable',
+        start_date: Date::parse('2020-01-01'),
+        members: new StableMembershipData,
+        end_date: Date::parse('2021-01-01'),
+    ));
+
+    // Assert
+    expect($stable->refresh()->name)->toBe('Renamed Stable')
+        ->and($first->refresh()->started_at->toDateTimeString())->toBe('2020-01-01 13:30:00')
+        ->and($second->refresh()->started_at->toDateString())->toBe('2022-01-01');
+});
+
+test('it rejects an end date on an open activity period instead of closing it', function () {
+    // Arrange
+    $stable = Stable::factory()->active()->create(['name' => 'Original Name']);
+    $period = $stable->firstActivityPeriod()->firstOrFail();
+    $data = new StableData(
+        name: 'Renamed Stable',
+        start_date: $period->started_at,
+        members: new StableMembershipData,
+        end_date: now()->subHour(),
+    );
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeUpdatedException::class)
+        ->and($stable->refresh()->name)->toBe('Original Name')
+        ->and($period->refresh()->ended_at)->toBeNull()
+        ->and($stable->currentWrestlers()->exists())->toBeTrue()
+        ->and($stable->currentTagTeams()->exists())->toBeTrue();
+});
+
+test('it rejects giving a disbanded stable members', function () {
+    // Arrange
+    $stable = Stable::factory()->inactive()->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $period = $stable->firstActivityPeriod()->firstOrFail();
+
+    // Act
+    $addMembers = fn () => resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: $period->started_at,
+        members: new StableMembershipData(wrestlers: collect([$wrestler])),
+    ));
+
+    // Assert
+    expect($addMembers)->toThrow(CannotBeUpdatedException::class)
+        ->and($stable->currentWrestlers()->exists())->toBeFalse();
+});
+
+test('it removes members left on a disbanded stable when the edit selects none', function () {
+    // Arrange
+    $stable = Stable::factory()->inactive()->create();
+    $period = $stable->firstActivityPeriod()->firstOrFail();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $stable->wrestlers()->attach($wrestler, ['joined_at' => $period->started_at]);
+
+    // Act
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: $period->started_at,
+        members: new StableMembershipData(wrestlers: collect()),
+    ));
+
+    // Assert
+    expect($stable->currentWrestlers()->exists())->toBeFalse()
+        ->and($stable->previousWrestlers()->whereKey($wrestler->getKey())->exists())->toBeTrue();
+});

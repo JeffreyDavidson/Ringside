@@ -6,6 +6,9 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -19,20 +22,28 @@ class UpdateAction
     public function __construct(
         protected EstablishAction $establishAction,
         protected SynchronizeStableMembersAction $synchronizeStableMembersAction,
+        protected StableActivityEligibility $eligibility,
     ) {}
 
     /**
      * Update a stable.
      *
      * This handles the complete stable update workflow:
-     * - Updates stable information (name, description)
-     * - Handles establishment date changes if allowed
-     * - Updates stable membership (wrestlers, tag teams, managers)
-     * - Maintains stable integrity and member relationships
+     * - Updates the stable name
+     * - Establishes a stable that has no activity history when a start date is given
+     * - Moves the dates of a disbanded stable's only activity period
+     * - Updates stable membership (wrestlers, tag teams)
+     *
+     * Disbanding, reuniting and changing earlier periods never happen here: an end date cannot close
+     * an open period (DisbandAction owns that), a blank end date never reopens a closed one
+     * (ReuniteAction owns that), and once a stable has several periods its start date is fixed.
      *
      * @param  Stable  $stable  The stable to update
      * @param  StableData  $stableData  The updated stable information
      * @return Stable The updated stable instance
+     *
+     * @throws CannotBeUpdatedException When the data would end an open period, move a locked start date, or give a disbanded stable members
+     * @throws CannotBeEstablishedException When an end date is given while establishing the stable
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {
@@ -47,6 +58,10 @@ class UpdateAction
         return DB::transaction(function () use ($stable, $stableData): Stable {
             $lockedStable = $stable->refreshForUpdate();
 
+            if ($stableData->members->isNotEmpty() && ! $this->eligibility->canHaveMembers($lockedStable)) {
+                throw CannotBeUpdatedException::inactiveWithMembers($lockedStable);
+            }
+
             $lockedStable->update([
                 'name' => $stableData->getTrimmedName(),
             ]);
@@ -54,54 +69,55 @@ class UpdateAction
             $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
 
             if ($stableData->start_date instanceof Carbon) {
-                $activityPeriod = $lockedStable->activityPeriods()
-                    ->orderBy('started_at')
-                    ->orderBy('id')
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($activityPeriod) {
-                    $endedAt = $this->endDateFor($lockedStable, $activityPeriod, $stableData);
-
-                    if ($endedAt instanceof Carbon && $endedAt->lt($stableData->start_date)) {
-                        throw InvalidDateRangeException::endBeforeStart(
-                            $stableData->start_date,
-                            $endedAt,
-                            'stable activity',
-                        );
-                    }
-
-                    $activityPeriod->update([
-                        'started_at' => $stableData->start_date,
-                        'ended_at' => $endedAt,
-                    ]);
-                } else {
-                    $this->establishAction->handle(
-                        $lockedStable,
-                        $stableData->start_date,
-                        $stableData->end_date,
-                    );
-                }
+                $this->updateActivity($lockedStable, $stableData->start_date, $stableData->end_date);
             }
 
             return $lockedStable;
         });
     }
 
-    /**
-     * An ended first period never reopens through the edit form: a disbanded stable returns only
-     * through ReuniteAction, and an earlier period cannot be closed or moved once later periods exist.
-     */
-    private function endDateFor(Stable $stable, ActivityPeriod $firstPeriod, StableData $stableData): ?Carbon
+    private function updateActivity(Stable $stable, Carbon $startDate, ?Carbon $endDate): void
     {
-        if ($firstPeriod->ended_at === null) {
-            return $stableData->end_date;
+        $periods = $stable->activityPeriods()
+            ->orderBy('started_at')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+        $firstPeriod = $periods->first();
+
+        if (! $firstPeriod instanceof ActivityPeriod) {
+            if ($endDate instanceof Carbon) {
+                throw CannotBeEstablishedException::withEndDate($stable);
+            }
+
+            $this->establishAction->handle($stable, $startDate);
+
+            return;
         }
 
-        if (! $stableData->end_date instanceof Carbon || $stable->activityPeriods()->whereKeyNot($firstPeriod->getKey())->exists()) {
-            return $firstPeriod->ended_at;
+        if ($periods->count() > 1) {
+            if (! $firstPeriod->started_at->isSameDay($startDate)) {
+                throw CannotBeUpdatedException::startDateLocked($stable);
+            }
+
+            return;
         }
 
-        return $stableData->end_date;
+        if ($firstPeriod->ended_at === null && $endDate instanceof Carbon) {
+            throw CannotBeUpdatedException::endsOpenPeriod($stable);
+        }
+
+        $endedAt = $firstPeriod->ended_at === null
+            ? null
+            : ($endDate ?? $firstPeriod->ended_at);
+
+        if ($endedAt instanceof Carbon && $endedAt->lt($startDate)) {
+            throw InvalidDateRangeException::endBeforeStart($startDate, $endedAt, 'stable activity');
+        }
+
+        $firstPeriod->update([
+            'started_at' => $startDate,
+            'ended_at' => $endedAt,
+        ]);
     }
 }

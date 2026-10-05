@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Modals;
 
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\UpdateAction;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
@@ -46,6 +47,18 @@ class FormModal extends BaseFormModal
     {
         $this->form->name = Str::of(fake()->sentence(2))->title()->value();
         $this->form->started_at = $this->generateOptionalStartDate();
+    }
+
+    #[\Override]
+    protected function storeForm(): bool
+    {
+        try {
+            return parent::storeForm();
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.started_at', $exception->getMessage());
+
+            return false;
+        }
     }
 
     protected function updateForm(): void
