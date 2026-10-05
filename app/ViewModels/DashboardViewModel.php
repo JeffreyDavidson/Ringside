@@ -84,7 +84,7 @@ final readonly class DashboardViewModel
         return Title::query()
             ->active()
             ->whereHas('currentChampionship')
-            ->with('currentChampionship.champion')
+            ->with(['currentChampionship.champion', 'currentChampionship.title.promotion'])
             ->orderBy('name')
             ->limit(self::CHAMPION_LIMIT)
             ->get();

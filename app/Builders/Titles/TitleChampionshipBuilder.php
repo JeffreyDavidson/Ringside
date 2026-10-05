@@ -77,7 +77,7 @@ class TitleChampionshipBuilder extends Builder
             ->previous()
             ->mostRecentlyLostFirst()
             ->withPreviousChampionshipId()
-            ->with(['title', 'previousChampionship.champion']);
+            ->with(['title.promotion', 'previousChampionship.champion']);
     }
 
     public function earliestWonFirst(): static

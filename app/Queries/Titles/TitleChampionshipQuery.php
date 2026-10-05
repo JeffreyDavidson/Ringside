@@ -70,7 +70,7 @@ final class TitleChampionshipQuery
 
     public static function longestChampion(Title $title, ?Carbon $asOf = null): Wrestler|TagTeam|null
     {
-        return self::longestChampionship($title, $asOf)?->champion;
+        return self::longestChampionship($title, $asOf)?->loadMissing('champion')->champion;
     }
 
     public static function reignCount(Title $title): int
