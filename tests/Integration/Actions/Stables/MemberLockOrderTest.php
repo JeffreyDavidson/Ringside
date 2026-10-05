@@ -82,8 +82,8 @@ test('it removes replaced stable members in ascending id order', function () {
     $statements = recordStatements(fn () => resolve(SynchronizeStableMembersAction::class)->handle($stable, $members, now()));
 
     // Assert
-    $removedWrestlerIds = updatedRowIds($statements, 'stables_wrestlers');
-    $removedTagTeamIds = updatedRowIds($statements, 'stables_tag_teams');
+    $removedWrestlerIds = updatedRowIds($statements, 'stables_wrestlers', bindingFromEnd: 2);
+    $removedTagTeamIds = updatedRowIds($statements, 'stables_tag_teams', bindingFromEnd: 2);
 
     expect($removedWrestlerIds)->toHaveCount(3)->toBe(collect($removedWrestlerIds)->sort()->values()->all())
         ->and($removedTagTeamIds)->toHaveCount(3)->toBe(collect($removedTagTeamIds)->sort()->values()->all())

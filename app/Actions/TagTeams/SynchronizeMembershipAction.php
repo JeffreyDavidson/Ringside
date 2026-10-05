@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\TagTeams\TagTeamMembershipData;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -23,9 +24,12 @@ class SynchronizeMembershipAction
             $currentWrestlers = $tagTeam->currentWrestlers()->inLockOrder()->get();
 
             foreach ($currentWrestlers->diff($members->wrestlers) as $wrestler) {
-                $tagTeam->wrestlers()->newPivotStatementForId($wrestler->getKey())
-                    ->whereNull('left_at')
-                    ->update(['left_at' => $date]);
+                OpenPeriodEnder::end(
+                    $tagTeam->wrestlers()->newPivotStatementForId($wrestler->getKey()),
+                    'joined_at',
+                    'left_at',
+                    $date,
+                );
             }
 
             $newWrestlers = $members->wrestlers->diff($currentWrestlers);
