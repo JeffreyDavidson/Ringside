@@ -50,7 +50,7 @@ The date-order check also rejects a result that would create a reign when the ev
 
 ### Reign dates
 
-A reign never ends before it began: `endCurrentReign()` and `endCurrentReignsForChampion()` clamp `lost_at` to `max(effective date, won_at)`. Reign length reporting (`TitleChampionshipQuery::reignLengthInDays()`) is clamped at zero days. Tag-team retirement ends the team's current reigns in the same locked transaction, like release and deletion do; wrestler retirement already did so.
+A reign never ends before it began, and the database enforces it for every row including soft-deleted reigns (`titles_championships_dates_ordered` CHECK, SQLite triggers; see `lifecycle-operation-boundaries.md`): `endCurrentReign()` and `endCurrentReignsForChampion()` clamp `lost_at` to `max(effective date, won_at)`. Reign length reporting (`TitleChampionshipQuery::reignLengthInDays()`) is clamped at zero days. Tag-team retirement ends the team's current reigns in the same locked transaction, like release and deletion do; wrestler retirement already did so.
 
 An event whose matches have created or closed a non-deleted reign cannot be moved or unscheduled (`CannotBeRescheduledException::hasTitleReigns()`, enforced in `EventSchedulingEligibility::ensureDateCanChange()` for both the Livewire rule and `Events\UpdateAction`), because reigns store the event date.
 

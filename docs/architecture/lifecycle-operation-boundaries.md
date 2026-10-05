@@ -241,7 +241,7 @@ Related-entity cascades use typed Actions and collaborators. Classes under `App\
 
 ## Date-order constraints
 
-The database rejects a period whose end is before its start on `employments`, `injuries`, `suspensions`, `retirements`, `activity_periods` (`started_at`/`ended_at`), `stables_wrestlers`, `stables_tag_teams`, `tag_teams_wrestlers` (`joined_at`/`left_at`) and `wrestlers_managers`, `tag_teams_managers` (`hired_at`/`fired_at`). A NULL on either side and an end equal to the start are allowed. PostgreSQL and MySQL use a `<table>_dates_ordered` CHECK constraint; SQLite cannot add a constraint to an existing table, so it uses `<table>_dates_ordered_insert` and `<table>_dates_ordered_update` triggers that raise an abort.
+The database rejects a period whose end is before its start on `employments`, `injuries`, `suspensions`, `retirements`, `activity_periods` (`started_at`/`ended_at`), `stables_wrestlers`, `stables_tag_teams`, `tag_teams_wrestlers` (`joined_at`/`left_at`) and `wrestlers_managers`, `tag_teams_managers` (`hired_at`/`fired_at`), and a championship reign on `titles_championships` (`won_at`/`lost_at`, soft-deleted reigns included). A NULL on either side and an end equal to the start are allowed. PostgreSQL and MySQL use a `<table>_dates_ordered` CHECK constraint; SQLite cannot add a constraint to an existing table, so it uses `<table>_dates_ordered_insert` and `<table>_dates_ordered_update` triggers that raise an abort.
 
 SQLite rule: never `->change()` or otherwise rebuild these tables without recreating the triggers (a rebuild drops them). The triggers compare `datetime()` of both sides, so sub-second differences are ignored.
 
