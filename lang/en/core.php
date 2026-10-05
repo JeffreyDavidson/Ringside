@@ -41,6 +41,7 @@ return [
         'disband' => 'Disband :name?',
         'injure' => 'Mark :name as injured?',
         'release' => 'Release :name?',
+        'remove' => 'Remove :name?',
         'retire' => 'Retire :name?',
         'suspend' => 'Suspend :name?',
     ],
@@ -68,6 +69,7 @@ return [
     ],
     'modal' => [
         'add' => 'Add :model',
+        'close' => 'Close dialog',
         'edit' => 'Edit :name',
     ],
     'no_records_description' => 'Records will appear here once they have been added.',
