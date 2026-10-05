@@ -150,7 +150,7 @@ test('two tag teams retiring together that share managers attached in opposite o
             );
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and($results[0]['ok'])->toBeTrue()
                 ->and($results[1]['exception'])->toBeIn([null, CannotBeRetiredException::class])
@@ -201,7 +201,7 @@ test('retiring a champion of two titles while a multi-title result is recorded n
             );
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and(TitleChampionship::query()->forChampion($champion)->current()->exists())->toBeFalse();
@@ -251,7 +251,7 @@ test('concurrent tag team membership writes leave a wrestler on exactly one curr
         $results = runBehindGate('select id from wrestlers where id = ? for update', [$shared->id], $workers($shared, $free->modelKeys(), $teamOne, $teamTwo));
 
         // Assert
-        expect(json_encode(collect($results)->pluck('message')->filter()->values()->all()))->toBe('[]')
+        expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
             ->and(collect($results)->pluck('exception')->sort()->values()->all())->toBe([null, CannotBeEstablishedException::class])
             ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $shared->id)->count())->toBe(1);
     });

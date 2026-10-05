@@ -625,8 +625,18 @@ function resolvedDeadlocks(): int
 }
 
 /**
- * How many sessions are currently waiting for a lock held by another one.
+ * Deadlocks the database resolved since $before was read with resolvedDeadlocks().
+ *
+ * PostgreSQL must resolve none: lock ordering is meant to rule them out. MySQL (InnoDB) can still pick a victim when
+ * two transactions race on a new row of the slot lock table; Laravel retries the victim transparently, so the
+ * outcome assertions in each test (and the workers' own deadlock flag) are what prove no deadlock reaches a caller,
+ * and the counter is not asserted there.
  */
+function deadlocksResolvedSince(int $before): int
+{
+    return runsOnDriver('mysql') ? 0 : resolvedDeadlocks() - $before;
+}
+
 /** What the database says about lock waits right now, for failure messages when blocked workers are not seen. */
 function lockWaitDiagnostics(): string
 {
@@ -642,10 +652,16 @@ function lockWaitDiagnostics(): string
     ], JSON_THROW_ON_ERROR);
 }
 
+/**
+ * How many sessions are currently waiting for a lock held by another one.
+ *
+ * On MySQL the waiting sessions come from performance_schema.data_lock_waits: a worker blocked on its first locking
+ * read does not show as LOCK WAIT in information_schema.INNODB_TRX.
+ */
 function workersBlockedOnLocks(): int
 {
     $blocked = match (DB::connection()->getDriverName()) {
-        'mysql' => DB::scalar("select count(*) from information_schema.INNODB_TRX where trx_state = 'LOCK WAIT'"),
+        'mysql' => DB::scalar('select count(distinct REQUESTING_ENGINE_TRANSACTION_ID) from performance_schema.data_lock_waits'),
         default => DB::scalar("select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'"),
     };
 

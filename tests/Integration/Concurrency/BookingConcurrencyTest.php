@@ -152,7 +152,7 @@ test('concurrent bookings on different events at the same time never deadlock', 
                 ->and($exceptions->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($eventsBookingTheWrestler)->toBe(1)
-                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
@@ -178,7 +178,7 @@ test('concurrent bookings without a real conflict both succeed', function () {
             expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
-                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
@@ -225,7 +225,7 @@ test('concurrent reschedules of events sharing a wrestler into the same empty da
                 ->distinct()
                 ->count('events.id');
 
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
@@ -248,7 +248,7 @@ test('concurrent reschedules into the same empty date without a real conflict bo
             ]);
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
@@ -276,7 +276,7 @@ test('two events swapping dates at once never deadlock', function () {
             ]);
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and($firstEvent->refresh()->date?->toDateTimeString())->toBe($secondDate->toDateTimeString())
@@ -320,7 +320,7 @@ test('restoring an event while its wrestler is booked in another event at the sa
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($liveEventsBookingTheWrestler)->toBe(1)
-                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
+                ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
@@ -341,7 +341,7 @@ test('concurrent events at the same venue on the same day admit only one', funct
             ]);
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and(Event::query()->whereBelongsTo($venue)->count())->toBe(1);
@@ -369,7 +369,7 @@ test('two owners demoting each other at once always leave one owner', function (
             ])->all());
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotRemoveLastOwnerException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($promotion->memberships()->withRole(MembershipRole::Owner)->count())->toBe(1);
