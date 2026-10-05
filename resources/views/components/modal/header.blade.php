@@ -4,7 +4,7 @@
         size="sm"
         iconOnly
         class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !rounded-none !border !bg-transparent"
-        aria-label="Close dialog"
+        :aria-label="__('core.modal.close')"
         wire:click="$dispatch('closeModal')"
     >
         <x-heroicon-m-x-mark class="size-4" />

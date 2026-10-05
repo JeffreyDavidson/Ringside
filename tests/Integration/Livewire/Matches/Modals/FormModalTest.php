@@ -51,6 +51,7 @@ describe('authorized match form interactions', function (): void {
         // Assert
         $modal
             ->assertCount('components', 1)
+            ->assertSeeHtml('aria-label="'.__('core.modal.close').'"')
             ->assertSet('components', function (array $components) use ($component, $arguments): bool {
                 $registeredComponent = array_first($components) ?? null;
 
@@ -89,6 +90,9 @@ describe('authorized match form interactions', function (): void {
             ->assertDontSee($referee->full_name)
             ->assertSee($title->name)
             ->assertSee($activeStipulation->name)
+            ->assertSee(__('matches.form.referees'))
+            ->assertSee(__('matches.form.match_stipulation'))
+            ->assertSee(__('matches.form.preview'))
             ->assertDontSee($inactiveStipulation->name);
     });
 
@@ -777,6 +781,57 @@ describe('booking for a global administrator without a promotion context', funct
         $modal->assertHasErrors(['form.competitors.0.wrestlers.0', 'form.competitors.1.wrestlers.0', 'form.referees.0']);
         expect($match->competitors()->exists())->toBeFalse();
     });
+
+    it('offers only the titles of the event promotion', function (): void {
+        // Arrange
+        Title::factory()->for($this->promotion, 'promotion')->create(['name' => 'Home Promotion Title']);
+        Title::factory()->for($this->foreignPromotion, 'promotion')->create(['name' => 'Foreign Promotion Title']);
+
+        // Act
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Assert
+        $modal
+            ->assertSee('Home Promotion Title')
+            ->assertDontSee('Foreign Promotion Title');
+    });
+
+    it('keeps the titles already selected on the form in the list', function (): void {
+        // Arrange
+        $foreignTitle = Title::factory()->for($this->foreignPromotion, 'promotion')->create(['name' => 'Foreign Promotion Title']);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+
+        // Act
+        $modal->set('form.titles', [$foreignTitle->id]);
+
+        // Assert
+        $modal->assertSee('Foreign Promotion Title');
+    });
+
+    it('rejects forged competitor sides that are not lists of ids', function (array $competitors): void {
+        // Arrange
+        $referee = Referee::factory()->bookable()->for($this->promotion, 'promotion')->create();
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal->call('openModal');
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => $competitors,
+            'form.referees' => [$referee->id],
+        ]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors();
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
+    })->with([
+        'sides that are strings' => [['x', 'y']],
+        'competitor lists that are strings' => [[
+            ['wrestlers' => 'x', 'tag_teams' => []],
+            ['wrestlers' => 'y', 'tag_teams' => []],
+        ]],
+    ]);
 
     it('leaves the card readable for the event promotion members after :dataset was refused', function (Closure $matchData): void {
         // Arrange

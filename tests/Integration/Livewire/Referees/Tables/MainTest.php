@@ -38,6 +38,7 @@ describe('referees table', function (): void {
             ->assertSeeHtml('wire:model.live="filterValues.employment_date.minDate"')
             ->assertSeeHtml('wire:model.live="filterValues.employment_date.maxDate"')
             ->assertSeeHtml('aria-label="Actions for Earl Hebner"')
+            ->assertSeeHtml('wire:confirm="Remove Earl Hebner?"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Earl Hebner')
             ->assertSee(EmploymentStatus::Employed->label());

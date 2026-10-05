@@ -165,6 +165,17 @@ class FormModal extends BaseFormModal
         return Event::query()->findOrFail($this->eventId);
     }
 
+    protected function titlesPromotionId(): ?int
+    {
+        return $this->bookedEvent()->promotion_id;
+    }
+
+    /** @return array<int, mixed> */
+    protected function selectedTitleIds(): array
+    {
+        return collect($this->form->titles)->flatten()->all();
+    }
+
     /**
      * Names for the ids already chosen in the form, so editing shows them even when they are
      * no longer bookable or fall outside the first search results.

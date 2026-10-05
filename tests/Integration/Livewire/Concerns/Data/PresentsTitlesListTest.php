@@ -16,10 +16,11 @@ describe('title list presentation', function (): void {
 
     it('returns titles keyed by their identifiers', function (): void {
         // Arrange
+        $event = Event::factory()->create();
         $title = Title::factory()->create(['name' => 'World Title']);
 
         // Act
-        $titles = app(FormModal::class)->getTitles();
+        $titles = livewire(FormModal::class, ['eventId' => $event->id])->instance()->getTitles();
 
         // Assert
         expect($titles)->toBe([$title->id => $title->name]);
