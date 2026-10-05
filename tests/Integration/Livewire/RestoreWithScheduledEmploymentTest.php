@@ -56,8 +56,9 @@ describe('restoring a record that was deleted with a scheduled employment', func
 
     test('it restores a tag team deleted with a scheduled employment', function (): void {
         // Arrange
+        $startedAt = Carbon::parse('2026-03-11 00:00:00');
         $tagTeam = TagTeam::factory()->create();
-        $tagTeam->employments()->create(['started_at' => Carbon::parse('2026-03-11 00:00:00')]);
+        $employment = $tagTeam->employments()->create(['started_at' => $startedAt]);
 
         actingAs(administrator());
         resolve(TagTeamDeleteAction::class)->handle($tagTeam);
@@ -68,7 +69,8 @@ describe('restoring a record that was deleted with a scheduled employment', func
 
         // Assert
         $component->assertHasNoErrors()->assertDispatched('flash-message', type: 'status');
-        expect($tagTeam->refresh()->trashed())->toBeFalse();
+        expect($tagTeam->refresh()->trashed())->toBeFalse()
+            ->and($employment->refresh()->ended_at?->equalTo($startedAt))->toBeTrue();
     });
 
     test('it closes a scheduled employment left open by an earlier deletion on its own start date', function (): void {
