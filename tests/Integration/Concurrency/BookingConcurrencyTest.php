@@ -148,11 +148,11 @@ test('concurrent bookings on different events at the same time never deadlock', 
                 ->distinct()
                 ->count('events_matches.event_id');
 
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and($exceptions->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
-                ->and($eventsBookingTheWrestler)->toBe(1);
+                ->and($eventsBookingTheWrestler)->toBe(1)
+                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
@@ -175,10 +175,10 @@ test('concurrent bookings without a real conflict both succeed', function () {
             ]);
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
-                ->and(collect($results)->where('ok', true))->toHaveCount(2);
+                ->and(collect($results)->where('ok', true))->toHaveCount(2)
+                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
@@ -316,11 +316,11 @@ test('restoring an event while its wrestler is booked in another event at the sa
                 ->distinct()
                 ->count('events.id');
 
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
-                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+            expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
-                ->and($liveEventsBookingTheWrestler)->toBe(1);
+                ->and($liveEventsBookingTheWrestler)->toBe(1)
+                ->and(resolvedDeadlocks())->toBe($deadlocksBefore);
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)

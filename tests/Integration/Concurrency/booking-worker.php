@@ -105,7 +105,7 @@ try {
 } catch (BaseBusinessException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false];
 } catch (DeadlockException|QueryException $exception) {
-    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception)];
+    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception), 'message' => mb_substr($exception->getMessage(), 0, 400)];
 }
 
 fwrite(STDOUT, 'RESULT:'.json_encode($result)."\n");

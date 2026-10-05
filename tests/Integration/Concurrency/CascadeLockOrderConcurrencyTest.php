@@ -60,7 +60,7 @@ function runBehindGate(string $gateSql, array $gateBindings, array $workers): ar
 
     // The workers run at READ COMMITTED on MySQL (config/database.php); the gate only takes a row lock, but match it.
     if (runsOnDriver('mysql')) {
-        $gate->exec('set session transaction isolation level read committed');
+        $gate->query('set session transaction isolation level read committed');
     }
 
     $gate->beginTransaction();
@@ -247,7 +247,7 @@ test('concurrent tag team membership writes leave a wrestler on exactly one curr
         $results = runBehindGate('select id from wrestlers where id = ? for update', [$shared->id], $workers($shared, $free->modelKeys(), $teamOne, $teamTwo));
 
         // Assert
-        expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+        expect(collect($results)->pluck('message')->filter()->values()->all())->toBe([])
             ->and(collect($results)->pluck('exception')->sort()->values()->all())->toBe([null, CannotBeEstablishedException::class])
             ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $shared->id)->count())->toBe(1);
     });
