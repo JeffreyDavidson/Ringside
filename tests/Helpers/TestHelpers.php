@@ -7,6 +7,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Lifecycle\Employment;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
@@ -672,4 +673,43 @@ function workersBlockedOnLocks(): int
     };
 
     return is_numeric($blocked) ? (int) $blocked : throw new RuntimeException('Unable to count the workers blocked on locks.');
+}
+
+/**
+ * Give a roster record a pinned employment history, for a test whose clock is travelled to 2024-06-01.
+ *
+ * "released" ended its only employment, "retired" also has an open retirement, and "future" is employed from a later date.
+ */
+function giveEmploymentHistory(Wrestler|Manager|Referee|TagTeam $entity, string $state): void
+{
+    if ($state === 'future') {
+        $entity->employments()->create(['started_at' => '2024-09-01']);
+
+        return;
+    }
+
+    $entity->employments()->create(['started_at' => '2024-01-15', 'ended_at' => '2024-03-01']);
+
+    if ($state === 'retired') {
+        $entity->retirements()->create(['started_at' => '2024-03-01']);
+    }
+}
+
+/**
+ * The record's employment rows as plain values, to prove an edit left them untouched.
+ *
+ * @return array<int, array{id: int, started_at: string, ended_at: ?string}>
+ */
+function employmentSnapshot(Wrestler|Manager|Referee|TagTeam $entity): array
+{
+    return $entity->employments()
+        ->orderBy('id')
+        ->get()
+        ->map(fn (Employment $employment): array => [
+            'id' => $employment->id,
+            'started_at' => $employment->started_at->toDateString(),
+            'ended_at' => $employment->ended_at?->toDateString(),
+        ])
+        ->values()
+        ->all();
 }

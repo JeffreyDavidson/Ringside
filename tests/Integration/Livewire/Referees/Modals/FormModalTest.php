@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Actions\Referees\UpdateAction;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Livewire\Referees\Modals\FormModal;
 use App\Models\Roster\Referees\Referee;
+use Illuminate\Support\Facades\Date;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 describe('authorized referee form interactions', function () {
@@ -54,7 +60,9 @@ describe('authorized referee form interactions', function () {
             ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', 'Earl')
             ->assertSet('form.last_name', 'Hebner')
-            ->assertSet('form.employment_date', '2024-01-15')
+            ->assertSet('form.employment_date', null)
+            ->assertSet('form.hasEmploymentHistory', true)
+            ->assertDontSeeHtml('wire:model="form.employment_date"')
             ->assertSee('Edit Earl Hebner');
     });
 
@@ -223,7 +231,7 @@ describe('authorized referee form interactions', function () {
         $modal
             ->assertSet('form.first_name', 'Original')
             ->assertSet('form.last_name', 'Referee')
-            ->assertSet('form.employment_date', '2024-01-15');
+            ->assertSet('form.employment_date', null);
     });
 
     it('resets edited referee data when reopening in create mode', function () {
@@ -254,6 +262,108 @@ describe('authorized referee form interactions', function () {
             ->assertDispatched('form-submitted')
             ->assertSet('isModalOpen', false);
         expect(Referee::query()->count())->toBe(1);
+    });
+});
+
+describe('Referee form employment history', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+        travelTo(Date::parse('2024-06-01 12:00:00'));
+    });
+
+    it('keeps the employment history of a released, retired or future-employed referee when only the name changes', function (
+        string $state,
+        ?string $submittedDate,
+    ) {
+        // Arrange
+        $referee = Referee::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        giveEmploymentHistory($referee, $state);
+        $employmentsBefore = employmentSnapshot($referee);
+        $statusBefore = $referee->fresh()?->status;
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $referee->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->set('form.employment_date', $submittedDate);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false);
+        $referee->refresh();
+        expect($referee->first_name)->toBe('Renamed')
+            ->and(employmentSnapshot($referee))->toBe($employmentsBefore)
+            ->and($referee->status)->toBe($statusBefore);
+    })->with([
+        'released' => ['released', null],
+        'retired' => ['retired', null],
+        'future-employed' => ['future', null],
+        'released with a submitted date' => ['released', '2024-04-01'],
+        'retired with a submitted date' => ['retired', '2024-04-01'],
+        'future-employed with a submitted date' => ['future', '2024-04-01'],
+    ]);
+
+    it('does not offer the employment date once the referee has an employment history', function (string $state) {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, $state);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $referee->id);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', true)
+            ->assertSet('form.employment_date', null)
+            ->assertDontSeeHtml('wire:model="form.employment_date"');
+    })->with(['released', 'retired', 'future']);
+
+    it('still employs a never-employed referee from the submitted date', function () {
+        // Arrange
+        $referee = Referee::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $referee->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->set('form.employment_date', '2024-02-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        $referee->refresh();
+        expect($referee->first_name)->toBe('Renamed')
+            ->and($referee->status)->toBe(EmploymentStatus::Employed)
+            ->and(employmentSnapshot($referee))->toBe([[
+                'id' => $referee->employments()->firstOrFail()->id,
+                'started_at' => '2024-02-01',
+                'ended_at' => null,
+            ]]);
+    });
+
+    it('shows a business rule failure on the first name field instead of failing the request', function () {
+        // Arrange
+        $referee = Referee::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        $action = Double::for(UpdateAction::class);
+        $action->expects('handle')->throws(CannotBeEmployedException::retired($referee));
+        app()->instance(UpdateAction::class, $action);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $referee->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.first_name'])
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('form-submitted');
+        expect($referee->fresh()?->first_name)->toBe('Original');
+        $action->verify();
     });
 });
 

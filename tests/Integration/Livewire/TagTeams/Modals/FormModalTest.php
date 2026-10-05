@@ -6,13 +6,16 @@ use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\EstablishMembershipAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
 use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 describe('authorized tag team form interactions', function () {
@@ -395,6 +398,61 @@ describe('authorized tag team form interactions', function () {
             ->assertSet('isModalOpen', false);
         expect(TagTeam::query()->count())->toBe(1)
             ->and(Wrestler::query()->count())->toBe(5);
+    });
+});
+
+describe('tag team form employment history', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+        travelTo(Date::parse('2024-06-01 12:00:00'));
+    });
+
+    it('keeps the employment history of a released, retired or future-employed tag team when only the name changes', function (string $state) {
+        // Arrange
+        $tagTeam = TagTeam::factory()->create(['name' => 'Original Team']);
+        $tagTeam->wrestlers()->attach(Wrestler::factory()->count(2)->create()->modelKeys(), ['joined_at' => '2024-01-15']);
+        giveEmploymentHistory($tagTeam, $state);
+        $employmentsBefore = employmentSnapshot($tagTeam);
+        $statusBefore = $tagTeam->fresh()?->status;
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $tagTeam->id);
+        $modal->set('form.name', 'Renamed Team');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false);
+        $tagTeam->refresh();
+        expect($tagTeam->name)->toBe('Renamed Team')
+            ->and(employmentSnapshot($tagTeam))->toBe($employmentsBefore)
+            ->and($tagTeam->status)->toBe($statusBefore);
+    })->with(['released', 'retired', 'future']);
+
+    it('still employs a never-employed tag team from the submitted date', function () {
+        // Arrange
+        $tagTeam = TagTeam::factory()->create(['name' => 'Original Team']);
+        $tagTeam->wrestlers()->attach(Wrestler::factory()->count(2)->create()->modelKeys(), ['joined_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $tagTeam->id);
+        $modal->set('form.name', 'Renamed Team');
+        $modal->set('form.employment_date', '2024-02-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        $tagTeam->refresh();
+        expect($tagTeam->name)->toBe('Renamed Team')
+            ->and($tagTeam->status)->toBe(EmploymentStatus::Employed)
+            ->and(employmentSnapshot($tagTeam))->toBe([[
+                'id' => $tagTeam->employments()->firstOrFail()->id,
+                'started_at' => '2024-02-01',
+                'ended_at' => null,
+            ]]);
     });
 });
 

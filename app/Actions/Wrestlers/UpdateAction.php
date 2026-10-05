@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
  *
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
- * - Uses EmployAction for consistent employment handling when employment_date is provided
+ * - Uses EmployAction for consistent employment handling when employment_date is provided and the wrestler has no employment history
  * - Automatically employs managers through EmployAction's typed collaborator
  * - Maintains employment history through proper action coordination
  */
@@ -35,7 +35,7 @@ class UpdateAction
      *
      * This handles the complete update workflow:
      * - Updates wrestler's basic information
-     * - Uses EmployAction for consistent employment creation when employment_date provided
+     * - Uses EmployAction for consistent employment creation when employment_date provided and the wrestler has never been employed
      * - Automatically employs managers through EmployAction's typed collaborator
      * - Maintains transaction boundaries for data consistency
      */
@@ -52,8 +52,9 @@ class UpdateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            // Employ wrestler if employment_date is provided and they're not already employed
-            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->currentEmployment()->exists()) {
+            // Only a wrestler with no employment history is employed from the form date; a released, retired or
+            // future-employed wrestler keeps their history (employing again would overlap or be rejected).
+            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->employments()->exists()) {
                 $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }
 

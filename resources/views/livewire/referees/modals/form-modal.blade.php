@@ -4,7 +4,9 @@
         :last-name-label="__('referees.last_name')"
     />
 
-    <x-form-modal.modal-input>
-        <x-form.inputs.date :label="__('employments.started_at')" wire:model="form.employment_date" />
-    </x-form-modal.modal-input>
+    @unless ($this->form->hasEmploymentHistory)
+        <x-form-modal.modal-input>
+            <x-form.inputs.date :label="__('employments.started_at')" wire:model="form.employment_date" />
+        </x-form-modal.modal-input>
+    @endunless
 </x-form-modal>

@@ -38,8 +38,10 @@
             <x-form.inputs.text :label="__('wrestlers.signature_move')" wire:model="form.signature_move" />
         </x-form-modal.modal-input>
 
-        <x-form-modal.modal-input>
-            <x-form.inputs.date :label="__('employments.started_at')" wire:model="form.employment_date" />
-        </x-form-modal.modal-input>
+        @unless ($this->form->hasEmploymentHistory)
+            <x-form-modal.modal-input>
+                <x-form.inputs.date :label="__('employments.started_at')" wire:model="form.employment_date" />
+            </x-form-modal.modal-input>
+        @endunless
     </div>
 </x-form-modal>

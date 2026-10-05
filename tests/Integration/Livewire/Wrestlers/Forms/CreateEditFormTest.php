@@ -80,7 +80,8 @@ describe('wrestler create and edit form', function (): void {
             ->and($form->height_inches)->toBe(0)
             ->and($form->weight)->toBe(235)
             ->and($form->signature_move)->toBe('Sharpshooter')
-            ->and($form->employment_date)->toBe('2024-01-15')
+            ->and($form->employment_date)->toBe('')
+            ->and($form->hasEmploymentHistory)->toBeTrue()
             ->and($selectedWrestler->is($wrestler))->toBeTrue();
     });
 });

@@ -12,6 +12,7 @@ use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 
 /** @extends BaseForm<Wrestler> */
 class CreateEditForm extends BaseForm
@@ -30,9 +31,14 @@ class CreateEditForm extends BaseForm
 
     public Carbon|string|null $employment_date = '';
 
+    /** Set when editing someone who has been employed before: their history is kept, so the date field is not offered. */
+    #[Locked]
+    public bool $hasEmploymentHistory = false;
+
     protected function loadModelData(Model $model): void
     {
-        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
+        $this->hasEmploymentHistory = $model->employments()->exists();
+        $this->employment_date = '';
 
         $height = $model->height;
         $this->height_feet = (int) floor($height->toInches() / 12);

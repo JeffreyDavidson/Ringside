@@ -47,11 +47,12 @@ class UpdateAction
             );
 
             if ($tagTeamData->employment_date instanceof Carbon) {
-                if (! $lockedTagTeam->currentEmployment()->exists()) {
-                    $this->employAction->handle($lockedTagTeam, $tagTeamData->employment_date);
-                } else {
+                if ($lockedTagTeam->currentEmployment()->exists()) {
                     $this->employCurrentWrestlersAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                     $this->employCurrentManagersAction->handle($lockedTagTeam, $tagTeamData->employment_date);
+                } elseif (! $lockedTagTeam->employments()->exists()) {
+                    // A released, retired or future-employed team keeps its history; only a never-employed team is employed here.
+                    $this->employAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                 }
             }
 
