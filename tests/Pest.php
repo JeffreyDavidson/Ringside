@@ -208,6 +208,17 @@ function waitForScript(AwaitableWebpage|PendingAwaitablePage $page, string $cond
         JS);
 }
 
+/**
+ * Wait until the opened modal is shown and its focus trap has moved focus inside it.
+ *
+ * Livewire renders the form into the modal while it is still hidden, so value assertions can pass before it shows,
+ * and typing (which does not wait for visibility) would then be lost; once shown, the trap focuses the first control.
+ */
+function waitForModalFocus(AwaitableWebpage|PendingAwaitablePage $page): void
+{
+    waitForScript($page, 'document.getElementById("modal-container")?.contains(document.activeElement)');
+}
+
 /*
 |--------------------------------------------------------------------------
 | Custom Test Helpers
