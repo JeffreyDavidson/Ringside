@@ -292,7 +292,7 @@ describe('unbookable booked members', function (): void {
         // Arrange
         $event = Event::factory()->scheduled()->create();
         $wrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
-        $referee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
+        $referee = Referee::factory()->retired()->create(['id' => $wrestler->id, 'first_name' => 'Retired', 'last_name' => 'Referee']);
         $match = EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler])->create();
         $match->referees()->attach($referee);
         $marker = MatchCompetitorRouteResolver::unbookableMarker();
