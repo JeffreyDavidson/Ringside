@@ -16,6 +16,7 @@ use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Concerns\ChecksIndividualLifecycleEligibility;
+use App\Livewire\Concerns\DescribesUpcomingBookings;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
@@ -25,6 +26,7 @@ use Livewire\Component;
 class Actions extends Component
 {
     use ChecksIndividualLifecycleEligibility;
+    use DescribesUpcomingBookings;
     use ExecutesRosterActions;
 
     public Wrestler $wrestler;
@@ -89,6 +91,11 @@ class Actions extends Component
     {
         $this->loadLifecycleState($this->wrestler);
 
-        return view('livewire.wrestlers.components.actions');
+        $showsBookingWarning = $this->canPerform(RosterLifecycleAction::Release)
+            || $this->canPerform(RosterLifecycleAction::Retire);
+
+        return view('livewire.wrestlers.components.actions', [
+            'bookedEvents' => $showsBookingWarning ? $this->upcomingBookingSummary($this->wrestler) : '',
+        ]);
     }
 }

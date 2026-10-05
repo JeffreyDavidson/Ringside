@@ -18,6 +18,7 @@ use App\Enums\Roster\RosterLifecycleAction;
 use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Lifecycle\Roster\TagTeams\TagTeamSuspensionEligibility;
+use App\Livewire\Concerns\DescribesUpcomingBookings;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
@@ -26,6 +27,7 @@ use Livewire\Component;
 
 class Actions extends Component
 {
+    use DescribesUpcomingBookings;
     use ExecutesRosterActions;
 
     public TagTeam $tagTeam;
@@ -98,6 +100,11 @@ class Actions extends Component
     {
         $this->tagTeam->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
 
-        return view('livewire.tag-teams.components.actions');
+        $showsBookingWarning = $this->canPerform(RosterLifecycleAction::Release)
+            || $this->canPerform(RosterLifecycleAction::Retire);
+
+        return view('livewire.tag-teams.components.actions', [
+            'bookedEvents' => $showsBookingWarning ? $this->upcomingBookingSummary($this->tagTeam) : '',
+        ]);
     }
 }

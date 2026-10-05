@@ -41,8 +41,10 @@ return [
         'disband' => 'Disband :name?',
         'injure' => 'Mark :name as injured?',
         'release' => 'Release :name?',
+        'release_booked' => 'Release :name? Booked in upcoming events: :events.',
         'remove' => 'Remove :name?',
         'retire' => 'Retire :name?',
+        'retire_booked' => 'Retire :name? Booked in upcoming events: :events.',
         'suspend' => 'Suspend :name?',
     ],
     'form' => [
