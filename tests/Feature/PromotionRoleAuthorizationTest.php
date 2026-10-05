@@ -134,7 +134,7 @@ test('managers can manage promotion data but cannot change promotion settings or
         ->assertForbidden();
 });
 
-test('owners can update promotion settings and manage membership roles', function () {
+test('owners can update promotion settings and invite members', function () {
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     attachPromotionMember($user, $promotion, MembershipRole::Owner);
@@ -153,7 +153,8 @@ test('owners can update promotion settings and manage membership roles', functio
         ->call('addMember')
         ->assertHasNoErrors();
 
-    expect($promotion->hasActiveMember($newMember))->toBeTrue();
+    expect($promotion->hasActiveMember($newMember))->toBeFalse()
+        ->and($promotion->memberships()->where('user_id', $newMember->id)->firstOrFail()->status)->toBe(MembershipStatus::Invited);
 });
 
 test('suspended promotion members no longer have access', function () {

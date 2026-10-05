@@ -259,18 +259,25 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 ### Promotion member invitations
 
 **Priority:** Low  
-**Status:** Deferred feature.
+**Status:** Core flow shipped; follow-ups open.
 
-Owners add promotion members by typing the exact email of an existing active
-account; the member is attached immediately and no message is sent. The Manage
-component answers every non-match (unknown, inactive, partial) with one generic
-message so it does not confirm which accounts exist. An account that is already
-a member gets its own message: the owner already sees every member in the list
-on that page, so naming the case reveals nothing new. Adding a member, saving a
-role, and suspending or reactivating a member confirm the change through the
-shared flash message. A real
-invitation flow (an invitation record, an email, and an accept page, using the
-existing `MembershipStatus::Invited` state) is deferred.
+Owners now invite a member by typing the exact email of an existing active
+account: the membership is created as `Invited` and the person joins only by
+accepting it in the application (see "Promotion Context and Membership" in
+`core-capabilities.md`). The remaining gaps:
+
+- **Invitations are tied to an existing account.** The form shows one message
+  for every email, but a real account's pending invitation then appears in the
+  owner's list while an unknown email adds no row, so an owner can still tell
+  whether an account exists. Closing it needs an invitation record keyed by
+  email (a new table, matched when that email signs in or registers), which would
+  also allow inviting someone who has no account yet.
+- **No email.** The app has no mail infrastructure in production, so an
+  invitation is seen only after the person signs in. Add a notification when a
+  mailer is configured.
+- **Platform administrators without a membership** have no switcher or
+  no-membership page on which to see an invitation; they reach promotions
+  through the directory.
 
 Business rules enforced in the membership and user Actions: a promotion always
 keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the
@@ -315,7 +322,7 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
   the Forge nginx config. A Content-Security-Policy is a separate project because Livewire and Vite need nonces or
   hashes. The full operator checklist is `docs/workflows/production-operations.md`.
 
-The real invitation flow is tracked under "Promotion member invitations" above.
+The remaining invitation follow-ups are tracked under "Promotion member invitations" above.
 
 ## Deferred from audit round 3
 

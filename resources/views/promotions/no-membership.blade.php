@@ -3,4 +3,6 @@
     :title="__('promotions.no_membership_title')"
     :description="__('promotions.no_membership_description')"
     :show-dashboard-link="false"
-/>
+>
+    <x-promotions.invitations :invitations="$invitations" />
+</x-errors.page>

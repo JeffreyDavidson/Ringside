@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Starts each request from an empty promotion context, then selects the session's promotion while the user
- * still has an active membership of it, otherwise their first active promotion.
+ * still has an active membership of it, otherwise the promotion of their oldest active membership.
  */
 class EstablishPromotionContext
 {
@@ -38,7 +38,9 @@ class EstablishPromotionContext
                 return $next($request);
             }
 
-            throw new HttpResponseException(response()->view('promotions.no-membership', [], 403));
+            throw new HttpResponseException(response()->view('promotions.no-membership', [
+                'invitations' => $this->context->pendingInvitationsFor($user),
+            ], 403));
         }
 
         $request->session()->put('active_promotion_id', $promotion->getKey());
