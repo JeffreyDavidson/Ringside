@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\Promotions\AddPromotionMemberAction;
+use App\Actions\Promotions\AcceptPromotionInvitationAction;
+use App\Actions\Promotions\InvitePromotionMemberAction;
 use App\Actions\Promotions\SwitchActivePromotionAction;
 use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Promotions\UpdatePromotionMemberStatusAction;
@@ -186,7 +187,7 @@ describe('staleness within a request', function (): void {
             ->and($reactivated)->toBeTrue();
     });
 
-    test('adding a member is reflected immediately', function (): void {
+    test('an invitation grants nothing until it is accepted, and acceptance is reflected immediately', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
         $other = Promotion::factory()->create();
@@ -194,12 +195,15 @@ describe('staleness within a request', function (): void {
         $before = Gate::forUser($user)->allows('view', $promotion);
 
         // Act
-        app(AddPromotionMemberAction::class)->handle($promotion, $user, MembershipRole::Member);
-        $after = Gate::forUser($user)->allows('view', $promotion);
+        app(InvitePromotionMemberAction::class)->handle($promotion, $user, MembershipRole::Member);
+        $invited = Gate::forUser($user)->allows('view', $promotion);
+        app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+        $accepted = Gate::forUser($user)->allows('view', $promotion);
 
         // Assert
         expect($before)->toBeFalse()
-            ->and($after)->toBeTrue();
+            ->and($invited)->toBeFalse()
+            ->and($accepted)->toBeTrue();
     });
 
     test('switching promotions authorizes against the new promotion', function (): void {

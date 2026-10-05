@@ -8,6 +8,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View as ViewFactory;
 
 use function Pest\Laravel\actingAs;
@@ -98,6 +99,40 @@ it('falls back to the first promotion when nothing valid is remembered', functio
     'nothing remembered' => [null],
     'not a number' => ['beta'],
 ]);
+
+it('lists the pending invitations apart from the active promotions, in one membership query', function () {
+    // Arrange
+    $user = User::factory()->create();
+    $active = joinPromotion($user, 'Alpha Wrestling');
+    $invitedBy = joinPromotion($user, 'Beta Wrestling', MembershipStatus::Invited);
+    joinPromotion($user, 'Gamma Wrestling', MembershipStatus::Suspended);
+    actingAs($user);
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    // Act
+    $view = composePromotionSwitcher('components.sidebar.index');
+    $membershipQueries = collect(DB::getQueryLog())
+        ->filter(fn (array $query): bool => str_contains($query['query'], 'promotion_user'))
+        ->count();
+    DB::disableQueryLog();
+
+    // Assert
+    expect($view->getData()['promotionSwitcherPromotions']->pluck('id')->all())->toBe([$active->id])
+        ->and($view->getData()['promotionInvitations']->pluck('id')->all())->toBe([$invitedBy->id])
+        ->and($membershipQueries)->toBe(1);
+});
+
+it('provides no invitations to a guest', function () {
+    // Arrange
+    Promotion::factory()->create();
+
+    // Act
+    $view = composePromotionSwitcher('components.sidebar.index');
+
+    // Assert
+    expect($view->getData()['promotionInvitations'])->toBeEmpty();
+});
 
 it('has no active promotion for a user without memberships', function () {
     $user = User::factory()->create();

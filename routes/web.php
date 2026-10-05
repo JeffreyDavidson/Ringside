@@ -7,6 +7,8 @@ use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
+use App\Http\Controllers\Promotions\AcceptPromotionInvitationController;
+use App\Http\Controllers\Promotions\DeclinePromotionInvitationController;
 use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
@@ -35,6 +37,9 @@ Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
+    // Outside promotion.context on purpose: a user with no active membership must still be able to reach them.
+    Route::post('promotions/{promotion}/invitation/accept', AcceptPromotionInvitationController::class)->name('promotions.invitation.accept');
+    Route::post('promotions/{promotion}/invitation/decline', DeclinePromotionInvitationController::class)->name('promotions.invitation.decline');
 
     Route::middleware('promotion.context')->group(function () {
         Route::get('promotions', [PromotionsController::class, 'index'])

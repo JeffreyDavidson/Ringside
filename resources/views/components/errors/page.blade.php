@@ -26,6 +26,8 @@
             <p class="text-ringside-muted mt-4 text-base leading-relaxed">{{ $description }}</p>
         </header>
 
+        {{ $slot }}
+
         <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
             @if (! $signedIn)
                 <x-button tag="a" variant="ringside" size="xl" :href="route('login')">

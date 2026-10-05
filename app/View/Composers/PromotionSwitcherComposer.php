@@ -19,6 +19,7 @@ class PromotionSwitcherComposer
 
         if (! $user instanceof User) {
             $view->with('promotionSwitcherPromotions', collect())
+                ->with('promotionInvitations', collect())
                 ->with('activePromotionId', null);
 
             return;
@@ -39,6 +40,7 @@ class PromotionSwitcherComposer
         }
 
         $view->with('promotionSwitcherPromotions', $promotions)
+            ->with('promotionInvitations', $this->context->pendingInvitationsFor($user))
             ->with('activePromotionId', $activePromotionId);
     }
 }

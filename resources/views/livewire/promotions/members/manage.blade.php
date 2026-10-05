@@ -195,4 +195,61 @@
             </table>
         </div>
     @endif
+
+    {{-- Owners see pending invitations by the email they typed; the invited account's name stays private until it accepts. --}}
+    @if ($canManageMembers && $invitations->isNotEmpty())
+        <div class="border-ringside-line border-t" data-test="promotion-invitations">
+            <h3 class="text-ringside-ink px-5 pt-5 pb-3 text-sm font-semibold lg:px-6">
+                {{ __('promotions.invitations_title') }}
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[38rem] text-left text-sm">
+                    <thead class="bg-ringside-surface-index text-ringside-muted border-ringside-line border-y text-xs tracking-[0.08em] uppercase">
+                        <tr>
+                            <th scope="col" class="px-5 py-3 font-semibold lg:px-6">
+                                {{ __('promotions.invited_email') }}
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-semibold">{{ __('promotions.role') }}</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">
+                                {{ __('promotions.membership_status') }}
+                            </th>
+                            <th scope="col" class="px-5 py-3 text-right font-semibold lg:px-6">
+                                {{ __('promotions.actions') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-ringside-line divide-y">
+                        @foreach ($invitations as $invitation)
+                            @if ($invitation->user)
+                                <tr
+                                    wire:key="promotion-invitation-{{ $invitation->user_id }}"
+                                    class="hover:bg-ringside-surface-hover"
+                                >
+                                    <td class="text-ringside-ink px-5 py-4 lg:px-6">{{ $invitation->user->email }}</td>
+                                    <td class="text-ringside-muted px-4 py-4">{{ $invitation->role->label() }}</td>
+                                    <td class="text-ringside-muted px-4 py-4">
+                                        <span class="border-ringside-outline inline-flex min-h-7 items-center border px-2 text-xs">
+                                            {{ __('promotions.invitation_pending') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-4 text-right lg:px-6">
+                                        <button
+                                            type="button"
+                                            wire:click="cancelInvitation({{ $invitation->user_id }})"
+                                            wire:confirm="{{ __('promotions.confirm_cancel_invitation') }}"
+                                            wire:loading.attr="disabled"
+                                            wire:target="cancelInvitation"
+                                            class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {{ __('promotions.cancel_invitation') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 </section>

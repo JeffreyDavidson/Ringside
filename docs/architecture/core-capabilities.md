@@ -122,6 +122,29 @@ stored in the `promotion_user` membership table, where role and membership
 status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
+A membership has a status: `Invited`, `Active` or `Suspended`. Only `Active`
+grants anything. An owner adds a member by typing the exact email of an active
+account (`Promotions\Members\Manage`, `InvitePromotionMemberAction`), which
+creates the membership as `Invited` with the role the owner chose; nobody joins
+without consent. The owner's form answers every email (known, unknown, inactive,
+partial) with one message that never names the account, and the owner's list
+shows a pending invitation by the typed email, role and "Invitation pending",
+never by name (an owner can cancel it; role and status cannot be changed while
+it is pending, so an owner cannot activate it behind the account's back). The
+invited user sees their invitations as a section of the promotion switcher (or
+on the no-membership page when they have no active promotion) with Accept and
+Decline, which post to `promotions.invitation.accept` / `.decline` (outside the
+promotion context, because a user with no active membership must reach them).
+`AcceptPromotionInvitationAction` makes the signed-in user's own `Invited`
+membership `Active` with the invited role; `RemovePromotionInvitationAction`
+deletes an `Invited` membership (the owner cancelling or the user declining).
+Both find the membership through the signed-in user, never through a request
+id, and only ever touch `Invited` rows. The middleware, the promotion switcher,
+`SwitchActivePromotionAction` and `PromotionGate` read active memberships only,
+so an invitation gives no context and no access until it is accepted. The
+last-owner guards count active owners only. No email is sent: the invitation is
+visible in the application only.
+
 Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
@@ -157,8 +180,8 @@ promotion switcher. `EstablishPromotionContext` resets the whole context
 (`PromotionContextService::clear()`: promotion, enforcement and memo) when a
 request starts, so nothing carries over from an earlier request that reused the
 scoped instance (several requests in one test, or a long-lived worker). The
-memo is also dropped whenever the
-member Actions add a member or change a role or status
+memo (active and invited promotions, read in one query) is also dropped whenever
+the member Actions invite, accept, remove or change a role or status
 (`PromotionContextService::forgetMemberships()`). Any new code that writes
 `promotion_user` must call it.
 When promotion context is enforced, new promotion-owned models receive the
@@ -189,9 +212,11 @@ Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership
 through its event. Promotion-scoped routes establish the context from the
-session's selected active membership, defaulting to the first active
-membership (lowest promotion id) when none is selected or the selected one is
-no longer usable (suspended, invited, removed or deleted); the session is then
+session's selected active membership, defaulting to the user's oldest active
+membership (`promotion_user.created_at`, the lower promotion id breaking ties)
+when none is selected or the selected one is no longer usable (suspended,
+invited, removed or deleted), so a promotion joined later never becomes the
+default; the session is then
 rewritten to the promotion actually used. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
 selected membership as a deliberate global-platform exception. The scope fails

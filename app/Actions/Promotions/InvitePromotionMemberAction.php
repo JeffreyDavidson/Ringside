@@ -12,9 +12,13 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
-final class AddPromotionMemberAction
+final class InvitePromotionMemberAction
 {
-    /** Returns false when the user is already a member. */
+    /**
+     * Invite the user with the role the owner chose. The membership stays `Invited`, and so grants nothing,
+     * until the user accepts it (AcceptPromotionInvitationAction). Returns false when the user already has a
+     * membership of any status.
+     */
     public function handle(Promotion $promotion, User $user, MembershipRole $role): bool
     {
         return DB::transaction(function () use ($promotion, $user, $role): bool {
@@ -40,7 +44,7 @@ final class AddPromotionMemberAction
 
             $lockedPromotion->users()->attach($activeUser->getKey(), [
                 'role' => $role,
-                'status' => MembershipStatus::Active,
+                'status' => MembershipStatus::Invited,
             ]);
 
             app(PromotionContextService::class)->forgetMemberships();
