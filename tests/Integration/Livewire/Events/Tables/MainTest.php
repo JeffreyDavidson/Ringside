@@ -6,6 +6,8 @@ use App\Enums\EventStatus;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
@@ -154,6 +156,79 @@ describe('events table', function (): void {
             ->assertSee('Within Range')
             ->assertSee('Range End')
             ->assertDontSee('After Range');
+    });
+
+    it('reads the chosen date range as days in the promotion time zone', function (
+        string $timezone,
+        array $included,
+        array $excluded,
+    ): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => $timezone]);
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        foreach ([...$included, ...$excluded] as $name => $utcDate) {
+            Event::factory()->scheduledOn($utcDate)->for($promotion, 'promotion')->create(['name' => $name]);
+        }
+
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('filterValues.event_dates', [
+            'minDate' => '2026-06-10',
+            'maxDate' => '2026-06-10',
+        ]);
+
+        // Assert
+        foreach (array_keys($included) as $name) {
+            $component->assertSee($name);
+        }
+
+        foreach (array_keys($excluded) as $name) {
+            $component->assertDontSee($name);
+        }
+
+        $context->clear();
+    })->with([
+        'west of UTC' => ['America/New_York', [
+            'Local Start' => '2026-06-10 04:00:00',
+            'Local Evening' => '2026-06-11 03:59:59',
+        ], [
+            'Local Previous Evening' => '2026-06-10 03:59:59',
+            'Local Next Day' => '2026-06-11 04:00:00',
+        ]],
+        'east of UTC' => ['Asia/Tokyo', [
+            'Local Start' => '2026-06-09 15:00:00',
+            'Local Evening' => '2026-06-10 14:59:59',
+        ], [
+            'Local Previous Evening' => '2026-06-09 14:59:59',
+            'Local Next Day' => '2026-06-10 15:00:00',
+        ]],
+    ]);
+
+    it('reads the chosen date range in the application time zone without a promotion context', function (): void {
+        // Arrange
+        config()->set('app.timezone', 'America/New_York');
+        Event::factory()->scheduledOn('2026-06-10 03:59:59')->create(['name' => 'Previous Evening']);
+        Event::factory()->scheduledOn('2026-06-10 04:00:00')->create(['name' => 'Local Start']);
+        Event::factory()->scheduledOn('2026-06-11 03:59:59')->create(['name' => 'Local Evening']);
+        Event::factory()->scheduledOn('2026-06-11 04:00:00')->create(['name' => 'Next Day']);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->set('filterValues.event_dates', [
+            'minDate' => '2026-06-10',
+            'maxDate' => '2026-06-10',
+        ]);
+
+        // Assert
+        $component
+            ->assertDontSee('Previous Evening')
+            ->assertSee('Local Start')
+            ->assertSee('Local Evening')
+            ->assertDontSee('Next Day');
     });
 
     it('ignores malformed event date range values', function (array $dateRange): void {
