@@ -12,6 +12,7 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 use LogicException;
 
 /**
@@ -70,9 +71,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function wonOn(string $date): static
     {
-        return $this->state([
-            'won_at' => $date,
-        ]);
+        return $this->state(function (array $attributes) use ($date): array {
+            $this->guardReignOrder($date, $attributes['lost_at'] ?? null);
+
+            return ['won_at' => $date];
+        });
     }
 
     /**
@@ -80,9 +83,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function lostOn(?string $date): static
     {
-        return $this->state([
-            'lost_at' => $date,
-        ]);
+        return $this->state(function (array $attributes) use ($date): array {
+            $this->guardReignOrder($attributes['won_at'] ?? null, $date);
+
+            return ['lost_at' => $date];
+        });
     }
 
     public function wonAtEventMatch(?EventMatch $eventMatch = null): static
@@ -139,8 +144,23 @@ class TitleChampionshipFactory extends Factory
      */
     public function ended(): static
     {
-        return $this->state([
-            'lost_at' => Carbon::yesterday(),
-        ]);
+        return $this->state(function (array $attributes): array {
+            $lostAt = Carbon::yesterday();
+
+            $this->guardReignOrder($attributes['won_at'] ?? null, $lostAt);
+
+            return ['lost_at' => $lostAt];
+        });
+    }
+
+    private function guardReignOrder(mixed $wonAt, mixed $lostAt): void
+    {
+        if ($wonAt === null || $lostAt === null) {
+            return;
+        }
+
+        if (Carbon::parse($lostAt)->isBefore(Carbon::parse($wonAt))) {
+            throw new InvalidArgumentException('A championship cannot be lost before it is won.');
+        }
     }
 }

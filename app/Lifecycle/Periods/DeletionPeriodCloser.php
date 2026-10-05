@@ -26,19 +26,19 @@ final readonly class DeletionPeriodCloser
     public function close(Model&Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
     {
         if ($subject->currentEmployment()->exists()) {
-            $this->employmentPeriods->end($subject, $date);
+            $this->employmentPeriods->end($subject, $date, clampToStart: true);
         }
 
         if ($subject->currentRetirement()->exists()) {
-            $this->retirementPeriods->end($subject, $date);
+            $this->retirementPeriods->end($subject, $date, clampToStart: true);
         }
 
         if ($subject->currentSuspension()->exists()) {
-            $this->suspensionPeriods->end($subject, $date);
+            $this->suspensionPeriods->end($subject, $date, clampToStart: true);
         }
 
         if ($subject->currentInjury()->exists()) {
-            $this->injuryPeriods->end($subject, $date);
+            $this->injuryPeriods->end($subject, $date, clampToStart: true);
         }
     }
 }

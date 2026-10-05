@@ -47,3 +47,17 @@ test('it leaves closed lifecycle periods untouched when deleting an inactive tit
     expect($title->activityPeriods()->firstOrFail()->ended_at?->toDateTimeString())
         ->toBe($originalEndedAt?->toDateTimeString());
 });
+
+test('it ends a period that starts after the deletion date on its own start date', function (string $periodRelation, int $startOffsetDays, int $deletionOffsetDays) {
+    $title = Title::factory()->create();
+    $startedAt = now()->addDays($startOffsetDays)->startOfSecond();
+    $period = $title->{$periodRelation}()->create(['started_at' => $startedAt]);
+
+    resolve(DeleteAction::class)->handle($title, now()->addDays($deletionOffsetDays));
+
+    expect($title->refresh()->trashed())->toBeTrue()
+        ->and($period->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString());
+})->with([
+    'back-dated deletion of an active title' => ['activityPeriods', -5, -10],
+    'deletion of a retirement that starts later' => ['retirements', 10, 0],
+]);

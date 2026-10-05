@@ -10,8 +10,10 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Closure;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 
 /**
  * Integration tests for TitleChampionshipFactory data generation and state management.
@@ -168,6 +170,36 @@ describe('TitleChampionshipFactory Integration Tests', function () {
             expect($championship->lost_match_id)->toBeNull()
                 ->and($championship->lost_at)->toBeNull();
         });
+    });
+
+    describe('date order', function () {
+        test('it rejects a championship that is lost before it is won', function (Closure $configure) {
+            // Arrange
+            $factory = $configure(TitleChampionship::factory());
+
+            // Act & Assert
+            expect(fn () => $factory->make())
+                ->toThrow(InvalidArgumentException::class, 'A championship cannot be lost before it is won.');
+        })->with([
+            'lostOn before the default win date' => [fn (TitleChampionshipFactory $factory) => $factory->lostOn('2000-01-01')],
+            'wonOn after an existing loss date' => [fn (TitleChampionshipFactory $factory) => $factory->lostOn('2000-01-01')->wonOn('2000-02-01')],
+            'ended before an explicit win date' => [fn (TitleChampionshipFactory $factory) => $factory->wonOn('2999-01-01')->ended()],
+        ]);
+
+        test('it accepts a championship that is lost on or after the day it is won', function (?string $lostOn) {
+            // Arrange & Act
+            $championship = TitleChampionship::factory()
+                ->wonOn('2000-01-01')
+                ->lostOn($lostOn)
+                ->make();
+
+            // Assert
+            expect($championship->lost_at?->toDateString())->toBe($lostOn);
+        })->with([
+            'same day' => ['2000-01-01'],
+            'later day' => ['2000-02-01'],
+            'still current' => [null],
+        ]);
     });
 
     describe('data consistency', function () {

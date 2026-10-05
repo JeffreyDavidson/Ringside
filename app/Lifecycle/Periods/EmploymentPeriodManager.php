@@ -38,6 +38,7 @@ final readonly class EmploymentPeriodManager
         Model&Employable $employable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
+        bool $clampToStart = false,
     ): void {
         $this->periodWriter->end(
             $employable,
@@ -45,6 +46,7 @@ final readonly class EmploymentPeriodManager
             LifecycleDimension::Employment,
             $date,
             $transition,
+            $clampToStart,
         );
     }
 }

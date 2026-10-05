@@ -38,7 +38,7 @@ test('it retires an employed referee', function () {
 
 test('it retires referee with specific retirement date', function () {
     $referee = Referee::factory()->employed()->create();
-    $retirementDate = now()->subDays(10);
+    $retirementDate = now()->startOfDay();
 
     resolve(RetireAction::class)->handle($referee, $retirementDate);
 

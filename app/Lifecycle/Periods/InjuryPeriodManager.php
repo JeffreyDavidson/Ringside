@@ -38,6 +38,7 @@ final readonly class InjuryPeriodManager
         Model&Injurable $injurable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
+        bool $clampToStart = false,
     ): void {
         $this->periodWriter->end(
             $injurable,
@@ -45,6 +46,7 @@ final readonly class InjuryPeriodManager
             LifecycleDimension::Injury,
             $date,
             $transition,
+            $clampToStart,
         );
     }
 }

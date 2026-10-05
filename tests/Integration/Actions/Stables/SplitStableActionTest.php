@@ -9,6 +9,7 @@ use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
+use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
@@ -18,6 +19,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use JMac\Testing\Double;
 
 /**
@@ -460,6 +462,43 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->refresh()->promotion_id)->toBe($promotion->id);
         });
 
+        test('split of a stable without a promotion locks the new name before the stable row', function () {
+            // Arrange
+            $nameKey = resolve(StableNameLock::class)->key($this->newStableName);
+
+            // Act
+            $statements = recordStatements(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                "  {$this->newStableName}  ",
+                $this->membersForNewStable,
+                now(),
+            ));
+
+            // Assert
+            $lockPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "stable_name_locks"'));
+            $stableLockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "stables"'));
+
+            expect($statements[$lockPosition]['bindings'])->toBe([$nameKey])
+                ->and($lockPosition)->toBeLessThan($stableLockPosition)
+                ->and(DB::table('stable_name_locks')->pluck('name_key')->all())->toBe([$nameKey]);
+        });
+
+        test('split of a stable with a promotion takes no name lock', function () {
+            // Arrange
+            $this->originalStable->forceFill(['promotion_id' => Promotion::factory()->create()->id])->save();
+
+            // Act
+            resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                now(),
+            );
+
+            // Assert
+            expect(DB::table('stable_name_locks')->exists())->toBeFalse();
+        });
+
         test('split allows a name only a deleted stable or another promotion uses', function () {
             // Arrange
             Stable::factory()->create(['name' => $this->newStableName])->delete();
@@ -521,6 +560,7 @@ describe('SplitStableAction Integration Tests', function () {
                 resolve(StableMembershipService::class),
                 resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
+                resolve(StableNameLock::class),
             );
 
             expect(fn () => $action->handle(

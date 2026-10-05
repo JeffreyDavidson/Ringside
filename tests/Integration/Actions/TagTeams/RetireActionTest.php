@@ -82,7 +82,7 @@ test('it can retire the tag team without retiring its members', function () {
 
 test('it retires tag team with specific retirement date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $retirementDate = now()->subDays(5);
+    $retirementDate = now()->startOfDay();
 
     resolve(RetireAction::class)->handle($tagTeam, $retirementDate);
 

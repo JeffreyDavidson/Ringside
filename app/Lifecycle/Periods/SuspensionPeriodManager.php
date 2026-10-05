@@ -38,6 +38,7 @@ final readonly class SuspensionPeriodManager
         Model&Suspendable $suspendable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
+        bool $clampToStart = false,
     ): void {
         $this->periodWriter->end(
             $suspendable,
@@ -45,6 +46,7 @@ final readonly class SuspensionPeriodManager
             LifecycleDimension::Suspension,
             $date,
             $transition,
+            $clampToStart,
         );
     }
 }

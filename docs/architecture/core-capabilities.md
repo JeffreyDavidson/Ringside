@@ -179,7 +179,8 @@ At the database level, `stables_active_name_unique` is unique on
 `(promotion_id, name) WHERE deleted_at IS NULL`; because NULLs are distinct in
 unique indexes, a second filtered index
 `stables_active_unowned_name_unique` keeps active unowned stable names unique
-(SQLite and PostgreSQL; MySQL relies on form validation for unowned stables).
+(SQLite and PostgreSQL; MySQL relies on form validation for unowned stables, plus the
+`StableNameLock` that serializes splits choosing the same unowned name).
 Existing unowned roster records can be assigned through the guarded
 `promotions:backfill-roster-ownership` command; events and titles use
 `promotions:backfill-event-title-ownership`. Both include soft-deleted records so a restored record is not left unowned. Match data inherits ownership

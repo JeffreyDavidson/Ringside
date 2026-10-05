@@ -90,6 +90,15 @@ class EventMatchBuilder extends Builder
         return $this;
     }
 
+    public function forRosterMember(Wrestler|Referee|TagTeam $member): static
+    {
+        return match (true) {
+            $member instanceof Wrestler => $this->forWrestlerId($member->id),
+            $member instanceof TagTeam => $this->forTagTeamId($member->id),
+            default => $this->forRefereeId($member->id),
+        };
+    }
+
     public function forWrestlerId(int $wrestlerId): static
     {
         return $this->forCompetitorId($wrestlerId, Wrestler::class);

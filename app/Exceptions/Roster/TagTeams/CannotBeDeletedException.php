@@ -37,7 +37,7 @@ final class CannotBeDeletedException extends BaseBusinessException
 
         return self::forReason(
             BusinessRuleReason::BookedInMatch,
-            "{$context} cannot be deleted because it is booked in a match that is upcoming or has no result. Remove it from the match or record the result first.",
+            __('core.delete_rejections.booked_in_match', ['context' => $context]),
         );
     }
 }

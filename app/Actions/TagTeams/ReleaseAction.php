@@ -35,7 +35,7 @@ class ReleaseAction
             $this->employmentPeriods->end($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Released);
 
             if ($lockedTagTeam->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate);
+                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate, clampToStart: true);
             }
 
             $this->endCurrentRelationships->handle($lockedTagTeam, $effectiveDate);

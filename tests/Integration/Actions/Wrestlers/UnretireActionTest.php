@@ -66,7 +66,7 @@ test('it unretires wrestler without immediate employment', function () {
 
 test('it unretires wrestler with specific date', function () {
     $wrestler = Wrestler::factory()->retired()->create();
-    $unretirementDate = now()->subDays(5);
+    $unretirementDate = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($wrestler, $unretirementDate);
 

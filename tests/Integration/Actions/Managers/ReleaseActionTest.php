@@ -36,7 +36,7 @@ test('it releases an employed manager', function () {
 
 test('it releases manager with specific release date', function () {
     $manager = Manager::factory()->employed()->create();
-    $releaseDate = now()->subDays(4);
+    $releaseDate = now()->startOfDay();
 
     resolve(ReleaseAction::class)->handle($manager, $releaseDate);
 
@@ -201,7 +201,7 @@ test('it handles database transactions correctly', function () {
 
 test('it uses the provided date', function () {
     $manager = Manager::factory()->suspended()->create();
-    $customReleaseDate = now()->subDays(2)->startOfDay();
+    $customReleaseDate = now()->startOfDay();
 
     resolve(ReleaseAction::class)->handle($manager, $customReleaseDate);
 

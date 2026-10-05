@@ -294,24 +294,16 @@ MySQL 8) is not yet a required check on either branch; add it with the other req
 Shipped from the original list: searchable booking selects (v0.6.0, #1788) and trusted proxies for Cloudflare
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
-- **Date-order CHECK constraints.** Still open: a CHECK that an end date is not before its start date. SQLite
-  cannot add a CHECK to an existing table without triggers or a table rebuild, and one app path must be hardened
-  first so it never writes inverted dates: `LifecyclePeriodWriter::end` with caller-supplied dates
-  (`RemoveStableMembersAction` was fixed in #1828). One open reign per title, unique match numbers per event
-  and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
-  `match-system.md`).
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
-- **Booked members can still be retired or released.** Deleting a wrestler or tag team booked in an upcoming or
-  unresulted match is blocked, but retiring or releasing one leaves them on the card. Decide whether that should be
-  blocked too, or whether the booking should be cleaned up.
+- **Booked members can still be retired or released.** Retiring or releasing a booked wrestler, referee or tag team is
+  allowed, and the confirmation now lists the upcoming events they are booked in. Still open: mark booked competitors
+  who are no longer bookable on the event page.
 - **Previous-matches tables.** They sort and count through a correlated sub-select and scan `events` twice (the
   promotion scope plus the past-event constraint). Cost scales with a participant's own history. A fix means joining
   `events` once in `EventMatchBuilder`, which is shared by other callers, so it was skipped.
 - **Table status counts are remembered, not live.** `DataTableComponent` keeps the status counts in a locked
   property and clears them on refresh and delete, so another user's changes show after the next refresh. The
   paginator still runs its own total count because reusing the remembered total could break page links.
-- **Delete rejection wording.** The "cannot be deleted because it is booked in a match" message is plain text in the
-  exception, like the other delete messages, and not a translation key.
 - **Browser test timing.** The intermittent 5000 ms Playwright timeouts had two causes, both fixed: the app layout
   loaded a render-blocking Google Fonts stylesheet (Inter is now self-hosted and a test asserts no request leaves the
   app host), and Alpine UI's combobox refocused its search box a frame after an option was chosen, which stole
@@ -332,23 +324,13 @@ These items were deliberately left open.
 
 **MySQL**
 
-- **No MySQL concurrency test.** The `postgres-concurrency` group uses PostgreSQL-only harness code. The slot lock is
-  one code path on every engine (an upsert that takes a row lock) and is proven under real concurrency on PostgreSQL,
-  but MySQL row locking across processes is verified only by reading its semantics. A MySQL variant of the harness
-  would close it.
-- **Concurrent stable splits on MySQL.** Two splits at the same instant can still pick the same unowned stable name,
-  because a generated-column unique index cannot cover rows without a promotion and there is no row to lock.
 - **MySQL collation.** MySQL's default collation is case- and accent-insensitive, so "Foo" and "foo", or "Café" and
   "Cafe", count as duplicates and surface as a validation error. This is expected and unlike PostgreSQL and SQLite.
-- **Design note.** `SchedulingSlotLockService` now writes coordination rows, while `.ai/rules/services.md` says services
-  are read-only. Move it under `app/Lifecycle` if the rule should stay strict.
 
 **Booking form**
 
 - The match form's title dropdown still lists every promotion's titles to an administrator without a membership. A
   foreign title is rejected by validation and by the action, so this is a convenience issue only.
-- The standalone `Add*ToMatchAction::handle()` entry points do not repeat the promotion check. Nothing in the
-  application calls them directly; the check lives in `AddMatchForEventAction` and `UpdateMatchAction`.
 - Unknown combobox labels show a neutral "Selected record" and are not resolved server-side. A forged non-array
   competitor side throws a `TypeError` instead of a validation error, like a tampered match type throws `ValueError`.
 - The roster combobox opens on click or typing, not on focus. Opening on focus brought back the focus-stealing problem.
@@ -364,20 +346,24 @@ These items were deliberately left open.
 
 **Tests and tooling**
 
-- Several ordering tie-breaks (Managers, Referees, TagTeams, Titles and Events tables) and the roster search id
-  tie-break are caught only under `REVERSE_UNORDERED_SELECTS=1` or on PostgreSQL, because plain SQLite returns ties in
-  id order. A nightly job running the suite with that flag would keep them honest.
-- The PostgreSQL CI job runs the full suite and then the concurrency group inside a 15 minute limit; check its
-  headroom as the suite grows.
+- CI headroom, checked October 2026: the PostgreSQL job takes about 6 of its 15 minutes and the MySQL job about 8
+  of its 15 (5 to 8, varying by run).
 
 ## Blocked dependency upgrades
 
 Dependabot proposed these in October 2026; they are deferred on purpose, not forgotten.
 
-- **Guzzle 8 stack and `brick/math` 1.0.** `guzzlehttp/guzzle` 7 to 8, `guzzlehttp/promises` 2 to 3,
-  `guzzlehttp/psr7` 2 to 3 and `brick/math` 0.19 to 1.0 arrived inside a dev-dependency Dependabot group PR (#1777,
-  closed). They are production packages with major versions, so review each on its own, with the HTTP client and any
-  big-number usage checked, and not as a side effect of a tooling bump.
+- **Guzzle 8 stack and `brick/math` 1.0.** `guzzlehttp/guzzle` 7 to 8, `guzzlehttp/promises` 2 to 3 and
+  `guzzlehttp/psr7` 2 to 3 (Dependabot PR #1777, closed) are deferred on purpose and ignored in
+  `.github/dependabot.yml` until Laravel, Nightwatch or another dependency requires the new majors. The application
+  makes no `Http::` calls; only the framework, Nightwatch (disabled in `.env.example`) and `ramsey/uuid` depend on
+  them, and the Guzzle 8 changes (stricter request options, exception hierarchy, redirect and auth handling, native
+  types) cannot be validated by this suite. The three move together, because Guzzle 8 forces promises 3 and psr7 3.
+  `brick/math` 1.0 is identical to 0.20 apart from removing `UnsupportedPlatformException` and `of()` throwing
+  `NumberFormatException` for `'2/0'`, so it is allowed through. If the Guzzle stack is ever upgraded, run
+  `composer update guzzlehttp/guzzle guzzlehttp/promises guzzlehttp/psr7 --with-all-dependencies` in one PR, then the
+  full suite, Larastan and Rector, a Nightwatch agent smoke test, and a real test mail if a mail transport is
+  configured.
 
 Resolved: ESLint 10 with `@eslint/js` 10 (#1791, #1800), Vite 8 with `laravel-vite-plugin` 3 (#1794), and the Pest 5.3
 update (#1793). Vite and `laravel-vite-plugin` must move together because the plugin's 2.x line only supports Vite 7,

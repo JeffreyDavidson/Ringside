@@ -6,11 +6,13 @@ namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
-use App\Models\Matches\EventMatch;
+use App\Lifecycle\Roster\UpcomingBookings;
 use App\Models\Roster\TagTeams\TagTeam;
 
-final class TagTeamDeletionEligibility
+final readonly class TagTeamDeletionEligibility
 {
+    public function __construct(private UpcomingBookings $upcomingBookings) {}
+
     public function canDelete(TagTeam $tagTeam): bool
     {
         try {
@@ -36,13 +38,7 @@ final class TagTeamDeletionEligibility
             throw CannotBeDeletedException::stillEmployed($tagTeam);
         }
 
-        $isBookedInLiveMatch = EventMatch::query()
-            ->withoutGlobalScope('promotion_context')
-            ->forTagTeamId($tagTeam->id)
-            ->upcomingOrUnresulted()
-            ->exists();
-
-        if ($isBookedInLiveMatch) {
+        if ($this->upcomingBookings->exist($tagTeam)) {
             throw CannotBeDeletedException::bookedInUpcomingMatch($tagTeam);
         }
     }

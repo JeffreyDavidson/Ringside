@@ -2,7 +2,7 @@
 
 ## Current Workflow Configuration
 
-The project uses four automated workflows:
+The project uses five automated workflows:
 
 ### 1. **CI Pipeline** (`.github/workflows/ci.yml`, workflow name "Application Quality")
 **Trigger**: Pushes to `develop` or `main`, and pull requests targeting `develop` or `main`. Pushing a feature branch on its own does **not** run this workflow; open a pull request to get CI feedback. A newer run for the same pull request or ref cancels the one in progress.
@@ -21,8 +21,8 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 | `type-coverage` | Pest type coverage | `composer test:type-coverage` (100% minimum) |
 | `frontend-verification` | Frontend verification | `npm run lint`, `npm run build` |
 | `application-tests` | `CI - PHP-8.5 - Laravel-13.*` | Pest with the `Browser` suite excluded (Feature, Integration, and Unit run), in parallel |
-| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. A second step runs the opt-in `postgres-concurrency` group (`RUN_CONCURRENCY_TESTS=1`), which books matches from two real processes to prove there are no lock-order deadlocks; see `docs/testing/postgres-concurrency-tests.md` |
-| `mysql-tests` | MySQL tests | The same non-browser suite, non-parallel and without coverage, against a `mysql:8.0` service container (the production engine), with job-level `DB_*` variables selecting it. Tests that only apply to another engine are skipped with an explicit reason. The concurrency group is not run here: its harness is PostgreSQL-only |
+| `postgres-tests` | Postgres tests | Pest with the `Browser` suite excluded (Unit, Feature, Integration), non-parallel and without coverage, against a `postgres:17` service container. Job-level `DB_*` environment variables override the SQLite settings in `.env.testing` and `phpunit.xml`. A second step runs the opt-in `concurrency` group (`RUN_CONCURRENCY_TESTS=1`; the tests also carry the older `postgres-concurrency` group name), which books matches from two real processes to prove there are no lock-order deadlocks; see `docs/testing/postgres-concurrency-tests.md` |
+| `mysql-tests` | MySQL tests | The same non-browser suite, non-parallel and without coverage, against a `mysql:8.0` service container (the production engine), with job-level `DB_*` variables selecting it. Tests that only apply to another engine are skipped with an explicit reason. A first extra step grants the test user `PROCESS` and `performance_schema` read access (and enables the `lock_deadlocks` InnoDB metric) so the harness can observe deadlocks and lock waits, and a second runs the same `concurrency` group as the PostgreSQL job (the job timeout is 20 minutes). The two PostgreSQL planner-order tests skip themselves there |
 | `coverage` | Coverage (100%) | `composer test:coverage`: non-parallel Pest run with PCOV, Browser suite excluded, fails below 100% |
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 
@@ -46,6 +46,10 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 ### 4. **Coverage Testing** (`.github/workflows/coverage.yml`, workflow name "Code Coverage")
 **Trigger**: Manual dispatch only
 **Purpose**: Generate PCOV coverage for the Feature, Integration, and Unit suites (`--min=100`, non-parallel), upload `coverage.xml` as the `pest-coverage-report` artifact for 14 days, and upload it to Codecov (the run fails if the Codecov upload fails)
+
+### 5. **Unordered Selects** (`.github/workflows/unordered-selects.yml`, workflow name "Unordered Selects")
+**Trigger**: A daily schedule (03:30 UTC, after the TIA baseline) and manual dispatch; it checks out `develop` explicitly because scheduled runs start on the default branch
+**Purpose**: Run the full application suite (Browser excluded, SQLite, `--parallel`) with `REVERSE_UNORDERED_SELECTS=1` so hidden row-order assumptions fail. A red run emails the repository's default GitHub notification; there is no other alert.
 
 ### Coverage policy (100%)
 The `coverage` job in `ci.yml` runs `composer test:coverage` on every pull request and push to `develop`/`main`. `phpunit.xml` has no `<source><exclude>` entries, so all of `app/` (Livewire, Console, and `AppServiceProvider` included) must be fully covered. The Browser suite is excluded from the gate because ordinary tests already cover what it reaches.
@@ -100,7 +104,7 @@ A query without `ORDER BY` returns rows in whatever order the engine finds conve
 REVERSE_UNORDERED_SELECTS=1 composer test:application
 ```
 
-`tests/Pest.php` turns the pragma on for every Feature and Integration test when the variable is `1` and the suite runs on SQLite (it is ignored on PostgreSQL and MySQL). Every unordered result then comes back reversed, so a test that depended on it fails. The fix is an explicit `ORDER BY` in the application when the order is shown to users or drives locking, or `toEqualCanonicalizing()` in the test when the order is not part of the contract. The run is opt-in and is not part of CI; run it after changing queries that return lists.
+`tests/Pest.php` turns the pragma on for every Feature and Integration test when the variable is `1` and the suite runs on SQLite (it is ignored on PostgreSQL and MySQL). Every unordered result then comes back reversed, so a test that depended on it fails. The fix is an explicit `ORDER BY` in the application when the order is shown to users or drives locking, or `toEqualCanonicalizing()` in the test when the order is not part of the contract. The pull request pipeline does not run it, but the Unordered Selects workflow (`unordered-selects.yml`) runs it nightly against `develop`; run it locally after changing queries that return lists.
 
 ## Troubleshooting Common Issues
 

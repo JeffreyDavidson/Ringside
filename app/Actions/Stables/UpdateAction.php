@@ -53,7 +53,7 @@ class UpdateAction
 
             $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
 
-            if ($stableData->hasStartDate()) {
+            if ($stableData->start_date instanceof Carbon) {
                 $activityPeriod = $lockedStable->activityPeriods()
                     ->orderBy('started_at')
                     ->orderBy('id')
@@ -61,9 +61,19 @@ class UpdateAction
                     ->first();
 
                 if ($activityPeriod) {
+                    $endedAt = $this->endDateFor($lockedStable, $activityPeriod, $stableData);
+
+                    if ($endedAt instanceof Carbon && $endedAt->lt($stableData->start_date)) {
+                        throw InvalidDateRangeException::endBeforeStart(
+                            $stableData->start_date,
+                            $endedAt,
+                            'stable activity',
+                        );
+                    }
+
                     $activityPeriod->update([
                         'started_at' => $stableData->start_date,
-                        'ended_at' => $this->endDateFor($lockedStable, $activityPeriod, $stableData),
+                        'ended_at' => $endedAt,
                     ]);
                 } else {
                     $this->establishAction->handle(

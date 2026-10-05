@@ -6,6 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -18,6 +19,7 @@ class AddTagTeamsToMatchAction
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
     /**
@@ -64,6 +66,11 @@ class AddTagTeamsToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
             $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
+                $lockedMatch->event()->firstOrFail(),
+                'tag teams',
+                $requestedTagTeams->all(),
+            );
             $this->handleWithinTransaction($lockedMatch, $requestedTagTeams, $sideNumber);
         }, attempts: 3);
     }

@@ -21,18 +21,19 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 
 /*
- * Opt-in PostgreSQL checks that cascades lock the rows they iterate in ascending id order. SQLite ignores row locks,
- * so the order can only be proven against a real server. Run with:
+ * Opt-in PostgreSQL and MySQL checks that cascades lock the rows they iterate in ascending id order. SQLite ignores row
+ * locks, so the order can only be proven against a real server. The two tests that force PostgreSQL planner plans are
+ * PostgreSQL-only. Run with:
  *
- *   DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_DATABASE=<scratch database> DB_USERNAME=... DB_PASSWORD=... \
- *   RUN_CONCURRENCY_TESTS=1 vendor/bin/pest --group=postgres-concurrency --no-coverage
+ *   DB_CONNECTION=pgsql|mysql DB_HOST=127.0.0.1 DB_DATABASE=<scratch database> DB_USERNAME=... DB_PASSWORD=... \
+ *   RUN_CONCURRENCY_TESTS=1 vendor/bin/pest --group=concurrency --no-coverage
  *
  * The scratch database is rebuilt with migrate:fresh afterwards; never point this at real data.
  *
  * The interleaving is forced instead of left to chance: a separate session holds one row lock (the gate), the workers
  * are started one at a time and each is allowed to block behind it, and releasing the gate lets them proceed in
  * arrival order. With unordered iteration the first worker then holds the gated row and waits for a row the second
- * already holds, which PostgreSQL resolves as a deadlock.
+ * already holds, which the server resolves as a deadlock.
  */
 
 /**
@@ -44,16 +45,24 @@ use Symfony\Component\Process\Process;
  */
 function runBehindGate(string $gateSql, array $gateBindings, array $workers): array
 {
+    $connection = config()->string('database.default');
     $gate = new PDO(
         sprintf(
-            'pgsql:host=%s;port=%s;dbname=%s',
-            config()->string('database.connections.pgsql.host'),
-            config()->string('database.connections.pgsql.port'),
-            config()->string('database.connections.pgsql.database'),
+            '%s:host=%s;port=%s;dbname=%s',
+            config()->string("database.connections.{$connection}.driver"),
+            config()->string("database.connections.{$connection}.host"),
+            config()->string("database.connections.{$connection}.port"),
+            config()->string("database.connections.{$connection}.database"),
         ),
-        config()->string('database.connections.pgsql.username'),
-        config()->string('database.connections.pgsql.password'),
+        config()->string("database.connections.{$connection}.username"),
+        config()->string("database.connections.{$connection}.password"),
     );
+
+    // The workers run at READ COMMITTED on MySQL (config/database.php); the gate only takes a row lock, but match it.
+    if (runsOnDriver('mysql')) {
+        $gate->query('set session transaction isolation level read committed');
+    }
+
     $gate->beginTransaction();
     $gate->prepare($gateSql)->execute($gateBindings);
 
@@ -69,6 +78,10 @@ function runBehindGate(string $gateSql, array $gateBindings, array $workers): ar
 
             while (workersBlockedOnLocks() < count($processes) && $processes[$key]->isRunning() && microtime(true) < $deadline) {
                 usleep(20_000);
+            }
+
+            if (workersBlockedOnLocks() < count($processes) && $processes[$key]->isRunning()) {
+                throw new RuntimeException('Workers never showed as blocked on locks: '.lockWaitDiagnostics());
             }
         }
     } finally {
@@ -93,21 +106,6 @@ function runBehindGate(string $gateSql, array $gateBindings, array $workers): ar
     return $results;
 }
 
-function workersBlockedOnLocks(): int
-{
-    $blocked = DB::scalar("select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'");
-
-    return is_int($blocked) ? $blocked : throw new RuntimeException('Unable to count the workers blocked on locks.');
-}
-
-/** PostgreSQL's own count of deadlocks it has resolved in this database. */
-function resolvedDeadlocks(): int
-{
-    $deadlocks = DB::scalar('select deadlocks from pg_stat_database where datname = current_database()');
-
-    return is_int($deadlocks) ? $deadlocks : throw new RuntimeException('Unable to read the PostgreSQL deadlock counter.');
-}
-
 /** Leave the transaction RefreshDatabase wraps around a test so child processes can see the data, and rebuild afterwards. */
 function committedScratchData(Closure $callback): void
 {
@@ -119,8 +117,6 @@ function committedScratchData(Closure $callback): void
         Artisan::call('migrate:fresh');
     }
 }
-
-$enabled = getenv('DB_CONNECTION') === 'pgsql' && getenv('RUN_CONCURRENCY_TESTS') === '1';
 
 test('two tag teams retiring together that share managers attached in opposite orders never deadlock', function () {
     committedScratchData(function (): void {
@@ -154,15 +150,16 @@ test('two tag teams retiring together that share managers attached in opposite o
             );
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and($results[0]['ok'])->toBeTrue()
                 ->and($results[1]['exception'])->toBeIn([null, CannotBeRetiredException::class])
                 ->and($firstTagTeam->currentRetirement()->exists())->toBeTrue();
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->skip(fn (): bool => ! runsOnDriver('pgsql'), POSTGRES_PLANNER_ORDER)
+    ->group('concurrency', 'postgres-concurrency');
 
 test('retiring a champion of two titles while a multi-title result is recorded never deadlocks', function () {
     committedScratchData(function (): void {
@@ -204,14 +201,15 @@ test('retiring a champion of two titles while a multi-title result is recorded n
             );
 
             // Assert
-            expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and(TitleChampionship::query()->forChampion($champion)->current()->exists())->toBeFalse();
         }
     });
-})->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->skip(fn (): bool => ! runsOnDriver('pgsql'), POSTGRES_PLANNER_ORDER)
+    ->group('concurrency', 'postgres-concurrency');
 
 /*
  * Membership writers race for the same wrestler. The gate holds the wrestler's row lock, so both writers queue behind it
@@ -253,10 +251,10 @@ test('concurrent tag team membership writes leave a wrestler on exactly one curr
         $results = runBehindGate('select id from wrestlers where id = ? for update', [$shared->id], $workers($shared, $free->modelKeys(), $teamOne, $teamTwo));
 
         // Assert
-        expect(resolvedDeadlocks())->toBe($deadlocksBefore)
+        expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
             ->and(collect($results)->pluck('exception')->sort()->values()->all())->toBe([null, CannotBeEstablishedException::class])
             ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $shared->id)->count())->toBe(1);
     });
 })->with('tag team membership races')
-    ->skip(! $enabled, 'Set DB_CONNECTION=pgsql and RUN_CONCURRENCY_TESTS=1 to run the PostgreSQL concurrency tests.')
-    ->group('postgres-concurrency');
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');

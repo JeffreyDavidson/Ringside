@@ -17,7 +17,13 @@ trait HasLifecyclePeriodStates
 
     public function started(Carbon $startedAt): static
     {
-        return $this->state(fn (): array => ['started_at' => $startedAt]);
+        return $this->state(function (array $attributes) use ($startedAt): array {
+            if (($attributes['ended_at'] ?? null) !== null && $this->parseLifecycleDate($attributes['ended_at'])->isBefore($startedAt)) {
+                throw new InvalidArgumentException('A lifecycle period cannot start after it ends.');
+            }
+
+            return ['started_at' => $startedAt];
+        });
     }
 
     public function ended(Carbon $endedAt): static

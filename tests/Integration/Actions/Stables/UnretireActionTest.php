@@ -16,7 +16,7 @@ beforeEach(function (): void {
 
 test('it unretires a retired stable and establishes it by default', function (): void {
     $stable = Stable::factory()->retired()->create();
-    $unretiredAt = now()->subWeek();
+    $unretiredAt = now()->startOfDay();
 
     resolve(UnretireAction::class)->handle($stable, $unretiredAt);
 

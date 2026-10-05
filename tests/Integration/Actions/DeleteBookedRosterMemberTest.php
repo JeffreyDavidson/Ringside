@@ -74,7 +74,7 @@ describe('deleting a booked referee', function (): void {
         // Assert
         expect($delete)->toThrow(
             IndividualCannotBeDeletedException::class,
-            'cannot be deleted because it is booked in a match that is upcoming or has no result',
+            'cannot be deleted because it is booked in a match that is upcoming or has no result. Remove it from the match or record the result first.',
         )
             ->and($referee->refresh()->trashed())->toBeFalse();
     });

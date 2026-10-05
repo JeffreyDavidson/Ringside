@@ -49,7 +49,7 @@ test('it prevents reinstating an injured manager', function () {
 
 test('it reinstates manager with specific reinstatement date', function () {
     $manager = Manager::factory()->suspended()->create();
-    $reinstatementDate = now()->subDays(2);
+    $reinstatementDate = now()->startOfDay();
 
     resolve(ReinstateAction::class)->handle($manager, $reinstatementDate);
 
@@ -139,7 +139,7 @@ test('it maintains employment status during reinstatement', function () {
 
 test('it uses the provided date', function () {
     $manager = Manager::factory()->suspended()->create();
-    $customReinstatementDate = now()->subDays(1)->startOfDay();
+    $customReinstatementDate = now()->startOfDay();
 
     resolve(ReinstateAction::class)->handle($manager, $customReinstatementDate);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
@@ -17,6 +18,7 @@ class AddRefereesToMatchAction
     public function __construct(
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
     /**
@@ -57,6 +59,11 @@ class AddRefereesToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedReferees): void {
             $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
+                $lockedMatch->event()->firstOrFail(),
+                'referees',
+                $requestedReferees->all(),
+            );
             $this->handleWithinTransaction($lockedMatch, $requestedReferees);
         }, attempts: 3);
     }

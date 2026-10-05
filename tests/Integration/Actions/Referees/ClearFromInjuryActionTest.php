@@ -36,7 +36,7 @@ test('it clears an injured referee', function () {
 test('it clears referee from injury with specific recovery date', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
-    $recoveryDate = now()->subDays(2);
+    $recoveryDate = now()->startOfDay();
 
     resolve(ClearFromInjuryAction::class)->handle($referee, $recoveryDate);
 
@@ -68,7 +68,7 @@ test('it persists the injury clearance lifecycle', function () {
 
 test('it uses the provided date', function () {
     $referee = Referee::factory()->injured()->create();
-    $recoveryDate = now()->subDays(5);
+    $recoveryDate = now()->startOfDay();
 
     resolve(ClearFromInjuryAction::class)->handle($referee, $recoveryDate);
 

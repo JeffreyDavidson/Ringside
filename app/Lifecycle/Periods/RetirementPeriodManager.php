@@ -38,6 +38,7 @@ final readonly class RetirementPeriodManager
         Model&Retirable $retirable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
+        bool $clampToStart = false,
     ): void {
         $this->periodWriter->end(
             $retirable,
@@ -45,6 +46,7 @@ final readonly class RetirementPeriodManager
             LifecycleDimension::Retirement,
             $date,
             $transition,
+            $clampToStart,
         );
     }
 }

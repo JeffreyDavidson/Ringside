@@ -31,6 +31,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 require dirname(__DIR__, 3).'/vendor/autoload.php';
+require_once __DIR__.'/worker-support.php';
 
 $app = require dirname(__DIR__, 3).'/bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
@@ -51,8 +52,11 @@ $planner = array_merge(
     ($spec['sequential_scans'] ?? false) ? ['enable_indexscan', 'enable_bitmapscan', 'enable_indexonlyscan'] : [],
 );
 
-foreach ($planner as $setting) {
-    DB::statement("set {$setting} = off");
+// The planner switches are PostgreSQL settings; other engines ignore the spec flags.
+if (DB::connection()->getDriverName() === 'pgsql') {
+    foreach ($planner as $setting) {
+        DB::statement("set {$setting} = off");
+    }
 }
 
 $tagTeamData = fn (): TagTeamData => new TagTeamData(
@@ -83,10 +87,8 @@ try {
     };
 } catch (BaseBusinessException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false];
-} catch (DeadlockException $exception) {
-    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => true];
-} catch (QueryException $exception) {
-    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => ($exception->errorInfo[0] ?? null) === '40P01'];
+} catch (DeadlockException|QueryException $exception) {
+    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception), 'message' => mb_substr($exception->getMessage(), 0, 400)];
 }
 
 fwrite(STDOUT, 'RESULT:'.json_encode($result)."\n");

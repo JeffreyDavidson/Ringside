@@ -7,6 +7,7 @@ namespace App\Actions\Matches;
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -19,6 +20,7 @@ class AddWrestlersToMatchAction
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
     /**
@@ -63,6 +65,11 @@ class AddWrestlersToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
             $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
+                $lockedMatch->event()->firstOrFail(),
+                'wrestlers',
+                $requestedWrestlers->all(),
+            );
             $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
         }, attempts: 3);
     }

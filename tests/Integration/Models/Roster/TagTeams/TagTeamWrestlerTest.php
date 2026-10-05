@@ -338,21 +338,14 @@ describe('TagTeamWrestler Pivot Model', function () {
             expect($this->wrestler->tagTeams()->count())->toBe(2);
         });
 
-        test('joined date must be before left date when both are set', function () {
+        test('joined date cannot be after left date', function () {
             $joinedDate = Carbon::now()->subMonths(3);
             $leftDate = Carbon::now()->subMonths(6); // Earlier than joined date (invalid)
 
-            createTagTeamMembership($this->wrestler, $this->tagTeam, [
+            expect(fn () => DB::transaction(fn () => createTagTeamMembership($this->wrestler, $this->tagTeam, [
                 'joined_at' => $joinedDate,
                 'left_at' => $leftDate,
-            ]);
-
-            $pivotRecord = TagTeamWrestler::where('wrestler_id', $this->wrestler->id)
-                ->where('tag_team_id', $this->tagTeam->id)
-                ->firstOrFail();
-
-            // Data is stored as-is; validation should happen in business logic
-            expect($pivotRecord->joined_at->greaterThan(requiredDate($pivotRecord->left_at)))->toBeTrue();
+            ])))->toThrow(QueryException::class);
         });
     });
 
