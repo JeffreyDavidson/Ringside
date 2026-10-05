@@ -244,6 +244,18 @@ leaves the date as prefilled keeps the event's stored instant (`Event::parseLoca
 renaming an event in the second occurrence neither moves it an hour nor trips the
 "already occurred" check.
 
+Reign dates (`titles_championships.won_at` and `lost_at`) are also stored in UTC and shown in the
+title's promotion zone through `TitleChampionship::local_won_at` and `local_lost_at`, so a 7 pm Los
+Angeles title change shows that evening's date. Every list that prints them eager-loads
+`title.promotion`.
+
+## Lazy Loading
+
+Lazy loading is prevented outside production (`Model::preventLazyLoading(! app()->isProduction())` in
+`AppServiceProvider`): a relationship read that was not eager-loaded throws, in tests and local
+development, instead of becoming a hidden N+1. Load relationships explicitly with `with()` or
+`load()`; do not disable the guard.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
