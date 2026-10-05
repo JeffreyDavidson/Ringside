@@ -8,6 +8,9 @@ paths:
 ## Explicit query eager loading
 Eager-load relationships explicitly on queries that need them with with(); do not add model-level $with defaults.
 
+## Lazy loading is prevented outside production
+AppServiceProvider calls Model::preventLazyLoading(! app()->isProduction()), so a relationship read that was not eager-loaded throws in tests and local development. Fix a violation by eager loading (with() on the query, or load()/loadMissing() after a refresh drops nested relations); never disable the guard or loosen it per test.
+
 ## Synchronous domain orchestration
 Compose domain workflows directly through Actions and Services. Do not add an application event/listener layer unless a workflow specifically requires event fan-out.
 

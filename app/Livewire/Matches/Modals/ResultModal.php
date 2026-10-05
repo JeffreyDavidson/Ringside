@@ -55,6 +55,9 @@ class ResultModal extends ModalComponent
             $this->addError('outcome', $exception->getMessage());
 
             return;
+        } finally {
+            // The action refreshes the match, which drops its nested competitor relations; reload them on the next read.
+            unset($this->match);
         }
 
         $this->dispatch('refreshDatatable');
