@@ -34,15 +34,16 @@ require __DIR__.'/auth.php';
 Route::get('/', MarketingController::class)->name('home');
 
 Route::middleware('auth')->group(function () {
-    Route::get('promotions', [PromotionsController::class, 'index'])
-        ->can('viewAny', Promotion::class)
-        ->name('promotions.index');
-    Route::get('promotions/{promotion}', [PromotionsController::class, 'show'])
-        ->can('view', 'promotion')
-        ->name('promotions.show');
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
 
     Route::middleware('promotion.context')->group(function () {
+        Route::get('promotions', [PromotionsController::class, 'index'])
+            ->can('viewAny', Promotion::class)
+            ->name('promotions.index');
+        Route::get('promotions/{promotion}', [PromotionsController::class, 'show'])
+            ->can('view', 'promotion')
+            ->name('promotions.show');
+
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 
         Route::prefix('roster')->group(function () {
@@ -64,13 +65,13 @@ Route::middleware('auth')->group(function () {
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
-    });
 
-    Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');
-    Route::get('venues/{venue}', [VenuesController::class, 'show'])->can('view', 'venue')->name('venues.show');
+        Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');
+        Route::get('venues/{venue}', [VenuesController::class, 'show'])->can('view', 'venue')->name('venues.show');
 
-    Route::prefix('user-management')->group(function () {
-        Route::get('users', [UsersController::class, 'index'])->can('viewAny', User::class)->name('users.index');
-        Route::get('users/{user}', [UsersController::class, 'show'])->can('view', 'user')->name('users.show');
+        Route::prefix('user-management')->group(function () {
+            Route::get('users', [UsersController::class, 'index'])->can('viewAny', User::class)->name('users.index');
+            Route::get('users/{user}', [UsersController::class, 'show'])->can('view', 'user')->name('users.show');
+        });
     });
 });

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\Concerns\NormalizesEmail;
-use App\Rules\Users\UniqueEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -19,14 +18,14 @@ class RegisterUserRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string|Rules\Password|UniqueEmail>>
+     * @return array<string, array<int, string|Rules\Password>>
      */
     public function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', new UniqueEmail],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
     }

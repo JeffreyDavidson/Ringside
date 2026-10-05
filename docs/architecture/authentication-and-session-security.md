@@ -7,12 +7,18 @@ has its own prefix, so exhausting one does not block the others.
 
 | Endpoint | Limit |
 | --- | --- |
-| `POST login` | 5 per minute per email and IP (`LoginRequest`, unchanged) |
+| `POST login` | 20 per minute per IP (`throttle:`), and 5 failed attempts per minute per email and IP (`LoginRequest`) |
 | `POST register` | 6 per minute per IP |
 | `POST forgot-password` | 6 per minute per IP |
 | `POST reset-password` | 6 per minute per IP |
 
-Requests over the limit receive `429`. The password broker keeps its own per-user resend throttle.
+Requests over the limit receive `429`. The password broker keeps its own per-user resend throttle. The per-IP login
+limit counts every attempt and stops one address from trying many different emails, which the per-email limit alone
+does not.
+
+Registration does not reveal whether an email is already registered: a taken email creates nothing and redirects to
+the login page with the same `auth-forms.account_pending` status as a new account, like the password reset response.
+Other validation errors are still shown.
 
 ## Reverse proxy and client IP
 
