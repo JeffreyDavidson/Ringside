@@ -627,6 +627,21 @@ function resolvedDeadlocks(): int
 /**
  * How many sessions are currently waiting for a lock held by another one.
  */
+/** What the database says about lock waits right now, for failure messages when blocked workers are not seen. */
+function lockWaitDiagnostics(): string
+{
+    if (! runsOnDriver('mysql')) {
+        return 'not mysql';
+    }
+
+    return json_encode([
+        'user' => DB::scalar('select current_user()'),
+        'trx' => DB::select('select trx_id, trx_state, trx_mysql_thread_id, substr(trx_query, 1, 120) as q from information_schema.INNODB_TRX'),
+        'data_lock_waits' => DB::scalar('select count(*) from performance_schema.data_lock_waits'),
+        'processlist' => DB::select('select id, user, command, state, substr(info, 1, 100) as info from information_schema.PROCESSLIST'),
+    ], JSON_THROW_ON_ERROR);
+}
+
 function workersBlockedOnLocks(): int
 {
     $blocked = match (DB::connection()->getDriverName()) {

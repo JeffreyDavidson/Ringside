@@ -79,6 +79,10 @@ function runBehindGate(string $gateSql, array $gateBindings, array $workers): ar
             while (workersBlockedOnLocks() < count($processes) && $processes[$key]->isRunning() && microtime(true) < $deadline) {
                 usleep(20_000);
             }
+
+            if (workersBlockedOnLocks() < count($processes) && $processes[$key]->isRunning()) {
+                throw new RuntimeException('Workers never showed as blocked on locks: '.lockWaitDiagnostics());
+            }
         }
     } finally {
         $gate->commit();
