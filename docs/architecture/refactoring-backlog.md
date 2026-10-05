@@ -294,9 +294,12 @@ MySQL 8) is not yet a required check on either branch; add it with the other req
 Shipped from the original list: searchable booking selects (v0.6.0, #1788) and trusted proxies for Cloudflare
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
-- **Database backstops.** CHECK and unique constraints for: one open reign per title, unique match numbers per
-  event, unique referee and title per match, and date-order checks. Each needs a pre-flight migration that finds
-  and repairs existing violating rows before the constraint is added.
+- **Date-order CHECK constraints.** Still open: a CHECK that an end date is not before its start date. SQLite
+  cannot add a CHECK to an existing table without triggers or a table rebuild, and two app paths must be hardened
+  first so they never write inverted dates: `RemoveStableMembersAction` (fixed in a separate PR) and
+  `LifecyclePeriodWriter::end` with caller-supplied dates. One open reign per title, unique match numbers per event
+  and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
+  `match-system.md`).
 - **Tag team availability badge.** It should reflect injured or suspended members.
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
 - **Not-yet-started members.** Removing a member who has not started yet through the stable, tag team or manager
