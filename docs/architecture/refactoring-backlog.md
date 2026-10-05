@@ -297,7 +297,6 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
 - **Database backstops.** CHECK and unique constraints for: one open reign per title, unique match numbers per
   event, unique referee and title per match, and date-order checks. Each needs a pre-flight migration that finds
   and repairs existing violating rows before the constraint is added.
-- **Tag team availability badge.** It should reflect injured or suspended members.
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
 - **Not-yet-started members.** Removing a member who has not started yet through the stable, tag team or manager
   forms can still set `left_at` before `joined_at`.

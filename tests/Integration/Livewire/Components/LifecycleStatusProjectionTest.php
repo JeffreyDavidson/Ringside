@@ -52,7 +52,7 @@ describe('lifecycle status projection', function (): void {
         'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create()],
         'manager' => [fn (): Model => Manager::factory()->employed()->create()],
         'referee' => [fn (): Model => Referee::factory()->employed()->create()],
-        'tag team' => [fn (): Model => TagTeam::factory()->employed()->create()],
+        'tag team' => [fn (): Model => TagTeam::factory()->employed()->withCurrentWrestlers(Wrestler::factory()->employed()->count(2))->create()],
         'stable' => [fn (): Model => Stable::factory()->active()->create()],
         'title' => [fn (): Model => Title::factory()->active()->create()],
     ]);

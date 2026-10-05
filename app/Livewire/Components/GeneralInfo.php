@@ -98,11 +98,15 @@ class GeneralInfo extends Component
     {
         $card = self::CARDS[$this->modelClass];
 
+        $model = $this->modelClass::query()->with($card['with'])->withExists($card['state'])->findOrFail($this->modelId);
+
+        if ($model instanceof TagTeam) {
+            $model->currentWrestlers->loadExists(IndividualBuilder::AVAILABILITY_STATE);
+        }
+
         return view('livewire.components.general-info', [
             'component' => $card['component'],
-            'props' => [
-                $card['prop'] => $this->modelClass::query()->with($card['with'])->withExists($card['state'])->findOrFail($this->modelId),
-            ],
+            'props' => [$card['prop'] => $model],
         ]);
     }
 }

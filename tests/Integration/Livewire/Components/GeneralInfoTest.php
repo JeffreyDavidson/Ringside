@@ -9,6 +9,8 @@ use App\Actions\TagTeams\ReleaseAction as ReleaseTagTeamAction;
 use App\Actions\Titles\DebutAction;
 use App\Actions\Wrestlers\EmployAction as EmployWrestlerAction;
 use App\Livewire\Components\GeneralInfo;
+use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -189,5 +191,34 @@ describe('general info component', function (): void {
             },
             'stable-updated',
         ],
+    ]);
+
+    test('it labels a tag team by its injured and suspended members', function (bool $injured, bool $suspended): void {
+        // Arrange
+        $member = Wrestler::factory()->employed()->create();
+        $tagTeam = TagTeam::factory()->employed()->withCurrentWrestlers(collect([$member]))->create();
+        actingAs(administrator());
+
+        if ($injured) {
+            Injury::factory()->for($member, 'injurable')->create();
+        }
+
+        if ($suspended) {
+            Suspension::factory()->for($member, 'suspendable')->create();
+        }
+
+        // Act
+        $component = livewire(GeneralInfo::class, ['model' => $tagTeam]);
+
+        // Assert
+        expect($component->html())
+            ->when($injured, fn ($html) => $html->toContain('data-test="availability-injured"'))
+            ->unless($injured, fn ($html) => $html->not->toContain('data-test="availability-injured"'))
+            ->when($suspended, fn ($html) => $html->toContain('data-test="availability-suspended"'))
+            ->unless($suspended, fn ($html) => $html->not->toContain('data-test="availability-suspended"'));
+    })->with([
+        'injured member' => [true, false],
+        'suspended member' => [false, true],
+        'healthy team' => [false, false],
     ]);
 });

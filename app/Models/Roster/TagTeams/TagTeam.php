@@ -174,6 +174,24 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
         return $this->wrestlers()->wherePivotNull('left_at');
     }
 
+    /**
+     * Determine whether any current wrestler is injured. Load currentWrestlers with the
+     * availability projection to avoid one query per wrestler.
+     */
+    public function hasInjuredMember(): bool
+    {
+        return $this->currentWrestlers->contains(fn (Wrestler $wrestler): bool => $wrestler->isInjured());
+    }
+
+    /**
+     * Determine whether any current wrestler is suspended. Load currentWrestlers with the
+     * availability projection to avoid one query per wrestler.
+     */
+    public function hasSuspendedMember(): bool
+    {
+        return $this->currentWrestlers->contains(fn (Wrestler $wrestler): bool => $wrestler->isSuspended());
+    }
+
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
     public function previousWrestlers(): BelongsToMany
     {

@@ -1,7 +1,11 @@
 <x-card.general-info>
     <x-card.general-info.stat label="Status">
         {{ $tagTeam->status->label() }}
-        <x-availability-badges class="ms-2" :suspended="$tagTeam->isSuspended()" />
+        <x-availability-badges
+            class="ms-2"
+            :injured="$tagTeam->hasInjuredMember()"
+            :suspended="$tagTeam->isSuspended() || $tagTeam->hasSuspendedMember()"
+        />
     </x-card.general-info.stat>
     <x-card.general-info.links label="Current Tag Team Partners">
         @forelse ($tagTeam->currentWrestlers as $wrestler)
