@@ -86,6 +86,7 @@ class AddTagTeamsToMatchAction
         $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
         $lockedTagTeams = TagTeam::query()
             ->whereKey($requestedTagTeams->pluck('id'))
+            ->with('currentWrestlers')
             ->orderBy('id')
             ->lockForUpdate()
             ->get();

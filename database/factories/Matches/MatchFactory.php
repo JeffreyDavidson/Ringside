@@ -356,7 +356,7 @@ class MatchFactory extends Factory
      */
     private function addResult(EventMatch $eventMatch): void
     {
-        $competitors = $eventMatch->competitors;
+        $competitors = $eventMatch->loadMissing('competitors.side')->competitors;
 
         if ($competitors->isEmpty()) {
             return;

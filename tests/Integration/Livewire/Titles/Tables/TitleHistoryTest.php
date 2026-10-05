@@ -234,6 +234,27 @@ describe('TitleHistory rendering', function (): void {
     });
 });
 
+describe('TitleHistory reign dates', function (): void {
+    it('shows reign dates as the day in the title promotion time zone', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $title = Title::factory()->for($promotion, 'promotion')->create();
+        TitleChampionship::factory()->for($title)->create([
+            'won_at' => Date::parse('2026-03-02 03:00:00', 'UTC'),
+            'lost_at' => Date::parse('2026-06-11 02:00:00', 'UTC'),
+        ]);
+
+        // Act
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
+
+        // Assert
+        $table
+            ->assertSee('2026-03-01 - 2026-06-10')
+            ->assertDontSee('2026-03-02')
+            ->assertDontSee('2026-06-11');
+    });
+});
+
 describe('TitleHistory authorization', function (): void {
     it('authorizes the selected title instance', function (): void {
         // Arrange
