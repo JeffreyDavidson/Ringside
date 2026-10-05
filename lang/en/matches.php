@@ -15,6 +15,14 @@ return [
 
     'form' => [
         'competitor' => 'Competitor :number',
+        'competitors_multiple' => 'Competitors (Select Multiple)',
+        'competitors_multiple_hint' => 'Select all wrestlers participating in this match',
+        'match_stipulation' => 'Match Stipulation',
+        'match_type_placeholder' => 'Select a match type',
+        'preview' => 'Preview',
+        'referees' => 'Referees',
+        'select_match_type_helper' => 'Select a match type to configure competitors',
+        'standard_match' => 'Standard match',
         'side' => 'Side :number',
         'team' => 'Team :team',
         'wrestlers' => 'Wrestlers',

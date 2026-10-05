@@ -36,6 +36,7 @@ describe('stables table', function (): void {
             ->assertSeeHtml('wire:model.live="filterValues.activation_date.minDate"')
             ->assertSeeHtml('wire:model.live="filterValues.activation_date.maxDate"')
             ->assertSeeHtml('aria-label="Actions for The Four Horsemen"')
+            ->assertSeeHtml('wire:confirm="Remove The Four Horsemen?"')
             ->assertSeeHtml('role="group"')
             ->assertSee('The Four Horsemen')
             ->assertSee(StableStatus::Active->label());

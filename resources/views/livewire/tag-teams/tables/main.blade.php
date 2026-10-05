@@ -60,12 +60,19 @@
                                 </p>
                                 <div class="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
                                     <x-tables.status :status="$row->status" />
-                                    <x-availability-badges :suspended="$row->isSuspended()" />
+                                    <x-availability-badges
+                                        :injured="$row->hasInjuredMember()"
+                                        :suspended="$row->isSuspended() || $row->hasSuspendedMember()"
+                                    />
                                 </div>
                             </td>
                             <td class="hidden px-4 py-4 align-top sm:table-cell">
                                 <x-tables.status :status="$row->status" />
-                                <x-availability-badges class="mt-2" :suspended="$row->isSuspended()" />
+                                <x-availability-badges
+                                    class="mt-2"
+                                    :injured="$row->hasInjuredMember()"
+                                    :suspended="$row->isSuspended() || $row->hasSuspendedMember()"
+                                />
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums xl:table-cell">
                                 {{ $row->firstEmployment?->started_at?->format('M j, Y') ?? '—' }}

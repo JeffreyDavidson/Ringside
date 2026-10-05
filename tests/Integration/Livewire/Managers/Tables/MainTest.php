@@ -38,6 +38,7 @@ describe('managers table', function (): void {
             ->assertSeeHtml('wire:model.live="filterValues.employment_date.minDate"')
             ->assertSeeHtml('wire:model.live="filterValues.employment_date.maxDate"')
             ->assertSeeHtml('aria-label="Actions for Bobby Heenan"')
+            ->assertSeeHtml('wire:confirm="Remove Bobby Heenan?"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Bobby Heenan')
             ->assertSee(EmploymentStatus::Employed->label());

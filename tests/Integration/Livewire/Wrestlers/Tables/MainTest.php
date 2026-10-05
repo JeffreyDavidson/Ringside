@@ -36,6 +36,7 @@ describe('wrestlers table', function (): void {
             ->assertSee('Add Wrestler')
             ->assertSeeHtml('placeholder="Search wrestlers"')
             ->assertSee('Big Wrestler')
+            ->assertSeeHtml('wire:confirm="Remove Big Wrestler?"')
             ->assertSee('6\'6"')
             ->assertSee('300')
             ->assertSee('Test City, TX');

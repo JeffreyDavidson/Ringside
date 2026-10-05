@@ -44,6 +44,7 @@ describe('titles table', function (): void {
             ->assertSee(__('titles.activation_date'))
             ->assertSeeHtml('id="titles-date-from"')
             ->assertSeeHtml('aria-label="Actions for World Title"')
+            ->assertSeeHtml('wire:confirm="Remove World Title?"')
             ->assertSeeHtml('role="group"')
             ->assertSee($title->name)
             ->assertSee('Current Champion')

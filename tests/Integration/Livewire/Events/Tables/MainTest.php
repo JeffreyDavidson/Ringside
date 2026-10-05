@@ -47,6 +47,7 @@ describe('events table', function (): void {
             ->assertSeeHtml('wire:model.live="filterValues.event_dates.maxDate"')
             ->assertSeeHtml('data-test="table-toolbar"')
             ->assertSeeHtml('aria-label="Actions for Future Showcase"')
+            ->assertSeeHtml('wire:confirm="Remove Future Showcase?"')
             ->assertSeeHtml('role="group"')
             ->assertSee('Future Showcase')
             ->assertSee('Past Showcase')

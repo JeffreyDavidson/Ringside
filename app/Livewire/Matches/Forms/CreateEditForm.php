@@ -196,8 +196,10 @@ class CreateEditForm extends BaseForm
     protected function prepareForValidation(mixed $attributes): array
     {
         $attributes['competitors'] = array_map(
-            fn (array $side): array => array_filter($side, fn (array $ids): bool => $ids !== []),
-            $this->competitors,
+            fn (mixed $side): mixed => is_array($side)
+                ? array_filter($side, fn (mixed $ids): bool => $ids !== [])
+                : $side,
+            (array) $attributes['competitors'],
         );
 
         return $attributes;

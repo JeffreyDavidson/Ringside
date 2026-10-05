@@ -80,6 +80,21 @@ describe('users table', function (): void {
         'inactive' => [UserStatus::Inactive, 'Reactivate account'],
     ]);
 
+    it('asks for confirmation before deactivating a user account', function (): void {
+        // Arrange
+        User::factory()->create([
+            'first_name' => 'Menu',
+            'last_name' => 'Owner',
+            'status' => UserStatus::Active,
+        ]);
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component->assertSeeHtml('wire:confirm="Deactivate Menu Owner?"');
+    });
+
     it('lets an administrator activate an unverified user account', function (): void {
         $user = User::factory()->unverified()->create();
 

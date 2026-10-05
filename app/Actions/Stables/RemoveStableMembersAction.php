@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 
@@ -35,15 +36,21 @@ class RemoveStableMembersAction
 
         if ($members->isNotEmpty()) {
             foreach ($members->wrestlers ?? [] as $wrestler) {
-                $stable->wrestlers()->newPivotStatementForId($wrestler->getKey())
-                    ->whereNull('left_at')
-                    ->update(['left_at' => $removalDate]);
+                OpenPeriodEnder::end(
+                    $stable->wrestlers()->newPivotStatementForId($wrestler->getKey()),
+                    'joined_at',
+                    'left_at',
+                    $removalDate,
+                );
             }
 
             foreach ($members->tagTeams ?? [] as $tagTeam) {
-                $stable->tagTeams()->newPivotStatementForId($tagTeam->getKey())
-                    ->whereNull('left_at')
-                    ->update(['left_at' => $removalDate]);
+                OpenPeriodEnder::end(
+                    $stable->tagTeams()->newPivotStatementForId($tagTeam->getKey()),
+                    'joined_at',
+                    'left_at',
+                    $removalDate,
+                );
             }
         }
     }

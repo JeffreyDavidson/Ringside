@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Actions\TagTeams\DeleteAction;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -50,6 +51,7 @@ class Main extends BaseTable
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
+        new Collection($rows->flatMap(fn (TagTeam $tagTeam): Collection => $tagTeam->currentWrestlers)->all())->loadExists(IndividualBuilder::AVAILABILITY_STATE);
     }
 
     protected function configure(): void

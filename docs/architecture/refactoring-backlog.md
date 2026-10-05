@@ -295,15 +295,12 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
 (v0.6.1, #1795; ranges in `config/trustedproxy.php`, overridable with `TRUSTED_PROXIES`).
 
 - **Date-order CHECK constraints.** Still open: a CHECK that an end date is not before its start date. SQLite
-  cannot add a CHECK to an existing table without triggers or a table rebuild, and two app paths must be hardened
-  first so they never write inverted dates: `RemoveStableMembersAction` (fixed in a separate PR) and
-  `LifecyclePeriodWriter::end` with caller-supplied dates. One open reign per title, unique match numbers per event
+  cannot add a CHECK to an existing table without triggers or a table rebuild, and one app path must be hardened
+  first so it never writes inverted dates: `LifecyclePeriodWriter::end` with caller-supplied dates
+  (`RemoveStableMembersAction` was fixed in #1828). One open reign per title, unique match numbers per event
   and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
   `match-system.md`).
-- **Tag team availability badge.** It should reflect injured or suspended members.
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
-- **Not-yet-started members.** Removing a member who has not started yet through the stable, tag team or manager
-  forms can still set `left_at` before `joined_at`.
 - **Booked members can still be retired or released.** Deleting a wrestler or tag team booked in an upcoming or
   unresulted match is blocked, but retiring or releasing one leaves them on the card. Decide whether that should be
   blocked too, or whether the booking should be cleaned up.
@@ -362,8 +359,6 @@ These items were deliberately left open.
 
 **Accounts**
 
-- An administrator who changes their own password stays signed in for the current session, but a "remember me" cookie
-  issued before the change still carries the old hash, so they sign in again when that session ends.
 - Every demote or deactivate request locks the (few) active administrator rows, even when the target is not an
   administrator, so the "keep an active administrator" decision never relies on a stale copy of the user.
 
