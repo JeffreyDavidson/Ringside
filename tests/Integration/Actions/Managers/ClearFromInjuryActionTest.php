@@ -31,7 +31,7 @@ test('it clears an injured manager', function () {
 
 test('it clears manager from injury with specific recovery date', function () {
     $manager = Manager::factory()->injured()->create();
-    $recoveryDate = now()->subDays(5);
+    $recoveryDate = now()->startOfDay();
 
     resolve(ClearFromInjuryAction::class)->handle($manager, $recoveryDate);
 
@@ -119,7 +119,7 @@ test('it maintains employment status during injury clearance', function () {
 
 test('it uses the provided date', function () {
     $manager = Manager::factory()->injured()->create();
-    $customRecoveryDate = now()->subDays(3)->startOfDay();
+    $customRecoveryDate = now()->startOfDay();
 
     resolve(ClearFromInjuryAction::class)->handle($manager, $customRecoveryDate);
 

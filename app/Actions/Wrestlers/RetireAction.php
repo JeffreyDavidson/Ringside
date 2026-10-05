@@ -52,13 +52,13 @@ class RetireAction
             $this->eligibility->ensureCanRetire($lockedWrestler);
 
             if ($lockedWrestler->currentEmployment()->exists()) {
-                $this->employmentPeriods->end($lockedWrestler, $effectiveDate);
+                $this->employmentPeriods->end($lockedWrestler, $effectiveDate, clampToStart: true);
             }
 
             if ($lockedWrestler->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedWrestler, $effectiveDate);
+                $this->suspensionPeriods->end($lockedWrestler, $effectiveDate, clampToStart: true);
             } elseif ($lockedWrestler->currentInjury()->exists()) {
-                $this->injuryPeriods->end($lockedWrestler, $effectiveDate);
+                $this->injuryPeriods->end($lockedWrestler, $effectiveDate, clampToStart: true);
             }
 
             $this->retirementPeriods->start($lockedWrestler, $effectiveDate, LifecycleTransitionType::Retired);

@@ -7,6 +7,7 @@ namespace App\Lifecycle\Periods;
 use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -38,7 +39,16 @@ final readonly class LifecyclePeriodWriter
     }
 
     /**
+     * End the open period on the given date.
+     *
+     * A date supplied by the caller for the period itself is validated: one before the period's start
+     * throws. A period ended as a side effect of another transition (release or retire cascades, deletion)
+     * passes $clampToStart so it ends on its own start date instead, which keeps the end from preceding
+     * the start (open periods may start in the future).
+     *
      * @param  MorphOne<*, *>  $currentPeriod
+     *
+     * @throws InvalidDateRangeException When the date precedes the period's start and $clampToStart is false
      */
     public function end(
         Model $subject,
@@ -46,13 +56,25 @@ final readonly class LifecyclePeriodWriter
         LifecycleDimension $dimension,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
+        bool $clampToStart = false,
     ): void {
-        DB::transaction(function () use ($subject, $currentPeriod, $dimension, $date, $transition): void {
+        DB::transaction(function () use ($subject, $currentPeriod, $dimension, $date, $transition, $clampToStart): void {
+            $startedAt = $currentPeriod->value('started_at');
+            $endedAt = $date;
+
+            if ($startedAt instanceof Carbon && $date->lt($startedAt)) {
+                if (! $clampToStart) {
+                    throw InvalidDateRangeException::endBeforeStart($startedAt, $date, "{$dimension->value} period");
+                }
+
+                $endedAt = $startedAt;
+            }
+
             $currentPeriod->update([
-                'ended_at' => $date,
+                'ended_at' => $endedAt,
             ]);
 
-            $this->recordTransition($subject, $dimension, $transition, $date);
+            $this->recordTransition($subject, $dimension, $transition, $endedAt);
         });
     }
 

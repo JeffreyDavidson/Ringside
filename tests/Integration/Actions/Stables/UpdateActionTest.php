@@ -155,3 +155,32 @@ test('it can still move the end date of a disbanded stable with a single period'
 
     expect($period->refresh()->ended_at?->toDateTimeString())->toBe($newEnd->toDateTimeString());
 });
+
+test('it rejects a new start date after the existing end of the activity period', function (bool $hasLaterPeriod, ?int $formEndOffsetDays) {
+    $stable = Stable::factory()->inactive()->create(['name' => 'Original Name']);
+    $originalPeriod = $stable->firstActivityPeriod()->firstOrFail();
+    $originalStart = $originalPeriod->started_at->toDateTimeString();
+    $originalEnd = $originalPeriod->ended_at?->toDateTimeString();
+
+    if ($hasLaterPeriod) {
+        $stable->activityPeriods()->create(['started_at' => now()->addDays(5)]);
+    }
+
+    $startedAt = now()->subHours(12);
+
+    $data = new StableData(
+        name: 'Updated Name',
+        start_date: $startedAt,
+        members: new StableMembershipData,
+        end_date: $formEndOffsetDays === null ? null : now()->addDays($formEndOffsetDays),
+    );
+
+    expect(fn () => resolve(UpdateAction::class)->handle($stable, $data))
+        ->toThrow(InvalidDateRangeException::class)
+        ->and($stable->refresh()->name)->toBe('Original Name')
+        ->and($originalPeriod->refresh()->started_at->toDateTimeString())->toBe($originalStart)
+        ->and($originalPeriod->ended_at?->toDateTimeString())->toBe($originalEnd);
+})->with([
+    'ended stable, form end omitted' => [false, null],
+    'ended stable with a later period, form end given' => [true, 1],
+]);

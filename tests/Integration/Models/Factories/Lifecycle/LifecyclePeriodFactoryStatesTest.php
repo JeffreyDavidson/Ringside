@@ -83,3 +83,13 @@ dataset('lifecycle period factories', [
     'retirement' => fn (): RetirementFactory => Retirement::factory(),
     'suspension' => fn (): SuspensionFactory => Suspension::factory(),
 ]);
+
+test('lifecycle period factories reject a start after the end', function (
+    ActivityPeriodFactory|EmploymentFactory|InjuryFactory|RetirementFactory|SuspensionFactory $factory,
+) {
+    $endedAt = now()->subMonth();
+    $startedAt = now()->subWeek();
+
+    expect(fn () => $factory->state(['ended_at' => $endedAt])->started($startedAt)->makeOne())
+        ->toThrow(InvalidArgumentException::class, 'A lifecycle period cannot start after it ends.');
+})->with('lifecycle period factories');

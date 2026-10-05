@@ -53,7 +53,7 @@ test('it prevents reinstating an injured wrestler', function () {
 
 test('it reinstates wrestler with specific reinstatement date', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
-    $reinstatementDate = now()->subDays(3);
+    $reinstatementDate = now()->startOfDay();
 
     resolve(ReinstateAction::class)->handle($wrestler, $reinstatementDate);
 

@@ -30,7 +30,7 @@ test('it releases an employed wrestler', function () {
 
 test('it releases wrestler with specific release date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    $releaseDate = now()->subDays(2);
+    $releaseDate = now()->startOfDay();
 
     resolve(ReleaseAction::class)->handle($wrestler, $releaseDate);
 

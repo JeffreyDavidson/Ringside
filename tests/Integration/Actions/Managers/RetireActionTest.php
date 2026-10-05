@@ -43,7 +43,7 @@ test('it retires an employed manager', function () {
 
 test('it retires manager with specific retirement date', function () {
     $manager = Manager::factory()->employed()->create();
-    $retirementDate = now()->subDays(5);
+    $retirementDate = now()->startOfDay();
 
     resolve(RetireAction::class)->handle($manager, $retirementDate);
 
@@ -211,7 +211,7 @@ test('it handles database transactions correctly', function () {
 
 test('it uses the provided date', function () {
     $manager = Manager::factory()->employed()->create();
-    $customRetirementDate = now()->subDays(3)->startOfDay();
+    $customRetirementDate = now()->startOfDay();
 
     resolve(RetireAction::class)->handle($manager, $customRetirementDate);
 

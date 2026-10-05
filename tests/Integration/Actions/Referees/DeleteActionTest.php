@@ -164,7 +164,7 @@ test('it ends retirement before deletion', function () {
 
 test('it uses the provided deletion date', function () {
     $referee = Referee::factory()->employed()->create();
-    $deletionDate = now()->subDays(5);
+    $deletionDate = now()->startOfDay();
 
     resolve(DeleteAction::class)->handle($referee, $deletionDate);
 
