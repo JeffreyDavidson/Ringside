@@ -359,8 +359,6 @@ These items were deliberately left open.
 
 **Accounts**
 
-- An administrator who changes their own password stays signed in for the current session, but a "remember me" cookie
-  issued before the change still carries the old hash, so they sign in again when that session ends.
 - Every demote or deactivate request locks the (few) active administrator rows, even when the target is not an
   administrator, so the "keep an active administrator" decision never relies on a stale copy of the user.
 
