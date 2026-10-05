@@ -21,8 +21,10 @@ use App\Models\Titles\Title;
 use Dom\Element;
 use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 /**
@@ -135,6 +137,9 @@ describe('lifecycle action buttons', function (): void {
 });
 
 describe('booked members', function (): void {
+    // The hard-coded event dates below must stay in the future, so pin the clock instead of using the real one.
+    beforeEach(fn () => travelTo(Carbon::parse('2026-06-01 12:00:00')));
+
     test('it lists the upcoming events in the release and retire confirmations of a booked member', function (
         string $component,
         string $property,

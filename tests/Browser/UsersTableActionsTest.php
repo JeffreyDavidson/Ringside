@@ -17,8 +17,8 @@ test('each user row has a labelled keyboard-operable actions menu', function ():
     $page->resize(1440, 900);
 
     // Act
-    $page->keys('button[aria-label="Actions for Keyboard Member"]', 'Enter')
-        ->wait(0.3);
+    $page->keys('button[aria-label="Actions for Keyboard Member"]', 'Enter');
+    waitForSettledScript($page, 'document.querySelector(\'button[aria-label="Actions for Keyboard Member"]\').getAttribute("aria-expanded") === "true"');
 
     // Assert
     $page->assertAttribute('button[aria-label="Actions for Keyboard Member"]', 'aria-expanded', 'true')

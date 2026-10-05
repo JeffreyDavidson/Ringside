@@ -12,6 +12,9 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+
+use function Pest\Laravel\travelTo;
 
 /**
  * Books a wrestler, tag team or referee in a new match on the given event.
@@ -39,6 +42,9 @@ dataset('rosterMembers', [
 ]);
 
 describe('upcoming bookings', function (): void {
+    // The hard-coded event dates below must stay in the future, so pin the clock instead of using the real one.
+    beforeEach(fn () => travelTo(Carbon::parse('2026-06-01 12:00:00')));
+
     it('lists the events a roster member is booked in ordered by date', function (Closure $makeMember): void {
         // Arrange
         $member = $makeMember();

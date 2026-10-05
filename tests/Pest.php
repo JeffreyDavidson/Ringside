@@ -209,14 +209,80 @@ function waitForScript(AwaitableWebpage|PendingAwaitablePage $page, string $cond
 }
 
 /**
- * Wait until the opened modal is shown and its focus trap has moved focus inside it.
+ * Wait until a JavaScript condition holds and the page has stopped animating (at most five seconds), then assert it.
  *
- * Livewire renders the form into the modal while it is still hidden, so value assertions can pass before it shows,
- * and typing (which does not wait for visibility) would then be lost; once shown, the trap focuses the first control.
+ * Alpine and Livewire flip state before the CSS transition for it exists (it starts a frame later), so a single
+ * "no animations" reading can be taken too early. The page must stay free of animations for 120 ms in a row.
  */
-function waitForModalFocus(AwaitableWebpage|PendingAwaitablePage $page): void
+function waitForSettledScript(AwaitableWebpage|PendingAwaitablePage $page, string $condition = 'true'): void
 {
-    waitForScript($page, 'document.getElementById("modal-container")?.contains(document.activeElement)');
+    $page->assertScript(<<<JS
+        () => new Promise((resolve) => {
+            const deadline = Date.now() + 5000;
+            let quietPolls = 0;
+            const holds = () => {
+                try {
+                    return Boolean({$condition});
+                } catch {
+                    return false;
+                }
+            };
+            const check = () => {
+                quietPolls = holds() && document.getAnimations().length === 0 ? quietPolls + 1 : 0;
+                if (quietPolls >= 6) {
+                    resolve(true);
+                } else if (Date.now() > deadline) {
+                    resolve(false);
+                } else {
+                    setTimeout(check, 20);
+                }
+            };
+            check();
+        })
+        JS);
+}
+
+/**
+ * Wait until every CSS animation and transition on the page has finished.
+ *
+ * Use this before clicking a toggle that a still-running animation could re-render, and instead of fixed sleeps that
+ * guess at a transition's duration.
+ */
+function waitForAnimationsToSettle(AwaitableWebpage|PendingAwaitablePage $page): void
+{
+    waitForSettledScript($page);
+}
+
+/**
+ * Resize the viewport, then wait for the layout animations the new size triggers to finish.
+ *
+ * The browser plugin retries an action in one second attempts, so a toggle clicked right after a resize can land
+ * twice (open, then closed again) when the first attempt is slow.
+ */
+function resizeAndSettle(AwaitableWebpage|PendingAwaitablePage $page, int $width, int $height): void
+{
+    $page->resize($width, $height);
+    waitForAnimationsToSettle($page);
+}
+
+/**
+ * Wait until the modal is hidden (or absent) and has finished animating out.
+ */
+function waitForModalToClose(AwaitableWebpage|PendingAwaitablePage $page): void
+{
+    waitForSettledScript($page, '! document.getElementById("modal-container")?.checkVisibility()');
+}
+
+/**
+ * Wait until the opened modal is shown and has finished animating in.
+ *
+ * Livewire renders the form into the modal while it is still hidden, so value assertions can pass before it shows.
+ * Typing does not wait for visibility, so click the field you type into (a click waits until it is actionable and
+ * focuses it) instead of relying on the modal's focus trap, which skips controls that are still hidden when it activates.
+ */
+function waitForModalReady(AwaitableWebpage|PendingAwaitablePage $page): void
+{
+    waitForSettledScript($page, 'document.getElementById("modal-container")?.checkVisibility()');
 }
 
 /*

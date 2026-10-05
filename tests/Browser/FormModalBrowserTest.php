@@ -18,10 +18,12 @@ beforeEach(function (): void {
 
 test('the wrestler form opens with the first field focused', function (): void {
     // Act / Assert
-    visit(route('wrestlers.index'))
+    $page = visit(route('wrestlers.index'));
+    $page
         ->click('Add Wrestler')
-        ->assertVisible('input[name="form.name"]')
-        ->wait(0.5)
+        ->assertVisible('input[name="form.name"]');
+    waitForScript($page, 'document.activeElement.id === "form.name"');
+    $page
         ->assertScript('document.activeElement.id', 'form.name')
         ->assertNoJavascriptErrors();
 });

@@ -28,9 +28,9 @@ test('the eliminations table is readable on the dark modal', function (): void {
 
     // Act
     $page->press('@match-result-action')
-        ->waitForText('Record Match Result')
-        ->wait(0.35)
-        ->fill('input[aria-label="Elimination order for Alpha Contender"]', '3');
+        ->waitForText('Record Match Result');
+    waitForModalReady($page);
+    $page->fill('input[aria-label="Elimination order for Alpha Contender"]', '3');
 
     // Assert
     $page->assertValue('input[aria-label="Elimination order for Alpha Contender"]', '3')
@@ -46,8 +46,9 @@ test('elimination order errors are linked to their inputs', function (): void {
 
     // Act
     $page->press('@match-result-action')
-        ->waitForText('Record Match Result')
-        ->wait(0.35)
+        ->waitForText('Record Match Result');
+    waitForModalReady($page);
+    $page
         ->select('#finish', MatchFinish::Pinfall->value)
         ->fill('input[aria-label="Elimination order for Alpha Contender"]', '1')
         ->fill('input[aria-label="Elimination order for Bravo Contender"]', '1')
@@ -69,8 +70,9 @@ test('a rejected result is announced in a readable alert', function (): void {
 
     // Act
     $page->press('@match-result-action')
-        ->waitForText('Record Match Result')
-        ->wait(0.35)
+        ->waitForText('Record Match Result');
+    waitForModalReady($page);
+    $page
         ->select('#finish', MatchFinish::Stipulation->value)
         ->select('#winningSideId', (string) $winningSide->id)
         ->press('@save-result');
