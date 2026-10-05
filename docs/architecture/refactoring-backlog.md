@@ -364,11 +364,8 @@ These items were deliberately left open.
 
 **Tests and tooling**
 
-- Several ordering tie-breaks (Managers, Referees, TagTeams, Titles and Events tables) and the roster search id
-  tie-break are caught only under `REVERSE_UNORDERED_SELECTS=1` or on PostgreSQL, because plain SQLite returns ties in
-  id order. A nightly job running the suite with that flag would keep them honest.
-- The PostgreSQL CI job runs the full suite and then the concurrency group inside a 15 minute limit; check its
-  headroom as the suite grows.
+- CI headroom, checked October 2026: the PostgreSQL job takes about 6 of its 15 minutes and the MySQL job about 8
+  of its 15 (5 to 8, varying by run).
 
 ## Blocked dependency upgrades
 

@@ -1,0 +1,41 @@
+name: Unordered Selects
+
+on:
+    schedule:
+        - cron: '30 3 * * *'
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    reverse-unordered-selects:
+        name: Reverse unordered selects
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        steps:
+            - name: Checkout develop
+              uses: actions/checkout@v7
+              with:
+                  ref: develop
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Prepare Laravel
+              run: |
+                  cp .env.testing .env
+                  php artisan key:generate
+                  php artisan config:cache
+
+            - name: Run application tests with reversed unordered selects
+              env:
+                  REVERSE_UNORDERED_SELECTS: '1'
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage --parallel
