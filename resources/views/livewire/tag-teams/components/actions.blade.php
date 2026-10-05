@@ -10,7 +10,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Release))
         <x-buttons.danger
             wire:click="release"
-            :wire:confirm="__('core.lifecycle_confirmations.release', ['name' => $tagTeam->name])"
+            :wire:confirm="__($bookedEvents === '' ? 'core.lifecycle_confirmations.release' : 'core.lifecycle_confirmations.release_booked', ['name' => $tagTeam->name, 'events' => $bookedEvents])"
             wire:loading.attr="disabled"
             wire:target="release"
         >
@@ -38,7 +38,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Retire))
         <x-buttons.warning
             wire:click="retire"
-            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $tagTeam->name])"
+            :wire:confirm="__($bookedEvents === '' ? 'core.lifecycle_confirmations.retire' : 'core.lifecycle_confirmations.retire_booked', ['name' => $tagTeam->name, 'events' => $bookedEvents])"
             wire:loading.attr="disabled"
             wire:target="retire"
         >

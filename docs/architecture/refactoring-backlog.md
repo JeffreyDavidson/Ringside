@@ -301,9 +301,9 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
   and unique referee and title per match are enforced by database constraints (see `championship-system.md` and
   `match-system.md`).
 - **Search indexing.** Add a `pg_trgm` index for `ILIKE` search if the tables grow.
-- **Booked members can still be retired or released.** Deleting a wrestler or tag team booked in an upcoming or
-  unresulted match is blocked, but retiring or releasing one leaves them on the card. Decide whether that should be
-  blocked too, or whether the booking should be cleaned up.
+- **Booked members can still be retired or released.** Retiring or releasing a booked wrestler, referee or tag team is
+  allowed, and the confirmation now lists the upcoming events they are booked in. Still open: mark booked competitors
+  who are no longer bookable on the event page.
 - **Previous-matches tables.** They sort and count through a correlated sub-select and scan `events` twice (the
   promotion scope plus the past-event constraint). Cost scales with a participant's own history. A fix means joining
   `events` once in `EventMatchBuilder`, which is shared by other callers, so it was skipped.
