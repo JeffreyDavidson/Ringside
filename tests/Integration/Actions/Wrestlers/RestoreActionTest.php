@@ -83,7 +83,7 @@ test('it restores wrestler without automatically restoring relationships', funct
     $wrestler = Wrestler::factory()->employed()->create();
 
     // End employment and manager relationships (simulate what happens during deletion)
-    $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()->subDays(5)]);
+    $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()]);
     $wrestler->managers()->wherePivot('fired_at', null)->updateExistingPivot(
         $wrestler->managers->first()->id ?? 1,
         ['fired_at' => now()->subDays(5)]
@@ -109,7 +109,7 @@ test('it restores wrestler without automatically restoring relationships', funct
     // Employment should still be ended
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
-        'ended_at' => now()->subDays(5)->toDateTimeString(),
+        'ended_at' => now()->toDateTimeString(),
     ]);
 });
 
@@ -206,7 +206,7 @@ test('it allows wrestler to be re-employed after restoration', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // End employment before deletion
-    $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()->subDays(5)]);
+    $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()]);
     $wrestler->delete(); // Soft delete
 
     resolve(RestoreAction::class)->handle($wrestler);
