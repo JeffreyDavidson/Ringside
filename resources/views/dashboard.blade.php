@@ -101,7 +101,7 @@
                                 <span class="text-ringside-muted text-sm">
                                     {{
                                         trans_choice('dashboard.champion_since', $dashboard->reignLengthInDays($championship), [
-                                            'date' => $championship->won_at->format('M j, Y'),
+                                            'date' => $championship->local_won_at->format('M j, Y'),
                                             'days' => $dashboard->reignLengthInDays($championship),
                                         ])
                                     }}
