@@ -589,7 +589,13 @@ const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the
 /**
  * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
  */
-const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation and the split eligibility check are the guard there (migration 2026_10_01_190000).';
+const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; the split name lock (StableNameLock) with the split eligibility check, and form validation, are the guard there (migration 2026_10_01_190000).';
+
+/**
+ * The reason the concurrent split test is skipped away from MySQL: on PostgreSQL and SQLite the partial unique index makes
+ * the losing split fail with a QueryException instead, so the test would not tell the name lock apart from the index.
+ */
+const MYSQL_CONCURRENT_STABLE_SPLITS = 'Only MySQL lacks a unique index over active stables without a promotion, so only there does the name lock decide the race; set DB_CONNECTION=mysql and RUN_CONCURRENCY_TESTS=1.';
 
 /**
  * The reason the real-process concurrency tests are skipped.
