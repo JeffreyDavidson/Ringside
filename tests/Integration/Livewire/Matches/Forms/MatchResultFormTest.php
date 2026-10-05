@@ -88,7 +88,7 @@ describe('match result form', function (): void {
 
         expect($data)->toBeInstanceOf(MatchResultData::class)
             ->and($data->finish)->toBe(MatchFinish::Stipulation)
-            ->and($data->winningSide?->is($winner->side))->toBeTrue()
+            ->and($data->winningSide?->id)->toBe($winner->match_side_id)
             ->and($elimination->competitor->is($eliminatedCompetitor))->toBeTrue()
             ->and($elimination->order)->toBe(1)
             ->and($elimination->eliminatedBy?->is($winner))->toBeTrue();

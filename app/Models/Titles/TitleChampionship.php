@@ -6,6 +6,7 @@ namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +33,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  * @property Carbon|null $deleted_at
+ * @property-read Carbon $local_won_at
+ * @property-read Carbon|null $local_lost_at
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title
@@ -78,6 +82,32 @@ class TitleChampionship extends Model
             'won_at' => 'datetime',
             'lost_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get when the reign began, as wall-clock time in the title's promotion time zone.
+     *
+     * @return Attribute<Carbon, never>
+     */
+    protected function localWonAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): Carbon => Promotion::toLocalTime($this->title?->promotion, $this->won_at)
+        );
+    }
+
+    /**
+     * Get when the reign ended, as wall-clock time in the title's promotion time zone.
+     *
+     * @return Attribute<Carbon|null, never>
+     */
+    protected function localLostAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?Carbon => $this->lost_at instanceof Carbon
+                ? Promotion::toLocalTime($this->title?->promotion, $this->lost_at)
+                : null
+        );
     }
 
     /**
