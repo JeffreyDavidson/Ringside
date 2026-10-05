@@ -34,11 +34,13 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 require dirname(__DIR__, 3).'/vendor/autoload.php';
+require_once __DIR__.'/worker-support.php';
 
 $app = require dirname(__DIR__, 3).'/bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
@@ -102,8 +104,8 @@ try {
     }
 } catch (BaseBusinessException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false];
-} catch (QueryException $exception) {
-    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => ($exception->errorInfo[0] ?? null) === '40P01'];
+} catch (DeadlockException|QueryException $exception) {
+    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception)];
 }
 
 fwrite(STDOUT, 'RESULT:'.json_encode($result)."\n");

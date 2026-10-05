@@ -311,7 +311,7 @@ jobs:
     mysql-tests:
         name: MySQL tests
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 20
         env:
             DB_CONNECTION: mysql
             DB_HOST: 127.0.0.1
@@ -353,6 +353,16 @@ jobs:
 
             - name: Run application tests against MySQL
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage
+
+            - name: Allow the test user to observe locks and deadlocks
+              run: >-
+                  mysql -h127.0.0.1 -uroot -pringside-root -e
+                  "GRANT PROCESS ON *.* TO 'ringside'@'%'; GRANT SELECT ON performance_schema.* TO 'ringside'@'%'; SET GLOBAL innodb_monitor_enable = 'lock_deadlocks';"
+
+            - name: Run MySQL concurrency tests
+              env:
+                  RUN_CONCURRENCY_TESTS: 1
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --group=concurrency --no-coverage
 
     coverage:
         name: Coverage (100%)

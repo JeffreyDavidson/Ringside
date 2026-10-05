@@ -590,3 +590,49 @@ const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the
  * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
  */
 const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; form validation and the split eligibility check are the guard there (migration 2026_10_01_190000).';
+
+/**
+ * The reason the real-process concurrency tests are skipped.
+ */
+const CONCURRENCY_TESTS_SKIPPED = 'Set DB_CONNECTION=pgsql or mysql and RUN_CONCURRENCY_TESTS=1 to run the concurrency tests.';
+
+/**
+ * The reason a concurrency test about PostgreSQL's physical row order is skipped on other engines.
+ */
+const POSTGRES_PLANNER_ORDER = 'The test forces PostgreSQL planner plans (hash joins off, sequential scans) and padding that InnoDB does not share.';
+
+/**
+ * Whether the real-process concurrency tests are switched on. SQLite ignores row locks, so they need a server engine,
+ * and they commit their data and rebuild the schema, so they only run when asked for in the real environment.
+ */
+function concurrencyTestsEnabled(): bool
+{
+    return in_array(getenv('DB_CONNECTION'), ['pgsql', 'mysql'], true) && getenv('RUN_CONCURRENCY_TESTS') === '1';
+}
+
+/**
+ * The server's own cumulative count of deadlocks it has resolved. Laravel retries a deadlocked transaction, so an
+ * outcome alone cannot show that a deadlock never happened; compare the count before and after.
+ */
+function resolvedDeadlocks(): int
+{
+    $deadlocks = match (DB::connection()->getDriverName()) {
+        'mysql' => DB::scalar("select `count` from information_schema.INNODB_METRICS where name = 'lock_deadlocks' and status = 'enabled'"),
+        default => DB::scalar('select deadlocks from pg_stat_database where datname = current_database()'),
+    };
+
+    return is_numeric($deadlocks) ? (int) $deadlocks : throw new RuntimeException('Unable to read the deadlock counter (on MySQL the lock_deadlocks InnoDB metric must be enabled and the user needs the PROCESS privilege).');
+}
+
+/**
+ * How many sessions are currently waiting for a lock held by another one.
+ */
+function workersBlockedOnLocks(): int
+{
+    $blocked = match (DB::connection()->getDriverName()) {
+        'mysql' => DB::scalar("select count(*) from information_schema.INNODB_TRX where trx_state = 'LOCK WAIT'"),
+        default => DB::scalar("select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'"),
+    };
+
+    return is_numeric($blocked) ? (int) $blocked : throw new RuntimeException('Unable to count the workers blocked on locks.');
+}
