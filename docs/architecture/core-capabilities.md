@@ -223,8 +223,9 @@ converts the entered value the same way, so it compares real instants.
 
 Because the stored value is the true instant, comparisons such as the "event not held" gate
 in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
-Event dates shown on the dashboard, events table and event page use `local_date`. Venue
-day booking and the events date-range filter still use the UTC date.
+Event dates shown on the dashboard, events table and event page use `local_date`, and the
+events table's date-range filter reads the chosen first and last day in the same zone. Venue
+day booking still uses the UTC date.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

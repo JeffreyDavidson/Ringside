@@ -17,6 +17,8 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
+use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
@@ -136,9 +138,12 @@ class Main extends BaseTable
                         return;
                     }
 
+                    $context = app(PromotionContextService::class);
+                    $promotion = $context->isEnforced() ? $context->current() : null;
+
                     $builder->whereBetween('date', [
-                        Date::parse($dateRange['minDate'])->startOfDay(),
-                        Date::parse($dateRange['maxDate'])->endOfDay(),
+                        Promotion::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
+                        Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
                     ]);
                 }),
             SelectFilter::make('Venue')
