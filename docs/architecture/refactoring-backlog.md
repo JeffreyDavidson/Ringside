@@ -374,10 +374,17 @@ These items were deliberately left open.
 
 Dependabot proposed these in October 2026; they are deferred on purpose, not forgotten.
 
-- **Guzzle 8 stack and `brick/math` 1.0.** `guzzlehttp/guzzle` 7 to 8, `guzzlehttp/promises` 2 to 3,
-  `guzzlehttp/psr7` 2 to 3 and `brick/math` 0.19 to 1.0 arrived inside a dev-dependency Dependabot group PR (#1777,
-  closed). They are production packages with major versions, so review each on its own, with the HTTP client and any
-  big-number usage checked, and not as a side effect of a tooling bump.
+- **Guzzle 8 stack and `brick/math` 1.0.** `guzzlehttp/guzzle` 7 to 8, `guzzlehttp/promises` 2 to 3 and
+  `guzzlehttp/psr7` 2 to 3 (Dependabot PR #1777, closed) are deferred on purpose and ignored in
+  `.github/dependabot.yml` until Laravel, Nightwatch or another dependency requires the new majors. The application
+  makes no `Http::` calls; only the framework, Nightwatch (disabled in `.env.example`) and `ramsey/uuid` depend on
+  them, and the Guzzle 8 changes (stricter request options, exception hierarchy, redirect and auth handling, native
+  types) cannot be validated by this suite. The three move together, because Guzzle 8 forces promises 3 and psr7 3.
+  `brick/math` 1.0 is identical to 0.20 apart from removing `UnsupportedPlatformException` and `of()` throwing
+  `NumberFormatException` for `'2/0'`, so it is allowed through. If the Guzzle stack is ever upgraded, run
+  `composer update guzzlehttp/guzzle guzzlehttp/promises guzzlehttp/psr7 --with-all-dependencies` in one PR, then the
+  full suite, Larastan and Rector, a Nightwatch agent smoke test, and a real test mail if a mail transport is
+  configured.
 
 Resolved: ESLint 10 with `@eslint/js` 10 (#1791, #1800), Vite 8 with `laravel-vite-plugin` 3 (#1794), and the Pest 5.3
 update (#1793). Vite and `laravel-vite-plugin` must move together because the plugin's 2.x line only supports Vite 7,
