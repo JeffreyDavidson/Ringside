@@ -5,6 +5,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
@@ -217,7 +218,7 @@ describe('promotion-owned modals', function (): void {
         expect(EventMatch::withoutGlobalScopes()->where('event_id', $victimEvent->getKey())->count())->toBe(1);
     });
 
-    it('does not let an administrator who belongs to another promotion open the record', function (): void {
+    it('does not let an administrator who belongs to another promotion open the record from :dataset', function (string $page): void {
         // Arrange
         $world = createIsolatedPromotions();
         $admin = User::factory()->administrator()->create(['status' => UserStatus::Active]);
@@ -226,12 +227,12 @@ describe('promotion-owned modals', function (): void {
         $wrestler = $world['records']['wrestler'];
 
         // Act
-        $response = openModalFromPage('dashboard', 'wrestlers.modals.form-modal', ['modelId' => $wrestler->getKey()]);
+        $response = openModalFromPage($page, 'wrestlers.modals.form-modal', ['modelId' => $wrestler->getKey()]);
 
         // Assert
         expect($response->getStatusCode())->toBeIn([403, 404]);
         expect(Wrestler::withoutGlobalScopes()->whereKey($wrestler->getKey())->value('name'))->toBe('VictimWrestler');
-    });
+    })->with(['dashboard', 'venues.index', 'users.index', 'promotions.index']);
 });
 
 describe('administration modals', function (): void {
@@ -266,4 +267,30 @@ describe('administration modals', function (): void {
         'users' => ['users.modals.form-modal', 'user'],
         'promotions' => ['promotions.modals.form-modal', 'promotion'],
     ]);
+});
+
+describe('venue event history', function (): void {
+    it('lists only the events of the active promotion for an administrator with a membership', function (): void {
+        // Arrange
+        $world = createIsolatedPromotions();
+        $admin = User::factory()->administrator()->create(['status' => UserStatus::Active]);
+        $world['attacker']->users()->attach($admin, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+        $venue = Venue::factory()->create();
+        Event::factory()->for($world['attacker'], 'promotion')->scheduled()->create(['name' => 'AttackerEvent', 'venue_id' => $venue->id]);
+        Event::factory()->for($world['victim'], 'promotion')->scheduled()->create(['name' => 'VictimEventAtVenue', 'venue_id' => $venue->id]);
+        actingAs($admin);
+        $page = get(route('venues.show', $venue))->assertOk();
+
+        // Act
+        $response = postLivewireUpdate(
+            snapshotOf((string) $page->getContent(), 'venues.tables.previous-events'),
+            [['method' => '$refresh']],
+        );
+
+        // Assert
+        $response->assertOk();
+        expect($response->json('components.0.effects.html'))
+            ->toContain('AttackerEvent')
+            ->not->toContain('VictimEventAtVenue');
+    });
 });

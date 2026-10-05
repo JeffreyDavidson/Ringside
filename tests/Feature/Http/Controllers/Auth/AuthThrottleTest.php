@@ -44,3 +44,29 @@ test('the guest account endpoints accept requests again after the window passes'
     // Assert
     $response->assertSessionHasErrors('email');
 });
+
+test('login stops responding after twenty failed attempts from one address across different emails', function (): void {
+    // Arrange
+    foreach (range(1, 20) as $attempt) {
+        post(route('login'), ['email' => "visitor{$attempt}@example.com", 'password' => 'wrong-password']);
+    }
+
+    // Act
+    $response = post(route('login'), ['email' => 'visitor21@example.com', 'password' => 'wrong-password']);
+
+    // Assert
+    $response->assertTooManyRequests();
+});
+
+test('login still answers a failed attempt below the per address limit', function (): void {
+    // Arrange
+    foreach (range(1, 19) as $attempt) {
+        post(route('login'), ['email' => "visitor{$attempt}@example.com", 'password' => 'wrong-password']);
+    }
+
+    // Act
+    $response = post(route('login'), ['email' => 'visitor20@example.com', 'password' => 'wrong-password']);
+
+    // Assert
+    $response->assertSessionHasErrors('email');
+});

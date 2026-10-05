@@ -8,8 +8,10 @@ use App\Enums\Users\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\Users\User;
+use App\Rules\Users\UniqueEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -22,8 +24,18 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
+    /**
+     * A taken email gets the same response as a new account so the form cannot be used to discover which
+     * emails are registered. The password is still hashed so the two outcomes take similar time.
+     */
     public function store(RegisterUserRequest $request): RedirectResponse
     {
+        if (new UniqueEmail()->isTaken($request->string('email')->value())) {
+            Hash::make($request->string('password')->value());
+
+            return $this->accountPending();
+        }
+
         $user = User::query()->create([
             'first_name' => $request->string('first_name')->value(),
             'last_name' => $request->string('last_name')->value(),
@@ -34,6 +46,11 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        return $this->accountPending();
+    }
+
+    private function accountPending(): RedirectResponse
+    {
         return redirect()
             ->route('login')
             ->with('status', __('auth-forms.account_pending'));

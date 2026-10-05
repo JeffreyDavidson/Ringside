@@ -141,8 +141,12 @@ The application resolves an active promotion through the scoped
 `PromotionContextService`. Wrestlers, managers, referees, tag teams, stables,
 events and titles now have nullable explicit promotion ownership. Venues are
 global shared resources that can host events for multiple promotions. Venue
-routes remain outside the promotion context middleware; a venue is globally
-visible while its related event history is filtered by the active promotion.
+routes, the promotions pages and user management run inside the
+`promotion.context` group like the rest of the app, so a modal opened from them
+cannot reach another promotion's records (Livewire only re-runs the context
+middleware for routes that have it); only `promotions.switch` stays outside. A
+venue is globally visible while its related event history is filtered by the
+active promotion.
 
 `PromotionGate::before()` runs on every Gate check, so membership is resolved
 once per request: `PromotionContextService` memoises the user's active role per
