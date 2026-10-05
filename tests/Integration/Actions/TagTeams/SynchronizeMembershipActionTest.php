@@ -25,3 +25,21 @@ test('synchronizing omitted wrestler memberships leaves them unchanged', functio
 
     expect($tagTeam->currentWrestlers()->exists())->toBeFalse();
 });
+
+test('synchronizing ends not-yet-started wrestler memberships on their own join date', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $startedWrestler = Wrestler::factory()->create();
+    $futureWrestler = Wrestler::factory()->create();
+    $start = today()->addWeek();
+    $tagTeam->wrestlers()->attach($startedWrestler, ['joined_at' => today()->subDay()]);
+    $tagTeam->wrestlers()->attach($futureWrestler, ['joined_at' => $start]);
+
+    resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(wrestlers: new Collection), today());
+
+    $leftAt = $tagTeam->wrestlers()->get()->mapWithKeys(
+        fn (Wrestler $wrestler): array => [$wrestler->getKey() => $wrestler->pivot->left_at],
+    );
+
+    expect($leftAt[$startedWrestler->getKey()]?->equalTo(today()))->toBeTrue()
+        ->and($leftAt[$futureWrestler->getKey()]?->equalTo($start))->toBeTrue();
+});

@@ -103,8 +103,8 @@ test('it ends replaced tag team members in ascending id order', function () {
     $unorderedMemberSelects = collect($statements)
         ->filter(fn (array $statement): bool => preg_match('/^select "(wrestlers|managers)"\.\*.*inner join/', $statement['sql']) === 1
             && preg_match('/order by "(wrestlers|managers)"\."id" asc/', $statement['sql']) !== 1);
-    $endedWrestlerIds = updatedRowIds($statements, 'tag_teams_wrestlers');
-    $endedManagerIds = updatedRowIds($statements, 'tag_teams_managers');
+    $endedWrestlerIds = updatedRowIds($statements, 'tag_teams_wrestlers', bindingFromEnd: 2);
+    $endedManagerIds = updatedRowIds($statements, 'tag_teams_managers', bindingFromEnd: 2);
 
     expect($unorderedMemberSelects)->toBeEmpty()
         ->and($endedWrestlerIds)->toHaveCount(3)->toBe(collect($endedWrestlerIds)->sort()->values()->all())

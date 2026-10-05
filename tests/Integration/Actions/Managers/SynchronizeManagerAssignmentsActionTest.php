@@ -15,3 +15,21 @@ test('synchronization ends omitted current assignments', function () {
     resolve(SynchronizeManagerAssignmentsAction::class)->handle($wrestler, new Collection, now());
     expect($wrestler->currentManagers()->exists())->toBeFalse();
 });
+
+test('synchronization ends not-yet-started assignments on their own hire date', function () {
+    $wrestler = Wrestler::factory()->create();
+    $startedManager = Manager::factory()->create();
+    $futureManager = Manager::factory()->create();
+    $start = today()->addWeek();
+    $wrestler->managers()->attach($startedManager, ['hired_at' => today()->subDay()]);
+    $wrestler->managers()->attach($futureManager, ['hired_at' => $start]);
+
+    resolve(SynchronizeManagerAssignmentsAction::class)->handle($wrestler, new Collection, today());
+
+    $firedAt = $wrestler->managers()->get()->mapWithKeys(
+        fn (Manager $manager): array => [$manager->getKey() => $manager->pivot->fired_at],
+    );
+
+    expect($firedAt[$startedManager->getKey()]?->equalTo(today()))->toBeTrue()
+        ->and($firedAt[$futureManager->getKey()]?->equalTo($start))->toBeTrue();
+});

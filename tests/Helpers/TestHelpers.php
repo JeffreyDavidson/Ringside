@@ -512,14 +512,14 @@ function statementPosition(array $statements, Closure $matches): int
 }
 
 /**
- * The primary key a recorded statement was bound to: the first binding of a single-row lock, or the last binding of an
- * update that targets one row of a pivot table.
+ * The primary key a recorded statement was bound to: the first binding of a single-row lock, or the binding counted from the
+ * end of an update that targets one row of a pivot table.
  *
  * @param  array{sql: string, bindings: array<int, mixed>, locked: bool}  $statement
  */
-function boundKey(array $statement, bool $last = false): int
+function boundKey(array $statement, int $fromEnd = 0): int
 {
-    $binding = $last ? array_last($statement['bindings']) : ($statement['bindings'][0] ?? null);
+    $binding = $fromEnd > 0 ? array_slice($statement['bindings'], -$fromEnd)[0] ?? null : ($statement['bindings'][0] ?? null);
 
     return is_int($binding) ? $binding : throw new RuntimeException('Expected the statement to be bound to an integer key.');
 }
@@ -544,18 +544,19 @@ function lockedRowIds(array $statements, string $table): array
 }
 
 /**
- * The related keys of the pivot rows a recorded action updated one at a time, in update order.
+ * The related keys of the pivot rows a recorded action updated one at a time, in update order. The key is the binding
+ * that many positions from the end of the statement (a pivot update ends with its start column comparison).
  *
  * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
  * @return array<int, int>
  */
-function updatedRowIds(array $statements, string $table): array
+function updatedRowIds(array $statements, string $table, int $bindingFromEnd = 1): array
 {
     $ids = [];
 
     foreach ($statements as $statement) {
         if (str_starts_with($statement['sql'], "update \"{$table}\"")) {
-            $ids[] = boundKey($statement, last: true);
+            $ids[] = boundKey($statement, fromEnd: $bindingFromEnd);
         }
     }
 
