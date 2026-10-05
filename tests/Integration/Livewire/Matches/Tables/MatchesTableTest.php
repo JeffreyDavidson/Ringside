@@ -8,8 +8,10 @@ use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
+use App\Models\Lifecycle\Injury;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
@@ -20,6 +22,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -159,6 +162,198 @@ describe('rendering', function (): void {
             ->assertSuccessful()
             ->assertSee($match->match_type->label())
             ->assertDontSeeHtml('data-test="match-edit-action"');
+    });
+});
+
+describe('unbookable booked members', function (): void {
+    it('marks competitors who can no longer be booked', function (string $state): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $unbookable = Wrestler::factory()->{$state}()->create(['name' => 'Unavailable Wrestler']);
+        $healthy = Wrestler::factory()->bookable()->create(['name' => 'Healthy Wrestler']);
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$unbookable, $healthy])
+            ->create();
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Unavailable Wrestler</a>{$marker}")
+            ->assertDontSeeHtml("Healthy Wrestler</a>{$marker}");
+    })->with([
+        'suspended' => 'suspended',
+        'injured' => 'injured',
+        'retired' => 'retired',
+        'released' => 'released',
+        'unemployed' => 'unemployed',
+    ]);
+
+    it('marks a deleted competitor without a link', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $deleted = Wrestler::factory()->bookable()->create(['name' => 'Deleted Wrestler']);
+        $healthy = Wrestler::factory()->bookable()->create(['name' => 'Healthy Wrestler']);
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$deleted, $healthy])
+            ->create();
+        $deleted->delete();
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component->assertSeeHtml("Deleted Wrestler{$marker}");
+    });
+
+    it('marks a tag team with an unbookable member', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $brokenTeam = TagTeam::factory()->bookable()->create(['name' => 'Broken Team']);
+        $healthyTeam = TagTeam::factory()->bookable()->create(['name' => 'Healthy Team']);
+        Injury::factory()
+            ->started(now())
+            ->for($brokenTeam->currentWrestlers()->firstOrFail(), 'injurable')
+            ->create();
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withMatchType(MatchType::TagTeam)
+            ->withCompetitors([$brokenTeam, $healthyTeam])
+            ->create();
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Broken Team</a>{$marker}")
+            ->assertDontSeeHtml("Healthy Team</a>{$marker}");
+    });
+
+    it('marks referees who can no longer be booked', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $retired = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
+        $healthy = Referee::factory()->bookable()->create(['first_name' => 'Healthy', 'last_name' => 'Referee']);
+        $match = EventMatch::factory()->forEvent($event)->create();
+        $match->referees()->attach([$retired->id, $healthy->id]);
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Retired Referee</a>{$marker}")
+            ->assertDontSeeHtml("Healthy Referee</a>{$marker}");
+    });
+
+    it('marks members of unresulted matches on a past event', function (): void {
+        // Arrange
+        $event = Event::factory()->past()->create();
+        $wrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
+        EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler])->create();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component->assertSeeHtml('Retired Wrestler</a>'.MatchCompetitorRouteResolver::unbookableMarker());
+    });
+
+    it('does not mark members of past matches that already have a result', function (): void {
+        // Arrange
+        $event = Event::factory()->past()->create();
+        $wrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
+        $referee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
+        $match = EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$wrestler])
+            ->create(['match_finish' => MatchFinish::TimeLimitDraw]);
+        $match->referees()->attach($referee);
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSee('Retired Wrestler')
+            ->assertSee('Retired Referee')
+            ->assertDontSee(__('matches.no_longer_bookable'));
+    });
+
+    it('marks competitors and referees that share the same id', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $wrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
+        $referee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
+        $match = EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler])->create();
+        $match->referees()->attach($referee);
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        expect($wrestler->id)->toBe($referee->id);
+        $component
+            ->assertSeeHtml("Retired Wrestler</a>{$marker}")
+            ->assertSeeHtml("Retired Referee</a>{$marker}");
+    });
+
+    it('marks unbookable members for promotion scoped users', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->scheduled()->for($promotion, 'promotion')->create();
+        $retired = Wrestler::factory()->for($promotion, 'promotion')->retired()->create(['name' => 'Retired Wrestler']);
+        $healthy = Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Healthy Wrestler']);
+        EventMatch::factory()->forEvent($event)->withCompetitors([$retired, $healthy])->create();
+        actingInPromotion($promotion, MembershipRole::Manager);
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Retired Wrestler</a>{$marker}")
+            ->assertDontSeeHtml("Healthy Wrestler</a>{$marker}");
+    });
+
+    it('checks availability in a bounded number of queries however many matches are listed', function (): void {
+        // Arrange
+        $event = Event::factory()->scheduled()->create();
+        $addMatch = function () use ($event): void {
+            $match = EventMatch::factory()
+                ->forEvent($event)
+                ->withCompetitors([Wrestler::factory()->retired()->create(), TagTeam::factory()->bookable()->create()])
+                ->create();
+            $match->referees()->attach(Referee::factory()->retired()->create());
+        };
+        $queriesDuring = function () use ($event): array {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            livewire(MatchesTable::class, ['eventId' => $event->id]);
+            $queries = DB::getQueryLog();
+            DB::disableQueryLog();
+
+            return $queries;
+        };
+        $addMatch();
+        $queriesWithOneMatch = $queriesDuring();
+        collect(range(1, 4))->each($addMatch);
+
+        // Act
+        $queriesWithFiveMatches = $queriesDuring();
+
+        // Assert
+        expect($queriesWithFiveMatches)->toHaveSameSize($queriesWithOneMatch);
     });
 });
 

@@ -107,6 +107,8 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 
 The Livewire match form applies model-specific booking rules to every selected wrestler, tag team, and referee before constructing `EventMatchData`. Assignment Actions repeat the eligibility check as the authoritative transactional boundary so non-UI callers and state changes between validation and persistence remain protected.
 
+Retiring, releasing or injuring someone does not remove them from matches they are already booked in. Instead the event page (`MatchesTable::projectRowState()`) marks any competitor or referee in an upcoming or unresulted match who is no longer bookable (including soft-deleted ones) with a small "No longer bookable" note so the card gets fixed. It runs one `bookable()` id query per type (wrestlers, tag teams, referees) for the page's rows and never marks members of past matches that already have a result.
+
 Assignment Actions treat each requested collection as an atomic command. They reject the entire assignment when any selected wrestler, tag team, referee, or title is unavailable; they never silently discard unavailable selections and persist a partial request. Repeated selections of the same record are normalized before assignment.
 
 `MatchCompetitorRequirements` authoritatively validates competitor types and composition before assignments are persisted. Match formats whose names encode a roster-member count use the current wrestlers represented by each selected tag team: standard and tornado tag matches require 2-on-2, six/eight/ten-person tag matches require 3/4/5 per side, and handicap matches require 2-on-1 or 3-on-2 in either side order. A wrestler cannot also be selected directly when represented by a selected tag team.

@@ -58,4 +58,22 @@ describe('match competitor resource links', function (): void {
         expect($link)
             ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">&lt;script&gt;alert(1)&lt;/script&gt;</a>');
     });
+
+    it('appends the escaped unbookable marker to linked and deleted competitors', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->make(['id' => 1, 'name' => 'Linked <b>One</b>']);
+        $deleted = Wrestler::factory()->create(['name' => 'Gone <b>Wrestler</b>']);
+        $deleted->delete();
+        $resolver = app(MatchCompetitorRouteResolver::class);
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $linked = $resolver->link($wrestler, true);
+        $plain = $resolver->link($deleted, true);
+
+        // Assert
+        expect($linked)->toBe('<a href="'.route('wrestlers.show', $wrestler).'">Linked &lt;b&gt;One&lt;/b&gt;</a>'.$marker)
+            ->and($plain)->toBe('Gone &lt;b&gt;Wrestler&lt;/b&gt;'.$marker)
+            ->and($marker)->toContain(__('matches.no_longer_bookable'));
+    });
 });
