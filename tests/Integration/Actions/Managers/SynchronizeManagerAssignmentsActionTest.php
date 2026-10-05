@@ -26,10 +26,6 @@ test('synchronization ends not-yet-started assignments on their own hire date', 
 
     resolve(SynchronizeManagerAssignmentsAction::class)->handle($wrestler, new Collection, today());
 
-    $firedAt = $wrestler->managers()->get()->mapWithKeys(
-        fn (Manager $manager): array => [$manager->getKey() => $manager->pivot->fired_at],
-    );
-
-    expect($firedAt[$startedManager->getKey()]?->equalTo(today()))->toBeTrue()
-        ->and($firedAt[$futureManager->getKey()]?->equalTo($start))->toBeTrue();
+    expect($wrestler->managers()->whereKey($startedManager->getKey())->wherePivot('fired_at', today())->exists())->toBeTrue()
+        ->and($wrestler->managers()->whereKey($futureManager->getKey())->wherePivot('fired_at', $start)->exists())->toBeTrue();
 });

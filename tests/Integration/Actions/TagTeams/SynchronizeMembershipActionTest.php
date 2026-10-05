@@ -36,10 +36,6 @@ test('synchronizing ends not-yet-started wrestler memberships on their own join 
 
     resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(wrestlers: new Collection), today());
 
-    $leftAt = $tagTeam->wrestlers()->get()->mapWithKeys(
-        fn (Wrestler $wrestler): array => [$wrestler->getKey() => $wrestler->pivot->left_at],
-    );
-
-    expect($leftAt[$startedWrestler->getKey()]?->equalTo(today()))->toBeTrue()
-        ->and($leftAt[$futureWrestler->getKey()]?->equalTo($start))->toBeTrue();
+    expect($tagTeam->wrestlers()->whereKey($startedWrestler->getKey())->wherePivot('left_at', today())->exists())->toBeTrue()
+        ->and($tagTeam->wrestlers()->whereKey($futureWrestler->getKey())->wherePivot('left_at', $start)->exists())->toBeTrue();
 });
