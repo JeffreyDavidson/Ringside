@@ -19,6 +19,16 @@ updates:
           prefix-development: 'chore(deps-dev)'
       labels:
           - dependencies
+      # Guzzle 8, promises 3 and psr7 3 must move together and the app never calls them directly (only the framework,
+      # Nightwatch and ramsey/uuid depend on them), so a major bump gains nothing and cannot be validated by our suite.
+      # See docs/architecture/refactoring-backlog.md, "Blocked dependency upgrades".
+      ignore:
+          - dependency-name: 'guzzlehttp/guzzle'
+            update-types: ['version-update:semver-major']
+          - dependency-name: 'guzzlehttp/promises'
+            update-types: ['version-update:semver-major']
+          - dependency-name: 'guzzlehttp/psr7'
+            update-types: ['version-update:semver-major']
       groups:
           # The framework, Livewire and Larastan change behaviour, test helpers and static-analysis types often
           # enough that one red package must not block the rest of the group, so each gets its own PR.
