@@ -297,3 +297,21 @@ test('it handles complex status combinations', function () {
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
     expect($manager->suspensions()->count())->toBe(2); // Preserve historical
 });
+
+test('it ends an open suspension or injury on its own start date when released before it began', function (string $relation) {
+    // Arrange
+    $manager = Manager::factory()->create();
+    $manager->employments()->create(['started_at' => now()->subDays(10)]);
+    $startedAt = now()->subDays(2)->startOfSecond();
+    $period = $manager->{$relation}()->create(['started_at' => $startedAt]);
+
+    // Act
+    resolve(ReleaseAction::class)->handle($manager, $startedAt->copy()->subSecond());
+
+    // Assert
+    expect($period->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
+})->with([
+    'suspension' => 'suspensions',
+    'injury' => 'injuries',
+]);

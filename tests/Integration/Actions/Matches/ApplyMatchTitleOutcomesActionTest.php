@@ -190,11 +190,14 @@ test('it keeps the existing championship changes when the same result is applied
 });
 
 test('it records a champion for an earlier local day even though they are no longer available', function (string $availability, string $timezone, string $eventDate): void {
+    // Arrange
     travelTo(Carbon::parse('2026-10-04 12:00:00'));
     [$match, $winningSide, $winner, $title] = titleMatchWithWinner($timezone, $eventDate, $availability);
 
+    // Act
     recordTitleMatchResult($match, $winningSide);
 
+    // Assert
     expect(TitleChampionship::query()
         ->where('title_id', $title->id)
         ->where('champion_id', $winner->id)
@@ -203,25 +206,40 @@ test('it records a champion for an earlier local day even though they are no lon
 })->with('availability lost after the event')->with('events from an earlier local day');
 
 test('it rejects a champion who is no longer available when the event is on the current local day', function (string $availability, string $timezone, string $eventDate, string $now = '2026-10-04 12:00:00'): void {
+    // Arrange
     travelTo($now);
     [$match, $winningSide, , $title] = titleMatchWithWinner($timezone, $eventDate, $availability);
 
-    expect(fn () => recordTitleMatchResult($match, $winningSide))->toThrow(InvalidMatchOutcomeException::class)
+    // Act
+    $record = fn () => recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class)
         ->and(TitleChampionship::query()->where('title_id', $title->id)->exists())->toBeFalse();
 })->with('availability lost after the event')->with('events from the current local day');
 
 test('it still rejects a deleted title for an earlier local day', function (): void {
+    // Arrange
     travelTo(Carbon::parse('2026-10-04 12:00:00'));
     [$match, $winningSide, , $title] = titleMatchWithWinner('UTC', '2026-10-03 12:00:00', 'available');
     $title->delete();
 
-    expect(fn () => recordTitleMatchResult($match, $winningSide))->toThrow(InvalidMatchOutcomeException::titleDeleted());
+    // Act
+    $record = fn () => recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::titleDeleted());
 });
 
 test('it still rejects a deleted winner for an earlier local day', function (): void {
+    // Arrange
     travelTo(Carbon::parse('2026-10-04 12:00:00'));
     [$match, $winningSide, $winner] = titleMatchWithWinner('UTC', '2026-10-03 12:00:00', 'available');
     $winner->delete();
 
-    expect(fn () => recordTitleMatchResult($match, $winningSide))->toThrow(InvalidMatchOutcomeException::winnerDeleted());
+    // Act
+    $record = fn () => recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::winnerDeleted());
 });

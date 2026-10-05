@@ -18,20 +18,18 @@ use function Pest\Laravel\withUnencryptedCookies;
 use function Pest\Livewire\livewire;
 
 /**
- * Saves a new password for the user through the users form modal with the request a browser sends, so the
- * web middleware (including AuthenticateSession) runs around the Livewire update.
+ * Saves the users form modal for the user with the request a browser sends, so the web middleware (including
+ * AuthenticateSession) runs around the Livewire update.
  *
+ * @param  array<string, string>  $formState  The form fields to change before saving, keyed by property path
  * @param  ?Cookie  $recaller  The encrypted remember-me cookie the browser sends along, when it has one
  * @return TestResponse<Response>
  */
-function saveNewPasswordThroughUsersForm(User $user, string $password, ?Cookie $recaller = null): TestResponse
+function saveUsersFormThroughHttp(User $user, array $formState, ?Cookie $recaller = null): TestResponse
 {
     $snapshot = livewire(FormModal::class)
         ->call('openModal', $user->id)
-        ->set([
-            'form.password' => $password,
-            'form.password_confirmation' => $password,
-        ])
+        ->set($formState)
         ->__get('snapshot');
 
     auth()->forgetGuards();
@@ -48,6 +46,20 @@ function saveNewPasswordThroughUsersForm(User $user, string $password, ?Cookie $
                 ],
             ],
         ]);
+}
+
+/**
+ * Saves a new password for the user through the users form modal.
+ *
+ * @param  ?Cookie  $recaller  The encrypted remember-me cookie the browser sends along, when it has one
+ * @return TestResponse<Response>
+ */
+function saveNewPasswordThroughUsersForm(User $user, string $password, ?Cookie $recaller = null): TestResponse
+{
+    return saveUsersFormThroughHttp($user, [
+        'form.password' => $password,
+        'form.password_confirmation' => $password,
+    ], $recaller);
 }
 
 function signInAsAdministrator(): User
@@ -204,4 +216,23 @@ test('an administrator who changes another user\'s password keeps their session 
 
     get(route('dashboard'))->assertSuccessful();
     visitDashboardWithOnlyCookie($oldCookie)->assertSuccessful();
+});
+
+test('an administrator who saves their own account with a blank password keeps their password and session', function (): void {
+    // Arrange
+    $administrator = signInAsAdministrator();
+    $originalHash = $administrator->password;
+
+    // Act
+    $response = saveUsersFormThroughHttp($administrator, ['form.first_name' => 'Renamed']);
+
+    // Assert
+    $response->assertOk();
+    auth()->forgetGuards();
+
+    get(route('dashboard'))->assertSuccessful();
+    $administrator->refresh();
+    expect($administrator->first_name)->toBe('Renamed')
+        ->and($administrator->password)->toBe($originalHash)
+        ->and(Hash::check('original-password', $administrator->password))->toBeTrue();
 });

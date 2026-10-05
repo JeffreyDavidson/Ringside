@@ -154,3 +154,21 @@ test('it preserves employment history', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
+
+test('it ends an open suspension or injury on its own start date when released before it began', function (string $relation) {
+    // Arrange
+    $referee = Referee::factory()->create();
+    $referee->employments()->create(['started_at' => now()->subDays(10)]);
+    $startedAt = now()->subDays(2)->startOfSecond();
+    $period = $referee->{$relation}()->create(['started_at' => $startedAt]);
+
+    // Act
+    resolve(ReleaseAction::class)->handle($referee, $startedAt->copy()->subSecond());
+
+    // Assert
+    expect($period->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
+        ->and($referee->currentEmployment()->exists())->toBeFalse();
+})->with([
+    'suspension' => 'suspensions',
+    'injury' => 'injuries',
+]);

@@ -231,3 +231,18 @@ test('it ends all current relationships', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
+
+test('it ends an open suspension on its own start date when released before it began', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->employments()->create(['started_at' => now()->subDays(10)]);
+    $startedAt = now()->subDays(2)->startOfSecond();
+    $suspension = $tagTeam->suspensions()->create(['started_at' => $startedAt]);
+
+    // Act
+    resolve(ReleaseAction::class)->handle($tagTeam, $startedAt->copy()->subSecond());
+
+    // Assert
+    expect($suspension->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
+        ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
+});
