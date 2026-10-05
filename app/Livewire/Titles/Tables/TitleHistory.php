@@ -57,7 +57,7 @@ class TitleHistory extends DataTableComponent
         return TitleChampionship::query()
             ->forTitleId($titleId)
             ->mostRecentlyWonFirst()
-            ->with('champion');
+            ->with(['champion', 'title.promotion']);
     }
 
     /**
@@ -90,8 +90,8 @@ class TitleHistory extends DataTableComponent
 
     private function datesHeld(TitleChampionship $championship): string
     {
-        $wonAt = $championship->won_at->toDateString();
-        $lostAt = $championship->lost_at?->toDateString() ?? __('championships.current');
+        $wonAt = $championship->local_won_at->toDateString();
+        $lostAt = $championship->local_lost_at?->toDateString() ?? __('championships.current');
 
         return "{$wonAt} - {$lostAt}";
     }

@@ -47,6 +47,8 @@ class EventMatchBuilder extends Builder
 
     public function forHistory(): static
     {
+        $this->with('event.promotion');
+
         return $this
             ->forPastEvents()
             ->withDisplayRelations()
