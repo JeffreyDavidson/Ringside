@@ -26,6 +26,8 @@ use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
+use function Pest\Laravel\travelTo;
+
 function sideWithCompetitor(
     EventMatch $match,
     int $position,
@@ -1039,3 +1041,138 @@ it('allows correcting the finish of an unchanged winner after a later vacancy an
     expect($match->refresh()->match_finish)->toBe(MatchFinish::Submission)
         ->and($title->championships()->count())->toBe(2);
 });
+
+/**
+ * Give the title a reign for the champion, with explicit dates.
+ */
+function reignOn(Title $title, Wrestler|TagTeam $champion, string $wonAt, ?string $lostAt = null): TitleChampionship
+{
+    $factory = TitleChampionship::factory()->for($title);
+    $factory = $champion instanceof TagTeam ? $factory->forTagTeam($champion) : $factory->forWrestler($champion);
+
+    return $factory->create(['won_at' => $wonAt, 'lost_at' => $lostAt]);
+}
+
+/** @return array<int, array{int, string, ?string, ?int, ?string}> */
+function reignSnapshot(Title $title): array
+{
+    return $title->championships()
+        ->withTrashed()
+        ->orderBy('id')
+        ->get()
+        ->map(fn (TitleChampionship $reign): array => [
+            $reign->champion_id,
+            $reign->won_at->toDateTimeString(),
+            $reign->lost_at?->toDateTimeString(),
+            $reign->lost_match_id,
+            $reign->deleted_at?->toDateTimeString(),
+        ])
+        ->all();
+}
+
+// In each case the champion (A) held the title on 2026-09-10, after which it moved on or was vacated.
+dataset('titles that moved on after the event', [
+    'singles, later reign by another champion' => [TitleType::Singles, 'later reign by another champion'],
+    'singles, own reign later vacated' => [TitleType::Singles, 'own reign later vacated'],
+    'tag team, later reign by another champion' => [TitleType::TagTeam, 'later reign by another champion'],
+    'tag team, own reign later vacated' => [TitleType::TagTeam, 'own reign later vacated'],
+]);
+
+it('records a back-filled defence after the title has moved on', function (TitleType $type, string $scenario): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-04 12:00:00'));
+    $newChampion = fn () => $type === TitleType::Singles ? Wrestler::factory()->bookable()->create() : TagTeam::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => $type]);
+    $champion = $newChampion();
+    reignOn($title, $champion, '2026-09-01 12:00:00', '2026-09-20 12:00:00');
+    if ($scenario === 'later reign by another champion') {
+        reignOn($title, $newChampion(), '2026-09-20 12:00:00');
+    }
+    $before = reignSnapshot($title);
+    [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
+
+    // Act
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+
+    // Assert
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+        ->and($match->winning_side_id)->toBe($winningSide->id)
+        ->and(reignSnapshot($title))->toBe($before);
+})->with('titles that moved on after the event');
+
+it('records a back-filled defence of a deleted title without treating it as a title change', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-04 12:00:00'));
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $champion = Wrestler::factory()->bookable()->create();
+    reignOn($title, $champion, '2026-09-01 12:00:00', '2026-09-20 12:00:00');
+    reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
+    $before = reignSnapshot($title);
+    [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
+    $title->delete();
+
+    // Act
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+
+    // Assert
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+        ->and(reignSnapshot($title))->toBe($before);
+});
+
+it('still rejects a title change back-dated before a later reign or inside a vacated one', function (bool $laterReignExists): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-04 12:00:00'));
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-01 12:00:00', '2026-09-20 12:00:00');
+    if ($laterReignExists) {
+        reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
+    }
+    $before = reignSnapshot($title);
+    [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, Wrestler::factory()->bookable()->create());
+
+    // Act
+    $record = fn () => resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+
+    // Assert
+    expect($record)->toThrow(InvalidMatchOutcomeException::class, 'record results in date order')
+        ->and($match->refresh()->match_finish)->toBeNull()
+        ->and(reignSnapshot($title))->toBe($before);
+})->with([
+    'later reign' => true,
+    'vacated reign' => false,
+]);
+
+it('corrects a recorded defence into a title change only while no later reign exists', function (bool $laterReignExists): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-04 12:00:00'));
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $champion = Wrestler::factory()->bookable()->create();
+    $firstReign = reignOn($title, $champion, '2026-09-01 12:00:00', $laterReignExists ? '2026-09-20 12:00:00' : null);
+    if ($laterReignExists) {
+        reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
+    }
+    [$match, $championSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
+    $challengerSide = $match->sides()->whereKeyNot($championSide->id)->sole();
+    resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $championSide));
+    $before = reignSnapshot($title);
+
+    // Act
+    $correct = fn () => resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $challengerSide));
+
+    // Assert
+    if ($laterReignExists) {
+        expect($correct)->toThrow(InvalidMatchOutcomeException::class, 'record results in date order')
+            ->and(reignSnapshot($title))->toBe($before);
+
+        return;
+    }
+
+    $correct();
+
+    expect($firstReign->refresh()->lost_match_id)->toBe($match->id)
+        ->and($firstReign->lost_at?->toDateTimeString())->toBe('2026-09-10 12:00:00')
+        ->and($title->championships()->current()->sole()->won_match_id)->toBe($match->id);
+})->with([
+    'no later reign' => false,
+    'later reign' => true,
+]);
