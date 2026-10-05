@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\DB;
 function pretendStableNameLock(string $driver, string $name): array
 {
     // Pretending runs no statement, but inlining the string key into the recorded SQL quotes it through a PDO, so
-    // the connection gets a throwaway in-memory one instead of a server.
-    $noServer = fn (): PDO => new PDO('sqlite::memory:');
+    // the connection borrows the already open test connection's one instead of reaching for a server.
+    $noServer = fn (): PDO => DB::connection()->getPdo();
 
     $connection = match ($driver) {
         'mysql' => new MySqlConnection($noServer, 'ringside'),
