@@ -23,6 +23,8 @@ class CreateEditForm extends BaseForm
 
     public int|string|null $zipcode = '';
 
+    public string $timezone = 'UTC';
+
     public function toData(): VenueData
     {
         return new VenueData(
@@ -31,6 +33,7 @@ class CreateEditForm extends BaseForm
             city: $this->city,
             state: $this->state,
             zipcode: (string) $this->zipcode,
+            timezone: $this->timezone,
         );
     }
 
@@ -47,6 +50,7 @@ class CreateEditForm extends BaseForm
             'city' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', Rule::enum(UnitedStatesState::class)],
             'zipcode' => ['required', 'digits:5'],
+            'timezone' => ['required', 'string', Rule::in(timezone_identifiers_list())],
         ];
     }
 
