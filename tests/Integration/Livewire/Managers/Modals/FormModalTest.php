@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Actions\Managers\UpdateAction;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
+use Illuminate\Support\Facades\Date;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 describe('authorized manager form interactions', function () {
@@ -54,7 +60,9 @@ describe('authorized manager form interactions', function () {
             ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', 'Bobby')
             ->assertSet('form.last_name', 'Heenan')
-            ->assertSet('form.employment_date', '2024-01-15')
+            ->assertSet('form.employment_date', null)
+            ->assertSet('form.hasEmploymentHistory', true)
+            ->assertDontSeeHtml('wire:model="form.employment_date"')
             ->assertSee('Edit Bobby Heenan');
     });
 
@@ -215,6 +223,108 @@ describe('authorized manager form interactions', function () {
             ->assertDispatched('form-submitted')
             ->assertSet('isModalOpen', false);
         expect(Manager::query()->count())->toBe(1);
+    });
+});
+
+describe('Manager form employment history', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+        travelTo(Date::parse('2024-06-01 12:00:00'));
+    });
+
+    it('keeps the employment history of a released, retired or future-employed manager when only the name changes', function (
+        string $state,
+        ?string $submittedDate,
+    ) {
+        // Arrange
+        $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        giveEmploymentHistory($manager, $state);
+        $employmentsBefore = employmentSnapshot($manager);
+        $statusBefore = $manager->fresh()?->status;
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $manager->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->set('form.employment_date', $submittedDate);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false);
+        $manager->refresh();
+        expect($manager->first_name)->toBe('Renamed')
+            ->and(employmentSnapshot($manager))->toBe($employmentsBefore)
+            ->and($manager->status)->toBe($statusBefore);
+    })->with([
+        'released' => ['released', null],
+        'retired' => ['retired', null],
+        'future-employed' => ['future', null],
+        'released with a submitted date' => ['released', '2024-04-01'],
+        'retired with a submitted date' => ['retired', '2024-04-01'],
+        'future-employed with a submitted date' => ['future', '2024-04-01'],
+    ]);
+
+    it('does not offer the employment date once the manager has an employment history', function (string $state) {
+        // Arrange
+        $manager = Manager::factory()->create();
+        giveEmploymentHistory($manager, $state);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $manager->id);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', true)
+            ->assertSet('form.employment_date', null)
+            ->assertDontSeeHtml('wire:model="form.employment_date"');
+    })->with(['released', 'retired', 'future']);
+
+    it('still employs a never-employed manager from the submitted date', function () {
+        // Arrange
+        $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $manager->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->set('form.employment_date', '2024-02-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        $manager->refresh();
+        expect($manager->first_name)->toBe('Renamed')
+            ->and($manager->status)->toBe(EmploymentStatus::Employed)
+            ->and(employmentSnapshot($manager))->toBe([[
+                'id' => $manager->employments()->firstOrFail()->id,
+                'started_at' => '2024-02-01',
+                'ended_at' => null,
+            ]]);
+    });
+
+    it('shows a business rule failure on the first name field instead of failing the request', function () {
+        // Arrange
+        $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+        $action = Double::for(UpdateAction::class);
+        $action->expects('handle')->throws(CannotBeEmployedException::retired($manager));
+        app()->instance(UpdateAction::class, $action);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $manager->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.first_name'])
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('form-submitted');
+        expect($manager->fresh()?->first_name)->toBe('Original');
+        $action->verify();
     });
 });
 

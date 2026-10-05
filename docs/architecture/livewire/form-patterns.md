@@ -130,8 +130,8 @@ protected function loadModelData(Model $model): void
         return;
     }
 
-    $this->employment_date = $model
-        ->firstEmployment?->started_at?->toDateString();
+    $this->hasEmploymentHistory = $model->employments()->exists();
+    $this->employment_date = null;
 }
 ```
 

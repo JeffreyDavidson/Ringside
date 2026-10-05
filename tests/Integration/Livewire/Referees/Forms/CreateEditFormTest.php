@@ -59,7 +59,8 @@ describe('referee create and edit form', function (): void {
         expect($form->modelId)->toBe($referee->id)
             ->and($form->first_name)->toBe('Earl')
             ->and($form->last_name)->toBe('Hebner')
-            ->and($form->employment_date)->toBe('2024-01-15')
+            ->and($form->employment_date)->toBeNull()
+            ->and($form->hasEmploymentHistory)->toBeTrue()
             ->and($selectedReferee->is($referee))->toBeTrue();
     });
 });

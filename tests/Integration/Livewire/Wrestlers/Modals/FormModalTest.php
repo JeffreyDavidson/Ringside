@@ -2,11 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Actions\Wrestlers\UpdateAction;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Date;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
@@ -296,5 +302,106 @@ describe('FormModal Reset Functionality', function () {
         // Then create new component for creation (no model ID)
         $creationComponent = livewire(FormModal::class);
         expect($creationComponent->get('form.name'))->toBe('');
+    });
+});
+
+describe('FormModal employment history', function () {
+    beforeEach(function () {
+        travelTo(Date::parse('2024-06-01 12:00:00'));
+    });
+
+    it('keeps the employment history of a released, retired or future-employed wrestler when only the name changes', function (
+        string $state,
+        ?string $submittedDate,
+    ) {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        giveEmploymentHistory($wrestler, $state);
+        $employmentsBefore = employmentSnapshot($wrestler);
+        $statusBefore = $wrestler->fresh()?->status;
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $wrestler->id);
+        $modal->set('form.name', 'Renamed Wrestler');
+        $modal->set('form.employment_date', $submittedDate);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertSet('isModalOpen', false);
+        $wrestler->refresh();
+        expect($wrestler->name)->toBe('Renamed Wrestler')
+            ->and(employmentSnapshot($wrestler))->toBe($employmentsBefore)
+            ->and($wrestler->status)->toBe($statusBefore);
+    })->with([
+        'released' => ['released', null],
+        'retired' => ['retired', null],
+        'future-employed' => ['future', null],
+        'released with a submitted date' => ['released', '2024-04-01'],
+        'retired with a submitted date' => ['retired', '2024-04-01'],
+        'future-employed with a submitted date' => ['future', '2024-04-01'],
+    ]);
+
+    it('does not offer the employment date once the wrestler has an employment history', function (string $state) {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, $state);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $wrestler->id);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', true)
+            ->assertSet('form.employment_date', '')
+            ->assertDontSeeHtml('wire:model="form.employment_date"');
+    })->with(['released', 'retired', 'future']);
+
+    it('still employs a never-employed wrestler from the submitted date', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $wrestler->id);
+        $modal->set('form.name', 'Renamed Wrestler');
+        $modal->set('form.employment_date', '2024-02-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        $wrestler->refresh();
+        expect($wrestler->name)->toBe('Renamed Wrestler')
+            ->and($wrestler->status)->toBe(EmploymentStatus::Employed)
+            ->and(employmentSnapshot($wrestler))->toBe([[
+                'id' => $wrestler->employments()->firstOrFail()->id,
+                'started_at' => '2024-02-01',
+                'ended_at' => null,
+            ]]);
+    });
+
+    it('shows a business rule failure on the name field instead of failing the request', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $action = Double::for(UpdateAction::class);
+        $action->expects('handle')->throws(CannotBeEmployedException::retired($wrestler));
+        app()->instance(UpdateAction::class, $action);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal', $wrestler->id);
+        $modal->set('form.name', 'Renamed Wrestler');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('form-submitted');
+        expect($wrestler->fresh()?->name)->toBe('Original Name');
+        $action->verify();
     });
 });

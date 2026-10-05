@@ -20,7 +20,7 @@ class UpdateAction
      *
      * This handles the complete referee update workflow:
      * - Updates referee personal and professional information
-     * - Uses EmployAction for consistent employment handling if employment_date is provided
+     * - Uses EmployAction for consistent employment handling if employment_date is provided and the referee has never been employed
      * - Maintains data integrity throughout the update process
      *
      * ARCHITECTURAL PATTERN:
@@ -41,7 +41,9 @@ class UpdateAction
                 'last_name' => $refereeData->last_name,
             ]);
 
-            if ($refereeData->employment_date instanceof Carbon && ! $lockedReferee->currentEmployment()->exists()) {
+            // Only a referee with no employment history is employed from the form date; a released, retired or
+            // future-employed referee keeps their history (employing again would overlap or be rejected).
+            if ($refereeData->employment_date instanceof Carbon && ! $lockedReferee->employments()->exists()) {
                 $this->employAction->handle($lockedReferee, $refereeData->employment_date);
             }
 

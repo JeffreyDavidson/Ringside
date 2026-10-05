@@ -19,7 +19,7 @@ class UpdateAction
      *
      * This handles the complete manager update workflow:
      * - Updates manager personal and professional information
-     * - Uses EmployAction for consistent employment handling if employment_date is modified
+     * - Uses EmployAction for consistent employment handling if employment_date is provided and the manager has never been employed
      * - Maintains data integrity throughout the update process
      *
      * ARCHITECTURAL PATTERN:
@@ -40,8 +40,9 @@ class UpdateAction
                 'last_name' => $managerData->last_name,
             ]);
 
-            // Handle employment using EmployAction for consistency
-            if (! is_null($managerData->employment_date) && ! $lockedManager->currentEmployment()->exists()) {
+            // Only a manager with no employment history is employed from the form date; a released, retired or
+            // future-employed manager keeps their history (employing again would overlap or be rejected).
+            if (! is_null($managerData->employment_date) && ! $lockedManager->employments()->exists()) {
                 $this->employAction->handle($lockedManager, $managerData->employment_date);
             }
 
