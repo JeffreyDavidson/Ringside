@@ -7,6 +7,10 @@ namespace App\Lifecycle\Matches;
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Events\Event;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 
 final class MatchConfigurationRequirements
 {
@@ -38,10 +42,20 @@ final class MatchConfigurationRequirements
         ];
 
         foreach ($participantsByType as $entityType => $participants) {
-            foreach ($participants as $participant) {
-                if ($participant->promotion_id !== $event->promotion_id) {
-                    throw InvalidMatchConfigurationException::outsideEventPromotion($entityType);
-                }
+            $this->ensureParticipantsWithinEventPromotion($event, $entityType, $participants);
+        }
+    }
+
+    /**
+     * @param  array<int, Referee|Title|TagTeam|Wrestler>  $participants
+     *
+     * @throws InvalidMatchConfigurationException
+     */
+    public function ensureParticipantsWithinEventPromotion(Event $event, string $entityType, array $participants): void
+    {
+        foreach ($participants as $participant) {
+            if ($participant->promotion_id !== $event->promotion_id) {
+                throw InvalidMatchConfigurationException::outsideEventPromotion($entityType);
             }
         }
     }

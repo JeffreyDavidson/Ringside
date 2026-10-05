@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Matches\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
@@ -17,6 +18,7 @@ class AddTitlesToMatchAction
     public function __construct(
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly MatchTitleRequirements $requirements,
+        private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
     /**
@@ -57,6 +59,11 @@ class AddTitlesToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
             $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
+                $lockedMatch->event()->firstOrFail(),
+                'titles',
+                $requestedTitles->all(),
+            );
             $this->handleWithinTransaction($lockedMatch, $requestedTitles);
         }, attempts: 3);
     }
