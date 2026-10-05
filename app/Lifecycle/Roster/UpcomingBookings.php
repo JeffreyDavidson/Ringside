@@ -32,7 +32,8 @@ final readonly class UpcomingBookings
             ->whereIn('id', $this->matches($rosterMember)->select('event_id'))
             ->orderBy('date')
             ->orderBy('id')
-            ->get(['id', 'name', 'date']);
+            ->with('promotion')
+            ->get(['id', 'name', 'date', 'promotion_id']);
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Livewire\Titles\Components\Actions as TitleActions;
 use App\Livewire\Wrestlers\Components\Actions as WrestlerActions;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -167,6 +168,23 @@ describe('booked members', function (): void {
         'tag team release' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'release', "Release The D'Arcys? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
         'tag team retire' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'retire', "Retire The D'Arcys? Booked in upcoming events: Winter Brawl (Dec 1, 2026)."],
     ]);
+
+    test('it names the booked event on its day in the promotion time zone', function (): void {
+        // Arrange
+        actingAs(administrator());
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy"]);
+        $event = Event::factory()
+            ->for(Promotion::factory()->create(['timezone' => 'Asia/Tokyo']), 'promotion')
+            ->scheduledOn('2030-03-04 23:30:00')
+            ->create(['name' => 'Late Show']);
+        EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler, Wrestler::factory()->create()])->create();
+
+        // Act
+        $buttons = renderedLifecycleButtons(WrestlerActions::class, 'wrestler', $wrestler);
+
+        // Assert
+        expect($buttons['retire']->getAttribute('wire:confirm'))->toBe("Retire Ann D'Arcy? Booked in upcoming events: Late Show (Mar 5, 2030).");
+    });
 
     test('it keeps the plain confirmation when the member only has resulted past bookings', function (): void {
         // Arrange

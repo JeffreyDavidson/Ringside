@@ -19,7 +19,7 @@ trait DescribesUpcomingBookings
     {
         return app(UpcomingBookings::class)
             ->events($rosterMember)
-            ->map(fn (Event $event): string => "{$event->name} ({$event->date?->format('M j, Y')})")
+            ->map(fn (Event $event): string => "{$event->name} ({$event->local_date?->format('M j, Y')})")
             ->implode(', ');
     }
 }
