@@ -13,6 +13,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\ViewModels\DashboardViewModel;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
@@ -85,6 +86,30 @@ test('the dashboard shows the roster, upcoming events and current champions', fu
         ->assertSeeHtml(route('events.show', $event))
         ->assertSee('Heavyweight Championship')
         ->assertSeeHtml(route('wrestlers.show', $champion));
+});
+
+/**
+ * @see DashboardController::__invoke()
+ */
+test('the dashboard shows when a reign began as the day in the title promotion time zone', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+    $title = Title::factory()->active()->for($promotion, 'promotion')->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->employed()->create())
+        ->current()
+        ->create(['won_at' => Date::parse('2026-03-02 03:00:00', 'UTC')]);
+
+    // Act
+    $response = actingAs(administrator())
+        ->get(route('dashboard'));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertSee('Since Mar 1, 2026')
+        ->assertDontSee('Mar 2, 2026');
 });
 
 /**
