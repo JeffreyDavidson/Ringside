@@ -6,6 +6,7 @@ return [
     'competitors' => 'Competitors',
     'titles' => 'Titles',
     'result' => 'Result',
+    'no_longer_bookable' => 'No longer bookable',
 
     'modal' => [
         'edit' => 'Edit Match',

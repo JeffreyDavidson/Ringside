@@ -14,8 +14,13 @@ use App\Livewire\Table\Columns\ArrayColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -26,6 +31,11 @@ class MatchesTable extends DataTableComponent
     use ShowTableTrait;
 
     protected MatchTableFormatter $matchTableFormatter;
+
+    /**
+     * @var array<string, true>
+     */
+    protected array $unbookable = [];
 
     protected string $databaseTableName = 'events_matches';
 
@@ -78,14 +88,14 @@ class MatchesTable extends DataTableComponent
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('matches.competitors'))
-                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->competitorLinks($row))
+                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->competitorLinks($row, $this->unbookable))
                 ->html(),
             ArrayColumn::make(__('matches.referees'))
                 ->data(fn (EventMatch $row) => $row->referees)
-                ->link(
-                    title: fn (Referee $value): string => $value->full_name,
-                    location: fn (Referee $value): string => route('referees.show', $value->id),
-                )
+                ->outputFormat(fn (Referee $value): string => $this->matchTableFormatter->refereeLink(
+                    $value,
+                    isset($this->unbookable[MatchTableFormatter::unbookableKey($value)]),
+                ))
                 ->separator(', ')
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('matches.titles'))
@@ -103,6 +113,55 @@ class MatchesTable extends DataTableComponent
                 ->view('components.matches.table-result-action')
                 ->html(),
         ];
+    }
+
+    /**
+     * Mark booked members of upcoming or unresulted matches who can no longer be booked, using one query per type.
+     *
+     * @param  Collection<int, EventMatch>  $rows
+     */
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $booked = $rows->toBase()
+            ->filter(fn (EventMatch $match): bool => $match->match_finish === null || $match->event->date >= now())
+            ->flatMap(fn (EventMatch $match): Collection => $match->competitors->toBase()
+                ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
+                ->merge($match->referees->toBase()))
+            ->unique(MatchTableFormatter::unbookableKey(...));
+
+        $bookable = $this->bookableKeys(Wrestler::class, $booked)
+            ->merge($this->bookableKeys(TagTeam::class, $booked))
+            ->merge($this->bookableKeys(Referee::class, $booked));
+
+        $this->unbookable = array_fill_keys(
+            $booked
+                ->map(MatchTableFormatter::unbookableKey(...))
+                ->reject(fn (string $key): bool => $bookable->contains($key))
+                ->all(),
+            true,
+        );
+    }
+
+    /**
+     * @param  class-string<Wrestler|TagTeam|Referee>  $type
+     * @param  Collection<int, Wrestler|TagTeam|Referee>  $booked
+     * @return Collection<int, string>
+     */
+    private function bookableKeys(string $type, Collection $booked): Collection
+    {
+        $members = $booked->filter(fn (Model $member): bool => $member instanceof $type);
+
+        if ($members->isEmpty()) {
+            return collect();
+        }
+
+        return $type::query()
+            ->whereKey($members->map->getKey())
+            ->bookable()
+            ->get()
+            ->toBase()
+            ->map(MatchTableFormatter::unbookableKey(...));
     }
 
     public function delete(EventMatch $eventMatch, DeleteAction $deleteAction): void
