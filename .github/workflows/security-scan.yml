@@ -26,20 +26,31 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
 
             - name: Setup Go
-              uses: actions/setup-go@v7
+              uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
               with:
                   go-version: '1.24.x'
+                  cache: false
 
             - name: Configure Ward environment
               run: |
                   echo "GOPATH=$RUNNER_TEMP/ward-go" >> "$GITHUB_ENV"
                   echo "HOME=$RUNNER_TEMP/ward-home" >> "$GITHUB_ENV"
                   mkdir -p "$RUNNER_TEMP/ward-home"
+
+            - name: Cache Go modules and build
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: |
+                      ${{ runner.temp }}/ward-go/pkg/mod
+                      ${{ runner.temp }}/ward-home/.cache/go-build
+                  key: ward-go-${{ runner.os }}-v0.4.2
+                  restore-keys: |
+                      ward-go-${{ runner.os }}-
 
             - name: Install Ward
               run: |
@@ -77,7 +88,7 @@ jobs:
 
             - name: Upload Ward reports
               if: always()
-              uses: actions/upload-artifact@v7
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: ward-security-reports
                   path: |
@@ -89,6 +100,6 @@ jobs:
             - name: Upload Ward SARIF
               if: always() && hashFiles('ward-report.sarif') != ''
               continue-on-error: true
-              uses: github/codeql-action/upload-sarif@v4
+              uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
               with:
                   sarif_file: ward-report.sarif

@@ -38,8 +38,12 @@ Route::get('/', MarketingController::class)->name('home');
 Route::middleware('auth')->group(function () {
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
     // Outside promotion.context on purpose: a user with no active membership must still be able to reach them.
-    Route::post('promotions/{promotion}/invitation/accept', AcceptPromotionInvitationController::class)->name('promotions.invitation.accept');
-    Route::post('promotions/{promotion}/invitation/decline', DeclinePromotionInvitationController::class)->name('promotions.invitation.decline');
+    Route::post('promotions/{promotion}/invitation/accept', AcceptPromotionInvitationController::class)
+        ->missing(fn () => redirect()->route('dashboard')->with('error', __('promotions.invitation_unavailable')))
+        ->name('promotions.invitation.accept');
+    Route::post('promotions/{promotion}/invitation/decline', DeclinePromotionInvitationController::class)
+        ->missing(fn () => redirect()->route('dashboard')->with('error', __('promotions.invitation_unavailable')))
+        ->name('promotions.invitation.decline');
 
     Route::middleware('promotion.context')->group(function () {
         Route::get('promotions', [PromotionsController::class, 'index'])

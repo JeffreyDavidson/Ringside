@@ -146,6 +146,14 @@ key `promotion-invitations:{promotionId}`, in `Manage::addMember`); only
 attempts that pass validation count, and the 31st shows an `email` error with the
 minutes until the limit resets. The limit is per promotion, not per owner.
 
+The member list is paginated at 25 per page (ordered by `created_at`, then
+`user_id`); `memberRoles` entries are backfilled for the members on the rendered
+page, and the role options are built once per render. Pending invitations are not
+paginated. Accepting or declining an invitation for a promotion that does not
+exist gets the same "no longer available" redirect as one without an invitation,
+and `promotions/switch` answers 403 for a missing promotion and for one the user
+does not belong to, so neither endpoint reveals which promotions exist.
+
 An invitation expires 30 days after it is sent (`PromotionInvitation::EXPIRES_AFTER_DAYS`,
 the `expires_at` column). Expiry is enforced on every read through the
 `pending()` builder scope: `pendingInvitationsFor()` (switcher and no-membership

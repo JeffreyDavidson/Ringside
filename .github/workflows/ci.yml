@@ -25,7 +25,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -45,7 +45,7 @@ jobs:
               run: composer audit --locked --format=plain
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 24
 
@@ -55,7 +55,7 @@ jobs:
               run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
             - name: Restore npm cache
-              uses: actions/cache@v6
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.npm-cache.outputs.directory }}
                   key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
@@ -88,7 +88,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -96,7 +96,7 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 24
 
@@ -106,7 +106,7 @@ jobs:
               run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
             - name: Restore npm cache
-              uses: actions/cache@v6
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.npm-cache.outputs.directory }}
                   key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
@@ -126,7 +126,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -143,7 +143,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -160,7 +160,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -183,7 +183,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -191,7 +191,7 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 24
 
@@ -201,7 +201,7 @@ jobs:
               run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
             - name: Restore npm cache
-              uses: actions/cache@v6
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.npm-cache.outputs.directory }}
                   key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
@@ -227,7 +227,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -287,7 +287,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -338,7 +338,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -371,7 +371,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -395,7 +395,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -403,7 +403,7 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Setup Node.js
-              uses: actions/setup-node@v7
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
               with:
                   node-version: 24
 
@@ -413,7 +413,7 @@ jobs:
               run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
             - name: Restore npm cache
-              uses: actions/cache@v6
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.npm-cache.outputs.directory }}
                   key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
@@ -440,7 +440,7 @@ jobs:
 
             - name: Upload browser failure screenshots
               if: failure()
-              uses: actions/upload-artifact@v7
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: pest-browser-screenshots
                   path: tests/Browser/Screenshots

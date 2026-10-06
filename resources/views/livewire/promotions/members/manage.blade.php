@@ -11,7 +11,7 @@
                 {{ __('promotions.members_title') }}
             </h2>
             <p class="text-ringside-muted mt-2 text-sm">
-                {{ trans_choice('promotions.member_count', $members->count(), ['count' => $members->count()]) }}
+                {{ trans_choice('promotions.member_count', $members->total(), ['count' => $members->total()]) }}
             </p>
         </div>
         <a
@@ -60,8 +60,8 @@
                     wire:model="newMemberRole"
                     class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-white min-h-14 w-full border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
-                    @foreach ($roles as $role)
-                        <option value="{{ $role->value }}">{{ $role->label() }}</option>
+                    @foreach ($roleOptions as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -130,12 +130,12 @@
                                                 aria-label="{{ __('promotions.role_for', ['name' => $membership->user->full_name]) }}"
                                                 class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-white min-h-10 min-w-28 border px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                                             >
-                                                @foreach ($roles as $role)
+                                                @foreach ($roleOptions as $value => $label)
                                                     <option
-                                                        value="{{ $role->value }}"
-                                                        @selected($role === $membership->role)
+                                                        value="{{ $value }}"
+                                                        @selected($value === $membership->role->value)
                                                     >
-                                                        {{ $role->label() }}
+                                                        {{ $label }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -194,6 +194,35 @@
                 </tbody>
             </table>
         </div>
+        @if ($members->hasPages())
+            <nav
+                class="border-ringside-line text-ringside-muted flex items-center justify-end gap-3 border-t px-5 py-3 text-xs lg:px-6"
+                aria-label="{{ __('core.table_pages') }}"
+                data-test="promotion-members-pagination"
+            >
+                <button
+                    type="button"
+                    wire:click="previousPage"
+                    wire:loading.attr="disabled"
+                    @disabled($members->onFirstPage())
+                    aria-label="{{ __('core.previous_page') }}"
+                    class="border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink inline-flex size-11 cursor-pointer items-center justify-center border focus-visible:outline-2 disabled:cursor-default disabled:opacity-40"
+                >
+                    <x-heroicon-o-chevron-left class="size-4" aria-hidden="true" />
+                </button>
+                <span class="tabular-nums">{{ __('core.page', ['current' => $members->currentPage(), 'last' => $members->lastPage()]) }}</span>
+                <button
+                    type="button"
+                    wire:click="nextPage"
+                    wire:loading.attr="disabled"
+                    @disabled(! $members->hasMorePages())
+                    aria-label="{{ __('core.next_page') }}"
+                    class="border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink inline-flex size-11 cursor-pointer items-center justify-center border focus-visible:outline-2 disabled:cursor-default disabled:opacity-40"
+                >
+                    <x-heroicon-o-chevron-right class="size-4" aria-hidden="true" />
+                </button>
+            </nav>
+        @endif
     @endif
 
     {{-- Owners see pending invitations by the email they typed; nobody joins, and no account name appears, until the invitation is accepted. --}}

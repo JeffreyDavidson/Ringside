@@ -20,7 +20,7 @@ jobs:
 
         steps:
             - name: Checkout develop
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   ref: develop
 
@@ -39,3 +39,27 @@ jobs:
               env:
                   REVERSE_UNORDERED_SELECTS: '1'
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage --parallel
+
+    report-failure:
+        name: Report unordered selects failure
+        needs: reverse-unordered-selects
+        if: failure()
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            issues: write
+
+        steps:
+            - name: Open or update the failure issue
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  ISSUE_TITLE: Nightly unordered selects failed
+              run: |
+                  number=$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number,title --jq "[.[] | select(.title == \"$ISSUE_TITLE\")][0].number // empty")
+                  if [ -n "$number" ]; then
+                    gh issue comment "$number" --body "The nightly unordered selects run failed again: $RUN_URL"
+                  else
+                    gh issue create --title "$ISSUE_TITLE" --body "The nightly unordered selects run failed: $RUN_URL"
+                  fi

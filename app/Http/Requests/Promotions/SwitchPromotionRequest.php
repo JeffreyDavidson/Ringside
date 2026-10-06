@@ -23,7 +23,6 @@ class SwitchPromotionRequest extends FormRequest
             'promotion_id' => [
                 'required',
                 'integer',
-                'exists:promotions,id',
             ],
         ];
     }
