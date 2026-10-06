@@ -37,7 +37,7 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 
 ### 2. **Security Scan** (`.github/workflows/security-scan.yml`, workflow name "Security")
 **Trigger**: Pull requests targeting `develop` or `main`, a weekly schedule (Mondays 09:00 UTC), and manual dispatch. It does not run on pushes.
-**Purpose**: Ward security scan (`Ward security scan` job; GitHub code scanning separately reports its own `Ward` check from the uploaded SARIF). Required on `main` (so release PRs must pass it); on `develop` a failure shows as a failing check but does not block merging. Pull requests are scanned against a baseline from the base commit and fail on new high findings; scheduled and manual runs fail on any high finding. Reports are uploaded as `ward-security-reports` and SARIF is uploaded to GitHub code scanning.
+**Purpose**: Ward security scan (`Ward security scan` job; GitHub code scanning separately reports its own `Ward` check from the uploaded SARIF). Required on `main` (so release PRs must pass it); on `develop` a failure shows as a failing check but does not block merging. Pull requests are scanned against a baseline from the base commit and fail on new high findings; scheduled and manual runs fail on any high finding. Reports are uploaded as `ward-security-reports` and SARIF is uploaded to GitHub code scanning. The Go module and build caches are restored with `actions/cache`, keyed on the Ward version, so changing the pinned Ward version rebuilds them.
 
 ### 3. **TIA Baseline** (`.github/workflows/tia-baseline.yml`, workflow name "Pest TIA Baseline")
 **Trigger**: Pushes to `develop`, a daily schedule (03:00 UTC), and manual dispatch
@@ -49,7 +49,7 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 
 ### 5. **Unordered Selects** (`.github/workflows/unordered-selects.yml`, workflow name "Unordered Selects")
 **Trigger**: A daily schedule (03:30 UTC, after the TIA baseline) and manual dispatch; it checks out `develop` explicitly because scheduled runs start on the default branch
-**Purpose**: Run the full application suite (Browser excluded, SQLite, `--parallel`) with `REVERSE_UNORDERED_SELECTS=1` so hidden row-order assumptions fail. A red run emails the repository's default GitHub notification; there is no other alert.
+**Purpose**: Run the full application suite (Browser excluded, SQLite, `--parallel`) with `REVERSE_UNORDERED_SELECTS=1` so hidden row-order assumptions fail. A red run emails the repository's default GitHub notification, and the `Report unordered selects failure` job (the only job with `issues: write`) opens an issue titled "Nightly unordered selects failed" with the run URL, or comments on the open one if it already exists.
 
 ### Coverage policy (100%)
 The `coverage` job in `ci.yml` runs `composer test:coverage` on every pull request and push to `develop`/`main`. `phpunit.xml` has no `<source><exclude>` entries, so all of `app/` (Livewire, Console, and `AppServiceProvider` included) must be fully covered. The Browser suite is excluded from the gate because ordinary tests already cover what it reaches.
@@ -81,6 +81,7 @@ git push origin develop
 `.github/dependabot.yml` opens weekly (Monday, 06:00 America/New_York) update PRs against `develop` for
 Composer, npm, and GitHub Actions (the workflows and the local `setup-php-composer` action).
 
+- Every third-party action is pinned to a full commit SHA with a trailing `# vX.Y.Z` comment, and Dependabot updates both. Resolve a SHA with `gh api repos/{owner}/{repo}/git/ref/tags/{tag}` (dereference annotated tags through the tag object).
 - Minor and patch updates are grouped per ecosystem; major updates arrive as individual PRs.
 - Titles follow Conventional Commits (`chore(deps)`, `chore(deps-dev)`, `ci(deps)`).
 - Nothing merges automatically. Each update PR runs the normal required checks (including Dependency
