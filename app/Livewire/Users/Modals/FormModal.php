@@ -8,8 +8,11 @@ use App\Actions\Users\CreateAction;
 use App\Actions\Users\UpdateAction;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Users\Forms\CreateEditForm;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
+use App\Services\Promotions\PendingInvitationSummaryService;
 use Illuminate\View\View;
 
 /**
@@ -17,6 +20,8 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use DispatchesActionFeedback;
+
     #[\Override]
     protected ?string $createdEventName = 'userCreated';
 
@@ -35,10 +40,13 @@ class FormModal extends BaseFormModal
 
     private UpdateAction $updateAction;
 
-    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    private PendingInvitationSummaryService $pendingInvitationSummaries;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction, PendingInvitationSummaryService $pendingInvitationSummaries): void
     {
         $this->createAction = $createAction;
         $this->updateAction = $updateAction;
+        $this->pendingInvitationSummaries = $pendingInvitationSummaries;
     }
 
     protected function getModelClass(): string
@@ -64,7 +72,11 @@ class FormModal extends BaseFormModal
      */
     protected function updateForm(): void
     {
-        $updatedUser = $this->updateAction->handle($this->form->user(), $this->form->toData());
+        $user = $this->form->user();
+        $previousEmail = $user->email;
+        $updatedUser = $this->updateAction->handle($user, $this->form->toData());
+
+        $this->warnAboutInvitationsReachedByEmailChange($updatedUser, $previousEmail);
 
         if ($updatedUser->is(auth()->user())) {
             auth()->guard()->setUser($updatedUser);
@@ -73,6 +85,25 @@ class FormModal extends BaseFormModal
                 auth()->guard()->logoutOtherDevices($this->form->password);
             }
         }
+    }
+
+    /** Changing an email moves the account onto that address's invitations, so the administrator is told which. */
+    private function warnAboutInvitationsReachedByEmailChange(User $user, string $previousEmail): void
+    {
+        if (PromotionInvitation::normalizeEmail($previousEmail) === PromotionInvitation::normalizeEmail($user->email)) {
+            return;
+        }
+
+        $invitations = $this->pendingInvitationSummaries->forEmail($user->email);
+
+        if ($invitations === null) {
+            return;
+        }
+
+        $this->dispatchActionWarning(__('users.email_change_invitations_warning', [
+            'name' => $user->full_name,
+            'invitations' => $invitations,
+        ]));
     }
 
     protected function createForm(): void

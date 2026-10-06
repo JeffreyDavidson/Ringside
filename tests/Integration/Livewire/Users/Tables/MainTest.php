@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Livewire\Users\Tables\Main;
+use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -373,4 +376,68 @@ describe('users table', function (): void {
         'guest' => ['guest'],
         'basic user' => ['basic user'],
     ]);
+});
+
+describe('account activation confirmation', function (): void {
+    it('lists the pending invitations for the account email, excluding expired ones and other emails', function (): void {
+        // Arrange
+        $user = User::factory()->unverified()->create(['first_name' => 'Ivy', 'last_name' => 'Invited', 'email' => 'ivy@example.com']);
+        PromotionInvitation::factory()->forEmail('Ivy@Example.com ')->withRole(MembershipRole::Owner)
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Acme Wrestling'])]);
+        PromotionInvitation::factory()->forEmail('ivy@example.com')->withRole(MembershipRole::Member)
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Beta Pro'])]);
+        PromotionInvitation::factory()->forEmail('ivy@example.com')->expired()
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Expired Federation'])]);
+        PromotionInvitation::factory()->forEmail('someone@example.com')
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Other Alliance'])]);
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSeeHtml('wire:confirm="Activate Ivy Invited? This email has pending invitations: Acme Wrestling (Owner), Beta Pro (Member)."')
+            ->assertDontSee('Expired Federation')
+            ->assertDontSee('Other Alliance');
+    });
+
+    it('leaves the activation unchanged when the email has no pending invitations', function (): void {
+        // Arrange
+        User::factory()->unverified()->create(['email' => 'plain@example.com']);
+        PromotionInvitation::factory()->forEmail('plain@example.com')->expired()->create();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSee('Activate account')
+            ->assertDontSeeHtml('wire:confirm="Activate');
+    });
+
+    it('does not add queries per row for a page of invited users', function (): void {
+        // Arrange
+        $countInvitationQueries = function (): int {
+            $component = livewire(Main::class);
+
+            return collect(recordStatements(fn () => $component->call('setPage', 1)))
+                ->filter(fn (array $statement): bool => str_contains($statement['sql'], 'promotion_invitations'))
+                ->count();
+        };
+        $invite = function (int $count): void {
+            User::factory()->unverified()->count($count)->create()->each(
+                fn (User $user) => PromotionInvitation::factory()->forEmail($user->email)->create(),
+            );
+        };
+        $invite(1);
+        $withOneInvitedUser = $countInvitationQueries();
+        $invite(8);
+
+        // Act
+        $withManyInvitedUsers = $countInvitationQueries();
+
+        // Assert
+        expect($withOneInvitedUser)->toBeGreaterThan(0)
+            ->and($withManyInvitedUsers)->toBe($withOneInvitedUser);
+    });
 });
