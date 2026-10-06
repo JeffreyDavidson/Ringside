@@ -190,7 +190,21 @@ through an id supplied by the invited user, and never touch memberships. The
 middleware, the promotion switcher, `SwitchActivePromotionAction` and
 `PromotionGate` read active memberships only, so an invitation gives no context
 and no access until it is accepted. The last-owner guards count active owners
-only. No email is sent: the invitation is visible in the application only.
+only.
+
+A new invitation (`PromotionInvitationOutcome::Invited`, including one that replaces
+an expired invitation) is announced by email: after its transaction commits,
+`InvitePromotionMemberAction` sends `Mail\Promotions\PromotionInvitationMail`
+(markdown, with a plain-text alternative) to the stored email, taking the inviting
+user from the caller. `AlreadyInvited` and `AlreadyMember` send nothing. The email
+names the inviter, promotion and role, shows the expiry date in the promotion's
+time zone, links to the login and register pages and says the invitation is
+accepted after signing in with that email address. It carries no token and reads
+identically whether or not an account exists, so it reveals nothing about
+accounts and grants nothing. It is sent synchronously (production has no queue
+worker). A delivery failure is reported (`report()`) and swallowed: the
+invitation stays saved and the outcome is still `Invited`, and the owner can
+still see it in the application. Text lives in `lang/en/mail.php`.
 
 Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,

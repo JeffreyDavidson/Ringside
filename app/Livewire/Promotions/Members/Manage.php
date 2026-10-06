@@ -81,7 +81,7 @@ class Manage extends Component
 
         RateLimiter::hit($rateLimitKey, 3600);
 
-        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role);
+        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role, User::query()->findOrFail(auth()->id()));
 
         // The owner already sees every member and pending invitation of the promotion, so these two cases
         // reveal nothing new. Every other email gets the same message whether or not it belongs to an account.

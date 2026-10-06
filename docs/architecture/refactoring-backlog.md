@@ -267,9 +267,6 @@ never reveals whether one exists), and the person joins only by accepting it in
 the application after signing in with that email (see "Promotion Context and
 Membership" in `core-capabilities.md`). The remaining gaps:
 
-- **No email.** The app has no mail infrastructure in production, so an
-  invitation is seen only after the person signs in. Add a notification when a
-  mailer is configured.
 - **Platform administrators without a membership** have no switcher or
   no-membership page on which to see an invitation; they reach promotions
   through the directory.
