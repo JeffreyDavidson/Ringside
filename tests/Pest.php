@@ -56,6 +56,7 @@ pest()
         'Integration/Enums',
         'Integration/Lifecycle',
         'Integration/Livewire',
+        'Integration/Mail',
         'Integration/Models',
         'Integration/Policies',
         'Integration/Promotions',

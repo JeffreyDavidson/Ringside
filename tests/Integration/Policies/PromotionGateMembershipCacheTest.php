@@ -195,7 +195,7 @@ describe('staleness within a request', function (): void {
         $before = Gate::forUser($user)->allows('view', $promotion);
 
         // Act
-        app(InvitePromotionMemberAction::class)->handle($promotion, $user->email, MembershipRole::Member);
+        app(InvitePromotionMemberAction::class)->handle($promotion, $user->email, MembershipRole::Member, User::factory()->create());
         $invited = Gate::forUser($user)->allows('view', $promotion);
         app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
         $accepted = Gate::forUser($user)->allows('view', $promotion);
