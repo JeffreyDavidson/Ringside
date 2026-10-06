@@ -537,8 +537,8 @@ describe('SplitStableAction Integration Tests', function () {
             expect(Stable::count())->toBe($initialStableCount + 1);
 
             // Verify both stables exist and have members
-            expect($newStable->currentWrestlers()->count())->toBeGreaterThan(0);
-            expect(freshModel($this->originalStable)->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
+            expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
+            expect(freshModel($this->originalStable)->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count());
         });
 
         test('split rolls back membership changes when stable creation fails', function () {

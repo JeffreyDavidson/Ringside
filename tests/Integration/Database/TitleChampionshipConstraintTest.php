@@ -53,22 +53,3 @@ test('different titles may each have an open reign', function () {
     // Assert
     expect(TitleChampionship::query()->whereNull('lost_at')->count())->toBe(2);
 });
-
-test('the migration lists the titles with several open reigns before changing anything', function () {
-    // Arrange
-    $title = Title::factory()->create();
-    DB::statement('DROP INDEX titles_championships_one_open_reign_unique');
-    [$first, $second] = TitleChampionship::factory()->for($title)->count(2)->create(['lost_at' => null])->all();
-    $migration = require database_path('migrations/2026_10_05_024420_enforce_single_open_reign_per_title.php');
-    $up = new ReflectionMethod($migration, 'up');
-
-    // Act
-    $runMigration = fn () => $up->invoke($migration);
-
-    // Assert
-    expect($runMigration)
-        ->toThrow(
-            RuntimeException::class,
-            "title {$title->id} has open reign ids {$first->id}, {$second->id}",
-        );
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);

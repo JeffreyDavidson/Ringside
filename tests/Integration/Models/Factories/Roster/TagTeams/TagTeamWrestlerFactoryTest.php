@@ -67,6 +67,21 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
             ->and($ended->left_at?->between($ended->joined_at, now()))->toBeTrue();
     });
 
+    test('an ended membership that joined in the future leaves on the day it joined', function () {
+        // Arrange
+        $joinedAt = now()->addDays(10);
+
+        // Act
+        $ended = TagTeamWrestler::factory()
+            ->state(['joined_at' => $joinedAt])
+            ->ended()
+            ->create();
+
+        // Assert
+        expect($ended->left_at?->greaterThanOrEqualTo($ended->joined_at))->toBeTrue()
+            ->and($ended->left_at?->toDateTimeString())->toBe($joinedAt->toDateTimeString());
+    });
+
     describe('factory state methods', function () {
         test('current partnership state works correctly', function () {
             // Arrange

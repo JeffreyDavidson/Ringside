@@ -223,9 +223,9 @@ describe('FormModal Dummy Data', function () {
 
         expect($component->get('form.name'))->not->toBeEmpty()
             ->and($component->get('form.hometown'))->not->toBeEmpty()
-            ->and($component->get('form.height_feet'))->toBeGreaterThan(0)
-            ->and($component->get('form.height_inches'))->toBeGreaterThanOrEqual(0)
-            ->and($component->get('form.weight'))->toBeGreaterThan(0);
+            ->and($component->get('form.height_feet'))->toBeBetween(5, 7)
+            ->and($component->get('form.height_inches'))->toBeBetween(0, 11)
+            ->and($component->get('form.weight'))->toBeBetween(180, 350);
     });
 
     it('generates realistic dummy data', function () {
@@ -233,16 +233,13 @@ describe('FormModal Dummy Data', function () {
         $component->call('fillDummyFields');
 
         // Check that height is realistic (5-7 feet)
-        expect($component->get('form.height_feet'))->toBeGreaterThanOrEqual(5);
-        expect($component->get('form.height_feet'))->toBeLessThanOrEqual(7);
+        expect($component->get('form.height_feet'))->toBeBetween(5, 7);
 
         // Check that height inches is valid (0-11)
-        expect($component->get('form.height_inches'))->toBeGreaterThanOrEqual(0);
-        expect($component->get('form.height_inches'))->toBeLessThanOrEqual(11);
+        expect($component->get('form.height_inches'))->toBeBetween(0, 11);
 
-        // Check that weight is realistic (150-350)
-        expect($component->get('form.weight'))->toBeGreaterThanOrEqual(150);
-        expect($component->get('form.weight'))->toBeLessThanOrEqual(350);
+        // Check that weight is realistic (180-350)
+        expect($component->get('form.weight'))->toBeBetween(180, 350);
 
         // Check that hometown includes state abbreviation
         expect($component->get('form.hometown'))->toContain(', ');

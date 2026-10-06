@@ -40,7 +40,7 @@ test('it gives existing invitations thirty days from the day they were created',
 
     expect($expiries['old@example.test'])->toBe('2026-01-31 10:00:00')
         ->and($expiries['undated@example.test'])->toBe(now()->addDays(30)->toDateTimeString());
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
+});
 
 test('it keeps the unique key, the email index and the promotion foreign key', function () {
     // Arrange
@@ -61,4 +61,4 @@ test('it keeps the unique key, the email index and the promotion foreign key', f
         ->and($foreignKeys->contains(fn (array $key): bool => $key['columns'] === ['promotion_id'] && $key['foreign_table'] === 'promotions' && $key['on_delete'] === 'cascade'))->toBeTrue()
         ->and($column['nullable'])->toBeFalse()
         ->and($promotion->exists)->toBeTrue();
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
+});

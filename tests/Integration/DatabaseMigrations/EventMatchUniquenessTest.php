@@ -24,7 +24,7 @@ test('the match number migration lists the repeated match numbers before changin
             RuntimeException::class,
             "match number 1 of event {$event->id} is used by match ids {$first->id}, {$second->id}",
         );
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
+});
 
 test('the pivot migration lists a referee repeated within a match before changing anything', function () {
     $match = EventMatch::factory()->create();
@@ -41,7 +41,7 @@ test('the pivot migration lists a referee repeated within a match before changin
             RuntimeException::class,
             "events_matches_referees: match {$match->id} lists referee_id {$referee->id} in row ids {$rowIds}",
         );
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
+});
 
 test('the pivot migration lists a title repeated within a match before changing anything', function () {
     $match = EventMatch::factory()->create();
@@ -59,4 +59,4 @@ test('the pivot migration lists a title repeated within a match before changing 
             "events_matches_titles: match {$match->id} lists title_id {$title->id} in row ids {$rowIds}",
         )
         ->and(DB::table('events_matches_titles')->count())->toBe(2);
-})->skip(fn (): bool => runsOnDriver('mysql'), MYSQL_IMPLICIT_COMMIT);
+});
