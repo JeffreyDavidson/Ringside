@@ -708,3 +708,47 @@ function employmentSnapshot(Wrestler|Manager|Referee|TagTeam $entity): array
         ->values()
         ->all();
 }
+
+/**
+ * Load config/<file>.php with the given environment variables set, or unset when null, and restore them afterwards.
+ *
+ * @param  array<string, ?string>  $variables
+ * @return array<string, mixed>
+ */
+function configFileWith(string $file, array $variables): array
+{
+    $previous = [];
+
+    foreach ($variables as $name => $value) {
+        $previous[$name] = [$_SERVER[$name] ?? null, $_ENV[$name] ?? null, getenv($name)];
+        unset($_SERVER[$name], $_ENV[$name]);
+        putenv($name);
+
+        if ($value !== null) {
+            $_SERVER[$name] = $value;
+            $_ENV[$name] = $value;
+            putenv("{$name}={$value}");
+        }
+    }
+
+    try {
+        return require config_path("{$file}.php");
+    } finally {
+        foreach ($previous as $name => [$server, $env, $process]) {
+            unset($_SERVER[$name], $_ENV[$name]);
+            putenv($name);
+
+            if ($server !== null) {
+                $_SERVER[$name] = $server;
+            }
+
+            if ($env !== null) {
+                $_ENV[$name] = $env;
+            }
+
+            if ($process !== false) {
+                putenv("{$name}={$process}");
+            }
+        }
+    }
+}

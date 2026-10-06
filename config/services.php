@@ -11,6 +11,11 @@ return [
         'scheme' => 'https',
     ],
 
+    // Laravel's own default reads RESEND_KEY; Ringside documents RESEND_API_KEY (see .env.example).
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
     'sparkpost' => [
         'secret' => env('SPARKPOST_SECRET'),
     ],
