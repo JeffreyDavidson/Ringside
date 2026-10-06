@@ -21,6 +21,8 @@ return [
     'invitation_cancelled' => 'The invitation was cancelled.',
     'invitation_declined' => 'Invitation declined.',
     'invitation_already_pending' => 'That email already has a pending invitation to this promotion. Cancel it in the list below to send a different role.',
+    'invitation_expires' => 'Expires :date',
+    'invitation_expires_heading' => 'Expires',
     'invitation_pending' => 'Invitation pending',
     'invitation_role' => 'Invited as :role',
     'invitation_sent' => 'An invitation to join this promotion as :role was saved for that email. The person sees it after signing in to Ringside with that email, and nobody joins until they accept.',

@@ -105,6 +105,7 @@ class PromotionContextService
     {
         return $this->invitations[$user->id] ??= PromotionInvitation::query()
             ->forEmail($user->email)
+            ->pending()
             ->with('promotion')
             ->orderBy('created_at')
             ->orderBy('id')

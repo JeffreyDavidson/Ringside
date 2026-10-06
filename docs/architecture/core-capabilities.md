@@ -141,6 +141,18 @@ role and "Invitation pending", never by name; an owner can cancel it by
 invitation id (scoped to the promotion). An invitation has no role or status to
 change, so an owner cannot activate it behind anyone's back.
 
+An invitation expires 30 days after it is sent (`PromotionInvitation::EXPIRES_AFTER_DAYS`,
+the `expires_at` column). Expiry is enforced on every read through the
+`pending()` builder scope: `pendingInvitationsFor()` (switcher and no-membership
+page), `AcceptPromotionInvitationAction` (an expired invitation is "no longer
+available" and creates no membership) and the owner's list, which shows
+"Expires {date}" in the promotion's time zone. The expiry moment itself counts as
+expired. Inviting an email whose invitation has expired replaces it
+(`InvitePromotionMemberAction` deletes the old row and saves a fresh one, so the
+new role and a new 30 days apply); a still-pending one gives `AlreadyInvited`.
+`PromotionInvitation` is `Prunable` and the scheduler runs `model:prune` for it
+daily, which only deletes expired rows: nothing depends on it for correctness.
+
 Whoever signs in with the invited email owns the invitation. There is no email
 verification in the application, so administrator activation is the trust
 anchor: only an `Active` account can sign in, and an administrator decides

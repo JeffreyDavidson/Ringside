@@ -32,3 +32,19 @@ test('it supports an explicit email and role', function () {
         ->and($invitation->email)->toBe('chosen@example.test')
         ->and($invitation->role)->toBe(MembershipRole::Owner);
 });
+
+test('it expires thirty days from now by default', function () {
+    // Act
+    $invitation = PromotionInvitation::factory()->create();
+
+    // Assert
+    expect($invitation->expires_at->toDateTimeString())->toBe(now()->addDays(30)->toDateTimeString());
+});
+
+test('its expired state is already past its expiry', function () {
+    // Act
+    $invitation = PromotionInvitation::factory()->expired()->create();
+
+    // Assert
+    expect($invitation->expires_at->isPast())->toBeTrue();
+});
