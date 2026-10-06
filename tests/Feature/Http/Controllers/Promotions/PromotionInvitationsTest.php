@@ -11,6 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\followingRedirects;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 use function Pest\Laravel\travel;
@@ -280,7 +281,7 @@ describe('accepting an invitation', function () {
             ->and($promotion->memberships()->count())->toBe(0);
     });
 
-    test('is not possible for a suspended member and keeps the suspension', function () {
+    test('is not possible for a suspended member, keeps the suspension and deletes the invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $other = Promotion::factory()->create();
@@ -299,7 +300,7 @@ describe('accepting an invitation', function () {
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
         expect($membership->status)->toBe(MembershipStatus::Suspended)
             ->and($membership->role)->toBe(MembershipRole::Member)
-            ->and($invitation->fresh())->not->toBeNull()
+            ->and($invitation->fresh())->toBeNull()
             ->and($promotion->hasActiveMember($user))->toBeFalse();
     });
 
@@ -412,5 +413,37 @@ describe('declining an invitation', function () {
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
         expect($invitation->fresh())->not->toBeNull();
+    });
+});
+
+describe('feedback for a user without a membership', function () {
+    test('shows the decline message on the no-membership page', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $invitee = basicUser();
+        inviteTo($promotion, $invitee);
+        actingAs($invitee);
+
+        // Act
+        $response = followingRedirects()->post(route('promotions.invitation.decline', $promotion));
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeHtml('role="status"')
+            ->assertSeeText(__('promotions.invitation_declined'));
+    });
+
+    test('shows the unavailable message on the no-membership page when accepting fails', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        actingAs(basicUser());
+
+        // Act
+        $response = followingRedirects()->post(route('promotions.invitation.accept', $promotion));
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSeeHtml('role="alert"')
+            ->assertSeeText(__('promotions.invitation_unavailable'));
     });
 });
