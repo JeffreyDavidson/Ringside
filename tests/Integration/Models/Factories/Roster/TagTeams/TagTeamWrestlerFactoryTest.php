@@ -62,8 +62,8 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
         $ended = TagTeamWrestler::factory()->ended()->make();
 
         // Assert
-        expect($default->joined_at->between(now()->subYears(2)->subDay(), now()))->toBeTrue()
-            ->and($current->joined_at->between(now()->subYear()->subDay(), now()))->toBeTrue()
+        expect($default->joined_at->between(now()->subYears(2)->subDay(), now()->subDays(2)))->toBeTrue()
+            ->and($current->joined_at->between(now()->subYear()->subDay(), now()->subDays(2)))->toBeTrue()
             ->and($ended->left_at?->between($ended->joined_at, now()))->toBeTrue();
     });
 
