@@ -10623,16 +10623,16 @@
         },
         {
             "name": "pestphp/pest-plugin-browser",
-            "version": "v5.1.1",
+            "version": "v5.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest-plugin-browser.git",
-                "reference": "309ecc37108cad9c490f620652311e09773a9513"
+                "reference": "3425026b6563ca936cbdfabb9ac979355fab74c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest-plugin-browser/zipball/309ecc37108cad9c490f620652311e09773a9513",
-                "reference": "309ecc37108cad9c490f620652311e09773a9513",
+                "url": "https://api.github.com/repos/pestphp/pest-plugin-browser/zipball/3425026b6563ca936cbdfabb9ac979355fab74c1",
+                "reference": "3425026b6563ca936cbdfabb9ac979355fab74c1",
                 "shasum": ""
             },
             "require": {
@@ -10687,7 +10687,7 @@
                 "unit"
             ],
             "support": {
-                "source": "https://github.com/pestphp/pest-plugin-browser/tree/v5.1.1"
+                "source": "https://github.com/pestphp/pest-plugin-browser/tree/v5.1.2"
             },
             "funding": [
                 {
@@ -10703,7 +10703,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-10-01T18:08:27+00:00"
+            "time": "2026-10-02T10:52:14+00:00"
         },
         {
             "name": "pestphp/pest-plugin-faker",
@@ -11001,16 +11001,16 @@
         },
         {
             "name": "pestphp/pest-plugin-phpstan",
-            "version": "v5.2.1",
+            "version": "v5.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest-plugin-phpstan.git",
-                "reference": "5739943b6f436c0ef3787538f8713d3d76ec3ede"
+                "reference": "19afd92402be203788b73eba9fdb5f5185f66a25"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest-plugin-phpstan/zipball/5739943b6f436c0ef3787538f8713d3d76ec3ede",
-                "reference": "5739943b6f436c0ef3787538f8713d3d76ec3ede",
+                "url": "https://api.github.com/repos/pestphp/pest-plugin-phpstan/zipball/19afd92402be203788b73eba9fdb5f5185f66a25",
+                "reference": "19afd92402be203788b73eba9fdb5f5185f66a25",
                 "shasum": ""
             },
             "require": {
@@ -11068,7 +11068,7 @@
                 "unit"
             ],
             "support": {
-                "source": "https://github.com/pestphp/pest-plugin-phpstan/tree/v5.2.1"
+                "source": "https://github.com/pestphp/pest-plugin-phpstan/tree/v5.2.2"
             },
             "funding": [
                 {
@@ -11088,7 +11088,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-09-06T02:51:17+00:00"
+            "time": "2026-10-02T16:21:04+00:00"
         },
         {
             "name": "pestphp/pest-plugin-profanity",
@@ -11702,11 +11702,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.14",
+            "version": "2.2.17",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9c672e7a8e791dfc3d30e55f683e73fc0b63a3ac",
-                "reference": "9c672e7a8e791dfc3d30e55f683e73fc0b63a3ac",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e676a49fa70cee9f5bf6ff4796186b928a08673f",
+                "reference": "e676a49fa70cee9f5bf6ff4796186b928a08673f",
                 "shasum": ""
             },
             "require": {
@@ -11762,7 +11762,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-12T21:39:33+00:00"
+            "time": "2026-10-04T19:40:09+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -14461,16 +14461,16 @@
         },
         {
             "name": "webmozart/assert",
-            "version": "2.4.1",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webmozarts/assert.git",
-                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70"
+                "reference": "8a163706bbcac613733dba03f51e13b5eb1bb819"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozarts/assert/zipball/2ccb7c2e821038c03a3e6e1700c570c158c55f70",
-                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/8a163706bbcac613733dba03f51e13b5eb1bb819",
+                "reference": "8a163706bbcac613733dba03f51e13b5eb1bb819",
                 "shasum": ""
             },
             "require": {
@@ -14521,9 +14521,9 @@
             ],
             "support": {
                 "issues": "https://github.com/webmozarts/assert/issues",
-                "source": "https://github.com/webmozarts/assert/tree/2.4.1"
+                "source": "https://github.com/webmozarts/assert/tree/2.5.0"
             },
-            "time": "2026-06-15T15:31:57+00:00"
+            "time": "2026-10-05T23:14:19+00:00"
         }
     ],
     "aliases": [],
