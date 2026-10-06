@@ -18,7 +18,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -39,7 +39,7 @@ jobs:
               run: php -d memory_limit=4G ./vendor/bin/pest --strict-coverage --coverage --min=100 --coverage-clover coverage.xml --testsuite "Feature","Integration","Unit"
 
             - name: Upload coverage artifact
-              uses: actions/upload-artifact@v7
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
                   name: pest-coverage-report
                   path: coverage.xml
@@ -47,7 +47,7 @@ jobs:
                   retention-days: 14
 
             - name: Upload coverage to Codecov
-              uses: codecov/codecov-action@v7
+              uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   files: coverage.xml
