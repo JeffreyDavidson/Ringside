@@ -53,24 +53,19 @@ test('it saves the same invitation whatever the state of the account behind the 
     'unverified account' => [UserStatus::Unverified],
 ]);
 
-test('it ignores a deleted account and a membership of another promotion', function () {
+test('it ignores a membership of another promotion', function () {
     // Arrange
     $promotion = Promotion::factory()->create();
     $otherPromotion = Promotion::factory()->create();
-    $deleted = User::factory()->create(['email' => 'deleted@example.test', 'status' => UserStatus::Active]);
-    $promotion->users()->attach($deleted, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    $deleted->delete();
     $elsewhere = User::factory()->create(['email' => 'elsewhere@example.test', 'status' => UserStatus::Active]);
     $otherPromotion->users()->attach($elsewhere, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
     // Act
-    $deletedOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'deleted@example.test', MembershipRole::Member);
     $elsewhereOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'elsewhere@example.test', MembershipRole::Member);
 
     // Assert
-    expect($deletedOutcome)->toBe(PromotionInvitationOutcome::Invited)
-        ->and($elsewhereOutcome)->toBe(PromotionInvitationOutcome::Invited)
-        ->and($promotion->invitations()->count())->toBe(2);
+    expect($elsewhereOutcome)->toBe(PromotionInvitationOutcome::Invited)
+        ->and($promotion->invitations()->count())->toBe(1);
 });
 
 test('it reports an invitation that is already pending without changing it, whatever the email spelling', function (string $email) {
@@ -232,4 +227,19 @@ test('it leaves an expired invitation alone when the email already belongs to a 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
         ->and($expired->fresh())->not->toBeNull();
+});
+
+test('it counts a soft-deleted account that still has a membership as already a member', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'gone@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    $user->delete();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Gone@Example.test', MembershipRole::Manager);
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
+        ->and($promotion->invitations()->count())->toBe(0);
 });

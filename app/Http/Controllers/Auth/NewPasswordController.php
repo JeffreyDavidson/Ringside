@@ -27,6 +27,10 @@ class NewPasswordController extends Controller
         ]);
     }
 
+    /**
+     * Every failure answers with the invalid token message, so the response cannot be used to tell an unknown
+     * email from a registered one.
+     */
     public function store(ResetPasswordRequest $request): RedirectResponse
     {
         $status = Password::reset(
@@ -41,10 +45,12 @@ class NewPasswordController extends Controller
             },
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withInput($request->only('email'))->withErrors([
-                'email' => is_string($status) ? __($status) : __('passwords.token'),
+        if ($status !== Password::PASSWORD_RESET) {
+            return back()->withInput($request->only('email'))->withErrors([
+                'email' => __('passwords.token'),
             ]);
+        }
+
+        return redirect()->route('login')->with('status', __($status));
     }
 }
