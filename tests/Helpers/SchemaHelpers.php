@@ -116,6 +116,24 @@ function dropEnforcingIndex(string $table, string $index, ?string $mysqlGenerate
 }
 
 /**
+ * Drops the index that keeps active stable names unique, so the migrations under test can be shown duplicates.
+ *
+ * On MySQL that unique (promotion_id, active_name) index is the only index on stables.promotion_id, and MySQL
+ * refuses to drop an index a foreign key needs, so a plain promotion_id index is added first.
+ */
+function dropActiveStableNameIndex(): void
+{
+    if (! runsOnDriver('mysql')) {
+        DB::statement('DROP INDEX stables_active_name_unique');
+
+        return;
+    }
+
+    DB::statement('ALTER TABLE stables ADD INDEX stables_promotion_id_index (promotion_id)');
+    DB::statement('ALTER TABLE stables DROP INDEX stables_active_name_unique');
+}
+
+/**
  * The index that keeps active unowned stable names unique exists on SQLite and PostgreSQL only: MySQL cannot index NULL promotions.
  */
 function dropUnownedStableNameIndex(): void

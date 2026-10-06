@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\Roster\Stables\Stable;
 
 test('the migration identifies existing duplicate active names', function () {
-    dropEnforcingIndex('stables', 'stables_active_name_unique');
+    dropActiveStableNameIndex();
     dropUnownedStableNameIndex();
     Stable::factory()->create(['name' => 'The Four Horsemen']);
     Stable::factory()->create(['name' => 'The Four Horsemen']);

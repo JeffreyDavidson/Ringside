@@ -7,7 +7,7 @@ use App\Models\Roster\Stables\Stable;
 
 test('the migration lists the stables that duplicate a name within a promotion before changing anything', function () {
     $promotion = Promotion::factory()->create();
-    dropEnforcingIndex('stables', 'stables_active_name_unique');
+    dropActiveStableNameIndex();
     dropUnownedStableNameIndex();
     $first = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Four Horsemen']);
     $second = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Four Horsemen']);
