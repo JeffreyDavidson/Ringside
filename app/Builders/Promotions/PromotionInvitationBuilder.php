@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Builders\Promotions;
+
+use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * @template TModel of PromotionInvitation
+ *
+ * @extends Builder<TModel>
+ */
+class PromotionInvitationBuilder extends Builder
+{
+    public function forPromotion(Promotion $promotion): static
+    {
+        return $this->whereBelongsTo($promotion, 'promotion');
+    }
+
+    /** Invitations are stored normalized, so the email is normalized the same way before the exact comparison. */
+    public function forEmail(string $email): static
+    {
+        return $this->where('email', PromotionInvitation::normalizeEmail($email));
+    }
+}

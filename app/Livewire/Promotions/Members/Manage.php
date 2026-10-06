@@ -10,13 +10,14 @@ use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Promotions\UpdatePromotionMemberStatusAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
-use App\Enums\Users\UserStatus;
+use App\Enums\Promotions\PromotionInvitationOutcome;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -46,7 +47,6 @@ class Manage extends Component
 
         $this->memberRoles = PromotionMembership::query()
             ->where('promotion_id', $this->promotionId)
-            ->joined()
             ->get(['user_id', 'role'])
             ->mapWithKeys(fn (PromotionMembership $membership): array => [
                 $membership->user_id => $membership->role->value,
@@ -62,53 +62,45 @@ class Manage extends Component
         $this->resetErrorBag('email');
 
         $validated = Validator::make(
-            ['email' => $this->email, 'role' => $this->newMemberRole],
+            ['email' => mb_trim($this->email), 'role' => $this->newMemberRole],
             [
-                'email' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255'],
                 'role' => ['required', Rule::enum(MembershipRole::class)],
             ],
         )->validate();
 
-        $email = mb_strtolower(trim($validated['email']));
-
-        // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
-        // `%` and `_` in the input can never widen the match.
-        $user = User::query()
-            ->whereLike('email', $email, caseSensitive: false)
-            ->where('status', UserStatus::Active)
-            ->get()
-            ->first(fn (User $candidate): bool => mb_strtolower($candidate->email) === $email);
-
         $role = MembershipRole::from($validated['role']);
 
-        // The owner already sees every member of the promotion, so naming this case reveals nothing new.
-        if ($user instanceof User && ! app(InvitePromotionMemberAction::class)->handle($promotion, $user, $role)) {
-            $this->addError('email', __('promotions.member_already_added'));
+        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role);
+
+        // The owner already sees every member and pending invitation of the promotion, so these two cases
+        // reveal nothing new. Every other email gets the same message whether or not it belongs to an account.
+        $error = match ($outcome) {
+            PromotionInvitationOutcome::Invited => null,
+            PromotionInvitationOutcome::AlreadyInvited => __('promotions.invitation_already_pending'),
+            PromotionInvitationOutcome::AlreadyMember => __('promotions.member_already_added'),
+        };
+
+        if ($error !== null) {
+            $this->addError('email', $error);
 
             return;
         }
 
-        // Unknown, inactive and invited emails share one message, and it never names the account, so the
-        // message cannot be used to discover accounts. (The pending row that appears in the list for a real
-        // account is the one remaining signal; see "Promotion member invitations" in the refactoring backlog.)
         $this->reset('email');
         $this->dispatchActionSuccess(__('promotions.invitation_sent', ['role' => $role->label()]));
     }
 
-    public function cancelInvitation(int $userId): void
+    public function cancelInvitation(int $invitationId): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
 
-        $invitee = User::query()
-            ->whereHas('promotionMemberships', function (Builder $query) use ($promotion): void {
-                $query->where('promotion_id', $promotion->getKey())
-                    ->where('status', MembershipStatus::Invited);
-            })
-            ->whereKey($userId)
+        $invitation = $promotion->invitations()
+            ->whereKey($invitationId)
             ->firstOrFail();
 
-        app(RemovePromotionInvitationAction::class)->handle($promotion, $invitee);
+        app(RemovePromotionInvitationAction::class)->handle($promotion, $invitation->email);
 
         $this->resetErrorBag(['email', 'member']);
         $this->dispatchActionSuccess(__('promotions.invitation_cancelled'));
@@ -186,17 +178,16 @@ class Manage extends Component
         $promotion = $this->promotion();
         Gate::authorize('view', $promotion);
 
-        $memberships = PromotionMembership::query()
-            ->where('promotion_id', $promotion->getKey())
+        $members = $promotion->memberships()
             ->with('user')
             ->orderBy('created_at')
             ->get();
 
-        [$invitations, $members] = $memberships->partition(
-            fn (PromotionMembership $membership): bool => $membership->status === MembershipStatus::Invited,
-        );
-
         $canManageMembers = Gate::allows('manageMembers', $promotion);
+
+        $invitations = $canManageMembers
+            ? $promotion->invitations()->orderBy('created_at')->orderBy('id')->get()
+            : new Collection;
 
         return view('livewire.promotions.members.manage', [
             'members' => $members,
@@ -232,8 +223,7 @@ class Manage extends Component
     {
         return User::query()
             ->whereHas('promotionMemberships', function (Builder $query) use ($promotion): void {
-                $query->where('promotion_id', $promotion->getKey())
-                    ->where('status', '!=', MembershipStatus::Invited);
+                $query->where('promotion_id', $promotion->getKey());
             })
             ->whereKey($userId)
             ->firstOrFail();

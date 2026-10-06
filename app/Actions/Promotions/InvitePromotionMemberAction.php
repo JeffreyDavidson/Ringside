@@ -5,51 +5,64 @@ declare(strict_types=1);
 namespace App\Actions\Promotions;
 
 use App\Enums\Promotions\MembershipRole;
-use App\Enums\Promotions\MembershipStatus;
-use App\Enums\Users\UserStatus;
+use App\Enums\Promotions\PromotionInvitationOutcome;
 use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class InvitePromotionMemberAction
 {
     /**
-     * Invite the user with the role the owner chose. The membership stays `Invited`, and so grants nothing,
-     * until the user accepts it (AcceptPromotionInvitationAction). Returns false when the user already has a
-     * membership of any status.
+     * Save a pending invitation for the email with the role the owner chose. It grants nothing until whoever
+     * signs in with that email accepts it (AcceptPromotionInvitationAction). Whether the email belongs to an
+     * account never matters: unknown, inactive and active accounts all get an invitation. The only refusals
+     * are an invitation that is already pending and an email that already has a membership of this promotion
+     * (active or suspended), both things the owner can already see.
      */
-    public function handle(Promotion $promotion, User $user, MembershipRole $role): bool
+    public function handle(Promotion $promotion, string $email, MembershipRole $role): PromotionInvitationOutcome
     {
-        return DB::transaction(function () use ($promotion, $user, $role): bool {
+        return DB::transaction(function () use ($promotion, $email, $role): PromotionInvitationOutcome {
             $lockedPromotion = Promotion::query()
                 ->whereKey($promotion->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $activeUser = User::query()
-                ->whereKey($user->getKey())
-                ->where('status', UserStatus::Active)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $membership = $lockedPromotion->memberships()
-                ->where('user_id', $activeUser->getKey())
-                ->lockForUpdate()
-                ->first();
-
-            if ($membership !== null) {
-                return false;
+            if ($lockedPromotion->invitations()->forEmail($email)->exists()) {
+                return PromotionInvitationOutcome::AlreadyInvited;
             }
 
-            $lockedPromotion->users()->attach($activeUser->getKey(), [
+            if ($this->hasMembership($lockedPromotion, $email)) {
+                return PromotionInvitationOutcome::AlreadyMember;
+            }
+
+            $lockedPromotion->invitations()->create([
+                'email' => $email,
                 'role' => $role,
-                'status' => MembershipStatus::Invited,
             ]);
 
             app(PromotionContextService::class)->forgetMemberships();
 
-            return true;
+            return PromotionInvitationOutcome::Invited;
         });
+    }
+
+    private function hasMembership(Promotion $promotion, string $email): bool
+    {
+        $normalized = PromotionInvitation::normalizeEmail($email);
+
+        // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
+        // `%` and `_` in the input can never widen the match.
+        $userIds = User::query()
+            ->whereLike('email', $normalized, caseSensitive: false)
+            ->get(['id', 'email'])
+            ->filter(fn (User $candidate): bool => Str::lower($candidate->email) === $normalized)
+            ->modelKeys();
+
+        return $promotion->memberships()
+            ->whereIn('user_id', $userIds)
+            ->exists();
     }
 }

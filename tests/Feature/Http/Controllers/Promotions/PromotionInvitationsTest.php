@@ -6,22 +6,24 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
+use function Pest\Laravel\travel;
 use function Pest\Laravel\withSession;
 
-function inviteTo(Promotion $promotion, User $user, MembershipRole $role = MembershipRole::Manager): void
+function inviteTo(Promotion $promotion, User $user, MembershipRole $role = MembershipRole::Manager): PromotionInvitation
 {
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Invited]);
+    return PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole($role)->create();
 }
 
-function joinAs(Promotion $promotion, User $user, MembershipRole $role = MembershipRole::Member): void
+function joinAs(Promotion $promotion, User $user, MembershipRole $role = MembershipRole::Member, MembershipStatus $status = MembershipStatus::Active): void
 {
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, ['role' => $role, 'status' => $status]);
 }
 
 describe('an invitation grants nothing until it is accepted', function () {
@@ -86,7 +88,7 @@ describe('an invitation grants nothing until it is accepted', function () {
 });
 
 describe('seeing invitations', function () {
-    test('the no-membership page lists the users own pending invitations with accept and decline', function () {
+    test('the no-membership page lists the invitations addressed to the users email with accept and decline', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
         $otherPromotion = Promotion::factory()->create(['name' => 'Somebody Elses Wrestling']);
@@ -143,10 +145,65 @@ describe('seeing invitations', function () {
             ->assertDontSeeHtml('data-test="invitation-indicator"')
             ->assertDontSeeHtml('data-test="pending-invitations"');
     });
+
+    test('an invitation saved before the account existed is shown once the account with that email is active', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
+        PromotionInvitation::factory()->for($promotion)->forEmail('Future.Wrestler@Example.test')->withRole(MembershipRole::Owner)->create();
+        $registered = User::factory()->basicUser()->create([
+            'email' => 'future.wrestler@example.test',
+            'status' => UserStatus::Unverified,
+        ]);
+        $registered->update(['status' => UserStatus::Active]);
+        actingAs($registered);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertForbidden()
+            ->assertSee('Invitation Championship Wrestling')
+            ->assertSee(__('promotions.invitation_role', ['role' => 'Owner']))
+            ->assertSeeHtml(route('promotions.invitation.accept', $promotion));
+    });
+
+    test('an invitation is shown whatever the case and whitespace it was typed in', function (string $typed) {
+        // Arrange
+        $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
+        $invitee = User::factory()->basicUser()->create(['email' => 'typed@example.test', 'status' => UserStatus::Active]);
+        PromotionInvitation::factory()->for($promotion)->forEmail($typed)->create();
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertSee('Invitation Championship Wrestling');
+    })->with([
+        'upper case' => ['TYPED@EXAMPLE.TEST'],
+        'whitespace' => ['  typed@example.test  '],
+    ]);
+
+    test('invitations are listed oldest first', function () {
+        // Arrange
+        $invitee = basicUser();
+        $newer = Promotion::factory()->create(['name' => 'Newer Invitation Wrestling']);
+        $older = Promotion::factory()->create(['name' => 'Older Invitation Wrestling']);
+        inviteTo($older, $invitee);
+        travel(1)->day();
+        inviteTo($newer, $invitee);
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertSeeInOrder(['Older Invitation Wrestling', 'Newer Invitation Wrestling']);
+    });
 });
 
 describe('accepting an invitation', function () {
-    test('turns the membership active with the role the owner chose', function (MembershipRole $role) {
+    test('creates an active membership with the role the owner chose and deletes the invitation', function (MembershipRole $role) {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
         $invitee = basicUser();
@@ -163,7 +220,8 @@ describe('accepting an invitation', function () {
             ->assertSessionHas('status', __('promotions.invitation_accepted', ['promotion' => 'Invitation Championship Wrestling', 'role' => $role->label()]));
         expect($membership->status)->toBe(MembershipStatus::Active)
             ->and($membership->role)->toBe($role)
-            ->and($promotion->hasMemberWithRole($invitee, $role))->toBeTrue();
+            ->and($promotion->hasMemberWithRole($invitee, $role))->toBeTrue()
+            ->and($promotion->invitations()->count())->toBe(0);
     })->with([
         'owner' => MembershipRole::Owner,
         'manager' => MembershipRole::Manager,
@@ -188,12 +246,12 @@ describe('accepting an invitation', function () {
         $afterAccepting->assertOk();
     });
 
-    test('cannot be done for someone else by forging the promotion of another users invitation', function () {
+    test('cannot be done for another email by forging the promotion of someone elses invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $invitee = basicUser();
         $attacker = basicUser();
-        inviteTo($promotion, $invitee, MembershipRole::Owner);
+        $invitation = inviteTo($promotion, $invitee, MembershipRole::Owner);
         actingAs($attacker);
 
         // Act
@@ -202,19 +260,37 @@ describe('accepting an invitation', function () {
         // Assert
         $response->assertRedirect(route('dashboard'))
             ->assertSessionHas('error', __('promotions.invitation_unavailable'));
-        expect($promotion->memberships()->where('user_id', $invitee->id)->firstOrFail()->status)->toBe(MembershipStatus::Invited)
-            ->and($promotion->memberships()->where('user_id', $attacker->id)->exists())->toBeFalse();
+        expect($invitation->fresh())->not->toBeNull()
+            ->and($promotion->memberships()->count())->toBe(0);
     });
 
-    test('is not possible for a suspended member or after the invitation is gone', function (?MembershipStatus $status) {
+    test('is not possible for a suspended member and keeps the suspension', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $other = Promotion::factory()->create();
+        $user = basicUser();
+        joinAs($promotion, $user, MembershipRole::Member, MembershipStatus::Suspended);
+        joinAs($other, $user);
+        $invitation = inviteTo($promotion, $user, MembershipRole::Owner);
+        actingAs($user);
+
+        // Act
+        $response = post(route('promotions.invitation.accept', $promotion));
+
+        // Assert
+        $membership = $promotion->memberships()->sole();
+
+        $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+        expect($membership->status)->toBe(MembershipStatus::Suspended)
+            ->and($membership->role)->toBe(MembershipRole::Member)
+            ->and($invitation->fresh())->not->toBeNull()
+            ->and($promotion->hasActiveMember($user))->toBeFalse();
+    });
+
+    test('is not possible after the invitation is gone', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $user = basicUser();
-
-        if ($status instanceof MembershipStatus) {
-            $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => $status]);
-        }
-
         actingAs($user);
 
         // Act
@@ -222,11 +298,8 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
-        expect($promotion->memberships()->where('user_id', $user->id)->first()?->status)->toBe($status);
-    })->with([
-        'cancelled invitation' => [null],
-        'suspended member' => [MembershipStatus::Suspended],
-    ]);
+        expect($promotion->memberships()->count())->toBe(0);
+    });
 
     test('requires a signed-in user', function () {
         // Arrange
@@ -243,7 +316,7 @@ describe('accepting an invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $user = User::factory()->basicUser()->create(['status' => UserStatus::Inactive]);
-        inviteTo($promotion, $user);
+        $invitation = inviteTo($promotion, $user);
         actingAs($user);
 
         // Act
@@ -251,7 +324,8 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertRedirect(route('login'));
-        expect($promotion->hasActiveMember($user))->toBeFalse();
+        expect($promotion->hasActiveMember($user))->toBeFalse()
+            ->and($invitation->fresh())->not->toBeNull();
     });
 });
 
@@ -263,8 +337,8 @@ describe('declining an invitation', function () {
         $invitee = basicUser();
         $bystander = basicUser();
         inviteTo($promotion, $invitee);
-        inviteTo($otherPromotion, $invitee);
-        inviteTo($promotion, $bystander);
+        $otherInvitation = inviteTo($otherPromotion, $invitee);
+        $bystanderInvitation = inviteTo($promotion, $bystander);
         actingAs($invitee);
 
         // Act
@@ -273,9 +347,9 @@ describe('declining an invitation', function () {
         // Assert
         $response->assertRedirect(route('dashboard'))
             ->assertSessionHas('status', __('promotions.invitation_declined'));
-        expect($promotion->memberships()->where('user_id', $invitee->id)->exists())->toBeFalse()
-            ->and($otherPromotion->memberships()->where('user_id', $invitee->id)->exists())->toBeTrue()
-            ->and($promotion->memberships()->where('user_id', $bystander->id)->exists())->toBeTrue();
+        expect($promotion->invitations()->pluck('id')->all())->toBe([$bystanderInvitation->id])
+            ->and($otherInvitation->fresh())->not->toBeNull()
+            ->and($promotion->memberships()->count())->toBe(0);
     });
 
     test('cannot remove an active membership', function () {
@@ -293,12 +367,12 @@ describe('declining an invitation', function () {
         expect($promotion->hasMemberWithRole($member, MembershipRole::Owner))->toBeTrue();
     });
 
-    test('cannot be done for someone else by forging the promotion of another users invitation', function () {
+    test('cannot be done for another email by forging the promotion of someone elses invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $invitee = basicUser();
         $attacker = basicUser();
-        inviteTo($promotion, $invitee);
+        $invitation = inviteTo($promotion, $invitee);
         actingAs($attacker);
 
         // Act
@@ -306,6 +380,6 @@ describe('declining an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
-        expect($promotion->memberships()->where('user_id', $invitee->id)->exists())->toBeTrue();
+        expect($invitation->fresh())->not->toBeNull();
     });
 });

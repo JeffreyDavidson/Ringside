@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
@@ -100,11 +101,13 @@ it('falls back to the first promotion when nothing valid is remembered', functio
     'not a number' => ['beta'],
 ]);
 
-it('lists the pending invitations apart from the active promotions, in one membership query', function () {
+it('lists the pending invitations apart from the active promotions, with one membership query and one invitation query', function () {
     // Arrange
     $user = User::factory()->create();
     $active = joinPromotion($user, 'Alpha Wrestling');
-    $invitedBy = joinPromotion($user, 'Beta Wrestling', MembershipStatus::Invited);
+    $invitedBy = Promotion::factory()->create(['name' => 'Beta Wrestling']);
+    $invitation = PromotionInvitation::factory()->for($invitedBy)->forEmail($user->email)->create();
+    PromotionInvitation::factory()->for($active)->forEmail('someone.else@example.test')->create();
     joinPromotion($user, 'Gamma Wrestling', MembershipStatus::Suspended);
     actingAs($user);
     DB::flushQueryLog();
@@ -112,15 +115,16 @@ it('lists the pending invitations apart from the active promotions, in one membe
 
     // Act
     $view = composePromotionSwitcher('components.sidebar.index');
-    $membershipQueries = collect(DB::getQueryLog())
-        ->filter(fn (array $query): bool => str_contains($query['query'], 'promotion_user'))
-        ->count();
+    $queries = collect(DB::getQueryLog())->pluck('query');
+    $membershipQueries = $queries->filter(fn (mixed $sql): bool => is_string($sql) && str_contains($sql, 'promotion_user'))->count();
+    $invitationQueries = $queries->filter(fn (mixed $sql): bool => is_string($sql) && str_contains(normalizedSql($sql), 'from "promotion_invitations"'))->count();
     DB::disableQueryLog();
 
     // Assert
     expect($view->getData()['promotionSwitcherPromotions']->pluck('id')->all())->toBe([$active->id])
-        ->and($view->getData()['promotionInvitations']->pluck('id')->all())->toBe([$invitedBy->id])
-        ->and($membershipQueries)->toBe(1);
+        ->and($view->getData()['promotionInvitations']->pluck('id')->all())->toBe([$invitation->id])
+        ->and($membershipQueries)->toBe(1)
+        ->and($invitationQueries)->toBe(1);
 });
 
 it('provides no invitations to a guest', function () {

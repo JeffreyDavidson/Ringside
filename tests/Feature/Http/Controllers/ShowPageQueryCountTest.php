@@ -35,10 +35,10 @@ describe('show page query counts', function (): void {
         expect(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'select exists')))->toBeEmpty()
             ->and(count($queries))->toBeLessThanOrEqual($maxQueries);
     })->with([
-        'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create(), 'wrestlers.show', 12],
+        'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create(), 'wrestlers.show', 13],
         'manager' => [fn (): Model => Manager::factory()->employed()->create(), 'managers.show', 10],
         'referee' => [fn (): Model => Referee::factory()->employed()->create(), 'referees.show', 8],
-        'tag team' => [fn (): Model => TagTeam::factory()->employed()->create(), 'tag-teams.show', 12],
+        'tag team' => [fn (): Model => TagTeam::factory()->employed()->create(), 'tag-teams.show', 13],
         'stable' => [fn (): Model => Stable::factory()->active()->create(), 'stables.show', 10],
         'title' => [fn (): Model => Title::factory()->active()->create(), 'titles.show', 9],
     ]);
