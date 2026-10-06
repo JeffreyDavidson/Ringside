@@ -1,6 +1,6 @@
 ---
 paths:
-  - config/mail.php
+  - config/**
 ---
 
 # Config

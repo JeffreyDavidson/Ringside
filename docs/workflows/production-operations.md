@@ -43,8 +43,10 @@ Fixed on 2026-10-06:
 - [ ] `LOG_LEVEL=warning`. The level is an operator setting; the code does not change it.
 - [x] `LOG_DEPRECATIONS_CHANNEL` is `null` to discard deprecation warnings, or a channel such as `daily` while
       preparing an upgrade. `LOG_DEPRECATIONS_TRACE=true` adds stack traces. Both are read by `config/logging.php`.
-- [ ] A real mailer (`MAIL_MAILER` set to SMTP or an API transport). With `MAIL_MAILER=log`, password reset links are
-      written to the log file instead of being sent.
+- [ ] A real mailer. Production uses Resend: `MAIL_MAILER=resend`, `RESEND_API_KEY` (an API key with sending access
+      for a domain verified in Resend, with its DNS records in Cloudflare), `MAIL_FROM_ADDRESS` on that domain and
+      `MAIL_FROM_NAME=Ringside`. The `resend/resend-php` package provides the transport. With `MAIL_MAILER=log`,
+      password reset links are written to the log file instead of being sent.
 - [x] `QUEUE_CONNECTION=database` needs the `jobs`, `failed_jobs` and `job_batches` tables; the last two are created
       by the `create_failed_jobs_and_job_batches_tables` migration. Run a queue worker as soon as the app dispatches
       queued jobs (it does not yet).
