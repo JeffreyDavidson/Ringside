@@ -9,6 +9,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,8 +24,11 @@ class PromotionContextService
     /** @var array<string, ?MembershipRole> Active membership roles memoised per "user:promotion" for this request. */
     private array $roles = [];
 
-    /** @var array<int, Collection<int, Promotion>> Active and invited promotions (each with its membership pivot) memoised per user id for this request. */
-    private array $joinablePromotions = [];
+    /** @var array<int, Collection<int, Promotion>> Active promotions (each with its membership pivot) memoised per user id for this request. */
+    private array $activePromotions = [];
+
+    /** @var array<int, Collection<int, PromotionInvitation>> Pending invitations for each user's email, memoised per user id for this request. */
+    private array $invitations = [];
 
     /**
      * Select the current promotion. When it was loaded through a user's membership relation its
@@ -54,7 +58,8 @@ class PromotionContextService
     public function forgetMemberships(): void
     {
         $this->roles = [];
-        $this->joinablePromotions = [];
+        $this->activePromotions = [];
+        $this->invitations = [];
     }
 
     /** The user's role from an active membership of the promotion, or null when they have none. */
@@ -81,42 +86,29 @@ class PromotionContextService
      */
     public function activePromotionsFor(User $user): Collection
     {
-        return $this->promotionsWithStatus($user, MembershipStatus::Active);
-    }
-
-    /**
-     * The promotions that have invited the user, oldest invitation first, loaded once per request. An
-     * invitation grants no access: it only lists what the user may accept or decline. Each promotion carries
-     * its membership as the `pivot` relation, so the invited role is readable.
-     *
-     * @return Collection<int, Promotion>
-     */
-    public function pendingInvitationsFor(User $user): Collection
-    {
-        return $this->promotionsWithStatus($user, MembershipStatus::Invited);
-    }
-
-    /**
-     * Active and invited memberships share one query, so the page, the switcher and the invitation list
-     * together read `promotion_user` once per request.
-     *
-     * @return Collection<int, Promotion>
-     */
-    private function promotionsWithStatus(User $user, MembershipStatus $status): Collection
-    {
-        $promotions = $this->joinablePromotions[$user->id] ??= $user->promotions()
-            ->wherePivotIn('status', [MembershipStatus::Active->value, MembershipStatus::Invited->value])
+        return $this->activePromotions[$user->id] ??= $user->promotions()
+            ->wherePivot('status', MembershipStatus::Active->value)
             ->orderBy('promotion_user.created_at')
             ->orderBy('promotions.id')
             ->get();
+    }
 
-        return $promotions
-            ->filter(function (Promotion $promotion) use ($status): bool {
-                $pivot = $promotion->getRelation('pivot');
-
-                return $pivot instanceof PromotionMembership && $pivot->status === $status;
-            })
-            ->values();
+    /**
+     * The invitations addressed to the user's email, oldest first, loaded once per request. An invitation
+     * grants no access: it only lists what the user may accept or decline, and each one carries its promotion.
+     * Whoever signs in with that email sees them, so administrator activation of the account is the trust
+     * anchor (there is no email verification).
+     *
+     * @return Collection<int, PromotionInvitation>
+     */
+    public function pendingInvitationsFor(User $user): Collection
+    {
+        return $this->invitations[$user->id] ??= PromotionInvitation::query()
+            ->forEmail($user->email)
+            ->with('promotion')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
     }
 
     private function roleKey(int $userId, int $promotionId): string

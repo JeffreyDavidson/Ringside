@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Date;
  * @property string $timezone
  * @property-read Collection<int, User> $users
  * @property-read Collection<int, PromotionMembership> $memberships
+ * @property-read Collection<int, PromotionInvitation> $invitations
  */
 #[Fillable('name', 'slug', 'timezone')]
 #[UseFactory(PromotionFactory::class)]
@@ -70,6 +71,12 @@ class Promotion extends Model
     public function memberships(): HasMany
     {
         return $this->hasMany(PromotionMembership::class);
+    }
+
+    /** @return HasMany<PromotionInvitation, $this> */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(PromotionInvitation::class);
     }
 
     public function hasActiveMember(User $user): bool

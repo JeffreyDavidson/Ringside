@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Promotions\Promotion;
-use App\Models\Users\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,13 +12,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('promotion_user', function (Blueprint $table): void {
+        Schema::create('promotion_invitations', function (Blueprint $table): void {
+            $table->id();
             $table->foreignIdFor(Promotion::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->string('email');
             $table->string('role')->default(MembershipRole::Member->value);
-            $table->string('status')->default('invited');
             $table->timestamps();
-            $table->unique(['promotion_id', 'user_id']);
+            $table->unique(['promotion_id', 'email']);
+            $table->index('email');
         });
     }
 };

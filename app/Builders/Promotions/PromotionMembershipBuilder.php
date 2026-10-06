@@ -28,18 +28,6 @@ class PromotionMembershipBuilder extends Builder
         return $this->where('status', MembershipStatus::Active->value);
     }
 
-    /** Pending invitations only: they grant no access until the invited user accepts. */
-    public function invited(): static
-    {
-        return $this->where('status', MembershipStatus::Invited->value);
-    }
-
-    /** Everything except pending invitations: members whose access is active or suspended. */
-    public function joined(): static
-    {
-        return $this->where('status', '!=', MembershipStatus::Invited->value);
-    }
-
     /** Limit to memberships whose user account is itself active (not inactive or unverified). */
     public function withActiveUser(): static
     {

@@ -196,7 +196,7 @@
         </div>
     @endif
 
-    {{-- Owners see pending invitations by the email they typed; the invited account's name stays private until it accepts. --}}
+    {{-- Owners see pending invitations by the email they typed; nobody joins, and no account name appears, until the invitation is accepted. --}}
     @if ($canManageMembers && $invitations->isNotEmpty())
         <div class="border-ringside-line border-t" data-test="promotion-invitations">
             <h3 class="text-ringside-ink px-5 pt-5 pb-3 text-sm font-semibold lg:px-6">
@@ -220,32 +220,30 @@
                     </thead>
                     <tbody class="divide-ringside-line divide-y">
                         @foreach ($invitations as $invitation)
-                            @if ($invitation->user)
-                                <tr
-                                    wire:key="promotion-invitation-{{ $invitation->user_id }}"
-                                    class="hover:bg-ringside-surface-hover"
-                                >
-                                    <td class="text-ringside-ink px-5 py-4 lg:px-6">{{ $invitation->user->email }}</td>
-                                    <td class="text-ringside-muted px-4 py-4">{{ $invitation->role->label() }}</td>
-                                    <td class="text-ringside-muted px-4 py-4">
-                                        <span class="border-ringside-outline inline-flex min-h-7 items-center border px-2 text-xs">
-                                            {{ __('promotions.invitation_pending') }}
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-4 text-right lg:px-6">
-                                        <button
-                                            type="button"
-                                            wire:click="cancelInvitation({{ $invitation->user_id }})"
-                                            wire:confirm="{{ __('promotions.confirm_cancel_invitation') }}"
-                                            wire:loading.attr="disabled"
-                                            wire:target="cancelInvitation"
-                                            class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            {{ __('promotions.cancel_invitation') }}
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endif
+                            <tr
+                                wire:key="promotion-invitation-{{ $invitation->id }}"
+                                class="hover:bg-ringside-surface-hover"
+                            >
+                                <td class="text-ringside-ink px-5 py-4 lg:px-6">{{ $invitation->email }}</td>
+                                <td class="text-ringside-muted px-4 py-4">{{ $invitation->role->label() }}</td>
+                                <td class="text-ringside-muted px-4 py-4">
+                                    <span class="border-ringside-outline inline-flex min-h-7 items-center border px-2 text-xs">
+                                        {{ __('promotions.invitation_pending') }}
+                                    </span>
+                                </td>
+                                <td class="px-5 py-4 text-right lg:px-6">
+                                    <button
+                                        type="button"
+                                        wire:click="cancelInvitation({{ $invitation->id }})"
+                                        wire:confirm="{{ __('promotions.confirm_cancel_invitation') }}"
+                                        wire:loading.attr="disabled"
+                                        wire:target="cancelInvitation"
+                                        class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {{ __('promotions.cancel_invitation') }}
+                                    </button>
+                                </td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
