@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
 use function Pest\Laravel\assertGuest;
@@ -139,4 +142,28 @@ test('registration still validates the other fields for a taken email', function
     $response->assertRedirect(route('register'))
         ->assertSessionHasErrors(['first_name', 'password'])
         ->assertSessionDoesntHaveErrors('email');
+});
+
+test('registration answers as pending when the database rejects a duplicate email', function (): void {
+    // Arrange
+    User::creating(function (): void {
+        throw new UniqueConstraintViolationException('testing', 'insert into users', [], new Exception('duplicate'));
+    });
+    Event::fake([Registered::class]);
+
+    // Act
+    $response = $this->post(route('register'), [
+        'first_name' => 'Taylor',
+        'last_name' => 'Promoter',
+        'email' => 'new@example.com',
+        'password' => 'test-password-123',
+        'password_confirmation' => 'test-password-123',
+    ]);
+
+    // Assert
+    $response->assertRedirect(route('login'))
+        ->assertSessionHas('status', __('auth-forms.account_pending'))
+        ->assertSessionHasNoErrors();
+    Event::assertNotDispatched(Registered::class);
+    expect(User::query()->count())->toBe(0);
 });

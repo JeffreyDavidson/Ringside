@@ -18,7 +18,12 @@ does not.
 
 Registration does not reveal whether an email is already registered: a taken email creates nothing and redirects to
 the login page with the same `auth-forms.account_pending` status as a new account, like the password reset response.
-Other validation errors are still shown.
+Other validation errors are still shown. A duplicate that only the database unique index catches (a concurrent
+registration, or an email the MySQL collation treats as equal) gets the same response and creates no user.
+
+Submitting the password reset form answers every failed reset, whether the email is unknown, the token is invalid or
+expired, or the broker throttled it, with the same `passwords.token` error on the email field and the email kept as
+old input, so the form cannot be used to discover which emails are registered.
 
 ## Reverse proxy and client IP
 
