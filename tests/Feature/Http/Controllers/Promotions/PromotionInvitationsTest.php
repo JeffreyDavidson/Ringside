@@ -447,3 +447,41 @@ describe('feedback for a user without a membership', function () {
             ->assertSeeText(__('promotions.invitation_unavailable'));
     });
 });
+
+describe('promotion existence is not revealed', function () {
+    test('a missing promotion answers an invitation action like an existing one without an invitation', function (string $routeName, bool $promotionExists) {
+        // Arrange
+        $user = basicUser();
+        $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+        actingAs($user);
+
+        // Act
+        $response = post(route($routeName, ['promotion' => $promotionId]));
+
+        // Assert
+        $response
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    })->with([
+        'accept, missing' => ['promotions.invitation.accept', false],
+        'accept, existing' => ['promotions.invitation.accept', true],
+        'decline, missing' => ['promotions.invitation.decline', false],
+        'decline, existing' => ['promotions.invitation.decline', true],
+    ]);
+
+    test('switching to a missing promotion answers like switching to one the user is not a member of', function (bool $promotionExists) {
+        // Arrange
+        $user = basicUser();
+        $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+        actingAs($user);
+
+        // Act
+        $response = post(route('promotions.switch'), ['promotion_id' => $promotionId]);
+
+        // Assert
+        $response->assertForbidden();
+    })->with([
+        'missing' => [false],
+        'existing, not a member' => [true],
+    ]);
+});
