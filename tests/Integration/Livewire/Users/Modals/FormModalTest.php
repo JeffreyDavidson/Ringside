@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
 use App\Enums\Users\Role;
 use App\Livewire\Users\Modals\FormModal;
+use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Rules\Users\UniqueEmail;
 use Illuminate\Support\Facades\Hash;
@@ -348,3 +351,70 @@ it('forbids users without administrative access from opening the user form', fun
     'guest updating' => ['guest', 'update'],
     'basic user updating' => ['basic user', 'update'],
 ]);
+
+describe('email change invitation warning', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('warns about the pending invitations of the new email while still saving', function (string $typedEmail) {
+        // Arrange
+        $user = User::factory()->create(['first_name' => 'Ivy', 'last_name' => 'Invited', 'email' => 'old@example.com']);
+        PromotionInvitation::factory()->forEmail('new@example.com')->withRole(MembershipRole::Owner)
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Acme Wrestling'])]);
+        PromotionInvitation::factory()->forEmail('new@example.com')->expired()
+            ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Expired Federation'])]);
+
+        // Act
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $user->id);
+        $modal->set('form.email', $typedEmail);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertDispatched(
+            'flash-message',
+            type: 'warning',
+            message: 'Ivy Invited now uses an email with pending invitations: Acme Wrestling (Owner). They can accept them once signed in.',
+        );
+        expect($user->refresh()->email)->toBe('new@example.com');
+    })->with([
+        'exact' => ['new@example.com'],
+        'mixed case' => ['New@Example.COM'],
+    ]);
+
+    it('shows no warning when the new email has no pending invitations', function () {
+        // Arrange
+        $user = User::factory()->create(['email' => 'old@example.com']);
+        PromotionInvitation::factory()->forEmail('elsewhere@example.com')->create();
+
+        // Act
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $user->id);
+        $modal->set('form.email', 'new@example.com');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertNotDispatched('flash-message');
+        expect($user->refresh()->email)->toBe('new@example.com');
+    });
+
+    it('shows no warning when the email is not changed', function (string $typedEmail) {
+        // Arrange
+        $user = User::factory()->create(['email' => 'same@example.com']);
+        PromotionInvitation::factory()->forEmail('same@example.com')->create();
+
+        // Act
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $user->id);
+        $modal->set('form.first_name', 'Renamed');
+        $modal->set('form.email', $typedEmail);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertNotDispatched('flash-message');
+    })->with([
+        'identical' => ['same@example.com'],
+        'case variant' => ['SAME@example.com'],
+    ]);
+});

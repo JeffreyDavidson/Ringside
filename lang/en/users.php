@@ -12,4 +12,6 @@ return [
     'last_name' => 'Last Name',
     'password' => 'Password',
     'password_confirmation' => 'Confirm Password',
+    'activation_confirmation' => 'Activate :name? This email has pending invitations: :invitations.',
+    'email_change_invitations_warning' => ':name now uses an email with pending invitations: :invitations. They can accept them once signed in.',
 ];

@@ -26,6 +26,14 @@ class PromotionInvitationBuilder extends Builder
         return $this->where('email', PromotionInvitation::normalizeEmail($email));
     }
 
+    /**
+     * @param  array<int, string>  $emails
+     */
+    public function forEmails(array $emails): static
+    {
+        return $this->whereIn('email', array_values(array_unique(array_map(PromotionInvitation::normalizeEmail(...), $emails))));
+    }
+
     /** Invitations that can still be accepted: the expiry moment itself counts as expired. */
     public function pending(): static
     {

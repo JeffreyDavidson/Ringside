@@ -164,7 +164,15 @@ anchor: only an `Active` account can sign in, and an administrator decides
 which accounts become active. An invitation saved before the account existed is
 shown once the account is registered, activated and signed in with that email;
 this is the same trust model as password reset, which also hands control to
-whoever holds the email address. The invited user sees their invitations
+whoever holds the email address.
+To make that decision informed, the administrator is shown what activation
+unlocks: the users table's "Activate account" confirmation lists the account's
+pending, unexpired invitations as "Promotion (Role)" pairs, and an administrator
+who changes a user's email in the user form to an address with pending
+invitations gets a non-blocking warning naming those promotions after saving
+(the save is never blocked). Both read through
+`PendingInvitationSummaryService`, which matches on the normalised email and
+loads a whole page of users in one query. The invited user sees their invitations
 (`PromotionContextService::pendingInvitationsFor()`, matched on the user's
 normalised email, oldest first) as a section of the promotion switcher, or on the
 no-membership page when they have no active promotion, with Accept and Decline,

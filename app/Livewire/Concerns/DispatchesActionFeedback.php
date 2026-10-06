@@ -12,6 +12,11 @@ trait DispatchesActionFeedback
         $this->dispatch('flash-message', type: 'status', message: $message);
     }
 
+    protected function dispatchActionWarning(string $message): void
+    {
+        $this->dispatch('flash-message', type: 'warning', message: $message);
+    }
+
     protected function dispatchActionFailure(string $message): void
     {
         session()->flash('error', $message);

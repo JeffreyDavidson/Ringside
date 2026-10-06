@@ -44,9 +44,11 @@
         <x-container-fixed>
             <div
                 class="bg-ringside-surface-panel text-ringside-ink flex items-center justify-between gap-4 border border-s-4 px-4 py-3 text-sm"
-                x-bind:class="
-                    notification?.type === 'error' ? 'border-ringside-signal-soft' : 'border-ringside-success'
-                "
+                x-bind:class="{
+                    'border-ringside-signal-soft': notification?.type === 'error',
+                    'border-ringside-warning': notification?.type === 'warning',
+                    'border-ringside-success': notification?.type !== 'error' && notification?.type !== 'warning',
+                }"
             >
                 <span class="flex items-start gap-3">
                     <x-heroicon-s-exclamation-circle
@@ -54,8 +56,13 @@
                         class="text-ringside-signal-soft mt-0.5 size-4 shrink-0"
                         aria-hidden="true"
                     />
+                    <x-heroicon-s-exclamation-triangle
+                        x-show="notification?.type === 'warning'"
+                        class="text-ringside-warning mt-0.5 size-4 shrink-0"
+                        aria-hidden="true"
+                    />
                     <x-heroicon-s-check-circle
-                        x-show="notification?.type !== 'error'"
+                        x-show="notification?.type !== 'error' && notification?.type !== 'warning'"
                         class="text-ringside-success mt-0.5 size-4 shrink-0"
                         aria-hidden="true"
                     />

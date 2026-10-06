@@ -13,7 +13,10 @@ use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
+use App\Services\Promotions\PendingInvitationSummaryService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -43,6 +46,18 @@ class Main extends BaseTable
             ->oldest('id');
     }
 
+    /** @var array<string, string> Pending invitation summaries by normalized email, for the unverified users on this page. */
+    protected array $pendingInvitationSummaries = [];
+
+    /** @param Collection<int, User> $rows */
+    #[\Override]
+    protected function projectRowState(Collection $rows): void
+    {
+        $this->pendingInvitationSummaries = resolve(PendingInvitationSummaryService::class)->forEmails(
+            $rows->where('status', UserStatus::Unverified)->map(fn (User $user): string => $user->email)->all(),
+        );
+    }
+
     protected function configure(): void
     {
         Gate::authorize('viewAny', User::class);
@@ -60,15 +75,31 @@ class Main extends BaseTable
     }
 
     /**
-     * @return array{label: string, status: UserStatus}
+     * @return array{label: string, status: UserStatus, confirmation: ?string}
      */
     private function statusActionFor(User $user): array
     {
         return match ($user->status) {
-            UserStatus::Unverified => ['label' => 'Activate account', 'status' => UserStatus::Active],
-            UserStatus::Active => ['label' => 'Deactivate account', 'status' => UserStatus::Inactive],
-            UserStatus::Inactive => ['label' => 'Reactivate account', 'status' => UserStatus::Active],
+            UserStatus::Unverified => [
+                'label' => 'Activate account',
+                'status' => UserStatus::Active,
+                'confirmation' => $this->activationConfirmationFor($user),
+            ],
+            UserStatus::Active => ['label' => 'Deactivate account', 'status' => UserStatus::Inactive, 'confirmation' => null],
+            UserStatus::Inactive => ['label' => 'Reactivate account', 'status' => UserStatus::Active, 'confirmation' => null],
         };
+    }
+
+    /** Activation lets the account accept every pending invitation for its email, so the administrator is told which. */
+    private function activationConfirmationFor(User $user): ?string
+    {
+        $invitations = $this->pendingInvitationSummaries[PromotionInvitation::normalizeEmail($user->email)] ?? null;
+
+        if ($invitations === null) {
+            return null;
+        }
+
+        return __('users.activation_confirmation', ['name' => $user->full_name, 'invitations' => $invitations]);
     }
 
     public function changeStatus(int $userId, string $status, ChangeStatusAction $changeStatusAction): void
