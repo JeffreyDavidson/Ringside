@@ -122,28 +122,50 @@ stored in the `promotion_user` membership table, where role and membership
 status are scoped to that promotion. This allows one global user to participate
 in more than one promotion without duplicating authentication records.
 
-A membership has a status: `Invited`, `Active` or `Suspended`. Only `Active`
-grants anything. An owner adds a member by typing the exact email of an active
-account (`Promotions\Members\Manage`, `InvitePromotionMemberAction`), which
-creates the membership as `Invited` with the role the owner chose; nobody joins
-without consent. The owner's form answers every email (known, unknown, inactive,
-partial) with one message that never names the account, and the owner's list
-shows a pending invitation by the typed email, role and "Invitation pending",
-never by name (an owner can cancel it; role and status cannot be changed while
-it is pending, so an owner cannot activate it behind the account's back). The
-invited user sees their invitations as a section of the promotion switcher (or
-on the no-membership page when they have no active promotion) with Accept and
-Decline, which post to `promotions.invitation.accept` / `.decline` (outside the
-promotion context, because a user with no active membership must reach them).
-`AcceptPromotionInvitationAction` makes the signed-in user's own `Invited`
-membership `Active` with the invited role; `RemovePromotionInvitationAction`
-deletes an `Invited` membership (the owner cancelling or the user declining).
-Both find the membership through the signed-in user, never through a request
-id, and only ever touch `Invited` rows. The middleware, the promotion switcher,
-`SwitchActivePromotionAction` and `PromotionGate` read active memberships only,
-so an invitation gives no context and no access until it is accepted. The
-last-owner guards count active owners only. No email is sent: the invitation is
-visible in the application only.
+A membership has a status: `Active` or `Suspended`. Only `Active` grants
+anything. A pending invitation is not a membership: it is a `promotion_invitations`
+row (`PromotionInvitation`) keyed by the invited email address, with the role the
+owner chose, unique per promotion and email. Emails are stored trimmed and
+lowercase (the model mutator, like `User::email`) and compared exactly after the
+same normalisation. An owner invites by typing an email
+(`Promotions\Members\Manage`, `InvitePromotionMemberAction`); no account is
+needed, so nobody joins without consent and the form never reveals whether an
+account exists. Unknown, inactive, unverified and active emails all store an
+invitation and get one message that never names an account. The only answers
+that differ are two things the owner can already see: the email already has a
+pending invitation (`PromotionInvitationOutcome::AlreadyInvited`, the stored
+invitation is kept as it is) or already belongs to a member of the promotion,
+active or suspended (`AlreadyMember`). The action locks the promotion row, then
+checks both. The owner's list shows a pending invitation by the typed email,
+role and "Invitation pending", never by name; an owner can cancel it by
+invitation id (scoped to the promotion). An invitation has no role or status to
+change, so an owner cannot activate it behind anyone's back.
+
+Whoever signs in with the invited email owns the invitation. There is no email
+verification in the application, so administrator activation is the trust
+anchor: only an `Active` account can sign in, and an administrator decides
+which accounts become active. An invitation saved before the account existed is
+shown once the account is registered, activated and signed in with that email;
+this is the same trust model as password reset, which also hands control to
+whoever holds the email address. The invited user sees their invitations
+(`PromotionContextService::pendingInvitationsFor()`, matched on the user's
+normalised email, oldest first) as a section of the promotion switcher, or on the
+no-membership page when they have no active promotion, with Accept and Decline,
+which post to `promotions.invitation.accept` / `.decline` (outside the promotion
+context, because a user with no active membership must reach them).
+`AcceptPromotionInvitationAction` locks the promotion and then the invitation
+for the signed-in user's own email, creates an `Active` membership with the
+invited role and deletes the invitation in one transaction. If the user already
+has a membership of that promotion (for example a suspended one) it does
+nothing and keeps the invitation: an invitation can never undo a suspension or
+change a role. `RemovePromotionInvitationAction` deletes the invitation for a
+promotion and email (the owner cancelling or the user declining). Both find the
+invitation through the signed-in user's email or the owner's promotion, never
+through an id supplied by the invited user, and never touch memberships. The
+middleware, the promotion switcher, `SwitchActivePromotionAction` and
+`PromotionGate` read active memberships only, so an invitation gives no context
+and no access until it is accepted. The last-owner guards count active owners
+only. No email is sent: the invitation is visible in the application only.
 
 Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,
@@ -180,10 +202,11 @@ promotion switcher. `EstablishPromotionContext` resets the whole context
 (`PromotionContextService::clear()`: promotion, enforcement and memo) when a
 request starts, so nothing carries over from an earlier request that reused the
 scoped instance (several requests in one test, or a long-lived worker). The
-memo (active and invited promotions, read in one query) is also dropped whenever
-the member Actions invite, accept, remove or change a role or status
+memo (the active promotions, one query, and the pending invitations for the
+user's email, one more) is also dropped whenever the member Actions invite,
+accept, remove or change a role or status
 (`PromotionContextService::forgetMemberships()`). Any new code that writes
-`promotion_user` must call it.
+`promotion_user` or `promotion_invitations` must call it.
 When promotion context is enforced, new promotion-owned models receive the
 active promotion during creation without exposing ownership columns to
 mass-assignment.
@@ -215,7 +238,7 @@ through its event. Promotion-scoped routes establish the context from the
 session's selected active membership, defaulting to the user's oldest active
 membership (`promotion_user.created_at`, the lower promotion id breaking ties)
 when none is selected or the selected one is no longer usable (suspended,
-invited, removed or deleted), so a promotion joined later never becomes the
+removed or deleted), so a promotion joined later never becomes the
 default; the session is then
 rewritten to the promotion actually used. Promotion-owned model queries are then
 filtered to that context, and platform administrators may operate without a
