@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Route;
@@ -60,8 +61,25 @@ test('a remembered promotion the user can no longer use falls back to the first 
 })->with([
     'no membership' => [null],
     'suspended membership' => [MembershipStatus::Suspended],
-    'invited membership' => [MembershipStatus::Invited],
 ]);
+
+test('a remembered promotion that only invited the user falls back to the first active promotion', function () {
+    // Arrange
+    $user = basicUser();
+    $invitingPromotion = Promotion::factory()->create();
+    $activePromotion = Promotion::factory()->create();
+    attachPromotionMembership($user, $activePromotion, MembershipStatus::Active);
+    PromotionInvitation::factory()->for($invitingPromotion)->forEmail($user->email)->create();
+    actingAs($user);
+    withSession(['active_promotion_id' => $invitingPromotion->id]);
+
+    // Act
+    $response = get(route('dashboard'));
+
+    // Assert
+    $response->assertSuccessful();
+    $response->assertSessionHas('active_promotion_id', $activePromotion->id);
+});
 
 test('a remembered promotion that no longer exists falls back to the first active promotion', function () {
     // Arrange
@@ -151,7 +169,7 @@ test('a promotion that invited the user earlier never becomes the default once t
     // Arrange
     $user = basicUser();
     [$invitingPromotion, $ownPromotion] = Promotion::factory()->count(2)->create()->all();
-    attachPromotionMembership($user, $invitingPromotion, MembershipStatus::Invited);
+    PromotionInvitation::factory()->for($invitingPromotion)->forEmail($user->email)->create();
     travel(1)->day();
     attachPromotionMembership($user, $ownPromotion, MembershipStatus::Active);
     actingAs($user);
