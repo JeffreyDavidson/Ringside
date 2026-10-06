@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Promotions\Promotion;
+use App\Models\Promotions\PromotionInvitation;
+
+test('it filters invitations by promotion', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $invitation = PromotionInvitation::factory()->for($promotion)->create();
+    PromotionInvitation::factory()->create();
+
+    // Act
+    $invitations = PromotionInvitation::query()
+        ->forPromotion($promotion)
+        ->get();
+
+    // Assert
+    expect($invitations->modelKeys())->toBe([$invitation->id]);
+});
+
+test('it filters invitations by email ignoring case and surrounding whitespace', function (string $search) {
+    // Arrange
+    $invitation = PromotionInvitation::factory()->forEmail('Match.Me@example.test')->create();
+    PromotionInvitation::factory()->forEmail('match.me.too@example.test')->create();
+
+    // Act
+    $invitations = PromotionInvitation::query()
+        ->forEmail($search)
+        ->get();
+
+    // Assert
+    expect($invitations->modelKeys())->toBe([$invitation->id]);
+})->with([
+    'exact' => ['match.me@example.test'],
+    'upper case' => ['MATCH.ME@EXAMPLE.TEST'],
+    'whitespace' => ['  match.me@example.test '],
+]);
+
+test('it never widens an email filter with wildcard characters', function (string $search) {
+    // Arrange
+    PromotionInvitation::factory()->forEmail('someone@example.test')->create();
+
+    // Act
+    $exists = PromotionInvitation::query()
+        ->forEmail($search)
+        ->exists();
+
+    // Assert
+    expect($exists)->toBeFalse();
+})->with([
+    'percent' => ['%@example.test'],
+    'underscore' => ['someon_@example.test'],
+]);

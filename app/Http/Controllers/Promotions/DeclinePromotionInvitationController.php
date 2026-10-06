@@ -21,7 +21,7 @@ class DeclinePromotionInvitationController
 
         abort_unless($user instanceof User, 401);
 
-        if (! $removeInvitation->handle($promotion, $user)) {
+        if (! $removeInvitation->handle($promotion, $user->email)) {
             return redirect()->route('dashboard')->with('error', __('promotions.invitation_unavailable'));
         }
 

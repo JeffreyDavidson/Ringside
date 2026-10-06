@@ -261,23 +261,20 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 **Priority:** Low  
 **Status:** Core flow shipped; follow-ups open.
 
-Owners now invite a member by typing the exact email of an existing active
-account: the membership is created as `Invited` and the person joins only by
-accepting it in the application (see "Promotion Context and Membership" in
-`core-capabilities.md`). The remaining gaps:
+Owners invite a member by typing an email address: the invitation is saved in
+`promotion_invitations`, keyed by the email (no account is needed, and the form
+never reveals whether one exists), and the person joins only by accepting it in
+the application after signing in with that email (see "Promotion Context and
+Membership" in `core-capabilities.md`). The remaining gaps:
 
-- **Invitations are tied to an existing account.** The form shows one message
-  for every email, but a real account's pending invitation then appears in the
-  owner's list while an unknown email adds no row, so an owner can still tell
-  whether an account exists. Closing it needs an invitation record keyed by
-  email (a new table, matched when that email signs in or registers), which would
-  also allow inviting someone who has no account yet.
 - **No email.** The app has no mail infrastructure in production, so an
   invitation is seen only after the person signs in. Add a notification when a
   mailer is configured.
 - **Platform administrators without a membership** have no switcher or
   no-membership page on which to see an invitation; they reach promotions
   through the directory.
+- **Invitations never expire.** A pending invitation stays until it is accepted,
+  declined or cancelled.
 
 Business rules enforced in the membership and user Actions: a promotion always
 keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the

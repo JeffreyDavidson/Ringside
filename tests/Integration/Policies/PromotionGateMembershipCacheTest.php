@@ -195,7 +195,7 @@ describe('staleness within a request', function (): void {
         $before = Gate::forUser($user)->allows('view', $promotion);
 
         // Act
-        app(InvitePromotionMemberAction::class)->handle($promotion, $user, MembershipRole::Member);
+        app(InvitePromotionMemberAction::class)->handle($promotion, $user->email, MembershipRole::Member);
         $invited = Gate::forUser($user)->allows('view', $promotion);
         app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
         $accepted = Gate::forUser($user)->allows('view', $promotion);
@@ -258,7 +258,7 @@ describe('page load queries', function (): void {
         [$total, $membershipQueries] = countQueries(fn () => get(route('wrestlers.index'))->assertOk());
 
         // Assert
-        // Previously 5 queries, 4 of them against promotion_user; the user re-read is a separate query.
-        expect([$total, $membershipQueries])->toBe([2, 1]);
+        // One promotion_user query, one promotion_invitations query for the sidebar indicator, and the user re-read.
+        expect([$total, $membershipQueries])->toBe([3, 1]);
     });
 });

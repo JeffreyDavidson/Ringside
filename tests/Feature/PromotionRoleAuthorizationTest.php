@@ -154,7 +154,8 @@ test('owners can update promotion settings and invite members', function () {
         ->assertHasNoErrors();
 
     expect($promotion->hasActiveMember($newMember))->toBeFalse()
-        ->and($promotion->memberships()->where('user_id', $newMember->id)->firstOrFail()->status)->toBe(MembershipStatus::Invited);
+        ->and($promotion->memberships()->count())->toBe(1)
+        ->and($promotion->invitations()->sole()->email)->toBe($newMember->email);
 });
 
 test('suspended promotion members no longer have access', function () {

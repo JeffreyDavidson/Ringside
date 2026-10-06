@@ -7,13 +7,14 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Livewire\Promotions\Members\Manage;
 use App\Models\Promotions\Promotion;
-use App\Models\Promotions\PromotionMembership;
+use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Dom\HTMLDocument;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Laravel\travel;
 
 it('shows a promotion detail page and its member manager to platform administrators', function () {
     $promotion = Promotion::factory()->create(['name' => 'Ringside Wrestling']);
@@ -42,7 +43,7 @@ it('redirects guests to login from the promotion member page', function () {
         ->assertRedirect(route('login'));
 });
 
-it('invites an existing active account by exact email to only the selected promotion with its selected role', function () {
+it('saves an invitation for the typed email to only the selected promotion with its selected role', function () {
     // Arrange
     $promotion = Promotion::factory()->create();
     $otherPromotion = Promotion::factory()->create();
@@ -54,35 +55,36 @@ it('invites an existing active account by exact email to only the selected promo
         ->call('addMember');
 
     // Assert
-    $membership = $promotion->memberships()->where('user_id', $user->id)->firstOrFail();
+    $invitation = $promotion->invitations()->sole();
 
     $component->assertHasNoErrors()->assertSet('email', '');
-    expect($membership->role)->toBe(MembershipRole::Manager)
-        ->and($membership->status)->toBe(MembershipStatus::Invited)
+    expect($invitation->email)->toBe($user->email)
+        ->and($invitation->role)->toBe(MembershipRole::Manager)
+        ->and($promotion->memberships()->count())->toBe(0)
         ->and($promotion->hasActiveMember($user))->toBeFalse()
-        ->and($otherPromotion->memberships()->where('user_id', $user->id)->exists())->toBeFalse()
-        ->and($user->promotions()->count())->toBe(1);
+        ->and($otherPromotion->invitations()->count())->toBe(0)
+        ->and($user->promotions()->count())->toBe(0);
 });
 
-it('matches the email without case sensitivity and ignores surrounding whitespace', function () {
+it('stores the email trimmed and lowercase and treats other spellings of it as the same invitation', function () {
     // Arrange
     $promotion = Promotion::factory()->create();
-    $user = User::factory()->create([
-        'email' => 'global.member@example.test',
-        'status' => UserStatus::Active,
-    ]);
 
     // Act
-    Livewire::actingAs(administrator())
+    $component = Livewire::actingAs(administrator())
         ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => '  GLOBAL.Member@Example.TEST '])
         ->call('addMember')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->set('email', 'global.member@example.test')
+        ->call('addMember');
 
     // Assert
-    expect($promotion->memberships()->where('user_id', $user->id)->firstOrFail()->status)->toBe(MembershipStatus::Invited);
+    $component->assertHasErrors(['email'])
+        ->assertSee(__('promotions.invitation_already_pending'));
+    expect($promotion->invitations()->sole()->email)->toBe('global.member@example.test');
 });
 
-it('answers every email with the same message that never names the account', function (string $case) {
+it('answers every email with the same message and a pending row, whether or not an account exists', function (string $case) {
     // Arrange
     $promotion = Promotion::factory()->create();
     $active = User::factory()->create([
@@ -91,16 +93,14 @@ it('answers every email with the same message that never names the account', fun
         'email' => 'secretive.person@example.test',
         'status' => UserStatus::Active,
     ]);
-    $inactive = User::factory()->create(['email' => 'inactive.person@example.test', 'status' => UserStatus::Inactive]);
+    $inactive = User::factory()->create(['first_name' => 'Dormant', 'last_name' => 'Person', 'email' => 'inactive.person@example.test', 'status' => UserStatus::Inactive]);
+    $unverified = User::factory()->create(['first_name' => 'Unverified', 'last_name' => 'Person', 'email' => 'unverified.person@example.test', 'status' => UserStatus::Unverified]);
 
     $email = match ($case) {
-        'existing active account' => $active->email,
-        'partial email' => 'secretive',
-        'percent wildcard' => '%@example.test',
-        'underscore wildcard' => 'secretive_person@example.test',
-        'name search' => 'Secretive Person',
-        'unknown email' => 'nobody@example.test',
-        default => $inactive->email,
+        'active account' => $active->email,
+        'inactive account' => $inactive->email,
+        'unverified account' => $unverified->email,
+        default => 'nobody@example.test',
     };
 
     // Act
@@ -111,17 +111,34 @@ it('answers every email with the same message that never names the account', fun
     // Assert
     $component->assertHasNoErrors()
         ->assertDispatched('flash-message', type: 'status', message: __('promotions.invitation_sent', ['role' => 'Member']))
+        ->assertSee($email)
         ->assertDontSee('Secretive')
-        ->assertDontSee('inactive.person@example.test');
-    expect($promotion->memberships()->count())->toBe($case === 'existing active account' ? 1 : 0);
+        ->assertDontSee('Dormant')
+        ->assertDontSee('Unverified Person');
+    expect($promotion->invitations()->sole()->email)->toBe($email)
+        ->and($promotion->memberships()->count())->toBe(0);
 })->with([
-    'existing active account',
-    'partial email',
-    'percent wildcard',
-    'underscore wildcard',
-    'name search',
+    'active account',
+    'inactive account',
+    'unverified account',
     'unknown email',
-    'inactive user',
+]);
+
+it('rejects text that is not an email address and stores nothing', function (string $value) {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => $value])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasErrors('email')->assertNotDispatched('flash-message');
+    expect($promotion->invitations()->count())->toBe(0);
+})->with([
+    'partial email' => ['secretive'],
+    'name search' => ['Secretive Person'],
 ]);
 
 it('never puts the invited accounts full name in the message the owner sees', function () {
@@ -140,7 +157,7 @@ it('never puts the invited accounts full name in the message the owner sees', fu
         ->assertDontSee("D'Arcy");
 });
 
-it('tells the owner when the account already has a membership or a pending invitation', function (MembershipStatus $status) {
+it('tells the owner when the email already belongs to a member of the promotion', function (MembershipStatus $status) {
     // Arrange
     $promotion = Promotion::factory()->create();
     $existing = User::factory()->create(['email' => 'existing.member@example.test', 'status' => UserStatus::Active]);
@@ -158,13 +175,29 @@ it('tells the owner when the account already has a membership or a pending invit
     $component->assertHasErrors(['email'])
         ->assertSee(__('promotions.member_already_added'))
         ->assertNotDispatched('flash-message');
-    expect($promotion->memberships()->count())->toBe(1)
-        ->and($promotion->memberships()->firstOrFail()->status)->toBe($status);
+    expect($promotion->invitations()->count())->toBe(0)
+        ->and($promotion->memberships()->sole()->status)->toBe($status);
 })->with([
     'active member' => [MembershipStatus::Active],
     'suspended member' => [MembershipStatus::Suspended],
-    'pending invitation (previously unreachable: members were added as active at once)' => [MembershipStatus::Invited],
 ]);
+
+it('tells the owner when the email already has a pending invitation and keeps the stored one', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('pending@example.test')->withRole(MembershipRole::Member)->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'Pending@example.test', 'newMemberRole' => MembershipRole::Owner->value])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasErrors(['email'])
+        ->assertSee(__('promotions.invitation_already_pending'))
+        ->assertNotDispatched('flash-message');
+    expect($promotion->invitations()->sole()->role)->toBe(MembershipRole::Member);
+});
 
 it('clears an earlier email error once an invitation is sent', function () {
     // Arrange
@@ -184,7 +217,7 @@ it('clears an earlier email error once an invitation is sent', function () {
 
     // Assert
     $component->assertHasNoErrors()
-        ->assertDispatched('flash-message', type: 'status', message: 'If that email belongs to an active account, an invitation to join this promotion as Manager was sent. Nobody joins until they accept.');
+        ->assertDispatched('flash-message', type: 'status', message: __('promotions.invitation_sent', ['role' => 'Manager']));
 });
 
 it('links the email error to the email input', function () {
@@ -237,6 +270,7 @@ it('requires an email and a valid role to add a member', function (string $email
 })->with([
     'missing email' => ['', 'member', 'email'],
     'invalid role' => ['someone@example.test', 'superuser', 'role'],
+    'invalid email' => ['someone', 'member', 'email'],
 ]);
 
 it('does not let a non-owner add members by email', function () {
@@ -253,7 +287,8 @@ it('does not let a non-owner add members by email', function () {
         ->call('addMember')
         ->assertForbidden();
 
-    expect($promotion->hasActiveMember($target))->toBeFalse();
+    expect($promotion->hasActiveMember($target))->toBeFalse()
+        ->and($promotion->invitations()->count())->toBe(0);
 });
 
 it('never lists other users in the member manager', function () {
@@ -329,7 +364,7 @@ it('does not allow membership status changes outside active and suspended states
 
     Livewire::actingAs(administrator())
         ->test(Manage::class, ['promotionId' => $promotion->id])
-        ->call('updateMemberStatus', $user->id, MembershipStatus::Invited->value)
+        ->call('updateMemberStatus', $user->id, 'invited')
         ->assertHasErrors('status');
 
     expect($promotion->hasActiveMember($user))->toBeTrue();
@@ -432,19 +467,11 @@ it('confirms suspending and reactivating a member', function () {
 });
 
 describe('pending invitations', function () {
-    /** @param array<string, string> $attributes */
-    function invitePending(Promotion $promotion, array $attributes = [], MembershipRole $role = MembershipRole::Manager): User
-    {
-        $user = User::factory()->create(['status' => UserStatus::Active, ...$attributes]);
-        $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Invited]);
-
-        return $user;
-    }
-
-    it('lists a pending invitation by the email only, never by the name, and keeps it out of the member list', function () {
+    it('lists a pending invitation by the email only, and keeps it out of the member list', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
-        invitePending($promotion, ['first_name' => 'Hidden', 'last_name' => 'Invitee', 'email' => 'hidden.invitee@example.test']);
+        User::factory()->create(['first_name' => 'Hidden', 'last_name' => 'Invitee', 'email' => 'hidden.invitee@example.test', 'status' => UserStatus::Active]);
+        PromotionInvitation::factory()->for($promotion)->forEmail('hidden.invitee@example.test')->withRole(MembershipRole::Manager)->create();
 
         // Act
         $component = Livewire::actingAs(administrator())
@@ -461,10 +488,25 @@ describe('pending invitations', function () {
             ->assertSee(__('promotions.no_members'));
     });
 
+    it('lists invitations oldest first', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        PromotionInvitation::factory()->for($promotion)->forEmail('m.second@example.test')->create();
+        travel(-1)->day();
+        PromotionInvitation::factory()->for($promotion)->forEmail('z.first@example.test')->create();
+
+        // Act
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Assert
+        $component->assertSeeInOrder(['z.first@example.test', 'm.second@example.test']);
+    });
+
     it('shows pending invitations only to people who can manage members', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
-        invitePending($promotion, ['email' => 'hidden.invitee@example.test']);
+        PromotionInvitation::factory()->for($promotion)->forEmail('hidden.invitee@example.test')->create();
         $member = basicUser();
         $promotion->users()->attach($member, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
 
@@ -477,69 +519,66 @@ describe('pending invitations', function () {
             ->assertDontSee(__('promotions.invitations_title'));
     });
 
-    it('lets an owner cancel a pending invitation without naming the account', function () {
+    it('lets an owner cancel a pending invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
-        $invitee = invitePending($promotion, ['first_name' => 'Hidden', 'last_name' => 'Invitee']);
         $otherPromotion = Promotion::factory()->create();
-        $otherPromotion->users()->attach($invitee, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Invited]);
+        $invitation = PromotionInvitation::factory()->for($promotion)->forEmail('cancel.me@example.test')->create();
+        $kept = PromotionInvitation::factory()->for($promotion)->forEmail('keep.me@example.test')->create();
+        $otherPromotionInvitation = PromotionInvitation::factory()->for($otherPromotion)->forEmail('cancel.me@example.test')->create();
 
         // Act
         $component = Livewire::actingAs(administrator())
             ->test(Manage::class, ['promotionId' => $promotion->id])
-            ->call('cancelInvitation', $invitee->id);
+            ->call('cancelInvitation', $invitation->id);
 
         // Assert
         $component->assertHasNoErrors()
             ->assertDispatched('flash-message', type: 'status', message: __('promotions.invitation_cancelled'))
-            ->assertDontSee(__('promotions.invitations_title'));
-        expect($promotion->memberships()->count())->toBe(0)
-            ->and($otherPromotion->memberships()->where('user_id', $invitee->id)->exists())->toBeTrue();
+            ->assertDontSee('cancel.me@example.test')
+            ->assertSee('keep.me@example.test');
+        expect($promotion->invitations()->pluck('id')->all())->toBe([$kept->id])
+            ->and($otherPromotionInvitation->fresh())->not->toBeNull();
     });
 
     it('does not let a non-owner cancel an invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
-        $invitee = invitePending($promotion);
+        $invitation = PromotionInvitation::factory()->for($promotion)->create();
         $manager = basicUser();
         $promotion->users()->attach($manager, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
 
         // Act
         $component = Livewire::actingAs($manager)
             ->test(Manage::class, ['promotionId' => $promotion->id])
-            ->call('cancelInvitation', $invitee->id);
+            ->call('cancelInvitation', $invitation->id);
 
         // Assert
         $component->assertForbidden();
-        expect($promotion->memberships()->where('user_id', $invitee->id)->exists())->toBeTrue();
+        expect($invitation->fresh())->not->toBeNull();
     });
 
-    it('cannot cancel an active member or an invitation of another promotion by forging an id', function (string $case) {
+    it('cannot cancel the invitation of another promotion by forging its id', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
         $otherPromotion = Promotion::factory()->create();
-        $target = User::factory()->create(['status' => UserStatus::Active]);
-
-        if ($case === 'active member') {
-            $promotion->users()->attach($target, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-        } else {
-            $otherPromotion->users()->attach($target, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Invited]);
-        }
+        $foreign = PromotionInvitation::factory()->for($otherPromotion)->create();
 
         // Act
         $component = Livewire::actingAs(administrator())
             ->test(Manage::class, ['promotionId' => $promotion->id])
-            ->call('cancelInvitation', $target->id);
+            ->call('cancelInvitation', $foreign->id);
 
         // Assert
         $component->assertNotFound();
-        expect(PromotionMembership::query()->where('user_id', $target->id)->count())->toBe(1);
-    })->with(['active member', 'invitation of another promotion']);
+        expect($foreign->fresh())->not->toBeNull();
+    });
 
-    it('never lets an owner activate or re-role a pending invitation behind the invited accounts back', function (string $action) {
+    it('cannot activate or re-role a pending invitation as if it were a member', function (string $action) {
         // Arrange
         $promotion = Promotion::factory()->create();
-        $invitee = invitePending($promotion, [], MembershipRole::Member);
+        $invitee = User::factory()->create(['email' => 'invitee@example.test', 'status' => UserStatus::Active]);
+        $invitation = PromotionInvitation::factory()->for($promotion)->forEmail('invitee@example.test')->withRole(MembershipRole::Member)->create();
 
         // Act
         $component = Livewire::actingAs(administrator())
@@ -552,18 +591,15 @@ describe('pending invitations', function () {
         };
 
         // Assert
-        $membership = $promotion->memberships()->where('user_id', $invitee->id)->firstOrFail();
-
         $component->assertNotFound();
-        expect($membership->status)->toBe(MembershipStatus::Invited)
-            ->and($membership->role)->toBe(MembershipRole::Member)
-            ->and($promotion->hasActiveMember($invitee))->toBeFalse();
+        expect($invitation->fresh()?->role)->toBe(MembershipRole::Member)
+            ->and($promotion->memberships()->count())->toBe(0);
     })->with(['activate', 'change role']);
 
-    it('counts only joined members on the promotion page', function () {
+    it('counts only members on the promotion page, not invitations', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
-        invitePending($promotion);
+        PromotionInvitation::factory()->for($promotion)->create();
         $member = User::factory()->create(['status' => UserStatus::Active]);
         $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
