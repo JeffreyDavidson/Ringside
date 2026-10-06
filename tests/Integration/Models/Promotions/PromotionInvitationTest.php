@@ -5,7 +5,10 @@ declare(strict_types=1);
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
+use Illuminate\Console\Scheduling\Event;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 test('it stores the email trimmed and lowercase', function (string $email) {
@@ -92,4 +95,30 @@ test('deleting a promotion deletes its invitations', function () {
 
     // Assert
     expect(PromotionInvitation::query()->pluck('id')->all())->toBe([$kept->id]);
+});
+
+test('it prunes only the expired invitations', function () {
+    // Arrange
+    $pending = PromotionInvitation::factory()->create();
+    $expired = PromotionInvitation::factory()->expired()->create();
+
+    // Act
+    Artisan::call('model:prune', ['--model' => [PromotionInvitation::class]]);
+
+    // Assert
+    expect(PromotionInvitation::query()->pluck('id')->all())->toBe([$pending->id])
+        ->and(PromotionInvitation::query()->find($expired->id))->toBeNull();
+});
+
+test('it is scheduled to be pruned daily', function () {
+    // Arrange
+    $events = collect(resolve(Schedule::class)->events());
+
+    // Act
+    $prune = $events->first(fn (Event $event): bool => str_contains($event->command ?? '', 'model:prune'));
+
+    // Assert
+    expect($prune)->toBeInstanceOf(Event::class)
+        ->and($prune?->expression)->toBe('0 0 * * *')
+        ->and($prune?->command)->toContain('PromotionInvitation');
 });

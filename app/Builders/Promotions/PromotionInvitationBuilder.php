@@ -25,4 +25,15 @@ class PromotionInvitationBuilder extends Builder
     {
         return $this->where('email', PromotionInvitation::normalizeEmail($email));
     }
+
+    /** Invitations that can still be accepted: the expiry moment itself counts as expired. */
+    public function pending(): static
+    {
+        return $this->where('expires_at', '>', now());
+    }
+
+    public function expired(): static
+    {
+        return $this->where('expires_at', '<=', now());
+    }
 }

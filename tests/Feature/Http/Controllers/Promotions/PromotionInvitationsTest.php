@@ -88,6 +88,22 @@ describe('an invitation grants nothing until it is accepted', function () {
 });
 
 describe('seeing invitations', function () {
+    test('the no-membership page leaves out an expired invitation', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['name' => 'Expired Invitation Wrestling']);
+        $invitee = basicUser();
+        PromotionInvitation::factory()->for($promotion)->forEmail($invitee->email)->expired()->create();
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertForbidden()
+            ->assertDontSee('Expired Invitation Wrestling')
+            ->assertDontSeeHtml(route('promotions.invitation.accept', $promotion));
+    });
+
     test('the no-membership page lists the invitations addressed to the users email with accept and decline', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
@@ -285,6 +301,21 @@ describe('accepting an invitation', function () {
             ->and($membership->role)->toBe(MembershipRole::Member)
             ->and($invitation->fresh())->not->toBeNull()
             ->and($promotion->hasActiveMember($user))->toBeFalse();
+    });
+
+    test('is not possible once the invitation has expired', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->expired()->create();
+        actingAs($user);
+
+        // Act
+        $response = post(route('promotions.invitation.accept', $promotion));
+
+        // Assert
+        $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+        expect($promotion->memberships()->count())->toBe(0);
     });
 
     test('is not possible after the invitation is gone', function () {
