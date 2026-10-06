@@ -610,3 +610,35 @@ describe('pending invitations', function () {
         $response->assertOk()->assertViewHas('promotion', fn (Promotion $shown): bool => $shown->memberships_count === 1);
     });
 });
+
+it('lists only pending invitations and shows when each expires in the promotion time zone', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create(['timezone' => 'Pacific/Auckland']);
+    PromotionInvitation::factory()->for($promotion)->forEmail('pending@example.test')->create(['expires_at' => '2026-11-05 20:00:00']);
+    PromotionInvitation::factory()->for($promotion)->forEmail('gone@example.test')->expired()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+    // Assert
+    $component->assertSee('pending@example.test')
+        ->assertDontSee('gone@example.test')
+        ->assertSee(__('promotions.invitation_expires', ['date' => 'Nov 6, 2026']))
+        ->assertDontSee('Nov 5, 2026');
+});
+
+it('lets the owner invite again once the earlier invitation has expired', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('late@example.test')->withRole(MembershipRole::Member)->expired()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'late@example.test', 'newMemberRole' => MembershipRole::Manager->value])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasNoErrors();
+    expect($promotion->invitations()->sole()->role)->toBe(MembershipRole::Manager);
+});

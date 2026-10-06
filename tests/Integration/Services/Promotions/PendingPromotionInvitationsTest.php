@@ -81,3 +81,20 @@ test('it reads the invitations once per request until memberships are forgotten'
         ->and($stale)->toBeEmpty()
         ->and($fresh)->toHaveCount(1);
 });
+
+test('it hides an invitation from the second it expires and not before', function () {
+    // Arrange
+    $user = User::factory()->create(['email' => 'invitee@example.test']);
+    $invitation = PromotionInvitation::factory()->forEmail('invitee@example.test')->create();
+    travel(30 * 86400 - 1)->seconds();
+
+    // Act
+    $beforeExpiry = app(PromotionContextService::class)->pendingInvitationsFor($user)->modelKeys();
+    travel(1)->seconds();
+    app(PromotionContextService::class)->forgetMemberships();
+    $atExpiry = app(PromotionContextService::class)->pendingInvitationsFor($user)->modelKeys();
+
+    // Assert
+    expect($beforeExpiry)->toBe([$invitation->id])
+        ->and($atExpiry)->toBeEmpty();
+});

@@ -211,6 +211,9 @@
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold">{{ __('promotions.role') }}</th>
                             <th scope="col" class="px-4 py-3 font-semibold">
+                                {{ __('promotions.invitation_expires_heading') }}
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-semibold">
                                 {{ __('promotions.membership_status') }}
                             </th>
                             <th scope="col" class="px-5 py-3 text-right font-semibold lg:px-6">
@@ -226,6 +229,9 @@
                             >
                                 <td class="text-ringside-ink px-5 py-4 lg:px-6">{{ $invitation->email }}</td>
                                 <td class="text-ringside-muted px-4 py-4">{{ $invitation->role->label() }}</td>
+                                <td class="text-ringside-muted px-4 py-4" data-test="invitation-expires">
+                                    {{ __('promotions.invitation_expires', ['date' => \App\Models\Promotions\Promotion::toLocalTime($promotion, $invitation->expires_at)->format('M j, Y')]) }}
+                                </td>
                                 <td class="text-ringside-muted px-4 py-4">
                                     <span class="border-ringside-outline inline-flex min-h-7 items-center border px-2 text-xs">
                                         {{ __('promotions.invitation_pending') }}

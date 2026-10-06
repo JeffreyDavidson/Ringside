@@ -10,9 +10,11 @@ use Database\Factories\Promotions\PromotionInvitationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -25,17 +27,33 @@ use Illuminate\Support\Str;
  * @property int $promotion_id
  * @property string $email
  * @property MembershipRole $role
+ * @property Carbon $expires_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Promotion $promotion
  */
-#[Fillable('promotion_id', 'email', 'role')]
+#[Fillable('promotion_id', 'email', 'role', 'expires_at')]
 #[UseEloquentBuilder(PromotionInvitationBuilder::class)]
 #[UseFactory(PromotionInvitationFactory::class)]
 class PromotionInvitation extends Model
 {
     /** @use HasFactory<PromotionInvitationFactory> */
     use HasFactory;
+
+    use Prunable;
+
+    /** How long an invitation stays acceptable after it is sent. */
+    public const int EXPIRES_AFTER_DAYS = 30;
+
+    /**
+     * Expiry is enforced wherever invitations are read (the pending() scope); pruning only removes the rows.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()->expired();
+    }
 
     /** The stored form of an email address: trimmed and lowercase, like User::email, so lookups never depend on case. */
     public static function normalizeEmail(string $email): string
@@ -61,6 +79,7 @@ class PromotionInvitation extends Model
     {
         return [
             'role' => MembershipRole::class,
+            'expires_at' => 'datetime',
         ];
     }
 }

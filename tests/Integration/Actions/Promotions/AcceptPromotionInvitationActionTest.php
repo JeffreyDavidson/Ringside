@@ -12,6 +12,8 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\travel;
+
 test('it creates an active membership with the invited role and deletes the invitation', function (MembershipRole $role) {
     // Arrange
     $promotion = Promotion::factory()->create();
@@ -160,4 +162,34 @@ test('it forgets the memoised memberships and invitations so access is reflected
         ->and($context->membershipRole($user, $promotion))->toBe(MembershipRole::Member)
         ->and($context->pendingInvitationsFor($user))->toBeEmpty()
         ->and($context->activePromotionsFor($user)->modelKeys())->toBe([$promotion->id]);
+});
+
+test('it accepts an invitation one second before it expires', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'invitee@example.test', 'status' => UserStatus::Active]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('invitee@example.test')->create();
+    travel(30 * 86400 - 1)->seconds();
+
+    // Act
+    $accepted = app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($accepted)->toBe(MembershipRole::Member)
+        ->and($promotion->hasActiveMember($user))->toBeTrue();
+});
+
+test('it refuses an expired invitation and creates no membership', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'invitee@example.test', 'status' => UserStatus::Active]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('invitee@example.test')->create();
+    travel(30)->days();
+
+    // Act
+    $accepted = app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($accepted)->toBeNull()
+        ->and($promotion->memberships()->count())->toBe(0);
 });

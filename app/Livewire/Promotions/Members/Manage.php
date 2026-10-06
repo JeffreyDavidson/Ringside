@@ -186,11 +186,12 @@ class Manage extends Component
         $canManageMembers = Gate::allows('manageMembers', $promotion);
 
         $invitations = $canManageMembers
-            ? $promotion->invitations()->orderBy('created_at')->orderBy('id')->get()
+            ? $promotion->invitations()->pending()->orderBy('created_at')->orderBy('id')->get()
             : new Collection;
 
         return view('livewire.promotions.members.manage', [
             'members' => $members,
+            'promotion' => $promotion,
             'invitations' => $invitations,
             'canManageMembers' => $canManageMembers,
             'roles' => MembershipRole::cases(),

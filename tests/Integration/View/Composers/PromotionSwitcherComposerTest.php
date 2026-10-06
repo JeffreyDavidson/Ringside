@@ -147,3 +147,18 @@ it('has no active promotion for a user without memberships', function () {
     expect($view->getData()['promotionSwitcherPromotions'])->toBeEmpty()
         ->and($view->getData()['activePromotionId'])->toBeNull();
 });
+
+it('leaves an expired invitation out of the switcher', function () {
+    // Arrange
+    $user = User::factory()->create();
+    joinPromotion($user, 'Alpha Wrestling');
+    $pending = PromotionInvitation::factory()->forEmail($user->email)->create();
+    PromotionInvitation::factory()->forEmail($user->email)->expired()->create();
+    actingAs($user);
+
+    // Act
+    $view = composePromotionSwitcher('components.sidebar.index');
+
+    // Assert
+    expect($view->getData()['promotionInvitations']->pluck('id')->all())->toBe([$pending->id]);
+});

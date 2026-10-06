@@ -25,6 +25,7 @@ class PromotionInvitationFactory extends Factory
             'promotion_id' => Promotion::factory(),
             'email' => fake()->unique()->safeEmail(),
             'role' => MembershipRole::Member,
+            'expires_at' => now()->addDays(PromotionInvitation::EXPIRES_AFTER_DAYS),
         ];
     }
 
@@ -36,5 +37,10 @@ class PromotionInvitationFactory extends Factory
     public function withRole(MembershipRole $role): static
     {
         return $this->state(['role' => $role]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(['expires_at' => now()->subSecond()]);
     }
 }
