@@ -53,7 +53,7 @@ class TagTeamWrestlerFactory extends Factory
             $joinedAt = Carbon::parse($attributes['joined_at']);
 
             return [
-                'left_at' => $joinedAt->copy()->addDays(fake()->numberBetween(0, (int) $joinedAt->diffInDays(now()))),
+                'left_at' => $joinedAt->copy()->addDays(fake()->numberBetween(0, max(0, (int) $joinedAt->diffInDays(now())))),
             ];
         });
     }
