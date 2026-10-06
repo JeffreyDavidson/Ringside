@@ -293,8 +293,8 @@ repair a promotion that has no owner.
 `main` reported required checks and signed commits when last queried through the
 GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
-`docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. The `MySQL tests` job (production runs
-MySQL 8) is not yet a required check on either branch; add it with the other required checks.
+`docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. Since October 2026 `main` requires every
+Application Quality job (including `MySQL tests`) and the `Ward security scan` job.
 
 ## Deferred from audit round 2
 
