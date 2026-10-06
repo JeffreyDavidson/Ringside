@@ -583,11 +583,6 @@ function runsOnDriver(string $driver): bool
 }
 
 /**
- * The reason a test that drops or creates schema objects inside the test transaction is skipped on MySQL.
- */
-const MYSQL_IMPLICIT_COMMIT = 'MySQL commits the test transaction on DDL, so the schema change and the test data would leak into later tests.';
-
-/**
  * The reason a test that relies on the database rejecting duplicate unowned stable names is skipped on MySQL.
  */
 const MYSQL_UNOWNED_STABLE_NAMES = 'MySQL has no partial index for active stables without a promotion; the split name lock (StableNameLock) with the split eligibility check, and form validation, are the guard there (migration 2026_10_01_190000).';

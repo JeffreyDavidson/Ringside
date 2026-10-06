@@ -45,7 +45,54 @@ pest()
         freezeTime();
         reverseUnorderedSelectsWhenRequested();
     })
-    ->in('Integration');
+    ->in(
+        'Integration/Actions',
+        'Integration/Builders',
+        'Integration/Casts',
+        'Integration/Collections',
+        'Integration/Concurrency',
+        'Integration/Config',
+        'Integration/Database',
+        'Integration/Enums',
+        'Integration/Lifecycle',
+        'Integration/Livewire',
+        'Integration/Models',
+        'Integration/Policies',
+        'Integration/Promotions',
+        'Integration/Providers',
+        'Integration/Queries',
+        'Integration/Rules',
+        'Integration/Services',
+        'Integration/Support',
+        'Integration/Validation',
+        'Integration/View',
+        'Integration/ViewModels',
+        'Integration/Workflows',
+    );
+
+/*
+ * Integration/DatabaseMigrations is deliberately missing from the list above. A new Integration directory must be
+ * added to that list, or its tests have no application.
+ *
+ * Tests that change the schema (DDL) or run migrations cannot use RefreshDatabase: MySQL commits the test
+ * transaction on DDL, so their schema changes and data would leak into later tests. They rebuild the schema with
+ * migrate:fresh before each test, and again afterwards so the next test starts from the full schema. An in-memory
+ * SQLite database is discarded with the test, so it needs no second rebuild.
+ */
+pest()
+    ->extend(TestCase::class)
+    ->beforeEach(function () {
+        withoutVite();
+        freezeTime();
+        reverseUnorderedSelectsWhenRequested();
+        rebuildDatabaseSchema();
+    })
+    ->afterEach(function () {
+        if (! databaseIsInMemory()) {
+            rebuildDatabaseSchema();
+        }
+    })
+    ->in('Integration/DatabaseMigrations');
 
 pest()
     ->beforeEach(function () {
@@ -297,5 +344,6 @@ function waitForModalReady(AwaitableWebpage|PendingAwaitablePage $page): void
 */
 
 require_once __DIR__.'/Helpers/TestHelpers.php';
+require_once __DIR__.'/Helpers/SchemaHelpers.php';
 require_once __DIR__.'/Helpers/ReflectionHelpers.php';
 require_once __DIR__.'/Helpers/FakerHelpers.php';
