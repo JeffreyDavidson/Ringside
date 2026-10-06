@@ -10,6 +10,7 @@ use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\Users\User;
 use App\Rules\Users\UniqueEmail;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
@@ -26,7 +27,8 @@ class RegisteredUserController extends Controller
 
     /**
      * A taken email gets the same response as a new account so the form cannot be used to discover which
-     * emails are registered. The password is still hashed so the two outcomes take similar time.
+     * emails are registered. A concurrent duplicate, or a lookalike email the database collation treats as equal,
+     * hits the unique index and gets the same response. The password is still hashed so the two outcomes take similar time.
      */
     public function store(RegisterUserRequest $request): RedirectResponse
     {
@@ -36,13 +38,17 @@ class RegisteredUserController extends Controller
             return $this->accountPending();
         }
 
-        $user = User::query()->create([
-            'first_name' => $request->string('first_name')->value(),
-            'last_name' => $request->string('last_name')->value(),
-            'email' => $request->string('email')->value(),
-            'password' => $request->string('password')->value(),
-            'role' => Role::Basic,
-        ]);
+        try {
+            $user = User::query()->create([
+                'first_name' => $request->string('first_name')->value(),
+                'last_name' => $request->string('last_name')->value(),
+                'email' => $request->string('email')->value(),
+                'password' => $request->string('password')->value(),
+                'role' => Role::Basic,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            return $this->accountPending();
+        }
 
         event(new Registered($user));
 

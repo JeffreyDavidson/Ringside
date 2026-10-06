@@ -139,7 +139,24 @@ active or suspended (`AlreadyMember`). The action locks the promotion row, then
 checks both. The owner's list shows a pending invitation by the typed email,
 role and "Invitation pending", never by name; an owner can cancel it by
 invitation id (scoped to the promotion). An invitation has no role or status to
-change, so an owner cannot activate it behind anyone's back.
+change, so an owner cannot activate it behind anyone's back. The `AlreadyMember`
+check includes soft-deleted accounts, which keep their `promotion_user` rows.
+Inviting is rate limited to 30 attempts per promotion per hour (`RateLimiter`
+key `promotion-invitations:{promotionId}`, in `Manage::addMember`); only
+attempts that pass validation count, and the 31st shows an `email` error with the
+minutes until the limit resets. The limit is per promotion, not per owner.
+
+An invitation expires 30 days after it is sent (`PromotionInvitation::EXPIRES_AFTER_DAYS`,
+the `expires_at` column). Expiry is enforced on every read through the
+`pending()` builder scope: `pendingInvitationsFor()` (switcher and no-membership
+page), `AcceptPromotionInvitationAction` (an expired invitation is "no longer
+available" and creates no membership) and the owner's list, which shows
+"Expires {date}" in the promotion's time zone. The expiry moment itself counts as
+expired. Inviting an email whose invitation has expired replaces it
+(`InvitePromotionMemberAction` deletes the old row and saves a fresh one, so the
+new role and a new 30 days apply); a still-pending one gives `AlreadyInvited`.
+`PromotionInvitation` is `Prunable` and the scheduler runs `model:prune` for it
+daily, which only deletes expired rows: nothing depends on it for correctness.
 
 Whoever signs in with the invited email owns the invitation. There is no email
 verification in the application, so administrator activation is the trust
@@ -156,9 +173,9 @@ context, because a user with no active membership must reach them).
 `AcceptPromotionInvitationAction` locks the promotion and then the invitation
 for the signed-in user's own email, creates an `Active` membership with the
 invited role and deletes the invitation in one transaction. If the user already
-has a membership of that promotion (for example a suspended one) it does
-nothing and keeps the invitation: an invitation can never undo a suspension or
-change a role. `RemovePromotionInvitationAction` deletes the invitation for a
+has a membership of that promotion (for example a suspended one) it leaves the
+membership untouched and deletes the now-useless invitation: an invitation can
+never undo a suspension or change a role. `RemovePromotionInvitationAction` deletes the invitation for a
 promotion and email (the owner cancelling or the user declining). Both find the
 invitation through the signed-in user's email or the owner's promotion, never
 through an id supplied by the invited user, and never touch memberships. The

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Promotions\AcceptPromotionInvitationAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
@@ -10,6 +11,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Dom\HTMLDocument;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -608,5 +610,176 @@ describe('pending invitations', function () {
 
         // Assert
         $response->assertOk()->assertViewHas('promotion', fn (Promotion $shown): bool => $shown->memberships_count === 1);
+    });
+});
+
+it('lists only pending invitations and shows when each expires in the promotion time zone', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create(['timezone' => 'Pacific/Auckland']);
+    PromotionInvitation::factory()->for($promotion)->forEmail('pending@example.test')->create(['expires_at' => '2026-11-05 20:00:00']);
+    PromotionInvitation::factory()->for($promotion)->forEmail('gone@example.test')->expired()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+    // Assert
+    $component->assertSee('pending@example.test')
+        ->assertDontSee('gone@example.test')
+        ->assertSee(__('promotions.invitation_expires', ['date' => 'Nov 6, 2026']))
+        ->assertDontSee('Nov 5, 2026');
+});
+
+it('lets the owner invite again once the earlier invitation has expired', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('late@example.test')->withRole(MembershipRole::Member)->expired()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'late@example.test', 'newMemberRole' => MembershipRole::Manager->value])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasNoErrors();
+    expect($promotion->invitations()->sole()->role)->toBe(MembershipRole::Manager);
+});
+
+it('rejects an email longer than 255 characters and stores nothing', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $email = str_repeat('a', 250).'@example.test';
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => $email])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasErrors(['email' => 'max']);
+    expect($promotion->invitations()->count())->toBe(0);
+});
+
+it('lists invitations created at the same moment in id order', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $createdAt = now()->startOfSecond();
+    PromotionInvitation::factory()->for($promotion)->forEmail('z.lower.id@example.test')->create(['id' => 10, 'created_at' => $createdAt]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('a.higher.id@example.test')->create(['id' => 20, 'created_at' => $createdAt]);
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+    // Assert
+    $component->assertSeeInOrder(['z.lower.id@example.test', 'a.higher.id@example.test']);
+});
+
+it('clears earlier email and member errors when an invitation is cancelled', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $invitation = PromotionInvitation::factory()->for($promotion)->forEmail('pending@example.test')->create();
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'pending@example.test'])
+        ->call('addMember')
+        ->assertHasErrors(['email']);
+    $component->instance()->addError('member', 'A member error.');
+
+    // Act
+    $component->call('cancelInvitation', $invitation->id);
+
+    // Assert
+    $component->assertHasNoErrors(['email', 'member']);
+});
+
+it('adds a role entry for a member who joined after the page was opened', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $owner = User::factory()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($owner, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $joiner = User::factory()->create(['email' => 'joiner@example.test', 'status' => UserStatus::Active]);
+    PromotionInvitation::factory()->for($promotion)->forEmail($joiner->email)->withRole(MembershipRole::Manager)->create();
+    $component = Livewire::actingAs($owner)
+        ->test(Manage::class, ['promotionId' => $promotion->id])
+        ->set("memberRoles.{$owner->id}", MembershipRole::Manager->value);
+
+    // Act
+    app(AcceptPromotionInvitationAction::class)->handle($promotion, $joiner);
+    $component->call('$refresh')
+        ->call('updateMemberRole', $joiner->id);
+
+    // Assert
+    $component->assertHasNoErrors()
+        ->assertSet("memberRoles.{$joiner->id}", MembershipRole::Manager->value)
+        ->assertSet("memberRoles.{$owner->id}", MembershipRole::Manager->value);
+});
+
+describe('invitation rate limit', function () {
+    it('allows 30 invitations an hour per promotion and refuses the 31st', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        RateLimiter::clear("promotion-invitations:{$promotion->id}");
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Act
+        foreach (range(1, 30) as $number) {
+            $component->set('email', "invitee{$number}@example.test")
+                ->call('addMember')
+                ->assertHasNoErrors();
+        }
+
+        $component->set('email', 'one.too.many@example.test')
+            ->call('addMember');
+
+        // Assert
+        $component->assertHasErrors(['email'])
+            ->assertSee(trans_choice('promotions.invitation_rate_limited', 60, ['minutes' => 60]));
+        expect($promotion->invitations()->count())->toBe(30);
+    });
+
+    it('does not count attempts that fail validation', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        RateLimiter::clear("promotion-invitations:{$promotion->id}");
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Act
+        foreach (range(1, 31) as $ignored) {
+            $component->set('email', 'not-an-email')->call('addMember');
+        }
+
+        $component->set('email', 'valid@example.test')->call('addMember');
+
+        // Assert
+        $component->assertHasNoErrors();
+        expect($promotion->invitations()->count())->toBe(1);
+    });
+
+    it('limits each promotion separately', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $other = Promotion::factory()->create();
+        RateLimiter::clear("promotion-invitations:{$promotion->id}");
+        RateLimiter::clear("promotion-invitations:{$other->id}");
+
+        foreach (range(1, 30) as $ignored) {
+            RateLimiter::hit("promotion-invitations:{$promotion->id}", 3600);
+        }
+
+        // Act
+        $blocked = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'blocked@example.test'])
+            ->call('addMember');
+        $allowed = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $other->id, 'email' => 'allowed@example.test'])
+            ->call('addMember');
+
+        // Assert
+        $blocked->assertHasErrors(['email']);
+        $allowed->assertHasNoErrors();
+        expect($promotion->invitations()->count())->toBe(0)
+            ->and($other->invitations()->count())->toBe(1);
     });
 });

@@ -31,5 +31,8 @@
     "dependencies": {
         "@alpinejs/ui": "^3.17.4"
     },
-    "$schema": "https://www.schemastore.org/package.json"
+    "$schema": "https://www.schemastore.org/package.json",
+    "overrides": {
+        "shell-quote": "^1.11.0"
+    }
 }

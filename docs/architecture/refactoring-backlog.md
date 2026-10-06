@@ -273,8 +273,6 @@ Membership" in `core-capabilities.md`). The remaining gaps:
 - **Platform administrators without a membership** have no switcher or
   no-membership page on which to see an invitation; they reach promotions
   through the directory.
-- **Invitations never expire.** A pending invitation stays until it is accepted,
-  declined or cancelled.
 
 Business rules enforced in the membership and user Actions: a promotion always
 keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the

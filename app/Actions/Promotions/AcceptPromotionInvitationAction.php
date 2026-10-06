@@ -17,8 +17,9 @@ final class AcceptPromotionInvitationAction
      * Turn the invitation for the user's own email into an active membership with the role the owner chose
      * and delete the invitation. The invitation is found through the user's email, never through an id from
      * the request, so nobody can accept for another email. Returns the role the user now holds, or null when
-     * there is no such invitation (cancelled, declined or already accepted) or the user already has a
-     * membership of the promotion: an invitation can never undo a suspension or change an existing role.
+     * there is no such invitation (cancelled, declined, expired or already accepted) or the user already has a
+     * membership of the promotion: an invitation can never undo a suspension or change an existing role, and
+     * in that case it is deleted, since it can never be used.
      */
     public function handle(Promotion $promotion, User $user): ?MembershipRole
     {
@@ -30,6 +31,7 @@ final class AcceptPromotionInvitationAction
 
             $invitation = $lockedPromotion->invitations()
                 ->forEmail($user->email)
+                ->pending()
                 ->lockForUpdate()
                 ->first();
 
@@ -38,6 +40,10 @@ final class AcceptPromotionInvitationAction
             }
 
             if ($lockedPromotion->memberships()->forUser($user)->exists()) {
+                $invitation->delete();
+
+                app(PromotionContextService::class)->forgetMemberships();
+
                 return null;
             }
 

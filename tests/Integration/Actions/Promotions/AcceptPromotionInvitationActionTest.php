@@ -12,6 +12,8 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\travel;
+
 test('it creates an active membership with the invited role and deletes the invitation', function (MembershipRole $role) {
     // Arrange
     $promotion = Promotion::factory()->create();
@@ -85,7 +87,7 @@ test('it never uses an invitation of another promotion', function () {
         ->and($otherPromotion->invitations()->count())->toBe(1);
 });
 
-test('an invitation never changes an existing membership and is kept', function (MembershipStatus $status, MembershipRole $role) {
+test('an invitation never changes an existing membership and is deleted', function (MembershipStatus $status, MembershipRole $role) {
     // Arrange
     $promotion = Promotion::factory()->create();
     $user = User::factory()->create(['email' => 'member@example.test', 'status' => UserStatus::Active]);
@@ -101,7 +103,7 @@ test('an invitation never changes an existing membership and is kept', function 
     expect($accepted)->toBeNull()
         ->and($membership->status)->toBe($status)
         ->and($membership->role)->toBe($role)
-        ->and($promotion->invitations()->count())->toBe(1);
+        ->and($promotion->invitations()->count())->toBe(0);
 })->with([
     'suspended member stays suspended' => [MembershipStatus::Suspended, MembershipRole::Member],
     'active member keeps their role' => [MembershipStatus::Active, MembershipRole::Manager],
@@ -160,4 +162,51 @@ test('it forgets the memoised memberships and invitations so access is reflected
         ->and($context->membershipRole($user, $promotion))->toBe(MembershipRole::Member)
         ->and($context->pendingInvitationsFor($user))->toBeEmpty()
         ->and($context->activePromotionsFor($user)->modelKeys())->toBe([$promotion->id]);
+});
+
+test('it accepts an invitation one second before it expires', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'invitee@example.test', 'status' => UserStatus::Active]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('invitee@example.test')->create();
+    travel(30 * 86400 - 1)->seconds();
+
+    // Act
+    $accepted = app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($accepted)->toBe(MembershipRole::Member)
+        ->and($promotion->hasActiveMember($user))->toBeTrue();
+});
+
+test('it refuses an expired invitation and creates no membership', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'invitee@example.test', 'status' => UserStatus::Active]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('invitee@example.test')->create();
+    travel(30)->days();
+
+    // Act
+    $accepted = app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($accepted)->toBeNull()
+        ->and($promotion->memberships()->count())->toBe(0);
+});
+
+test('it forgets the memoised invitations when it deletes an invitation of an existing member', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'member@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Suspended]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('member@example.test')->create();
+    $context = app(PromotionContextService::class);
+    $invitationsBefore = $context->pendingInvitationsFor($user);
+
+    // Act
+    app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($invitationsBefore)->toHaveCount(1)
+        ->and($context->pendingInvitationsFor($user))->toBeEmpty();
 });

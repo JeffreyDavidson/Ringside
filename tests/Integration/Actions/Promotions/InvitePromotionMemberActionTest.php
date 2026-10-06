@@ -13,6 +13,8 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\travel;
+
 test('it saves a pending invitation for an email without an account and grants no access', function () {
     // Arrange
     $promotion = Promotion::factory()->create();
@@ -51,24 +53,19 @@ test('it saves the same invitation whatever the state of the account behind the 
     'unverified account' => [UserStatus::Unverified],
 ]);
 
-test('it ignores a deleted account and a membership of another promotion', function () {
+test('it ignores a membership of another promotion', function () {
     // Arrange
     $promotion = Promotion::factory()->create();
     $otherPromotion = Promotion::factory()->create();
-    $deleted = User::factory()->create(['email' => 'deleted@example.test', 'status' => UserStatus::Active]);
-    $promotion->users()->attach($deleted, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    $deleted->delete();
     $elsewhere = User::factory()->create(['email' => 'elsewhere@example.test', 'status' => UserStatus::Active]);
     $otherPromotion->users()->attach($elsewhere, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
     // Act
-    $deletedOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'deleted@example.test', MembershipRole::Member);
     $elsewhereOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'elsewhere@example.test', MembershipRole::Member);
 
     // Assert
-    expect($deletedOutcome)->toBe(PromotionInvitationOutcome::Invited)
-        ->and($elsewhereOutcome)->toBe(PromotionInvitationOutcome::Invited)
-        ->and($promotion->invitations()->count())->toBe(2);
+    expect($elsewhereOutcome)->toBe(PromotionInvitationOutcome::Invited)
+        ->and($promotion->invitations()->count())->toBe(1);
 });
 
 test('it reports an invitation that is already pending without changing it, whatever the email spelling', function (string $email) {
@@ -185,4 +182,64 @@ test('it forgets the memoised invitations of the user', function () {
     // Assert
     expect($before)->toBeEmpty()
         ->and($context->pendingInvitationsFor($user))->toHaveCount(1);
+});
+
+test('it replaces an expired invitation with a fresh one for the new role', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('again@example.test')->withRole(MembershipRole::Member)->expired()->create();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Again@example.test', MembershipRole::Manager);
+
+    // Assert
+    $invitation = $promotion->invitations()->sole();
+
+    expect($outcome)->toBe(PromotionInvitationOutcome::Invited)
+        ->and($invitation->role)->toBe(MembershipRole::Manager)
+        ->and($invitation->expires_at->toDateTimeString())->toBe(now()->addDays(30)->toDateTimeString());
+});
+
+test('it keeps an invitation that has not expired yet', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('again@example.test')->withRole(MembershipRole::Member)->create();
+    travel(30 * 86400 - 1)->seconds();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'again@example.test', MembershipRole::Owner);
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyInvited)
+        ->and($promotion->invitations()->sole()->role)->toBe(MembershipRole::Member);
+});
+
+test('it leaves an expired invitation alone when the email already belongs to a member', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $member = User::factory()->create(['email' => 'member@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    $expired = PromotionInvitation::factory()->for($promotion)->forEmail('member@example.test')->expired()->create();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'member@example.test', MembershipRole::Owner);
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
+        ->and($expired->fresh())->not->toBeNull();
+});
+
+test('it counts a soft-deleted account that still has a membership as already a member', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'gone@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    $user->delete();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Gone@Example.test', MembershipRole::Manager);
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
+        ->and($promotion->invitations()->count())->toBe(0);
 });

@@ -19,8 +19,8 @@ final class InvitePromotionMemberAction
      * Save a pending invitation for the email with the role the owner chose. It grants nothing until whoever
      * signs in with that email accepts it (AcceptPromotionInvitationAction). Whether the email belongs to an
      * account never matters: unknown, inactive and active accounts all get an invitation. The only refusals
-     * are an invitation that is already pending and an email that already has a membership of this promotion
-     * (active or suspended), both things the owner can already see.
+     * are an invitation that is already pending (an expired one is replaced) and an email that already has a membership of this promotion
+     * (active or suspended, including a soft-deleted account that still has its membership row), both things the owner can already see.
      */
     public function handle(Promotion $promotion, string $email, MembershipRole $role): PromotionInvitationOutcome
     {
@@ -30,7 +30,7 @@ final class InvitePromotionMemberAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($lockedPromotion->invitations()->forEmail($email)->exists()) {
+            if ($lockedPromotion->invitations()->forEmail($email)->pending()->exists()) {
                 return PromotionInvitationOutcome::AlreadyInvited;
             }
 
@@ -38,9 +38,13 @@ final class InvitePromotionMemberAction
                 return PromotionInvitationOutcome::AlreadyMember;
             }
 
+            // An expired invitation for the email is replaced, so the unique (promotion, email) key never blocks a new one.
+            $lockedPromotion->invitations()->forEmail($email)->delete();
+
             $lockedPromotion->invitations()->create([
                 'email' => $email,
                 'role' => $role,
+                'expires_at' => now()->addDays(PromotionInvitation::EXPIRES_AFTER_DAYS),
             ]);
 
             app(PromotionContextService::class)->forgetMemberships();
@@ -56,6 +60,7 @@ final class InvitePromotionMemberAction
         // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
         // `%` and `_` in the input can never widen the match.
         $userIds = User::query()
+            ->withTrashed()
             ->whereLike('email', $normalized, caseSensitive: false)
             ->get(['id', 'email'])
             ->filter(fn (User $candidate): bool => Str::lower($candidate->email) === $normalized)

@@ -81,3 +81,35 @@ test('it reads the invitations once per request until memberships are forgotten'
         ->and($stale)->toBeEmpty()
         ->and($fresh)->toHaveCount(1);
 });
+
+test('it hides an invitation from the second it expires and not before', function () {
+    // Arrange
+    $user = User::factory()->create(['email' => 'invitee@example.test']);
+    $invitation = PromotionInvitation::factory()->forEmail('invitee@example.test')->create();
+    travel(30 * 86400 - 1)->seconds();
+
+    // Act
+    $beforeExpiry = app(PromotionContextService::class)->pendingInvitationsFor($user)->modelKeys();
+    travel(1)->seconds();
+    app(PromotionContextService::class)->forgetMemberships();
+    $atExpiry = app(PromotionContextService::class)->pendingInvitationsFor($user)->modelKeys();
+
+    // Assert
+    expect($beforeExpiry)->toBe([$invitation->id])
+        ->and($atExpiry)->toBeEmpty();
+});
+
+test('it lists invitations created at the same moment in id order', function () {
+    // Arrange
+    $user = User::factory()->create(['email' => 'invitee@example.test']);
+    [$first, $second] = Promotion::factory()->count(2)->create()->all();
+    $createdAt = now()->startOfSecond();
+    $lowerId = PromotionInvitation::factory()->for($second)->forEmail('invitee@example.test')->create(['id' => 10, 'created_at' => $createdAt]);
+    $higherId = PromotionInvitation::factory()->for($first)->forEmail('invitee@example.test')->create(['id' => 20, 'created_at' => $createdAt]);
+
+    // Act
+    $invitations = app(PromotionContextService::class)->pendingInvitationsFor($user);
+
+    // Assert
+    expect($invitations->modelKeys())->toBe([$lowerId->id, $higherId->id]);
+});

@@ -53,3 +53,18 @@ test('it never widens an email filter with wildcard characters', function (strin
     'percent' => ['%@example.test'],
     'underscore' => ['someon_@example.test'],
 ]);
+
+test('it separates pending invitations from expired ones, counting the expiry moment itself as expired', function () {
+    // Arrange
+    $pending = PromotionInvitation::factory()->create(['expires_at' => now()->addSecond()]);
+    $atExpiry = PromotionInvitation::factory()->create(['expires_at' => now()]);
+    $expired = PromotionInvitation::factory()->expired()->create();
+
+    // Act
+    $pendingIds = PromotionInvitation::query()->pending()->pluck('id')->all();
+    $expiredIds = PromotionInvitation::query()->expired()->pluck('id')->all();
+
+    // Assert
+    expect($pendingIds)->toBe([$pending->id])
+        ->and($expiredIds)->toEqualCanonicalizing([$atExpiry->id, $expired->id]);
+});
