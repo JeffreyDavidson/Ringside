@@ -20,9 +20,8 @@ permissions:
 
 jobs:
     ward:
-        name: Ward (Advisory)
+        name: Ward security scan
         runs-on: ubuntu-latest
-        continue-on-error: true
         timeout-minutes: 15
 
         steps:
