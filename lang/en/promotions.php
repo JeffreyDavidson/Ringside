@@ -20,6 +20,7 @@ return [
     'invitation_accepted' => 'You joined :promotion as :role.',
     'invitation_cancelled' => 'The invitation was cancelled.',
     'invitation_declined' => 'Invitation declined.',
+    'invitation_rate_limited' => '{1} Too many invitations were sent for this promotion. Try again in :minutes minute.|[2,*] Too many invitations were sent for this promotion. Try again in :minutes minutes.',
     'invitation_already_pending' => 'That email already has a pending invitation to this promotion. Cancel it in the list below to send a different role.',
     'invitation_expires' => 'Expires :date',
     'invitation_expires_heading' => 'Expires',

@@ -98,3 +98,18 @@ test('it hides an invitation from the second it expires and not before', functio
     expect($beforeExpiry)->toBe([$invitation->id])
         ->and($atExpiry)->toBeEmpty();
 });
+
+test('it lists invitations created at the same moment in id order', function () {
+    // Arrange
+    $user = User::factory()->create(['email' => 'invitee@example.test']);
+    [$first, $second] = Promotion::factory()->count(2)->create()->all();
+    $createdAt = now()->startOfSecond();
+    $lowerId = PromotionInvitation::factory()->for($second)->forEmail('invitee@example.test')->create(['id' => 10, 'created_at' => $createdAt]);
+    $higherId = PromotionInvitation::factory()->for($first)->forEmail('invitee@example.test')->create(['id' => 20, 'created_at' => $createdAt]);
+
+    // Act
+    $invitations = app(PromotionContextService::class)->pendingInvitationsFor($user);
+
+    // Assert
+    expect($invitations->modelKeys())->toBe([$lowerId->id, $higherId->id]);
+});

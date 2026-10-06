@@ -87,7 +87,7 @@ test('it never uses an invitation of another promotion', function () {
         ->and($otherPromotion->invitations()->count())->toBe(1);
 });
 
-test('an invitation never changes an existing membership and is kept', function (MembershipStatus $status, MembershipRole $role) {
+test('an invitation never changes an existing membership and is deleted', function (MembershipStatus $status, MembershipRole $role) {
     // Arrange
     $promotion = Promotion::factory()->create();
     $user = User::factory()->create(['email' => 'member@example.test', 'status' => UserStatus::Active]);
@@ -103,7 +103,7 @@ test('an invitation never changes an existing membership and is kept', function 
     expect($accepted)->toBeNull()
         ->and($membership->status)->toBe($status)
         ->and($membership->role)->toBe($role)
-        ->and($promotion->invitations()->count())->toBe(1);
+        ->and($promotion->invitations()->count())->toBe(0);
 })->with([
     'suspended member stays suspended' => [MembershipStatus::Suspended, MembershipRole::Member],
     'active member keeps their role' => [MembershipStatus::Active, MembershipRole::Manager],
@@ -192,4 +192,21 @@ test('it refuses an expired invitation and creates no membership', function () {
     // Assert
     expect($accepted)->toBeNull()
         ->and($promotion->memberships()->count())->toBe(0);
+});
+
+test('it forgets the memoised invitations when it deletes an invitation of an existing member', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = User::factory()->create(['email' => 'member@example.test', 'status' => UserStatus::Active]);
+    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Suspended]);
+    PromotionInvitation::factory()->for($promotion)->forEmail('member@example.test')->create();
+    $context = app(PromotionContextService::class);
+    $invitationsBefore = $context->pendingInvitationsFor($user);
+
+    // Act
+    app(AcceptPromotionInvitationAction::class)->handle($promotion, $user);
+
+    // Assert
+    expect($invitationsBefore)->toHaveCount(1)
+        ->and($context->pendingInvitationsFor($user))->toBeEmpty();
 });

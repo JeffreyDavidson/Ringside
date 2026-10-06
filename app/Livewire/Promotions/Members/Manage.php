@@ -19,6 +19,7 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -31,6 +32,8 @@ class Manage extends Component
 
     #[Locked]
     public int $promotionId;
+
+    private const int MAX_INVITATIONS_PER_HOUR = 30;
 
     public string $email = '';
 
@@ -70,6 +73,18 @@ class Manage extends Component
         )->validate();
 
         $role = MembershipRole::from($validated['role']);
+
+        $rateLimitKey = "promotion-invitations:{$this->promotionId}";
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_INVITATIONS_PER_HOUR)) {
+            $minutes = (int) ceil(RateLimiter::availableIn($rateLimitKey) / 60);
+
+            $this->addError('email', trans_choice('promotions.invitation_rate_limited', $minutes, ['minutes' => $minutes]));
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, 3600);
 
         $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role);
 
@@ -182,6 +197,11 @@ class Manage extends Component
             ->with('user')
             ->orderBy('created_at')
             ->get();
+
+        // A member who joined after mount (by accepting an invitation) gets a role entry; unsaved edits stay untouched.
+        foreach ($members as $member) {
+            $this->memberRoles[$member->user_id] ??= $member->role->value;
+        }
 
         $canManageMembers = Gate::allows('manageMembers', $promotion);
 
