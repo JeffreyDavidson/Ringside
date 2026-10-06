@@ -15,8 +15,6 @@ headers, and in Forge. Ticked items below were verified. Open findings:
 - The `single` log channel logs at `debug`. `LOG_LEVEL` is not set to `warning`.
 - `MAIL_MAILER` resolves to `log`, so password reset links are written to the log and never emailed. Nobody can reset
   a password until a real mailer is configured.
-- The app connects as `forge`, which has `ALL`-style privileges on `*.*` `WITH GRANT OPTION`. It is not a dedicated
-  user limited to the `ringside` database.
 - Forge's database backups need the Business plan, which this account does not have, so no Forge-managed backups
   exist. Confirm where the pre-release backups go and test a restore.
 - No `Strict-Transport-Security` header is sent, so HSTS is off in Cloudflare.
@@ -31,6 +29,8 @@ Fixed on 2026-10-06:
 - `SESSION_SECURE_COOKIE=true`.
 - `NIGHTWATCH_INGEST_URI` changed from `127.0.0.1:2410` (another site's agent) to `127.0.0.1:2411`.
 - The deploy script restarts `daemon-1095961` after each deploy.
+- The app connects as a dedicated `ringside` MySQL user with `ALL PRIVILEGES ON ringside.*` only. The `forge` user stays
+  for admin access. The credentials are in 1Password (Ringside vault, "Ringside Database (Production)").
 
 ## Environment (`.env` on the server)
 
@@ -60,7 +60,7 @@ Fixed on 2026-10-06:
 
 ## Database
 
-- [ ] The app connects with a dedicated MySQL user that only has privileges on the Ringside database (no `root`, no
+- [x] The app connects with a dedicated MySQL user that only has privileges on the Ringside database (no `root`, no
       global grants). Migrations need DDL on that database only.
 - [ ] Off-site backups: automated, kept somewhere other than the server, and restored at least once to prove they
       work. Take a manual backup before merging a release that contains migrations
