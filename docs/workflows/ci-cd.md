@@ -37,7 +37,7 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 
 ### 2. **Security Scan** (`.github/workflows/security-scan.yml`, workflow name "Security")
 **Trigger**: Pull requests targeting `develop` or `main`, a weekly schedule (Mondays 09:00 UTC), and manual dispatch. It does not run on pushes.
-**Purpose**: Ward security scan (`Ward (Advisory)` job, `continue-on-error: true`, so it does not block merges). Pull requests are scanned against a baseline from the base commit and fail on new high findings; scheduled and manual runs fail on any high finding. Reports are uploaded as `ward-security-reports` and SARIF is uploaded to GitHub code scanning.
+**Purpose**: Ward security scan (`Ward` job). Required on `main` (so release PRs must pass it); on `develop` a failure shows as a failing check but does not block merging. Pull requests are scanned against a baseline from the base commit and fail on new high findings; scheduled and manual runs fail on any high finding. Reports are uploaded as `ward-security-reports` and SARIF is uploaded to GitHub code scanning.
 
 ### 3. **TIA Baseline** (`.github/workflows/tia-baseline.yml`, workflow name "Pest TIA Baseline")
 **Trigger**: Pushes to `develop`, a daily schedule (03:00 UTC), and manual dispatch
@@ -62,7 +62,7 @@ Branch protection is configured in GitHub repository settings and is **not verif
 
 What the repository does define:
 - The project convention (see `AGENTS.md`) is that `develop` is the integration branch and `main` is the release branch, and that changes reach them through pull requests
-- The `application-tests` job is named `CI - PHP-8.5 - Laravel-13.*`. If that name is configured as a required status check, renaming the job in `ci.yml` also requires updating the setting
+- The `application-tests` job is named `CI - PHP-8.5 - Laravel-13.*`. If that name is configured as a required status check, renaming the job in `ci.yml` also requires updating the setting. The same applies to the `Ward` job in `security-scan.yml`
 - CI and the security scan run for pull requests targeting `develop` or `main`, so those runs are what any required checks report against
 
 ```bash
