@@ -19,6 +19,7 @@ test('tag team memberships can be filtered by tag team and wrestler', function (
     TagTeamWrestler::factory()->create([
         'tag_team_id' => $otherTagTeam->id,
         'wrestler_id' => $wrestler->id,
+        'joined_at' => now()->subMonth(),
         'left_at' => now()->subDay(),
     ]);
     TagTeamWrestler::factory()->create([
