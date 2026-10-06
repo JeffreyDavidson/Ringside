@@ -294,7 +294,7 @@ repair a promotion that has no owner.
 GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. Since October 2026 `main` requires every
-Application Quality job (including `MySQL tests`) and the `Ward` security scan.
+Application Quality job (including `MySQL tests`) and the `Ward security scan` job.
 
 ## Deferred from audit round 2
 
