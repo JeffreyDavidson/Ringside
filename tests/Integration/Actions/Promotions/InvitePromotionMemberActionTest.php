@@ -7,11 +7,15 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Promotions\PromotionInvitationOutcome;
 use App\Enums\Users\UserStatus;
+use App\Mail\Promotions\PromotionInvitationMail;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 use function Pest\Laravel\travel;
 
@@ -20,7 +24,7 @@ test('it saves a pending invitation for an email without an account and grants n
     $promotion = Promotion::factory()->create();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Nobody.Yet@Example.test ', MembershipRole::Manager);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Nobody.Yet@Example.test ', MembershipRole::Manager, User::factory()->create());
 
     // Assert
     $invitation = $promotion->invitations()->sole();
@@ -40,7 +44,7 @@ test('it saves the same invitation whatever the state of the account behind the 
     }
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'known@example.test', MembershipRole::Member);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'known@example.test', MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::Invited)
@@ -61,7 +65,7 @@ test('it ignores a membership of another promotion', function () {
     $otherPromotion->users()->attach($elsewhere, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
     // Act
-    $elsewhereOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'elsewhere@example.test', MembershipRole::Member);
+    $elsewhereOutcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'elsewhere@example.test', MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($elsewhereOutcome)->toBe(PromotionInvitationOutcome::Invited)
@@ -74,7 +78,7 @@ test('it reports an invitation that is already pending without changing it, what
     PromotionInvitation::factory()->for($promotion)->forEmail('pending@example.test')->withRole(MembershipRole::Member)->create();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Owner);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Owner, User::factory()->create());
 
     // Assert
     $invitation = $promotion->invitations()->sole();
@@ -94,7 +98,7 @@ test('it invites the same email to another promotion', function () {
     PromotionInvitation::factory()->for($otherPromotion)->forEmail('both@example.test')->create();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'both@example.test', MembershipRole::Member);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'both@example.test', MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::Invited)
@@ -108,7 +112,7 @@ test('it reports an email that already has a membership and never invites it', f
     $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => $status]);
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Owner);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Owner, User::factory()->create());
 
     // Assert
     $membership = $promotion->memberships()->sole();
@@ -132,7 +136,7 @@ test('it finds a member stored with a mixed case email', function () {
     DB::table('users')->where('id', $member->id)->update(['email' => 'Legacy.Member@Example.test']);
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'legacy.member@example.test', MembershipRole::Member);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'legacy.member@example.test', MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember);
@@ -145,7 +149,7 @@ test('it never lets a wildcard in the email match another account', function (st
     $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Member);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $email, MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::Invited);
@@ -159,7 +163,7 @@ test('it locks the promotion before it reads or writes invitations', function ()
     $promotion = Promotion::factory()->create();
 
     // Act
-    $statements = recordStatements(fn () => app(InvitePromotionMemberAction::class)->handle($promotion, 'locked@example.test', MembershipRole::Member));
+    $statements = recordStatements(fn () => app(InvitePromotionMemberAction::class)->handle($promotion, 'locked@example.test', MembershipRole::Member, User::factory()->create()));
 
     // Assert
     $lock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "promotions"'));
@@ -177,7 +181,7 @@ test('it forgets the memoised invitations of the user', function () {
     $before = $context->pendingInvitationsFor($user);
 
     // Act
-    app(InvitePromotionMemberAction::class)->handle($promotion, 'memo@example.test', MembershipRole::Member);
+    app(InvitePromotionMemberAction::class)->handle($promotion, 'memo@example.test', MembershipRole::Member, User::factory()->create());
 
     // Assert
     expect($before)->toBeEmpty()
@@ -190,7 +194,7 @@ test('it replaces an expired invitation with a fresh one for the new role', func
     PromotionInvitation::factory()->for($promotion)->forEmail('again@example.test')->withRole(MembershipRole::Member)->expired()->create();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Again@example.test', MembershipRole::Manager);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Again@example.test', MembershipRole::Manager, User::factory()->create());
 
     // Assert
     $invitation = $promotion->invitations()->sole();
@@ -207,7 +211,7 @@ test('it keeps an invitation that has not expired yet', function () {
     travel(30 * 86400 - 1)->seconds();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'again@example.test', MembershipRole::Owner);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'again@example.test', MembershipRole::Owner, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyInvited)
@@ -222,7 +226,7 @@ test('it leaves an expired invitation alone when the email already belongs to a 
     $expired = PromotionInvitation::factory()->for($promotion)->forEmail('member@example.test')->expired()->create();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'member@example.test', MembershipRole::Owner);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'member@example.test', MembershipRole::Owner, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
@@ -237,9 +241,83 @@ test('it counts a soft-deleted account that still has a membership as already a 
     $user->delete();
 
     // Act
-    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Gone@Example.test', MembershipRole::Manager);
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Gone@Example.test', MembershipRole::Manager, User::factory()->create());
 
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::AlreadyMember)
         ->and($promotion->invitations()->count())->toBe(0);
+});
+
+test('it sends one invitation email to the normalized address after saving a new invitation', function () {
+    // Arrange
+    Mail::fake();
+    $promotion = Promotion::factory()->create();
+    $inviter = User::factory()->create();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'Nobody.Yet@Example.test ', MembershipRole::Manager, $inviter);
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::Invited);
+
+    Mail::assertSentCount(1);
+    Mail::assertSent(PromotionInvitationMail::class, fn (PromotionInvitationMail $mail): bool => $mail->hasTo('nobody.yet@example.test')
+        && $mail->invitedBy->is($inviter)
+        && $mail->invitation->is($promotion->invitations()->sole()));
+});
+
+test('it sends a new invitation email when it replaces an expired invitation', function () {
+    // Arrange
+    Mail::fake();
+    $promotion = Promotion::factory()->create();
+    PromotionInvitation::factory()->for($promotion)->forEmail('again@example.test')->expired()->create();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'again@example.test', MembershipRole::Member, User::factory()->create());
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::Invited);
+
+    Mail::assertSent(PromotionInvitationMail::class, 1);
+});
+
+test('it sends no email when the invitation was not created', function (string $case) {
+    // Arrange
+    Mail::fake();
+    $promotion = Promotion::factory()->create();
+
+    if ($case === 'already invited') {
+        PromotionInvitation::factory()->for($promotion)->forEmail('someone@example.test')->create();
+    }
+
+    if ($case === 'already a member') {
+        $member = User::factory()->create(['email' => 'someone@example.test', 'status' => UserStatus::Active]);
+        $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    }
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'someone@example.test', MembershipRole::Member, User::factory()->create());
+
+    // Assert
+    expect($outcome)->not->toBe(PromotionInvitationOutcome::Invited);
+
+    Mail::assertNothingSent();
+})->with(['already invited', 'already a member']);
+
+test('it keeps the invitation, reports the failure and still returns invited when the email cannot be sent', function () {
+    // Arrange
+    $reported = [];
+    app(ExceptionHandler::class)->reportable(function (TransportException $exception) use (&$reported): void {
+        $reported[] = $exception->getMessage();
+    })->stop();
+    Mail::shouldReceive('to')->once()->andThrow(new TransportException('transport down'));
+    $promotion = Promotion::factory()->create();
+
+    // Act
+    $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, 'down@example.test', MembershipRole::Member, User::factory()->create());
+
+    // Assert
+    expect($outcome)->toBe(PromotionInvitationOutcome::Invited)
+        ->and($promotion->invitations()->sole()->email)->toBe('down@example.test')
+        ->and($reported)->toBe(['transport down']);
 });

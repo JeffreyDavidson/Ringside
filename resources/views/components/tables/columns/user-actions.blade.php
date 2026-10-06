@@ -33,7 +33,7 @@
                 class="hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm focus-visible:outline-2"
                 x-on:click="open = false"
                 wire:click="changeStatus({{ $user->id }}, '{{ $statusAction['status']->value }}')"
-                @if ($statusAction['status'] === \App\Enums\Users\UserStatus::Inactive) wire:confirm="{{ __('core.lifecycle_confirmations.deactivate', ['name' => $user->full_name]) }}" @endif
+                @if ($statusAction['status'] === \App\Enums\Users\UserStatus::Inactive) wire:confirm="{{ __('core.lifecycle_confirmations.deactivate', ['name' => $user->full_name]) }}" @elseif ($statusAction['confirmation'] !== null) wire:confirm="{{ $statusAction['confirmation'] }}" @endif
             >
                 @if ($statusAction['status'] === \App\Enums\Users\UserStatus::Inactive)
                     <x-heroicon-m-no-symbol class="text-ringside-muted size-5" aria-hidden="true" />

@@ -14,7 +14,6 @@ use App\Enums\Promotions\PromotionInvitationOutcome;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Models\Promotions\Promotion;
-use App\Models\Promotions\PromotionMembership;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,15 +24,19 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Manage extends Component
 {
     use DispatchesActionFeedback;
+    use WithPagination;
 
     #[Locked]
     public int $promotionId;
 
     private const int MAX_INVITATIONS_PER_HOUR = 30;
+
+    private const int MEMBERS_PER_PAGE = 25;
 
     public string $email = '';
 
@@ -47,14 +50,6 @@ class Manage extends Component
         $this->promotionId = $promotionId;
 
         Gate::authorize('view', $this->promotion());
-
-        $this->memberRoles = PromotionMembership::query()
-            ->where('promotion_id', $this->promotionId)
-            ->get(['user_id', 'role'])
-            ->mapWithKeys(fn (PromotionMembership $membership): array => [
-                $membership->user_id => $membership->role->value,
-            ])
-            ->all();
     }
 
     public function addMember(): void
@@ -86,7 +81,7 @@ class Manage extends Component
 
         RateLimiter::hit($rateLimitKey, 3600);
 
-        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role);
+        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role, User::query()->findOrFail(auth()->id()));
 
         // The owner already sees every member and pending invitation of the promotion, so these two cases
         // reveal nothing new. Every other email gets the same message whether or not it belongs to an account.
@@ -196,9 +191,10 @@ class Manage extends Component
         $members = $promotion->memberships()
             ->with('user')
             ->orderBy('created_at')
-            ->get();
+            ->orderBy('user_id')
+            ->paginate(self::MEMBERS_PER_PAGE);
 
-        // A member who joined after mount (by accepting an invitation) gets a role entry; unsaved edits stay untouched.
+        // Members on the page being shown get a role entry; unsaved edits stay untouched.
         foreach ($members as $member) {
             $this->memberRoles[$member->user_id] ??= $member->role->value;
         }
@@ -214,7 +210,7 @@ class Manage extends Component
             'promotion' => $promotion,
             'invitations' => $invitations,
             'canManageMembers' => $canManageMembers,
-            'roles' => MembershipRole::cases(),
+            'roleOptions' => collect(MembershipRole::cases())->mapWithKeys(fn (MembershipRole $role): array => [$role->value => $role->label()])->all(),
             'activeStatus' => MembershipStatus::Active,
             'suspendedStatus' => MembershipStatus::Suspended,
         ]);

@@ -11,6 +11,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Dom\HTMLDocument;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 
@@ -781,5 +782,73 @@ describe('invitation rate limit', function () {
         $allowed->assertHasNoErrors();
         expect($promotion->invitations()->count())->toBe(0)
             ->and($other->invitations()->count())->toBe(1);
+    });
+});
+
+/**
+ * @return array{Promotion, Collection<int, User>}
+ */
+function promotionWithMembers(int $count): array
+{
+    $promotion = Promotion::factory()->create();
+    $users = User::factory()->count($count)->create(['status' => UserStatus::Active]);
+
+    foreach ($users as $index => $user) {
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+            'created_at' => now()->addMinutes($index),
+        ]);
+    }
+
+    return [$promotion, $users];
+}
+
+describe('member pagination', function () {
+    it('shows 25 members on the first page and the rest on the second', function () {
+        // Arrange
+        [$promotion, $users] = promotionWithMembers(30);
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Act
+        $first = $component->viewData('members')->pluck('user_id')->all();
+        $component->call('nextPage');
+        $second = $component->viewData('members')->pluck('user_id')->all();
+
+        // Assert
+        expect($first)->toHaveCount(25)
+            ->and($second)->toHaveCount(5)
+            ->and([...$first, ...$second])->toBe($users->pluck('id')->all());
+    });
+
+    it('changes the role of a member on the second page', function () {
+        // Arrange
+        [$promotion, $users] = promotionWithMembers(30);
+        $member = $users->sortByDesc('id')->firstOrFail();
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id])
+            ->call('nextPage');
+
+        // Act
+        $component->set("memberRoles.{$member->id}", MembershipRole::Manager->value)
+            ->call('updateMemberRole', $member->id);
+
+        // Assert
+        $component->assertHasNoErrors();
+        expect($promotion->memberships()->where('user_id', $member->id)->firstOrFail()->role)->toBe(MembershipRole::Manager);
+    });
+
+    it('builds the role options once and reuses them for every select', function () {
+        // Arrange
+        [$promotion] = promotionWithMembers(3);
+        $component = Livewire::actingAs(administrator())
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Act
+        $options = $component->viewData('roleOptions');
+
+        // Assert
+        expect($options)->toBe(collect(MembershipRole::cases())->mapWithKeys(fn (MembershipRole $role): array => [$role->value => $role->label()])->all());
     });
 });

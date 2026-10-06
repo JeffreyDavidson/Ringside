@@ -146,6 +146,14 @@ key `promotion-invitations:{promotionId}`, in `Manage::addMember`); only
 attempts that pass validation count, and the 31st shows an `email` error with the
 minutes until the limit resets. The limit is per promotion, not per owner.
 
+The member list is paginated at 25 per page (ordered by `created_at`, then
+`user_id`); `memberRoles` entries are backfilled for the members on the rendered
+page, and the role options are built once per render. Pending invitations are not
+paginated. Accepting or declining an invitation for a promotion that does not
+exist gets the same "no longer available" redirect as one without an invitation,
+and `promotions/switch` answers 403 for a missing promotion and for one the user
+does not belong to, so neither endpoint reveals which promotions exist.
+
 An invitation expires 30 days after it is sent (`PromotionInvitation::EXPIRES_AFTER_DAYS`,
 the `expires_at` column). Expiry is enforced on every read through the
 `pending()` builder scope: `pendingInvitationsFor()` (switcher and no-membership
@@ -164,7 +172,15 @@ anchor: only an `Active` account can sign in, and an administrator decides
 which accounts become active. An invitation saved before the account existed is
 shown once the account is registered, activated and signed in with that email;
 this is the same trust model as password reset, which also hands control to
-whoever holds the email address. The invited user sees their invitations
+whoever holds the email address.
+To make that decision informed, the administrator is shown what activation
+unlocks: the users table's "Activate account" confirmation lists the account's
+pending, unexpired invitations as "Promotion (Role)" pairs, and an administrator
+who changes a user's email in the user form to an address with pending
+invitations gets a non-blocking warning naming those promotions after saving
+(the save is never blocked). Both read through
+`PendingInvitationSummaryService`, which matches on the normalised email and
+loads a whole page of users in one query. The invited user sees their invitations
 (`PromotionContextService::pendingInvitationsFor()`, matched on the user's
 normalised email, oldest first) as a section of the promotion switcher, or on the
 no-membership page when they have no active promotion, with Accept and Decline,
@@ -182,7 +198,21 @@ through an id supplied by the invited user, and never touch memberships. The
 middleware, the promotion switcher, `SwitchActivePromotionAction` and
 `PromotionGate` read active memberships only, so an invitation gives no context
 and no access until it is accepted. The last-owner guards count active owners
-only. No email is sent: the invitation is visible in the application only.
+only.
+
+A new invitation (`PromotionInvitationOutcome::Invited`, including one that replaces
+an expired invitation) is announced by email: after its transaction commits,
+`InvitePromotionMemberAction` sends `Mail\Promotions\PromotionInvitationMail`
+(markdown, with a plain-text alternative) to the stored email, taking the inviting
+user from the caller. `AlreadyInvited` and `AlreadyMember` send nothing. The email
+names the inviter, promotion and role, shows the expiry date in the promotion's
+time zone, links to the login and register pages and says the invitation is
+accepted after signing in with that email address. It carries no token and reads
+identically whether or not an account exists, so it reveals nothing about
+accounts and grants nothing. It is sent synchronously (production has no queue
+worker). A delivery failure is reported (`report()`) and swallowed: the
+invitation stays saved and the outcome is still `Invited`, and the owner can
+still see it in the application. Text lives in `lang/en/mail.php`.
 
 Promotion roles apply only within the active promotion context. Members can
 view promotion-owned data. Managers can view and manage promotion-owned roster,
