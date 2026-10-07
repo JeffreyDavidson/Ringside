@@ -6,7 +6,6 @@ namespace App\Livewire\Users\Modals;
 
 use App\Actions\Users\CreateAction;
 use App\Actions\Users\UpdateAction;
-use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Users\Forms\CreateEditForm;
@@ -27,6 +26,9 @@ class FormModal extends BaseFormModal
 
     #[\Override]
     protected string $modelTitleField = 'full_name';
+
+    #[\Override]
+    protected ?string $businessErrorField = 'form.role';
 
     public CreateEditForm $form;
 
@@ -103,18 +105,6 @@ class FormModal extends BaseFormModal
     protected function createForm(): void
     {
         $this->createAction->handle($this->form->toData());
-    }
-
-    #[\Override]
-    protected function storeForm(): bool
-    {
-        try {
-            return parent::storeForm();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.role', $exception->getMessage());
-
-            return false;
-        }
     }
 
     #[\Override]
