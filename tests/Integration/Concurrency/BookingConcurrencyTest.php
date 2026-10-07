@@ -17,7 +17,6 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
@@ -108,21 +107,6 @@ function bookingFor(Event $event, Wrestler $firstWrestler): array
         'second_wrestler_id' => Wrestler::factory()->bookable()->create()->id,
         'referee_id' => Referee::factory()->bookable()->create()->id,
     ];
-}
-
-/**
- * Leave the transaction RefreshDatabase wraps around a test so child processes can see the data,
- * and rebuild the scratch database afterwards.
- */
-function withCommittedData(Closure $callback): void
-{
-    DB::commit();
-
-    try {
-        $callback();
-    } finally {
-        Artisan::call('migrate:fresh');
-    }
 }
 
 test('concurrent bookings on different events at the same time never deadlock', function () {

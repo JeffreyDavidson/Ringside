@@ -6,12 +6,6 @@ use App\Actions\Wrestlers\InjureAction;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it injures an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 

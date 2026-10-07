@@ -8,12 +8,6 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it reinstates suspended current wrestlers and managers', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $manager = Manager::factory()->suspended()->create();

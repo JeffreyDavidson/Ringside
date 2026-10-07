@@ -6,12 +6,6 @@ use App\Actions\TagTeams\ReleaseAction;
 use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it releases an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 

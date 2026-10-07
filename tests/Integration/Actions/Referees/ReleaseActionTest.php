@@ -6,12 +6,6 @@ use App\Actions\Referees\ReleaseAction;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it releases an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();

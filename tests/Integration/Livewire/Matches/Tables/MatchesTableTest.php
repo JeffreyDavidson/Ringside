@@ -31,19 +31,6 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
-function actingInPromotion(Promotion $promotion, MembershipRole $role): void
-{
-    $user = basicUser();
-    $promotion->users()->attach($user, [
-        'role' => $role->value,
-        'status' => MembershipStatus::Active->value,
-    ]);
-    actingAs($user);
-    $context = app(PromotionContextService::class);
-    $context->set($promotion);
-    $context->enforce();
-}
-
 describe('rendering', function (): void {
     it('renders an empty state when the event has no matches', function (): void {
         // Arrange
@@ -333,7 +320,7 @@ describe('unbookable booked members', function (): void {
         $retired = Wrestler::factory()->for($promotion, 'promotion')->retired()->create(['name' => 'Retired Wrestler']);
         $healthy = Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Healthy Wrestler']);
         EventMatch::factory()->forEvent($event)->withCompetitors([$retired, $healthy])->create();
-        actingInPromotion($promotion, MembershipRole::Manager);
+        actingAsPromotionMember($promotion, MembershipRole::Manager);
         $marker = MatchCompetitorRouteResolver::unbookableMarker();
 
         // Act
@@ -399,7 +386,7 @@ describe('deleting matches', function (): void {
         $promotion = Promotion::factory()->create();
         $event = Event::factory()->for($promotion, 'promotion')->create();
         EventMatch::factory()->forEvent($event)->create();
-        actingInPromotion($promotion, MembershipRole::Member);
+        actingAsPromotionMember($promotion, MembershipRole::Member);
 
         // Act
         $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
@@ -417,7 +404,7 @@ describe('deleting matches', function (): void {
         $promotion = Promotion::factory()->create();
         $event = Event::factory()->for($promotion, 'promotion')->create();
         EventMatch::factory()->forEvent($event)->create();
-        actingInPromotion($promotion, MembershipRole::Manager);
+        actingAsPromotionMember($promotion, MembershipRole::Manager);
 
         // Act
         $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
@@ -468,7 +455,7 @@ describe('deleting matches', function (): void {
         $promotion = Promotion::factory()->create();
         $event = Event::factory()->for($promotion, 'promotion')->create();
         $match = EventMatch::factory()->forEvent($event)->create();
-        actingInPromotion($promotion, MembershipRole::Member);
+        actingAsPromotionMember($promotion, MembershipRole::Member);
         $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
 
         // Act

@@ -6,12 +6,6 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Titles\Title;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it ends the current title activity period', function () {
     $title = Title::factory()->active()->create();
     $period = $title->currentActivityPeriod()->firstOrFail();

@@ -218,14 +218,6 @@ function freshModel(?Model $model): Model
 }
 
 /**
- * Return a reflection type that must exist for the tested declaration.
- */
-function requiredReflectionType(?ReflectionType $type): ReflectionType
-{
-    return $type ?? throw new RuntimeException('Expected the reflected declaration to have a type.');
-}
-
-/**
  * Wait until a JavaScript condition holds in the browser (at most five seconds), then assert it.
  *
  * Use this instead of fixed sleeps so a browser test waits exactly as long as the page needs.
@@ -332,19 +324,3 @@ function waitForModalReady(AwaitableWebpage|PendingAwaitablePage $page): void
 {
     waitForSettledScript($page, 'document.getElementById("modal-container")?.checkVisibility()');
 }
-
-/*
-|--------------------------------------------------------------------------
-| Custom Test Helpers
-|--------------------------------------------------------------------------
-|
-| Load custom helper functions for common testing scenarios. These helpers
-| provide convenient methods for creating test data, setting up scenarios,
-| and performing repetitive test operations.
-|
-*/
-
-require_once __DIR__.'/Helpers/TestHelpers.php';
-require_once __DIR__.'/Helpers/SchemaHelpers.php';
-require_once __DIR__.'/Helpers/ReflectionHelpers.php';
-require_once __DIR__.'/Helpers/FakerHelpers.php';

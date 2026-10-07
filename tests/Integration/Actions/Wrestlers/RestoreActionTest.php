@@ -6,12 +6,6 @@ use App\Actions\Wrestlers\RestoreAction;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it restores a soft-deleted wrestler', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete

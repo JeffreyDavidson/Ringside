@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Models\Titles\Title;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it starts a title activity period', function () {
     $title = Title::factory()->unactivated()->create();
 

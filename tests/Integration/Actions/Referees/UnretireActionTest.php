@@ -7,12 +7,6 @@ use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it unretires a retired referee', function () {
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();

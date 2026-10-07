@@ -9,12 +9,6 @@ use App\Models\Roster\TagTeams\TagTeamManager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it restores a soft-deleted manager', function () {
     $manager = Manager::factory()->create();
     $managerId = $manager->id;

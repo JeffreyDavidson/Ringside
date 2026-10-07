@@ -6,12 +6,6 @@ use App\Actions\Referees\CreateAction;
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it creates a referee with basic information', function () {
     $data = new RefereeData(
         first_name: 'Earl',
