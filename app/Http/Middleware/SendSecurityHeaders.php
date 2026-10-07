@@ -12,9 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
  * Adds the browser security headers the web server does not send.
  *
  * A header that is already on the response is left untouched, so a route can
- * choose its own policy. Content-Security-Policy and Strict-Transport-Security
- * are deliberately not set here: CSP needs its own work for Livewire and Vite,
- * and HSTS is configured at Cloudflare.
+ * choose its own policy. Strict-Transport-Security is sent only on HTTPS
+ * requests (behind Cloudflare via the trusted proxy), so local http:// development
+ * is never pinned to HTTPS. It covers this host only, without includeSubDomains or
+ * preload. Content-Security-Policy is deliberately not set: it needs its own work
+ * for Livewire and Vite.
  */
 class SendSecurityHeaders
 {
@@ -27,6 +29,9 @@ class SendSecurityHeaders
         'X-Content-Type-Options' => 'nosniff',
     ];
 
+    /** HTTPS only for six months (15552000 seconds), this host only. */
+    private const string STRICT_TRANSPORT_SECURITY = 'max-age=15552000';
+
     /**
      * @param  Closure(Request): (Response)  $next
      */
@@ -38,6 +43,10 @@ class SendSecurityHeaders
             if (! $response->headers->has($name)) {
                 $response->headers->set($name, $value);
             }
+        }
+
+        if ($request->isSecure() && ! $response->headers->has('Strict-Transport-Security')) {
+            $response->headers->set('Strict-Transport-Security', self::STRICT_TRANSPORT_SECURITY);
         }
 
         return $response;

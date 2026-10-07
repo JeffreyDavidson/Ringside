@@ -67,3 +67,19 @@ test('routes outside the web group are left alone', function () {
         ->assertHeaderMissing('Referrer-Policy')
         ->assertHeaderMissing('Permissions-Policy');
 });
+
+test('secure requests are told to use https for six months', function () {
+    // Act
+    $response = get(str_replace('http://', 'https://', route('login')));
+
+    // Assert
+    expect($response->headers->all('Strict-Transport-Security'))->toBe(['max-age=15552000']);
+});
+
+test('plain http requests do not get the https only header', function () {
+    // Act
+    $response = get(str_replace('https://', 'http://', route('login')));
+
+    // Assert
+    $response->assertHeaderMissing('Strict-Transport-Security');
+});
