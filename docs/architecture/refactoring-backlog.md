@@ -253,6 +253,20 @@ Cancel button called `closeModal()`, which never dispatched the package's close 
 dialog; it now dispatches `closeModal` like the other modals (browser test added). The Titles `Actions` component
 runs its transitions through one `perform()` like Stables.
 
+### Shared table bases (phase 3)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+History tables share `ShowTableTrait::authorizeContextRecord()` (resolve the locked parent id, authorize `view`) and
+`UsesRosterRouteResolver`. `BasePreviousMembersTable` (stable wrestlers, stable tag teams, tag team wrestlers) and
+`BasePreviousManagedTable` (a manager's wrestlers and tag teams) take the relationship and translation keys as
+properties; `BaseTable` now owns the `viewAny` authorization (`$modelClass`), the dedicated index view (`$indexView`),
+the row actions column (`$actionsView`, `$actionsRowVariable`) and `deleteRecord()`. Left alone on purpose: the status
+column and status filters (the status enums share no contract, so a helper would need casts), per-table builders, eager
+loading and `projectRowState()`, the Users and Promotions action columns, and the history tables with their own
+columns (stable managers, manager stables, venue events, title history, matches).
+
 ### Dead application code cleanup (phase 2)
 
 **Priority:** Medium  
