@@ -253,10 +253,29 @@ describe('stable actions component', function (): void {
         'reunite',
     ]);
 
-    test('it hides a disbanded stable reunite button while a former member is unavailable', function (): void {
+    test('it shows the reunite button when enough former members remain available', function (): void {
         // Arrange
         $stable = Stable::factory()->inactive()->create();
+        $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), [
+            'joined_at' => now()->subDays(2),
+            'left_at' => now()->subDay(),
+        ]);
         $stable->previousWrestlers()->firstOrFail()->suspensions()->create(['started_at' => now()->subHour()]);
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['stable' => $stable]);
+
+        // Assert
+        $component->assertSeeHtml('wire:click="reunite"');
+    });
+
+    test('it hides the reunite button when too few former members are available', function (): void {
+        // Arrange
+        $stable = Stable::factory()->inactive()->create();
+        $stable->previousWrestlers()->get()->each(fn (Wrestler $wrestler) => $wrestler->retirements()->create(['started_at' => now()->subHour()]));
+        $stable->previousTagTeams()->get()->each(fn ($tagTeam) => $tagTeam->retirements()->create(['started_at' => now()->subHour()]));
 
         actingAs(administrator());
 

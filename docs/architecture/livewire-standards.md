@@ -61,8 +61,8 @@ expose row actions such as delete but no lifecycle methods.
 - Stables offer Establish, Disband, Retire and Unretire. They take a
   `StableLifecycleAction` in `canPerform()` (Gate ability plus `StableActivityEligibility` /
   `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
-  a rejected action shows the domain exception's message. Merge, split and reunite remain
-  unwired.
+  a rejected action shows the domain exception's message. Merge, split and reunite open
+  modals (`Stables\Modals\MergeModal`, `SplitModal`, `ReuniteModal`) that collect their input.
 - Destructive transitions (Release, Suspend, Injure, Retire, Disband, and Deactivate for
   titles) ask for confirmation with `wire:confirm`, using a `core.lifecycle_confirmations.*`
   message that names the record. Bind it as `:wire:confirm="__(...)"` so names with

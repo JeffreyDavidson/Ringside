@@ -22,7 +22,8 @@ final class StableFormerMemberEligibility
     }
 
     /**
-     * Former members that can return to the stable, once each however often they joined and left.
+     * Former members that can return to the stable, once each however often they joined and left: employed, not
+     * injured (wrestlers), suspended or retired, and not a current member of another stable.
      */
     public function availableMembersFor(Stable $stable): StableMembershipData
     {
@@ -31,6 +32,7 @@ final class StableFormerMemberEligibility
             ->whereDoesntHave('currentInjury')
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentStable')
             ->get()
             ->unique('id')
             ->values();
@@ -39,6 +41,7 @@ final class StableFormerMemberEligibility
             ->whereHas('currentEmployment')
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentRetirement')
+            ->whereDoesntHave('currentStable')
             ->get()
             ->unique('id')
             ->values();

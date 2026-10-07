@@ -140,24 +140,13 @@ final readonly class StableActivityEligibility
             throw CannotBeReunitedException::retired($stable);
         }
 
-        $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);
-        if ($availableFormerMembers->count() < StableMembershipRequirements::MINIMUM_MEMBER_COUNT) {
+        // Only the members who return must be available: an unavailable former member is simply not offered.
+        $availableHeadcount = $this->formerMemberEligibility->availableMembersFor($stable)->getTotalMemberCount();
+        if (! StableMembershipRequirements::hasMinimumHeadcount($availableHeadcount)) {
             throw CannotBeReunitedException::insufficientFormerMembers(
                 $stable,
-                $availableFormerMembers->count(),
+                $availableHeadcount,
                 StableMembershipRequirements::MINIMUM_MEMBER_COUNT,
-            );
-        }
-
-        $unavailableKeyMembers = $this->formerMemberEligibility->unavailableKeyMembersFor($stable);
-        if ($unavailableKeyMembers->isNotEmpty()) {
-            $unavailableMemberNames = $unavailableKeyMembers
-                ->map(fn (Wrestler|TagTeam $member): string => $member->name)
-                ->implode(', ');
-
-            throw CannotBeReunitedException::keyMembersUnavailable(
-                $stable,
-                $unavailableMemberNames,
             );
         }
     }

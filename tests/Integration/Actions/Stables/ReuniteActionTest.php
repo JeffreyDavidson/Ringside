@@ -47,7 +47,8 @@ test('it rejects reuniting a stable that was never active or is retired', functi
     ],
 ]);
 
-test('it rejects reuniting a stable when a key former member is unavailable', function (Closure $makeMemberUnavailable): void {
+test('it reunites without a former member who has become unavailable', function (Closure $makeMemberUnavailable): void {
+    // Arrange
     $stable = Stable::factory()->disbanded()->create();
     $spareWrestler = Wrestler::factory()->employed()->create();
     $stable->wrestlers()->attach($spareWrestler, [
@@ -55,33 +56,50 @@ test('it rejects reuniting a stable when a key former member is unavailable', fu
         'left_at' => now()->subDay(),
     ]);
     $unavailableMember = $makeMemberUnavailable($stable);
+    $returningMembers = formerMembersOf($stable);
 
-    expect(fn () => resolve(ReuniteAction::class)->handle($stable, formerMembersOf($stable)))
-        ->toThrow(CannotBeReunitedException::class, "key former members unavailable: {$unavailableMember->name}")
+    // Act
+    resolve(ReuniteAction::class)->handle($stable, $returningMembers);
+
+    // Assert
+    $offeredIds = $unavailableMember instanceof Wrestler
+        ? $returningMembers->wrestlers?->pluck('id')->all()
+        : $returningMembers->tagTeams?->pluck('id')->all();
+    expect($offeredIds ?? [])->not->toContain($unavailableMember->getKey())
+        ->and($stable->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($unavailableMember->currentStable()->whereKey($stable->getKey())->exists())->toBeFalse();
+})->with('unavailable stable former members');
+
+test('it rejects an unavailable former member chosen to return', function (Closure $makeMemberUnavailable): void {
+    // Arrange
+    $stable = Stable::factory()->disbanded()->create();
+    $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), [
+        'joined_at' => now()->subDays(2),
+        'left_at' => now()->subDay(),
+    ]);
+    $unavailableMember = $makeMemberUnavailable($stable);
+    $available = formerMembersOf($stable);
+    $returningMembers = $unavailableMember instanceof Wrestler
+        ? new StableMembershipData(($available->wrestlers ?? collect())->push($unavailableMember), $available->tagTeams)
+        : new StableMembershipData($available->wrestlers, ($available->tagTeams ?? collect())->push($unavailableMember));
+
+    // Act & Assert
+    expect(fn () => resolve(ReuniteAction::class)->handle($stable, $returningMembers))
+        ->toThrow(CannotBeReunitedException::class, $unavailableMember->name)
         ->and($stable->currentActivityPeriod()->exists())->toBeFalse()
         ->and($stable->lifecycleTransitions()->exists())->toBeFalse();
 })->with('unavailable stable former members');
 
-test('it names every unavailable key former member when reunion is rejected', function (): void {
+test('it rejects reuniting when the available former members count under three', function (): void {
+    // Arrange
     $stable = Stable::factory()->disbanded()->create();
-    $spareWrestler = Wrestler::factory()->employed()->create();
-    $stable->wrestlers()->attach($spareWrestler, [
-        'joined_at' => now()->subDays(2),
-        'left_at' => now()->subDay(),
-    ]);
-    $suspendedWrestler = $stable->previousWrestlers()->where('wrestlers.id', '!=', $spareWrestler->id)->firstOrFail();
-    $suspendedWrestler->suspensions()->create(['started_at' => now()->subHour()]);
-    $retiredTagTeam = $stable->previousTagTeams()->get()->firstOrFail();
-    $retiredTagTeam->retirements()->create(['started_at' => now()->subHour()]);
-    $extraWrestler = Wrestler::factory()->employed()->create();
-    $stable->wrestlers()->attach($extraWrestler, [
-        'joined_at' => now()->subDays(2),
-        'left_at' => now()->subDay(),
-    ]);
-    $expectedNames = "{$suspendedWrestler->name}, {$retiredTagTeam->name}";
+    $stable->previousWrestlers()->get()->each(fn (Wrestler $wrestler) => $wrestler->retirements()->create(['started_at' => now()->subHour()]));
+    $stable->previousTagTeams()->get()->each(fn ($tagTeam) => $tagTeam->retirements()->create(['started_at' => now()->subHour()]));
 
+    // Act & Assert
     expect(fn () => resolve(ReuniteAction::class)->handle($stable, formerMembersOf($stable)))
-        ->toThrow(CannotBeReunitedException::class, "key former members unavailable: {$expectedNames}");
+        ->toThrow(CannotBeReunitedException::class)
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it restores the returning members on the reunite date and keeps their history', function (): void {

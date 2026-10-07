@@ -58,11 +58,4 @@ final class CannotBeReunitedException extends BaseBusinessException
 
         return new self("{$context} cannot be reunited: the returning members count as {$memberCount}, but at least {$minimumRequired} are required.");
     }
-
-    public static function keyMembersUnavailable(Stable $stable, string $unavailableMembers): static
-    {
-        $context = self::formatModelContext($stable);
-
-        return new self("{$context} cannot be reunited: key former members unavailable: {$unavailableMembers}.");
-    }
 }
