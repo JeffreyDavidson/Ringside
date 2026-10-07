@@ -59,7 +59,7 @@ trait HasActivityPeriods
     }
 
     /**
-     * Determine whether a current activity period exists, reusing the `withActivityStatusState`
+     * Determine whether a current activity period exists, reusing the `ACTIVITY_STATUS_STATE`
      * projection when the model was loaded with it.
      */
     public function hasCurrentActivityPeriod(): bool
@@ -72,7 +72,7 @@ trait HasActivityPeriods
     }
 
     /**
-     * Determine whether a scheduled activity period exists, reusing the `withActivityStatusState`
+     * Determine whether a scheduled activity period exists, reusing the `ACTIVITY_STATUS_STATE`
      * projection when the model was loaded with it.
      */
     public function hasFutureActivityPeriod(): bool
@@ -85,7 +85,7 @@ trait HasActivityPeriods
     }
 
     /**
-     * Determine whether any activity period exists, reusing the `withActivityStatusState`
+     * Determine whether any activity period exists, reusing the `ACTIVITY_STATUS_STATE`
      * projection when the model was loaded with it.
      */
     public function hasActivityHistory(): bool

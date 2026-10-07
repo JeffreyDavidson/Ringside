@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Models\Titles\Title;
 
@@ -88,7 +89,7 @@ test('projected activity status does not query per title', function () {
 
     // Act
     $query = Title::query();
-    $query->withActivityStatusState();
+    $query->withExists(TitleBuilder::ACTIVITY_STATUS_STATE);
     $query->orderBy('id');
     $titles = $query->get();
     $statuses = $titles->mapWithKeys(fn (Title $title): array => [$title->id => $title->status]);

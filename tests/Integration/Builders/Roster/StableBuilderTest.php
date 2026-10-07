@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
@@ -100,7 +101,7 @@ test('projected activity status does not query per stable', function () {
 
     // Act
     $query = Stable::query();
-    $query->withActivityStatusState();
+    $query->withExists(StableBuilder::ACTIVITY_STATUS_STATE);
     $query->orderBy('id');
     $stables = $query->get();
     $statuses = $stables->mapWithKeys(fn (Stable $stable): array => [$stable->id => $stable->status]);

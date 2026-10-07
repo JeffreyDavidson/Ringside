@@ -13,9 +13,4 @@ trait ProjectsActivityStatus
         'futureActivityPeriod as status_future_activity_period_exists',
         'activityPeriods as status_activity_periods_exists',
     ];
-
-    public function withActivityStatusState(): static
-    {
-        return $this->withExists(self::ACTIVITY_STATUS_STATE);
-    }
 }

@@ -30,15 +30,6 @@ abstract class IndividualBuilder extends Builder
     ];
 
     /**
-     * Project the current injury and suspension state so availability badges
-     * render without per-row queries.
-     */
-    public function withAvailabilityState(): static
-    {
-        return $this->withExists(self::AVAILABILITY_STATE);
-    }
-
-    /**
      * Restrict to individuals RosterBookingEligibility would allow: currently
      * employed, not retired, not suspended and not injured.
      */

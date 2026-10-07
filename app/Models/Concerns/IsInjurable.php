@@ -41,7 +41,7 @@ trait IsInjurable
     }
 
     /**
-     * Determine whether a current injury exists, reusing the `withAvailabilityState`
+     * Determine whether a current injury exists, reusing the `AVAILABILITY_STATE`
      * projection when the model was loaded with it.
      */
     public function isInjured(): bool
