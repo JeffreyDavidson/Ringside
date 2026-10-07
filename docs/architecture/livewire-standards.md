@@ -66,6 +66,9 @@ expose row actions such as delete but no lifecycle methods.
   `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
   a rejected action shows the domain exception's message. Merge, split and reunite open
   modals (`Stables\Modals\MergeModal`, `SplitModal`, `ReuniteModal`) that collect their input.
+- Titles run every transition through one private `perform(TitleLifecycleTransition, Closure, string)`, like
+  stables: it authorizes the transition's ability, runs the Action through `executeBusinessAction()` and dispatches
+  `title-updated` on success.
 - Destructive transitions (Release, Suspend, Injure, Retire, Disband, and the Pull
   button, whose Livewire method is `deactivate`, for titles) ask for confirmation with `wire:confirm`, using a `core.lifecycle_confirmations.*`
   message that names the record. Bind it as `:wire:confirm="__(...)"` so names with
@@ -80,6 +83,18 @@ are disabled while `save`, `clear` or `fillDummyFields` runs. The footer stores 
 as it was when the modal opened. Clear does nothing while the form is unchanged and asks
 for confirmation before it discards changes (typed, auto-filled, or kept after a failed
 save).
+
+A form modal's Cancel button closes through the modal host with `wire:click="$dispatch('closeModal')"`, like the
+header's close button. Do not call the component's `closeModal()` from a view: `BaseFormModal::closeModal()` only
+clears `isModalOpen` and never dispatches the package's `closeModal` event, so the dialog would stay open.
+
+`BaseFormModal::storeForm()` validates and runs `createForm()` / `updateForm()` inside `reportBusinessErrors()`,
+which turns a `BaseBusinessException` from the Action into an error on the field named by the modal's
+`$businessErrorField` (for example `form.venue_id` for events, `form.first_name` for managers and referees) and
+keeps the modal open. A modal that does not set the property lets the exception propagate (promotions and venues
+have no business rules to report). A modal that picks the field from the exception overrides
+`businessErrorField()`, as the match form does (`form.titles` when a current champion is missing, otherwise
+`form.configuration`), and the match form also overrides `storeForm()` to validate against its event first.
 
 Fields that the form's rules require take a `required` attribute; the form components
 pass it to the control and show the label's `*` marker. The first field of each modal

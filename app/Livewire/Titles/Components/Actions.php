@@ -14,6 +14,7 @@ use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Titles\Title;
+use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -38,89 +39,29 @@ class Actions extends Component
         $this->title = $title;
     }
 
-    /**
-     * Employ a title.
-     */
     public function debut(DebutAction $debutAction): void
     {
-        Gate::authorize('debut', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($debutAction): void {
-                $debutAction->handle($this->title);
-            },
-            __('titles.actions.debuted'),
-        )) {
-            $this->dispatch('title-updated');
-        }
+        $this->perform(TitleLifecycleTransition::Debut, fn () => $debutAction->handle($this->title), __('titles.actions.debuted'));
     }
 
-    /**
-     * Retire a title.
-     */
     public function retire(RetireAction $retireAction): void
     {
-        Gate::authorize('retire', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($retireAction): void {
-                $retireAction->handle($this->title);
-            },
-            __('titles.actions.retired'),
-        )) {
-            $this->dispatch('title-updated');
-        }
+        $this->perform(TitleLifecycleTransition::Retire, fn () => $retireAction->handle($this->title), __('titles.actions.retired'));
     }
 
-    /**
-     * Unretire a title.
-     */
     public function unretire(UnretireAction $unretireAction): void
     {
-        Gate::authorize('unretire', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($unretireAction): void {
-                $unretireAction->handle($this->title);
-            },
-            __('titles.actions.unretired'),
-        )) {
-            $this->dispatch('title-updated');
-        }
+        $this->perform(TitleLifecycleTransition::Unretire, fn () => $unretireAction->handle($this->title), __('titles.actions.unretired'));
     }
 
-    /**
-     * Pull a title.
-     */
     public function deactivate(PullAction $pullAction): void
     {
-        Gate::authorize('pull', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($pullAction): void {
-                $pullAction->handle($this->title);
-            },
-            __('titles.actions.pulled'),
-        )) {
-            $this->dispatch('title-updated');
-        }
+        $this->perform(TitleLifecycleTransition::Pull, fn () => $pullAction->handle($this->title), __('titles.actions.pulled'));
     }
 
-    /**
-     * Reinstate a title.
-     */
     public function reinstate(ReinstateAction $reinstateAction): void
     {
-        Gate::authorize('reinstate', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($reinstateAction): void {
-                $reinstateAction->handle($this->title);
-            },
-            __('titles.actions.reinstated'),
-        )) {
-            $this->dispatch('title-updated');
-        }
+        $this->perform(TitleLifecycleTransition::Reinstate, fn () => $reinstateAction->handle($this->title), __('titles.actions.reinstated'));
     }
 
     public function canPerform(TitleLifecycleTransition $transition): bool
@@ -134,5 +75,17 @@ class Actions extends Component
         $this->title->loadExists(TitleBuilder::ACTIVITY_STATUS_STATE);
 
         return view('livewire.titles.components.actions');
+    }
+
+    /** @param Closure(): mixed $handler */
+    private function perform(TitleLifecycleTransition $transition, Closure $handler, string $successMessage): void
+    {
+        Gate::authorize($transition->ability(), $this->title);
+
+        if ($this->executeBusinessAction(function () use ($handler): void {
+            $handler();
+        }, $successMessage)) {
+            $this->dispatch('title-updated');
+        }
     }
 }

@@ -7,7 +7,6 @@ namespace App\Livewire\TagTeams\Modals;
 use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\UpdateAction;
 use App\Enums\Roster\RosterMemberKind;
-use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
@@ -25,6 +24,9 @@ use Livewire\Attributes\Computed;
 class FormModal extends BaseFormModal
 {
     use SearchesRosterMembers;
+
+    #[\Override]
+    protected ?string $businessErrorField = 'form.wrestlerA';
 
     public CreateEditForm $form;
 
@@ -60,18 +62,6 @@ class FormModal extends BaseFormModal
     protected function updateForm(): void
     {
         $this->updateAction->handle($this->form->tagTeam(), $this->form->toData());
-    }
-
-    #[\Override]
-    protected function storeForm(): bool
-    {
-        try {
-            return parent::storeForm();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.wrestlerA', $exception->getMessage());
-
-            return false;
-        }
     }
 
     protected function createForm(): void

@@ -88,27 +88,25 @@ class FormModal extends BaseFormModal
 
         $this->form->validateForEvent($event);
 
-        try {
+        return $this->reportBusinessErrors(function () use ($event): void {
             if ($this->form->isEditing()) {
                 $match = EventMatch::query()->findOrFail($this->form->modelId);
                 $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
             } else {
                 $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
             }
-        } catch (BaseBusinessException $exception) {
-            $field = $exception instanceof InvalidMatchConfigurationException
-                && $exception->reason() === BusinessRuleReason::CurrentChampionMissing
-                    ? 'form.titles'
-                    : 'form.configuration';
 
-            $this->addError($field, $exception->getMessage());
+            $this->form->setModel($storedMatch);
+        });
+    }
 
-            return false;
-        }
-
-        $this->form->setModel($storedMatch);
-
-        return true;
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return $exception instanceof InvalidMatchConfigurationException
+            && $exception->reason() === BusinessRuleReason::CurrentChampionMissing
+                ? 'form.titles'
+                : 'form.configuration';
     }
 
     /** @return array<int, string> */

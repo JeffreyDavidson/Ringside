@@ -241,6 +241,18 @@ Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called b
 (the modal package mounts components with `mount()`), but about 250 modal test call sites
 depend on them; remove them together with a rewrite of those tests.
 
+### Form modal business errors (phase 3)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+`BaseFormModal` now owns the catch-and-report handling for domain failures
+(`reportBusinessErrors()` plus a `$businessErrorField` property or `businessErrorField()` override); the eight
+per-modal `storeForm()` try/catch overrides are gone and the match form uses the same helper. The promotion form's
+Cancel button called `closeModal()`, which never dispatched the package's close event, so it did not close the
+dialog; it now dispatches `closeModal` like the other modals (browser test added). The Titles `Actions` component
+runs its transitions through one `perform()` like Stables.
+
 ### Dead application code cleanup (phase 2)
 
 **Priority:** Medium  

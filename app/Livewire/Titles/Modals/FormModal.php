@@ -7,7 +7,6 @@ namespace App\Livewire\Titles\Modals;
 use App\Actions\Titles\CreateAction;
 use App\Actions\Titles\UpdateAction;
 use App\Enums\Titles\TitleType;
-use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Titles\Forms\CreateEditForm;
@@ -24,6 +23,9 @@ use Livewire\Attributes\Computed;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
+    protected ?string $businessErrorField = 'form.type';
+
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -61,18 +63,6 @@ class FormModal extends BaseFormModal
     public function isTypeLocked(): bool
     {
         return $this->form->isEditing() && TitleTypeEligibility::isLocked($this->form->title());
-    }
-
-    #[\Override]
-    protected function storeForm(): bool
-    {
-        try {
-            return parent::storeForm();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.type', $exception->getMessage());
-
-            return false;
-        }
     }
 
     protected function updateForm(): void
