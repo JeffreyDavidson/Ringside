@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Data\Stables\StableMembershipData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
+use App\Lifecycle\Roster\Stables\StableFormerMemberEligibility;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Lifecycle\Employment;
@@ -264,6 +266,25 @@ function createStableWithMembers(int $wrestlerCount = 3, int $tagTeamCount = 1):
         'wrestlers' => $wrestlers,
         'tag_teams' => $tagTeams,
     ];
+}
+
+/**
+ * The former members of a stable that can return to it, as the reunite action expects them.
+ */
+function formerMembersOf(Stable $stable): StableMembershipData
+{
+    return resolve(StableFormerMemberEligibility::class)->availableMembersFor($stable);
+}
+
+/**
+ * Move a stable's current and former members into the stable's promotion, so a promotion-scoped user can see and move them.
+ */
+function putStableMembersInPromotion(Stable $stable): Stable
+{
+    $stable->wrestlers()->withoutGlobalScopes()->update(['wrestlers.promotion_id' => $stable->promotion_id]);
+    $stable->tagTeams()->withoutGlobalScopes()->update(['tag_teams.promotion_id' => $stable->promotion_id]);
+
+    return $stable;
 }
 
 /**

@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
 use App\Enums\Stables\StableLifecycleAction;
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Components\Actions;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -165,5 +168,143 @@ describe('stable actions component', function (): void {
         // Assert
         expect($component->instance()->canPerform(StableLifecycleAction::Disband))->toBeFalse();
         $component->assertDontSeeHtml('wire:click="disband"');
+    });
+
+    test('it shows the merge, split and reunite buttons that fit the stable state', function (
+        Closure $makeStable,
+        array $visible,
+        array $hidden,
+    ): void {
+        // Arrange
+        $stable = $makeStable();
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['stable' => $stable]);
+
+        // Assert
+        foreach ($visible as $method) {
+            $component->assertSeeHtml("wire:click=\"{$method}\"");
+        }
+
+        foreach ($hidden as $method) {
+            $component->assertDontSeeHtml("wire:click=\"{$method}\"");
+        }
+    })->with([
+        'unformed' => [fn (): Stable => Stable::factory()->withNoMembers()->create(), [], ['merge', 'split', 'reunite']],
+        'ready to establish' => [fn (): Stable => Stable::factory()->withEmployedDefaultMembers()->create(), [], ['merge', 'split', 'reunite']],
+        'active with too few members to split' => [fn (): Stable => Stable::factory()->active()->create(), ['merge'], ['split', 'reunite']],
+        'active with enough members to split' => [
+            function (): Stable {
+                $stable = Stable::factory()->active()->create();
+                $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), ['joined_at' => now()->subDay()]);
+
+                return $stable;
+            },
+            ['merge', 'split'],
+            ['reunite'],
+        ],
+        'disbanded' => [fn (): Stable => Stable::factory()->inactive()->create(), ['reunite'], ['merge', 'split']],
+        'retired' => [fn (): Stable => Stable::factory()->retired()->create(), [], ['merge', 'split', 'reunite']],
+    ]);
+
+    test('it opens the modal for a restructuring action', function (
+        string $method,
+        string $state,
+        string $component,
+    ): void {
+        // Arrange
+        $stable = Stable::factory()->{$state}()->create();
+
+        actingAs(administrator());
+        $livewire = livewire(Actions::class, ['stable' => $stable]);
+
+        // Act
+        $livewire->call($method);
+
+        // Assert
+        $livewire->assertDispatched(
+            'openModal',
+            fn (string $event, array $params): bool => $params === [$component, ['stableId' => $stable->id]],
+        );
+    })->with([
+        'merge' => ['merge', 'active', 'stables.modals.merge-modal'],
+        'split' => ['split', 'active', 'stables.modals.split-modal'],
+        'reunite' => ['reunite', 'inactive', 'stables.modals.reunite-modal'],
+    ]);
+
+    test('it forbids opening a restructuring modal without the ability', function (string $method): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+
+        actingAs(basicUser());
+        $livewire = livewire(Actions::class, ['stable' => $stable]);
+
+        // Act
+        $livewire->call($method);
+
+        // Assert
+        $livewire->assertNotDispatched('openModal');
+        $livewire->assertForbidden();
+    })->with([
+        'merge',
+        'split',
+        'reunite',
+    ]);
+
+    test('it hides a disbanded stable reunite button while a former member is unavailable', function (): void {
+        // Arrange
+        $stable = Stable::factory()->inactive()->create();
+        $stable->previousWrestlers()->firstOrFail()->suspensions()->create(['started_at' => now()->subHour()]);
+
+        actingAs(administrator());
+
+        // Act
+        $component = livewire(Actions::class, ['stable' => $stable]);
+
+        // Assert
+        $component->assertDontSeeHtml('wire:click="reunite"');
+    });
+
+    test('it shows the restructuring buttons by promotion role', function (
+        MembershipRole $role,
+        bool $visible,
+    ): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $stable = Stable::factory()->active()->for($promotion, 'promotion')->create();
+        $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), ['joined_at' => now()->subDay()]);
+        putStableMembersInPromotion($stable);
+
+        actingAsPromotionMember($promotion, $role);
+
+        // Act
+        $component = livewire(Actions::class, ['stable' => $stable]);
+
+        // Assert
+        expect($component->instance()->canPerform(StableLifecycleAction::Merge))->toBe($visible)
+            ->and($component->instance()->canPerform(StableLifecycleAction::Split))->toBe($visible);
+    })->with([
+        'owner' => [MembershipRole::Owner, true],
+        'manager' => [MembershipRole::Manager, true],
+        'member' => [MembershipRole::Member, false],
+    ]);
+
+    test('it refreshes the page state after a modal restructures the stable', function (): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['stable' => $stable]);
+        $stable->currentActivityPeriod()->firstOrFail()->update(['ended_at' => now()]);
+
+        // Act
+        $component->dispatch('stable-restructured');
+
+        // Assert
+        $component
+            ->assertDispatched('stable-updated')
+            ->assertDontSeeHtml('wire:click="merge"');
     });
 });

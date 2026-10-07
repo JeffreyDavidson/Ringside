@@ -34,4 +34,27 @@
             {{ __('core.lifecycle_actions.unretire') }}
         </x-buttons.success>
     @endif
+
+    @if ($this->canPerform(StableLifecycleAction::Merge))
+        <x-buttons.primary wire:click="merge" wire:loading.attr="disabled" wire:target="merge" data-test="merge-stable">
+            {{ __('core.lifecycle_actions.merge') }}
+        </x-buttons.primary>
+    @endif
+
+    @if ($this->canPerform(StableLifecycleAction::Split))
+        <x-buttons.primary wire:click="split" wire:loading.attr="disabled" wire:target="split" data-test="split-stable">
+            {{ __('core.lifecycle_actions.split') }}
+        </x-buttons.primary>
+    @endif
+
+    @if ($this->canPerform(StableLifecycleAction::Reunite))
+        <x-buttons.success
+            wire:click="reunite"
+            wire:loading.attr="disabled"
+            wire:target="reunite"
+            data-test="reunite-stable"
+        >
+            {{ __('core.lifecycle_actions.reunite') }}
+        </x-buttons.success>
+    @endif
 </div>

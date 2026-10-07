@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Roster\Stables;
 
+use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
@@ -50,6 +51,33 @@ final readonly class StableActivityEligibility
             StableActivityTransition::Disband => $this->ensureCanDisband($stable),
             StableActivityTransition::Reunite => $this->ensureCanReunite($stable),
         };
+    }
+
+    /**
+     * Every returning member must be an available former member of the stable, and together they must meet the
+     * minimum headcount a stable needs to be active.
+     */
+    public function ensureReturningMembersAllowed(Stable $stable, StableMembershipData $returningMembers): void
+    {
+        $available = $this->formerMemberEligibility->availableMembersFor($stable);
+
+        $availableWrestlerIds = $available->wrestlers?->pluck('id')->all() ?? [];
+        $availableTagTeamIds = $available->tagTeams?->pluck('id')->all() ?? [];
+
+        $notAvailableNames = collect([
+            ...$returningMembers->wrestlers?->reject(fn (Wrestler $wrestler): bool => in_array($wrestler->getKey(), $availableWrestlerIds, true)) ?? [],
+            ...$returningMembers->tagTeams?->reject(fn (TagTeam $tagTeam): bool => in_array($tagTeam->getKey(), $availableTagTeamIds, true)) ?? [],
+        ])->map(fn (Wrestler|TagTeam $member): string => $member->name)->values()->all();
+
+        if ($notAvailableNames !== []) {
+            throw CannotBeReunitedException::membersNotAvailable($stable, $notAvailableNames);
+        }
+
+        $headcount = $returningMembers->getTotalMemberCount();
+
+        if (! StableMembershipRequirements::hasMinimumHeadcount($headcount)) {
+            throw CannotBeReunitedException::belowMinimum($stable, $headcount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
+        }
     }
 
     private function ensureCanEstablish(Stable $stable): void

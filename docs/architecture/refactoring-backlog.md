@@ -251,8 +251,8 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 `core.modal.edit`: "Add X" and "Edit {name}"). Open follow-ups verified against the code:
 
 - Stables render a lifecycle actions component (Establish, Disband, Retire,
-  Unretire) on the detail page. `MergeStablesAction`, `SplitStableAction`, and
-  `ReuniteAction` remain unwired (kept intentionally as planned features).
+  Unretire, Merge, Split, Reunite) on the detail page; merge, split and reunite
+  open modals (see `stable-membership.md`).
 - Matches can be deleted from the event matches table, but `DeleteAction` does
   not renumber; deleted numbers leave gaps by design.
 

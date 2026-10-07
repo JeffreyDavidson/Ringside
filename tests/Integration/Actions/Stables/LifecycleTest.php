@@ -154,7 +154,7 @@ describe('Stable Activation Action Integration', function () {
         test('reunite action creates new activity period and updates status', function () {
             $reuniteDate = Carbon::now();
 
-            resolve(ReuniteAction::class)->handle($this->disbandedStable, $reuniteDate);
+            resolve(ReuniteAction::class)->handle($this->disbandedStable, formerMembersOf($this->disbandedStable), $reuniteDate);
 
             $refreshedStable = freshModel($this->disbandedStable);
             expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue()
@@ -171,7 +171,7 @@ describe('Stable Activation Action Integration', function () {
         });
 
         test('reunite action maintains historical activity periods', function () {
-            resolve(ReuniteAction::class)->handle($this->disbandedStable, Carbon::now());
+            resolve(ReuniteAction::class)->handle($this->disbandedStable, formerMembersOf($this->disbandedStable), Carbon::now());
 
             $refreshedStable = freshModel($this->disbandedStable);
             $activityPeriods = $refreshedStable->activityPeriods()->get();
@@ -313,7 +313,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Reunite
             $reuniteDate = Carbon::now()->subMonths(3);
-            resolve(ReuniteAction::class)->handle($stable, $reuniteDate);
+            resolve(ReuniteAction::class)->handle($stable, formerMembersOf($stable), $reuniteDate);
             expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
 
             // Retire
@@ -356,7 +356,7 @@ describe('Stable Activation Action Integration', function () {
             // Sequential actions with proper dates
             resolve(EstablishAction::class)->handle($stable, $debutDate);
             resolve(DisbandAction::class)->handle($stable, $disbandDate);
-            resolve(ReuniteAction::class)->handle($stable, $reuniteDate);
+            resolve(ReuniteAction::class)->handle($stable, formerMembersOf($stable), $reuniteDate);
 
             $refreshedStable = freshModel($stable);
             $activityPeriods = $refreshedStable->activityPeriods()->orderBy('started_at')->get();
@@ -387,7 +387,7 @@ describe('Stable Activation Action Integration', function () {
         test('reunite action requires disbanded status', function () {
             $activeStable = Stable::factory()->active()->create();
 
-            expect(fn () => resolve(ReuniteAction::class)->handle($activeStable, Carbon::now()))
+            expect(fn () => resolve(ReuniteAction::class)->handle($activeStable, formerMembersOf($activeStable), Carbon::now()))
                 ->toThrow(CannotBeReunitedException::class);
         });
 

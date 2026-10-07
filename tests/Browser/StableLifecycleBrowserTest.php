@@ -40,3 +40,32 @@ test('administrator can disband and retire a stable from the detail page', funct
 
     expect($stable->refresh()->currentRetirement()->exists())->toBeTrue();
 });
+
+test('owner can merge another stable into a stable from the detail page', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $stable = Stable::factory()->active()->create(['promotion_id' => $promotion->id, 'name' => 'Primary Faction']);
+    $other = Stable::factory()->active()->create(['promotion_id' => $promotion->id, 'name' => 'Absorbed Faction']);
+    putStableMembersInPromotion($stable);
+    putStableMembersInPromotion($other);
+    $owner = basicUser();
+    $promotion->users()->attach($owner, [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
+    $this->actingAs($owner);
+
+    // Act / Assert
+    $page = visit(route('stables.show', $stable));
+    $page
+        ->assertSee('Primary Faction')
+        ->click('[data-test="merge-stable"]')
+        ->assertSee('Stable to merge in')
+        ->select('#otherStableId', (string) $other->id)
+        ->assertSee('Primary Faction keeps its name')
+        ->click('[data-test="save-merge"]')
+        ->assertSee('Absorbed Faction was merged into Primary Faction.')
+        ->assertNoJavascriptErrors();
+
+    expect($other->refresh()->trashed())->toBeTrue();
+});

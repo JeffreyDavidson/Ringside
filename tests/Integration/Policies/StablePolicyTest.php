@@ -222,6 +222,9 @@ describe('StablePolicy Integration Tests', function () {
                 'disband',
                 'retire',
                 'unretire',
+                'merge',
+                'split',
+                'reunite',
             ];
 
             foreach ($requiredMethods as $method) {
@@ -257,6 +260,9 @@ describe('StablePolicy Integration Tests', function () {
                 ['disband', [$this->stable]],
                 ['retire', [$this->stable]],
                 ['unretire', [$this->stable]],
+                ['merge', [$this->stable]],
+                ['split', [$this->stable]],
+                ['reunite', [$this->stable]],
             ];
 
             foreach ($methods as [$method, $params]) {
@@ -268,7 +274,7 @@ describe('StablePolicy Integration Tests', function () {
         });
 
         test('global Gate hook returns boolean true for admin or null for others', function () {
-            $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
+            $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire', 'merge', 'split', 'reunite'];
 
             foreach ($abilities as $ability) {
                 expect(Gate::forUser($this->admin)->raw($ability))->toBeTrue()
