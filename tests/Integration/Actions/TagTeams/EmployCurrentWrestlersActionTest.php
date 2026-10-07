@@ -12,6 +12,27 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
+test('it skips retired current wrestlers and employs the rest', function () {
+    $tagTeam = TagTeam::factory()->unemployed()->create();
+    $retiredWrestler = Wrestler::factory()->retired()->create();
+
+    $tagTeam->wrestlers()->attach($retiredWrestler, ['joined_at' => now()->subMonth()]);
+    $eligibleWrestlers = $tagTeam->currentWrestlers()
+        ->whereKeyNot($retiredWrestler->id)
+        ->get();
+
+    resolve(EmployCurrentWrestlersAction::class)
+        ->handle($tagTeam, now());
+
+    expect($retiredWrestler->refresh()->currentEmployment()->exists())->toBeFalse()
+        ->and($retiredWrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($eligibleWrestlers)->not->toBeEmpty();
+
+    foreach ($eligibleWrestlers as $wrestler) {
+        expect($wrestler->refresh()->currentEmployment()->exists())->toBeTrue();
+    }
+});
+
 test('it employs unemployed current wrestlers', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
     $employmentDate = now()->subDay();

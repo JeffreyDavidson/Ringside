@@ -13,6 +13,21 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
+test('it skips retired managers and employs the rest', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $retiredManager = Manager::factory()->retired()->create();
+    $eligibleManager = Manager::factory()->create();
+
+    $tagTeam->managers()->attach([$retiredManager->id, $eligibleManager->id], ['hired_at' => now()->subMonth()]);
+
+    resolve(EmployCurrentManagersAction::class)
+        ->handle($tagTeam, now());
+
+    expect($retiredManager->refresh()->currentEmployment()->exists())->toBeFalse()
+        ->and($retiredManager->currentRetirement()->exists())->toBeTrue()
+        ->and($eligibleManager->refresh()->currentEmployment()->exists())->toBeTrue();
+});
+
 test('it employs unemployed managers for each manageable roster type', function () {
     $wrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create();
