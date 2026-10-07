@@ -45,6 +45,7 @@ return [
         'merge' => [
             'title' => 'Merge stable',
             'other_stable' => 'Stable to merge in',
+            'other_stable_attribute' => 'stable',
             'select_stable' => 'Select a stable',
             'no_candidates' => 'There are no other active stables in this promotion to merge with.',
             'summary' => ':name keeps its name and receives :other’s members; :other ends and is removed.',
@@ -64,6 +65,7 @@ return [
             'description' => 'Choose the former members who rejoin :name. At least :minimum members are needed, and a tag team counts as two.',
             'wrestlers' => 'Wrestlers',
             'tag_teams' => 'Tag teams',
+            'no_members' => 'There are no former members available to reunite right now.',
             'submit' => 'Reunite stable',
         ],
     ],
