@@ -28,7 +28,7 @@
 
         <x-slot:footer>
             <div data-form-footer class="flex w-full justify-end gap-2">
-                <x-buttons.light wire:click="closeModal" wire:loading.attr="disabled" wire:target="save">
+                <x-buttons.light wire:click="$dispatch('closeModal')" wire:loading.attr="disabled" wire:target="save">
                     {{ __('core.form.cancel') }}
                 </x-buttons.light>
                 <x-buttons.primary

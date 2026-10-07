@@ -50,3 +50,18 @@ test('clearing the wrestler form asks before discarding typed values', function 
         ->assertValue('input[name="form.name"]', '')
         ->assertNoJavascriptErrors();
 });
+
+test('cancelling the promotion form closes the dialog', function (): void {
+    // Arrange
+    $page = visit(route('promotions.index'));
+
+    // Act / Assert
+    $page
+        ->click('Create promotion')
+        ->assertVisible('input[name="form.name"]')
+        ->click('[data-form-footer] button:has-text("Cancel")');
+    waitForScript($page, '!document.querySelector(\'input[name="form.name"]\')');
+    $page
+        ->assertMissing('input[name="form.name"]')
+        ->assertNoJavascriptErrors();
+});
