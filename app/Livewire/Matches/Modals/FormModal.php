@@ -43,12 +43,6 @@ class FormModal extends BaseFormModal
     use PresentsTitlesList;
 
     #[\Override]
-    protected ?string $createdEventName = 'matchCreated';
-
-    #[\Override]
-    protected ?string $updatedEventName = 'matchUpdated';
-
-    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     #[Locked]

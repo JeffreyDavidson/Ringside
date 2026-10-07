@@ -103,8 +103,6 @@ describe('authorized user form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('userCreated')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false)
             ->assertSet('form.first_name', '')
@@ -122,7 +120,7 @@ describe('authorized user form interactions', function () {
         $modal
             ->assertHasErrors('form.role')
             ->assertSet('isModalOpen', true)
-            ->assertNotDispatched('userUpdated');
+            ->assertNotDispatched('refreshDatatable');
 
         expect($administrator->refresh()->role)->toBe(Role::Administrator);
     });
@@ -154,7 +152,7 @@ describe('authorized user form interactions', function () {
             ->and($user->password)->toBe($originalPassword);
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('userUpdated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
     });
 
@@ -330,7 +328,7 @@ describe('authorized user form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('userCreated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(User::query()->count())->toBe(2);
     });

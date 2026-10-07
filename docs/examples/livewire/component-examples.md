@@ -83,7 +83,7 @@ Source: `app/Livewire/Wrestlers/Modals/FormModal.php`.
 
 A domain modal extends `App\Livewire\Base\BaseFormModal`, receives its create and update Actions in
 `boot()`, and implements `getModelClass()`, `createForm()`, `updateForm()`, and `render()`.
-`BaseFormModal` handles authorization, validation, `refreshDatatable`, closing, and `form-submitted`.
+`BaseFormModal` handles authorization, validation, `refreshDatatable`, and closing.
 
 ```php
 /**

@@ -110,7 +110,6 @@ describe('authorized stable form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
     });
@@ -339,7 +338,7 @@ describe('authorized stable form interactions', function () {
         $modal
             ->assertHasErrors(['form.started_at'])
             ->assertSet('isModalOpen', true)
-            ->assertNotDispatched('form-submitted');
+            ->assertNotDispatched('refreshDatatable');
     });
 
     it('requires a stable name', function () {

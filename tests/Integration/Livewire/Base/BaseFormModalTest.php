@@ -62,8 +62,7 @@ it('completes the shared form submission workflow', function (): void {
         ->assertHasNoErrors()
         ->assertSet('isModalOpen', false)
         ->assertDispatched('refreshDatatable')
-        ->assertDispatched('closeModal')
-        ->assertDispatched('form-submitted');
+        ->assertDispatched('closeModal');
 
     $this->assertDatabaseHas('events', [
         'name' => 'Shared Modal Event',

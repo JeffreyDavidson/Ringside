@@ -61,17 +61,16 @@ $component->set('form.name', 'Test Wrestler')
 expect(Wrestler::where('name', 'Test Wrestler')->exists())->toBeTrue();
 ```
 
-A successful submission dispatches `refreshDatatable`, `closeModal`, and `form-submitted`, closes the modal
+A successful submission dispatches `refreshDatatable` and `closeModal`, closes the modal
 (`isModalOpen` is `false`), and dispatches the modal's optional `$createdEventName` / `$updatedEventName`
-(for example `venueCreated` for Venues, `matchCreated` for Matches):
+(only the Promotions modal sets them, as `promotion-saved`):
 
 ```php
 $modal
     ->assertHasNoErrors()
     ->assertSet('isModalOpen', false)
     ->assertDispatched('refreshDatatable')
-    ->assertDispatched('closeModal')
-    ->assertDispatched('form-submitted');
+    ->assertDispatched('closeModal');
 ```
 
 Source: `tests/Integration/Livewire/Base/BaseFormModalTest.php`.

@@ -104,7 +104,6 @@ describe('authorized venue form interactions', function () {
             ->and($venue->timezone)->toBe('America/Los_Angeles');
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('venueCreated')
             ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false)
             ->assertSet('form.name', '');
@@ -136,7 +135,7 @@ describe('authorized venue form interactions', function () {
             ->and($venue->timezone)->toBe('Asia/Tokyo');
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('venueUpdated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false)
             ->assertSet('form.name', '');
     });
@@ -203,7 +202,7 @@ describe('authorized venue form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('venueCreated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(Venue::query()->count())->toBe(1);
     });
