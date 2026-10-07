@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Stables\RestoreAction as RestoreStable;
 use App\Actions\TagTeams\RestoreAction as RestoreTagTeam;
+use App\Actions\TagTeams\UnretireAction as UnretireTagTeam;
 use App\Actions\Titles\RestoreAction as RestoreTitle;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException as StableCannotBeRestored;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeRestored;
+use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretired;
 use App\Exceptions\Titles\CannotBeRestoredException as TitleCannotBeRestored;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
@@ -56,4 +58,22 @@ it('rejects restoring a tag team whose name an employed tag team of the same pro
     TagTeam::factory()->for($promotion, 'promotion')->employed()->create(['name' => $deleted->name]);
 
     expect(fn () => resolve(RestoreTagTeam::class)->handle($deleted))->toThrow(TagTeamCannotBeRestored::class);
+});
+
+it('unretires a tag team whose name an employed tag team of another promotion uses', function () {
+    [$first, $second] = Promotion::factory()->count(2)->create()->all();
+    $retired = TagTeam::factory()->for($first, 'promotion')->retired()->create();
+    TagTeam::factory()->for($second, 'promotion')->employed()->create(['name' => $retired->name]);
+
+    resolve(UnretireTagTeam::class)->handle($retired);
+
+    expect($retired->refresh()->currentRetirement()->exists())->toBeFalse();
+});
+
+it('rejects unretiring a tag team whose name an employed tag team of the same promotion uses', function () {
+    $promotion = Promotion::factory()->create();
+    $retired = TagTeam::factory()->for($promotion, 'promotion')->retired()->create();
+    TagTeam::factory()->for($promotion, 'promotion')->employed()->create(['name' => $retired->name]);
+
+    expect(fn () => resolve(UnretireTagTeam::class)->handle($retired))->toThrow(TagTeamCannotBeUnretired::class);
 });
