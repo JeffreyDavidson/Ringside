@@ -6,7 +6,7 @@ Title matches and championship validation rules.
 
 The championship system manages title matches and ensures proper competitor validation.
 
-`Title` owns only the championship relationships. Current, previous, first, longest, vacancy, reign-count, and reign-length reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
+`Title` owns only the championship relationships. Current-champion lookup and reign-length reporting are provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
 
 The previous-championship history tables show, for each ended reign, the reign it followed: `TitleChampionshipBuilder::withPreviousChampionshipId()` selects the latest non-deleted reign of the same title won before it. Its subquery aliases the table as `previous_championships`, and Eloquent qualifies the soft-delete constraint with that alias, so a deleted reign (for example one removed by a result correction) is never reported as the previous champion.
 
