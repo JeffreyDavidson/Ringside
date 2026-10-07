@@ -136,7 +136,7 @@
                                         {{ $row->type->label() }}
                                     </p>
                                     <div class="mt-2 sm:hidden">
-                                        <x-tables.title-status :status="$row->status" />
+                                        <x-tables.status :status="$row->status" />
                                     </div>
                                     <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 wrap-break-word md:hidden">
                                         @if ($champion instanceof \App\Models\Roster\Wrestlers\Wrestler)
@@ -173,7 +173,7 @@
                                     @endif
                                 </td>
                                 <td class="hidden px-4 py-4 align-top sm:table-cell">
-                                    <x-tables.title-status :status="$row->status" />
+                                    <x-tables.status :status="$row->status" />
                                 </td>
                                 <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                     {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
