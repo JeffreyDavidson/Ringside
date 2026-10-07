@@ -259,17 +259,14 @@ unreachable lifecycle methods. Modal titles are unified (`core.modal.add` and
 ### Promotion member invitations
 
 **Priority:** Low  
-**Status:** Core flow shipped; follow-ups open.
+**Status:** Shipped.
 
 Owners invite a member by typing an email address: the invitation is saved in
 `promotion_invitations`, keyed by the email (no account is needed, and the form
 never reveals whether one exists), and the person joins only by accepting it in
 the application after signing in with that email (see "Promotion Context and
-Membership" in `core-capabilities.md`). The remaining gaps:
-
-- **Platform administrators without a membership** have no switcher or
-  no-membership page on which to see an invitation; they reach promotions
-  through the directory.
+Membership" in `core-capabilities.md`). No open gaps remain; platform
+administrators without a membership see their invitations in the sidebar.
 
 Business rules enforced in the membership and user Actions: a promotion always
 keeps at least one active owner (`EnsureAnotherActiveOwnerAction`), and the
@@ -313,8 +310,6 @@ Shipped from the original list: searchable booking selects (v0.6.0, #1788) and t
   `secure`), add HSTS and a TLS 1.2 minimum in Cloudflare, and drop the duplicate `X-Content-Type-Options` line from
   the Forge nginx config. A Content-Security-Policy is a separate project because Livewire and Vite need nonces or
   hashes. The full operator checklist is `docs/workflows/production-operations.md`.
-
-The remaining invitation follow-ups are tracked under "Promotion member invitations" above.
 
 ## Deferred from audit round 3
 
