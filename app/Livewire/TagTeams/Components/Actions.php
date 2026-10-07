@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Components;
 
-use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
-use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
@@ -67,17 +65,6 @@ class Actions extends Component
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::TagTeam, $this->tagTeam, fn () => $reinstateAction->handle($this->tagTeam));
     }
 
-    public function delete(DeleteAction $deleteAction): void
-    {
-        Gate::authorize('delete', $this->tagTeam);
-        $this->executeRosterAction('deleted', RosterEntityType::TagTeam, fn () => $deleteAction->handle($this->tagTeam));
-    }
-
-    public function restore(RestoreAction $restoreAction): void
-    {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::TagTeam, $this->tagTeam, fn () => $restoreAction->handle($this->tagTeam));
-    }
-
     public function canPerform(RosterLifecycleAction $action): bool
     {
         if (! Gate::allows($action->ability(), $this->tagTeam)) {
@@ -91,7 +78,6 @@ class Actions extends Component
             RosterLifecycleAction::Reinstate => app(TagTeamSuspensionEligibility::class)->canReinstate($this->tagTeam),
             RosterLifecycleAction::Retire => app(TagTeamRetirementEligibility::class)->canRetire($this->tagTeam),
             RosterLifecycleAction::Unretire => app(TagTeamRetirementEligibility::class)->canUnretire($this->tagTeam),
-            RosterLifecycleAction::Restore => $this->tagTeam->trashed(),
             default => false,
         };
     }

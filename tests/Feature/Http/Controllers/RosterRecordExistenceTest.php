@@ -43,3 +43,23 @@ test('a record from another promotion looks the same as a missing record', funct
     'title' => [Title::class, 'titles.show'],
     'event' => [Event::class, 'events.show'],
 ])->with([MembershipRole::Owner, MembershipRole::Member]);
+
+test('a soft-deleted record has no show page', function (string $modelClass, string $routeName): void {
+    // Arrange
+    $record = $modelClass::factory()->create();
+    $record->delete();
+    actingAs(administrator());
+
+    // Act
+    $response = get(route($routeName, $record->getKey()));
+
+    // Assert
+    $response->assertNotFound();
+})->with([
+    'wrestler' => [Wrestler::class, 'wrestlers.show'],
+    'manager' => [Manager::class, 'managers.show'],
+    'referee' => [Referee::class, 'referees.show'],
+    'tag team' => [TagTeam::class, 'tag-teams.show'],
+    'stable' => [Stable::class, 'stables.show'],
+    'title' => [Title::class, 'titles.show'],
+]);

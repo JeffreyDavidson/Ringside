@@ -13,7 +13,6 @@ test('it defines backed lifecycle action values', function (RosterLifecycleActio
     [RosterLifecycleAction::Injure, 'injure'],
     [RosterLifecycleAction::Reinstate, 'reinstate'],
     [RosterLifecycleAction::Release, 'release'],
-    [RosterLifecycleAction::Restore, 'restore'],
     [RosterLifecycleAction::Retire, 'retire'],
     [RosterLifecycleAction::Suspend, 'suspend'],
     [RosterLifecycleAction::Unretire, 'unretire'],
@@ -32,16 +31,10 @@ test('it maps lifecycle actions to policy abilities and success messages', funct
     [RosterLifecycleAction::Injure, 'injure', 'injured'],
     [RosterLifecycleAction::Reinstate, 'reinstate', 'reinstated'],
     [RosterLifecycleAction::Release, 'release', 'released'],
-    [RosterLifecycleAction::Restore, 'restore', 'restored'],
     [RosterLifecycleAction::Retire, 'retire', 'retired'],
     [RosterLifecycleAction::Suspend, 'suspend', 'suspended'],
     [RosterLifecycleAction::Unretire, 'unretire', 'unretired'],
 ]);
-
-test('it identifies actions that operate on trashed roster models', function (): void {
-    expect(RosterLifecycleAction::Restore->usesTrashedModel())->toBeTrue()
-        ->and(RosterLifecycleAction::Retire->usesTrashedModel())->toBeFalse();
-});
 
 test('it exposes the roster entities supported by each lifecycle action', function (
     RosterLifecycleAction $action,
@@ -60,7 +53,6 @@ test('it exposes the roster entities supported by each lifecycle action', functi
         RosterEntityType::Manager,
         RosterEntityType::Referee,
     ]],
-    [RosterLifecycleAction::Restore, RosterEntityType::cases()],
 ]);
 
 test('it identifies whether a lifecycle action supports a roster entity', function (): void {

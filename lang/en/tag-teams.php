@@ -37,7 +37,6 @@ return [
         'unretired' => 'Tag team has been brought out of retirement.',
         'suspended' => 'Tag team has been suspended.',
         'reinstated' => 'Tag team has been reinstated.',
-        'restored' => 'Tag team has been restored.',
         'deleted' => 'Tag team has been deleted.',
     ],
 

@@ -6,7 +6,6 @@ use App\Actions\Managers\ClearFromInjuryAction;
 use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReleaseAction;
-use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
@@ -70,7 +69,6 @@ describe('manager actions component', function (): void {
         'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Manager has been suspended.'],
         'injure' => ['injure', InjureAction::class, Double::for(InjureAction::class), 'Manager injury has been recorded.'],
         'clear from injury' => ['clearFromInjury', ClearFromInjuryAction::class, Double::for(ClearFromInjuryAction::class), 'Manager has been cleared from injury.'],
-        'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Manager has been restored.'],
     ]);
 
     test('it reinstates a suspended manager and dispatches feedback', function (): void {
@@ -116,7 +114,6 @@ describe('manager actions component', function (): void {
         'reinstate',
         'injure',
         'clearFromInjury',
-        'restore',
     ]);
 
     test('it only shows the lifecycle buttons that fit the manager state', function (
@@ -141,11 +138,11 @@ describe('manager actions component', function (): void {
             $component->assertDontSeeHtml("wire:click=\"{$method}\"");
         }
     })->with([
-        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'unretire', 'restore']],
-        'employed' => ['employed', ['release', 'suspend', 'injure', 'retire'], ['employ', 'reinstate', 'clearFromInjury', 'unretire', 'restore']],
-        'suspended' => ['suspended', ['release', 'reinstate', 'retire'], ['employ', 'suspend', 'injure', 'clearFromInjury', 'unretire', 'restore']],
-        'injured' => ['injured', ['release', 'clearFromInjury', 'retire'], ['employ', 'suspend', 'reinstate', 'injure', 'unretire', 'restore']],
-        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'restore']],
+        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire', 'unretire']],
+        'employed' => ['employed', ['release', 'suspend', 'injure', 'retire'], ['employ', 'reinstate', 'clearFromInjury', 'unretire']],
+        'suspended' => ['suspended', ['release', 'reinstate', 'retire'], ['employ', 'suspend', 'injure', 'clearFromInjury', 'unretire']],
+        'injured' => ['injured', ['release', 'clearFromInjury', 'retire'], ['employ', 'suspend', 'reinstate', 'injure', 'unretire']],
+        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'injure', 'clearFromInjury', 'retire']],
     ]);
 
     test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {

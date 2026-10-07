@@ -37,7 +37,6 @@ return [
         'reinstated' => 'Referee has been reinstated.',
         'injured' => 'Injury has been recorded.',
         'cleared_from_injury' => 'Referee has been cleared from injury.',
-        'restored' => 'Referee has been restored.',
         'deleted' => 'Referee has been removed from the roster.',
     ],
 

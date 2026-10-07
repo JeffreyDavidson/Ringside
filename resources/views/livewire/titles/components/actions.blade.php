@@ -40,10 +40,4 @@
             {{ __('core.lifecycle_actions.reinstate') }}
         </x-buttons.success>
     @endif
-
-    @if ($this->canRestore())
-        <x-buttons.success wire:click="restore" wire:loading.attr="disabled" wire:target="restore">
-            {{ __('core.lifecycle_actions.restore') }}
-        </x-buttons.success>
-    @endif
 </div>

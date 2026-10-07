@@ -68,10 +68,4 @@
             {{ __('core.lifecycle_actions.unretire') }}
         </x-buttons.success>
     @endif
-
-    @if ($this->canPerform(RosterLifecycleAction::Restore))
-        <x-buttons.success wire:click="restore" wire:loading.attr="disabled" wire:target="restore">
-            {{ __('core.lifecycle_actions.restore') }}
-        </x-buttons.success>
-    @endif
 </div>
