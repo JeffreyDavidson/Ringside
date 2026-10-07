@@ -6,6 +6,7 @@ namespace App\Builders\Titles;
 
 use App\Builders\Concerns\FiltersByInactiveActivity;
 use App\Builders\Concerns\FiltersByName;
+use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstActivityPeriod;
 use App\Builders\Concerns\ProjectsActivityStatus;
@@ -23,6 +24,7 @@ class TitleBuilder extends Builder
 {
     use FiltersByInactiveActivity;
     use FiltersByName;
+    use FiltersByNameInPromotion;
     use FiltersByRetirementStatus;
     use LoadsFirstActivityPeriod;
     use ProjectsActivityStatus;

@@ -43,10 +43,7 @@ final readonly class StableRestructuringEligibility
     public function hasMergeCandidate(Stable $stable): bool
     {
         return Stable::query()
-            ->where('promotion_id', $stable->promotion_id)
-            ->whereKeyNot($stable->getKey())
-            ->established()
-            ->whereDoesntHave('currentRetirement')
+            ->mergeCandidatesFor($stable)
             ->value('id') !== null;
     }
 
@@ -77,8 +74,7 @@ final readonly class StableRestructuringEligibility
     {
         $nameTaken = Stable::query()
             ->withoutGlobalScope(PromotionContextScope::class)
-            ->where('promotion_id', $stable->promotion_id)
-            ->where('name', $name)
+            ->whereNameInPromotion($name, $stable->promotion_id)
             ->exists();
 
         if ($nameTaken) {

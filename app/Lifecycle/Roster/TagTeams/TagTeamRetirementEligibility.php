@@ -51,9 +51,7 @@ final class TagTeamRetirementEligibility
         }
 
         $conflictingTeam = TagTeam::query()
-            ->whereName($tagTeam->name)
-            ->where('promotion_id', $tagTeam->promotion_id)
-            ->whereKeyNot($tagTeam->getKey())
+            ->whereNameConflictsWith($tagTeam)
             ->whereHas('currentEmployment')
             ->first();
 

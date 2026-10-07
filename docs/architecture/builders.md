@@ -32,7 +32,12 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 - `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.
 - `FiltersByRetirementStatus` provides the shared `retired()` filter for individual roster members and tag teams.
+- `FiltersByNameInPromotion` provides `whereNameInPromotion($name, $promotionId)` and `whereNameConflictsWith($record)` for the stable, tag team and title builders, whose names are unique within a promotion. Restore, unretire and split eligibility use them for the "another record in the same promotion already uses this name" check and keep any extra condition (for example `whereHas('currentEmployment')`) at the call site.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
+
+## Stable Membership Scopes
+
+`WrestlerBuilder::joinableToStable()` and `TagTeamBuilder::joinableToStable()` are the one query constraint for who may be added to a stable: employed, not retired, suspended (or injured, for wrestlers) and not a current member of another stable. `StableFormerMemberEligibility` uses them to offer former members on reunite and retirement checks. `StableBuilder::mergeCandidatesFor($stable)` lists the other active, unretired stables of the same promotion, shared by `MergeModal` and `StableRestructuringEligibility::hasMergeCandidate()`. Per-record checks that must report a specific reason (`CanJoinStable`, `StableRestructuringEligibility::unavailabilityOf()`) stay separate because they return a message rather than filter a query.
 
 ## Status Projections
 

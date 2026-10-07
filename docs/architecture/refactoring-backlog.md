@@ -57,7 +57,7 @@ must have relationship eager-loading and `BelongsTo` regression tests.
 ### Builder scopes and relationship queries
 
 **Priority:** Medium  
-**Status:** Ongoing.
+**Status:** Ongoing; the promotion-scoped name-conflict query (`FiltersByNameInPromotion`) and the stable-join constraints (`joinableToStable()`, `mergeCandidatesFor()`) are shared builder scopes (see `builders.md`).
 
 Prefer typed Eloquent Builders and Laravel relationship constraints for reused
 database predicates. Keep collection-level comparisons in lifecycle validation
