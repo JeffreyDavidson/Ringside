@@ -131,6 +131,7 @@ class SplitStableAction
         }
 
         $this->eligibility->ensureSplitMembersAvailable($membersForNewStable);
+        $this->eligibility->ensureSplitKeepsTagTeamsWithWrestlers($currentMembers, $membersForNewStable);
 
         $newStableMemberCount = $membersForNewStable->getTotalMemberCount();
         $remainingMemberCount = $currentMembers->getTotalMemberCount() - $newStableMemberCount;

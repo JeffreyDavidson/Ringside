@@ -75,6 +75,33 @@ describe('split modal', function (): void {
             ->and($stable->currentWrestlers()->whereKey($movingWrestler->id)->exists())->toBeFalse();
     });
 
+    it('shows a concurrent membership change as a form error instead of failing', function (): void {
+        // Arrange
+        $stable = splittableStable();
+        $movingWrestler = $stable->currentWrestlers()->firstOrFail();
+        $movingTagTeam = $stable->currentTagTeams()->get()->firstOrFail();
+        rivalStableClaimsWrestlerOnNextMembershipInsert($movingWrestler);
+
+        actingAs(administrator());
+        $modal = livewire(SplitModal::class, ['stableId' => $stable->id]);
+
+        // Act
+        $modal
+            ->set('form.name', 'Breakaway')
+            ->set('form.wrestlerIds', [(string) $movingWrestler->id])
+            ->set('form.tagTeamIds', [(string) $movingTagTeam->id])
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors('stable')
+            ->assertSee('This stable or one of its members was changed at the same time. Refresh the page and try again.')
+            ->assertNotDispatched('stable-restructured')
+            ->assertNotDispatched('closeModal');
+        expect(Stable::query()->where('name', 'Breakaway')->exists())->toBeFalse()
+            ->and($stable->currentWrestlers()->whereKey($movingWrestler->id)->exists())->toBeTrue();
+    });
+
     it('forbids a promotion member without the split ability', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();

@@ -65,6 +65,26 @@ describe('reunite modal', function (): void {
             ->and($stable->currentTagTeams()->count())->toBe(1);
     });
 
+    it('shows a concurrent membership change as a form error instead of failing', function (): void {
+        // Arrange
+        $stable = Stable::factory()->disbanded()->create();
+        rivalStableClaimsWrestlerOnNextMembershipInsert($stable->previousWrestlers()->firstOrFail());
+
+        actingAs(administrator());
+        $modal = livewire(ReuniteModal::class, ['stableId' => $stable->id]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors('stable')
+            ->assertSee('This stable or one of its members was changed at the same time. Refresh the page and try again.')
+            ->assertNotDispatched('stable-restructured')
+            ->assertNotDispatched('closeModal');
+        expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    });
+
     it('forbids a promotion member without the reunite ability', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
@@ -119,6 +139,42 @@ describe('reunite modal', function (): void {
             ->assertNotDispatched('stable-restructured')
             ->assertNotDispatched('closeModal');
         expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    });
+
+    it('shows member validation errors next to the checkboxes', function (): void {
+        // Arrange
+        $stable = Stable::factory()->disbanded()->create();
+
+        actingAs(administrator());
+        $modal = livewire(ReuniteModal::class, ['stableId' => $stable->id]);
+
+        // Act
+        $modal
+            ->set('form.wrestlerIds', ['not-an-id'])
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors('form.wrestlerIds.0')
+            ->assertSeeHtml('id="form.wrestlerIds-error"')
+            ->assertSeeHtml('role="alert"');
+    });
+
+    it('explains when no former members are available any more', function (): void {
+        // Arrange
+        $stable = Stable::factory()->disbanded()->create();
+        $stable->previousWrestlers()->get()->each(fn (Wrestler $wrestler) => $wrestler->retirements()->create(['started_at' => now()->subHour()]));
+        $stable->previousTagTeams()->get()->each(fn ($tagTeam) => $tagTeam->retirements()->create(['started_at' => now()->subHour()]));
+
+        actingAs(administrator());
+
+        // Act
+        $modal = livewire(ReuniteModal::class, ['stableId' => $stable->id]);
+
+        // Assert
+        $modal
+            ->assertSee('There are no former members available to reunite right now.')
+            ->assertDontSeeHtml('data-test="save-reunite"');
     });
 
     it('rejects a member who was never a former member', function (): void {

@@ -80,6 +80,30 @@ describe('merge modal', function (): void {
             ->and($other->refresh()->trashed())->toBeTrue();
     });
 
+    it('shows a concurrent membership change as a form error instead of failing', function (): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+        $other = Stable::factory()->active()->create();
+        rivalStableClaimsWrestlerOnNextMembershipInsert($other->currentWrestlers()->firstOrFail());
+
+        actingAs(administrator());
+        $modal = livewire(MergeModal::class, ['stableId' => $stable->id]);
+
+        // Act
+        $modal
+            ->set('form.otherStableId', $other->id)
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors('stable')
+            ->assertSee('This stable or one of its members was changed at the same time. Refresh the page and try again.')
+            ->assertNotDispatched('stable-restructured')
+            ->assertNotDispatched('closeModal');
+        expect($other->refresh()->trashed())->toBeFalse()
+            ->and($other->currentWrestlers()->exists())->toBeTrue();
+    });
+
     it('forbids a promotion member without the merge ability', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
@@ -129,7 +153,8 @@ describe('merge modal', function (): void {
         // Assert
         $modal
             ->assertNotDispatched('stable-restructured')
-            ->assertHasErrors(['form.otherStableId' => 'required']);
+            ->assertHasErrors(['form.otherStableId' => 'required'])
+            ->assertSee('The stable field is required.');
     });
 
     it('rejects a stable that was not offered', function (string $state): void {
@@ -194,6 +219,8 @@ describe('merge modal', function (): void {
         $modal = livewire(MergeModal::class, ['stableId' => $stable->id]);
 
         // Assert
-        $modal->assertSee('There are no other active stables in this promotion to merge with.');
+        $modal
+            ->assertSee('There are no other active stables in this promotion to merge with.')
+            ->assertDontSeeHtml('data-test="save-merge"');
     });
 });

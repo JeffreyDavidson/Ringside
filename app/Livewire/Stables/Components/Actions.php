@@ -74,6 +74,7 @@ class Actions extends Component
     {
         $this->stable->refresh();
         $this->dispatch('stable-updated');
+        $this->dispatch('refreshDatatable');
     }
 
     public function canPerform(StableLifecycleAction $action): bool
@@ -87,7 +88,8 @@ class Actions extends Component
             StableLifecycleAction::Disband => app(StableActivityEligibility::class)->allows($this->stable, StableActivityTransition::Disband),
             StableLifecycleAction::Retire => app(StableRetirementEligibility::class)->canRetire($this->stable),
             StableLifecycleAction::Unretire => app(StableRetirementEligibility::class)->canUnretire($this->stable),
-            StableLifecycleAction::Merge => app(StableRestructuringEligibility::class)->canStartMerge($this->stable),
+            StableLifecycleAction::Merge => app(StableRestructuringEligibility::class)->canStartMerge($this->stable)
+                && app(StableRestructuringEligibility::class)->hasMergeCandidate($this->stable),
             StableLifecycleAction::Split => app(StableRestructuringEligibility::class)->canSplit($this->stable),
             StableLifecycleAction::Reunite => app(StableActivityEligibility::class)->allows($this->stable, StableActivityTransition::Reunite),
         };
@@ -116,6 +118,7 @@ class Actions extends Component
             $handler();
         }, $successMessage)) {
             $this->dispatch('stable-updated');
+            $this->dispatch('refreshDatatable');
         }
     }
 }

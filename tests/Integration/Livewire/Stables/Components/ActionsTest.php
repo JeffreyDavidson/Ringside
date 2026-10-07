@@ -194,10 +194,22 @@ describe('stable actions component', function (): void {
     })->with([
         'unformed' => [fn (): Stable => Stable::factory()->withNoMembers()->create(), [], ['merge', 'split', 'reunite']],
         'ready to establish' => [fn (): Stable => Stable::factory()->withEmployedDefaultMembers()->create(), [], ['merge', 'split', 'reunite']],
-        'active with too few members to split' => [fn (): Stable => Stable::factory()->active()->create(), ['merge'], ['split', 'reunite']],
+        'active with too few members to split' => [
+            function (): Stable {
+                $promotion = Promotion::factory()->create();
+                Stable::factory()->active()->for($promotion, 'promotion')->create();
+
+                return Stable::factory()->active()->for($promotion, 'promotion')->create();
+            },
+            ['merge'],
+            ['split', 'reunite'],
+        ],
+        'active with no other stable to merge with' => [fn (): Stable => Stable::factory()->active()->create(), [], ['merge', 'split', 'reunite']],
         'active with enough members to split' => [
             function (): Stable {
-                $stable = Stable::factory()->active()->create();
+                $promotion = Promotion::factory()->create();
+                Stable::factory()->active()->for($promotion, 'promotion')->create();
+                $stable = Stable::factory()->active()->for($promotion, 'promotion')->create();
                 $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), ['joined_at' => now()->subDay()]);
 
                 return $stable;
@@ -293,6 +305,7 @@ describe('stable actions component', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
         $stable = Stable::factory()->active()->for($promotion, 'promotion')->create();
+        Stable::factory()->active()->for($promotion, 'promotion')->create();
         $stable->wrestlers()->attach(Wrestler::factory()->employed()->count(2)->create(), ['joined_at' => now()->subDay()]);
         putStableMembersInPromotion($stable);
 
@@ -324,6 +337,23 @@ describe('stable actions component', function (): void {
         // Assert
         $component
             ->assertDispatched('stable-updated')
+            ->assertDispatched('refreshDatatable')
             ->assertDontSeeHtml('wire:click="merge"');
+    });
+
+    test('it refreshes the history tables after a lifecycle action', function (): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['stable' => $stable]);
+
+        // Act
+        $component->call('disband');
+
+        // Assert
+        $component
+            ->assertDispatched('stable-updated')
+            ->assertDispatched('refreshDatatable');
     });
 });

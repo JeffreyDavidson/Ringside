@@ -277,6 +277,33 @@ function formerMembersOf(Stable $stable): StableMembershipData
 }
 
 /**
+ * Simulate a concurrent request: just before the next stable membership insert for the wrestler, another stable
+ * claims them, so the partial unique index rejects the insert as it would for the losing request of a race.
+ */
+function rivalStableClaimsWrestlerOnNextMembershipInsert(Wrestler $wrestler): void
+{
+    $rivalStable = Stable::factory()->create();
+    $claimed = false;
+
+    DB::beforeExecuting(function (string $query) use ($wrestler, $rivalStable, &$claimed): void {
+        if ($claimed || ! str_starts_with(mb_strtolower($query), 'insert into') || ! str_contains($query, 'stables_wrestlers')) {
+            return;
+        }
+
+        $claimed = true;
+
+        DB::table('stables_wrestlers')->insert([
+            'stable_id' => $rivalStable->getKey(),
+            'wrestler_id' => $wrestler->getKey(),
+            'joined_at' => now(),
+            'left_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    });
+}
+
+/**
  * Move a stable's current and former members into the stable's promotion, so a promotion-scoped user can see and move them.
  */
 function putStableMembersInPromotion(Stable $stable): Stable
