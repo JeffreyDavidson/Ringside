@@ -20,41 +20,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LifecyclePeriodBuilder extends Builder
 {
-    public function open(): static
-    {
-        self::constrainToOpen($this);
-
-        return $this;
-    }
-
-    public function ended(): static
-    {
-        self::constrainToEnded($this);
-
-        return $this;
-    }
-
-    public function current(): static
-    {
-        self::constrainToCurrent($this);
-
-        return $this;
-    }
-
-    public function scheduled(): static
-    {
-        self::constrainToScheduled($this);
-
-        return $this;
-    }
-
-    public function activeOn(DateTimeInterface $date): static
-    {
-        self::constrainToActiveOn($this, $date);
-
-        return $this;
-    }
-
     /**
      * @template TRelatedModel of Model
      *
