@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Data\Titles\TitleData;
 use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Models\Titles\Title;
@@ -12,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
-    public function __construct(private readonly StartActivityPeriodAction $startActivityPeriod) {}
+    public function __construct(private readonly DebutAction $debut) {}
 
     /**
      * Update a title.
@@ -42,7 +41,7 @@ class UpdateAction
             // Handle conditional debut creation - only debut titles that have never debuted before
             // Note: This will not reactivate pulled titles - use ReinstateAction for that
             if (! is_null($titleData->debut_date) && ! $lockedTitle->activityPeriods()->exists()) {
-                $this->startActivityPeriod->handle($lockedTitle, $titleData->debut_date);
+                $this->debut->handle($lockedTitle, $titleData->debut_date);
             }
 
             return $lockedTitle;

@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\UnretireAction as UnretireManagerAction;
 use App\Actions\Wrestlers\UnretireAction as UnretireWrestlerAction;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -17,6 +18,7 @@ class UnretireCurrentMembersAction
     public function __construct(
         private readonly UnretireWrestlerAction $unretireWrestler,
         private readonly UnretireManagerAction $unretireManager,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     public function handle(TagTeam $tagTeam, Carbon $unretirementDate): void
@@ -24,7 +26,7 @@ class UnretireCurrentMembersAction
         $wrestlers = $tagTeam->currentWrestlers()
             ->inLockOrder()
             ->get()
-            ->filter(fn (Wrestler $wrestler): bool => $wrestler->currentRetirement()->exists());
+            ->filter(fn (Wrestler $wrestler): bool => $this->eligibility->canUnretire($wrestler));
 
         foreach ($wrestlers as $wrestler) {
             try {
@@ -37,7 +39,7 @@ class UnretireCurrentMembersAction
         $managers = $tagTeam->currentManagers()
             ->inLockOrder()
             ->get()
-            ->filter(fn (Manager $manager): bool => $manager->currentRetirement()->exists());
+            ->filter(fn (Manager $manager): bool => $this->eligibility->canUnretire($manager));
 
         foreach ($managers as $manager) {
             try {

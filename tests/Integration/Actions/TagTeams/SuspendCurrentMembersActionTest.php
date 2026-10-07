@@ -7,6 +7,32 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+
+test('it skips members that are not eligible for suspension and suspends the rest', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $injuredWrestler = Wrestler::factory()->injured()->create();
+    $injuredManager = Manager::factory()->injured()->create();
+    $eligibleManager = Manager::factory()->employed()->create();
+
+    $tagTeam->wrestlers()->attach($injuredWrestler, ['joined_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach([$injuredManager->id, $eligibleManager->id], ['hired_at' => now()->subMonth()]);
+    $eligibleWrestlers = $tagTeam->currentWrestlers()
+        ->whereKeyNot($injuredWrestler->id)
+        ->get();
+
+    resolve(SuspendCurrentMembersAction::class)
+        ->handle($tagTeam, now());
+
+    expect($injuredWrestler->refresh()->currentSuspension()->exists())->toBeFalse()
+        ->and($injuredManager->refresh()->currentSuspension()->exists())->toBeFalse()
+        ->and($eligibleManager->refresh()->currentSuspension()->exists())->toBeTrue()
+        ->and($eligibleWrestlers)->not->toBeEmpty();
+
+    foreach ($eligibleWrestlers as $wrestler) {
+        expect($wrestler->refresh()->currentSuspension()->exists())->toBeTrue();
+    }
+});
 
 test('it suspends eligible current wrestlers and managers', function () {
     $tagTeam = TagTeam::factory()->employed()->create();

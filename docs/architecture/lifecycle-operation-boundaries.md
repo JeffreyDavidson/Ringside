@@ -66,6 +66,10 @@ Examples include employing a tag team's members, ending a wrestler's professiona
 
 Callables may be replaced incrementally. A cascade must not hide unsupported model operations behind `method_exists()` checks when a domain contract can express the requirement.
 
+### Cascade eligibility filtering
+
+Every tag-team member cascade (`EmployCurrentWrestlersAction`, `EmployCurrentManagersAction`, and the `Suspend`, `Reinstate`, `Retire`, and `UnretireCurrentMembersAction` classes) selects its members through the matching `Individual*Eligibility::canX()` predicate (`canEmploy`, `canSuspend`, `canReinstate`, `canRetire`, `canUnretire`) instead of hand-coded filters. A member that is not eligible for the transition (for example an injured member of a team being suspended, or a retired member of a team being employed) is skipped and the operation continues for the others; an ineligible member never aborts or rolls back the whole operation. The member's own typed Action still re-validates under its lock.
+
 ### Cascade lock order
 
 A cascade locks its members through the nested Actions it calls (`refreshForUpdate()` per member), so the order it iterates them in is the order it locks them in. Two transactions that lock the same rows in different orders can each hold one row and wait for the other, which PostgreSQL resolves as a deadlock (SQLSTATE 40P01). Unordered relationship queries return rows in whatever order the planner chooses (pivot order for a nested loop or sequential scan, id order for a merge join), so the order can differ between two callers on the same data.
@@ -209,7 +213,7 @@ The typed `StableActivityTransition` graph identifies establishment, disbandment
 
 Stable and title models expose activity history through the canonical `activityPeriods` relationship. Their factories use the corresponding activity-period models directly; the legacy `activations` relationship alias and duplicate `StableActivation` model are not part of the model boundary.
 
-Title debut and reinstatement use the same shared lifecycle persistence Actions, while the typed title Actions retain title-specific eligibility and terminology. The starter explicitly supports rescheduling an existing future title period without creating a second period.
+Title debut and reinstatement use the same shared lifecycle persistence Actions, while the typed title Actions retain title-specific eligibility and terminology. Creating a title with a debut date, and updating an undebuted title with one, delegate to `Titles\DebutAction`, so debut eligibility runs and the `Debuted` transition is recorded exactly as for the detail-page debut. The starter explicitly supports rescheduling an existing future title period without creating a second period.
 
 Title lifecycle eligibility is expressed through the typed `TitleLifecycleTransition` graph. `TitleLifecycleEligibility` maps each supported transition to its focused guard and domain exception, while the concrete title Actions retain transaction, locking, effective-date, persistence, and audit responsibilities. The transition graph does not execute mutations and is not shared with unrelated lifecycle dimensions.
 
