@@ -52,6 +52,14 @@ final class CannotBeSplitException extends BaseBusinessException
         return new self('Cannot split stable: these selected members are unavailable: '.implode(', ', $memberNames).'.');
     }
 
+    /** @param array<int, string> $wrestlerNames */
+    public static function separatesTagTeamFromWrestlers(string $tagTeamName, array $wrestlerNames): static
+    {
+        $names = implode(', ', $wrestlerNames);
+
+        return new self("Cannot split stable: tag team '{$tagTeamName}' and its wrestlers ({$names}) must move together, otherwise they would be current members of both stables.");
+    }
+
     public static function nameTaken(string $name): static
     {
         return new self("Cannot split stable: an active stable named '{$name}' already exists in this promotion.");

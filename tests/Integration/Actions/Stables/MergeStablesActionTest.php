@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\MergeStablesAction;
+use App\Actions\Stables\RestoreAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Roster\Stables\StableMembershipService;
 
 it('moves current members to the primary stable and preserves secondary history', function () {
@@ -163,7 +165,9 @@ it('records a merged transition on both stables', function () {
     resolve(MergeStablesAction::class)->handle($primaryStable, $secondaryStable, $mergeDate);
 
     $primaryTransition = $primaryStable->lifecycleTransitions()->sole();
-    $secondaryTransition = $secondaryStable->lifecycleTransitions()->sole();
+    $secondaryTransition = $secondaryStable->lifecycleTransitions()
+        ->where('transition', LifecycleTransitionType::Merged)
+        ->sole();
 
     expect($primaryTransition->transition)->toBe(LifecycleTransitionType::Merged)
         ->and($primaryTransition->dimension)->toBe(LifecycleDimension::Activity)
@@ -177,4 +181,45 @@ it('records a merged transition on both stables', function () {
             'merged_into_stable_id' => $primaryStable->id,
             'merged_into_stable_name' => 'Primary Stable',
         ]);
+});
+
+it('records a deleted transition on the merged secondary stable so a later restore has a matching pair', function () {
+    $primaryStable = Stable::factory()->active()->create();
+    $secondaryStable = Stable::factory()->active()->create();
+    $mergeDate = now()->subHour();
+
+    resolve(MergeStablesAction::class)->handle($primaryStable, $secondaryStable, $mergeDate);
+
+    $deletion = $secondaryStable->lifecycleTransitions()
+        ->where('dimension', LifecycleDimension::Deletion)
+        ->sole();
+
+    expect($deletion->transition)->toBe(LifecycleTransitionType::Deleted)
+        ->and($deletion->effective_at->toDateTimeString())->toBe($mergeDate->toDateTimeString())
+        ->and($secondaryStable->lifecycleTransitions()->where('transition', LifecycleTransitionType::Merged)->count())->toBe(1)
+        ->and($primaryStable->lifecycleTransitions()->where('dimension', LifecycleDimension::Deletion)->exists())->toBeFalse();
+
+    resolve(RestoreAction::class)->handle($secondaryStable->refresh(), now());
+
+    expect($secondaryStable->lifecycleTransitions()
+        ->where('dimension', LifecycleDimension::Deletion)
+        ->orderBy('id')
+        ->pluck('transition')
+        ->all())->toBe([LifecycleTransitionType::Deleted, LifecycleTransitionType::Restored]);
+});
+
+it('keeps a tag team and its direct wrestler together when merging', function () {
+    $primaryStable = Stable::factory()->active()->create();
+    $secondaryStable = Stable::factory()->active()->create();
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $wrestler = $tagTeam->currentWrestlers()->firstOrFail();
+    $secondaryStable->tagTeams()->attach($tagTeam, ['joined_at' => now()->subDay()]);
+    $secondaryStable->wrestlers()->attach($wrestler, ['joined_at' => now()->subDay()]);
+
+    resolve(MergeStablesAction::class)->handle($primaryStable, $secondaryStable, now());
+
+    expect($primaryStable->currentTagTeams()->whereKey($tagTeam->getKey())->exists())->toBeTrue()
+        ->and($primaryStable->currentWrestlers()->whereKey($wrestler->getKey())->exists())->toBeTrue()
+        ->and($secondaryStable->currentTagTeams()->exists())->toBeFalse()
+        ->and($secondaryStable->currentWrestlers()->exists())->toBeFalse();
 });

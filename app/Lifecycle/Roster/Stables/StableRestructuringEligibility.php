@@ -121,6 +121,34 @@ final readonly class StableRestructuringEligibility
         }
     }
 
+    /**
+     * A tag team and its current wrestlers can both be direct members of one stable. Moving only one side would leave
+     * the wrestler a current member of both stables, so a moving tag team takes its direct-member wrestlers along and
+     * a moving direct wrestler needs the stable's tag team they belong to to move with them.
+     */
+    public function ensureSplitKeepsTagTeamsWithWrestlers(StableMembershipData $currentMembers, StableMembershipData $movingMembers): void
+    {
+        $directWrestlerIds = $currentMembers->wrestlers?->pluck('id')->all() ?? [];
+        $movingWrestlerIds = $movingMembers->wrestlers?->pluck('id')->all() ?? [];
+        $movingTagTeamIds = $movingMembers->tagTeams?->pluck('id')->all() ?? [];
+
+        foreach ($currentMembers->tagTeams ?? [] as $tagTeam) {
+            $teamMoves = in_array($tagTeam->getKey(), $movingTagTeamIds, true);
+
+            $separatedWrestlerNames = $tagTeam->currentWrestlers()
+                ->get()
+                ->filter(fn (Wrestler $wrestler): bool => in_array($wrestler->getKey(), $directWrestlerIds, true)
+                    && in_array($wrestler->getKey(), $movingWrestlerIds, true) !== $teamMoves)
+                ->map(fn (Wrestler $wrestler): string => $wrestler->name)
+                ->values()
+                ->all();
+
+            if ($separatedWrestlerNames !== []) {
+                throw CannotBeSplitException::separatesTagTeamFromWrestlers($tagTeam->name, $separatedWrestlerNames);
+            }
+        }
+    }
+
     public function ensureMergeMembersAvailable(StableMembershipData $members): void
     {
         $unavailableMemberNames = $this->unavailableMemberNames($members);

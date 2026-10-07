@@ -30,6 +30,10 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
+    'errors' => [
+        'members_changed_concurrently' => 'This stable or one of its members was changed at the same time. Refresh the page and try again.',
+    ],
+
     'actions' => [
         'deleted' => 'Stable successfully deleted.',
         'disbanded' => 'Stable successfully disbanded.',

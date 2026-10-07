@@ -21,6 +21,7 @@ use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Roster\Stables\StableMembershipService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use JMac\Testing\Double;
@@ -740,4 +741,67 @@ test('split rejects an active stable with fewer than twice the minimum headcount
     ))->toThrow(CannotBeSplitException::class, "has only {$currentMemberCount} members but requires at least 6 members to split")
         ->and(Stable::query()->where('name', 'Breakaway Stable')->exists())->toBeFalse()
         ->and(resolve(StableMembershipService::class)->currentMembers($stable)->getTotalMemberCount())->toBe($currentMemberCount);
+});
+
+/**
+ * An active stable holding a tag team and one of the team's wrestlers directly, plus four other wrestlers.
+ *
+ * @return array{stable: Stable, tagTeam: TagTeam, sharedWrestler: Wrestler, others: Collection<int, Wrestler>}
+ */
+function stableWithOverlappingTagTeamAndWrestler(): array
+{
+    $stable = Stable::factory()->create(['name' => 'Overlap Stable']);
+    $stable->activityPeriods()->create(['started_at' => Carbon::yesterday()]);
+
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $sharedWrestler = $tagTeam->currentWrestlers()->firstOrFail();
+    $others = Wrestler::factory()->bookable()->count(4)->create();
+
+    $stable->tagTeams()->attach($tagTeam, ['joined_at' => Carbon::yesterday()]);
+    $stable->wrestlers()->attach($others->push($sharedWrestler)->pluck('id'), ['joined_at' => Carbon::yesterday()]);
+
+    return ['stable' => $stable, 'tagTeam' => $tagTeam, 'sharedWrestler' => $sharedWrestler, 'others' => new Collection($others->take(4)->all())];
+}
+
+test('split rejects moving a tag team while its wrestler stays as a direct member', function () {
+    ['stable' => $stable, 'tagTeam' => $tagTeam, 'sharedWrestler' => $sharedWrestler, 'others' => $others] = stableWithOverlappingTagTeamAndWrestler();
+
+    expect(fn () => resolve(SplitStableAction::class)->handle(
+        $stable,
+        'Breakaway Stable',
+        new StableMembershipData(wrestlers: $others->take(1), tagTeams: new Collection([$tagTeam])),
+        now(),
+    ))->toThrow(CannotBeSplitException::class, "{$tagTeam->name}")
+        ->and(Stable::query()->where('name', 'Breakaway Stable')->exists())->toBeFalse()
+        ->and($sharedWrestler->currentStable()->exists())->toBeTrue()
+        ->and($stable->currentTagTeams()->whereKey($tagTeam->getKey())->exists())->toBeTrue();
+});
+
+test('split rejects moving a direct wrestler while their tag team stays', function () {
+    ['stable' => $stable, 'sharedWrestler' => $sharedWrestler, 'others' => $others] = stableWithOverlappingTagTeamAndWrestler();
+
+    expect(fn () => resolve(SplitStableAction::class)->handle(
+        $stable,
+        'Breakaway Stable',
+        new StableMembershipData(wrestlers: new Collection([...$others->take(2), $sharedWrestler])),
+        now(),
+    ))->toThrow(CannotBeSplitException::class, $sharedWrestler->name)
+        ->and(Stable::query()->where('name', 'Breakaway Stable')->exists())->toBeFalse()
+        ->and($stable->currentWrestlers()->whereKey($sharedWrestler->getKey())->exists())->toBeTrue();
+});
+
+test('split moves a tag team together with its direct wrestler', function () {
+    ['stable' => $stable, 'tagTeam' => $tagTeam, 'sharedWrestler' => $sharedWrestler, 'others' => $others] = stableWithOverlappingTagTeamAndWrestler();
+
+    $newStable = resolve(SplitStableAction::class)->handle(
+        $stable,
+        'Breakaway Stable',
+        new StableMembershipData(wrestlers: new Collection([$sharedWrestler]), tagTeams: new Collection([$tagTeam])),
+        now(),
+    );
+
+    expect($newStable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$sharedWrestler->getKey()])
+        ->and($newStable->currentTagTeams()->pluck('tag_teams.id')->all())->toBe([$tagTeam->getKey()])
+        ->and($stable->currentTagTeams()->exists())->toBeFalse()
+        ->and($stable->currentWrestlers()->whereKey($sharedWrestler->getKey())->exists())->toBeFalse();
 });
