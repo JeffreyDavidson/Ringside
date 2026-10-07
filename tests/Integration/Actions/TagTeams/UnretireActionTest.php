@@ -9,12 +9,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it unretires a retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
@@ -100,26 +94,6 @@ test('it unretires and employs current members by default', function () {
         ->and($manager->currentEmployment()->exists())->toBeTrue();
 });
 
-test('it can unretire the tag team without unretiring or employing its members', function () {
-    $tagTeam = TagTeam::factory()->retired()->create();
-    $wrestlers = $tagTeam->currentWrestlers()->get();
-
-    resolve(UnretireAction::class)
-        ->handle($tagTeam, unretireMembers: false, employImmediately: false);
-
-    $tagTeam->refresh();
-
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
-        ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
-
-    foreach ($wrestlers as $wrestler) {
-        $wrestler->refresh();
-
-        expect($wrestler->currentRetirement()->exists())->toBeTrue()
-            ->and($wrestler->currentEmployment()->exists())->toBeFalse();
-    }
-});
-
 test('it unretires tag team with specific unretirement date', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $unretirementDate = now()->startOfDay();
@@ -161,30 +135,6 @@ test('it persists the unretirement lifecycle', function () {
     expect($tagTeam->currentEmployment)->not()->toBeNull()
         ->and($tagTeam->currentRetirement()->exists())->toBeFalse()
         ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
-});
-
-test('it unretires without auto-employing when no current wrestlers are available', function () {
-    $tagTeam = TagTeam::factory()->create();
-    $tagTeam->retirements()->create([
-        'started_at' => now()->subDays(2),
-        'ended_at' => null,
-    ]);
-
-    $tagTeam->refresh();
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
-        ->and($tagTeam->currentWrestlers)->toBeEmpty()
-        ->and(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
-        ->and(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))->toBeTrue();
-
-    resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
-
-    $tagTeam->refresh();
-
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
-        ->and($tagTeam->currentEmployment()->exists())->toBeFalse()
-        ->and($tagTeam->currentRetirement)->toBeNull()
-        ->and($tagTeam->currentEmployment)->toBeNull()
-        ->and($tagTeam->employments()->count())->toBe(0);
 });
 
 test('it prevents unretiring non-retired tag team', function () {

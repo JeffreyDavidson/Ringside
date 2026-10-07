@@ -3,13 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Titles\Title;
-
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
 
 test('it starts a title activity period', function () {
     $title = Title::factory()->unactivated()->create();
@@ -38,4 +34,43 @@ test('it reschedules a pending title activity period', function () {
     expect($period->is($pendingPeriod))->toBeTrue()
         ->and($period->started_at->toDateTimeString())->toBe(now()->toDateTimeString())
         ->and($title->activityPeriods()->count())->toBe(1);
+});
+
+test('it records the given transition with its context when starting a period', function () {
+    $title = Title::factory()->unactivated()->create();
+
+    resolve(StartActivityPeriodAction::class)->handle(
+        $title,
+        now(),
+        transition: LifecycleTransitionType::Debuted,
+        context: ['notes' => 'Opening night'],
+    );
+
+    $transition = $title->lifecycleTransitions()->sole();
+
+    expect($transition->dimension)->toBe(LifecycleDimension::Activity)
+        ->and($transition->transition)->toBe(LifecycleTransitionType::Debuted)
+        ->and($transition->effective_at->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($transition->context)->toBe(['notes' => 'Opening night']);
+});
+
+test('it records the given transition when rescheduling a pending period', function () {
+    $title = Title::factory()->withFutureActivation()->create();
+
+    resolve(StartActivityPeriodAction::class)->handle(
+        $title,
+        now(),
+        rescheduleFuturePeriod: true,
+        transition: LifecycleTransitionType::Reinstated,
+    );
+
+    expect($title->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Reinstated);
+});
+
+test('it records no transition when none is given', function () {
+    $title = Title::factory()->unactivated()->create();
+
+    resolve(StartActivityPeriodAction::class)->handle($title, now());
+
+    expect($title->lifecycleTransitions()->exists())->toBeFalse();
 });

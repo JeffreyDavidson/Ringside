@@ -21,34 +21,21 @@ class UnretireAction
     ) {}
 
     /**
-     * Unretire a tag team and optionally return it to employment.
+     * Unretire a tag team, its current members, and return it to employment when it has current wrestlers.
      */
-    public function handle(
-        TagTeam $tagTeam,
-        ?Carbon $unretiredDate = null,
-        bool $unretireMembers = true,
-        bool $employImmediately = true,
-        bool $requireAvailablePartners = true
-    ): void {
+    public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
+    {
         $effectiveDate = $unretiredDate ?? now();
 
-        DB::transaction(function () use (
-            $tagTeam,
-            $effectiveDate,
-            $unretireMembers,
-            $employImmediately,
-            $requireAvailablePartners,
-        ): void {
+        DB::transaction(function () use ($tagTeam, $effectiveDate): void {
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
-            $this->eligibility->ensureCanUnretire($lockedTagTeam, $requireAvailablePartners);
+            $this->eligibility->ensureCanUnretire($lockedTagTeam);
             $this->retirementPeriods->end($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Unretired);
 
-            if ($unretireMembers) {
-                $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
-            }
+            $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
 
-            if ($employImmediately && ! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
+            if (! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
                 $this->employ->handle($lockedTagTeam, $effectiveDate);
             }
         });

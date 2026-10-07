@@ -18,7 +18,6 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\Store;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
@@ -47,15 +46,9 @@ function memberInEnforcedContext(Promotion $promotion, MembershipRole $role, Mem
  */
 function countQueries(Closure $callback): array
 {
-    DB::flushQueryLog();
-    DB::enableQueryLog();
+    $queries = collect(queriesDuring($callback));
 
-    $callback();
-
-    $queries = collect(DB::getQueryLog())->pluck('query');
-    DB::disableQueryLog();
-
-    return [$queries->count(), $queries->filter(fn (mixed $sql): bool => is_string($sql) && str_contains($sql, 'promotion_user'))->count()];
+    return [$queries->count(), $queries->filter(fn (string $sql): bool => str_contains($sql, 'promotion_user'))->count()];
 }
 
 describe('table query counts', function (): void {

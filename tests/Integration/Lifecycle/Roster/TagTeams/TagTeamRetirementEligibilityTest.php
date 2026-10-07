@@ -57,3 +57,11 @@ test('future employment does not block unretiring a duplicate tag-team name', fu
     expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))
         ->toBeTrue();
 });
+
+test('a retired tag team without current partners cannot be unretired', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->retirements()->create(['started_at' => now()->subDays(2)]);
+
+    expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam->refresh()))
+        ->toThrow(CannotBeUnretiredException::class, 'no current partners are available');
+});

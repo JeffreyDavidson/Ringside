@@ -49,7 +49,7 @@ class Main extends BaseTable
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
-        $rows->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
+        $rows->loadExists(IndividualBuilder::ROSTER_STATE);
     }
 
     protected function configure(): void
@@ -91,7 +91,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'))
+            SelectFilter::make(__('core.status'), 'status')
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (WrestlerBuilder $builder, string $value): void {
                     $status = EmploymentStatus::tryFrom($value);
@@ -100,7 +100,7 @@ class Main extends BaseTable
                         $builder->whereEmploymentStatus($status);
                     }
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
+            FirstEmploymentFilter::make(__('core.employment_date'), 'employment_date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 

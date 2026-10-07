@@ -80,7 +80,6 @@ describe('authorized title form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
     });
@@ -276,7 +275,7 @@ describe('authorized title form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('form-submitted')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(Title::query()->count())->toBe(1);
     });
@@ -342,7 +341,7 @@ describe('title type locking', function () {
 
         $modal
             ->assertHasErrors(['form.type'])
-            ->assertNotDispatched('form-submitted');
+            ->assertNotDispatched('refreshDatatable');
         expect($title->refresh()->type)->toBe(TitleType::Singles);
     });
 });

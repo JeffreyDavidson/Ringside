@@ -9,12 +9,6 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it retires an active stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
 

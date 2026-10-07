@@ -126,7 +126,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'))
+            SelectFilter::make(__('core.status'), 'status')
                 ->options(EventStatus::filterOptions())
                 ->filter(function (EventBuilder $builder, string $value): void {
                     $status = EventStatus::tryFrom($value);
@@ -135,13 +135,13 @@ class Main extends BaseTable
                         $builder->whereStatus($status);
                     }
                 }),
-            DateRangeFilter::make('Event Dates')
+            DateRangeFilter::make(__('core.event_dates'), 'event_dates')
                 ->config([
                     'allowInput' => true,   // Allow manual input of dates
                     'altFormat' => 'F j, Y', // Date format that will be displayed once selected
                     'ariaDateFormat' => 'F j, Y', // An aria-friendly date format
                     'dateFormat' => 'Y-m-d', // Date format that will be received by the filter
-                    'placeholder' => 'Enter Date Range', // A placeholder value
+                    'placeholder' => __('core.enter_date_range'), // A placeholder value
                     'locale' => 'en',
                 ])
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
@@ -159,7 +159,7 @@ class Main extends BaseTable
                         Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
                     ]);
                 }),
-            SelectFilter::make('Venue')
+            SelectFilter::make(__('core.venue'), 'venue')
                 ->options([
                     '' => 'All',
                     ...array_map(

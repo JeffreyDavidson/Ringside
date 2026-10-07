@@ -35,8 +35,6 @@ enum MembershipRole: string
         'reunite',
         'debut',
         'pull',
-        'activate',
-        'deactivate',
     ];
 
     public function label(): string

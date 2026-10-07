@@ -42,7 +42,6 @@ return [
         'reinstated' => 'Wrestler has been reinstated.',
         'injured' => 'Injury has been recorded.',
         'cleared_from_injury' => 'Wrestler has been cleared from injury.',
-        'restored' => 'Wrestler has been restored.',
     ],
 
     'validation' => [

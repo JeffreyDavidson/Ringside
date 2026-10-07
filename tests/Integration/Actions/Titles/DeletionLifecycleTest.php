@@ -10,12 +10,6 @@ use App\Exceptions\Titles\CannotBeRestoredException;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('deleting a title ends its current championship reign', function () {
     $title = Title::factory()->create();
     $championship = TitleChampionship::factory()

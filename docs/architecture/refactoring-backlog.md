@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, `isCurrentlyActive()`, `hasFutureEmployment()`, `hasNoCurrentOrFutureEmployment()`, `hasEmploymentHistory()`, `isEmployed()`, `isRetired()`, `isSuspended()`, `isInjured()`, `isReleased()`, and `employedOn()` predicates have been removed in favor of typed relationship queries, lifecycle builders, and the computed employment status enum.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, `isCurrentlyActive()`, `hasNoCurrentOrFutureEmployment()`, `isEmployed()`, `isRetired()`, `isReleased()`, and `employedOn()` predicates have been removed in favor of typed relationship queries, lifecycle builders, and the computed employment status enum. `isInjured()`, `isSuspended()`, `hasFutureEmployment()`, and `hasEmploymentHistory()` exist again as projection-aware accessors: they read the `availability_*_exists` / `status_*_exists` attribute when a query or `loadExists()` projected it and fall back to an `exists` query otherwise, so status badges avoid per-row queries (see `builders.md`).
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
@@ -57,7 +57,7 @@ must have relationship eager-loading and `BelongsTo` regression tests.
 ### Builder scopes and relationship queries
 
 **Priority:** Medium  
-**Status:** Ongoing.
+**Status:** Ongoing; the promotion-scoped name-conflict query (`FiltersByNameInPromotion`) and the stable-join constraints (`joinableToStable()`, `mergeCandidatesFor()`) are shared builder scopes (see `builders.md`).
 
 Prefer typed Eloquent Builders and Laravel relationship constraints for reused
 database predicates. Keep collection-level comparisons in lifecycle validation
@@ -185,8 +185,10 @@ global scope, and the controller passes it to the view as `dashboard`.
 **Status:** In progress; `tests/Feature/Architecture` now enforces controller
 structure, exception construction, morph aliases, roster model namespaces, test
 suite boundaries, translation-key resolution, orphaned docblocks, locked Livewire
-context identifiers, and that Livewire components neither create records through
-factories nor write directly through Eloquent models.
+context identifiers, that Livewire components neither create records through
+factories nor write directly through Eloquent models, and that
+`MembershipRole::CONTENT_ABILITIES`, the policy methods and the lifecycle enums'
+`ability()` values stay in agreement (`PolicyAbilityArchitectureTest`).
 
 Still to enforce from the decisions above:
 
@@ -218,6 +220,53 @@ not deterministic. There are no `@codeCoverageIgnore` markers: unreachable code
 is deleted instead of tested, and randomized inputs in tests are pinned (fixed
 distinctive values or `forceFakerBoolean()`). Keep the threshold at 100 and treat
 a new uncovered line as either a missing behavior test or dead code.
+
+### Dead application code cleanup (phase 1)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+Removed code that only tests called: the `TitleChampionshipQuery` reporting
+methods beyond `currentChampion()` and `reignLengthInDays()`, `Promotion::hasActiveMember()`
+and `hasMemberWithRole()` (tests use helpers in `tests/Helpers/TestHelpers.php`), the
+`LifecyclePeriodBuilder` instance scopes (the static `constrainTo*()` helpers remain),
+`withActivityStatusState()` and `withAvailabilityState()` (use `withExists()` or
+`loadExists()` with the `*_STATE` constants), `LifecycleStateReader::readProjectedBooleans()`,
+`TagTeamMembershipData::combinedWeightInPounds()`, the Title `activate`/`deactivate`,
+Promotion `forceDelete` and User `changeUserRoles`/`viewAuditLogs` policy abilities, and
+Livewire events nothing listens to. The `'promotion_context'` closure scopes became the
+`PromotionContextScope` and `EventMatchPromotionContextScope` classes.
+
+Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called by tests
+(the modal package mounts components with `mount()`), but about 250 modal test call sites
+depend on them; remove them together with a rewrite of those tests.
+
+### Dead application code cleanup (phase 2)
+
+**Priority:** Medium  
+**Status:** Step 5 completed.
+
+Step 5 extracted the period-closing sequence the wrestler, manager, referee, and tag team
+`Release` and `Retire` Actions each repeated into `CareerPeriodCloser`
+(`app/Lifecycle/Periods`), a small typed collaborator beside `DeletionPeriodCloser`. This is
+deliberately not the rejected generic base for per-entity Actions: each Action keeps its own
+transaction, owner lock, eligibility check, retirement start, and cascade. The stable and
+title `Retire` Actions close only an activity period and were left alone. The test-only
+`retireMembers` flag on the tag team `RetireAction`, the `unretireMembers`, `employImmediately`
+and `requireAvailablePartners` flags on the tag team `UnretireAction`, and the
+`establishImmediately` and `requireFormerMembers` flags on the stable `UnretireAction` were
+removed. Follow-up: the `requireAvailablePartners` and `requireFormerMembers` parameters on
+`TagTeamRetirementEligibility` and `StableRetirementEligibility` are now only exercised by
+eligibility tests; remove them after the in-flight eligibility query changes land.
+
+Activity period history: `StartActivityPeriodAction` and `EndActivityPeriodAction` now accept an
+optional `LifecycleTransitionType` (and a context array for notes or the planned end date) and
+record the `Activity` transition in the period's own transaction, as the employment, injury,
+suspension, and retirement period managers do. Stable `Establish`, `Disband`, and `Reunite` and
+title `Debut`, `Pull`, and `Reinstate` no longer call `RecordLifecycleTransitionAction` themselves.
+`MergeStablesAction` and `SplitStableAction` keep their manual calls: each records a pair of related
+`Merged` or `Split` transitions on two stables, and only the secondary stable's activity period is
+touched by a merge, so moving that one record onto the period end would reorder the pair.
 
 ### Promotion gate extraction
 

@@ -6,12 +6,6 @@ use App\Actions\Managers\CreateAction;
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it creates a manager with basic information', function () {
     $data = new ManagerData('Taylor', 'Otwell', null);
 

@@ -7,12 +7,6 @@ use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it soft deletes an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 

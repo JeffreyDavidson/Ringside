@@ -91,7 +91,6 @@ describe('authorized referee form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
     });
@@ -259,7 +258,7 @@ describe('authorized referee form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('form-submitted')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(Referee::query()->count())->toBe(1);
     });
@@ -361,7 +360,7 @@ describe('Referee form employment history', function () {
         $modal
             ->assertHasErrors(['form.first_name'])
             ->assertSet('isModalOpen', true)
-            ->assertNotDispatched('form-submitted');
+            ->assertNotDispatched('refreshDatatable');
         expect($referee->fresh()?->first_name)->toBe('Original');
         $action->verify();
     });

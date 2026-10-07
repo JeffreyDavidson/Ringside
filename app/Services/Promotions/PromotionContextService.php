@@ -11,6 +11,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Promotions\PromotionMembership;
+use App\Models\Scopes\PromotionContextScope;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -171,7 +172,7 @@ class PromotionContextService
                 ? $model->getRelation('event')
                 : $model->event()
                     ->withTrashed()
-                    ->withoutGlobalScope('promotion_context')
+                    ->withoutGlobalScope(PromotionContextScope::class)
                     ->first();
 
             return $event instanceof Event && $event->promotion_id === $promotionKey;

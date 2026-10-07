@@ -11,12 +11,6 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 function wrestlerMatchSide(EventMatch $match, int $position): MatchSide
 {
     return MatchSide::factory()->for($match, 'match')->create(compact('position'));

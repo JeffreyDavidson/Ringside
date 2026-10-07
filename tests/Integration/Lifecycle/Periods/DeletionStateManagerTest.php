@@ -16,12 +16,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it records deletion and restoration for every soft-deletable owner', function (LifecycleOwnerType $ownerType) {
     $owner = match ($ownerType) {
         LifecycleOwnerType::Event => Event::factory()->create(),

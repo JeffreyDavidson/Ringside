@@ -5,13 +5,40 @@ declare(strict_types=1);
 use App\Actions\TagTeams\ReinstateCurrentMembersAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Models\Lifecycle\Injury;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
+test('it skips members that are not eligible for reinstatement and reinstates the rest', function () {
+    $tagTeam = TagTeam::factory()->suspended()->create();
+    $injuredSuspendedWrestler = Wrestler::factory()
+        ->suspended()
+        ->has(Injury::factory()->started(now()->subDay()), 'injuries')
+        ->create();
+    $injuredSuspendedManager = Manager::factory()
+        ->suspended()
+        ->has(Injury::factory()->started(now()->subDay()), 'injuries')
+        ->create();
+    $eligibleManager = Manager::factory()->suspended()->create();
 
-beforeEach(function () {
-    testTime()->freeze();
+    $tagTeam->wrestlers()->attach($injuredSuspendedWrestler, ['joined_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach([$injuredSuspendedManager->id, $eligibleManager->id], ['hired_at' => now()->subMonth()]);
+    $eligibleWrestlers = $tagTeam->currentWrestlers()
+        ->whereKeyNot($injuredSuspendedWrestler->id)
+        ->get();
+
+    resolve(ReinstateCurrentMembersAction::class)
+        ->handle($tagTeam, now());
+
+    expect($injuredSuspendedWrestler->refresh()->currentSuspension()->exists())->toBeTrue()
+        ->and($injuredSuspendedManager->refresh()->currentSuspension()->exists())->toBeTrue()
+        ->and($eligibleManager->refresh()->currentSuspension()->exists())->toBeFalse()
+        ->and($eligibleWrestlers)->not->toBeEmpty();
+
+    foreach ($eligibleWrestlers as $wrestler) {
+        expect($wrestler->refresh()->currentSuspension()->exists())->toBeFalse();
+    }
 });
 
 test('it reinstates suspended current wrestlers and managers', function () {

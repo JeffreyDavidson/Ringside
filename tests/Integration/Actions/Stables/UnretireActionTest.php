@@ -8,12 +8,6 @@ use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function (): void {
-    testTime()->freeze();
-});
-
 test('it unretires a retired stable and establishes it by default', function (): void {
     $stable = Stable::factory()->retired()->create();
     $unretiredAt = now()->startOfDay();
@@ -31,18 +25,6 @@ test('it unretires a retired stable and establishes it by default', function ():
 
     expect(requiredDate($retirement->ended_at)->toDateTimeString())->toBe($unretiredAt->toDateTimeString())
         ->and(requiredDate($activityPeriod->started_at)->toDateTimeString())->toBe($unretiredAt->toDateTimeString());
-});
-
-test('it can unretire a stable without immediately establishing it', function (): void {
-    $stable = Stable::factory()->retired()->create();
-
-    resolve(UnretireAction::class)->handle($stable, establishImmediately: false);
-
-    $stable->refresh();
-
-    expect($stable->status)->toBe(StableStatus::Inactive)
-        ->and($stable->currentRetirement()->exists())->toBeFalse()
-        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it rejects unretiring a stable that is not retired', function (): void {
@@ -76,13 +58,3 @@ test('it rejects unretiring a stable when a key former member is unavailable', f
         ->and($stable->currentRetirement()->exists())->toBeTrue()
         ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 })->with('unavailable stable former members');
-
-test('it unretires a stable without checking former members when they are not required', function (): void {
-    $stable = Stable::factory()->retired()->create();
-    $stable->previousWrestlers()->firstOrFail()->suspensions()->create(['started_at' => now()->subHour()]);
-
-    resolve(UnretireAction::class)->handle($stable, requireFormerMembers: false);
-
-    expect($stable->currentRetirement()->exists())->toBeFalse()
-        ->and($stable->currentActivityPeriod()->exists())->toBeTrue();
-});

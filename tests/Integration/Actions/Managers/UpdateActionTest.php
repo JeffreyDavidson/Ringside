@@ -6,12 +6,6 @@ use App\Actions\Managers\UpdateAction;
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it updates a manager with new information', function () {
     $manager = Manager::factory()->create([
         'first_name' => 'Original',

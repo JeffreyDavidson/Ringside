@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\Titles\CreateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
-
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
 
 test('it creates a title', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
@@ -35,4 +30,23 @@ test('it activates a title if activation date is filled in request', function ()
         ->and($result->type)->toBe(TitleType::Singles)
         ->and($result->activityPeriods)->toHaveCount(1)
         ->and(requiredDate($result->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+});
+
+test('it records a single debuted transition when a debut date is provided', function () {
+    $datetime = now();
+    $data = new TitleData('Example Title', TitleType::Singles, $datetime);
+
+    $result = resolve(CreateAction::class)->handle($data);
+
+    $transition = $result->lifecycleTransitions()->sole();
+    expect($transition->transition)->toBe(LifecycleTransitionType::Debuted)
+        ->and($transition->effective_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+});
+
+test('it records no lifecycle transition when no debut date is provided', function () {
+    $data = new TitleData('Example Title', TitleType::Singles, null);
+
+    $result = resolve(CreateAction::class)->handle($data);
+
+    expect($result->lifecycleTransitions()->exists())->toBeFalse();
 });

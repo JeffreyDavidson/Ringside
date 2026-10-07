@@ -65,7 +65,7 @@ describe('pending invitations in the sidebar', function () {
             ->assertSee('Accepted Wrestling')
             ->assertSeeHtml('id="promotion-menu"')
             ->assertDontSeeHtml('data-test="pending-invitations"');
-        expect($promotion->hasActiveMember($admin))->toBeTrue();
+        expect(promotionHasActiveMember($promotion, $admin))->toBeTrue();
     });
 
     test('an administrator without invitations sees no invitations block', function () {

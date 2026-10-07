@@ -6,6 +6,7 @@ namespace App\Builders\Roster;
 
 use App\Builders\Concerns\FiltersByInactiveActivity;
 use App\Builders\Concerns\FiltersByName;
+use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstActivityPeriod;
 use App\Builders\Concerns\ProjectsActivityStatus;
@@ -24,6 +25,7 @@ class StableBuilder extends Builder
 {
     use FiltersByInactiveActivity;
     use FiltersByName;
+    use FiltersByNameInPromotion;
     use FiltersByRetirementStatus;
     use LoadsFirstActivityPeriod;
     use ProjectsActivityStatus;
@@ -37,6 +39,17 @@ class StableBuilder extends Builder
             StableStatus::Inactive => $this->disbanded(),
             StableStatus::Retired => $this->retired(),
         };
+    }
+
+    /**
+     * Restrict to the other active, unretired stables of the stable's promotion that it could merge with.
+     */
+    public function mergeCandidatesFor(Stable $stable): static
+    {
+        return $this->where('promotion_id', $stable->promotion_id)
+            ->whereKeyNot($stable->getKey())
+            ->established()
+            ->whereDoesntHave('currentRetirement');
     }
 
     public function previousForTagTeamId(int $tagTeamId): static

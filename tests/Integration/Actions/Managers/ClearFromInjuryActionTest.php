@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\Managers\ClearFromInjuryAction;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it clears an injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 

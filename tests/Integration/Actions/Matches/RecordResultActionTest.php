@@ -908,7 +908,7 @@ it('still records a defence by the current champion on a title that was pulled',
     $champion = Wrestler::factory()->bookable()->create();
     [$match, $winningSide] = titleMatchOn(now()->subDay(), $title, $champion);
     TitleChampionship::factory()->for($title)->forWrestler($champion)->create(['won_at' => now()->subDays(30)]);
-    $title->activityPeriods()->current()->sole()->update(['ended_at' => now()->subHour()]);
+    $title->activityPeriods()->whereNull('ended_at')->sole()->update(['ended_at' => now()->subHour()]);
 
     // Act
     resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));

@@ -6,12 +6,6 @@ use App\Actions\Referees\ClearFromInjuryAction;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it clears an injured referee', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();

@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
-use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
@@ -66,8 +64,6 @@ describe('tag team actions component', function (): void {
         'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Tag team has been brought out of retirement.'],
         'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Tag team has been suspended.'],
         'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Tag team has been reinstated.'],
-        'delete' => ['delete', DeleteAction::class, Double::for(DeleteAction::class), 'Tag team has been deleted.'],
-        'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Tag team has been restored.'],
     ]);
 
     test('it forbids lifecycle actions for unauthorized users without success feedback', function (string $method): void {
@@ -94,8 +90,6 @@ describe('tag team actions component', function (): void {
         'unretire',
         'suspend',
         'reinstate',
-        'delete',
-        'restore',
     ]);
 
     test('it only shows the lifecycle buttons that fit the tag team state', function (
@@ -120,10 +114,10 @@ describe('tag team actions component', function (): void {
             $component->assertDontSeeHtml("wire:click=\"{$method}\"");
         }
     })->with([
-        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'retire', 'unretire', 'restore']],
-        'employed' => ['employed', ['release', 'suspend', 'retire'], ['employ', 'reinstate', 'unretire', 'restore']],
-        'suspended' => ['suspended', ['reinstate'], ['employ', 'suspend', 'unretire', 'restore']],
-        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'retire', 'restore']],
+        'unemployed' => ['unemployed', ['employ'], ['release', 'suspend', 'reinstate', 'retire', 'unretire']],
+        'employed' => ['employed', ['release', 'suspend', 'retire'], ['employ', 'reinstate', 'unretire']],
+        'suspended' => ['suspended', ['reinstate'], ['employ', 'suspend', 'unretire']],
+        'retired' => ['retired', ['unretire'], ['employ', 'release', 'suspend', 'reinstate', 'retire']],
     ]);
 
     test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {

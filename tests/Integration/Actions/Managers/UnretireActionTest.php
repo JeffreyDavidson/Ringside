@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\Managers\UnretireAction;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it unretires a retired manager', function () {
     $manager = Manager::factory()->retired()->create();
 

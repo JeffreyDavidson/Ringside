@@ -74,7 +74,7 @@ function createPromotionAuthorizationSubjects(Promotion $promotion): array
         [
             'modelClass' => Title::class,
             'model' => Title::factory()->for($promotion, 'promotion')->create(),
-            'abilities' => ['update', 'delete', 'restore', 'debut', 'pull', 'reinstate', 'retire', 'unretire', 'activate', 'deactivate'],
+            'abilities' => ['update', 'delete', 'restore', 'debut', 'pull', 'reinstate', 'retire', 'unretire'],
         ],
     ];
 }
@@ -153,7 +153,7 @@ test('owners can update promotion settings and invite members', function () {
         ->call('addMember')
         ->assertHasNoErrors();
 
-    expect($promotion->hasActiveMember($newMember))->toBeFalse()
+    expect(promotionHasActiveMember($promotion, $newMember))->toBeFalse()
         ->and($promotion->memberships()->count())->toBe(1)
         ->and($promotion->invitations()->sole()->email)->toBe($newMember->email);
 });

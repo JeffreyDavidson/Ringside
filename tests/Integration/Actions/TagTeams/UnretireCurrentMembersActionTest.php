@@ -6,17 +6,12 @@ use App\Actions\Managers\UnretireAction as UnretireManagerAction;
 use App\Actions\TagTeams\UnretireCurrentMembersAction;
 use App\Actions\Wrestlers\UnretireAction as UnretireWrestlerAction;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 use JMac\Testing\Matching\Argument;
-
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
 
 test('it unretires retired current wrestlers and managers without employing them', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
@@ -63,10 +58,26 @@ test('it skips current members rejected by unretirement rules', function () {
     $unretireWrestler->expects('handle')
         ->throws(CannotBeUnretiredException::notRetired($wrestler));
 
-    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager)
+    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager, new IndividualRetirementEligibility)
         ->handle($tagTeam, now());
 
     $unretireWrestler->verify();
+    $unretireManager->unused();
+});
+
+test('it does not attempt to unretire members that are not eligible', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $deletedWrestler = Wrestler::factory()->retired()->trashed()->create();
+    $deletedManager = Manager::factory()->retired()->trashed()->create();
+    $tagTeam->wrestlers()->attach($deletedWrestler, ['joined_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach($deletedManager, ['hired_at' => now()->subMonth()]);
+    $unretireWrestler = Double::for(UnretireWrestlerAction::class);
+    $unretireManager = Double::for(UnretireManagerAction::class);
+
+    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager, new IndividualRetirementEligibility)
+        ->handle($tagTeam, now());
+
+    $unretireWrestler->unused();
     $unretireManager->unused();
 });
 
@@ -78,7 +89,7 @@ test('it does not swallow programmer errors while unretiring current members', f
     $unretireManager = Double::for(UnretireManagerAction::class);
     $unretireWrestler->expects('handle')
         ->throws(new LogicException('Unexpected unretirement failure.'));
-    $action = new UnretireCurrentMembersAction($unretireWrestler, $unretireManager);
+    $action = new UnretireCurrentMembersAction($unretireWrestler, $unretireManager, new IndividualRetirementEligibility);
 
     expect(fn () => $action->handle($tagTeam, now()))
         ->toThrow(LogicException::class, 'Unexpected unretirement failure.');
@@ -110,7 +121,7 @@ test('it skips a manager rejected by unretirement rules and still unretires the 
                 && ($arguments[2] ?? null) === false,
         ));
 
-    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager)
+    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager, new IndividualRetirementEligibility)
         ->handle($tagTeam, $unretirementDate);
 
     $unretireManager->verify();

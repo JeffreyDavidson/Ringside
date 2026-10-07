@@ -9,7 +9,6 @@ use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReinstateAction;
 use App\Actions\Managers\ReleaseAction;
-use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
@@ -72,11 +71,6 @@ class Actions extends Component
     public function clearFromInjury(ClearFromInjuryAction $clearFromInjuryAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Manager, $this->manager, fn () => $clearFromInjuryAction->handle($this->manager));
-    }
-
-    public function restore(RestoreAction $restoreAction): void
-    {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Manager, $this->manager, fn () => $restoreAction->handle($this->manager));
     }
 
     public function canPerform(RosterLifecycleAction $action): bool

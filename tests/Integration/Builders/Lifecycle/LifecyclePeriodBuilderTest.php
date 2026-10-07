@@ -9,7 +9,19 @@ use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+
+/**
+ * @param  Builder<Employment>  $query
+ * @return array<int, mixed>
+ */
+function pluckConstrained(Builder $query, string $constraint, mixed ...$arguments): array
+{
+    LifecyclePeriodBuilder::$constraint($query, ...$arguments);
+
+    return $query->pluck('id')->all();
+}
 
 test('lifecycle period models use the shared builder', function (string $modelClass) {
     /** @var Model $model */
@@ -41,13 +53,13 @@ test('lifecycle periods can be queried by temporal state', function () {
         ->ended(now()->subDay())
         ->create();
 
-    expect(Employment::query()->open()->pluck('id')->all())
+    expect(pluckConstrained(Employment::query(), 'constrainToOpen'))
         ->toEqualCanonicalizing([$currentEmployment->id, $scheduledEmployment->id])
-        ->and(Employment::query()->ended()->pluck('id')->all())
+        ->and(pluckConstrained(Employment::query(), 'constrainToEnded'))
         ->toBe([$endedEmployment->id])
-        ->and(Employment::query()->current()->pluck('id')->all())
+        ->and(pluckConstrained(Employment::query(), 'constrainToCurrent'))
         ->toBe([$currentEmployment->id])
-        ->and(Employment::query()->scheduled()->pluck('id')->all())
+        ->and(pluckConstrained(Employment::query(), 'constrainToScheduled'))
         ->toBe([$scheduledEmployment->id]);
 });
 
@@ -73,6 +85,6 @@ test('lifecycle periods can be queried as active on a date', function () {
         ->ended($date->copy()->subDay())
         ->create();
 
-    expect(Employment::query()->activeOn($date)->pluck('id')->all())
+    expect(pluckConstrained(Employment::query(), 'constrainToActiveOn', $date))
         ->toEqualCanonicalizing([$activeOpenEmployment->id, $activeEndedEmployment->id]);
 });

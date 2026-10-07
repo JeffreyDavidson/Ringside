@@ -11,7 +11,6 @@ enum RosterLifecycleAction: string
     case Injure = 'injure';
     case Reinstate = 'reinstate';
     case Release = 'release';
-    case Restore = 'restore';
     case Retire = 'retire';
     case Suspend = 'suspend';
     case Unretire = 'unretire';
@@ -22,11 +21,6 @@ enum RosterLifecycleAction: string
             self::ClearFromInjury => 'clearFromInjury',
             default => $this->value,
         };
-    }
-
-    public function usesTrashedModel(): bool
-    {
-        return $this === self::Restore;
     }
 
     /**
@@ -57,7 +51,6 @@ enum RosterLifecycleAction: string
             self::Injure => 'injured',
             self::Reinstate => 'reinstated',
             self::Release => 'released',
-            self::Restore => 'restored',
             self::Retire => 'retired',
             self::Suspend => 'suspended',
             self::Unretire => 'unretired',

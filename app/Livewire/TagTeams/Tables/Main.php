@@ -50,7 +50,7 @@ class Main extends BaseTable
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
-        $rows->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
+        $rows->loadExists(TagTeamBuilder::ROSTER_STATE);
         new Collection($rows->flatMap(fn (TagTeam $tagTeam): Collection => $tagTeam->currentWrestlers)->all())->loadExists(IndividualBuilder::AVAILABILITY_STATE);
     }
 
@@ -100,7 +100,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'))
+            SelectFilter::make(__('core.status'), 'status')
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
@@ -110,7 +110,7 @@ class Main extends BaseTable
                         $builder->whereEmploymentStatus($status);
                     }
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
+            FirstEmploymentFilter::make(__('core.employment_date'), 'employment_date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 

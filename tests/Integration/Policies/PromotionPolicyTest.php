@@ -33,7 +33,7 @@ it('never grants an instance ability on its own', function (string $ability) {
     $allowed = $policy->{$ability}($owner, $promotion);
 
     expect($allowed)->toBeFalse();
-})->with(['view', 'manageMembers', 'update', 'delete', 'restore', 'forceDelete']);
+})->with(['view', 'manageMembers', 'update', 'delete', 'restore']);
 
 it('never grants a class ability on its own', function (string $ability) {
     $policy = new PromotionPolicy;
@@ -58,7 +58,7 @@ it('denies every ability on a promotion to a user who is not a member', function
     $decision = Gate::forUser($basicUser)->inspect($ability, $promotion);
 
     expect($decision->allowed())->toBeFalse();
-})->with(['view', 'manageMembers', 'update', 'delete', 'restore', 'forceDelete']);
+})->with(['view', 'manageMembers', 'update', 'delete', 'restore']);
 
 it('lets an active owner view, update and manage members but not delete or restore', function (string $ability, bool $expected) {
     $promotion = Promotion::factory()->create();
@@ -77,5 +77,4 @@ it('lets an active owner view, update and manage members but not delete or resto
     'update' => ['update', true],
     'delete' => ['delete', false],
     'restore' => ['restore', false],
-    'forceDelete' => ['forceDelete', false],
 ]);

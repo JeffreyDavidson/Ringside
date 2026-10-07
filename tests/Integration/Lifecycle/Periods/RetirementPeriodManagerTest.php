@@ -13,12 +13,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it starts a retirement period on the effective date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $effectiveDate = now()->subDay();

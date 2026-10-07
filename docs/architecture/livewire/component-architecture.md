@@ -87,7 +87,7 @@ from the form's locked `modelId` and builds the title from `core.modal.edit` or
 1. mount create or edit state and authorize when the modal opens;
 2. authorize again on submit, then delegate to `storeForm()`, whose default
    validates and calls the domain's `createForm()` or `updateForm()`;
-3. dispatch table refresh and form-submitted events; and
+3. dispatch the table refresh event; and
 4. close the modal after a successful submission.
 
 Domain modals implement `createForm()` and `updateForm()` (or override `storeForm()`)

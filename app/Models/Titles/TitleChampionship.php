@@ -45,7 +45,6 @@ use Illuminate\Support\Carbon;
  *
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
  * @method static TitleChampionshipBuilder<static>|TitleChampionship current()
- * @method static TitleChampionshipBuilder<static>|TitleChampionship earliestWonFirst()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forPreviousHistory()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forChampion(Wrestler|TagTeam $champion)
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forTagTeamId(int $tagTeamId)

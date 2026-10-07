@@ -31,9 +31,9 @@ test('it creates an active membership with the invited role and deletes the invi
     expect($accepted)->toBe($role)
         ->and($membership->status)->toBe(MembershipStatus::Active)
         ->and($membership->role)->toBe($role)
-        ->and($promotion->hasActiveMember($user))->toBeTrue()
+        ->and(promotionHasActiveMember($promotion, $user))->toBeTrue()
         ->and($promotion->invitations()->count())->toBe(0)
-        ->and($otherPromotion->hasActiveMember($user))->toBeFalse()
+        ->and(promotionHasActiveMember($otherPromotion, $user))->toBeFalse()
         ->and($otherInvitation->fresh())->not->toBeNull();
 })->with([
     'owner' => MembershipRole::Owner,
@@ -53,7 +53,7 @@ test('it matches an invitation to the users email whatever the case or whitespac
 
     // Assert
     expect($accepted)->toBe(MembershipRole::Manager)
-        ->and($promotion->hasMemberWithRole($user, MembershipRole::Manager))->toBeTrue();
+        ->and(promotionHasMemberWithRole($promotion, $user, MembershipRole::Manager))->toBeTrue();
 });
 
 test('it does nothing when there is no invitation for the users email', function () {
@@ -83,7 +83,7 @@ test('it never uses an invitation of another promotion', function () {
 
     // Assert
     expect($accepted)->toBeNull()
-        ->and($promotion->hasActiveMember($user))->toBeFalse()
+        ->and(promotionHasActiveMember($promotion, $user))->toBeFalse()
         ->and($otherPromotion->invitations()->count())->toBe(1);
 });
 
@@ -176,7 +176,7 @@ test('it accepts an invitation one second before it expires', function () {
 
     // Assert
     expect($accepted)->toBe(MembershipRole::Member)
-        ->and($promotion->hasActiveMember($user))->toBeTrue();
+        ->and(promotionHasActiveMember($promotion, $user))->toBeTrue();
 });
 
 test('it refuses an expired invitation and creates no membership', function () {

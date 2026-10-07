@@ -9,7 +9,6 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Actions\Wrestlers\ReleaseAction;
-use App\Actions\Wrestlers\RestoreAction;
 use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
@@ -74,11 +73,6 @@ class Actions extends Component
     public function clearFromInjury(ClearFromInjuryAction $clearFromInjuryAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Wrestler, $this->wrestler, fn () => $clearFromInjuryAction->handle($this->wrestler));
-    }
-
-    public function restore(RestoreAction $restoreAction): void
-    {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Wrestler, $this->wrestler, fn () => $restoreAction->handle($this->wrestler));
     }
 
     public function canPerform(RosterLifecycleAction $action): bool

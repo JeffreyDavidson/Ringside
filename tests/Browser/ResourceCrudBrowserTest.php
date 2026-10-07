@@ -14,6 +14,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 
@@ -149,7 +150,7 @@ test('administrator can create a wrestler from the roster page', function (): vo
     waitForModalToClose($page);
 
     $createdWrestler = Wrestler::query()
-        ->withoutGlobalScope('promotion_context')
+        ->withoutGlobalScope(PromotionContextScope::class)
         ->whereName('Browser Test Wrestler')
         ->firstOrFail();
 
@@ -171,7 +172,7 @@ test('administrator can create a wrestler from the roster page', function (): vo
         ->assertNoJavascriptErrors();
 
     $wrestler = Wrestler::query()
-        ->withoutGlobalScope('promotion_context')
+        ->withoutGlobalScope(PromotionContextScope::class)
         ->whereName('Updated Browser Test Wrestler')
         ->firstOrFail();
 

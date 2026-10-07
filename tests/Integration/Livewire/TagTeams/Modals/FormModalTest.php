@@ -133,7 +133,6 @@ describe('authorized tag team form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
     });
@@ -171,7 +170,7 @@ describe('authorized tag team form interactions', function () {
         $modal
             ->assertHasErrors(['form.wrestlerA'])
             ->assertSet('isModalOpen', true)
-            ->assertNotDispatched('form-submitted');
+            ->assertNotDispatched('refreshDatatable');
     });
 
     it('creates a tag team without optional profile or employment data', function () {
@@ -394,7 +393,7 @@ describe('authorized tag team form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('form-submitted')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(TagTeam::query()->count())->toBe(1)
             ->and(Wrestler::query()->count())->toBe(5);

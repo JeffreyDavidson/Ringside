@@ -99,7 +99,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make('Status', 'status')
+            SelectFilter::make(__('core.status'), 'status')
                 ->options([
                     '' => 'All',
                     StableStatus::Unformed->value => StableStatus::Unformed->label(),
@@ -116,7 +116,7 @@ class Main extends BaseTable
                         $builder->whereStatus($status);
                     }
                 }),
-            FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
+            FirstActivityPeriodFilter::make(__('core.activation_date'), 'activation_date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
     }
 

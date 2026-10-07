@@ -60,7 +60,6 @@ abstract class BaseFormModal extends BaseModal
         $this->dispatch('refreshDatatable');
         $this->closeModal();
         $this->dispatch('closeModal');
-        $this->dispatch('form-submitted');
 
         $eventName = $wasCreating
             ? $this->createdEventName

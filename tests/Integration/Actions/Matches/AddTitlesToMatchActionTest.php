@@ -17,12 +17,6 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Facades\DB;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 function createSinglesMatchWithCompetitors(): EventMatch
 {
     return EventMatch::factory()

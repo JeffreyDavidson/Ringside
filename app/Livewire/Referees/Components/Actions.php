@@ -9,7 +9,6 @@ use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReinstateAction;
 use App\Actions\Referees\ReleaseAction;
-use App\Actions\Referees\RestoreAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
@@ -74,11 +73,6 @@ class Actions extends Component
     public function clearFromInjury(ClearFromInjuryAction $clearFromInjuryAction): void
     {
         $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Referee, $this->referee, fn () => $clearFromInjuryAction->handle($this->referee));
-    }
-
-    public function restore(RestoreAction $restoreAction): void
-    {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Referee, $this->referee, fn () => $restoreAction->handle($this->referee));
     }
 
     public function canPerform(RosterLifecycleAction $action): bool

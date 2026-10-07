@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Promotions\Promotion;
+use App\Models\Scopes\PromotionContextScope;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait BelongsToPromotion
 {
-    /**
-     * Scopes every query to the enforced promotion. When no promotion is enforced, queries are
-     * unscoped for administrators, console, queue and guest contexts, but match nothing for an
-     * authenticated non-administrator (see PromotionContextService::failsClosed()).
-     */
+    /** Queries are scoped to the enforced promotion by PromotionContextScope. */
     protected static function bootBelongsToPromotion(): void
     {
         static::creating(function (Model $model): void {
@@ -31,30 +27,7 @@ trait BelongsToPromotion
             ]);
         });
 
-        static::addGlobalScope('promotion_context', function (Builder $builder): void {
-            $context = app(PromotionContextService::class);
-            $column = $builder->getModel()->qualifyColumn('promotion_id');
-
-            if ($context->failsClosed()) {
-                $builder->whereNull($column)->whereNotNull($column);
-
-                return;
-            }
-
-            if (! $context->isEnforced()) {
-                return;
-            }
-
-            $promotion = $context->current();
-
-            if ($promotion === null) {
-                $builder->whereNull($column)->whereNotNull($column);
-
-                return;
-            }
-
-            $builder->where($column, $promotion->getKey());
-        });
+        static::addGlobalScope(new PromotionContextScope);
     }
 
     /** @return BelongsTo<Promotion, $this> */

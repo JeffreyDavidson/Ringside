@@ -39,7 +39,6 @@ return [
         'reinstated' => 'Manager has been reinstated.',
         'injured' => 'Manager injury has been recorded.',
         'cleared_from_injury' => 'Manager has been cleared from injury.',
-        'restored' => 'Manager has been restored.',
         'deleted' => 'Manager has been deleted.',
     ],
 

@@ -11,10 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 use function Spatie\PestPluginTestTime\testTime;
 
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it closes every active lifecycle period at the deletion date', function () {
     $wrestler = Wrestler::factory()->create();
     $startedAt = now()->subMonth();

@@ -28,20 +28,13 @@ final class StableFormerMemberEligibility
     public function availableMembersFor(Stable $stable): StableMembershipData
     {
         $wrestlers = $stable->previousWrestlers()
-            ->whereHas('currentEmployment')
-            ->whereDoesntHave('currentInjury')
-            ->whereDoesntHave('currentSuspension')
-            ->whereDoesntHave('currentRetirement')
-            ->whereDoesntHave('currentStable')
+            ->joinableToStable()
             ->get()
             ->unique('id')
             ->values();
 
         $tagTeams = $stable->previousTagTeams()
-            ->whereHas('currentEmployment')
-            ->whereDoesntHave('currentSuspension')
-            ->whereDoesntHave('currentRetirement')
-            ->whereDoesntHave('currentStable')
+            ->joinableToStable()
             ->get()
             ->unique('id')
             ->values();

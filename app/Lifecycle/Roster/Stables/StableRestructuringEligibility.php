@@ -11,6 +11,7 @@ use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Scopes\PromotionContextScope;
 use App\Services\Roster\Stables\StableMembershipService;
 
 final readonly class StableRestructuringEligibility
@@ -42,10 +43,7 @@ final readonly class StableRestructuringEligibility
     public function hasMergeCandidate(Stable $stable): bool
     {
         return Stable::query()
-            ->where('promotion_id', $stable->promotion_id)
-            ->whereKeyNot($stable->getKey())
-            ->established()
-            ->whereDoesntHave('currentRetirement')
+            ->mergeCandidatesFor($stable)
             ->value('id') !== null;
     }
 
@@ -75,9 +73,8 @@ final readonly class StableRestructuringEligibility
     public function ensureSplitNameAvailable(Stable $stable, string $name): void
     {
         $nameTaken = Stable::query()
-            ->withoutGlobalScope('promotion_context')
-            ->where('promotion_id', $stable->promotion_id)
-            ->where('name', $name)
+            ->withoutGlobalScope(PromotionContextScope::class)
+            ->whereNameInPromotion($name, $stable->promotion_id)
             ->exists();
 
         if ($nameTaken) {

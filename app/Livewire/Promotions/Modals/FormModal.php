@@ -10,6 +10,7 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Promotions\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
+use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -78,7 +79,7 @@ class FormModal extends BaseFormModal
     {
         return $this->form->isEditing()
             && Event::query()
-                ->withoutGlobalScope('promotion_context')
+                ->withoutGlobalScope(PromotionContextScope::class)
                 ->where('promotion_id', $this->form->modelId)
                 ->exists();
     }

@@ -25,8 +25,8 @@ test('a promotion can have global users with scoped membership data', function (
         ->and($membership)->toBeInstanceOf(PromotionMembership::class)
         ->and($membership->role)->toBe(MembershipRole::Owner)
         ->and($membership->status)->toBe(MembershipStatus::Active)
-        ->and($promotion->hasActiveMember($user))->toBeTrue()
-        ->and($promotion->hasMemberWithRole($user, MembershipRole::Owner))->toBeTrue();
+        ->and(promotionHasActiveMember($promotion, $user))->toBeTrue()
+        ->and(promotionHasMemberWithRole($promotion, $user, MembershipRole::Owner))->toBeTrue();
 });
 
 test('a user cannot have duplicate membership in the same promotion', function () {
