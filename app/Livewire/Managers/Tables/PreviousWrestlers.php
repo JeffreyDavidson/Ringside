@@ -5,27 +5,34 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Builders\Roster\ManagerAssignmentBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\DateColumn;
-use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Base\Tables\BasePreviousManagedTable;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-/** @extends DataTableComponent<WrestlerManager> */
-class PreviousWrestlers extends DataTableComponent
+/** @extends BasePreviousManagedTable<WrestlerManager> */
+class PreviousWrestlers extends BasePreviousManagedTable
 {
-    use ShowTableTrait;
-
     #[Locked]
     public ?int $managerId = null;
 
+    #[\Override]
     protected string $databaseTableName = 'wrestlers_managers';
 
     #[\Override]
     protected string $resourceName = 'wrestlers';
+
+    #[\Override]
+    protected string $managedRelation = 'wrestler';
+
+    #[\Override]
+    protected string $managedLabelGroup = 'wrestlers';
+
+    #[\Override]
+    protected string $hiredLabelKey = 'wrestlers.date_hired';
+
+    #[\Override]
+    protected string $firedLabelKey = 'wrestlers.date_left';
 
     /** @return ManagerAssignmentBuilder<WrestlerManager> */
     public function builder(): ManagerAssignmentBuilder
@@ -46,28 +53,5 @@ class PreviousWrestlers extends DataTableComponent
         $this->addAdditionalSelects([
             'wrestlers_managers.wrestler_id as wrestler_id',
         ]);
-    }
-
-    /**
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('wrestlers.name'), 'wrestler.name')
-                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
-                    $builder->whereHas(
-                        'wrestler',
-                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
-                            'name',
-                            '%'.mb_trim($searchTerm).'%',
-                        ),
-                    );
-                }),
-            DateColumn::make(__('wrestlers.date_hired'), 'hired_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('wrestlers.date_left'), 'fired_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

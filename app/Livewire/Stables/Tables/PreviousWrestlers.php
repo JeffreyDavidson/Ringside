@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Builders\Roster\StableMembershipBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
-use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\DateColumn;
-use App\Livewire\Table\Columns\LinkColumn;
-use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Base\Tables\BasePreviousMembersTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-/** @extends DataTableComponent<StableWrestler> */
-class PreviousWrestlers extends DataTableComponent
+/** @extends BasePreviousMembersTable<StableWrestler> */
+class PreviousWrestlers extends BasePreviousMembersTable
 {
-    use ShowTableTrait;
-    use UsesRosterRouteResolver;
-
     #[\Override]
     protected string $resourceName = 'wrestlers';
 
+    #[\Override]
     protected string $databaseTableName = 'stables_wrestlers';
+
+    #[\Override]
+    protected string $memberRelation = 'wrestler';
+
+    #[\Override]
+    protected string $memberLabelGroup = 'wrestlers';
+
+    #[\Override]
+    protected string $dateLabelGroup = 'stables';
 
     #[Locked]
     public ?int $stableId = null;
@@ -39,31 +40,6 @@ class PreviousWrestlers extends DataTableComponent
             ->with('wrestler')
             ->forStableId($stableId)
             ->forHistory();
-    }
-
-    /**
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            LinkColumn::make(__('wrestlers.name'))
-                ->title(fn (StableWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (StableWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
-                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
-                    $builder->whereHas(
-                        'wrestler',
-                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
-                            'name',
-                            '%'.mb_trim($searchTerm).'%',
-                        ),
-                    );
-                }),
-            DateColumn::make(__('stables.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('stables.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 
     protected function configure(): void

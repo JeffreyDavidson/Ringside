@@ -5,30 +5,37 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Builders\Roster\ManagerAssignmentBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\DateColumn;
-use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Base\Tables\BasePreviousManagedTable;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeamManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-/** @extends DataTableComponent<TagTeamManager> */
-class PreviousTagTeams extends DataTableComponent
+/** @extends BasePreviousManagedTable<TagTeamManager> */
+class PreviousTagTeams extends BasePreviousManagedTable
 {
-    use ShowTableTrait;
-
     /**
      * ManagerId to use for component.
      */
     #[Locked]
     public ?int $managerId = null;
 
+    #[\Override]
     protected string $databaseTableName = 'tag_teams_managers';
 
     #[\Override]
     protected string $resourceName = 'tag teams';
+
+    #[\Override]
+    protected string $managedRelation = 'tagTeam';
+
+    #[\Override]
+    protected string $managedLabelGroup = 'tag-teams';
+
+    #[\Override]
+    protected string $hiredLabelKey = 'managers.date_hired';
+
+    #[\Override]
+    protected string $firedLabelKey = 'managers.date_fired';
 
     /** @return ManagerAssignmentBuilder<TagTeamManager> */
     public function builder(): ManagerAssignmentBuilder
@@ -49,28 +56,5 @@ class PreviousTagTeams extends DataTableComponent
         $this->addAdditionalSelects([
             'tag_teams_managers.tag_team_id as tag_team_id',
         ]);
-    }
-
-    /**
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('tag-teams.name'), 'tagTeam.name')
-                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
-                    $builder->whereHas(
-                        'tagTeam',
-                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
-                            'name',
-                            '%'.mb_trim($searchTerm).'%',
-                        ),
-                    );
-                }),
-            DateColumn::make(__('managers.date_hired'), 'hired_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('managers.date_fired'), 'fired_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

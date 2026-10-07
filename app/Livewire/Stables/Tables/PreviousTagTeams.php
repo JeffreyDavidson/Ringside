@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Builders\Roster\StableMembershipBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
-use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\DateColumn;
-use App\Livewire\Table\Columns\LinkColumn;
-use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Base\Tables\BasePreviousMembersTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-/** @extends DataTableComponent<StableTagTeam> */
-class PreviousTagTeams extends DataTableComponent
+/** @extends BasePreviousMembersTable<StableTagTeam> */
+class PreviousTagTeams extends BasePreviousMembersTable
 {
-    use ShowTableTrait;
-    use UsesRosterRouteResolver;
-
     #[\Override]
     protected string $resourceName = 'tag teams';
 
+    #[\Override]
     protected string $databaseTableName = 'stables_tag_teams';
+
+    #[\Override]
+    protected string $memberRelation = 'tagTeam';
+
+    #[\Override]
+    protected string $memberLabelGroup = 'tag-teams';
+
+    #[\Override]
+    protected string $dateLabelGroup = 'stables';
 
     #[Locked]
     public ?int $stableId = null;
@@ -39,31 +40,6 @@ class PreviousTagTeams extends DataTableComponent
             ->with('tagTeam')
             ->forStableId($stableId)
             ->forHistory();
-    }
-
-    /**
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            LinkColumn::make(__('tag-teams.name'))
-                ->title(fn (StableTagTeam $row) => $row->tagTeam->name ?? 'Unknown')
-                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? $this->routeResolver->urlFor($row->tagTeam) : '#')
-                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
-                    $builder->whereHas(
-                        'tagTeam',
-                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
-                            'name',
-                            '%'.mb_trim($searchTerm).'%',
-                        ),
-                    );
-                }),
-            DateColumn::make(__('stables.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('stables.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 
     protected function configure(): void

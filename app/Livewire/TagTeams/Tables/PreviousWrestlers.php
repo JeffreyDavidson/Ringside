@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Builders\Roster\TagTeamMembershipBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
-use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\DateColumn;
-use App\Livewire\Table\Columns\LinkColumn;
-use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Base\Tables\BasePreviousMembersTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-/** @extends DataTableComponent<TagTeamWrestler> */
-class PreviousWrestlers extends DataTableComponent
+/** @extends BasePreviousMembersTable<TagTeamWrestler> */
+class PreviousWrestlers extends BasePreviousMembersTable
 {
-    use ShowTableTrait;
-    use UsesRosterRouteResolver;
-
     #[\Override]
     protected string $resourceName = 'wrestlers';
 
+    #[\Override]
     protected string $databaseTableName = 'tag_teams_wrestlers';
+
+    #[\Override]
+    protected string $memberRelation = 'wrestler';
+
+    #[\Override]
+    protected string $memberLabelGroup = 'wrestlers';
+
+    #[\Override]
+    protected string $dateLabelGroup = 'tag-teams';
 
     #[Locked]
     public ?int $tagTeamId = null;
@@ -39,31 +40,6 @@ class PreviousWrestlers extends DataTableComponent
             ->with('wrestler')
             ->forTagTeamId($tagTeamId)
             ->forHistory();
-    }
-
-    /**
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            LinkColumn::make(__('wrestlers.name'))
-                ->title(fn (TagTeamWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
-                ->searchable(function (TagTeamMembershipBuilder $builder, string $searchTerm): void {
-                    $builder->whereHas(
-                        'wrestler',
-                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
-                            'name',
-                            '%'.mb_trim($searchTerm).'%',
-                        ),
-                    );
-                }),
-            DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('tag-teams.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 
     protected function configure(): void
