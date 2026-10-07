@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
@@ -26,14 +27,15 @@ class MergeStablesAction
         protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableMembershipService $membershipService,
         protected StableRestructuringEligibility $eligibility,
+        protected DeletionStateManager $deletionState,
     ) {}
 
     /**
      * Merge two stables into one.
      *
      * Transfers all members from the secondary stable to the primary stable
-     * and ends and soft-deletes the secondary stable. Both stables get a Merged transition, so the
-     * primary's history shows what it absorbed and the secondary's shows where it went.
+     * and ends and soft-deletes the secondary stable, recording a Deleted transition on it. Both stables get a Merged
+     * transition, so the primary's history shows what it absorbed and the secondary's shows where it went.
      *
      * @param  Stable  $primaryStable  The stable that will receive all members
      * @param  Stable  $secondaryStable  The stable that will be merged into the primary
@@ -82,7 +84,7 @@ class MergeStablesAction
                 $date,
                 ['merged_into_stable_id' => $lockedPrimaryStable->getKey(), 'merged_into_stable_name' => $lockedPrimaryStable->name],
             );
-            $lockedSecondaryStable->delete();
+            $this->deletionState->delete($lockedSecondaryStable, $date);
         });
     }
 }

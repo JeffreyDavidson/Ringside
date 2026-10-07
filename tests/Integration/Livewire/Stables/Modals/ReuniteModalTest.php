@@ -65,6 +65,26 @@ describe('reunite modal', function (): void {
             ->and($stable->currentTagTeams()->count())->toBe(1);
     });
 
+    it('shows a concurrent membership change as a form error instead of failing', function (): void {
+        // Arrange
+        $stable = Stable::factory()->disbanded()->create();
+        rivalStableClaimsWrestlerOnNextMembershipInsert($stable->previousWrestlers()->firstOrFail());
+
+        actingAs(administrator());
+        $modal = livewire(ReuniteModal::class, ['stableId' => $stable->id]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors('stable')
+            ->assertSee('This stable or one of its members was changed at the same time. Refresh the page and try again.')
+            ->assertNotDispatched('stable-restructured')
+            ->assertNotDispatched('closeModal');
+        expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    });
+
     it('forbids a promotion member without the reunite ability', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
