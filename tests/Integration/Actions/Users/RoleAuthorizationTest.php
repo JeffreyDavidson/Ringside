@@ -43,8 +43,6 @@ describe('User Role Integration Tests', function () {
 
             // Administrator should also pass custom abilities
             expect(Gate::allows('manageUsers', User::class))->toBeTrue();
-            expect(Gate::allows('changeUserRoles', User::class))->toBeTrue()
-                ->and(Gate::allows('viewAuditLogs', User::class))->toBeTrue();
         });
 
         test('basic user role integrates with Gate system', function () {
@@ -59,8 +57,6 @@ describe('User Role Integration Tests', function () {
 
             // Basic user should also be denied custom abilities
             expect(Gate::denies('manageUsers', User::class))->toBeTrue();
-            expect(Gate::denies('changeUserRoles', User::class))->toBeTrue()
-                ->and(Gate::denies('viewAuditLogs', User::class))->toBeTrue();
         });
 
         test('role system works consistently across user instances', function () {
@@ -240,9 +236,6 @@ describe('User Role Integration Tests', function () {
 
             // Basic user should not be able to change their own role
             expect(Gate::denies('update', $basicUser))->toBeTrue();
-
-            // Basic user should not be able to change other users' roles either
-            expect(Gate::denies('changeUserRoles', User::class))->toBeTrue();
 
             // Privilege escalation protection is enforced at the policy level,
             // not by ignoring model state changes

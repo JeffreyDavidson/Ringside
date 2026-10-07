@@ -69,14 +69,4 @@ class TitlePolicy
     {
         return false;
     }
-
-    public function activate(User $user, Title $title): bool
-    {
-        return false;
-    }
-
-    public function deactivate(User $user, Title $title): bool
-    {
-        return false;
-    }
 }

@@ -74,7 +74,7 @@ function createPromotionAuthorizationSubjects(Promotion $promotion): array
         [
             'modelClass' => Title::class,
             'model' => Title::factory()->for($promotion, 'promotion')->create(),
-            'abilities' => ['update', 'delete', 'restore', 'debut', 'pull', 'reinstate', 'retire', 'unretire', 'activate', 'deactivate'],
+            'abilities' => ['update', 'delete', 'restore', 'debut', 'pull', 'reinstate', 'retire', 'unretire'],
         ],
     ];
 }

@@ -237,22 +237,3 @@ describe('TitlePolicy Integration Tests', function () {
         });
     });
 });
-
-it('denies activating and deactivating a title to users without a promotion role', function (string $ability) {
-    $title = Title::factory()->create();
-    $basicUser = basicUser();
-
-    $decision = Gate::forUser($basicUser)->inspect($ability, $title);
-
-    expect($decision->allowed())->toBeFalse()
-        ->and(Gate::getPolicyFor($title))->toBeInstanceOf(TitlePolicy::class);
-})->with(['activate', 'deactivate']);
-
-it('lets administrators activate and deactivate a title', function (string $ability) {
-    $title = Title::factory()->create();
-    $administrator = administrator();
-
-    $allowed = Gate::forUser($administrator)->allows($ability, $title);
-
-    expect($allowed)->toBeTrue();
-})->with(['activate', 'deactivate']);
