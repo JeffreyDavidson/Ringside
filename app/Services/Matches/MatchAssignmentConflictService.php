@@ -10,6 +10,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -42,10 +43,10 @@ final readonly class MatchAssignmentConflictService
             return;
         }
 
-        // The promotion_context scope filters through the soft-deletable event, hiding the matches of an
+        // The promotion context scope filters through the soft-deletable event, hiding the matches of an
         // event being restored. The caller has already verified ownership of the event.
         $matches = EventMatch::query()
-            ->withoutGlobalScope('promotion_context')
+            ->withoutGlobalScope(PromotionContextScope::class)
             ->whereBelongsTo($event)
             ->with(['competitors.competitor', 'referees', 'titles'])
             ->get();

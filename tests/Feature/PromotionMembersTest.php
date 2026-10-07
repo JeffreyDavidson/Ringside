@@ -64,7 +64,7 @@ it('saves an invitation for the typed email to only the selected promotion with 
     expect($invitation->email)->toBe($user->email)
         ->and($invitation->role)->toBe(MembershipRole::Manager)
         ->and($promotion->memberships()->count())->toBe(0)
-        ->and($promotion->hasActiveMember($user))->toBeFalse()
+        ->and(promotionHasActiveMember($promotion, $user))->toBeFalse()
         ->and($otherPromotion->invitations()->count())->toBe(0)
         ->and($user->promotions()->count())->toBe(0);
 });
@@ -290,7 +290,7 @@ it('does not let a non-owner add members by email', function () {
         ->call('addMember')
         ->assertForbidden();
 
-    expect($promotion->hasActiveMember($target))->toBeFalse()
+    expect(promotionHasActiveMember($promotion, $target))->toBeFalse()
         ->and($promotion->invitations()->count())->toBe(0);
 });
 
@@ -345,7 +345,7 @@ it('suspends and reactivates a member without deleting their promotion relations
         ->call('updateMemberStatus', $user->id, MembershipStatus::Suspended->value)
         ->assertHasNoErrors();
 
-    expect($promotion->hasActiveMember($user))->toBeFalse();
+    expect(promotionHasActiveMember($promotion, $user))->toBeFalse();
 
     $component->call('updateMemberStatus', $user->id, MembershipStatus::Active->value)
         ->assertHasNoErrors();
@@ -353,7 +353,7 @@ it('suspends and reactivates a member without deleting their promotion relations
     expect($promotion->memberships()->count())->toBe(1)
         ->and($promotion->memberships()->where('user_id', $user->id)->firstOrFail()->role)
         ->toBe(MembershipRole::Manager)
-        ->and($promotion->hasActiveMember($user))->toBeTrue();
+        ->and(promotionHasActiveMember($promotion, $user))->toBeTrue();
 });
 
 it('does not allow membership status changes outside active and suspended states', function () {
@@ -370,7 +370,7 @@ it('does not allow membership status changes outside active and suspended states
         ->call('updateMemberStatus', $user->id, 'invited')
         ->assertHasErrors('status');
 
-    expect($promotion->hasActiveMember($user))->toBeTrue();
+    expect(promotionHasActiveMember($promotion, $user))->toBeTrue();
 });
 
 it('keeps the last active owner when changing roles or status', function (string $change) {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Promotions;
 
-use App\Enums\Promotions\MembershipRole;
 use App\Models\Users\User;
 use Database\Factories\Promotions\PromotionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -77,22 +76,5 @@ class Promotion extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(PromotionInvitation::class);
-    }
-
-    public function hasActiveMember(User $user): bool
-    {
-        return $this->memberships()
-            ->forUser($user)
-            ->active()
-            ->exists();
-    }
-
-    public function hasMemberWithRole(User $user, MembershipRole ...$roles): bool
-    {
-        return $this->memberships()
-            ->forUser($user)
-            ->active()
-            ->withRole(...$roles)
-            ->exists();
     }
 }

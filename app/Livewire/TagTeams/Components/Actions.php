@@ -84,7 +84,7 @@ class Actions extends Component
 
     public function render(): View
     {
-        $this->tagTeam->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
+        $this->tagTeam->loadExists(TagTeamBuilder::ROSTER_STATE);
 
         $showsBookingWarning = $this->canPerform(RosterLifecycleAction::Release)
             || $this->canPerform(RosterLifecycleAction::Retire);

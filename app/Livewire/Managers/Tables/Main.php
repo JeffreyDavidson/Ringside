@@ -51,7 +51,7 @@ class Main extends BaseTable
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
-        $rows->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
+        $rows->loadExists(IndividualBuilder::ROSTER_STATE);
     }
 
     protected function configure(): void

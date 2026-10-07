@@ -446,3 +446,20 @@ function queriesDuring(Closure $callback): array
 
     return $queries;
 }
+
+function promotionHasActiveMember(Promotion $promotion, User $user): bool
+{
+    return $promotion->memberships()
+        ->forUser($user)
+        ->active()
+        ->exists();
+}
+
+function promotionHasMemberWithRole(Promotion $promotion, User $user, MembershipRole ...$roles): bool
+{
+    return $promotion->memberships()
+        ->forUser($user)
+        ->active()
+        ->withRole(...$roles)
+        ->exists();
+}

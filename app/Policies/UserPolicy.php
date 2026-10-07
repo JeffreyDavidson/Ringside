@@ -48,14 +48,4 @@ class UserPolicy
     {
         return false;
     }
-
-    public function changeUserRoles(User $user): bool
-    {
-        return false;
-    }
-
-    public function viewAuditLogs(User $user): bool
-    {
-        return false;
-    }
 }

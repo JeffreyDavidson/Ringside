@@ -37,11 +37,8 @@ beforeEach(function () {
         ->create();
 });
 
-test('returns current and previous championship records and champions', function () {
-    expect(TitleChampionshipQuery::currentChampionship($this->title)?->is($this->currentChampionship))->toBeTrue()
-        ->and(TitleChampionshipQuery::currentChampion($this->title)?->is($this->currentChampion))->toBeTrue()
-        ->and(TitleChampionshipQuery::previousChampionship($this->title)?->is($this->previousChampionship))->toBeTrue()
-        ->and(TitleChampionshipQuery::previousChampion($this->title)?->is($this->previousChampion))->toBeTrue();
+test('returns the current champion', function () {
+    expect(TitleChampionshipQuery::currentChampion($this->title)?->is($this->currentChampion))->toBeTrue();
 });
 
 test('uses the eager-loaded current championship', function () {
@@ -56,13 +53,6 @@ test('uses the eager-loaded current championship', function () {
 
     expect($champion?->is($this->currentChampion))->toBeTrue()
         ->and(DB::getQueryLog())->toBeEmpty();
-});
-
-test('returns first and longest championship records and champions', function () {
-    expect(TitleChampionshipQuery::firstChampionship($this->title)?->is($this->firstChampionship))->toBeTrue()
-        ->and(TitleChampionshipQuery::firstChampion($this->title)?->is($this->firstChampion))->toBeTrue()
-        ->and(TitleChampionshipQuery::longestChampionship($this->title)?->is($this->previousChampionship))->toBeTrue()
-        ->and(TitleChampionshipQuery::longestChampion($this->title)?->is($this->previousChampion))->toBeTrue();
 });
 
 test('calculates the length of an ended championship reign', function () {
@@ -102,28 +92,8 @@ test('calculates current reign length from an explicit as-of date', function () 
     expect(TitleChampionshipQuery::reignLengthInDays($championship, Carbon::parse('2025-01-11')))->toBe(10);
 });
 
-test('counts reigns and reports vacancy from the current relationship', function () {
-    expect(TitleChampionshipQuery::reignCount($this->title))->toBe(3)
-        ->and(TitleChampionshipQuery::isVacant($this->title))->toBeFalse();
-
-    $this->currentChampionship->update(['lost_at' => now()]);
-
-    expect(TitleChampionshipQuery::isVacant($this->title))->toBeTrue();
-});
-
-test('returns null records and champions for a title without reigns', function () {
-    $title = Title::factory()->create();
-
-    expect(TitleChampionshipQuery::currentChampionship($title))->toBeNull()
-        ->and(TitleChampionshipQuery::currentChampion($title))->toBeNull()
-        ->and(TitleChampionshipQuery::previousChampionship($title))->toBeNull()
-        ->and(TitleChampionshipQuery::previousChampion($title))->toBeNull()
-        ->and(TitleChampionshipQuery::firstChampionship($title))->toBeNull()
-        ->and(TitleChampionshipQuery::firstChampion($title))->toBeNull()
-        ->and(TitleChampionshipQuery::longestChampionship($title))->toBeNull()
-        ->and(TitleChampionshipQuery::longestChampion($title))->toBeNull()
-        ->and(TitleChampionshipQuery::reignCount($title))->toBe(0)
-        ->and(TitleChampionshipQuery::isVacant($title))->toBeTrue();
+test('returns no champion for a title without reigns', function () {
+    expect(TitleChampionshipQuery::currentChampion(Title::factory()->create()))->toBeNull();
 });
 
 test('never reports a negative reign length for a reign dated in the future', function () {

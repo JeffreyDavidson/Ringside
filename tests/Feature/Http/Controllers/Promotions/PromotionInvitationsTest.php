@@ -67,7 +67,7 @@ describe('an invitation grants nothing until it is accepted', function () {
         $dashboard->assertSuccessful()->assertSessionHas('active_promotion_id', $own->id);
         $foreignRecord->assertNotFound();
         $foreignPage->assertForbidden();
-        expect($inviting->hasActiveMember($invitee))->toBeFalse();
+        expect(promotionHasActiveMember($inviting, $invitee))->toBeFalse();
     });
 
     test('an invited user cannot switch to the inviting promotion', function () {
@@ -237,7 +237,7 @@ describe('accepting an invitation', function () {
             ->assertSessionHas('status', __('promotions.invitation_accepted', ['promotion' => 'Invitation Championship Wrestling', 'role' => $role->label()]));
         expect($membership->status)->toBe(MembershipStatus::Active)
             ->and($membership->role)->toBe($role)
-            ->and($promotion->hasMemberWithRole($invitee, $role))->toBeTrue()
+            ->and(promotionHasMemberWithRole($promotion, $invitee, $role))->toBeTrue()
             ->and($promotion->invitations()->count())->toBe(0);
     })->with([
         'owner' => MembershipRole::Owner,
@@ -301,7 +301,7 @@ describe('accepting an invitation', function () {
         expect($membership->status)->toBe(MembershipStatus::Suspended)
             ->and($membership->role)->toBe(MembershipRole::Member)
             ->and($invitation->fresh())->toBeNull()
-            ->and($promotion->hasActiveMember($user))->toBeFalse();
+            ->and(promotionHasActiveMember($promotion, $user))->toBeFalse();
     });
 
     test('is not possible once the invitation has expired', function () {
@@ -356,7 +356,7 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertRedirect(route('login'));
-        expect($promotion->hasActiveMember($user))->toBeFalse()
+        expect(promotionHasActiveMember($promotion, $user))->toBeFalse()
             ->and($invitation->fresh())->not->toBeNull();
     });
 });
@@ -396,7 +396,7 @@ describe('declining an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
-        expect($promotion->hasMemberWithRole($member, MembershipRole::Owner))->toBeTrue();
+        expect(promotionHasMemberWithRole($promotion, $member, MembershipRole::Owner))->toBeTrue();
     });
 
     test('cannot be done for another email by forging the promotion of someone elses invitation', function () {

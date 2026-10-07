@@ -80,13 +80,6 @@ class TitleChampionshipBuilder extends Builder
             ->with(['title.promotion', 'previousChampionship.champion']);
     }
 
-    public function earliestWonFirst(): static
-    {
-        $this->orderBy('won_at');
-
-        return $this;
-    }
-
     public function mostRecentlyWonFirst(): static
     {
         $this->orderByDesc('won_at');

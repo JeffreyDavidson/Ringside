@@ -23,12 +23,6 @@ class FormModal extends BaseFormModal
     use DispatchesActionFeedback;
 
     #[\Override]
-    protected ?string $createdEventName = 'userCreated';
-
-    #[\Override]
-    protected ?string $updatedEventName = 'userUpdated';
-
-    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     #[\Override]

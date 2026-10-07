@@ -18,11 +18,12 @@ app/Livewire/{Domain}/
     └── Previous{Entity}.php     (relationship history tables on detail pages)
 ```
 
-Not every domain has every folder. For example, Stables and Promotions have no
-`Components/Actions.php` (see the refactoring backlog), Matches uses
-`Tables/MatchesTable.php`, and the title page uses `Titles/Tables/TitleHistory.php`
-because it lists every reign (current reign first, shown as "Current"), not only
-previous ones.
+Not every domain has every folder. Only domains with lifecycle transitions (Wrestlers,
+Managers, Referees, Tag Teams, Stables and Titles) have `Components/Actions.php`; Events,
+Venues, Users and Promotions have none. Matches uses `Tables/MatchesTable.php` and has no
+`Components` folder, Promotions adds `Members/Manage.php`, and the title page uses
+`Titles/Tables/TitleHistory.php` because it lists every reign (current reign first, shown as
+"Current"), not only previous ones.
 
 Relationship tables use `ShowTableTrait`, which gives each table a heading derived from
 its `$resourceName` (for example "Title championships") and, when a table has no
@@ -49,11 +50,13 @@ Each detail page (wrestlers, managers, referees, tag teams, stables, titles) ren
 These are the only Livewire entry points for lifecycle transitions; the index tables
 expose row actions such as delete but no lifecycle methods.
 
-- Each transition method resolves its typed Action from the container and runs it
-  through `ExecutesRosterActions::executeAuthorizedRosterAction()` (titles use
-  `ExecutesBusinessActions`), which authorizes with `Gate::authorize()`, executes the
-  Action, translates `BaseBusinessException` into a localized failure message, and
-  dispatches `{entity}-updated` plus a `flash-message` for the toast.
+- Each roster transition method resolves its typed Action from the container and runs it
+  through `ExecutesRosterActions::executeAuthorizedRosterAction()`, which authorizes with
+  `Gate::authorize()`, executes the Action, translates `BaseBusinessException` into a
+  localized failure message, and dispatches `{entity}-updated` plus a `flash-message` for the
+  toast. Titles and stables call `Gate::authorize()` themselves and run the Action through
+  `ExecutesBusinessActions::executeBusinessAction()`, which shows the domain exception's own
+  message and leaves dispatching `title-updated` / `stable-updated` to the component.
 - `canPerform(RosterLifecycleAction $action)` decides which buttons render. It combines
   the Gate ability with the domain eligibility check
   (`ChecksIndividualLifecycleEligibility` for wrestlers, managers and referees). Titles
@@ -63,8 +66,8 @@ expose row actions such as delete but no lifecycle methods.
   `StableRetirementEligibility`) and, like titles, run through `ExecutesBusinessActions`, so
   a rejected action shows the domain exception's message. Merge, split and reunite open
   modals (`Stables\Modals\MergeModal`, `SplitModal`, `ReuniteModal`) that collect their input.
-- Destructive transitions (Release, Suspend, Injure, Retire, Disband, and Deactivate for
-  titles) ask for confirmation with `wire:confirm`, using a `core.lifecycle_confirmations.*`
+- Destructive transitions (Release, Suspend, Injure, Retire, Disband, and the Pull
+  button, whose Livewire method is `deactivate`, for titles) ask for confirmation with `wire:confirm`, using a `core.lifecycle_confirmations.*`
   message that names the record. Bind it as `:wire:confirm="__(...)"` so names with
   apostrophes are escaped once. Every action button also carries
   `wire:loading.attr="disabled"` and a `wire:target` for its own method, so a second click
@@ -107,8 +110,8 @@ Adding another entity means adding one `CARDS` entry, not a new Livewire compone
 every call and reads `$modelTitleField` (default `name`; Managers and Referees use
 `full_name`). It uses `core.modal.edit` (`Edit :name`) and `core.modal.add`
 (`Add :model`). Modals with their own wording override `getModalTitle()` and use
-`<domain>.modal.*` keys. The base modal says "Add" while several domain modals say
-"Create"; this inconsistency is tracked in the refactoring backlog.
+`<domain>.modal.*` keys: the stable Merge, Split and Reunite modals, the match Result
+modal, and the match form modal when editing (`matches.modal.edit`).
 
 ## Model Keys
 

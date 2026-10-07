@@ -20,12 +20,6 @@ use Illuminate\View\View;
 class FormModal extends BaseFormModal
 {
     #[\Override]
-    protected ?string $createdEventName = 'venueCreated';
-
-    #[\Override]
-    protected ?string $updatedEventName = 'venueUpdated';
-
-    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     public CreateEditForm $form;

@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, `isCurrentlyActive()`, `hasFutureEmployment()`, `hasNoCurrentOrFutureEmployment()`, `hasEmploymentHistory()`, `isEmployed()`, `isRetired()`, `isSuspended()`, `isInjured()`, `isReleased()`, and `employedOn()` predicates have been removed in favor of typed relationship queries, lifecycle builders, and the computed employment status enum.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, `isCurrentlyActive()`, `hasNoCurrentOrFutureEmployment()`, `isEmployed()`, `isRetired()`, `isReleased()`, and `employedOn()` predicates have been removed in favor of typed relationship queries, lifecycle builders, and the computed employment status enum. `isInjured()`, `isSuspended()`, `hasFutureEmployment()`, and `hasEmploymentHistory()` exist again as projection-aware accessors: they read the `availability_*_exists` / `status_*_exists` attribute when a query or `loadExists()` projected it and fall back to an `exists` query otherwise, so status badges avoid per-row queries (see `builders.md`).
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
@@ -185,8 +185,10 @@ global scope, and the controller passes it to the view as `dashboard`.
 **Status:** In progress; `tests/Feature/Architecture` now enforces controller
 structure, exception construction, morph aliases, roster model namespaces, test
 suite boundaries, translation-key resolution, orphaned docblocks, locked Livewire
-context identifiers, and that Livewire components neither create records through
-factories nor write directly through Eloquent models.
+context identifiers, that Livewire components neither create records through
+factories nor write directly through Eloquent models, and that
+`MembershipRole::CONTENT_ABILITIES`, the policy methods and the lifecycle enums'
+`ability()` values stay in agreement (`PolicyAbilityArchitectureTest`).
 
 Still to enforce from the decisions above:
 
@@ -218,6 +220,26 @@ not deterministic. There are no `@codeCoverageIgnore` markers: unreachable code
 is deleted instead of tested, and randomized inputs in tests are pinned (fixed
 distinctive values or `forceFakerBoolean()`). Keep the threshold at 100 and treat
 a new uncovered line as either a missing behavior test or dead code.
+
+### Dead application code cleanup (phase 1)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+Removed code that only tests called: the `TitleChampionshipQuery` reporting
+methods beyond `currentChampion()` and `reignLengthInDays()`, `Promotion::hasActiveMember()`
+and `hasMemberWithRole()` (tests use helpers in `tests/Helpers/TestHelpers.php`), the
+`LifecyclePeriodBuilder` instance scopes (the static `constrainTo*()` helpers remain),
+`withActivityStatusState()` and `withAvailabilityState()` (use `withExists()` or
+`loadExists()` with the `*_STATE` constants), `LifecycleStateReader::readProjectedBooleans()`,
+`TagTeamMembershipData::combinedWeightInPounds()`, the Title `activate`/`deactivate`,
+Promotion `forceDelete` and User `changeUserRoles`/`viewAuditLogs` policy abilities, and
+Livewire events nothing listens to. The `'promotion_context'` closure scopes became the
+`PromotionContextScope` and `EventMatchPromotionContextScope` classes.
+
+Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called by tests
+(the modal package mounts components with `mount()`), but about 250 modal test call sites
+depend on them; remove them together with a rewrite of those tests.
 
 ### Promotion gate extraction
 

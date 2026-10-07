@@ -92,7 +92,6 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false);
     });
@@ -160,7 +159,6 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('form-submitted')
             ->assertSet('isModalOpen', false);
     });
 
@@ -287,7 +285,7 @@ describe('authorized event form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('form-submitted')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(Event::query()->count())->toBe(1);
     });

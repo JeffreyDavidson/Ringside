@@ -29,6 +29,9 @@ class TagTeamBuilder extends Builder
     /** Relationship existence projections read by isSuspended(). */
     public const array AVAILABILITY_STATE = ['currentSuspension as availability_current_suspension_exists'];
 
+    /** Employment and availability projections that roster status and booking checks read. */
+    public const array ROSTER_STATE = [...self::EMPLOYMENT_STATUS_STATE, ...self::AVAILABILITY_STATE];
+
     /**
      * Restrict to tag teams RosterBookingEligibility would allow: the team is
      * currently employed, not retired and not suspended, has the minimum number

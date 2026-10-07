@@ -256,7 +256,7 @@ describe('FormModal Event Handling', function () {
             ->set('form.height_inches', 0)
             ->set('form.weight', 200)
             ->call('submitForm')
-            ->assertDispatched('form-submitted');
+            ->assertDispatched('refreshDatatable');
     });
 
     it('can handle external close modal calls', function () {
@@ -397,7 +397,7 @@ describe('FormModal employment history', function () {
         $modal
             ->assertHasErrors(['form.name'])
             ->assertSet('isModalOpen', true)
-            ->assertNotDispatched('form-submitted');
+            ->assertNotDispatched('refreshDatatable');
         expect($wrestler->fresh()?->name)->toBe('Original Name');
         $action->verify();
     });

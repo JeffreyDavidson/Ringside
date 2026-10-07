@@ -263,7 +263,6 @@ describe('authorized match form interactions', function (): void {
             ->and($match->titles()->pluck('titles.id')->all())->toBe([$title->id]);
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('matchCreated')
             ->assertDispatched('refreshDatatable')
             ->assertDispatched('closeModal')
             ->assertSet('isModalOpen', false)
@@ -295,7 +294,7 @@ describe('authorized match form interactions', function (): void {
             ->and($match->tagTeams()->pluck('tag_teams.id')->sort()->values()->all())
             ->toBe($tagTeams->modelKeys())
             ->and($match->sides)->toHaveCount(2);
-        $modal->assertHasNoErrors()->assertDispatched('matchCreated');
+        $modal->assertHasNoErrors()->assertDispatched('refreshDatatable');
     });
 
     it('persists each individual entrant on an ordered side', function (MatchType $matchType, int $entrantCount, array $entryOrder): void {
@@ -382,7 +381,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertHasErrors(['form.titles'])
             ->assertHasNoErrors(['form.configuration'])
-            ->assertNotDispatched('matchCreated')
+            ->assertNotDispatched('refreshDatatable')
             ->assertSet('isModalOpen', true);
         expect($modal->instance()->getErrorBag()->first('form.titles'))
             ->toBe('The current champion of [World Heavyweight Title] must compete in the title match.');
@@ -414,7 +413,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertHasErrors(['form.configuration'])
             ->assertHasNoErrors(['form.titles'])
-            ->assertNotDispatched('matchCreated')
+            ->assertNotDispatched('refreshDatatable')
             ->assertNotDispatched('closeModal')
             ->assertSet('isModalOpen', true)
             ->assertSet('form.referees', [$referee->id]);
@@ -448,7 +447,7 @@ describe('authorized match form interactions', function (): void {
         // Assert
         $modal
             ->assertHasErrors(['form.configuration'])
-            ->assertNotDispatched('matchCreated')
+            ->assertNotDispatched('refreshDatatable')
             ->assertSet('isModalOpen', true);
         $action->verify();
     });
@@ -643,7 +642,7 @@ describe('authorized match form interactions', function (): void {
             ->and($match->referees()->pluck('referees.id')->all())->toBe([$newReferee->id]);
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('matchUpdated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
     });
 
@@ -683,7 +682,7 @@ describe('authorized match form interactions', function (): void {
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertDispatched('matchCreated')
+            ->assertDispatched('refreshDatatable')
             ->assertSet('isModalOpen', false);
         expect(EventMatch::query()->whereBelongsTo($this->event)->count())->toBe(1);
     });

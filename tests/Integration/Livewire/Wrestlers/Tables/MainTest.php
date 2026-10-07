@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\IndividualBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Lifecycle\Injury;
@@ -244,7 +245,7 @@ describe('wrestlers table metadata', function (): void {
             Suspension::factory()->for($wrestler, 'suspendable')->create();
         });
 
-        $wrestlers = (new Main)->builder()->withAvailabilityState()->get();
+        $wrestlers = (new Main)->builder()->withExists(IndividualBuilder::AVAILABILITY_STATE)->get();
 
         // Act
         DB::enableQueryLog();
