@@ -55,3 +55,23 @@ describe('event timing queries', function () {
         });
     });
 });
+
+test('events held between two instants include both boundaries', function () {
+    // Arrange
+    $start = Date::parse('2026-03-01 00:00:00');
+    $end = Date::parse('2026-03-31 23:59:59');
+    Event::factory()->create(['date' => $start->copy()->subSecond()]);
+    $first = Event::factory()->create(['date' => $start]);
+    $last = Event::factory()->create(['date' => $end]);
+    Event::factory()->create(['date' => $end->copy()->addSecond()]);
+    Event::factory()->unscheduled()->create();
+
+    // Act
+    $events = Event::query()
+        ->heldBetween($start, $end)
+        ->orderBy('id')
+        ->get();
+
+    // Assert
+    expect($events->modelKeys())->toBe([$first->id, $last->id]);
+});

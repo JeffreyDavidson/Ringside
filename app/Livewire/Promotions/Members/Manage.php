@@ -15,7 +15,6 @@ use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -190,8 +189,7 @@ class Manage extends Component
 
         $members = $promotion->memberships()
             ->with('user')
-            ->orderBy('created_at')
-            ->orderBy('user_id')
+            ->oldestFirst()
             ->paginate(self::MEMBERS_PER_PAGE);
 
         // Members on the page being shown get a role entry; unsaved edits stay untouched.
@@ -202,7 +200,7 @@ class Manage extends Component
         $canManageMembers = Gate::allows('manageMembers', $promotion);
 
         $invitations = $canManageMembers
-            ? $promotion->invitations()->pending()->orderBy('created_at')->orderBy('id')->get()
+            ? $promotion->invitations()->pending()->oldestFirst()->get()
             : new Collection;
 
         return view('livewire.promotions.members.manage', [
@@ -239,9 +237,7 @@ class Manage extends Component
     private function memberUser(Promotion $promotion, int $userId): User
     {
         return User::query()
-            ->whereHas('promotionMemberships', function (Builder $query) use ($promotion): void {
-                $query->where('promotion_id', $promotion->getKey());
-            })
+            ->memberOfPromotion($promotion)
             ->whereKey($userId)
             ->firstOrFail();
     }

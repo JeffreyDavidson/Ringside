@@ -26,7 +26,11 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
 
-`EventBuilder` owns event scheduling-state filters and the canonical event-list ordering: dated events newest first, followed by unscheduled events.
+`EventBuilder` owns event scheduling-state filters and the canonical event-list ordering: dated events newest first, followed by unscheduled events. It also owns `heldBetween()` (the event-date range filter, both instants included). `VenueBuilder::hostingEvents()` limits venue lists to venues some event uses.
+
+`MatchStipulationBuilder` owns the `active()` filter and `alphabetical()` ordering used by the match form's stipulation list. `EventMatchBuilder::inCardOrder()` is the match-number ordering of an event's card. `TitleBuilder::offeredForPromotion()` lists a promotion's titles (or unowned titles) plus ids already selected in a form. `PromotionMembershipBuilder::oldestFirst()`, `PromotionInvitationBuilder::oldestFirst()` and `UserBuilder::memberOfPromotion()` serve the promotion member management screen.
+
+Livewire components compose these scopes instead of writing `where`, `whereHas` or `orderBy` chains that express domain meaning. Plain table plumbing (default sort and search wiring, `whereKey()` lookups, id tie-breakers on relations, and the relation-name-driven `RelatedPeriodDateRangeFilter`) stays in the component.
 
 ## Shared Concerns
 

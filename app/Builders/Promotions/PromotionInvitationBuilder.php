@@ -40,6 +40,11 @@ class PromotionInvitationBuilder extends Builder
         return $this->where('expires_at', '>', now());
     }
 
+    public function oldestFirst(): static
+    {
+        return $this->orderBy('created_at')->orderBy('id');
+    }
+
     public function expired(): static
     {
         return $this->where('expires_at', '<=', now());

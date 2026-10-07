@@ -62,8 +62,7 @@ class MatchesTable extends DataTableComponent
 
         return EventMatch::query()
             ->forEventId($eventId)
-            ->orderBy('events_matches.match_number')
-            ->orderBy('events_matches.id')
+            ->inCardOrder()
             ->withDisplayRelations();
     }
 

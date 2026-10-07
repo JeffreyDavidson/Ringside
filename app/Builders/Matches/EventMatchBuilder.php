@@ -37,6 +37,12 @@ class EventMatchBuilder extends Builder
         return $this;
     }
 
+    /** Matches in card order: by match number, with the id breaking ties. */
+    public function inCardOrder(): static
+    {
+        return $this->orderBy('events_matches.match_number')->orderBy('events_matches.id');
+    }
+
     public function forPastEvents(): static
     {
         self::constrainToPastEvents($this);

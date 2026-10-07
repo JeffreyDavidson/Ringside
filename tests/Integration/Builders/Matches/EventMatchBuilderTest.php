@@ -329,3 +329,21 @@ it('orders matches by event date, card, and match number', function () {
         $oldestMatch->id,
     ]);
 });
+
+test('it orders matches in card order with the id breaking ties', function () {
+    // Arrange
+    $event = Event::factory()->create();
+    $otherEvent = Event::factory()->create();
+    $second = EventMatch::factory()->for($event)->create(['match_number' => 2]);
+    $first = EventMatch::factory()->for($event)->create(['match_number' => 1]);
+    $tiedFirst = EventMatch::factory()->for($otherEvent)->create(['match_number' => 1]);
+    $tiedSecond = EventMatch::factory()->for($otherEvent)->create(['match_number' => 2]);
+
+    // Act
+    $matches = EventMatch::query()
+        ->inCardOrder()
+        ->get();
+
+    // Assert
+    expect($matches->modelKeys())->toBe([$first->id, $tiedFirst->id, $second->id, $tiedSecond->id]);
+});

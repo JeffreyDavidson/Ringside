@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Data;
 
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Computed;
 
 trait PresentsTitlesList
@@ -27,9 +26,7 @@ trait PresentsTitlesList
     public function getTitles(): array
     {
         return Title::query()
-            ->where(fn (Builder $query): Builder => $query
-                ->where('promotion_id', $this->titlesPromotionId())
-                ->orWhereKey($this->selectedTitleIds()))
+            ->offeredForPromotion($this->titlesPromotionId(), $this->selectedTitleIds())
             ->pluck('name', 'id')
             ->mapWithKeys(
                 static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
