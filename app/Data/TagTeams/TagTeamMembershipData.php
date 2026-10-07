@@ -59,11 +59,4 @@ readonly class TagTeamMembershipData
     {
         return $this->managers ?? new Collection;
     }
-
-    public function combinedWeightInPounds(): int
-    {
-        return (int) $this->getWrestlers()->sum(
-            fn (Wrestler $wrestler): int => $wrestler->weight->toPounds()
-        );
-    }
 }
