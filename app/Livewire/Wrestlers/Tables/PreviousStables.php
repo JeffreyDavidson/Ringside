@@ -8,7 +8,6 @@ use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -36,9 +35,7 @@ class PreviousStables extends BasePreviousStablesTable
 
     protected function configure(): void
     {
-        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
-
-        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+        $this->authorizeContextRecord(Wrestler::class, $this->wrestlerId, 'wrestler');
 
         $this->setSearchPlaceholder('Search '.$this->resourceName)
             ->setPerPageAccepted([5, 10, 25, 50, 100]);

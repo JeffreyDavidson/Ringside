@@ -6,7 +6,7 @@ namespace App\Livewire\Base\Tables;
 
 use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Support\RosterResourceRouteResolver;
+use App\Livewire\Concerns\UsesRosterRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -20,18 +20,12 @@ use Illuminate\Database\Eloquent\Builder;
 abstract class BasePreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
+    use UsesRosterRouteResolver;
 
     #[\Override]
     protected string $resourceName = 'tag teams';
 
     protected string $databaseTableName;
-
-    protected RosterResourceRouteResolver $routeResolver;
-
-    public function boot(RosterResourceRouteResolver $routeResolver): void
-    {
-        $this->routeResolver = $routeResolver;
-    }
 
     /**
      * Get the partner wrestler name for the given tag team relationship.

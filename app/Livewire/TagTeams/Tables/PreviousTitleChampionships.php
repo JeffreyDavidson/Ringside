@@ -8,7 +8,6 @@ use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
@@ -34,8 +33,6 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     {
         parent::configure();
 
-        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
-
-        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+        $this->authorizeContextRecord(TagTeam::class, $this->tagTeamId, 'tag team');
     }
 }

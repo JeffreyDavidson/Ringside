@@ -11,22 +11,29 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Wrestler::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.wrestlers.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.wrestler-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'wrestler';
 
     #[\Override]
     protected string $databaseTableName = 'wrestlers';
@@ -50,20 +57,6 @@ class Main extends BaseTable
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
-    }
-
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', Wrestler::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.wrestlers.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-        ]);
     }
 
     /**
@@ -106,22 +99,6 @@ class Main extends BaseTable
 
     public function delete(Wrestler $wrestler, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $wrestler);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $wrestler): void {
-            $deleteAction->handle($wrestler);
-        }, __('wrestlers.actions.deleted'));
-
-        $this->forgetMetadata();
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Wrestler $row) => view('components.tables.columns.wrestler-actions', [
-                'wrestler' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
+        $this->deleteRecord($wrestler, $deleteAction->handle(...), __('wrestlers.actions.deleted'));
     }
 }

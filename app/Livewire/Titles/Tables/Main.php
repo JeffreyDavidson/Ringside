@@ -11,23 +11,30 @@ use App\Enums\Titles\TitleType;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Title::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.titles.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.title-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'title';
 
     #[\Override]
     protected string $databaseTableName = 'titles';
@@ -54,21 +61,6 @@ class Main extends BaseTable
         $rows->loadExists(TitleBuilder::ACTIVITY_STATUS_STATE);
     }
 
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', Title::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.titles.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-            'beforeWrapperView' => $this->beforeWrapperView,
-        ]);
-    }
-
     /** @return array<int, Column> */
     public function columns(): array
     {
@@ -82,16 +74,6 @@ class Main extends BaseTable
                 ->label(fn (Title $row) => TitleChampionshipQuery::currentChampion($row)->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Title $row) => view('components.tables.columns.title-actions', [
-                'title' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /** @return array<int, Filter> */
@@ -127,12 +109,6 @@ class Main extends BaseTable
 
     public function delete(Title $title, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $title);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $title): void {
-            $deleteAction->handle($title);
-        }, __('titles.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($title, $deleteAction->handle(...), __('titles.actions.deleted'));
     }
 }

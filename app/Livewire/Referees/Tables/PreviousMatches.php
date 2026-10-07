@@ -8,7 +8,6 @@ use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 class PreviousMatches extends BasePreviousMatchesTable
@@ -34,8 +33,6 @@ class PreviousMatches extends BasePreviousMatchesTable
     {
         parent::configure();
 
-        $refereeId = $this->requireContextId($this->refereeId ?? null, 'referee');
-
-        Gate::authorize('view', Referee::query()->findOrFail($refereeId));
+        $this->authorizeContextRecord(Referee::class, $this->refereeId, 'referee');
     }
 }

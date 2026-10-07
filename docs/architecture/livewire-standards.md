@@ -30,6 +30,19 @@ its `$resourceName` (for example "Title championships") and, when a table has no
 records and no search, a one-line "No {resource} yet." message instead of the full
 search, table and pager chrome.
 
+`authorizeContextRecord()` (also in `ShowTableTrait`) resolves the table's locked parent id and authorizes `view`
+on that record, so a history table's `configure()` is one call. Tables that list the same shape of rows extend a
+shared base and set the relationship and translation keys as properties: `BasePreviousMembersTable` (linked member
+name plus joined and left dates, with `UsesRosterRouteResolver`) and `BasePreviousManagedTable` (a manager's past
+wrestlers and tag teams); the older `BasePrevious*Table` classes cover managers, stables, tag teams, championships and
+matches.
+
+Index tables extend `BaseTable`, which authorizes `viewAny` on `$modelClass`, renders the dedicated Blade view named
+by `$indexView` (or the generic data table when it is null), builds the row actions column from `$actionsView` and
+`$actionsRowVariable`, and offers `deleteRecord()` (authorize `delete`, run the Action through
+`executeBusinessAction()`, forget the status counts). A table with extra setup calls `parent::configure()`; a table
+with a different actions column overrides `getDefaultActionColumn()`.
+
 ## Component Naming Conventions
 
 ### Class to View Mapping:

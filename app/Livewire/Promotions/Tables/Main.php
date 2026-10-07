@@ -8,13 +8,15 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Models\Promotions\Promotion;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Promotion> */
 class Main extends BaseTable
 {
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Promotion::class;
 
     #[\Override]
     protected string $databaseTableName = 'promotions';
@@ -36,7 +38,7 @@ class Main extends BaseTable
 
     protected function configure(): void
     {
-        Gate::authorize('viewAny', Promotion::class);
+        parent::configure();
         $this->setSearchPlaceholder(__('promotions.search'));
         $this->emptyStateTitle = __('promotions.empty_title');
         $this->emptyStateDescription = __('promotions.empty_description');
