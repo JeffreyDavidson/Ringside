@@ -95,7 +95,7 @@ describe('former members', function (): void {
         $members = resolve(StableFormerMemberEligibility::class)->availableMembersFor($stable);
 
         // Assert
-        expect($members->wrestlers?->pluck('id')->all())->toEqualCanonicalizing($stable->previousWrestlers()->pluck('wrestlers.id')->unique()->all())
+        expect($members->wrestlers?->pluck('id')->all())->toEqualCanonicalizing($stable->previousWrestlers()->pluck('wrestlers.id')->unique()->values()->all())
             ->and($members->wrestlers?->where('id', $rejoiner->id))->toHaveCount(1);
     });
 });
