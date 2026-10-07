@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
@@ -20,6 +23,7 @@ class MergeStablesAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected AddStableMembersAction $addStableMembersAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableMembershipService $membershipService,
         protected StableRestructuringEligibility $eligibility,
     ) {}
@@ -28,7 +32,8 @@ class MergeStablesAction
      * Merge two stables into one.
      *
      * Transfers all members from the secondary stable to the primary stable
-     * and optionally deletes the secondary stable if the operation is successful.
+     * and ends and soft-deletes the secondary stable. Both stables get a Merged transition, so the
+     * primary's history shows what it absorbed and the secondary's shows where it went.
      *
      * @param  Stable  $primaryStable  The stable that will receive all members
      * @param  Stable  $secondaryStable  The stable that will be merged into the primary
@@ -63,6 +68,20 @@ class MergeStablesAction
             $this->removeStableMembersAction->handle($lockedSecondaryStable, $members, $date);
             $this->addStableMembersAction->handle($lockedPrimaryStable, $members, $date);
             $this->endActivityPeriodAction->handle($lockedSecondaryStable, $date);
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedPrimaryStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Merged,
+                $date,
+                ['merged_stable_id' => $lockedSecondaryStable->getKey(), 'merged_stable_name' => $lockedSecondaryStable->name],
+            );
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedSecondaryStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Merged,
+                $date,
+                ['merged_into_stable_id' => $lockedPrimaryStable->getKey(), 'merged_into_stable_name' => $lockedPrimaryStable->name],
+            );
             $lockedSecondaryStable->delete();
         });
     }

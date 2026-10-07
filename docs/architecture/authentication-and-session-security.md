@@ -50,16 +50,17 @@ sends:
 - `Permissions-Policy` disabling camera, microphone, geolocation, payment, USB, display capture, MIDI, autoplay and the
   motion sensors
 - `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security: max-age=15552000` (six months, this host only, no `includeSubDomains` or `preload`), sent
+  only on HTTPS requests. Production is HTTPS through Cloudflare and the trusted proxy, so local `http://` development
+  is never pinned to HTTPS. Cloudflare's own HSTS setting did not produce the header, so the application sends it.
 
 A header the response already carries is left as it is, so a route can choose its own value and nothing is sent twice
-from the application. The Forge nginx config also adds `X-Content-Type-Options`, `X-Frame-Options` and
-`X-XSS-Protection`; a repeated `nosniff` is harmless, and it can be removed from nginx now that the application sends it.
+from the application. The Forge nginx config adds `X-Frame-Options` and `X-XSS-Protection`; its `X-Content-Type-Options` line was removed on
+2026-10-07 so `nosniff` is sent once.
 
 Not set in code on purpose:
 
 - `Content-Security-Policy`: Livewire and Vite need nonces or hashes, which is a separate project.
-- `Strict-Transport-Security`: HSTS is configured at Cloudflare (see
-  [Production operations](../workflows/production-operations.md)).
 
 `tests/Feature/Http/Middleware/SendSecurityHeadersTest.php` covers the behaviour.
 

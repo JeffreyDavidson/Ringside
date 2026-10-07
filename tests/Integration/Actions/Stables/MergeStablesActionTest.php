@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\MergeStablesAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
 
@@ -125,3 +128,53 @@ it('merges regardless of which stable was created first', function (bool $primar
     'primary is the older stable' => true,
     'primary is the newer stable' => false,
 ]);
+
+it('rejects merging stables of different promotions without changing either stable', function () {
+    $primaryStable = Stable::factory()->active()->for(Promotion::factory(), 'promotion')->create();
+    $secondaryStable = Stable::factory()->active()->for(Promotion::factory(), 'promotion')->create();
+    $secondaryMemberCount = resolve(StableMembershipService::class)->currentMembers($secondaryStable)->getTotalMemberCount();
+
+    expect(fn () => resolve(MergeStablesAction::class)->handle(
+        $primaryStable,
+        $secondaryStable,
+        now(),
+    ))->toThrow(CannotBeMergedException::class, 'belong to different promotions')
+        ->and(resolve(StableMembershipService::class)->currentMembers($secondaryStable)->getTotalMemberCount())->toBe($secondaryMemberCount)
+        ->and($secondaryStable->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($secondaryStable->fresh()?->trashed())->toBeFalse()
+        ->and($primaryStable->lifecycleTransitions()->exists())->toBeFalse();
+});
+
+it('merges stables that share a promotion', function () {
+    $promotion = Promotion::factory()->create();
+    $primaryStable = Stable::factory()->active()->for($promotion, 'promotion')->create();
+    $secondaryStable = Stable::factory()->active()->for($promotion, 'promotion')->create();
+
+    resolve(MergeStablesAction::class)->handle($primaryStable, $secondaryStable, now());
+
+    expect($secondaryStable->refresh()->trashed())->toBeTrue();
+});
+
+it('records a merged transition on both stables', function () {
+    $primaryStable = Stable::factory()->active()->create(['name' => 'Primary Stable']);
+    $secondaryStable = Stable::factory()->active()->create(['name' => 'Secondary Stable']);
+    $mergeDate = now()->subHour();
+
+    resolve(MergeStablesAction::class)->handle($primaryStable, $secondaryStable, $mergeDate);
+
+    $primaryTransition = $primaryStable->lifecycleTransitions()->sole();
+    $secondaryTransition = $secondaryStable->lifecycleTransitions()->sole();
+
+    expect($primaryTransition->transition)->toBe(LifecycleTransitionType::Merged)
+        ->and($primaryTransition->dimension)->toBe(LifecycleDimension::Activity)
+        ->and($primaryTransition->effective_at->toDateTimeString())->toBe($mergeDate->toDateTimeString())
+        ->and($primaryTransition->context)->toBe([
+            'merged_stable_id' => $secondaryStable->id,
+            'merged_stable_name' => 'Secondary Stable',
+        ])
+        ->and($secondaryTransition->transition)->toBe(LifecycleTransitionType::Merged)
+        ->and($secondaryTransition->context)->toBe([
+            'merged_into_stable_id' => $primaryStable->id,
+            'merged_into_stable_name' => 'Primary Stable',
+        ]);
+});

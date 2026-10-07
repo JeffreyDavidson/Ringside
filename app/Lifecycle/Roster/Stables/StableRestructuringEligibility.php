@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Roster\Stables;
 
 use App\Data\Stables\StableMembershipData;
+use App\Enums\Stables\StableMemberUnavailability;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Roster\Stables\Stable;
@@ -16,13 +17,32 @@ final readonly class StableRestructuringEligibility
 {
     public function __construct(private StableMembershipService $membershipService) {}
 
+    public function canSplit(Stable $stable): bool
+    {
+        try {
+            $this->ensureCanSplit($stable);
+
+            return true;
+        } catch (CannotBeSplitException) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether the stable could take part in a merge at all; the other stable is only known once one is picked.
+     */
+    public function canStartMerge(Stable $stable): bool
+    {
+        return $stable->hasCurrentActivityPeriod() && ! $stable->hasCurrentRetirement();
+    }
+
     public function ensureCanSplit(Stable $stable): void
     {
-        if ($stable->currentRetirement()->exists()) {
+        if ($stable->hasCurrentRetirement()) {
             throw CannotBeSplitException::retired($stable);
         }
 
-        if (! $stable->currentActivityPeriod()->exists()) {
+        if (! $stable->hasCurrentActivityPeriod()) {
             throw CannotBeSplitException::notActive($stable);
         }
 
@@ -56,6 +76,10 @@ final readonly class StableRestructuringEligibility
     {
         if ($primaryStable->is($secondaryStable)) {
             throw CannotBeMergedException::selfMerge($primaryStable);
+        }
+
+        if ($primaryStable->promotion_id !== $secondaryStable->promotion_id) {
+            throw CannotBeMergedException::differentPromotions($primaryStable, $secondaryStable);
         }
 
         if ($primaryStable->currentRetirement()->exists()) {
@@ -93,22 +117,27 @@ final readonly class StableRestructuringEligibility
         }
     }
 
+    /**
+     * Why a member cannot be moved to another stable, or null when it is available.
+     */
+    public function unavailabilityOf(Wrestler|TagTeam $member): ?StableMemberUnavailability
+    {
+        return match (true) {
+            $member->currentRetirement()->exists() => StableMemberUnavailability::Retired,
+            ! $member->currentEmployment()->exists() => StableMemberUnavailability::Unemployed,
+            $member->currentSuspension()->exists() => StableMemberUnavailability::Suspended,
+            $member instanceof Wrestler && $member->currentInjury()->exists() => StableMemberUnavailability::Injured,
+            default => null,
+        };
+    }
+
     /** @return array<int, string> */
     private function unavailableMemberNames(StableMembershipData $members): array
     {
-        $unavailableWrestlers = $members->wrestlers?->filter(
-            fn (Wrestler $wrestler): bool => ! $wrestler->currentEmployment()->exists()
-                || $wrestler->currentSuspension()->exists()
-                || $wrestler->currentInjury()->exists()
-                || $wrestler->currentRetirement()->exists(),
-        )->map(fn (Wrestler $wrestler): string => $wrestler->name)->all() ?? [];
-
-        $unavailableTagTeams = $members->tagTeams?->filter(
-            fn (TagTeam $tagTeam): bool => ! $tagTeam->currentEmployment()->exists()
-                || $tagTeam->currentSuspension()->exists()
-                || $tagTeam->currentRetirement()->exists(),
-        )->map(fn (TagTeam $tagTeam): string => $tagTeam->name)->all() ?? [];
-
-        return [...$unavailableWrestlers, ...$unavailableTagTeams];
+        return collect([...($members->wrestlers ?? []), ...($members->tagTeams ?? [])])
+            ->filter(fn (Wrestler|TagTeam $member): bool => $this->unavailabilityOf($member) instanceof StableMemberUnavailability)
+            ->map(fn (Wrestler|TagTeam $member): string => $member->name)
+            ->values()
+            ->all();
     }
 }

@@ -13,6 +13,7 @@ enum LifecycleTransitionType: string
     case Established = 'established';
     case ClearedFromInjury = 'cleared_from_injury';
     case Injured = 'injured';
+    case Merged = 'merged';
     case LegacyStatusChanged = 'legacy_status_changed';
     case Pulled = 'pulled';
     case Reinstated = 'reinstated';
@@ -20,6 +21,7 @@ enum LifecycleTransitionType: string
     case Released = 'released';
     case Reunited = 'reunited';
     case Retired = 'retired';
+    case Split = 'split';
     case Suspended = 'suspended';
     case Unretired = 'unretired';
 }

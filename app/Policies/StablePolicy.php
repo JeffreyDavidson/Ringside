@@ -64,4 +64,19 @@ class StablePolicy
     {
         return false;
     }
+
+    public function merge(User $user, Stable $stable): bool
+    {
+        return false;
+    }
+
+    public function split(User $user, Stable $stable): bool
+    {
+        return false;
+    }
+
+    public function reunite(User $user, Stable $stable): bool
+    {
+        return false;
+    }
 }

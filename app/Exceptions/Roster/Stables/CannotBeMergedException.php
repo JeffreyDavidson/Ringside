@@ -16,6 +16,14 @@ final class CannotBeMergedException extends BaseBusinessException
         return new self("{$context} cannot be merged with itself.");
     }
 
+    public static function differentPromotions(Stable $primaryStable, Stable $secondaryStable): static
+    {
+        $primaryContext = self::formatModelContext($primaryStable);
+        $secondaryContext = self::formatModelContext($secondaryStable);
+
+        return new self("{$primaryContext} and {$secondaryContext} belong to different promotions and cannot be merged.");
+    }
+
     public static function primaryRetired(Stable $primaryStable): static
     {
         $context = self::formatModelContext($primaryStable);

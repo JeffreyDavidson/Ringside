@@ -182,8 +182,11 @@ invitations gets a non-blocking warning naming those promotions after saving
 `PendingInvitationSummaryService`, which matches on the normalised email and
 loads a whole page of users in one query. The invited user sees their invitations
 (`PromotionContextService::pendingInvitationsFor()`, matched on the user's
-normalised email, oldest first) as a section of the promotion switcher, or on the
-no-membership page when they have no active promotion, with Accept and Decline,
+normalised email, oldest first) as a section of the promotion switcher, on the
+no-membership page when they have no active promotion and no access, or, for a
+platform administrator who continues globally without a membership, as a block in
+the sidebar itself (a compact envelope button when the sidebar is collapsed), with
+Accept and Decline,
 which post to `promotions.invitation.accept` / `.decline` (outside the promotion
 context, because a user with no active membership must reach them).
 `AcceptPromotionInvitationAction` locks the promotion and then the invitation

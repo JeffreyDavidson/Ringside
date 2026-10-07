@@ -159,6 +159,23 @@
                 </div>
             @endif
 
+            @if (! $activePromotion && $promotionInvitations->isNotEmpty())
+                <div x-show="expanded" class="border-ringside-line mb-6 border p-3">
+                    <x-promotions.invitations :invitations="$promotionInvitations" />
+                </div>
+                <button
+                    type="button"
+                    x-show="! expanded"
+                    @click="toggle()"
+                    class="border-ringside-line hover:bg-ringside-surface focus-visible:outline-ringside-ink relative mb-6 grid min-h-11 w-full place-items-center border focus-visible:outline-2 focus-visible:outline-offset-4"
+                    data-test="invitation-collapsed-toggle"
+                >
+                    <x-heroicon-o-envelope class="size-5" />
+                    <span class="bg-ringside-signal absolute end-1 top-1 size-2" aria-hidden="true"></span>
+                    <span class="sr-only">{{ __('promotions.invitations_pending') }}</span>
+                </button>
+            @endif
+
             <x-sidebar.menu />
         </div>
 
