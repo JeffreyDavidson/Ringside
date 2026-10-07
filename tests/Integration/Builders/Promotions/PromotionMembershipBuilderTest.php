@@ -90,3 +90,29 @@ test('it filters memberships by role', function (): void {
     expect($memberships)->toHaveCount(1)
         ->and($memberships->sole()->promotion_id)->toBe($ownerPromotion->id);
 });
+
+test('it orders memberships by creation with the user id breaking ties', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $later = User::factory()->create();
+    $earlier = User::factory()->create();
+    $tieLow = User::factory()->create();
+    $tieHigh = User::factory()->create();
+    $role = ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active];
+    $promotion->users()->attach($later, [...$role]);
+    $promotion->users()->attach($tieHigh, [...$role]);
+    $promotion->users()->attach($tieLow, [...$role]);
+    $promotion->users()->attach($earlier, [...$role]);
+
+    PromotionMembership::query()->where('user_id', $later->id)->update(['created_at' => '2026-02-01 00:00:00']);
+    PromotionMembership::query()->whereIn('user_id', [$tieLow->id, $tieHigh->id])->update(['created_at' => '2026-01-01 00:00:00']);
+    PromotionMembership::query()->where('user_id', $earlier->id)->update(['created_at' => '2025-12-01 00:00:00']);
+
+    // Act
+    $memberships = PromotionMembership::query()
+        ->oldestFirst()
+        ->get();
+
+    // Assert
+    expect($memberships->pluck('user_id')->all())->toBe([$earlier->id, $tieLow->id, $tieHigh->id, $later->id]);
+});

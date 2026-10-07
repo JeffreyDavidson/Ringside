@@ -116,8 +116,8 @@ class FormModal extends BaseFormModal
     public function getMatchStipulations(): array
     {
         return MatchStipulation::query()
-            ->where('is_active', true)
-            ->orderBy('name')
+            ->active()
+            ->alphabetical()
             ->get(['id', 'name'])
             ->mapWithKeys(fn (MatchStipulation $stipulation): array => [
                 $stipulation->id => $stipulation->name,

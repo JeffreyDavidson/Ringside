@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Builders\Matches\MatchStipulationBuilder;
 use Database\Factories\Matches\MatchStipulationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +32,7 @@ use Illuminate\Support\Carbon;
  */
 #[Table('matches_stipulations')]
 #[Fillable('name', 'slug', 'description', 'is_active')]
+#[UseEloquentBuilder(MatchStipulationBuilder::class)]
 #[UseFactory(MatchStipulationFactory::class)]
 class MatchStipulation extends Model
 {

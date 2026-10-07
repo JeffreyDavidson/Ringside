@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 test('orders venues alphabetically by name', function () {
@@ -38,4 +39,19 @@ test('remains chainable with other query constraints', function () {
 
     // Assert
     expect($venues->modelKeys())->toBe([$capitol->id, $zenith->id]);
+});
+
+test('it keeps only venues that host events', function () {
+    // Arrange
+    $used = Venue::factory()->create();
+    Venue::factory()->create();
+    Event::factory()->for($used)->create();
+
+    // Act
+    $venues = Venue::query()
+        ->hostingEvents()
+        ->get();
+
+    // Assert
+    expect($venues->modelKeys())->toBe([$used->id]);
 });

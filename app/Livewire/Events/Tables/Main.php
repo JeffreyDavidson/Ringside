@@ -66,7 +66,7 @@ class Main extends BaseTable
      */
     protected function venuesQuery(): VenueBuilder
     {
-        return Venue::query()->whereIn('id', Event::query()->select('venue_id'));
+        return Venue::query()->hostingEvents();
     }
 
     protected function configure(): void
@@ -154,10 +154,10 @@ class Main extends BaseTable
                     $context = app(PromotionContextService::class);
                     $promotion = $context->isEnforced() ? $context->current() : null;
 
-                    $builder->whereBetween('date', [
+                    $builder->heldBetween(
                         Promotion::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
                         Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
-                    ]);
+                    );
                 }),
             SelectFilter::make(__('core.venue'), 'venue')
                 ->options([
