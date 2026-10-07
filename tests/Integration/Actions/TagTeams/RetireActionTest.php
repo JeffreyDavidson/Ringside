@@ -54,26 +54,6 @@ test('it retires eligible current members by default', function () {
         ->and($manager->currentRetirement()->exists())->toBeTrue();
 });
 
-test('it can retire the tag team without retiring its members', function () {
-    $tagTeam = TagTeam::factory()->employed()->create();
-    $wrestler = Wrestler::factory()->employed()->create();
-    $manager = Manager::factory()->employed()->create();
-
-    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => now()->subMonth()]);
-    $tagTeam->managers()->attach($manager, ['hired_at' => now()->subMonth()]);
-
-    resolve(RetireAction::class)
-        ->handle($tagTeam, retireMembers: false);
-
-    $tagTeam->refresh();
-    $wrestler->refresh();
-    $manager->refresh();
-
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
-        ->and($wrestler->currentRetirement()->exists())->toBeFalse()
-        ->and($manager->currentRetirement()->exists())->toBeFalse();
-});
-
 test('it retires tag team with specific retirement date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $retirementDate = now()->startOfDay();
@@ -300,7 +280,7 @@ test('it ends employment and an open suspension on their own start dates when re
     $suspension = $tagTeam->suspensions()->create(['started_at' => $suspensionStartedAt]);
 
     // Act
-    resolve(RetireAction::class)->handle($tagTeam, now()->subDays(20), retireMembers: false);
+    resolve(RetireAction::class)->handle($tagTeam, now()->subDays(20));
 
     // Assert
     expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($employmentStartedAt->toDateTimeString())

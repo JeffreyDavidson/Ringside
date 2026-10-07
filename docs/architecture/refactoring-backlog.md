@@ -241,6 +241,24 @@ Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called b
 (the modal package mounts components with `mount()`), but about 250 modal test call sites
 depend on them; remove them together with a rewrite of those tests.
 
+### Dead application code cleanup (phase 2)
+
+**Priority:** Medium  
+**Status:** Step 5 completed.
+
+Step 5 extracted the period-closing sequence the wrestler, manager, referee, and tag team
+`Release` and `Retire` Actions each repeated into `CareerPeriodCloser`
+(`app/Lifecycle/Periods`), a small typed collaborator beside `DeletionPeriodCloser`. This is
+deliberately not the rejected generic base for per-entity Actions: each Action keeps its own
+transaction, owner lock, eligibility check, retirement start, and cascade. The stable and
+title `Retire` Actions close only an activity period and were left alone. The test-only
+`retireMembers` flag on the tag team `RetireAction`, the `unretireMembers`, `employImmediately`
+and `requireAvailablePartners` flags on the tag team `UnretireAction`, and the
+`establishImmediately` and `requireFormerMembers` flags on the stable `UnretireAction` were
+removed. Follow-up: the `requireAvailablePartners` and `requireFormerMembers` parameters on
+`TagTeamRetirementEligibility` and `StableRetirementEligibility` are now only exercised by
+eligibility tests; remove them after the in-flight eligibility query changes land.
+
 ### Promotion gate extraction
 
 **Priority:** Medium  

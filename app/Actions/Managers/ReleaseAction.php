@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\Periods\EmploymentPeriodManager;
-use App\Lifecycle\Periods\InjuryPeriodManager;
-use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Periods\CareerPeriodCloser;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
@@ -16,9 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ReleaseAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly CareerPeriodCloser $careerPeriods,
         private readonly IndividualEmploymentEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
@@ -34,14 +29,7 @@ class ReleaseAction
             $lockedManager = $manager->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedManager);
-
-            $this->employmentPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::Released);
-
-            if ($lockedManager->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedManager, $effectiveDate, clampToStart: true);
-            } elseif ($lockedManager->currentInjury()->exists()) {
-                $this->injuryPeriods->end($lockedManager, $effectiveDate, clampToStart: true);
-            }
+            $this->careerPeriods->release($lockedManager, $effectiveDate);
 
             $this->endCurrentRelationships->handle($lockedManager, $effectiveDate);
         });

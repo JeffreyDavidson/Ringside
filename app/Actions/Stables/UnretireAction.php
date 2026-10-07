@@ -24,25 +24,19 @@ class UnretireAction
     ) {}
 
     /**
-     * Unretire a retired stable and optionally make it active again.
+     * Unretire a retired stable and make it active again.
      */
-    public function handle(
-        Stable $stable,
-        ?Carbon $unretiredDate = null,
-        bool $establishImmediately = true,
-        bool $requireFormerMembers = true
-    ): void {
+    public function handle(Stable $stable, ?Carbon $unretiredDate = null): void
+    {
         $effectiveDate = $unretiredDate ?? now();
 
-        DB::transaction(function () use ($stable, $effectiveDate, $establishImmediately, $requireFormerMembers): void {
+        DB::transaction(function () use ($stable, $effectiveDate): void {
             $lockedStable = $stable->refreshForUpdate();
 
-            $this->eligibility->ensureCanUnretire($lockedStable, $requireFormerMembers);
+            $this->eligibility->ensureCanUnretire($lockedStable);
             $this->retirementPeriods->end($lockedStable, $effectiveDate, LifecycleTransitionType::Unretired);
 
-            if ($establishImmediately) {
-                $this->startActivityPeriodAction->handle($lockedStable, $effectiveDate);
-            }
+            $this->startActivityPeriodAction->handle($lockedStable, $effectiveDate);
         });
     }
 }
