@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Titles\CannotChangeTypeException;
 use App\Models\Matches\EventMatch;
@@ -57,6 +58,25 @@ test('it activates an unactivated title if activation date is filled in request'
         ->and($title->type)->toBe(TitleType::Singles)
         ->and($title->activityPeriods)->toHaveCount(1)
         ->and(requiredDate($title->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+});
+
+test('it records a single debuted transition when updating an unactivated title with a debut date', function () {
+    $datetime = now();
+    $title = Title::factory()->unactivated()->create();
+
+    resolve(UpdateAction::class)->handle($title, new TitleData('New Example Title', TitleType::Singles, $datetime));
+
+    $transition = $title->lifecycleTransitions()->sole();
+    expect($transition->transition)->toBe(LifecycleTransitionType::Debuted)
+        ->and($transition->effective_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+});
+
+test('it records no debuted transition when the title has already debuted', function () {
+    $title = Title::factory()->active()->create();
+
+    resolve(UpdateAction::class)->handle($title, new TitleData('New Example Title', TitleType::Singles, now()));
+
+    expect($title->lifecycleTransitions()->exists())->toBeFalse();
 });
 
 test('it updates a title with future activation but does not create new debut since it already has debuted', function () {

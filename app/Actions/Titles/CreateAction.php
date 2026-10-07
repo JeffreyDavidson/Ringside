@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    public function __construct(private readonly StartActivityPeriodAction $startActivityPeriod) {}
+    public function __construct(private readonly DebutAction $debut) {}
 
     /**
      * Create a title.
      *
      * This handles the complete title creation workflow:
      * - Creates the title record with name, description, and championship type
-     * - Creates active status record if debut_date is provided
+     * - Debuts the title through DebutAction if debut_date is provided, recording the Debuted transition
      * - Establishes the title as available for championship competition
      * - Sets up the foundation for future championship lineage
      *
@@ -36,7 +35,7 @@ class CreateAction
 
             // Create active status if debut_date is provided
             if (isset($titleData->debut_date)) {
-                $this->startActivityPeriod->handle($title, $titleData->debut_date);
+                $this->debut->handle($title, $titleData->debut_date);
             }
 
             return $title;
