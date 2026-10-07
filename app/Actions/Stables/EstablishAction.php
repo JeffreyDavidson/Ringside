@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
@@ -20,7 +18,6 @@ class EstablishAction
 {
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
-        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableActivityEligibility $eligibility,
     ) {}
 
@@ -43,19 +40,16 @@ class EstablishAction
 
             $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
 
-            $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $effectiveActivationDate);
+            $activityPeriod = $this->startActivityPeriodAction->handle(
+                $lockedStable,
+                $effectiveActivationDate,
+                transition: LifecycleTransitionType::Established,
+                context: array_filter(['ended_at' => $endDate?->toDateTimeString()]),
+            );
 
             if ($endDate instanceof Carbon) {
                 $activityPeriod->update(['ended_at' => $endDate]);
             }
-
-            $this->recordLifecycleTransitionAction->handle(
-                $lockedStable,
-                LifecycleDimension::Activity,
-                LifecycleTransitionType::Established,
-                $effectiveActivationDate,
-                array_filter(['ended_at' => $endDate?->toDateTimeString()]),
-            );
 
             return $activityPeriod;
         });

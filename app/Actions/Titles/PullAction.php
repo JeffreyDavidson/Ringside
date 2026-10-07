@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
@@ -19,7 +17,6 @@ class PullAction
     public function __construct(
         private readonly TitleLifecycleEligibility $eligibility,
         private readonly EndActivityPeriodAction $endActivityPeriod,
-        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
     ) {}
 
     /**
@@ -45,12 +42,10 @@ class PullAction
         DB::transaction(function () use ($title, $date, $notes): void {
             $lockedTitle = $title->refreshForUpdate();
             $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Pull);
-            $this->endActivityPeriod->handle($lockedTitle, $date);
-            $this->recordLifecycleTransition->handle(
+            $this->endActivityPeriod->handle(
                 $lockedTitle,
-                LifecycleDimension::Activity,
-                LifecycleTransitionType::Pulled,
                 $date,
+                LifecycleTransitionType::Pulled,
                 array_filter(['notes' => $notes]),
             );
         });

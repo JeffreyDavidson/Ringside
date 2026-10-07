@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
@@ -19,7 +17,6 @@ class ReinstateAction
     public function __construct(
         private readonly TitleLifecycleEligibility $eligibility,
         private readonly StartActivityPeriodAction $startActivityPeriod,
-        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
     ) {}
 
     /**
@@ -43,13 +40,12 @@ class ReinstateAction
         DB::transaction(function () use ($title, $date, $notes): void {
             $lockedTitle = $title->refreshForUpdate();
             $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Reinstate);
-            $this->startActivityPeriod->handle($lockedTitle, $date, rescheduleFuturePeriod: true);
-            $this->recordLifecycleTransition->handle(
+            $this->startActivityPeriod->handle(
                 $lockedTitle,
-                LifecycleDimension::Activity,
-                LifecycleTransitionType::Reinstated,
                 $date,
-                array_filter(['notes' => $notes]),
+                rescheduleFuturePeriod: true,
+                transition: LifecycleTransitionType::Reinstated,
+                context: array_filter(['notes' => $notes]),
             );
         });
     }

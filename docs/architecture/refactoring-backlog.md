@@ -259,6 +259,15 @@ removed. Follow-up: the `requireAvailablePartners` and `requireFormerMembers` pa
 `TagTeamRetirementEligibility` and `StableRetirementEligibility` are now only exercised by
 eligibility tests; remove them after the in-flight eligibility query changes land.
 
+Activity period history: `StartActivityPeriodAction` and `EndActivityPeriodAction` now accept an
+optional `LifecycleTransitionType` (and a context array for notes or the planned end date) and
+record the `Activity` transition in the period's own transaction, as the employment, injury,
+suspension, and retirement period managers do. Stable `Establish`, `Disband`, and `Reunite` and
+title `Debut`, `Pull`, and `Reinstate` no longer call `RecordLifecycleTransitionAction` themselves.
+`MergeStablesAction` and `SplitStableAction` keep their manual calls: each records a pair of related
+`Merged` or `Split` transitions on two stables, and only the secondary stable's activity period is
+touched by a merge, so moving that one record onto the period end would reorder the pair.
+
 ### Promotion gate extraction
 
 **Priority:** Medium  
