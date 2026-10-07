@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\Periods\EmploymentPeriodManager;
-use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Periods\CareerPeriodCloser;
 use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
@@ -15,8 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ReleaseAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly CareerPeriodCloser $careerPeriods,
         private readonly TagTeamEmploymentEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
@@ -32,11 +29,7 @@ class ReleaseAction
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedTagTeam);
-            $this->employmentPeriods->end($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Released);
-
-            if ($lockedTagTeam->currentSuspension()->exists()) {
-                $this->suspensionPeriods->end($lockedTagTeam, $effectiveDate, clampToStart: true);
-            }
+            $this->careerPeriods->release($lockedTagTeam, $effectiveDate);
 
             $this->endCurrentRelationships->handle($lockedTagTeam, $effectiveDate);
         });

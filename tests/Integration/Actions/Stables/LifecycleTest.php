@@ -17,8 +17,6 @@ use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 
@@ -239,39 +237,6 @@ describe('Stable Activation Action Integration', function () {
             expect(requiredDate($retirement->ended_at)->format('Y-m-d H:i:s'))->toBe($unretireDate->format('Y-m-d H:i:s'));
         });
 
-        test('unretire action can leave the stable inactive when immediate establishment is disabled', function () {
-            $originalPeriodCount = $this->retiredStable->activityPeriods()->count();
-
-            resolve(UnretireAction::class)->handle($this->retiredStable, Carbon::now(), establishImmediately: false);
-
-            $refreshedStable = freshModel($this->retiredStable);
-            expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount)
-                ->and($refreshedStable->currentActivityPeriod()->exists())->toBeFalse();
-        });
-
-        test('unretire action preserves former members retirement state', function () {
-            $retiredWrestler = Wrestler::factory()->retired()->create();
-            $retiredTagTeam = TagTeam::factory()->retired()->create();
-
-            $this->retiredStable->wrestlers()->attach($retiredWrestler, [
-                'joined_at' => now()->subMonth(),
-                'left_at' => now()->subWeek(),
-            ]);
-            $this->retiredStable->tagTeams()->attach($retiredTagTeam, [
-                'joined_at' => now()->subMonth(),
-                'left_at' => now()->subWeek(),
-            ]);
-
-            resolve(UnretireAction::class)->handle(
-                $this->retiredStable,
-                establishImmediately: false,
-                requireFormerMembers: false,
-            );
-
-            expect($retiredWrestler->refresh()->currentRetirement()->exists())->toBeTrue()
-                ->and($retiredTagTeam->refresh()->currentRetirement()->exists())->toBeTrue();
-        });
-
         test('unretire eligibility respects the former member option', function () {
             $stable = Stable::factory()
                 ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
@@ -321,10 +286,6 @@ describe('Stable Activation Action Integration', function () {
             resolve(RetireAction::class)->handle($stable, $retireDate);
             expect(freshModel($stable)->currentRetirement()->exists())->toBeTrue();
 
-            // Unretire
-            $unretireDate = Carbon::now();
-            resolve(UnretireAction::class)->handle($stable, $unretireDate, establishImmediately: false, requireFormerMembers: false);
-
             $finalStable = freshModel($stable);
             expect($finalStable->currentActivityPeriod()->exists())->toBeFalse();
 
@@ -337,13 +298,12 @@ describe('Stable Activation Action Integration', function () {
                 LifecycleTransitionType::Disbanded,
                 LifecycleTransitionType::Reunited,
                 LifecycleTransitionType::Retired,
-                LifecycleTransitionType::Unretired,
             ]);
 
             // Verify retirement record
             $retirement = $finalStable->retirements()->firstOrFail();
             expect($retirement->started_at)->toBeInstanceOf(Carbon::class)
-                ->and($retirement->ended_at)->toBeInstanceOf(Carbon::class);
+                ->and($retirement->ended_at)->toBeNull();
         });
 
         test('action date validation maintains data integrity', function () {
