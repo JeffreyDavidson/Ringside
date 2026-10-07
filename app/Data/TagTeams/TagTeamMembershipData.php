@@ -39,24 +39,4 @@ readonly class TagTeamMembershipData
             managers: $managers
         );
     }
-
-    /**
-     * Get the wrestlers collection, defaulting to empty Eloquent collection.
-     *
-     * @return Collection<int, Wrestler>
-     */
-    public function getWrestlers(): Collection
-    {
-        return $this->wrestlers ?? new Collection;
-    }
-
-    /**
-     * Get the managers collection, defaulting to empty Eloquent collection.
-     *
-     * @return Collection<int, Manager>
-     */
-    public function getManagers(): Collection
-    {
-        return $this->managers ?? new Collection;
-    }
 }
