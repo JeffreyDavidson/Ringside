@@ -84,13 +84,13 @@
                                 <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 wrap-break-word">
                                     {{ trans_choice('stables.members_count', $row->currentWrestlers->count() + $row->currentTagTeams->count(), ['count' => $row->currentWrestlers->count() + $row->currentTagTeams->count()]) }}
                                 </p>
-                                <div class="mt-2 sm:hidden"><x-tables.stable-status :status="$row->status" /></div>
+                                <div class="mt-2 sm:hidden"><x-tables.status :status="$row->status" /></div>
                                 <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
                                     {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
                                 </p>
                             </td>
                             <td class="hidden px-4 py-4 align-top sm:table-cell">
-                                <x-tables.stable-status :status="$row->status" />
+                                <x-tables.status :status="$row->status" />
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                 {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
