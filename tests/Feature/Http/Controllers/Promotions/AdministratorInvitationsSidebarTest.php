@@ -31,6 +31,24 @@ describe('pending invitations in the sidebar', function () {
             ->assertSeeHtml(route('promotions.invitation.decline', $promotion));
     });
 
+    test('an administrator is told that accepting scopes them to the promotion, a regular user is not', function (callable $makeUser, int $status, bool $seesNote): void {
+        // Arrange
+        $user = $makeUser();
+        $promotion = Promotion::factory()->create();
+        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        actingAs($user);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertStatus($status)->assertSeeHtml('data-test="pending-invitations"');
+        expect(str_contains((string) $response->getContent(), 'data-test="invitation-admin-note"'))->toBe($seesNote);
+    })->with([
+        'administrator' => [administrator(...), 200, true],
+        'regular user' => [basicUser(...), 403, false],
+    ]);
+
     test('an administrator accepting the invitation then gets the promotion in the switcher', function () {
         // Arrange
         $admin = administrator();

@@ -36,6 +36,19 @@ final readonly class StableRestructuringEligibility
         return $stable->hasCurrentActivityPeriod() && ! $stable->hasCurrentRetirement();
     }
 
+    /**
+     * Whether another active, unretired stable of the same promotion exists to merge in.
+     */
+    public function hasMergeCandidate(Stable $stable): bool
+    {
+        return Stable::query()
+            ->where('promotion_id', $stable->promotion_id)
+            ->whereKeyNot($stable->getKey())
+            ->established()
+            ->whereDoesntHave('currentRetirement')
+            ->value('id') !== null;
+    }
+
     public function ensureCanSplit(Stable $stable): void
     {
         if ($stable->hasCurrentRetirement()) {

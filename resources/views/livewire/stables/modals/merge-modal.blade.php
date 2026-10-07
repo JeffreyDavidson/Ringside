@@ -27,9 +27,16 @@
     <x-slot:footer>
         <div class="flex flex-1 justify-end gap-2">
             <x-buttons.light wire:click="$dispatch('closeModal')">{{ __('core.form.cancel') }}</x-buttons.light>
-            <x-buttons.primary data-test="save-merge" wire:click="save" wire:loading.attr="disabled" wire:target="save">
-                {{ __('stables.modals.merge.submit') }}
-            </x-buttons.primary>
+            @if ($this->candidates->isNotEmpty())
+                <x-buttons.primary
+                    data-test="save-merge"
+                    wire:click="save"
+                    wire:loading.attr="disabled"
+                    wire:target="save"
+                >
+                    {{ __('stables.modals.merge.submit') }}
+                </x-buttons.primary>
+            @endif
         </div>
     </x-slot:footer>
 </x-modal>

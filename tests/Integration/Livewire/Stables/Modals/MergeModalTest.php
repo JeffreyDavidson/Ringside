@@ -153,7 +153,8 @@ describe('merge modal', function (): void {
         // Assert
         $modal
             ->assertNotDispatched('stable-restructured')
-            ->assertHasErrors(['form.otherStableId' => 'required']);
+            ->assertHasErrors(['form.otherStableId' => 'required'])
+            ->assertSee('The stable field is required.');
     });
 
     it('rejects a stable that was not offered', function (string $state): void {
@@ -218,6 +219,8 @@ describe('merge modal', function (): void {
         $modal = livewire(MergeModal::class, ['stableId' => $stable->id]);
 
         // Assert
-        $modal->assertSee('There are no other active stables in this promotion to merge with.');
+        $modal
+            ->assertSee('There are no other active stables in this promotion to merge with.')
+            ->assertDontSeeHtml('data-test="save-merge"');
     });
 });
