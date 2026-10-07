@@ -8,12 +8,6 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\Roster\TagTeams\TagTeam;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it retires a bookable tag team at the current datetime by default', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
 

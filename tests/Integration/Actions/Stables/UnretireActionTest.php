@@ -8,12 +8,6 @@ use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function (): void {
-    testTime()->freeze();
-});
-
 test('it unretires a retired stable and establishes it by default', function (): void {
     $stable = Stable::factory()->retired()->create();
     $unretiredAt = now()->startOfDay();

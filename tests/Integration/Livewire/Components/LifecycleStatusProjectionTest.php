@@ -16,7 +16,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -26,15 +25,7 @@ use function Pest\Livewire\livewire;
  */
 function fallbackStatusQueries(Closure $callback): array
 {
-    DB::flushQueryLog();
-    DB::enableQueryLog();
-
-    $callback();
-
-    $queries = array_column(DB::getQueryLog(), 'query');
-    DB::disableQueryLog();
-
-    return array_values(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'select exists')));
+    return array_values(array_filter(queriesDuring($callback), fn (string $sql): bool => str_starts_with($sql, 'select exists')));
 }
 
 describe('lifecycle status projection', function (): void {

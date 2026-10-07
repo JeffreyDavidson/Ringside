@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\TagTeams\ReinstateAction;
 use App\Models\Roster\TagTeams\TagTeam;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it reinstates a suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 

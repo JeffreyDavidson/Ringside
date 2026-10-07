@@ -7,12 +7,6 @@ use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it creates a title', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
 

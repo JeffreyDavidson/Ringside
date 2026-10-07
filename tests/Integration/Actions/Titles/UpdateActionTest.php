@@ -10,12 +10,6 @@ use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it updates a title', function () {
     $data = new TitleData('New Example Title', TitleType::Singles, null);
     $title = Title::factory()->create();

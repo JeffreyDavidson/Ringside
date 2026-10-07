@@ -6,12 +6,6 @@ use App\Actions\Referees\RetireAction;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it retires an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();

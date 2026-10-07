@@ -6,12 +6,6 @@ use App\Actions\Referees\ReinstateAction;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it reinstates a suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();

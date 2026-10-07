@@ -6,12 +6,6 @@ use App\Actions\Referees\SuspendAction;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it suspends an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 

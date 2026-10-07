@@ -6,12 +6,6 @@ use App\Actions\TagTeams\EmployCurrentWrestlersAction;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it employs unemployed current wrestlers', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
     $employmentDate = now()->subDay();

@@ -6,12 +6,6 @@ use App\Actions\Managers\SuspendAction;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it suspends an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 

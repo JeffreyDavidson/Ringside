@@ -6,12 +6,6 @@ use App\Actions\Referees\DeleteAction;
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it soft deletes an unemployed referee', function () {
     $referee = Referee::factory()->create();
 

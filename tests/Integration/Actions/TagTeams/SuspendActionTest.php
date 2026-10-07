@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\TagTeams\SuspendAction;
 use App\Models\Roster\TagTeams\TagTeam;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it suspends an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 

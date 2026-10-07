@@ -6,12 +6,6 @@ use App\Actions\Referees\InjureAction;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it injures an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 

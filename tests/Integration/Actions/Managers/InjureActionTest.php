@@ -6,12 +6,6 @@ use App\Actions\Managers\InjureAction;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it injures an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 

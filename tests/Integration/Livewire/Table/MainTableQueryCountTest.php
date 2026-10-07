@@ -14,7 +14,6 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -22,22 +21,6 @@ use function Pest\Livewire\livewire;
 beforeEach(function (): void {
     actingAs(administrator());
 });
-
-/**
- * @return list<string> The SQL of every query issued by the callback.
- */
-function queriesDuring(Closure $callback): array
-{
-    DB::flushQueryLog();
-    DB::enableQueryLog();
-
-    $callback();
-
-    $queries = array_column(DB::getQueryLog(), 'query');
-    DB::disableQueryLog();
-
-    return $queries;
-}
 
 dataset('main tables', [
     'wrestlers' => [WrestlersTable::class, fn (int $count) => Wrestler::factory()->employed()->count($count)->create()],

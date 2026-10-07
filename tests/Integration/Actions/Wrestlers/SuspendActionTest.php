@@ -6,12 +6,6 @@ use App\Actions\Wrestlers\SuspendAction;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it suspends an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
