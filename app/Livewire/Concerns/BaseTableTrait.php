@@ -14,6 +14,15 @@ trait BaseTableTrait
 
     protected string $routeBasePath = '';
 
+    /**
+     * Blade view of the row actions menu, rendered with the row under the $actionsRowVariable name.
+     *
+     * @var view-string
+     */
+    protected string $actionsView;
+
+    protected string $actionsRowVariable;
+
     public function mountBaseTableTrait(): void
     {
         $this->addAdditionalSelects([$this->databaseTableName.'.id as id'])
@@ -28,7 +37,15 @@ trait BaseTableTrait
     /**
      * Build the row actions column shown when the table enables it.
      */
-    abstract protected function getDefaultActionColumn(): Column;
+    protected function getDefaultActionColumn(): Column
+    {
+        return Column::make(__('core.actions'))
+            ->label(fn (mixed $row) => view($this->actionsView, [
+                $this->actionsRowVariable => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
+    }
 
     /** @return array<int, Column> */
     protected function additionalColumns(): array

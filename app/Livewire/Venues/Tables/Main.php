@@ -7,18 +7,23 @@ namespace App\Livewire\Venues\Tables;
 use App\Actions\Venues\DeleteAction;
 use App\Builders\Events\VenueBuilder;
 use App\Livewire\Base\Tables\BaseTable;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Venue::class;
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.venue-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'venue';
 
     #[\Override]
     protected string $databaseTableName = 'venues';
@@ -40,7 +45,7 @@ class Main extends BaseTable
 
     protected function configure(): void
     {
-        Gate::authorize('viewAny', Venue::class);
+        parent::configure();
         $this->emptyStateTitle = __('venues.empty_title');
         $this->emptyStateDescription = __('venues.empty_description');
         $this->emptyStateIcon = 'heroicon-o-building-office-2';
@@ -64,24 +69,8 @@ class Main extends BaseTable
         ];
     }
 
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Venue $row) => view('components.tables.columns.venue-actions', [
-                'venue' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
-    }
-
     public function delete(Venue $venue, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $venue);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $venue): void {
-            $deleteAction->handle($venue);
-        }, __('venues.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($venue, $deleteAction->handle(...), __('venues.actions.deleted'));
     }
 }
