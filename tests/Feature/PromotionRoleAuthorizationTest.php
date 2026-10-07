@@ -59,7 +59,7 @@ function createPromotionAuthorizationSubjects(Promotion $promotion): array
         [
             'modelClass' => Stable::class,
             'model' => Stable::factory()->for($promotion, 'promotion')->create(),
-            'abilities' => ['update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'],
+            'abilities' => ['update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire', 'merge', 'split', 'reunite'],
         ],
         [
             'modelClass' => Event::class,

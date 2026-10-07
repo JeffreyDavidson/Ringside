@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\RemoveStableMembersAction;
 use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
@@ -67,6 +70,34 @@ describe('SplitStableAction Integration Tests', function () {
     });
 
     describe('complete split workflow', function () {
+        test('split records a split transition on both stables', function () {
+            $splitDate = Carbon::now()->subHour();
+
+            $newStable = resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                $splitDate
+            );
+
+            $originalTransition = $this->originalStable->lifecycleTransitions()->sole();
+            $newTransition = $newStable->lifecycleTransitions()
+                ->where('transition', LifecycleTransitionType::Split)
+                ->sole();
+
+            expect($originalTransition->transition)->toBe(LifecycleTransitionType::Split)
+                ->and($originalTransition->dimension)->toBe(LifecycleDimension::Activity)
+                ->and($originalTransition->effective_at->toDateTimeString())->toBe($splitDate->toDateTimeString())
+                ->and($originalTransition->context)->toBe([
+                    'new_stable_id' => $newStable->id,
+                    'new_stable_name' => $this->newStableName,
+                ])
+                ->and($newTransition->context)->toBe([
+                    'split_from_stable_id' => $this->originalStable->id,
+                    'split_from_stable_name' => 'Original Stable',
+                ]);
+        });
+
         test('split creates new stable with specified members', function () {
             $splitDate = Carbon::now();
 
@@ -561,6 +592,7 @@ describe('SplitStableAction Integration Tests', function () {
                 resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
                 resolve(StableNameLock::class),
+                resolve(RecordLifecycleTransitionAction::class),
             );
 
             expect(fn () => $action->handle(

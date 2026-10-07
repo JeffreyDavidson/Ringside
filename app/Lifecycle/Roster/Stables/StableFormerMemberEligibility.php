@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Roster\Stables;
 
+use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -15,20 +16,37 @@ final class StableFormerMemberEligibility
     /** @return Collection<int, Wrestler|TagTeam> */
     public function availableFor(Stable $stable): Collection
     {
+        $members = $this->availableMembersFor($stable);
+
+        return collect([...($members->wrestlers ?? []), ...($members->tagTeams ?? [])]);
+    }
+
+    /**
+     * Former members that can return to the stable, once each however often they joined and left: employed, not
+     * injured (wrestlers), suspended or retired, and not a current member of another stable.
+     */
+    public function availableMembersFor(Stable $stable): StableMembershipData
+    {
         $wrestlers = $stable->previousWrestlers()
             ->whereHas('currentEmployment')
             ->whereDoesntHave('currentInjury')
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentRetirement')
-            ->get();
+            ->whereDoesntHave('currentStable')
+            ->get()
+            ->unique('id')
+            ->values();
 
         $tagTeams = $stable->previousTagTeams()
             ->whereHas('currentEmployment')
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentRetirement')
-            ->get();
+            ->whereDoesntHave('currentStable')
+            ->get()
+            ->unique('id')
+            ->values();
 
-        return $wrestlers->concat($tagTeams);
+        return new StableMembershipData($wrestlers, $tagTeams);
     }
 
     /** @return Collection<int, Wrestler|TagTeam> */

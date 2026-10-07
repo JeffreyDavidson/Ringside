@@ -34,7 +34,44 @@ return [
         'deleted' => 'Stable successfully deleted.',
         'disbanded' => 'Stable successfully disbanded.',
         'established' => 'Stable successfully established.',
+        'merged' => ':other was merged into :name.',
         'retired' => 'Stable successfully retired.',
+        'reunited' => ':name was reunited.',
+        'split' => ':name was split. The new stable is :new.',
         'unretired' => 'Stable successfully unretired.',
+    ],
+
+    'modals' => [
+        'merge' => [
+            'title' => 'Merge stable',
+            'other_stable' => 'Stable to merge in',
+            'select_stable' => 'Select a stable',
+            'no_candidates' => 'There are no other active stables in this promotion to merge with.',
+            'summary' => ':name keeps its name and receives :other’s members; :other ends and is removed.',
+            'summary_pending' => ':name keeps its name and receives the members of the stable you pick; that stable ends and is removed.',
+            'submit' => 'Merge stables',
+        ],
+        'split' => [
+            'title' => 'Split stable',
+            'description' => 'Choose the members who leave :name for a new stable. Each stable needs at least :minimum members after the split, and a tag team counts as two.',
+            'new_name' => 'New stable name',
+            'wrestlers' => 'Wrestlers',
+            'tag_teams' => 'Tag teams',
+            'submit' => 'Split stable',
+        ],
+        'reunite' => [
+            'title' => 'Reunite stable',
+            'description' => 'Choose the former members who rejoin :name. At least :minimum members are needed, and a tag team counts as two.',
+            'wrestlers' => 'Wrestlers',
+            'tag_teams' => 'Tag teams',
+            'submit' => 'Reunite stable',
+        ],
+    ],
+
+    'unavailability' => [
+        'injured' => 'Injured',
+        'retired' => 'Retired',
+        'suspended' => 'Suspended',
+        'unemployed' => 'Not employed',
     ],
 ];
