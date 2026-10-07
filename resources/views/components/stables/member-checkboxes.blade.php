@@ -5,10 +5,12 @@
 
 @php
     $model = (string) $attributes->get('wire:model');
+    $errorId = "{$model}-error";
+    $errorMessages = collect($errors->get($model))->merge($errors->get("{$model}.*"))->flatten()->unique()->all();
 @endphp
 
 @if ($members->isNotEmpty())
-    <fieldset class="space-y-2">
+    <fieldset class="space-y-2" @if ($errorMessages !== []) aria-describedby="{{ $errorId }}" @endif>
         <legend class="text-ringside-ink text-sm font-semibold">{{ $heading }}</legend>
 
         <ul class="divide-ringside-line border-ringside-line divide-y border">
@@ -34,5 +36,13 @@
                 </li>
             @endforeach
         </ul>
+
+        @if ($errorMessages !== [])
+            <div id="{{ $errorId }}" class="text-ringside-signal-soft space-y-1 text-sm" role="alert">
+                @foreach ($errorMessages as $message)
+                    <p>{{ $message }}</p>
+                @endforeach
+            </div>
+        @endif
     </fieldset>
 @endif

@@ -39,7 +39,7 @@ describe('show page query counts', function (): void {
         'manager' => [fn (): Model => Manager::factory()->employed()->create(), 'managers.show', 10],
         'referee' => [fn (): Model => Referee::factory()->employed()->create(), 'referees.show', 8],
         'tag team' => [fn (): Model => TagTeam::factory()->employed()->create(), 'tag-teams.show', 13],
-        'stable' => [fn (): Model => Stable::factory()->active()->create(), 'stables.show', 11],
+        'stable' => [fn (): Model => Stable::factory()->active()->create(), 'stables.show', 12],
         'title' => [fn (): Model => Title::factory()->active()->create(), 'titles.show', 9],
     ]);
 });

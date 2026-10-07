@@ -16,6 +16,6 @@ class MergeForm extends Form
     {
         $this->validate([
             'otherStableId' => ['required', 'integer', Rule::in($candidateIds)],
-        ]);
+        ], attributes: ['otherStableId' => __('stables.modals.merge.other_stable_attribute')]);
     }
 }

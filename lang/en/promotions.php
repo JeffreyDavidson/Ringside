@@ -22,6 +22,7 @@ return [
     'invitation_declined' => 'Invitation declined.',
     'invitation_rate_limited' => '{1} Too many invitations were sent for this promotion. Try again in :minutes minute.|[2,*] Too many invitations were sent for this promotion. Try again in :minutes minutes.',
     'invitation_already_pending' => 'That email already has a pending invitation to this promotion. Cancel it in the list below to send a different role.',
+    'invitation_administrator_note' => 'Accepting makes you a member of this promotion; you’ll then work inside it instead of seeing all promotions.',
     'invitation_expires' => 'Expires :date',
     'invitation_expires_heading' => 'Expires',
     'invitation_pending' => 'Invitation pending',
