@@ -80,10 +80,7 @@ class MergeModal extends ModalComponent
     public function candidates(): Collection
     {
         return Stable::query()
-            ->where('promotion_id', $this->stable->promotion_id)
-            ->whereKeyNot($this->stableId)
-            ->established()
-            ->whereDoesntHave('currentRetirement')
+            ->mergeCandidatesFor($this->stable)
             ->orderBy('name')
             ->orderBy('id')
             ->get();
