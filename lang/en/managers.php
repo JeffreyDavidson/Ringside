@@ -46,19 +46,15 @@ return [
         'employ' => [
             'default' => 'Unable to hire this manager at this time.',
             'already_employed' => 'This manager is already hired.',
-            'injured' => 'Injured managers cannot be hired until they are cleared from injury.',
             'retired' => 'Retired managers cannot be hired without unretiring first.',
-            'suspended' => 'Cannot hire suspended managers.',
         ],
         'release' => [
             'default' => 'Unable to release this manager.',
-            'suspended' => 'Manager must be reinstated before being released.',
             'unemployed' => 'This manager is not currently employed.',
         ],
         'retire' => [
             'default' => 'Unable to retire this manager.',
             'already_retired' => 'This manager is already retired.',
-            'suspended' => 'Suspended managers must be reinstated before retiring.',
             'unemployed' => 'Only employed managers can retire.',
         ],
         'unretire' => [
@@ -73,7 +69,7 @@ return [
         ],
         'reinstate' => [
             'default' => 'Unable to reinstate this manager.',
-            'injured' => 'Managers cannot be reinstated while injured.',
+            'injured' => 'Injured managers must be cleared from injury instead of reinstated.',
             'not_suspended' => 'This manager is not currently suspended.',
         ],
         'injure' => [
@@ -86,10 +82,6 @@ return [
             'default' => 'Unable to clear this manager from injury.',
             'not_injured' => 'This manager is not currently injured.',
         ],
-        'restore' => [
-            'default' => 'Unable to restore this manager.',
-            'not_deleted' => 'This manager has not been deleted.',
-        ],
-        'general' => 'An unexpected error occurred with this manager action. Please try again.',
+        'general' => 'An unexpected error occurred. Please try again.',
     ],
 ];
