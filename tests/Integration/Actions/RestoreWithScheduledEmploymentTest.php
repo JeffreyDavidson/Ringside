@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\DeleteAction as ManagerDeleteAction;
+use App\Actions\Managers\RestoreAction as ManagerRestoreAction;
 use App\Actions\Referees\DeleteAction as RefereeDeleteAction;
+use App\Actions\Referees\RestoreAction as RefereeRestoreAction;
 use App\Actions\TagTeams\DeleteAction as TagTeamDeleteAction;
+use App\Actions\TagTeams\RestoreAction as TagTeamRestoreAction;
 use App\Actions\Wrestlers\DeleteAction as WrestlerDeleteAction;
-use App\Livewire\Managers\Components\Actions as ManagerActions;
-use App\Livewire\Referees\Components\Actions as RefereeActions;
-use App\Livewire\TagTeams\Components\Actions as TagTeamActions;
-use App\Livewire\Wrestlers\Components\Actions as WrestlerActions;
+use App\Actions\Wrestlers\RestoreAction as WrestlerRestoreAction;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -18,7 +18,6 @@ use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
-use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     travelTo(Carbon::parse('2026-03-10 09:00:00'));
@@ -28,8 +27,7 @@ describe('restoring a record that was deleted with a scheduled employment', func
     test('it closes the scheduled employment on its own start date and restores the record', function (
         string $modelClass,
         string $deleteActionClass,
-        string $componentClass,
-        string $componentProperty,
+        string $restoreActionClass,
     ): void {
         // Arrange
         $startedAt = Carbon::parse('2026-03-11 00:00:00');
@@ -40,18 +38,16 @@ describe('restoring a record that was deleted with a scheduled employment', func
         resolve($deleteActionClass)->handle($subject);
 
         // Act
-        $component = livewire($componentClass, [$componentProperty => $subject->refresh()])
-            ->call('restore');
+        resolve($restoreActionClass)->handle($subject->refresh());
 
         // Assert
-        $component->assertHasNoErrors()->assertDispatched('flash-message', type: 'status');
         expect($subject->refresh()->trashed())->toBeFalse()
             ->and($employment->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString())
             ->and($subject->employments()->whereNull('ended_at')->exists())->toBeFalse();
     })->with([
-        'wrestler' => [Wrestler::class, WrestlerDeleteAction::class, WrestlerActions::class, 'wrestler'],
-        'manager' => [Manager::class, ManagerDeleteAction::class, ManagerActions::class, 'manager'],
-        'referee' => [Referee::class, RefereeDeleteAction::class, RefereeActions::class, 'referee'],
+        'wrestler' => [Wrestler::class, WrestlerDeleteAction::class, WrestlerRestoreAction::class],
+        'manager' => [Manager::class, ManagerDeleteAction::class, ManagerRestoreAction::class],
+        'referee' => [Referee::class, RefereeDeleteAction::class, RefereeRestoreAction::class],
     ]);
 
     test('it restores a tag team deleted with a scheduled employment', function (): void {
@@ -64,11 +60,9 @@ describe('restoring a record that was deleted with a scheduled employment', func
         resolve(TagTeamDeleteAction::class)->handle($tagTeam);
 
         // Act
-        $component = livewire(TagTeamActions::class, ['tagTeam' => $tagTeam->refresh()])
-            ->call('restore');
+        resolve(TagTeamRestoreAction::class)->handle($tagTeam->refresh());
 
         // Assert
-        $component->assertHasNoErrors()->assertDispatched('flash-message', type: 'status');
         expect($tagTeam->refresh()->trashed())->toBeFalse()
             ->and($employment->refresh()->ended_at?->equalTo($startedAt))->toBeTrue();
     });
@@ -83,11 +77,9 @@ describe('restoring a record that was deleted with a scheduled employment', func
         actingAs(administrator());
 
         // Act
-        $component = livewire(ManagerActions::class, ['manager' => $manager->refresh()])
-            ->call('restore');
+        resolve(ManagerRestoreAction::class)->handle($manager->refresh());
 
         // Assert
-        $component->assertHasNoErrors()->assertDispatched('flash-message', type: 'status');
         expect($manager->refresh()->trashed())->toBeFalse()
             ->and($employment->refresh()->ended_at?->toDateTimeString())->toBe($startedAt->toDateTimeString());
     });
@@ -101,8 +93,7 @@ describe('restoring a record that was deleted with a scheduled employment', func
         actingAs(administrator());
 
         // Act
-        livewire(ManagerActions::class, ['manager' => $manager->refresh()])
-            ->call('restore');
+        resolve(ManagerRestoreAction::class)->handle($manager->refresh());
 
         // Assert
         expect($employment->refresh()->ended_at?->toDateTimeString())->toBe('2026-03-10 09:00:00');

@@ -7,7 +7,6 @@ namespace App\Livewire\Titles\Components;
 use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\PullAction;
 use App\Actions\Titles\ReinstateAction;
-use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
@@ -124,32 +123,10 @@ class Actions extends Component
         }
     }
 
-    /**
-     * Restore a deleted title.
-     */
-    public function restore(RestoreAction $restoreAction): void
-    {
-        Gate::authorize('restore', $this->title);
-
-        if ($this->executeBusinessAction(
-            function () use ($restoreAction): void {
-                $restoreAction->handle($this->title);
-            },
-            __('titles.actions.restored'),
-        )) {
-            $this->dispatch('title-updated');
-        }
-    }
-
     public function canPerform(TitleLifecycleTransition $transition): bool
     {
         return Gate::allows($transition->ability(), $this->title)
             && app(TitleLifecycleEligibility::class)->allows($this->title, $transition);
-    }
-
-    public function canRestore(): bool
-    {
-        return $this->title->trashed() && Gate::allows('restore', $this->title);
     }
 
     public function render(): View

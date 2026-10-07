@@ -36,7 +36,6 @@ trait ChecksIndividualLifecycleEligibility
             RosterLifecycleAction::ClearFromInjury => app(IndividualInjuryEligibility::class)->canBeClearedFromInjury($individual),
             RosterLifecycleAction::Retire => app(IndividualRetirementEligibility::class)->canRetire($individual),
             RosterLifecycleAction::Unretire => app(IndividualRetirementEligibility::class)->canUnretire($individual),
-            RosterLifecycleAction::Restore => $individual->trashed(),
         };
     }
 }

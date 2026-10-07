@@ -99,7 +99,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make('Status', 'status')
+            SelectFilter::make(__('core.status'), 'status')
                 ->options(TitleStatus::filterOptions())
                 ->filter(function (TitleBuilder $builder, string $value): void {
                     $status = TitleStatus::tryFrom($value);
@@ -108,7 +108,7 @@ class Main extends BaseTable
                         $builder->whereStatus($status);
                     }
                 }),
-            SelectFilter::make('Type', 'type')
+            SelectFilter::make(__('core.type'), 'type')
                 ->options([
                     '' => 'All',
                     TitleType::Singles->value => TitleType::Singles->label(),
@@ -121,7 +121,7 @@ class Main extends BaseTable
                         $builder->whereType($type);
                     }
                 }),
-            FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
+            FirstActivityPeriodFilter::make(__('core.activation_date'), 'activation_date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
     }
 

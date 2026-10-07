@@ -41,6 +41,5 @@ return [
         'unretired' => 'Title successfully unretired.',
         'pulled' => 'Title successfully pulled.',
         'reinstated' => 'Title successfully reinstated.',
-        'restored' => 'Title successfully restored.',
     ],
 ];

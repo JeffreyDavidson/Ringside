@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\PullAction;
 use App\Actions\Titles\ReinstateAction;
-use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Enums\Titles\TitleLifecycleTransition;
@@ -65,7 +64,6 @@ describe('title actions component', function (): void {
         'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Title successfully unretired.'],
         'deactivate' => ['deactivate', PullAction::class, Double::for(PullAction::class), 'Title successfully pulled.'],
         'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Title successfully reinstated.'],
-        'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Title successfully restored.'],
     ]);
 
     test('it forbids lifecycle actions for unauthorized users without success feedback', function (string $method): void {
@@ -91,7 +89,6 @@ describe('title actions component', function (): void {
         'unretire',
         'deactivate',
         'reinstate',
-        'restore',
     ]);
 
     test('it only shows the lifecycle buttons that fit the title state', function (
@@ -116,10 +113,10 @@ describe('title actions component', function (): void {
             $component->assertDontSeeHtml("wire:click=\"{$method}\"");
         }
     })->with([
-        'undebuted' => ['undebuted', ['debut'], ['retire', 'unretire', 'deactivate', 'reinstate', 'restore']],
-        'active' => ['active', ['retire', 'deactivate'], ['debut', 'unretire', 'reinstate', 'restore']],
-        'inactive' => ['inactive', ['retire', 'reinstate'], ['debut', 'unretire', 'deactivate', 'restore']],
-        'retired' => ['retired', ['unretire'], ['debut', 'retire', 'deactivate', 'reinstate', 'restore']],
+        'undebuted' => ['undebuted', ['debut'], ['retire', 'unretire', 'deactivate', 'reinstate']],
+        'active' => ['active', ['retire', 'deactivate'], ['debut', 'unretire', 'reinstate']],
+        'inactive' => ['inactive', ['retire', 'reinstate'], ['debut', 'unretire', 'deactivate']],
+        'retired' => ['retired', ['unretire'], ['debut', 'retire', 'deactivate', 'reinstate']],
     ]);
 
     test('it shows the buttons for the new state after a lifecycle action succeeds', function (): void {

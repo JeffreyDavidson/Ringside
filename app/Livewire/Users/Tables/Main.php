@@ -153,7 +153,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'))
+            SelectFilter::make(__('core.status'), 'status')
                 ->options(UserStatus::filterOptions())
                 ->filter(function (UserBuilder $builder, string $value): void {
                     $status = UserStatus::tryFrom($value);
