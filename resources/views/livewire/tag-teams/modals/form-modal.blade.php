@@ -1,3 +1,5 @@
+@use('App\Enums\Roster\RosterMemberKind')
+
 <x-form-modal>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="tag-team-details-grid">
         <x-form-modal.modal-input>
@@ -11,21 +13,21 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="tag-team-wrestlers-grid">
         <x-form-modal.modal-input>
-            <x-form.inputs.select
+            <x-form.inputs.roster-combobox
                 :label="__('tag-teams.wrestlerA')"
                 wire:model="form.wrestlerA"
-                :options="$this->getWrestlers"
-                selected="form.wrestlerA"
+                :kind="RosterMemberKind::Wrestlers"
+                :labels="$this->selectedRosterLabels['wrestlers']"
                 required
             />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.select
+            <x-form.inputs.roster-combobox
                 :label="__('tag-teams.wrestlerB')"
                 wire:model="form.wrestlerB"
-                :options="$this->getWrestlers"
-                selected="form.wrestlerB"
+                :kind="RosterMemberKind::Wrestlers"
+                :labels="$this->selectedRosterLabels['wrestlers']"
                 required
             />
         </x-form-modal.modal-input>
@@ -37,11 +39,12 @@
 
     <div data-test="tag-team-managers-field">
         <x-form-modal.modal-input>
-            <x-form.inputs.select
+            <x-form.inputs.roster-combobox
                 :label="__('core.managers')"
                 wire:model="form.managers"
-                :options="$this->getManagers"
-                :multiple="true"
+                :kind="RosterMemberKind::Managers"
+                :labels="$this->selectedRosterLabels['managers']"
+                multiple
             />
         </x-form-modal.modal-input>
     </div>

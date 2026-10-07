@@ -294,8 +294,12 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->assertPresent('input[name="form.name"]')
         ->assertScript('document.querySelector("[data-test=tag-team-managers-field]").innerText.includes("Managers")')
         ->fill('input[name="form.name"]', 'Browser Test Tag Team')
-        ->select('select[name="form.wrestlerA"]', (string) $firstWrestler->id)
-        ->select('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
+        ->click('input[data-field="form.wrestlerA"]')
+        ->typeSlowly('input[data-field="form.wrestlerA"]', 'Member One', 20)
+        ->click('[data-roster-combobox="form.wrestlerA"] [role="option"]:has-text("Browser Team Member One")')
+        ->click('input[data-field="form.wrestlerB"]')
+        ->typeSlowly('input[data-field="form.wrestlerB"]', 'Member Two', 20)
+        ->click('[data-roster-combobox="form.wrestlerB"] [role="option"]:has-text("Browser Team Member Two")')
         ->press('Save')
         ->assertSee('Browser Test Tag Team')
         ->resize(320, 740)
@@ -314,10 +318,12 @@ test('administrator can create and edit a tag team from the roster page', functi
         ->assertPathIs('/roster/tag-teams')
         ->assertSeeIn('#modal-title', 'Edit Browser Test Tag Team')
         ->assertValue('input[name="form.name"]', 'Browser Test Tag Team')
-        ->assertValue('select[name="form.wrestlerA"]', (string) $firstWrestler->id)
-        ->assertValue('select[name="form.wrestlerB"]', (string) $secondWrestler->id)
+        ->assertValue('input[data-field="form.wrestlerA"]', 'Browser Team Member One')
+        ->assertValue('input[data-field="form.wrestlerB"]', 'Browser Team Member Two')
         ->fill('input[name="form.name"]', 'Updated Browser Test Tag Team')
-        ->select('select[name="form.wrestlerB"]', (string) $replacementWrestler->id)
+        ->click('input[data-field="form.wrestlerB"]')
+        ->typeSlowly('input[data-field="form.wrestlerB"]', 'Replacement', 20)
+        ->click('[data-roster-combobox="form.wrestlerB"] [role="option"]:has-text("Browser Team Replacement Member")')
         ->press('Save')
         ->assertSee('Updated Browser Test Tag Team')
         ->assertNoJavascriptErrors();
@@ -459,6 +465,10 @@ test('administrator can create and edit a stable from the roster page', function
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
+    $wrestler = Wrestler::factory()->bookable()->create([
+        'name' => 'Browser Stable Member',
+        'promotion_id' => $promotion->id,
+    ]);
     $this->actingAs($administrator);
 
     $page = visit(route('stables.index'));
@@ -468,6 +478,10 @@ test('administrator can create and edit a stable from the roster page', function
         ->assertPathIs('/roster/stables')
         ->assertSeeIn('#modal-title', 'Add Stable')
         ->fill('input[name="form.name"]', 'Browser Test Stable')
+        ->click('input[data-field="form.wrestlers"]')
+        ->typeSlowly('input[data-field="form.wrestlers"]', 'Stable Member', 20)
+        ->click('[data-roster-combobox="form.wrestlers"] [role="option"]:has-text("Browser Stable Member")')
+        ->assertSeeIn('[data-roster-combobox="form.wrestlers"] [data-test="selected-chips"]', 'Browser Stable Member')
         ->press('Save')
         ->assertSee('Browser Test Stable');
     waitForModalToClose($page);
@@ -477,12 +491,14 @@ test('administrator can create and edit a stable from the roster page', function
         ->assertPathIs('/roster/stables')
         ->assertSeeIn('#modal-title', 'Edit Browser Test Stable')
         ->assertValue('input[name="form.name"]', 'Browser Test Stable')
+        ->assertSeeIn('[data-roster-combobox="form.wrestlers"] [data-test="selected-chips"]', 'Browser Stable Member')
         ->fill('input[name="form.name"]', 'Updated Browser Test Stable')
         ->press('Save')
         ->assertSee('Updated Browser Test Stable')
         ->assertNoJavascriptErrors();
 
-    expect(Stable::query()->whereName('Updated Browser Test Stable')->value('promotion_id'))->toBe($promotion->id);
+    expect(Stable::query()->whereName('Updated Browser Test Stable')->firstOrFail()->currentWrestlers->modelKeys())->toBe([$wrestler->id])
+        ->and(Stable::query()->whereName('Updated Browser Test Stable')->value('promotion_id'))->toBe($promotion->id);
 });
 
 test('administrator can create and edit a title from the title directory', function (): void {
