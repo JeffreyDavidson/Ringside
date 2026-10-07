@@ -8,7 +8,6 @@ use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousManagersTable<TagTeamManager> */
@@ -37,9 +36,7 @@ class PreviousManagers extends BasePreviousManagersTable
 
     protected function configure(): void
     {
-        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
-
-        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+        $this->authorizeContextRecord(TagTeam::class, $this->tagTeamId, 'tag team');
 
         $this->addAdditionalSelects([
             'tag_teams_managers.manager_id',

@@ -68,3 +68,19 @@ test('it separates pending invitations from expired ones, counting the expiry mo
     expect($pendingIds)->toBe([$pending->id])
         ->and($expiredIds)->toEqualCanonicalizing([$atExpiry->id, $expired->id]);
 });
+
+test('it orders invitations by creation with the id breaking ties', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $later = PromotionInvitation::factory()->for($promotion)->create(['created_at' => '2026-02-01 00:00:00']);
+    $tieFirst = PromotionInvitation::factory()->for($promotion)->create(['created_at' => '2026-01-01 00:00:00']);
+    $tieSecond = PromotionInvitation::factory()->for($promotion)->create(['created_at' => '2026-01-01 00:00:00']);
+
+    // Act
+    $invitations = PromotionInvitation::query()
+        ->oldestFirst()
+        ->get();
+
+    // Assert
+    expect($invitations->modelKeys())->toBe([$tieFirst->id, $tieSecond->id, $later->id]);
+});

@@ -11,22 +11,29 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Managers\Manager;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Manager> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Manager::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.managers.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.manager-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'manager';
 
     #[\Override]
     protected string $databaseTableName = 'managers';
@@ -54,21 +61,6 @@ class Main extends BaseTable
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
     }
 
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', Manager::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.managers.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-            'beforeWrapperView' => $this->beforeWrapperView,
-        ]);
-    }
-
     /**
      * @return array<int, Column>
      */
@@ -84,16 +76,6 @@ class Main extends BaseTable
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Manager $row) => view('components.tables.columns.manager-actions', [
-                'manager' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /**
@@ -119,12 +101,6 @@ class Main extends BaseTable
 
     public function delete(Manager $manager, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $manager);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $manager): void {
-            $deleteAction->handle($manager);
-        }, __('managers.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($manager, $deleteAction->handle(...), __('managers.actions.deleted'));
     }
 }

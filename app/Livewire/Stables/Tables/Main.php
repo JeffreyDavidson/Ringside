@@ -10,23 +10,30 @@ use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Stable::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.stables.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.stable-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'stable';
 
     #[\Override]
     protected string $databaseTableName = 'stables';
@@ -53,20 +60,6 @@ class Main extends BaseTable
         $rows->loadExists(StableBuilder::ACTIVITY_STATUS_STATE);
     }
 
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', Stable::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.stables.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-        ]);
-    }
-
     /**
      * @return array<int, Column>
      */
@@ -80,16 +73,6 @@ class Main extends BaseTable
                 ->excludeFromColumnSelect(),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Stable $row) => view('components.tables.columns.stable-actions', [
-                'stable' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /**
@@ -122,12 +105,6 @@ class Main extends BaseTable
 
     public function delete(Stable $stable, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $stable);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $stable): void {
-            $deleteAction->handle($stable);
-        }, __('stables.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($stable, $deleteAction->handle(...), __('stables.actions.deleted'));
     }
 }

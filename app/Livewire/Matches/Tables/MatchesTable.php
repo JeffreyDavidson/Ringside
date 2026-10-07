@@ -62,16 +62,13 @@ class MatchesTable extends DataTableComponent
 
         return EventMatch::query()
             ->forEventId($eventId)
-            ->orderBy('events_matches.match_number')
-            ->orderBy('events_matches.id')
+            ->inCardOrder()
             ->withDisplayRelations();
     }
 
     protected function configure(): void
     {
-        $eventId = $this->requireContextId($this->eventId, 'event');
-
-        Gate::authorize('view', Event::query()->findOrFail($eventId));
+        $this->authorizeContextRecord(Event::class, $this->eventId, 'event');
 
         $this->addAdditionalSelects([
             'events_matches.event_id',

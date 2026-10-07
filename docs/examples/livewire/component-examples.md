@@ -231,8 +231,11 @@ class Main extends BaseTable
 ```
 
 `BaseTable` requires `getDefaultActionColumn()`. Each index table returns a column rendering a
-`components.tables.columns.{entity}-actions` view built on `<x-tables.row-actions-menu>`, which
-labels the trigger `Actions for {name}` and gates every entry with `@can`. Set
+`components.tables.columns.{entity}-actions` view built on `<x-tables.entity-actions>` (the shared
+view/edit/remove entries on top of `<x-tables.row-actions-menu>`), which labels the trigger
+`Actions for {name}` and gates every entry with `@can`. Pass `:removable="false"` to drop Remove and
+add entity-specific entries through the slot. Status cells use `<x-tables.status :status="...">`,
+which maps each status enum case to its dot colour. Set
 `$showActionColumn = true` to append it after `columns()`.
 
 Relationship history tables on detail pages (for example

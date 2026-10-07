@@ -23,7 +23,7 @@ describe('authorized tag team form interactions', function () {
         actingAs(administrator());
     });
 
-    it('renders the tag team fields and available choices', function () {
+    it('renders the tag team fields as searchable selects without embedding the roster', function () {
         Wrestler::factory()->create(['name' => 'Ricky Morton']);
         Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
 
@@ -34,12 +34,83 @@ describe('authorized tag team form interactions', function () {
         $modal
             ->assertPropertyWired('form.name')
             ->assertPropertyWired('form.signature_move')
-            ->assertPropertyWired('form.wrestlerA')
-            ->assertPropertyWired('form.wrestlerB')
-            ->assertPropertyWired('form.managers')
             ->assertPropertyWired('form.employment_date')
-            ->assertSee('Ricky Morton')
-            ->assertSee('Bobby Heenan');
+            ->assertSeeHtml('data-roster-combobox="form.wrestlerA"')
+            ->assertSeeHtml('data-roster-combobox="form.wrestlerB"')
+            ->assertSeeHtml('data-roster-combobox="form.managers"')
+            ->assertDontSee('Ricky Morton')
+            ->assertDontSee('Bobby Heenan')
+            ->assertDontSeeHtml('<option');
+    });
+
+    it('shows the current wrestlers and managers of an edited tag team as selected labels', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        Wrestler::factory()->create(['name' => 'Unrelated Wrestler']);
+        $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $tagTeam = TagTeam::factory()->create();
+        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
+        $tagTeam->managers()->attach($manager, ['hired_at' => now()->subYear()]);
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $tagTeam->id);
+
+        $modal
+            ->assertSee($wrestlers->firstOrFail()->name)
+            ->assertSee($wrestlers->skip(1)->firstOrFail()->name)
+            ->assertSee('Bobby Heenan')
+            ->assertDontSee('Unrelated Wrestler');
+    });
+
+    it('searches wrestlers and managers for the tag team form', function (string $kind, string $term, string $expected) {
+        Wrestler::factory()->create(['name' => 'Ricky Morton']);
+        Wrestler::factory()->create(['name' => 'Robert Gibson']);
+        Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $modal = livewire(FormModal::class);
+
+        $options = $modal->instance()->searchRoster($kind, $term);
+
+        expect(array_column($options, 'name'))->toBe([$expected]);
+    })->with([
+        'wrestlers' => ['wrestlers', 'morton', 'Ricky Morton'],
+        'managers' => ['managers', 'heenan', 'Bobby Heenan'],
+    ]);
+
+    it('searches the roster while editing an existing tag team', function () {
+        $tagTeam = TagTeam::factory()->create();
+        Wrestler::factory()->create(['name' => 'Ricky Morton']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $tagTeam->id);
+
+        $options = $modal->instance()->searchRoster('wrestlers', 'morton');
+
+        expect(array_column($options, 'name'))->toBe(['Ricky Morton']);
+    });
+
+    it('does not search kinds the tag team form does not offer', function () {
+        TagTeam::factory()->create(['name' => 'The Rockers']);
+        $modal = livewire(FormModal::class);
+
+        $options = $modal->instance()->searchRoster('tag_teams', '');
+
+        expect($options)->toBe([]);
+    });
+
+    it('creates a tag team from wrestlers and managers chosen through search', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $modal = livewire(FormModal::class);
+        $searched = $modal->instance()->searchRoster('wrestlers', $wrestlers->firstOrFail()->name);
+
+        $modal
+            ->set('form.name', 'The Searchers')
+            ->set('form.wrestlerA', $searched[0]['id'])
+            ->set('form.wrestlerB', $wrestlers->skip(1)->firstOrFail()->id)
+            ->set('form.managers', [$manager->id])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $tagTeam = TagTeam::query()->where('name', 'The Searchers')->firstOrFail();
+        expect($tagTeam->currentManagers()->pluck('managers.id')->all())->toBe([$manager->id]);
     });
 
     it('opens an empty form for creating a tag team', function () {

@@ -28,7 +28,7 @@ it('renders the default actions for a table record', function (): void {
         ->assertSee('Remove')
         ->assertSeeHtml(route('venues.show', $venue))
         ->assertSeeHtml("component: 'venues.modals.form-modal'")
-        ->assertSeeHtml("'modelId': '{$venue->id}'")
+        ->assertSeeHtml("modelId: {$venue->id}")
         ->assertSeeHtml('wire:confirm')
         ->assertSeeHtml("wire:click=\"delete({$venue->id})\"");
 });

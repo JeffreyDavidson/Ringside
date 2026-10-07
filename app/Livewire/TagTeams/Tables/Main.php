@@ -11,22 +11,29 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\TagTeams\TagTeam;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<TagTeam> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = TagTeam::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.tag-teams.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.tag-team-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'tagTeam';
 
     #[\Override]
     protected string $databaseTableName = 'tag_teams';
@@ -54,20 +61,6 @@ class Main extends BaseTable
         new Collection($rows->flatMap(fn (TagTeam $tagTeam): Collection => $tagTeam->currentWrestlers)->all())->loadExists(IndividualBuilder::AVAILABILITY_STATE);
     }
 
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', TagTeam::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.tag-teams.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-        ]);
-    }
-
     /**
      * @return array<int, Column>
      */
@@ -81,16 +74,6 @@ class Main extends BaseTable
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (TagTeam $row) => view('components.tables.columns.tag-team-actions', [
-                'tagTeam' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /**
@@ -116,12 +99,6 @@ class Main extends BaseTable
 
     public function delete(TagTeam $tagTeam, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $tagTeam);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $tagTeam): void {
-            $deleteAction->handle($tagTeam);
-        }, __('tag-teams.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($tagTeam, $deleteAction->handle(...), __('tag-teams.actions.deleted'));
     }
 }

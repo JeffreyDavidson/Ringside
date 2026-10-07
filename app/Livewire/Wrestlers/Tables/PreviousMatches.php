@@ -8,7 +8,6 @@ use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 class PreviousMatches extends BasePreviousMatchesTable
@@ -34,8 +33,6 @@ class PreviousMatches extends BasePreviousMatchesTable
     {
         parent::configure();
 
-        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
-
-        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+        $this->authorizeContextRecord(Wrestler::class, $this->wrestlerId, 'wrestler');
     }
 }

@@ -67,4 +67,17 @@ class TitleBuilder extends Builder
         return $this->whereHas('futureActivityPeriod')
             ->whereDoesntHave('currentRetirement');
     }
+
+    /**
+     * Titles a booking form offers for a promotion (null for titles without one), plus ids already chosen even when
+     * they belong to another promotion.
+     *
+     * @param  array<int, mixed>  $selectedIds
+     */
+    public function offeredForPromotion(?int $promotionId, array $selectedIds = []): static
+    {
+        return $this->where(fn (Builder $query): Builder => $query
+            ->where('promotion_id', $promotionId)
+            ->orWhereKey($selectedIds));
+    }
 }

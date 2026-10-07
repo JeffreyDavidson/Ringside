@@ -19,7 +19,7 @@ describe('authorized stable form interactions', function () {
         actingAs(administrator());
     });
 
-    it('renders the stable fields and available member choices', function () {
+    it('renders the stable fields as searchable selects without embedding the roster', function () {
         Wrestler::factory()->bookable()->create(['name' => 'Ric Flair']);
         TagTeam::factory()->employed()->create(['name' => 'The Andersons']);
         Manager::factory()->create(['first_name' => 'J. J.', 'last_name' => 'Dillon']);
@@ -32,12 +32,54 @@ describe('authorized stable form interactions', function () {
             ->assertPropertyWired('form.name')
             ->assertPropertyWired('form.started_at')
             ->assertPropertyWired('form.ended_at')
-            ->assertPropertyWired('form.wrestlers')
-            ->assertPropertyWired('form.tag_teams')
+            ->assertSeeHtml('data-roster-combobox="form.wrestlers"')
+            ->assertSeeHtml('data-roster-combobox="form.tag_teams"')
+            ->assertDontSee('Ric Flair')
+            ->assertDontSee('The Andersons')
+            ->assertDontSee('J. J. Dillon')
+            ->assertDontSeeHtml('<option')
+            ->assertDontSeeHtml('wire:model="form.managers"');
+    });
+
+    it('shows the current members of an edited stable as selected labels', function () {
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Ric Flair']);
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'The Andersons']);
+        Wrestler::factory()->bookable()->create(['name' => 'Unrelated Wrestler']);
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2024-01-01']);
+        $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2024-01-01']);
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $stable->id);
+
+        $modal
             ->assertSee('Ric Flair')
             ->assertSee('The Andersons')
-            ->assertDontSee('J. J. Dillon')
-            ->assertDontSeeHtml('wire:model="form.managers"');
+            ->assertDontSee('Unrelated Wrestler');
+    });
+
+    it('searches wrestlers and tag teams for the stable form', function (string $kind, string $term, string $expected) {
+        Wrestler::factory()->bookable()->create(['name' => 'Ric Flair']);
+        Wrestler::factory()->bookable()->create(['name' => 'Arn Anderson']);
+        TagTeam::factory()->employed()->create(['name' => 'The Andersons']);
+        $modal = livewire(FormModal::class);
+
+        $options = $modal->instance()->searchRoster($kind, $term);
+
+        expect(array_column($options, 'name'))->toBe([$expected]);
+    })->with([
+        'wrestlers' => ['wrestlers', 'flair', 'Ric Flair'],
+        'tag teams' => ['tag_teams', 'anderson', 'The Andersons'],
+    ]);
+
+    it('does not search kinds the stable form does not offer', function () {
+        Manager::factory()->create(['first_name' => 'J. J.', 'last_name' => 'Dillon']);
+        $modal = livewire(FormModal::class);
+
+        $options = $modal->instance()->searchRoster('managers', '');
+
+        expect($options)->toBe([]);
     });
 
     it('opens an empty form for creating a stable', function () {

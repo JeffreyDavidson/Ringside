@@ -6,7 +6,7 @@ namespace App\Livewire\Base\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Support\RosterResourceRouteResolver;
+use App\Livewire\Concerns\UsesRosterRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -21,18 +21,12 @@ use Illuminate\Database\Eloquent\Builder;
 abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
+    use UsesRosterRouteResolver;
 
     protected string $databaseTableName = 'titles_championships';
 
     #[\Override]
     protected string $resourceName = 'title championships';
-
-    protected RosterResourceRouteResolver $routeResolver;
-
-    public function boot(RosterResourceRouteResolver $routeResolver): void
-    {
-        $this->routeResolver = $routeResolver;
-    }
 
     protected function configure(): void
     {

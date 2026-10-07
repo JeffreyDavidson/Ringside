@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\Promotions\CreateAction;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Livewire\Promotions\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Illuminate\Support\Str;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -156,6 +159,24 @@ describe('promotion form interactions', function () {
 
         $modal->assertHasNoErrors()->assertDispatched('promotion-saved');
         expect(Promotion::query()->where('slug', Str::slug($name))->exists())->toBeTrue();
+    });
+
+    it('lets a business rule failure propagate because the form names no error field', function () {
+        // Arrange
+        $action = Double::for(CreateAction::class);
+        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment('wrestlers'));
+        app()->instance(CreateAction::class, $action);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Promotion',
+            'form.slug' => 'valid-promotion',
+        ]);
+
+        // Assert
+        expect(fn () => $modal->call('save'))->toThrow(EntityNotAvailableException::class);
     });
 
     it('does not allow a regular user to open the promotion form', function () {

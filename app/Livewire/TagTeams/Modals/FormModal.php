@@ -6,26 +6,27 @@ namespace App\Livewire\TagTeams\Modals;
 
 use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\UpdateAction;
-use App\Exceptions\BaseBusinessException;
+use App\Enums\Roster\RosterMemberKind;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\Data\PresentsManagersList;
-use App\Livewire\Concerns\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\SearchesRosterMembers;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 
 /**
  * @extends BaseFormModal<CreateEditForm, TagTeam>
  *
- * @property-read array<int|string,string|null> $getManagers
- * @property-read array<int|string,string|null> $getWrestlers
+ * @property-read array<string, array<int, array{id: int|string, name: string}>> $selectedRosterLabels
  */
 class FormModal extends BaseFormModal
 {
-    use PresentsManagersList;
-    use PresentsWrestlersList;
+    use SearchesRosterMembers;
+
+    #[\Override]
+    protected ?string $businessErrorField = 'form.wrestlerA';
 
     public CreateEditForm $form;
 
@@ -63,21 +64,35 @@ class FormModal extends BaseFormModal
         $this->updateAction->handle($this->form->tagTeam(), $this->form->toData());
     }
 
-    #[\Override]
-    protected function storeForm(): bool
-    {
-        try {
-            return parent::storeForm();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.wrestlerA', $exception->getMessage());
-
-            return false;
-        }
-    }
-
     protected function createForm(): void
     {
         $this->createAction->handle($this->form->toData());
+    }
+
+    /** @return array<int, RosterMemberKind> */
+    protected function searchableRosterKinds(): array
+    {
+        return [RosterMemberKind::Wrestlers, RosterMemberKind::Managers];
+    }
+
+    /**
+     * Names for the ids already chosen in the form, so editing shows them whatever the search returns.
+     *
+     * @return array<string, array<int, array{id: int|string, name: string}>>
+     */
+    #[Computed]
+    public function selectedRosterLabels(): array
+    {
+        return [
+            RosterMemberKind::Wrestlers->value => $this->rosterLabels(
+                RosterMemberKind::Wrestlers,
+                [$this->form->wrestlerA, $this->form->wrestlerB],
+            ),
+            RosterMemberKind::Managers->value => $this->rosterLabels(
+                RosterMemberKind::Managers,
+                $this->form->managers,
+            ),
+        ];
     }
 
     public function render(): View

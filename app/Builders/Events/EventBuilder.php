@@ -6,6 +6,7 @@ namespace App\Builders\Events;
 
 use App\Enums\EventStatus;
 use App\Models\Events\Event;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -58,5 +59,11 @@ class EventBuilder extends Builder
         $this->whereNull('date');
 
         return $this;
+    }
+
+    /** Events dated within the range, both instants included. */
+    public function heldBetween(CarbonInterface $start, CarbonInterface $end): static
+    {
+        return $this->whereBetween('date', [$start, $end]);
     }
 }

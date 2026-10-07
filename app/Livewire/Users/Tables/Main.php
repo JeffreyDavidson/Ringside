@@ -9,7 +9,6 @@ use App\Builders\Users\UserBuilder;
 use App\Enums\Users\UserStatus;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\Tables\BaseTable;
-use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -23,10 +22,11 @@ use Illuminate\Validation\ValidationException;
 /** @extends BaseTable<User> */
 class Main extends BaseTable
 {
-    use DispatchesActionFeedback;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = User::class;
 
     #[\Override]
     protected string $databaseTableName = 'users';
@@ -56,11 +56,6 @@ class Main extends BaseTable
         $this->pendingInvitationSummaries = resolve(PendingInvitationSummaryService::class)->forEmails(
             $rows->where('status', UserStatus::Unverified)->map(fn (User $user): string => $user->email)->all(),
         );
-    }
-
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', User::class);
     }
 
     protected function getDefaultActionColumn(): Column

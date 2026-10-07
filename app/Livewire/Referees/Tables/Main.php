@@ -11,22 +11,29 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Referee> */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
-
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Referee::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.referees.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.referee-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'referee';
 
     #[\Override]
     protected string $databaseTableName = 'referees';
@@ -52,21 +59,6 @@ class Main extends BaseTable
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
     }
 
-    protected function configure(): void
-    {
-        Gate::authorize('viewAny', Referee::class);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.referees.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
-            'beforeWrapperView' => $this->beforeWrapperView,
-        ]);
-    }
-
     /** @return array<int, Column> */
     public function columns(): array
     {
@@ -80,16 +72,6 @@ class Main extends BaseTable
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Referee $row) => view('components.tables.columns.referee-actions', [
-                'referee' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /** @return array<int, Filter> */
@@ -113,12 +95,6 @@ class Main extends BaseTable
 
     public function delete(Referee $referee, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $referee);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $referee): void {
-            $deleteAction->handle($referee);
-        }, __('referees.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($referee, $deleteAction->handle(...), __('referees.actions.deleted'));
     }
 }

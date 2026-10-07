@@ -7,7 +7,6 @@ namespace App\Livewire\Wrestlers\Modals;
 use App\Actions\Wrestlers\CreateAction;
 use App\Actions\Wrestlers\UpdateAction;
 use App\Enums\Shared\UnitedStatesState;
-use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -20,6 +19,9 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
+    protected ?string $businessErrorField = 'form.name';
+
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -46,18 +48,6 @@ class FormModal extends BaseFormModal
         $this->form->weight = fake()->numberBetween(180, 350);
         $this->form->signature_move = Str::of(fake()->optional(0.8)->sentence(3))->title()->value();
         $this->form->employment_date = $this->generateOptionalEmploymentDate();
-    }
-
-    #[\Override]
-    protected function storeForm(): bool
-    {
-        try {
-            return parent::storeForm();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.name', $exception->getMessage());
-
-            return false;
-        }
     }
 
     protected function updateForm(): void

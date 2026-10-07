@@ -23,6 +23,12 @@ class PromotionMembershipBuilder extends Builder
         return $this->whereBelongsTo($user, 'user');
     }
 
+    /** Longest-standing members first, with the user id breaking ties. */
+    public function oldestFirst(): static
+    {
+        return $this->orderBy('created_at')->orderBy('user_id');
+    }
+
     public function active(): static
     {
         return $this->where('status', MembershipStatus::Active->value);

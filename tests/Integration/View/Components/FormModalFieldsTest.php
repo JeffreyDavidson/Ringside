@@ -29,11 +29,22 @@ function renderedFormModal(string $modal, array $parameters = []): HTMLDocument
 
 function formModalField(HTMLDocument $document, string $id): Element
 {
-    return $document->getElementById($id) ?? throw new RuntimeException("The form has no [{$id}] field.");
+    return $document->getElementById($id) ?? $document->querySelector("input[data-field=\"{$id}\"]") ?? throw new RuntimeException("The form has no [{$id}] field.");
+}
+
+function formModalFieldIsRequired(Element $field): bool
+{
+    return $field->hasAttribute('required') || $field->getAttribute('aria-required') === 'true';
 }
 
 function formModalLabelMarksRequired(HTMLDocument $document, string $id): bool
 {
+    $combobox = $document->querySelector("[data-roster-combobox=\"{$id}\"] label");
+
+    if ($combobox instanceof Element) {
+        return $combobox->querySelector('[aria-hidden="true"]')?->textContent === '*';
+    }
+
     foreach ($document->querySelectorAll('label') as $label) {
         if ($label->getAttribute('for') === $id) {
             return $label->querySelector('[aria-hidden="true"]')?->textContent === '*';
@@ -58,12 +69,12 @@ describe('form modal fields', function (): void {
 
         // Assert
         foreach ($required as $id) {
-            expect(formModalField($document, $id)->hasAttribute('required'))->toBeTrue("[{$id}] should be required.")
+            expect(formModalFieldIsRequired(formModalField($document, $id)))->toBeTrue("[{$id}] should be required.")
                 ->and(formModalLabelMarksRequired($document, $id))->toBeTrue("[{$id}] label should be marked.");
         }
 
         foreach ($optional as $id) {
-            expect(formModalField($document, $id)->hasAttribute('required'))->toBeFalse("[{$id}] should be optional.")
+            expect(formModalFieldIsRequired(formModalField($document, $id)))->toBeFalse("[{$id}] should be optional.")
                 ->and(formModalLabelMarksRequired($document, $id))->toBeFalse("[{$id}] label should not be marked.");
         }
     })->with([

@@ -7,6 +7,7 @@
     'limit' => \App\Livewire\Matches\Support\BookableRosterSearch::LIMIT,
     'placeholder' => null,
     'errorName' => null,
+    'required' => false,
 ])
 
 @php
@@ -53,7 +54,7 @@
         @keydown.enter.capture="ignoreEnterWhileLoading($event)"
     >
         @if ($label)
-            <x-form.label x-combobox:label class="mb-1">
+            <x-form.label x-combobox:label class="mb-1" :required="$required">
                 @if ($group)
                     <span class="sr-only">{{ $group }}</span>
                 @endif
@@ -78,6 +79,7 @@
                 @class([$inputClasses, 'pr-9'])
                 data-field="{{ $fieldName }}"
                 aria-invalid="{{ $hasError ? 'true' : 'false' }}"
+                aria-required="{{ $required ? 'true' : 'false' }}"
                 aria-describedby="{{ $describedBy }}"
             />
             <button

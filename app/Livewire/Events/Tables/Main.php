@@ -10,7 +10,6 @@ use App\Builders\Events\VenueBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
-use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -21,9 +20,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Gate;
 
 /**
  * @property-read array<int|string, string|null> $getVenues
@@ -32,11 +29,22 @@ use Illuminate\Support\Facades\Gate;
  */
 class Main extends BaseTable
 {
-    use ExecutesBusinessActions;
     use PresentsVenuesList;
 
     #[\Override]
     protected bool $showActionColumn = true;
+
+    #[\Override]
+    protected string $modelClass = Event::class;
+
+    #[\Override]
+    protected ?string $indexView = 'livewire.events.tables.main';
+
+    #[\Override]
+    protected string $actionsView = 'components.tables.columns.event-actions';
+
+    #[\Override]
+    protected string $actionsRowVariable = 'event';
 
     #[\Override]
     protected string $databaseTableName = 'events';
@@ -66,24 +74,15 @@ class Main extends BaseTable
      */
     protected function venuesQuery(): VenueBuilder
     {
-        return Venue::query()->whereIn('id', Event::query()->select('venue_id'));
+        return Venue::query()->hostingEvents();
     }
 
     protected function configure(): void
     {
-        Gate::authorize('viewAny', Event::class);
+        parent::configure();
 
         $this->addAdditionalSelects([
             'events.venue_id',
-        ]);
-    }
-
-    #[\Override]
-    public function render(): View
-    {
-        return view('livewire.events.tables.main', [
-            'rows' => $this->getRows(),
-            'perPageOptions' => $this->perPageAccepted,
         ]);
     }
 
@@ -107,16 +106,6 @@ class Main extends BaseTable
                 ->location(fn (Event $row): string => $row->venue ? route('venues.show', $row->venue) : ''),
 
         ];
-    }
-
-    protected function getDefaultActionColumn(): Column
-    {
-        return Column::make(__('core.actions'))
-            ->label(fn (Event $row) => view('components.tables.columns.event-actions', [
-                'event' => $row,
-            ])->render())
-            ->html()
-            ->excludeFromColumnSelect();
     }
 
     /**
@@ -154,10 +143,10 @@ class Main extends BaseTable
                     $context = app(PromotionContextService::class);
                     $promotion = $context->isEnforced() ? $context->current() : null;
 
-                    $builder->whereBetween('date', [
+                    $builder->heldBetween(
                         Promotion::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
                         Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
-                    ]);
+                    );
                 }),
             SelectFilter::make(__('core.venue'), 'venue')
                 ->options([
@@ -175,12 +164,6 @@ class Main extends BaseTable
 
     public function delete(Event $event, DeleteAction $deleteAction): void
     {
-        Gate::authorize('delete', $event);
-
-        $this->executeBusinessAction(function () use ($deleteAction, $event): void {
-            $deleteAction->handle($event);
-        }, __('events.actions.deleted'));
-
-        $this->forgetMetadata();
+        $this->deleteRecord($event, $deleteAction->handle(...), __('events.actions.deleted'));
     }
 }

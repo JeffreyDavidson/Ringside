@@ -241,6 +241,32 @@ Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called b
 (the modal package mounts components with `mount()`), but about 250 modal test call sites
 depend on them; remove them together with a rewrite of those tests.
 
+### Form modal business errors (phase 3)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+`BaseFormModal` now owns the catch-and-report handling for domain failures
+(`reportBusinessErrors()` plus a `$businessErrorField` property or `businessErrorField()` override); the eight
+per-modal `storeForm()` try/catch overrides are gone and the match form uses the same helper. The promotion form's
+Cancel button called `closeModal()`, which never dispatched the package's close event, so it did not close the
+dialog; it now dispatches `closeModal` like the other modals (browser test added). The Titles `Actions` component
+runs its transitions through one `perform()` like Stables.
+
+### Shared table bases (phase 3)
+
+**Priority:** Medium  
+**Status:** Completed.
+
+History tables share `ShowTableTrait::authorizeContextRecord()` (resolve the locked parent id, authorize `view`) and
+`UsesRosterRouteResolver`. `BasePreviousMembersTable` (stable wrestlers, stable tag teams, tag team wrestlers) and
+`BasePreviousManagedTable` (a manager's wrestlers and tag teams) take the relationship and translation keys as
+properties; `BaseTable` now owns the `viewAny` authorization (`$modelClass`), the dedicated index view (`$indexView`),
+the row actions column (`$actionsView`, `$actionsRowVariable`) and `deleteRecord()`. Left alone on purpose: the status
+column and status filters (the status enums share no contract, so a helper would need casts), per-table builders, eager
+loading and `projectRowState()`, the Users and Promotions action columns, and the history tables with their own
+columns (stable managers, manager stables, venue events, title history, matches).
+
 ### Dead application code cleanup (phase 2)
 
 **Priority:** Medium  

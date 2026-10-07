@@ -118,7 +118,7 @@
                                         {{ __('events.no_venue') }}
                                     @endif
                                 </p>
-                                <div class="mt-2 md:hidden"><x-tables.event-status :status="$row->status" /></div>
+                                <div class="mt-2 md:hidden"><x-tables.status :status="$row->status" /></div>
                             </td>
                             <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums sm:table-cell">
                                 {{ $row->local_date?->format('M j, Y') ?? __('events.no_date') }}
@@ -136,7 +136,7 @@
                                 @endif
                             </td>
                             <td class="hidden px-4 py-4 align-top md:table-cell">
-                                <x-tables.event-status :status="$row->status" />
+                                <x-tables.status :status="$row->status" />
                             </td>
                             <td class="px-2 py-3 align-top"><x-tables.columns.event-actions :event="$row" /></td>
                         </tr>

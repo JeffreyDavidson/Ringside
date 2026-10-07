@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
+use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 
 test('active titles can be retrieved', function () {
@@ -102,4 +103,35 @@ test('projected activity status does not query per title', function () {
         $inactive->id => TitleStatus::Inactive,
         $initial->id => TitleStatus::Undebuted,
     ]);
+});
+
+test('titles offered for a promotion include its titles and the ids already selected', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $own = Title::factory()->for($promotion)->create();
+    $selectedElsewhere = Title::factory()->create();
+    Title::factory()->create();
+
+    // Act
+    $titles = Title::query()
+        ->offeredForPromotion($promotion->id, [$selectedElsewhere->id])
+        ->orderBy('id')
+        ->get();
+
+    // Assert
+    expect($titles->modelKeys())->toBe([$own->id, $selectedElsewhere->id]);
+});
+
+test('titles offered without a promotion are the unowned ones', function () {
+    // Arrange
+    $unowned = Title::factory()->create(['promotion_id' => null]);
+    Title::factory()->for(Promotion::factory())->create();
+
+    // Act
+    $titles = Title::query()
+        ->offeredForPromotion(null)
+        ->get();
+
+    // Assert
+    expect($titles->modelKeys())->toBe([$unowned->id]);
 });
