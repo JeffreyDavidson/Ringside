@@ -50,7 +50,7 @@ class Main extends BaseTable
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
-        $rows->loadExists([...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE]);
+        $rows->loadExists(TagTeamBuilder::ROSTER_STATE);
         new Collection($rows->flatMap(fn (TagTeam $tagTeam): Collection => $tagTeam->currentWrestlers)->all())->loadExists(IndividualBuilder::AVAILABILITY_STATE);
     }
 

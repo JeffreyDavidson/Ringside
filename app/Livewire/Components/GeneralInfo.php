@@ -36,21 +36,21 @@ class GeneralInfo extends Component
             'component' => 'wrestlers.show.general-info',
             'prop' => 'wrestler',
             'with' => ['currentManagers', 'currentStable', 'currentTagTeam', 'currentChampionships.title', 'firstEmployment'],
-            'state' => [...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE],
+            'state' => IndividualBuilder::ROSTER_STATE,
         ],
         Manager::class => [
             'event' => 'manager-updated',
             'component' => 'managers.show.general-info',
             'prop' => 'manager',
             'with' => ['currentTagTeams', 'currentWrestlers', 'firstEmployment'],
-            'state' => [...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE],
+            'state' => IndividualBuilder::ROSTER_STATE,
         ],
         Referee::class => [
             'event' => 'referee-updated',
             'component' => 'referees.show.general-info',
             'prop' => 'referee',
             'with' => ['firstEmployment'],
-            'state' => [...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE],
+            'state' => IndividualBuilder::ROSTER_STATE,
         ],
         Stable::class => [
             'event' => 'stable-updated',
@@ -64,7 +64,7 @@ class GeneralInfo extends Component
             'component' => 'tag-teams.show.general-info',
             'prop' => 'tagTeam',
             'with' => ['currentManagers', 'currentStable', 'currentWrestlers', 'currentChampionships.title'],
-            'state' => [...TagTeamBuilder::EMPLOYMENT_STATUS_STATE, ...TagTeamBuilder::AVAILABILITY_STATE],
+            'state' => TagTeamBuilder::ROSTER_STATE,
         ],
         Title::class => [
             'event' => 'title-updated',

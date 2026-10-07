@@ -22,7 +22,7 @@ trait ChecksIndividualLifecycleEligibility
      */
     protected function loadLifecycleState(Wrestler|Manager|Referee $individual): void
     {
-        $individual->loadExists([...IndividualBuilder::EMPLOYMENT_STATUS_STATE, ...IndividualBuilder::AVAILABILITY_STATE]);
+        $individual->loadExists(IndividualBuilder::ROSTER_STATE);
     }
 
     protected function isEligibleFor(RosterLifecycleAction $action, Wrestler|Manager|Referee $individual): bool

@@ -29,6 +29,9 @@ abstract class IndividualBuilder extends Builder
         'currentSuspension as availability_current_suspension_exists',
     ];
 
+    /** Employment and availability projections that roster status and booking checks read. */
+    public const array ROSTER_STATE = [...self::EMPLOYMENT_STATUS_STATE, ...self::AVAILABILITY_STATE];
+
     /**
      * Restrict to individuals RosterBookingEligibility would allow: currently
      * employed, not retired, not suspended and not injured.
