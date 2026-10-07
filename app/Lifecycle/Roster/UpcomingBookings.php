@@ -10,6 +10,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -33,7 +34,7 @@ final readonly class UpcomingBookings
         $matches = [$this->matches($rosterMember), ...$this->relatedMatches($rosterMember)];
 
         return Event::query()
-            ->withoutGlobalScope('promotion_context')
+            ->withoutGlobalScope(PromotionContextScope::class)
             ->where(function (Builder $query) use ($matches): void {
                 foreach ($matches as $matchesQuery) {
                     $query->orWhereIn('id', $matchesQuery->select('event_id'));
@@ -63,7 +64,7 @@ final readonly class UpcomingBookings
     {
         if ($rosterMember instanceof TagTeam) {
             return array_values($rosterMember->currentWrestlers()
-                ->withoutGlobalScope('promotion_context')
+                ->withoutGlobalScope(PromotionContextScope::class)
                 ->get([(new Wrestler)->qualifyColumn('id')])
                 ->map(fn (Wrestler $wrestler): EventMatchBuilder => $this->liveMatches()->forWrestlerId($wrestler->id))
                 ->all());
@@ -71,7 +72,7 @@ final readonly class UpcomingBookings
 
         if ($rosterMember instanceof Wrestler) {
             return array_values($rosterMember->currentTagTeam()
-                ->withoutGlobalScope('promotion_context')
+                ->withoutGlobalScope(PromotionContextScope::class)
                 ->get([(new TagTeam)->qualifyColumn('id')])
                 ->map(fn (TagTeam $tagTeam): EventMatchBuilder => $this->liveMatches()->forTagTeamId($tagTeam->id))
                 ->all());
@@ -86,7 +87,7 @@ final readonly class UpcomingBookings
     private function liveMatches(): EventMatchBuilder
     {
         return EventMatch::query()
-            ->withoutGlobalScope('promotion_context')
+            ->withoutGlobalScope(PromotionContextScope::class)
             ->upcomingOrUnresulted();
     }
 }

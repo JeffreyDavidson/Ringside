@@ -7,6 +7,7 @@ namespace App\Lifecycle\Venues;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Carbon;
 
 final class VenueSchedulingEligibility
@@ -20,7 +21,7 @@ final class VenueSchedulingEligibility
         $day = self::calendarDay($venue, $date);
 
         $events = $venue->events()
-            ->withoutGlobalScope('promotion_context')
+            ->withoutGlobalScope(PromotionContextScope::class)
             ->whereBetween('date', [
                 $day->copy()->startOfDay()->utc(),
                 $day->copy()->endOfDay()->utc(),

@@ -11,6 +11,7 @@ use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Scopes\PromotionContextScope;
 use App\Services\Roster\Stables\StableMembershipService;
 
 final readonly class StableRestructuringEligibility
@@ -75,7 +76,7 @@ final readonly class StableRestructuringEligibility
     public function ensureSplitNameAvailable(Stable $stable, string $name): void
     {
         $nameTaken = Stable::query()
-            ->withoutGlobalScope('promotion_context')
+            ->withoutGlobalScope(PromotionContextScope::class)
             ->where('promotion_id', $stable->promotion_id)
             ->where('name', $name)
             ->exists();
