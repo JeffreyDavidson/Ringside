@@ -75,6 +75,17 @@ describe('authorized tag team form interactions', function () {
         'managers' => ['managers', 'heenan', 'Bobby Heenan'],
     ]);
 
+    it('searches the roster while editing an existing tag team', function () {
+        $tagTeam = TagTeam::factory()->create();
+        Wrestler::factory()->create(['name' => 'Ricky Morton']);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $tagTeam->id);
+
+        $options = $modal->instance()->searchRoster('wrestlers', 'morton');
+
+        expect(array_column($options, 'name'))->toBe(['Ricky Morton']);
+    });
+
     it('does not search kinds the tag team form does not offer', function () {
         TagTeam::factory()->create(['name' => 'The Rockers']);
         $modal = livewire(FormModal::class);
