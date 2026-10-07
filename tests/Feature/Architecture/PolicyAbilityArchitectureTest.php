@@ -35,7 +35,7 @@ function policyAbilities(): array
             continue;
         }
 
-        foreach ((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+        foreach (new ReflectionClass($class)->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             if ($method->getDeclaringClass()->getName() === $class && ! $method->isConstructor()) {
                 $abilities[] = $method->getName();
             }
