@@ -5,12 +5,6 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it releases an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 

@@ -6,12 +6,6 @@ use App\Actions\Wrestlers\UnretireAction;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it unretires a retired wrestler with employment', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 

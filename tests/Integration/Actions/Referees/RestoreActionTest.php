@@ -7,12 +7,6 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it restores a soft-deleted referee', function () {
     $referee = Referee::factory()->create();
     $originalId = $referee->id;

@@ -13,12 +13,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 use JMac\Testing\Matching\Argument;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it unretires retired current wrestlers and managers without employing them', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $manager = Manager::factory()->retired()->create();

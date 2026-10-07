@@ -6,12 +6,6 @@ use App\Actions\Managers\EmployAction;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it employs an unemployed manager', function () {
     $manager = Manager::factory()->create();
 

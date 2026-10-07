@@ -6,12 +6,6 @@ use App\Actions\Referees\UpdateAction;
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it updates referee basic information', function () {
     $referee = Referee::factory()->create([
         'first_name' => 'Original',

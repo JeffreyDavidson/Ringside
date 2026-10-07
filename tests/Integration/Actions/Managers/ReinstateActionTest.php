@@ -6,12 +6,6 @@ use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Roster\Managers\Manager;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it reinstates a suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 

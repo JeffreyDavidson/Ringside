@@ -6,12 +6,6 @@ use App\Actions\TagTeams\EmployCurrentWrestlersAction;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it skips retired current wrestlers and employs the rest', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
     $retiredWrestler = Wrestler::factory()->retired()->create();

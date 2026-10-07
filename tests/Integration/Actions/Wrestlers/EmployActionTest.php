@@ -7,12 +7,6 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it employs an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 

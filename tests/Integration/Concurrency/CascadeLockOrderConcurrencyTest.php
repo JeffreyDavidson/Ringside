@@ -16,7 +16,6 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 
@@ -106,20 +105,8 @@ function runBehindGate(string $gateSql, array $gateBindings, array $workers): ar
     return $results;
 }
 
-/** Leave the transaction RefreshDatabase wraps around a test so child processes can see the data, and rebuild afterwards. */
-function committedScratchData(Closure $callback): void
-{
-    DB::commit();
-
-    try {
-        $callback();
-    } finally {
-        Artisan::call('migrate:fresh');
-    }
-}
-
 test('two tag teams retiring together that share managers attached in opposite orders never deadlock', function () {
-    committedScratchData(function (): void {
+    withCommittedData(function (): void {
         // With few managers the planner scans them in id order whatever the pivot order is; a large managers table
         // makes it read the pivot rows first, as it does in production, so the members come back in pivot order.
         DB::statement("insert into managers (first_name, last_name, created_at, updated_at) select 'Padding', 'Manager '||number, now(), now() from generate_series(1, 20000) as number");
@@ -162,7 +149,7 @@ test('two tag teams retiring together that share managers attached in opposite o
     ->group('concurrency', 'postgres-concurrency');
 
 test('retiring a champion of two titles while a multi-title result is recorded never deadlocks', function () {
-    committedScratchData(function (): void {
+    withCommittedData(function (): void {
         foreach (range(1, 3) as $run) {
             // Arrange
             $champion = Wrestler::factory()->bookable()->create();
@@ -239,7 +226,7 @@ dataset('tag team membership races', [
 ]);
 
 test('concurrent tag team membership writes leave a wrestler on exactly one current tag team', function (Closure $workers) {
-    committedScratchData(function () use ($workers): void {
+    withCommittedData(function () use ($workers): void {
         // Arrange
         $shared = Wrestler::factory()->create();
         $free = Wrestler::factory()->count(2)->create();

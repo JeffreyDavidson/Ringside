@@ -7,12 +7,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it skips retired managers and employs the rest', function () {
     $tagTeam = TagTeam::factory()->create();
     $retiredManager = Manager::factory()->retired()->create();

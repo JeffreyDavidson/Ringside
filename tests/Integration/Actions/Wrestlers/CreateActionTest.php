@@ -9,12 +9,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Collection;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it creates a wrestler with basic information', function () {
     $data = new WrestlerData(
         name: 'John Cena',

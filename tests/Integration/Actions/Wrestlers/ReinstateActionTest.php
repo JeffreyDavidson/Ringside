@@ -6,12 +6,6 @@ use App\Actions\Wrestlers\ReinstateAction;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-use function Spatie\PestPluginTestTime\testTime;
-
-beforeEach(function () {
-    testTime()->freeze();
-});
-
 test('it reinstates a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
