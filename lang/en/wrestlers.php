@@ -55,8 +55,7 @@ return [
         'employ' => [
             'default' => 'Unable to hire this wrestler at this time.',
             'already_employed' => 'This wrestler is already hired.',
-            'retired' => 'Retired wrestlers cannot be hired.',
-            'suspended' => 'Cannot hire suspended wrestlers.',
+            'retired' => 'Retired wrestlers cannot be hired without unretiring first.',
         ],
         'release' => [
             'default' => 'Unable to release this wrestler.',
@@ -74,6 +73,8 @@ return [
         'suspend' => [
             'default' => 'Unable to suspend this wrestler.',
             'already_suspended' => 'This wrestler is already suspended.',
+            'injured' => 'Injured wrestlers cannot be suspended.',
+            'unemployed' => 'Only employed wrestlers can be suspended.',
         ],
         'reinstate' => [
             'default' => 'Unable to reinstate this wrestler.',
@@ -83,14 +84,12 @@ return [
         'injure' => [
             'default' => 'Unable to record injury for this wrestler.',
             'already_injured' => 'This wrestler is already injured.',
+            'suspended' => 'Suspended wrestlers cannot be injured.',
+            'unemployed' => 'Only employed wrestlers can be injured.',
         ],
         'clear_from_injury' => [
             'default' => 'Unable to clear this wrestler from injury.',
             'not_injured' => 'This wrestler is not currently injured.',
-        ],
-        'restore' => [
-            'default' => 'Unable to restore this wrestler.',
-            'not_deleted' => 'This wrestler has not been deleted.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],
