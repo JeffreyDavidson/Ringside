@@ -12,7 +12,6 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<TagTeamManager> */
@@ -45,9 +44,7 @@ class PreviousTagTeams extends DataTableComponent
 
     protected function configure(): void
     {
-        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
-
-        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+        $this->authorizeContextRecord(Manager::class, $this->managerId, 'manager');
 
         $this->addAdditionalSelects([
             'tag_teams_managers.tag_team_id as tag_team_id',

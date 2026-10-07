@@ -68,9 +68,7 @@ class MatchesTable extends DataTableComponent
 
     protected function configure(): void
     {
-        $eventId = $this->requireContextId($this->eventId, 'event');
-
-        Gate::authorize('view', Event::query()->findOrFail($eventId));
+        $this->authorizeContextRecord(Event::class, $this->eventId, 'event');
 
         $this->addAdditionalSelects([
             'events_matches.event_id',

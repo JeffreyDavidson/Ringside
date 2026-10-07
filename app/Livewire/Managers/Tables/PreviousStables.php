@@ -10,7 +10,6 @@ use App\Livewire\Table\Column;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\StableManagerHistoryQuery;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -51,8 +50,6 @@ class PreviousStables extends BasePreviousStablesTable
 
     protected function configure(): void
     {
-        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
-
-        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+        $this->authorizeContextRecord(Manager::class, $this->managerId, 'manager');
     }
 }

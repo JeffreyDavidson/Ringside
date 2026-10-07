@@ -6,7 +6,7 @@ namespace App\Livewire\Titles\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Support\RosterResourceRouteResolver;
+use App\Livewire\Concerns\UsesRosterRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
@@ -16,13 +16,13 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<TitleChampionship> */
 class TitleHistory extends DataTableComponent
 {
     use ShowTableTrait;
+    use UsesRosterRouteResolver;
 
     protected string $databaseTableName = 'titles_championships';
 
@@ -35,18 +35,9 @@ class TitleHistory extends DataTableComponent
     #[Locked]
     public ?int $titleId = null;
 
-    protected RosterResourceRouteResolver $routeResolver;
-
-    public function boot(RosterResourceRouteResolver $routeResolver): void
-    {
-        $this->routeResolver = $routeResolver;
-    }
-
     protected function configure(): void
     {
-        $titleId = $this->requireContextId($this->titleId ?? null, 'title');
-
-        Gate::authorize('view', Title::query()->findOrFail($titleId));
+        $this->authorizeContextRecord(Title::class, $this->titleId, 'title');
     }
 
     /** @return TitleChampionshipBuilder<TitleChampionship> */

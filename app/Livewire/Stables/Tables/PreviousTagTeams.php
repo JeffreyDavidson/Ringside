@@ -6,7 +6,7 @@ namespace App\Livewire\Stables\Tables;
 
 use App\Builders\Roster\StableMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Support\RosterResourceRouteResolver;
+use App\Livewire\Concerns\UsesRosterRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -14,13 +14,13 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<StableTagTeam> */
 class PreviousTagTeams extends DataTableComponent
 {
     use ShowTableTrait;
+    use UsesRosterRouteResolver;
 
     #[\Override]
     protected string $resourceName = 'tag teams';
@@ -29,13 +29,6 @@ class PreviousTagTeams extends DataTableComponent
 
     #[Locked]
     public ?int $stableId = null;
-
-    protected RosterResourceRouteResolver $routeResolver;
-
-    public function boot(RosterResourceRouteResolver $routeResolver): void
-    {
-        $this->routeResolver = $routeResolver;
-    }
 
     /** @return StableMembershipBuilder<StableTagTeam> */
     public function builder(): StableMembershipBuilder
@@ -75,9 +68,7 @@ class PreviousTagTeams extends DataTableComponent
 
     protected function configure(): void
     {
-        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
-
-        Gate::authorize('view', Stable::query()->findOrFail($stableId));
+        $this->authorizeContextRecord(Stable::class, $this->stableId, 'stable');
 
         $this->addAdditionalSelects([
             'stables_tag_teams.tag_team_id',

@@ -8,7 +8,6 @@ use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
@@ -40,8 +39,6 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     {
         parent::configure();
 
-        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
-
-        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+        $this->authorizeContextRecord(Wrestler::class, $this->wrestlerId, 'wrestler');
     }
 }
