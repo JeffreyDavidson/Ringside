@@ -8,6 +8,7 @@ return [
     'date_fired' => 'Date Fired',
     'index_description' => 'Manage your promotion’s managers, employment, and representation.',
     'index_title' => 'Managers',
+    'add' => 'Add Manager',
     'all' => 'All managers',
     'filter_status' => 'Filter managers by status',
     'search' => 'Search managers',
@@ -31,6 +32,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Manager actions',
         'employed' => 'Manager has been hired.',
         'released' => 'Manager contract has been terminated.',
         'retired' => 'Manager has been retired.',
@@ -83,5 +85,13 @@ return [
             'not_injured' => 'This manager is not currently injured.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
+    ],
+
+    'validation' => [
+        'attributes' => [
+            'first_name' => 'first name',
+            'last_name' => 'last name',
+            'employment_date' => 'employment date',
+        ],
     ],
 ];

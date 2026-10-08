@@ -54,6 +54,7 @@ pest()
         'Integration/Config',
         'Integration/Database',
         'Integration/Enums',
+        'Integration/Exceptions',
         'Integration/Lifecycle',
         'Integration/Livewire',
         'Integration/Mail',

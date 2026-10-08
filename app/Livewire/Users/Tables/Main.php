@@ -76,12 +76,12 @@ class Main extends BaseTable
     {
         return match ($user->status) {
             UserStatus::Unverified => [
-                'label' => 'Activate account',
+                'label' => __('users.actions.activate'),
                 'status' => UserStatus::Active,
                 'confirmation' => $this->activationConfirmationFor($user),
             ],
-            UserStatus::Active => ['label' => 'Deactivate account', 'status' => UserStatus::Inactive, 'confirmation' => null],
-            UserStatus::Inactive => ['label' => 'Reactivate account', 'status' => UserStatus::Active, 'confirmation' => null],
+            UserStatus::Active => ['label' => __('users.actions.deactivate'), 'status' => UserStatus::Inactive, 'confirmation' => null],
+            UserStatus::Inactive => ['label' => __('users.actions.reactivate'), 'status' => UserStatus::Active, 'confirmation' => null],
         };
     }
 
@@ -105,7 +105,7 @@ class Main extends BaseTable
 
         if ($targetStatus === null) {
             throw ValidationException::withMessages([
-                'status' => 'Select a valid user status.',
+                'status' => __('users.invalid_status'),
             ]);
         }
 
@@ -120,7 +120,7 @@ class Main extends BaseTable
         }
 
         $this->forgetMetadata();
-        $this->dispatchActionSuccess("User account status changed to {$targetStatus->label()}.");
+        $this->dispatchActionSuccess(__('users.status_changed', ['status' => $targetStatus->label()]));
     }
 
     /** @return array<Column> */

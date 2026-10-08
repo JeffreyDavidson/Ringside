@@ -16,18 +16,18 @@
         <div class="grid gap-4 md:grid-cols-2">
             <x-form.inputs.select
                 id="finish"
-                label="Finish"
+                :label="__('matches.result_modal.finish')"
                 wire:model.live="form.finish"
                 :options="$this->finishOptions"
-                placeholder="Select a finish"
+                :placeholder="__('matches.result_modal.select_finish')"
             />
 
             <x-form.inputs.select
                 id="winningSideId"
-                label="Winning Side"
+                :label="__('matches.result_modal.winning_side')"
                 wire:model="form.winningSideId"
                 :options="$this->sideOptions"
-                placeholder="No winning side"
+                :placeholder="__('matches.result_modal.no_winning_side')"
             />
         </div>
 
@@ -35,20 +35,18 @@
             <section class="space-y-3" aria-labelledby="result-eliminations-heading">
                 <div>
                     <h3 id="result-eliminations-heading" class="text-ringside-ink text-sm font-semibold">
-                        Eliminations
+                        {{ __('matches.result_modal.eliminations') }}
                     </h3>
-                    <p class="text-ringside-muted text-xs">
-                        Record each eliminated competitor in order. Leave the winner without an elimination order.
-                    </p>
+                    <p class="text-ringside-muted text-xs">{{ __('matches.result_modal.eliminations_hint') }}</p>
                 </div>
 
                 <div class="border-ringside-line overflow-x-auto border">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-ringside-surface text-ringside-muted text-xs font-medium">
                             <tr>
-                                <th scope="col" class="px-4 py-2.5">Competitor</th>
-                                <th scope="col" class="px-4 py-2.5">Order</th>
-                                <th scope="col" class="px-4 py-2.5">Eliminated By</th>
+                                <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.competitor') }}</th>
+                                <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.order') }}</th>
+                                <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.eliminated_by') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-ringside-line divide-y">
@@ -69,7 +67,7 @@
                                             :id="$orderInputId"
                                             :name="$orderField"
                                             wire:model="form.eliminations.{{ $competitor->id }}.order"
-                                            :aria-label="'Elimination order for '.$competitor->competitor->name"
+                                            :aria-label="__('matches.result_modal.elimination_order_for', ['name' => $competitor->competitor->name])"
                                         />
                                         @error($orderField)
                                             <div id="{{ $orderInputId }}-error">
@@ -81,9 +79,9 @@
                                         <x-form.inputs.select
                                             wire:model="form.eliminations.{{ $competitor->id }}.eliminatedById"
                                             :options="collect($this->competitorOptions)->except([$competitor->id])->all()"
-                                            placeholder="Not recorded"
+                                            :placeholder="__('matches.result_modal.not_recorded')"
                                             size="sm"
-                                            :aria-label="'Eliminator for '.$competitor->competitor->name"
+                                            :aria-label="__('matches.result_modal.eliminator_for', ['name' => $competitor->competitor->name])"
                                         />
                                     </td>
                                 </tr>
@@ -97,14 +95,14 @@
 
     <x-slot:footer>
         <div class="flex flex-1 justify-end gap-2">
-            <x-buttons.light wire:click="$dispatch('closeModal')">Cancel</x-buttons.light>
+            <x-buttons.light wire:click="$dispatch('closeModal')">{{ __('core.form.cancel') }}</x-buttons.light>
             <x-buttons.primary
                 data-test="save-result"
                 wire:click="save"
                 wire:loading.attr="disabled"
                 wire:target="save"
             >
-                Save Result
+                {{ __('matches.result_modal.save_result') }}
             </x-buttons.primary>
         </div>
     </x-slot:footer>

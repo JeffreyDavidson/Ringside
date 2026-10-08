@@ -42,7 +42,7 @@
     x-trap.noreturn="$store.sidebar && $store.sidebar.mobileOpen"
     :role="$store.sidebar && $store.sidebar.mobileOpen ? 'dialog' : null"
     :aria-modal="$store.sidebar && $store.sidebar.mobileOpen ? 'true' : null"
-    :aria-label="$store.sidebar && $store.sidebar.mobileOpen ? 'Main navigation' : null"
+    :aria-label="$store.sidebar && $store.sidebar.mobileOpen ? @js(__('navigation.sidebar.main')) : null"
     data-test="mobile-navigation"
 >
     <div
@@ -68,13 +68,13 @@
             : '--sidebar-width: var(--sidebar-collapsed-width)'"
         id="app-sidebar"
         class="group border-ringside-line bg-ringside-surface-header fixed inset-y-0 start-0 z-50 flex w-[var(--sidebar-default-width)] shrink-0 flex-col border-e transition-[width,transform] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:w-[var(--sidebar-width)]"
-        :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
+        :aria-label="expanded ? @js(__('navigation.sidebar.main')) : @js(__('navigation.sidebar.main_collapsed'))"
     >
         <div class="border-ringside-line relative flex h-[var(--header-height)] min-h-[var(--header-height)] shrink-0 items-center border-b px-6 group-data-[collapsed=true]:px-4">
             <a
                 class="sidebar-brand font-display text-[2rem] leading-none tracking-tight"
                 href="{{ route('dashboard') }}"
-                aria-label="Ringside dashboard"
+                aria-label="{{ __('navigation.sidebar.brand_home') }}"
             >
                 <span class="sidebar-brand-full" aria-hidden="true"
                     >RING<span class="text-ringside-signal">SIDE</span></span>
@@ -83,14 +83,14 @@
             <button
                 @click="toggle()"
                 :aria-expanded="expanded"
-                :aria-label="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+                :aria-label="expanded ? @js(__('navigation.sidebar.collapse')) : @js(__('navigation.sidebar.expand'))"
                 class="border-ringside-line bg-ringside-surface-header text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink absolute end-0 top-1/2 hidden size-8 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-4 lg:inline-flex"
             >
                 <x-heroicon-s-chevron-left class="sidebar-toggle-icon size-4" />
             </button>
             <button
                 @click="$store.sidebar && $store.sidebar.closeMobile()"
-                aria-label="Close navigation"
+                aria-label="{{ __('navigation.sidebar.close') }}"
                 class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink ms-auto inline-flex size-10 items-center justify-center lg:hidden"
             >
                 <x-heroicon-o-x-mark class="size-5" />
@@ -114,7 +114,10 @@
                         >{{ str($activePromotion->name)->substr(0, 2)->upper() }}</span>
                         <span x-show="expanded" class="min-w-0 flex-1"
                             ><span class="block truncate text-sm font-semibold">{{ $activePromotion->name }}</span
-                            ><span class="text-ringside-muted mt-1 block text-xs">Promotion workspace</span></span>
+                            ><span
+                                class="text-ringside-muted mt-1 block text-xs"
+                                >{{ __('navigation.sidebar.promotion_workspace') }}</span
+                            ></span>
                         <x-heroicon-o-chevron-down x-show="expanded" class="text-ringside-muted size-4 shrink-0" />
                         @if ($promotionInvitations->isNotEmpty())
                             <span
@@ -153,7 +156,7 @@
                             class="border-ringside-line mt-2 border-t px-3 pt-3"
                         />
                         <p class="text-ringside-muted px-3 pt-3 pb-1 text-xs">
-                            Memberships determine available workspaces.
+                            {{ __('navigation.sidebar.memberships_hint') }}
                         </p>
                     </div>
                 </div>
@@ -183,17 +186,17 @@
             @can('viewAny', \App\Models\Users\User::class)
                 <a
                     href="{{ route('users.index') }}"
-                    aria-label="User management"
-                    :title="expanded ? 'User management' : null"
+                    aria-label="{{ __('navigation.sections.user_management') }}"
+                    :title="expanded ? @js(__('navigation.sections.user_management')) : null"
                     data-sidebar-tooltip
-                    data-tooltip="User management"
+                    data-tooltip="{{ __('navigation.sections.user_management') }}"
                     @if (request()->routeIs('users.*')) aria-current="page" @endif
                     @class(['flex min-h-11 items-center gap-3 px-3 text-ringside-muted transition-[background-color,color,padding] duration-300 ease-out hover:bg-ringside-surface hover:text-ringside-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-ink group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0', 'bg-ringside-surface-hover text-ringside-ink' => request()->routeIs('users.*')])
                 >
                     <x-heroicon-o-cog-6-tooth class="size-5 shrink-0" aria-hidden="true" /><span
                         x-show="expanded"
                         class="truncate text-sm"
-                        >User management</span>
+                        >{{ __('navigation.sections.user_management') }}</span>
                 </a>
             @endcan
             @if ($user instanceof \App\Models\Users\User)
@@ -201,10 +204,10 @@
                     <button @click="open = ! open"
                         :aria-expanded="open"
                         aria-controls="account-menu"
-                        aria-label="Account menu"
-                        :title="expanded ? 'Account menu' : null"
+                        aria-label="{{ __('navigation.sidebar.account_menu') }}"
+                        :title="expanded ? @js(__('navigation.sidebar.account_menu')) : null"
                         data-sidebar-tooltip
-                        data-tooltip="Account menu"
+                        data-tooltip="{{ __('navigation.sidebar.account_menu') }}"
                         data-test="profile-menu"
                         class="hover:bg-ringside-surface hover:text-ringside-ink flex min-h-14 w-full items-center gap-3 px-3 text-start transition-[background-color,color,padding] duration-300 ease-out group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:gap-0 group-data-[collapsed=true]:px-0"
                     >
@@ -227,14 +230,18 @@
                         id="account-menu"
                         class="border-ringside-line bg-ringside-surface absolute start-0 bottom-[calc(100%+8px)] z-40 w-60 border p-2 shadow-xl"
                     >
-                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">Your account</p>
+                        <p class="text-ringside-muted px-3 pt-1 pb-2 text-xs">
+                            {{ __('navigation.sidebar.your_account') }}
+                        </p>
                         <form action="{{ route('logout') }}" method="post">
                             @csrf
                             <button
                                 type="submit"
                                 class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink flex min-h-11 w-full items-center gap-3 px-3 text-start text-sm"
                             >
-                                <x-heroicon-o-arrow-left-start-on-rectangle class="size-4" />Log out
+                                <x-heroicon-o-arrow-left-start-on-rectangle
+                                    class="size-4"
+                                />{{ __('navigation.sidebar.log_out') }}
                             </button>
                         </form>
                     </div>

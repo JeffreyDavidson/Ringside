@@ -82,12 +82,12 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'signature_move' => 'signature move',
-            'wrestlerA' => 'first wrestler',
-            'wrestlerB' => 'second wrestler',
-            'managers' => 'managers',
-            'managers.*' => 'manager',
-            'employment_date' => 'employment date',
+            'signature_move' => __('tag-teams.validation.attributes.signature_move'),
+            'wrestlerA' => __('tag-teams.validation.attributes.first_wrestler'),
+            'wrestlerB' => __('tag-teams.validation.attributes.second_wrestler'),
+            'managers' => __('tag-teams.validation.attributes.managers'),
+            'managers.*' => __('tag-teams.validation.attributes.manager'),
+            'employment_date' => __('tag-teams.validation.attributes.employment_date'),
         ];
     }
 }

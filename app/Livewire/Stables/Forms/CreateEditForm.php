@@ -149,10 +149,10 @@ class CreateEditForm extends BaseForm
     protected function messages(): array
     {
         return [
-            'ended_at.required' => 'A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.',
-            'ended_at.prohibited' => 'An end date cannot be entered here. Establish the stable, then use disband to end it.',
-            'wrestlers.prohibited' => 'A disbanded stable cannot have members. Use reunite instead.',
-            'tag_teams.prohibited' => 'A disbanded stable cannot have members. Use reunite instead.',
+            'ended_at.required' => __('stables.validation.ended_at_required'),
+            'ended_at.prohibited' => __('stables.validation.ended_at_prohibited'),
+            'wrestlers.prohibited' => __('stables.validation.members_prohibited'),
+            'tag_teams.prohibited' => __('stables.validation.members_prohibited'),
         ];
     }
 
@@ -160,8 +160,8 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'started_at' => 'start date',
-            'ended_at' => 'end date',
+            'started_at' => __('stables.validation.attributes.start_date'),
+            'ended_at' => __('stables.validation.attributes.end_date'),
         ];
     }
 }

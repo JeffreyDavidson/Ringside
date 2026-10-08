@@ -13,6 +13,6 @@ final class CannotBeDebutedException extends BaseBusinessException
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} has already been debuted and cannot be debuted again.");
+        return new self(__('titles.errors.debuted.already_debuted', ['context' => $context]));
     }
 }

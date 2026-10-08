@@ -11,6 +11,6 @@ final class CannotRemoveLastOwnerException extends BaseBusinessException
 {
     public static function lastActiveOwner(Promotion $promotion): static
     {
-        return new self("{$promotion->name} must keep at least one active owner. Make another member an active owner first.");
+        return new self(__('promotions.last_owner', ['name' => $promotion->name]));
     }
 }

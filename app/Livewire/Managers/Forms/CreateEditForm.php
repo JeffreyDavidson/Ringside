@@ -60,9 +60,9 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'first_name' => 'first name',
-            'last_name' => 'last name',
-            'employment_date' => 'employment date',
+            'first_name' => __('managers.validation.attributes.first_name'),
+            'last_name' => __('managers.validation.attributes.last_name'),
+            'employment_date' => __('managers.validation.attributes.employment_date'),
         ];
     }
 }

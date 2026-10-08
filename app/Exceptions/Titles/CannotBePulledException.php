@@ -13,6 +13,6 @@ final class CannotBePulledException extends BaseBusinessException
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} is not currently active and cannot be pulled from competition.");
+        return new self(__('titles.errors.pulled.not_active', ['context' => $context]));
     }
 }

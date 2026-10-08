@@ -13,20 +13,20 @@ final class CannotBeUpdatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} has been active in more than one period, so its start date cannot be changed.");
+        return new self(__('stables.errors.updated.start_date_locked', ['context' => $context]));
     }
 
     public static function endsOpenPeriod(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is active, so it cannot be given an end date here. Disband it instead.");
+        return new self(__('stables.errors.updated.ends_open_period', ['context' => $context]));
     }
 
     public static function inactiveWithMembers(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is disbanded and cannot have members. Reunite it instead.");
+        return new self(__('stables.errors.updated.inactive_with_members', ['context' => $context]));
     }
 }

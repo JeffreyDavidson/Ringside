@@ -46,7 +46,7 @@ class CurrentChampionIsCompeting implements DataAwareRule, ValidationRule
             return;
         }
 
-        $fail('The current champion must be included in title matches.');
+        $fail(__('titles.validation.champion_must_compete'));
     }
 
     private function includesChampion(string $competitorKey, int $championId): bool

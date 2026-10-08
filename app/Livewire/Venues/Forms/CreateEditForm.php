@@ -58,8 +58,8 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'street_address' => 'street address',
-            'zipcode' => 'zip code',
+            'street_address' => __('venues.validation.attributes.street_address'),
+            'zipcode' => __('venues.validation.attributes.zip_code'),
         ];
     }
 }

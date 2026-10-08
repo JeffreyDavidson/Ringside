@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'or' => 'Or',
     'sign_in' => 'Sign in',
     'sign_in_action' => 'Sign in to Ringside',
     'signing_in' => 'Signing in…',

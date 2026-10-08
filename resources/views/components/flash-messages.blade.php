@@ -72,7 +72,7 @@
                 <button
                     type="button"
                     class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex size-9 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
-                    aria-label="Dismiss notification"
+                    aria-label="{{ __('core.dismiss_notification') }}"
                     x-on:click="notification = null"
                 >
                     <x-heroicon-m-x-mark class="size-4" aria-hidden="true" />

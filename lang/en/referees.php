@@ -6,6 +6,7 @@ return [
     'last_name' => 'Last Name',
     'index_description' => 'Manage your promotion’s referees, assignments, and officiating records.',
     'index_title' => 'Referees',
+    'add' => 'Add Referee',
     'all' => 'All referees',
     'filter_status' => 'Filter referees by status',
     'search' => 'Search referees',
@@ -29,6 +30,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Referee actions',
         'employed' => 'Referee has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Referee has been retired.',
@@ -81,5 +83,14 @@ return [
             'not_injured' => 'This referee is not currently injured.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
+    ],
+
+    'validation' => [
+        'attributes' => [
+            'first_name' => 'first name',
+            'last_name' => 'last name',
+            'employment_date' => 'employment date',
+        ],
+        'not_bookable' => 'This referee is not available to officiate matches.',
     ],
 ];

@@ -37,7 +37,24 @@ return [
     'next_page' => 'Next page',
     'page' => ':current / :last',
 
+    'errors' => [
+        'reschedule' => [
+            'already_occurred' => 'Event [:name] cannot be rescheduled because it has already occurred.',
+            'has_title_reigns' => 'Event [:name] cannot be rescheduled because its matches have created or ended title reigns.',
+        ],
+    ],
+
     'actions' => [
+        'menu_label' => 'Event actions',
         'deleted' => 'Event successfully deleted.',
+    ],
+
+    'validation' => [
+        'attributes' => [
+            'event_name' => 'event name',
+            'event_date' => 'event date',
+            'venue' => 'venue',
+            'event_preview' => 'event preview',
+        ],
     ],
 ];

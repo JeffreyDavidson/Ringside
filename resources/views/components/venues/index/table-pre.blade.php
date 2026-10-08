@@ -7,7 +7,7 @@
                 class="min-h-11"
                 @click="$dispatch('openModal', { component: 'venues.modals.form-modal' })"
             >
-                Add Venue
+                {{ __('venues.add') }}
             </x-button>
         @endcan
     </x-slot:actions>

@@ -12,12 +12,12 @@
     $itemClass = 'hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink flex min-h-11 items-center gap-3 px-3 text-sm focus-visible:outline-2';
 @endphp
 
-<x-tables.row-actions-menu :label="'Actions for '.$name" :menu-label="$menuLabel">
+<x-tables.row-actions-menu :label="__('core.row_actions.actions_for', ['name' => $name])" :menu-label="$menuLabel">
     @if (! $gateView || auth()->user()?->can('view', $model))
         <li class="m-0 flex flex-col p-0">
             <a class="{{ $itemClass }}" x-on:click="open = false" href="{{ $showUrl }}">
                 <x-heroicon-m-eye class="text-ringside-muted size-5" aria-hidden="true" />
-                <span>View</span>
+                <span>{{ __('core.row_actions.view') }}</span>
             </a>
         </li>
     @endif
@@ -31,7 +31,7 @@
                 wire:click="$dispatch('openModal', { component: '{{ $formModal }}', arguments: { modelId: {{ $model->id }} } })"
             >
                 <x-heroicon-m-pencil-square class="text-ringside-muted size-5" aria-hidden="true" />
-                <span>Edit</span>
+                <span>{{ __('core.row_actions.edit') }}</span>
             </button>
         </li>
     @endcan
@@ -47,7 +47,7 @@
                     wire:confirm="{{ __('core.lifecycle_confirmations.remove', ['name' => $name]) }}"
                 >
                     <x-heroicon-m-trash class="size-5" aria-hidden="true" />
-                    <span>Remove</span>
+                    <span>{{ __('core.row_actions.remove') }}</span>
                 </button>
             </li>
         @endcan

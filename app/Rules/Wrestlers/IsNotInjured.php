@@ -13,7 +13,7 @@ class IsNotInjured implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_int($value) && ! is_string($value)) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
@@ -21,13 +21,13 @@ class IsNotInjured implements ValidationRule
         $wrestler = Wrestler::query()->whereKey($value)->first();
 
         if (! $wrestler instanceof Wrestler) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
 
         if ($wrestler->currentInjury()->exists()) {
-            $fail("{$wrestler->name} is injured and cannot join the stable.");
+            $fail(__('wrestlers.validation.injured', ['name' => $wrestler->name]));
         }
     }
 }

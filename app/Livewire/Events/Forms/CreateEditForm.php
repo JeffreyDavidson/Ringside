@@ -89,10 +89,10 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'name' => 'event name',
-            'date' => 'event date',
-            'venue_id' => 'venue',
-            'preview' => 'event preview',
+            'name' => __('events.validation.attributes.event_name'),
+            'date' => __('events.validation.attributes.event_date'),
+            'venue_id' => __('events.validation.attributes.venue'),
+            'preview' => __('events.validation.attributes.event_preview'),
         ];
     }
 }
