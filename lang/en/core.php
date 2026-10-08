@@ -168,4 +168,12 @@ return [
         'remove' => 'Remove',
         'view' => 'View',
     ],
+
+    'errors' => [
+        'date_range' => [
+            'end_before_start' => 'Invalid date range: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',
+            'end_before_start_for_context' => 'Invalid date range for :context: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',
+            'future_not_allowed' => ':context date (:date) cannot be in the future. Use current or past date only.',
+        ],
+    ],
 ];

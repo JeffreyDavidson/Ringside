@@ -11,17 +11,23 @@ final class InvalidDateRangeException extends BaseBusinessException
 {
     public static function endBeforeStart(Carbon $startDate, Carbon $endDate, ?string $context = null): static
     {
-        $contextInformation = $context ? " for {$context}" : '';
+        $replacements = [
+            'start' => $startDate->format('Y-m-d'),
+            'end' => $endDate->format('Y-m-d'),
+        ];
 
-        return new self(
-            "Invalid date range{$contextInformation}: end date ({$endDate->format('Y-m-d')}) cannot be before start date ({$startDate->format('Y-m-d')}). Ensure logical date ordering."
-        );
+        if ($context) {
+            return new self(__('core.errors.date_range.end_before_start_for_context', [...$replacements, 'context' => $context]));
+        }
+
+        return new self(__('core.errors.date_range.end_before_start', $replacements));
     }
 
     public static function futureNotAllowed(Carbon $date, string $context): static
     {
-        return new self(
-            "{$context} date ({$date->format('Y-m-d')}) cannot be in the future. Use current or past date only."
-        );
+        return new self(__('core.errors.date_range.future_not_allowed', [
+            'context' => $context,
+            'date' => $date->format('Y-m-d'),
+        ]));
     }
 }
