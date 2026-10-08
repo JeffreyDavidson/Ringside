@@ -32,7 +32,7 @@ class HasMinimumMembers implements ValidationRule
         $totalMembersCount = $members->getTotalMemberCount();
 
         if (! StableMembershipRequirements::hasMinimumHeadcount($totalMembersCount)) {
-            $fail('A stable must have at least '.StableMembershipRequirements::MINIMUM_MEMBER_COUNT." members. Currently adding {$totalMembersCount} members.");
+            $fail(__('stables.validation.minimum_members', ['minimum' => StableMembershipRequirements::MINIMUM_MEMBER_COUNT, 'count' => $totalMembersCount]));
         }
     }
 }

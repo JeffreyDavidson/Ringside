@@ -72,4 +72,15 @@ return [
         'pulled' => 'Title successfully pulled.',
         'reinstated' => 'Title successfully reinstated.',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'title_type' => 'title type',
+            'start_date' => 'start date',
+        ],
+        'champion_must_compete' => 'The current champion must be included in title matches.',
+        'competitor_type' => 'The :title may only be contested by :competitors.',
+        'inactive' => 'This title is not active and cannot be used in matches.',
+        'invalid' => 'The selected title is invalid.',
+    ],
 ];

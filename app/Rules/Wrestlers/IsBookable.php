@@ -17,7 +17,7 @@ class IsBookable implements ValidationRule
         $wrestler = Wrestler::find($value);
 
         if (! $wrestler || ! resolve(RosterBookingEligibility::class)->allows($wrestler)) {
-            $fail('This wrestler is not available for booking.');
+            $fail(__('wrestlers.validation.not_bookable'));
         }
     }
 }

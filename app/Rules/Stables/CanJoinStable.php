@@ -27,7 +27,7 @@ class CanJoinStable implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_int($value) && ! is_string($value)) {
-            $fail('The selected stable member is invalid.');
+            $fail(__('stables.validation.invalid_member'));
 
             return;
         }
@@ -35,7 +35,7 @@ class CanJoinStable implements ValidationRule
         $member = $this->memberClass::query()->find($value);
 
         if (! $member instanceof Model) {
-            $fail('The selected stable member is invalid.');
+            $fail(__('stables.validation.invalid_member'));
 
             return;
         }
@@ -56,19 +56,19 @@ class CanJoinStable implements ValidationRule
         $currentStable = $member->currentStable()->first();
 
         if ($currentStable) {
-            $fail('This member already belongs to another stable.');
+            $fail(__('stables.validation.member_already_in_stable'));
 
             return;
         }
 
         if ($member->currentSuspension()->exists()) {
-            $fail('This member is suspended and cannot join the stable.');
+            $fail(__('stables.validation.member_suspended'));
 
             return;
         }
 
         if (! $member->currentEmployment()->exists()) {
-            $fail('This member is not employed and cannot join the stable.');
+            $fail(__('stables.validation.member_not_employed'));
 
             return;
         }
@@ -76,7 +76,7 @@ class CanJoinStable implements ValidationRule
         if ($this->stableStartDate instanceof Carbon && ! $member->currentEmployment()
             ->where('started_at', '<=', $this->stableStartDate)
             ->exists()) {
-            $fail("This member's employment must begin on or before the stable's start date.");
+            $fail(__('stables.validation.employment_after_start'));
         }
     }
 }

@@ -93,10 +93,10 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'height_feet' => 'height in feet',
-            'height_inches' => 'height in inches',
-            'signature_move' => 'signature move',
-            'employment_date' => 'employment date',
+            'height_feet' => __('wrestlers.validation.attributes.height_in_feet'),
+            'height_inches' => __('wrestlers.validation.attributes.height_in_inches'),
+            'signature_move' => __('wrestlers.validation.attributes.signature_move'),
+            'employment_date' => __('wrestlers.validation.attributes.employment_date'),
         ];
     }
 }

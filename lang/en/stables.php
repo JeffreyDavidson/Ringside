@@ -149,4 +149,20 @@ return [
         'suspended' => 'Suspended',
         'unemployed' => 'Not employed',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+        ],
+        'ended_at_prohibited' => 'An end date cannot be entered here. Establish the stable, then use disband to end it.',
+        'ended_at_required' => 'A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.',
+        'employment_after_start' => 'This member\'s employment must begin on or before the stable\'s start date.',
+        'invalid_member' => 'The selected stable member is invalid.',
+        'member_already_in_stable' => 'This member already belongs to another stable.',
+        'member_not_employed' => 'This member is not employed and cannot join the stable.',
+        'member_suspended' => 'This member is suspended and cannot join the stable.',
+        'members_prohibited' => 'A disbanded stable cannot have members. Use reunite instead.',
+        'minimum_members' => 'A stable must have at least :minimum members. Currently adding :count members.',
+    ],
 ];

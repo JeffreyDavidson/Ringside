@@ -112,4 +112,12 @@ return [
     'wrestlers' => 'Wrestlers',
     'tag-teams' => 'Tag Teams',
     'managers' => 'Managers',
+
+    'validation' => [
+        'debut_date_active' => 'The debut date cannot be changed while :name is currently active.',
+        'debut_date_invalid' => 'The debut date must be a valid date.',
+        'debut_date_multiple_periods' => 'The debut date cannot be changed because :name has been active in more than one period.',
+        'employment_date_employed' => 'The employment date cannot be changed while :name is currently employed.',
+        'employment_date_invalid' => 'The employment date must be a valid date.',
+    ],
 ];

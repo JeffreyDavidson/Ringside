@@ -84,4 +84,12 @@ return [
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'first_name' => 'first name',
+            'last_name' => 'last name',
+            'employment_date' => 'employment date',
+        ],
+    ],
 ];

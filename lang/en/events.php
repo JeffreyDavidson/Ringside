@@ -47,4 +47,13 @@ return [
     'actions' => [
         'deleted' => 'Event successfully deleted.',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'event_name' => 'event name',
+            'event_date' => 'event date',
+            'venue' => 'venue',
+            'event_preview' => 'event preview',
+        ],
+    ],
 ];

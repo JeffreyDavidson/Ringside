@@ -40,6 +40,12 @@ return [
         'wrestler_distinct' => 'A wrestler can only be booked once in a match.',
         'tag_team_distinct' => 'A tag team can only be booked once in a match.',
         'attributes' => [
+            'match_preview' => 'match preview',
+            'match_type' => 'match type',
+            'match_stipulation' => 'match stipulation',
+            'competitors' => 'competitors',
+            'referees' => 'referees',
+            'championship_titles' => 'championship titles',
             'wrestler' => 'wrestler',
             'tag_team' => 'tag team',
             'referee' => 'referee',

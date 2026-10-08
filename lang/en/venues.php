@@ -17,4 +17,11 @@ return [
     'actions' => [
         'deleted' => 'Venue successfully deleted.',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'street_address' => 'street address',
+            'zip_code' => 'zip code',
+        ],
+    ],
 ];

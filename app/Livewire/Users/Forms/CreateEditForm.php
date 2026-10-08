@@ -78,7 +78,7 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'password_confirmation' => 'password confirmation',
+            'password_confirmation' => __('users.validation.attributes.password_confirmation'),
         ];
     }
 }

@@ -17,4 +17,10 @@ return [
     'last_administrator' => 'The platform must keep at least one active administrator. Make another user an active administrator first.',
     'status_changed' => 'User account status changed to :status.',
     'email_change_invitations_warning' => ':name now uses an email with pending invitations: :invitations. They can accept them once signed in.',
+
+    'validation' => [
+        'attributes' => [
+            'password_confirmation' => 'password confirmation',
+        ],
+    ],
 ];

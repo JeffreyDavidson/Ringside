@@ -70,4 +70,16 @@ return [
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],
+
+    'validation' => [
+        'attributes' => [
+            'signature_move' => 'signature move',
+            'first_wrestler' => 'first wrestler',
+            'second_wrestler' => 'second wrestler',
+            'managers' => 'managers',
+            'manager' => 'manager',
+            'employment_date' => 'employment date',
+        ],
+        'not_bookable' => 'This tag team is not available for booking.',
+    ],
 ];
