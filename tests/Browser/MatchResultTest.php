@@ -11,52 +11,70 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
-    $this->event = Event::factory()->past()->create();
-    $this->match = EventMatch::factory()->for($this->event)->create();
+/**
+ * @return array{
+ *     event: Event,
+ *     match: EventMatch,
+ *     winningSide: MatchSide,
+ * }
+ */
+function matchResultFixtures(): array
+{
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
     $firstWrestler = Wrestler::factory()->create(['name' => 'First Competitor']);
     $secondWrestler = Wrestler::factory()->create(['name' => 'Second Competitor']);
 
     foreach ([$firstWrestler, $secondWrestler] as $index => $wrestler) {
-        $side = MatchSide::factory()->for($this->match, 'match')->create([
+        $side = MatchSide::factory()->for($match, 'match')->create([
             'position' => $index + 1,
         ]);
 
         MatchCompetitor::factory()->create([
-            'match_id' => $this->match->id,
+            'match_id' => $match->id,
             'match_side_id' => $side->id,
             'competitor_type' => $wrestler->getMorphClass(),
             'competitor_id' => $wrestler->id,
         ]);
     }
 
-    $this->winningSide = $this->match->sides()->firstOrFail();
+    $winningSide = $match->sides()->firstOrFail();
     actingAs(administrator());
-});
+
+    return [
+        'event' => $event,
+        'match' => $match,
+        'winningSide' => $winningSide,
+    ];
+}
 
 test('administrator can record a match result', function () {
-    $page = visit(route('events.show', $this->event));
+    ['event' => $event, 'winningSide' => $winningSide, 'match' => $match] = matchResultFixtures();
+
+    $page = visit(route('events.show', $event));
 
     $page->press('@match-result-action')
         ->waitForText('Record Match Result')
         ->select('#finish', MatchFinish::Pinfall->value)
-        ->select('#winningSideId', $this->winningSide->id)
+        ->select('#winningSideId', $winningSide->id)
         ->press('@save-result')
         ->waitForText('Correct Result')
         ->assertSee('First Competitor by Pinfall')
         ->assertNoJavascriptErrors();
 
-    expect($this->match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
-        ->and($this->match->winning_side_id)->toBe($this->winningSide->id);
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+        ->and($match->winning_side_id)->toBe($winningSide->id);
 });
 
 test('administrator can correct a match result', function () {
-    $this->match->update([
+    ['match' => $match, 'winningSide' => $winningSide, 'event' => $event] = matchResultFixtures();
+
+    $match->update([
         'match_finish' => MatchFinish::Pinfall,
-        'winning_side_id' => $this->winningSide->id,
+        'winning_side_id' => $winningSide->id,
     ]);
 
-    $page = visit(route('events.show', $this->event));
+    $page = visit(route('events.show', $event));
 
     $page->press('@match-result-action')
         ->waitForText('Correct Match Result')
@@ -67,6 +85,6 @@ test('administrator can correct a match result', function () {
     waitForModalToClose($page);
     $page->assertNoJavascriptErrors();
 
-    expect($this->match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
-        ->and($this->match->winning_side_id)->toBeNull();
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
+        ->and($match->winning_side_id)->toBeNull();
 });
