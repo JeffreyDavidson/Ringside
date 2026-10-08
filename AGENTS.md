@@ -189,12 +189,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Squash merge feature, fix, refactor, chore, docs, and test branches into `develop` through pull requests.
 - Squash merge `hotfix/` branches into `main`; merge `release/` branches into `main` with regular merge commits. Do not rebase-merge pull requests.
 - Name release branches with the SemVer version they release, using `release/v<MAJOR>.<MINOR>.<PATCH>` (for example, `release/v0.3.0`). Use the same version in the release PR title and tag.
-- The release profile read by the `release` agent skill is in [docs/workflows/releases.md](docs/workflows/releases.md).
+- The release profile and checklist are in [docs/workflows/releases.md](docs/workflows/releases.md); follow it for every release.
+- After a release PR merges into `main` and is tagged, fast-forward `develop` to `main` (`git merge --ff-only origin/main`, then push `develop`). Never create a sync merge commit or a merge-back pull request. If the fast-forward isn't possible, stop, change nothing, and explain which commits are on `develop` but not on `main` and how they got there.
 - Before merging, verify the pull request's head branch, base branch, and merge method.
 - Every new commit must follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/): `type: description`, with an optional scope (`type(scope): description`) and optional breaking-change marker (`type(scope)!: description`).
-- Use lowercase types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `feat` for new features and `fix` for bug fixes; branch prefixes such as `feature/`, `hotfix/`, and `release/` are not commit types.
+- Use lowercase types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `feat` for new features and `fix` for bug fixes; `hotfix/` and `release/` are branch prefixes, not commit types, and `feature` is not a commit type (use `feat`).
 - Write a concise, imperative description. Mark breaking changes with `!` before the colon or a `BREAKING CHANGE: description` footer.
-- Apply the same convention to pull request titles, squash commit subjects, and release or synchronization merge commit subjects; replace generated merge subjects when necessary (for example, `chore(release): release v0.3.0`).
+- Apply the same convention to pull request titles, squash commit subjects, and release merge commit subjects; replace generated merge subjects when necessary (for example, `chore(release): release v0.3.0`).
 - Check the message before every commit and verify the final commit subject before merging a pull request. Do not rely on squash merging to excuse nonconforming feature-branch commits.
 
 ### Branch migration status
