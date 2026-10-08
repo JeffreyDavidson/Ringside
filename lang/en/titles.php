@@ -67,6 +67,7 @@ return [
     'actions' => [
         'menu_label' => 'Title actions',
         'deleted' => 'Title successfully deleted.',
+        'restored' => 'Title successfully restored.',
         'debuted' => 'Title successfully debuted.',
         'retired' => 'Title successfully retired.',
         'unretired' => 'Title successfully unretired.',

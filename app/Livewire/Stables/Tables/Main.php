@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Actions\Stables\DeleteAction;
+use App\Actions\Stables\RestoreAction;
 use App\Builders\Roster\StableBuilder;
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
@@ -83,16 +85,22 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options([
+                ->options(DeletedFilter::appendTo([
                     '' => 'All',
                     StableStatus::Unformed->value => StableStatus::Unformed->label(),
                     StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
                     StableStatus::Active->value => StableStatus::Active->label(),
                     StableStatus::Inactive->value => StableStatus::Inactive->label(),
                     StableStatus::Retired->value => StableStatus::Retired->label(),
-                ])
+                ]))
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var StableBuilder<Stable> $builder */
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = StableStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -106,5 +114,10 @@ class Main extends BaseTable
     public function delete(Stable $stable, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($stable, $deleteAction->handle(...), __('stables.actions.deleted'));
+    }
+
+    public function restore(int $stableId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(Stable::withTrashed()->findOrFail($stableId), $restoreAction->handle(...), __('stables.actions.restored'));
     }
 }

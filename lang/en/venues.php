@@ -18,6 +18,7 @@ return [
     'actions' => [
         'menu_label' => 'Venue actions',
         'deleted' => 'Venue successfully deleted.',
+        'restored' => 'Venue successfully restored.',
     ],
 
     'validation' => [

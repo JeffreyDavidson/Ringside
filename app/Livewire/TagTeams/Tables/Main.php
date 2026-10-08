@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Actions\TagTeams\DeleteAction;
+use App\Actions\TagTeams\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\TagTeamBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
@@ -84,9 +87,15 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(EmploymentStatus::filterOptions())
+                ->options(DeletedFilter::appendTo(EmploymentStatus::filterOptions()))
                 ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = EmploymentStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -100,5 +109,10 @@ class Main extends BaseTable
     public function delete(TagTeam $tagTeam, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($tagTeam, $deleteAction->handle(...), __('tag-teams.actions.deleted'));
+    }
+
+    public function restore(int $tagTeamId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(TagTeam::withTrashed()->findOrFail($tagTeamId), $restoreAction->handle(...), __('tag-teams.actions.restored'), RosterEntityType::TagTeam);
     }
 }

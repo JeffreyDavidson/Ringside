@@ -373,11 +373,20 @@ GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. Since October 2026 `main` requires every
 Application Quality job (including `MySQL tests`) and the `Ward security scan` job.
 
+## Restoring soft-deleted records
+
+**Priority:** Medium  
+**Status:** Shipped from the index tables (option A); detail pages stay without restore.
+
+Show routes still 404 for trashed models (#1888), so restore lives in the eight index tables (wrestlers, managers,
+referees, tag teams, stables, titles, events, venues). Each table offers a Deleted status option (a "Show deleted"
+filter for venues, which have no status filter) that lists only soft-deleted rows, and a deleted row has one action,
+Restore, that runs the entity's `RestoreAction` through `BaseTable::restoreRecord()`. Roster refusals resolve through
+`RosterErrorMessageResolver` (`{entity}.errors.restore.*`); titles, stables, events and venues show their
+translated exception messages. See "Deleted records and Restore" in `livewire-standards.md`.
+
 ## Open follow-ups
 
-- **Restoring soft-deleted records has no UI.** Show routes do not use `withTrashed()` and the restore buttons were
-  removed (#1888), so the roster, title, stable and other `RestoreAction` classes and the `CannotBeRestoredException`
-  roster mappings are unused by the application. Product decision pending: add a restore UI, or delete them.
 - **`$this->` sweep in tests.** Pest tests still use `$this->` in some files; replacing it with global helpers per the
   testing rules is in progress.
 - **Booked members can still be retired or released**, and the other items under the audit rounds below.

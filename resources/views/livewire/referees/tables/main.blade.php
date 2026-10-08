@@ -82,10 +82,8 @@
                             class="hover:bg-ringside-surface-hover/40 transition-colors"
                         >
                             <td class="px-4 py-4 align-top sm:px-5">
-                                <a
-                                    href="{{ route('referees.show', $row) }}"
-                                    class="text-ringside-ink focus-visible:outline-ringside-ink font-semibold wrap-break-word underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-                                >{{ $row->full_name }}</a>
+                                <x-tables.record-name :record="$row" :href="route('referees.show', $row)">
+                                    {{ $row->full_name }}</x-tables.record-name>
                                 <div class="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
                                     <x-tables.status :status="$row->status" />
                                     <x-availability-badges

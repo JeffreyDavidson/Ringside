@@ -89,6 +89,27 @@ expose row actions such as delete but no lifecycle methods.
   `wire:loading.attr="disabled"` and a `wire:target` for its own method, so a second click
   cannot queue the transition again while it runs.
 
+## Deleted Records and Restore
+
+Restoring a soft-deleted record happens only in the index tables; the detail pages have no restore button because
+their show routes 404 for trashed models.
+
+- Every main index table lists deleted rows through the existing `status` filter: its options end with
+  `DeletedFilter::Deleted` (`DeletedFilter::appendTo()`), and the filter closure calls `onlyTrashed()` on the table's
+  builder for that value, so the promotion scope still applies. Venues have no status filter, so they get a
+  `deleted` select filter (`core.deleted_filter.*`). The default view keeps hiding deleted rows, and the status chips
+  show a Deleted count because the metadata counts every option through the same closure.
+- `x-tables.entity-actions` renders a Restore-only menu for a trashed model (`@can('restore', $model)`, with a
+  `core.lifecycle_confirmations.restore` `wire:confirm` that names the record) instead of View, Edit and Remove.
+  Deleted names render through `x-tables.record-name` as plain text, not a link to the missing show page.
+- The table's `restore(int $id, RestoreAction $action)` resolves the model with `withTrashed()->findOrFail()`
+  (the promotion scope still hides other promotions' records) and calls `BaseTable::restoreRecord()`, the analogue
+  of `deleteRecord()`: it authorizes `restore`, runs the Action through `executeBusinessAction()`, flashes the
+  `{entity}.actions.restored` message and forgets the cached status metadata so the counts and the Deleted list
+  refresh. Roster tables pass their `RosterEntityType` so a refusal resolves to the translated
+  `{entity}.errors.restore.*` message through `RosterErrorMessageResolver`; the other tables show the
+  translated exception message.
+
 ## Form Modals
 
 `x-form-modal` renders the shared `x-form.footer`. Its Save, Clear and Auto fill buttons
