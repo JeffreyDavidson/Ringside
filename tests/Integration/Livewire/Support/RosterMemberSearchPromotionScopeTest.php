@@ -28,8 +28,7 @@ describe('scoping the roster search to the form promotion', function (): void {
         Manager::factory()->create(['first_name' => 'Ours', 'last_name' => 'Manager', 'promotion_id' => $promotion->id]);
         Manager::factory()->create(['first_name' => 'Theirs', 'last_name' => 'Manager', 'promotion_id' => $otherPromotion->id]);
         $tagTeam = TagTeam::factory()->create(['promotion_id' => $promotion->id]);
-        $modal = livewire(TagTeamFormModal::class);
-        $modal->call('openModal', $tagTeam->id);
+        $modal = livewire(TagTeamFormModal::class, ['modelId' => $tagTeam->id]);
 
         // Act
         $wrestlers = $modal->instance()->searchRoster('wrestlers', '');
@@ -49,8 +48,7 @@ describe('scoping the roster search to the form promotion', function (): void {
         TagTeam::factory()->create(['name' => 'Ours Team', 'promotion_id' => $promotion->id]);
         TagTeam::factory()->create(['name' => 'Theirs Team', 'promotion_id' => $otherPromotion->id]);
         $stable = Stable::factory()->create(['promotion_id' => $promotion->id]);
-        $modal = livewire(StableFormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(StableFormModal::class, ['modelId' => $stable->id]);
 
         // Act
         $wrestlers = $modal->instance()->searchRoster('wrestlers', '');
@@ -99,8 +97,7 @@ describe('scoping the roster search to the form promotion', function (): void {
         $deleted = Wrestler::factory()->trashed()->create(['name' => 'Ours Deleted', 'promotion_id' => $promotion->id]);
         $foreign = Wrestler::factory()->create(['name' => 'Theirs Wrestler', 'promotion_id' => $otherPromotion->id]);
         $tagTeam = TagTeam::factory()->create(['promotion_id' => $promotion->id]);
-        $modal = livewire(TagTeamFormModal::class);
-        $modal->call('openModal', $tagTeam->id);
+        $modal = livewire(TagTeamFormModal::class, ['modelId' => $tagTeam->id]);
         $modal->set('form.wrestlerA', $deleted->id);
         $modal->set('form.wrestlerB', $foreign->id);
 
