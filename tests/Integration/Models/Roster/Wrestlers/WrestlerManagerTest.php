@@ -51,7 +51,6 @@ function wrestlersWrestlerManagerManagerFixtures(): array
 function wrestlersWrestlerManagerWrestlerSetupFixtures(Wrestler $wrestler, Manager $manager): void
 {
     createManagementRelationship($wrestler, $manager);
-
 }
 
 function wrestlersWrestlerManagerWrestlerSetupFixtures2(Wrestler $wrestler, Manager $manager, Manager $secondManager, Wrestler $secondWrestler): void
@@ -73,7 +72,6 @@ function wrestlersWrestlerManagerWrestlerSetupFixtures2(Wrestler $wrestler, Mana
     createManagementRelationship($secondWrestler, $manager, [
         'hired_at' => Carbon::now()->subMonths(2),
     ]);
-
 }
 
 /**

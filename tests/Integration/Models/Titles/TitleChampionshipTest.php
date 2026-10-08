@@ -88,7 +88,6 @@ function titlesTitleChampionshipTitleSetupFixtures(Title $title, Wrestler $wrest
         ->create([
             'won_at' => Carbon::now()->subMonths(3),
         ]);
-
 }
 
 /**

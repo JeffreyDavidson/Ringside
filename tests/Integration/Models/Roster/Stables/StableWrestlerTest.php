@@ -52,7 +52,6 @@ function stablesStableWrestlerWrestlerSetupFixtures(Wrestler $wrestler, Stable $
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-
 }
 
 function stablesStableWrestlerWrestlerSetupFixtures2(Wrestler $wrestler, Stable $stable, Stable $secondStable): void
@@ -70,7 +69,6 @@ function stablesStableWrestlerWrestlerSetupFixtures2(Wrestler $wrestler, Stable 
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-
 }
 
 /**

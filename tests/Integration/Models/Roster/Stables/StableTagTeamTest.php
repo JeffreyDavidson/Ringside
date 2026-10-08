@@ -50,7 +50,6 @@ function stablesStableTagTeamTagTeamSetupFixtures(TagTeam $tagTeam, Stable $stab
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-
 }
 
 function stablesStableTagTeamTagTeamSetupFixtures2(TagTeam $tagTeam, Stable $stable, Stable $secondStable): void
@@ -68,7 +67,6 @@ function stablesStableTagTeamTagTeamSetupFixtures2(TagTeam $tagTeam, Stable $sta
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-
 }
 
 /**

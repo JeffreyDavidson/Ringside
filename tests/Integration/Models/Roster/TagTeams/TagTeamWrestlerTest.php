@@ -68,7 +68,6 @@ function tagTeamsTagTeamWrestlerTagTeamFixtures(): array
 function tagTeamsTagTeamWrestlerWrestlerSetupFixtures(Wrestler $wrestler, TagTeam $tagTeam): void
 {
     createTagTeamMembership($wrestler, $tagTeam);
-
 }
 
 function tagTeamsTagTeamWrestlerWrestlerSetupFixtures2(Wrestler $wrestler, TagTeam $tagTeam, TagTeam $secondTagTeam, Wrestler $secondWrestler): void
@@ -90,7 +89,6 @@ function tagTeamsTagTeamWrestlerWrestlerSetupFixtures2(Wrestler $wrestler, TagTe
     createTagTeamMembership($secondWrestler, $tagTeam, [
         'joined_at' => Carbon::now()->subMonths(2),
     ]);
-
 }
 
 /**
