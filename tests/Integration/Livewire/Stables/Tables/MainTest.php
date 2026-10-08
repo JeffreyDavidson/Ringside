@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Tables\Main;
 use App\Models\Lifecycle\ActivityPeriod;
@@ -179,10 +180,14 @@ describe('stables table metadata', function (): void {
         $statuses = collect($metadata['statuses'])->keyBy('value');
 
         expect($metadata['total'])->toBe(3)
-            ->and($statuses->keys()->all())->toBe(array_map(
-                static fn (StableStatus $status): string => $status->value,
-                StableStatus::cases(),
-            ))
+            ->and($statuses->keys()->all())->toBe([
+                ...array_map(
+                    static fn (StableStatus $status): string => $status->value,
+                    StableStatus::cases(),
+                ),
+                DeletedFilter::Deleted->value,
+            ])
+            ->and(data_get($statuses->get(DeletedFilter::Deleted->value), 'count'))->toBe(1)
             ->and($statuses->get(StableStatus::Active->value))->toBe([
                 'value' => StableStatus::Active->value,
                 'label' => StableStatus::Active->label(),

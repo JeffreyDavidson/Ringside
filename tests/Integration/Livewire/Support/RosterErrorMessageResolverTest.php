@@ -12,12 +12,14 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
+use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException as TagTeamCannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException as TagTeamCannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
@@ -57,6 +59,7 @@ $individualFailures = [
     'injure already_injured' => [CannotBeInjuredException::injured(...), 'injure.already_injured'],
     'injure suspended' => [CannotBeInjuredException::suspended(...), 'injure.suspended'],
     'clear_from_injury not_injured' => [CannotBeClearedFromInjuryException::notInjured(...), 'clear_from_injury.not_injured'],
+    'restore not_deleted' => [CannotBeRestoredException::notDeleted(...), 'restore.not_deleted'],
 ];
 
 $tagTeamFailures = [
@@ -71,6 +74,8 @@ $tagTeamFailures = [
     'suspend unemployed' => [TagTeamCannotBeSuspendedException::notEmployed(...), 'suspend.unemployed'],
     'suspend already_suspended' => [TagTeamCannotBeSuspendedException::alreadySuspended(...), 'suspend.already_suspended'],
     'reinstate not_suspended' => [TagTeamCannotBeReinstatedException::notSuspended(...), 'reinstate.not_suspended'],
+    'restore not_deleted' => [TagTeamCannotBeRestoredException::notDeleted(...), 'restore.not_deleted'],
+    'restore name conflict' => [fn (TagTeam $member): BaseBusinessException => TagTeamCannotBeRestoredException::nameConflict($member, 'Other Team'), 'restore.default'],
 ];
 
 $rosterFailures = [];
@@ -113,12 +118,14 @@ dataset('mapped roster exceptions', [
     'individual reinstate' => [CannotBeReinstatedException::class, false],
     'individual injure' => [CannotBeInjuredException::class, false],
     'individual clear from injury' => [CannotBeClearedFromInjuryException::class, false],
+    'individual restore' => [CannotBeRestoredException::class, false],
     'tag team employ' => [TagTeamCannotBeEmployedException::class, true],
     'tag team release' => [TagTeamCannotBeReleasedException::class, true],
     'tag team retire' => [TagTeamCannotBeRetiredException::class, true],
     'tag team unretire' => [TagTeamCannotBeUnretiredException::class, true],
     'tag team suspend' => [TagTeamCannotBeSuspendedException::class, true],
     'tag team reinstate' => [TagTeamCannotBeReinstatedException::class, true],
+    'tag team restore' => [TagTeamCannotBeRestoredException::class, true],
 ]);
 
 describe('roster error messages', function (): void {
@@ -168,7 +175,8 @@ describe('roster error messages', function (): void {
             ->filter(fn (RosterLifecycleAction $action): bool => $action->supports($entityType))
             ->map(fn (RosterLifecycleAction $action): string => "{$namespace}.{$action->value}.default")
             ->all();
-        $expectedKeys = [...$reachableKeys, ...$defaultKeys, "{$namespace}.general"];
+        // Restoring runs from the index tables rather than as a lifecycle action, but it resolves to its own default.
+        $expectedKeys = [...$reachableKeys, ...$defaultKeys, "{$namespace}.restore.default", "{$namespace}.general"];
 
         // Act
         $translatedKeys = collect(Arr::dot(__($namespace)))
