@@ -11,10 +11,6 @@ describe('event timing queries', function () {
     beforeEach(function () {
         // Arrange
         freezeSecond();
-        $this->scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
-        $this->startingEvent = Event::factory()->create(['date' => Date::now()]);
-        $this->unscheduledEvent = Event::factory()->unscheduled()->create();
-        $this->pastEvent = Event::factory()->create(['date' => Date::now()->subSecond()]);
         Event::factory()->trashed()->create(['date' => Date::now()->addSecond()]);
         Event::factory()->trashed()->create(['date' => Date::now()]);
         Event::factory()->trashed()->create(['date' => Date::now()->subSecond()]);
@@ -23,6 +19,11 @@ describe('event timing queries', function () {
 
     describe('event timing scopes', function () {
         test('scheduled events include the current second and future events only', function () {
+            $scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
+            $startingEvent = Event::factory()->create(['date' => Date::now()]);
+            Event::factory()->unscheduled()->create();
+            Event::factory()->create(['date' => Date::now()->subSecond()]);
+
             // Act
             $query = Event::query();
             $query->scheduled();
@@ -31,29 +32,39 @@ describe('event timing queries', function () {
 
             // Assert
             expect($scheduledEvents->modelKeys())->toBe([
-                $this->scheduledEvent->id,
-                $this->startingEvent->id,
+                $scheduledEvent->id,
+                $startingEvent->id,
             ]);
         });
 
         test('unscheduled events can be retrieved', function () {
+            Event::factory()->create(['date' => Date::now()->addSecond()]);
+            Event::factory()->create(['date' => Date::now()]);
+            $unscheduledEvent = Event::factory()->unscheduled()->create();
+            Event::factory()->create(['date' => Date::now()->subSecond()]);
+
             // Act
             $query = Event::query();
             $query->unscheduled();
             $unscheduledEvents = $query->get();
 
             // Assert
-            expect($unscheduledEvents->modelKeys())->toBe([$this->unscheduledEvent->id]);
+            expect($unscheduledEvents->modelKeys())->toBe([$unscheduledEvent->id]);
         });
 
         test('past events exclude the current second and future events', function () {
+            Event::factory()->create(['date' => Date::now()->addSecond()]);
+            Event::factory()->create(['date' => Date::now()]);
+            Event::factory()->unscheduled()->create();
+            $pastEvent = Event::factory()->create(['date' => Date::now()->subSecond()]);
+
             // Act
             $query = Event::query();
             $query->past();
             $pastEvents = $query->get();
 
             // Assert
-            expect($pastEvents->modelKeys())->toBe([$this->pastEvent->id]);
+            expect($pastEvents->modelKeys())->toBe([$pastEvent->id]);
         });
     });
 });

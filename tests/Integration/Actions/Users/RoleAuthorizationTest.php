@@ -24,42 +24,48 @@ use function Pest\Laravel\actingAs;
  */
 describe('User Role Integration Tests', function () {
 
-    beforeEach(function () {
-        $this->administrator = administrator();
-        $this->basicUser = basicUser();
-        $this->unverifiedUser = User::factory()->unverified()->create();
-    });
-
     describe('role-based authorization integration', function () {
         test('administrator role integrates with Gate system', function () {
-            actingAs($this->administrator);
+            $administrator = administrator();
+            $basicUser = basicUser();
+            User::factory()->unverified()->create();
+
+            actingAs($administrator);
 
             // Administrator should pass all Gate checks across different models
             expect(Gate::allows('viewAny', User::class))->toBeTrue();
             expect(Gate::allows('create', User::class))->toBeTrue()
-                ->and(Gate::allows('update', $this->basicUser))->toBeTrue()
-                ->and(Gate::allows('delete', $this->basicUser))->toBeTrue()
-                ->and(Gate::allows('restore', $this->basicUser))->toBeTrue();
+                ->and(Gate::allows('update', $basicUser))->toBeTrue()
+                ->and(Gate::allows('delete', $basicUser))->toBeTrue()
+                ->and(Gate::allows('restore', $basicUser))->toBeTrue();
 
             // Administrator should also pass custom abilities
             expect(Gate::allows('manageUsers', User::class))->toBeTrue();
         });
 
         test('basic user role integrates with Gate system', function () {
-            actingAs($this->basicUser);
+            $administrator = administrator();
+            $basicUser = basicUser();
+            User::factory()->unverified()->create();
+
+            actingAs($basicUser);
 
             // Basic user should be denied access across different operations
             expect(Gate::denies('viewAny', User::class))->toBeTrue();
             expect(Gate::denies('create', User::class))->toBeTrue()
-                ->and(Gate::denies('update', $this->administrator))->toBeTrue()
-                ->and(Gate::denies('delete', $this->administrator))->toBeTrue()
-                ->and(Gate::denies('restore', $this->administrator))->toBeTrue();
+                ->and(Gate::denies('update', $administrator))->toBeTrue()
+                ->and(Gate::denies('delete', $administrator))->toBeTrue()
+                ->and(Gate::denies('restore', $administrator))->toBeTrue();
 
             // Basic user should also be denied custom abilities
             expect(Gate::denies('manageUsers', User::class))->toBeTrue();
         });
 
         test('role system works consistently across user instances', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $user1 = administrator();
             $user2 = administrator();
             $user3 = basicUser();
@@ -81,6 +87,10 @@ describe('User Role Integration Tests', function () {
 
     describe('user status and role interaction', function () {
         test('user status does not affect role-based permissions', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $activeAdmin = User::factory()->administrator()->create(['status' => UserStatus::Active]);
             $inactiveAdmin = User::factory()->administrator()->create(['status' => UserStatus::Inactive]);
             $unverifiedAdmin = User::factory()->administrator()->create(['status' => UserStatus::Unverified]);
@@ -101,6 +111,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role changes are reflected immediately in authorization', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $user = basicUser();
 
             // Initially basic user should be denied
@@ -117,6 +131,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('status changes do not affect role-based authorization', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $admin = User::factory()->administrator()->create(['status' => UserStatus::Active]);
 
             // Initially should have permissions
@@ -134,14 +152,18 @@ describe('User Role Integration Tests', function () {
 
     describe('cross-component role validation', function () {
         test('user role system integrates with other entity policies', function () {
-            actingAs($this->administrator);
+            $administrator = administrator();
+            $basicUser = basicUser();
+            User::factory()->unverified()->create();
+
+            actingAs($administrator);
 
             // Administrator should have access to other entity management
             expect(Gate::allows('viewAny', Wrestler::class))->toBeTrue();
             expect(Gate::allows('viewAny', Manager::class))->toBeTrue()
                 ->and(Gate::allows('viewAny', Title::class))->toBeTrue();
 
-            actingAs($this->basicUser);
+            actingAs($basicUser);
 
             // Basic user should be denied access to other entities
             expect(Gate::denies('viewAny', Wrestler::class))->toBeTrue();
@@ -150,12 +172,16 @@ describe('User Role Integration Tests', function () {
         });
 
         test('authentication system respects user roles', function () {
+            $administrator = administrator();
+            $basicUser = basicUser();
+            User::factory()->unverified()->create();
+
             // Test authentication state integration with roles
-            actingAs($this->administrator);
+            actingAs($administrator);
             expect(auth()->check())->toBeTrue()
                 ->and(requiredModel(auth()->user())->role->isAdministrator())->toBeTrue();
 
-            actingAs($this->basicUser);
+            actingAs($basicUser);
             expect(auth()->check())->toBeTrue()
                 ->and(requiredModel(auth()->user())->role->isAdministrator())->toBeFalse();
         });
@@ -163,6 +189,10 @@ describe('User Role Integration Tests', function () {
 
     describe('role management workflows', function () {
         test('role promotion workflow maintains consistency', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $user = basicUser();
 
             // Verify initial state
@@ -186,6 +216,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role demotion workflow maintains consistency', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $user = administrator();
 
             // Verify initial administrator state
@@ -209,6 +243,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('bulk role operations maintain system integrity', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $users = User::factory()->count(5)->create(['role' => Role::Basic]);
 
             // Verify all are basic users initially
@@ -230,6 +268,10 @@ describe('User Role Integration Tests', function () {
 
     describe('security and edge cases', function () {
         test('role system prevents privilege escalation', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $basicUser = basicUser();
 
             actingAs($basicUser);
@@ -243,6 +285,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role enum validation prevents invalid roles', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $user = User::factory()->create();
 
             // Valid role assignments should work
@@ -259,6 +305,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system handles concurrent access correctly', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $admin1 = administrator();
             $admin2 = administrator();
 
@@ -275,6 +325,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system maintains consistency after user deletion and restoration', function () {
+            administrator();
+            basicUser();
+            User::factory()->unverified()->create();
+
             $admin = administrator();
 
             // Verify initial state

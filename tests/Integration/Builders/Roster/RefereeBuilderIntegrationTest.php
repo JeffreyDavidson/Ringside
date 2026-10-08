@@ -21,58 +21,79 @@ use App\Models\Roster\Referees\Referee;
  * @see RefereeBuilder
  */
 describe('RefereeQueryBuilder Integration Tests', function () {
-    beforeEach(function () {
-        // Create referees in all possible states for comprehensive scope testing
-        $this->futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-        $this->availableReferee = Referee::factory()->bookable()->create();
-        $this->suspendedReferee = Referee::factory()->suspended()->create();
-        $this->retiredReferee = Referee::factory()->retired()->create();
-        $this->releasedReferee = Referee::factory()->released()->create();
-        $this->unemployedReferee = Referee::factory()->unemployed()->create();
-        $this->injuredReferee = Referee::factory()->injured()->create();
-    });
-
     describe('employment status scopes', function () {
         test('future employed referees can be retrieved', function () {
+            $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
+            Referee::factory()->bookable()->create();
+            Referee::factory()->suspended()->create();
+            Referee::factory()->retired()->create();
+            Referee::factory()->released()->create();
+            Referee::factory()->unemployed()->create();
+            Referee::factory()->injured()->create();
+
             // Act
             $futureEmployedReferees = Referee::futureEmployed()->get();
 
             // Assert
             expect($futureEmployedReferees)
                 ->toHaveCount(1)
-                ->and($futureEmployedReferees->contains($this->futureEmployedReferee))->toBeTrue();
+                ->and($futureEmployedReferees->contains($futureEmployedReferee))->toBeTrue();
         });
 
         test('unemployed referees can be retrieved', function () {
+            Referee::factory()->withFutureEmployment()->create();
+            Referee::factory()->bookable()->create();
+            Referee::factory()->suspended()->create();
+            Referee::factory()->retired()->create();
+            Referee::factory()->released()->create();
+            $unemployedReferee = Referee::factory()->unemployed()->create();
+            Referee::factory()->injured()->create();
+
             // Act
             $unemployedReferees = Referee::unemployed()->get();
 
             // Assert
             expect($unemployedReferees)
                 ->toHaveCount(1)
-                ->and($unemployedReferees->contains($this->unemployedReferee))->toBeTrue();
+                ->and($unemployedReferees->contains($unemployedReferee))->toBeTrue();
         });
 
         test('released referees can be retrieved', function () {
+            Referee::factory()->withFutureEmployment()->create();
+            Referee::factory()->bookable()->create();
+            Referee::factory()->suspended()->create();
+            Referee::factory()->retired()->create();
+            $releasedReferee = Referee::factory()->released()->create();
+            Referee::factory()->unemployed()->create();
+            Referee::factory()->injured()->create();
+
             // Act
             $releasedReferees = Referee::released()->get();
 
             // Assert
             expect($releasedReferees)
                 ->toHaveCount(1)
-                ->and($releasedReferees->contains($this->releasedReferee))->toBeTrue();
+                ->and($releasedReferees->contains($releasedReferee))->toBeTrue();
         });
     });
 
     describe('individual roster member status scopes', function () {
         test('retired referees can be retrieved', function () {
+            Referee::factory()->withFutureEmployment()->create();
+            Referee::factory()->bookable()->create();
+            Referee::factory()->suspended()->create();
+            $retiredReferee = Referee::factory()->retired()->create();
+            Referee::factory()->released()->create();
+            Referee::factory()->unemployed()->create();
+            Referee::factory()->injured()->create();
+
             // Act
             $retiredReferees = Referee::retired()->get();
 
             // Assert
             expect($retiredReferees)
                 ->toHaveCount(1)
-                ->and($retiredReferees->contains($this->retiredReferee))->toBeTrue();
+                ->and($retiredReferees->contains($retiredReferee))->toBeTrue();
         });
 
     });

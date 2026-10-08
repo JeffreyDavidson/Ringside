@@ -12,30 +12,31 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->tagTeam = TagTeam::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousTitleChampionships query', function (): void {
     it('returns only previous championships for the requested tag team in newest-first order', function (): void {
+        $tagTeam = TagTeam::factory()->create();
+
         // Arrange
         $otherTagTeam = TagTeam::factory()->create();
         $title = Title::factory()->tagTeam()->create();
         $olderChampionship = TitleChampionship::factory()
             ->for($title)
-            ->forTagTeam($this->tagTeam)
+            ->forTagTeam($tagTeam)
             ->wonOn(Date::now()->subYears(4)->toDateString())
             ->lostOn(Date::now()->subYears(3)->toDateString())
             ->create();
         $recentChampionship = TitleChampionship::factory()
             ->for($title)
-            ->forTagTeam($this->tagTeam)
+            ->forTagTeam($tagTeam)
             ->wonOn(Date::now()->subYears(2)->toDateString())
             ->lostOn(Date::now()->subYear()->toDateString())
             ->create();
         TitleChampionship::factory()
             ->for($title)
-            ->forTagTeam($this->tagTeam)
+            ->forTagTeam($tagTeam)
             ->current()
             ->create();
         TitleChampionship::factory()
@@ -44,7 +45,7 @@ describe('PreviousTitleChampionships query', function (): void {
             ->ended()
             ->create();
         $table = new PreviousTitleChampionships;
-        $table->tagTeamId = $this->tagTeam->id;
+        $table->tagTeamId = $tagTeam->id;
 
         // Act
         $championships = $table->builder()->get();
@@ -59,6 +60,8 @@ describe('PreviousTitleChampionships query', function (): void {
 
 describe('PreviousTitleChampionships rendering', function (): void {
     it('renders title history with the previous champion, dates, links, and search control', function (): void {
+        $tagTeam = TagTeam::factory()->create();
+
         // Arrange
         $title = Title::factory()->tagTeam()->create(['name' => 'Historic Tag Team Titles']);
         $previousChampion = TagTeam::factory()->create(['name' => 'Previous Champions']);
@@ -70,13 +73,13 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->create();
         TitleChampionship::factory()
             ->for($title)
-            ->forTagTeam($this->tagTeam)
+            ->forTagTeam($tagTeam)
             ->wonOn('2020-06-01')
             ->lostOn('2021-01-01')
             ->create();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $tagTeam->id]);
 
         // Assert
         $component
@@ -91,12 +94,14 @@ describe('PreviousTitleChampionships rendering', function (): void {
     });
 
     it('searches previous championships by title name', function (): void {
+        $tagTeam = TagTeam::factory()->create();
+
         // Arrange
         foreach (['Historic Tag Team Titles', 'Former Tag Team Titles'] as $offset => $name) {
             $title = Title::factory()->tagTeam()->create(['name' => $name]);
             TitleChampionship::factory()
                 ->for($title)
-                ->forTagTeam($this->tagTeam)
+                ->forTagTeam($tagTeam)
                 ->wonOn(Date::now()->subMonths($offset + 3)->toDateString())
                 ->lostOn(Date::now()->subMonths($offset + 1)->toDateString())
                 ->create();
@@ -110,13 +115,13 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->create();
         TitleChampionship::factory()
             ->for(Title::factory()->tagTeam()->create(['name' => 'Historic Current Tag Team Titles']))
-            ->forTagTeam($this->tagTeam)
+            ->forTagTeam($tagTeam)
             ->wonOn('2025-01-01')
             ->current()
             ->create();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $tagTeam->id]);
         $component->set('search', 'Historic');
 
         // Assert

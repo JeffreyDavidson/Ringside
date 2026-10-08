@@ -13,12 +13,13 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->manager = Manager::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousStables query', function (): void {
     it('returns distinct previous stables associated through managed roster members in name order', function (): void {
+        $manager = Manager::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $tagTeam = TagTeam::factory()->create();
@@ -27,7 +28,7 @@ describe('PreviousStables query', function (): void {
         $nonOverlappingStable = Stable::factory()->create(['name' => 'Gamma Stable']);
         $currentStable = Stable::factory()->create(['name' => 'Current Stable']);
 
-        $wrestler->managers()->attach($this->manager, [
+        $wrestler->managers()->attach($manager, [
             'hired_at' => Date::now()->subYears(3),
             'fired_at' => Date::now()->subYears(2),
         ]);
@@ -40,7 +41,7 @@ describe('PreviousStables query', function (): void {
             'left_at' => Date::now()->subMonths(6),
         ]);
 
-        $tagTeam->managers()->attach($this->manager, [
+        $tagTeam->managers()->attach($manager, [
             'hired_at' => Date::now()->subYears(2),
             'fired_at' => Date::now()->subYear(),
         ]);
@@ -51,11 +52,11 @@ describe('PreviousStables query', function (): void {
         $currentStable->tagTeams()->attach($tagTeam, [
             'joined_at' => Date::now()->subMonths(6),
         ]);
-        $tagTeam->managers()->attach($this->manager, [
+        $tagTeam->managers()->attach($manager, [
             'hired_at' => Date::now()->subMonths(5),
         ]);
         $table = new PreviousStables;
-        $table->managerId = $this->manager->id;
+        $table->managerId = $manager->id;
 
         // Act
         $stables = $table->builder()->get();
@@ -68,6 +69,8 @@ describe('PreviousStables query', function (): void {
     });
 
     it('includes associations whose membership and manager periods touch at an endpoint', function (): void {
+        $manager = Manager::factory()->create();
+
         // Arrange
         $boundary = Date::parse('2024-01-01');
         $wrestler = Wrestler::factory()->create();
@@ -75,7 +78,7 @@ describe('PreviousStables query', function (): void {
         $membershipBoundaryStable = Stable::factory()->create(['name' => 'Alpha Stable']);
         $assignmentBoundaryStable = Stable::factory()->create(['name' => 'Beta Stable']);
 
-        $wrestler->managers()->attach($this->manager, [
+        $wrestler->managers()->attach($manager, [
             'hired_at' => $boundary,
             'fired_at' => $boundary->copy()->addMonth(),
         ]);
@@ -84,7 +87,7 @@ describe('PreviousStables query', function (): void {
             'left_at' => $boundary,
         ]);
 
-        $tagTeam->managers()->attach($this->manager, [
+        $tagTeam->managers()->attach($manager, [
             'hired_at' => $boundary->copy()->subMonth(),
             'fired_at' => $boundary,
         ]);
@@ -93,7 +96,7 @@ describe('PreviousStables query', function (): void {
             'left_at' => $boundary->copy()->addMonth(),
         ]);
         $table = new PreviousStables;
-        $table->managerId = $this->manager->id;
+        $table->managerId = $manager->id;
 
         // Act
         $stables = $table->builder()->get();
@@ -108,11 +111,13 @@ describe('PreviousStables query', function (): void {
 
 describe('PreviousStables rendering', function (): void {
     it('renders stable names and search controls', function (): void {
+        $manager = Manager::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $alphaStable = Stable::factory()->create(['name' => 'Alpha Stable']);
         $betaStable = Stable::factory()->create(['name' => 'Beta Stable']);
-        $wrestler->managers()->attach($this->manager, [
+        $wrestler->managers()->attach($manager, [
             'hired_at' => Date::now()->subYears(2),
             'fired_at' => Date::now()->subYear(),
         ]);
@@ -126,7 +131,7 @@ describe('PreviousStables rendering', function (): void {
         ]);
 
         // Act
-        $table = livewire(PreviousStables::class, ['managerId' => $this->manager->id]);
+        $table = livewire(PreviousStables::class, ['managerId' => $manager->id]);
 
         // Assert
         $table
@@ -136,11 +141,13 @@ describe('PreviousStables rendering', function (): void {
     });
 
     it('searches previous stables by name', function (): void {
+        $manager = Manager::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $alphaStable = Stable::factory()->create(['name' => 'Alpha Stable']);
         $betaStable = Stable::factory()->create(['name' => 'Beta Stable']);
-        $wrestler->managers()->attach($this->manager, [
+        $wrestler->managers()->attach($manager, [
             'hired_at' => Date::now()->subYears(2),
             'fired_at' => Date::now()->subYear(),
         ]);
@@ -154,7 +161,7 @@ describe('PreviousStables rendering', function (): void {
         ]);
 
         // Act
-        $table = livewire(PreviousStables::class, ['managerId' => $this->manager->id]);
+        $table = livewire(PreviousStables::class, ['managerId' => $manager->id]);
         $table->set('search', 'Alpha');
 
         // Assert

@@ -14,14 +14,15 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->wrestler = Wrestler::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousTagTeamsTable Configuration', function () {
     it('uses the tag team membership table', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component->assertSet('databaseTableName', 'tag_teams_wrestlers');
@@ -30,16 +31,18 @@ describe('PreviousTagTeamsTable Configuration', function () {
 
 describe('PreviousTagTeamsTable Query Building', function () {
     it('returns the wrestler previous tag team memberships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $formerMembership = TagTeamWrestler::factory()->create([
-            'wrestler_id' => $this->wrestler->id,
+            'wrestler_id' => $wrestler->id,
             'joined_at' => Date::parse('2024-01-01'),
             'left_at' => Date::parse('2024-06-01'),
         ]);
 
         // Act
-        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -47,12 +50,14 @@ describe('PreviousTagTeamsTable Query Building', function () {
     });
 
     it('excludes previous memberships belonging to another wrestler', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $otherMembership = TagTeamWrestler::factory()->ended()->create();
 
         // Act
-        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -60,14 +65,16 @@ describe('PreviousTagTeamsTable Query Building', function () {
     });
 
     it('excludes current tag team memberships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $currentMembership = TagTeamWrestler::factory()->current()->create([
-            'wrestler_id' => $this->wrestler->id,
+            'wrestler_id' => $wrestler->id,
         ]);
 
         // Act
-        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $memberships = tap(app(PreviousTagTeams::class), function (PreviousTagTeams $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -77,6 +84,8 @@ describe('PreviousTagTeamsTable Query Building', function () {
 
 describe('PreviousTagTeamsTable Rendering', function () {
     it('renders previous tag team membership details', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $tagTeam = TagTeam::factory()->create(['name' => 'Historic Partners']);
         $partner = Wrestler::factory()->create(['name' => 'Historic Partner']);
@@ -85,7 +94,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
 
         TagTeamWrestler::factory()->create([
             'tag_team_id' => $tagTeam->id,
-            'wrestler_id' => $this->wrestler->id,
+            'wrestler_id' => $wrestler->id,
             'joined_at' => $joinedAt,
             'left_at' => $leftAt,
         ]);
@@ -97,7 +106,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
         ]);
 
         // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component
@@ -111,6 +120,8 @@ describe('PreviousTagTeamsTable Rendering', function () {
     });
 
     it('renders the overlapping historical partner without additional queries', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $tagTeam = TagTeam::factory()->create();
         $partner = Wrestler::factory()->create(['name' => "Louisa O'Hara"]);
@@ -120,7 +131,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
 
         TagTeamWrestler::factory()->create([
             'tag_team_id' => $tagTeam->id,
-            'wrestler_id' => $this->wrestler->id,
+            'wrestler_id' => $wrestler->id,
             'joined_at' => $joinedAt,
             'left_at' => $leftAt,
         ]);
@@ -138,7 +149,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
         ]);
 
         $table = app(PreviousTagTeams::class);
-        $table->wrestlerId = $this->wrestler->id;
+        $table->wrestlerId = $wrestler->id;
         $table->boot(app(RosterResourceRouteResolver::class));
         $membership = $table->builder()->firstOrFail();
 
@@ -160,18 +171,20 @@ describe('PreviousTagTeamsTable Rendering', function () {
 
 describe('PreviousTagTeamsTable Deleted Tag Teams', function () {
     it('renders a membership without a link when its tag team was deleted', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $tagTeam = TagTeam::factory()->create(['name' => 'Vanished Partners']);
         TagTeamWrestler::factory()->create([
             'tag_team_id' => $tagTeam->id,
-            'wrestler_id' => $this->wrestler->id,
+            'wrestler_id' => $wrestler->id,
             'joined_at' => Date::parse('2024-01-15'),
             'left_at' => Date::parse('2024-06-30'),
         ]);
         $tagTeam->delete();
 
         // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component

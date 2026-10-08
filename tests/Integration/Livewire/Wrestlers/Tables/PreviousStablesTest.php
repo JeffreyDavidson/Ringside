@@ -11,12 +11,13 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->wrestler = Wrestler::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousStablesTable Configuration', function () {
     it('uses stable identifiers for rendered rows', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $formerStable = Stable::factory()->create();
         $otherStable = Stable::factory()->create();
@@ -25,13 +26,13 @@ describe('PreviousStablesTable Configuration', function () {
             'joined_at' => Date::parse('2023-01-01'),
             'left_at' => Date::parse('2023-06-01'),
         ]);
-        $formerStable->wrestlers()->attach($this->wrestler, [
+        $formerStable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::parse('2024-01-01'),
             'left_at' => Date::parse('2024-06-01'),
         ]);
 
         // Act
-        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component->assertSeeHtml('wire:key="row-'.$formerStable->id.'"');
@@ -40,16 +41,18 @@ describe('PreviousStablesTable Configuration', function () {
 
 describe('PreviousStablesTable Query Building', function () {
     it('returns the wrestler previous stable memberships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $formerStable = Stable::factory()->create();
-        $formerStable->wrestlers()->attach($this->wrestler, [
+        $formerStable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::parse('2024-01-01'),
             'left_at' => Date::parse('2024-06-01'),
         ]);
 
         // Act
-        $stables = tap(app(PreviousStables::class), function (PreviousStables $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $stables = tap(app(PreviousStables::class), function (PreviousStables $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -57,6 +60,8 @@ describe('PreviousStablesTable Query Building', function () {
     });
 
     it('excludes previous memberships belonging to another wrestler', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $otherWrestler = Wrestler::factory()->create();
         $otherStable = Stable::factory()->create();
@@ -66,8 +71,8 @@ describe('PreviousStablesTable Query Building', function () {
         ]);
 
         // Act
-        $stables = tap(app(PreviousStables::class), function (PreviousStables $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $stables = tap(app(PreviousStables::class), function (PreviousStables $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -75,15 +80,17 @@ describe('PreviousStablesTable Query Building', function () {
     });
 
     it('excludes current stable memberships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $currentStable = Stable::factory()->create();
-        $currentStable->wrestlers()->attach($this->wrestler, [
+        $currentStable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::parse('2024-01-01'),
         ]);
 
         // Act
-        $stables = tap(app(PreviousStables::class), function (PreviousStables $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $stables = tap(app(PreviousStables::class), function (PreviousStables $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert

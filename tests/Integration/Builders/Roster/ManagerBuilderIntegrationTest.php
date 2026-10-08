@@ -21,58 +21,79 @@ use App\Models\Roster\Managers\Manager;
  * @see ManagerBuilder
  */
 describe('ManagerQueryBuilder Integration Tests', function () {
-    beforeEach(function () {
-        // Create managers in all possible states for comprehensive scope testing
-        $this->futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-        $this->availableManager = Manager::factory()->employed()->create();
-        $this->suspendedManager = Manager::factory()->suspended()->create();
-        $this->retiredManager = Manager::factory()->retired()->create();
-        $this->releasedManager = Manager::factory()->released()->create();
-        $this->unemployedManager = Manager::factory()->unemployed()->create();
-        $this->injuredManager = Manager::factory()->injured()->create();
-    });
-
     describe('employment status scopes', function () {
         test('future employed managers can be retrieved', function () {
+            $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+            Manager::factory()->employed()->create();
+            Manager::factory()->suspended()->create();
+            Manager::factory()->retired()->create();
+            Manager::factory()->released()->create();
+            Manager::factory()->unemployed()->create();
+            Manager::factory()->injured()->create();
+
             // Act
             $futureEmployedManagers = Manager::futureEmployed()->get();
 
             // Assert
             expect($futureEmployedManagers)
                 ->toHaveCount(1)
-                ->and($futureEmployedManagers->contains($this->futureEmployedManager))->toBeTrue();
+                ->and($futureEmployedManagers->contains($futureEmployedManager))->toBeTrue();
         });
 
         test('unemployed managers can be retrieved', function () {
+            Manager::factory()->withFutureEmployment()->create();
+            Manager::factory()->employed()->create();
+            Manager::factory()->suspended()->create();
+            Manager::factory()->retired()->create();
+            Manager::factory()->released()->create();
+            $unemployedManager = Manager::factory()->unemployed()->create();
+            Manager::factory()->injured()->create();
+
             // Act
             $unemployedManagers = Manager::unemployed()->get();
 
             // Assert
             expect($unemployedManagers)
                 ->toHaveCount(1)
-                ->and($unemployedManagers->contains($this->unemployedManager))->toBeTrue();
+                ->and($unemployedManagers->contains($unemployedManager))->toBeTrue();
         });
 
         test('released managers can be retrieved', function () {
+            Manager::factory()->withFutureEmployment()->create();
+            Manager::factory()->employed()->create();
+            Manager::factory()->suspended()->create();
+            Manager::factory()->retired()->create();
+            $releasedManager = Manager::factory()->released()->create();
+            Manager::factory()->unemployed()->create();
+            Manager::factory()->injured()->create();
+
             // Act
             $releasedManagers = Manager::released()->get();
 
             // Assert
             expect($releasedManagers)
                 ->toHaveCount(1)
-                ->and($releasedManagers->contains($this->releasedManager))->toBeTrue();
+                ->and($releasedManagers->contains($releasedManager))->toBeTrue();
         });
     });
 
     describe('individual roster member status scopes', function () {
         test('retired managers can be retrieved', function () {
+            Manager::factory()->withFutureEmployment()->create();
+            Manager::factory()->employed()->create();
+            Manager::factory()->suspended()->create();
+            $retiredManager = Manager::factory()->retired()->create();
+            Manager::factory()->released()->create();
+            Manager::factory()->unemployed()->create();
+            Manager::factory()->injured()->create();
+
             // Act
             $retiredManagers = Manager::retired()->get();
 
             // Assert
             expect($retiredManagers)
                 ->toHaveCount(1)
-                ->and($retiredManagers->contains($this->retiredManager))->toBeTrue();
+                ->and($retiredManagers->contains($retiredManager))->toBeTrue();
         });
 
     });

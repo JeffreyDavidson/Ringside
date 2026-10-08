@@ -21,58 +21,79 @@ use App\Models\Roster\Wrestlers\Wrestler;
  * @see WrestlerBuilder
  */
 describe('WrestlerQueryBuilder Integration Tests', function () {
-    beforeEach(function () {
-        // Create wrestlers in all possible states for comprehensive scope testing
-        $this->futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-        $this->availableWrestler = Wrestler::factory()->bookable()->create();
-        $this->suspendedWrestler = Wrestler::factory()->suspended()->create();
-        $this->retiredWrestler = Wrestler::factory()->retired()->create();
-        $this->releasedWrestler = Wrestler::factory()->released()->create();
-        $this->unemployedWrestler = Wrestler::factory()->unemployed()->create();
-        $this->injuredWrestler = Wrestler::factory()->injured()->create();
-    });
-
     describe('employment status scopes', function () {
         test('future employed wrestlers can be retrieved', function () {
+            $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->bookable()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+
             // Act
             $futureEmployedWrestlers = Wrestler::futureEmployed()->get();
 
             // Assert
             expect($futureEmployedWrestlers)
                 ->toHaveCount(1)
-                ->and($futureEmployedWrestlers->contains($this->futureEmployedWrestler))->toBeTrue();
+                ->and($futureEmployedWrestlers->contains($futureEmployedWrestler))->toBeTrue();
         });
 
         test('unemployed wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->bookable()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+
             // Act
             $unemployedWrestlers = Wrestler::unemployed()->get();
 
             // Assert
             expect($unemployedWrestlers)
                 ->toHaveCount(1)
-                ->and($unemployedWrestlers->contains($this->unemployedWrestler))->toBeTrue();
+                ->and($unemployedWrestlers->contains($unemployedWrestler))->toBeTrue();
         });
 
         test('released wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->bookable()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            $releasedWrestler = Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+
             // Act
             $releasedWrestlers = Wrestler::released()->get();
 
             // Assert
             expect($releasedWrestlers)
                 ->toHaveCount(1)
-                ->and($releasedWrestlers->contains($this->releasedWrestler))->toBeTrue();
+                ->and($releasedWrestlers->contains($releasedWrestler))->toBeTrue();
         });
     });
 
     describe('status-based scopes', function () {
         test('retired wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->bookable()->create();
+            Wrestler::factory()->suspended()->create();
+            $retiredWrestler = Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+
             // Act
             $retiredWrestlers = Wrestler::retired()->get();
 
             // Assert
             expect($retiredWrestlers)
                 ->toHaveCount(1)
-                ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
+                ->and($retiredWrestlers->contains($retiredWrestler))->toBeTrue();
         });
 
     });

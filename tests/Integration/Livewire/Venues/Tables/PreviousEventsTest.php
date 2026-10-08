@@ -11,28 +11,29 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->venue = Venue::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousEvents query', function (): void {
     it('returns only the selected venue events in reverse chronological order with unscheduled events last', function (): void {
+        $venue = Venue::factory()->create();
+
         // Arrange
-        $recentEvent = Event::factory()->atVenue($this->venue)->create([
+        $recentEvent = Event::factory()->atVenue($venue)->create([
             'date' => Date::parse('2026-08-15'),
         ]);
-        $olderEvent = Event::factory()->atVenue($this->venue)->create([
+        $olderEvent = Event::factory()->atVenue($venue)->create([
             'date' => Date::parse('2026-07-15'),
         ]);
-        $futureEvent = Event::factory()->atVenue($this->venue)->create([
+        $futureEvent = Event::factory()->atVenue($venue)->create([
             'date' => Date::parse('2026-09-15'),
         ]);
-        $unscheduledEvent = Event::factory()->atVenue($this->venue)->unscheduled()->create();
+        $unscheduledEvent = Event::factory()->atVenue($venue)->unscheduled()->create();
         Event::factory()->atVenue(Venue::factory()->create())->create([
             'date' => Date::parse('2026-08-01'),
         ]);
         $table = new PreviousEvents;
-        $table->venueId = $this->venue->id;
+        $table->venueId = $venue->id;
 
         // Act
         $events = $table->builder()->get();
@@ -49,14 +50,16 @@ describe('PreviousEvents query', function (): void {
 
 describe('PreviousEvents rendering', function (): void {
     it('renders event links, formatted dates, and search controls', function (): void {
+        $venue = Venue::factory()->create();
+
         // Arrange
-        $event = Event::factory()->atVenue($this->venue)->create([
+        $event = Event::factory()->atVenue($venue)->create([
             'name' => 'Linked Wrestling Event',
             'date' => Date::parse('2026-08-15 19:00:00'),
         ]);
 
         // Act
-        $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
+        $table = livewire(PreviousEvents::class, ['venueId' => $venue->id]);
 
         // Assert
         $table
@@ -68,22 +71,24 @@ describe('PreviousEvents rendering', function (): void {
     });
 
     it('searches the selected venue event history', function (): void {
+        $venue = Venue::factory()->create();
+
         // Arrange
-        Event::factory()->atVenue($this->venue)->create([
+        Event::factory()->atVenue($venue)->create([
             'name' => 'Summer Spectacular',
         ]);
-        Event::factory()->atVenue($this->venue)->create([
+        Event::factory()->atVenue($venue)->create([
             'name' => 'Winter Warfare',
         ]);
         Event::factory()->atVenue(Venue::factory()->create())->create([
             'name' => 'Summer Elsewhere',
         ]);
-        Event::factory()->atVenue($this->venue)->trashed()->create([
+        Event::factory()->atVenue($venue)->trashed()->create([
             'name' => 'Summer Deleted',
         ]);
 
         // Act
-        $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
+        $table = livewire(PreviousEvents::class, ['venueId' => $venue->id]);
         $table->set('search', 'Summer');
 
         // Assert

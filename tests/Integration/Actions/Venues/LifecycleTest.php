@@ -30,8 +30,7 @@ use function Pest\Laravel\travel;
  */
 describe('Venue Action Integration Tests', function () {
     beforeEach(function () {
-        $this->admin = administrator();
-        actingAs($this->admin);
+        actingAs(administrator());
     });
 
     describe('venue creation integration', function () {

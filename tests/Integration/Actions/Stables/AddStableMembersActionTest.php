@@ -14,66 +14,74 @@ use Illuminate\Database\Eloquent\Collection;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-beforeEach(function () {
-    $this->addMembers = resolve(AddStableMembersAction::class);
-    $this->removeMembers = resolve(RemoveStableMembersAction::class);
-    $this->stable = Stable::factory()->create();
-    $this->membershipDate = now()->subDay();
-});
-
 it('adds wrestlers and tag teams with the same membership date', function () {
+    $addMembers = resolve(AddStableMembersAction::class);
+    resolve(RemoveStableMembersAction::class);
+    $stable = Stable::factory()->create();
+    $membershipDate = now()->subDay();
+
     $wrestlers = Wrestler::factory()->count(2)->create();
     $tagTeams = TagTeam::factory()->count(2)->create();
 
-    $this->addMembers->handle(
-        $this->stable,
+    $addMembers->handle(
+        $stable,
         new StableMembershipData($wrestlers, $tagTeams),
-        $this->membershipDate,
+        $membershipDate,
     );
 
-    expect($this->stable->currentWrestlers()->pluck('wrestlers.id')->all())
+    expect($stable->currentWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing($wrestlers->modelKeys())
-        ->and($this->stable->currentTagTeams()->pluck('tag_teams.id')->all())
+        ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())
         ->toEqualCanonicalizing($tagTeams->modelKeys());
 
     foreach ($wrestlers as $wrestler) {
         assertDatabaseHas('stables_wrestlers', [
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'wrestler_id' => $wrestler->id,
-            'joined_at' => $this->membershipDate->toDateTimeString(),
+            'joined_at' => $membershipDate->toDateTimeString(),
             'left_at' => null,
         ]);
     }
 
     foreach ($tagTeams as $tagTeam) {
         assertDatabaseHas('stables_tag_teams', [
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'tag_team_id' => $tagTeam->id,
-            'joined_at' => $this->membershipDate->toDateTimeString(),
+            'joined_at' => $membershipDate->toDateTimeString(),
             'left_at' => null,
         ]);
     }
 });
 
 it('ends wrestler and tag team memberships without deleting their history', function () {
+    $addMembers = resolve(AddStableMembersAction::class);
+    $removeMembers = resolve(RemoveStableMembersAction::class);
+    $stable = Stable::factory()->create();
+    $membershipDate = now()->subDay();
+
     $wrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create();
     $members = new StableMembershipData(
         new Collection([$wrestler]),
         new Collection([$tagTeam]),
     );
-    $this->addMembers->handle($this->stable, $members, $this->membershipDate);
+    $addMembers->handle($stable, $members, $membershipDate);
     $departureDate = now();
 
-    $this->removeMembers->handle($this->stable, $members, $departureDate);
+    $removeMembers->handle($stable, $members, $departureDate);
 
-    expect($this->stable->currentWrestlers()->exists())->toBeFalse()
-        ->and($this->stable->currentTagTeams()->exists())->toBeFalse()
-        ->and($this->stable->previousWrestlers()->whereKey($wrestler->id)->exists())->toBeTrue()
-        ->and($this->stable->previousTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
+    expect($stable->currentWrestlers()->exists())->toBeFalse()
+        ->and($stable->currentTagTeams()->exists())->toBeFalse()
+        ->and($stable->previousWrestlers()->whereKey($wrestler->id)->exists())->toBeTrue()
+        ->and($stable->previousTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
 });
 
 it('preserves each membership period when members rejoin a stable', function () {
+    $addMembers = resolve(AddStableMembersAction::class);
+    $removeMembers = resolve(RemoveStableMembersAction::class);
+    $stable = Stable::factory()->create();
+    now()->subDay();
+
     $wrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create();
     $members = new StableMembershipData(
@@ -85,18 +93,18 @@ it('preserves each membership period when members rejoin a stable', function () 
     $secondJoinedAt = now()->subDays(2)->startOfSecond();
     $secondLeftAt = now()->subDay()->startOfSecond();
 
-    $this->addMembers->handle($this->stable, $members, $firstJoinedAt);
-    $this->removeMembers->handle($this->stable, $members, $firstLeftAt);
-    $this->addMembers->handle($this->stable, $members, $secondJoinedAt);
-    $this->removeMembers->handle($this->stable, $members, $secondLeftAt);
+    $addMembers->handle($stable, $members, $firstJoinedAt);
+    $removeMembers->handle($stable, $members, $firstLeftAt);
+    $addMembers->handle($stable, $members, $secondJoinedAt);
+    $removeMembers->handle($stable, $members, $secondLeftAt);
 
     $wrestlerMemberships = StableWrestler::query()
-        ->whereBelongsTo($this->stable)
+        ->whereBelongsTo($stable)
         ->whereBelongsTo($wrestler)
         ->orderBy('joined_at')
         ->get();
     $tagTeamMemberships = StableTagTeam::query()
-        ->whereBelongsTo($this->stable)
+        ->whereBelongsTo($stable)
         ->whereBelongsTo($tagTeam, 'tagTeam')
         ->orderBy('joined_at')
         ->get();
@@ -115,6 +123,6 @@ it('preserves each membership period when members rejoin a stable', function () 
         ->and($firstTagTeamMembership->left_at?->equalTo($firstLeftAt))->toBeTrue()
         ->and($secondTagTeamMembership->joined_at->equalTo($secondJoinedAt))->toBeTrue()
         ->and($secondTagTeamMembership->left_at?->equalTo($secondLeftAt))->toBeTrue()
-        ->and($this->stable->currentWrestlers()->exists())->toBeFalse()
-        ->and($this->stable->currentTagTeams()->exists())->toBeFalse();
+        ->and($stable->currentWrestlers()->exists())->toBeFalse()
+        ->and($stable->currentTagTeams()->exists())->toBeFalse();
 });
