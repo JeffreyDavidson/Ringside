@@ -31,7 +31,7 @@ trait SearchesRosterMembers
             return [];
         }
 
-        return resolve(RosterMemberSearch::class)->search($memberKind, $term);
+        return resolve(RosterMemberSearch::class)->search($memberKind, $term, $this->form->formPromotionId());
     }
 
     /** @return array<int, RosterMemberKind> */
@@ -43,7 +43,7 @@ trait SearchesRosterMembers
      */
     protected function rosterLabels(RosterMemberKind $kind, array $ids): array
     {
-        return resolve(RosterMemberSearch::class)->labels($kind, $ids);
+        return resolve(RosterMemberSearch::class)->labels($kind, $ids, $this->form->formPromotionId());
     }
 
     private function authorizeRosterSearch(): void

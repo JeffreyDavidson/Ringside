@@ -27,7 +27,7 @@ describe('searching roster members', function (): void {
         Wrestler::factory()->create(['name' => 'Ted DiBiase']);
 
         // Act
-        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, ' RICKY ');
+        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, ' RICKY ', null);
 
         // Assert
         expect(array_column($options, 'name'))->toBe(['Ricky Morton', 'Ricky Steamboat']);
@@ -38,7 +38,7 @@ describe('searching roster members', function (): void {
         Wrestler::factory()->create(['name' => 'Ricky Morton']);
 
         // Act
-        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, '%');
+        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, '%', null);
 
         // Assert
         expect($options)->toHaveCount(1);
@@ -49,7 +49,7 @@ describe('searching roster members', function (): void {
         Wrestler::factory()->count(RosterMemberSearch::LIMIT + 5)->create();
 
         // Act
-        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, '');
+        $options = resolve(RosterMemberSearch::class)->search(RosterMemberKind::Wrestlers, '', null);
 
         // Assert
         expect($options)->toHaveCount(RosterMemberSearch::LIMIT);
@@ -62,8 +62,8 @@ describe('searching roster members', function (): void {
         $search = resolve(RosterMemberSearch::class);
 
         // Act
-        $managers = $search->search(RosterMemberKind::Managers, 'bobby heenan');
-        $tagTeams = $search->search(RosterMemberKind::TagTeams, 'rockers');
+        $managers = $search->search(RosterMemberKind::Managers, 'bobby heenan', null);
+        $tagTeams = $search->search(RosterMemberKind::TagTeams, 'rockers', null);
 
         // Assert
         expect(array_column($managers, 'name'))->toBe(['Bobby Heenan'])
@@ -86,6 +86,7 @@ describe('resolving selected labels', function (): void {
         $labels = resolve(RosterMemberSearch::class)->labels(
             RosterMemberKind::Wrestlers,
             [$deleted->id, $active->id, $active->id, 'junk', null],
+            null,
         );
 
         // Assert
@@ -94,7 +95,7 @@ describe('resolving selected labels', function (): void {
 
     it('returns no labels for no ids', function (): void {
         // Act
-        $labels = resolve(RosterMemberSearch::class)->labels(RosterMemberKind::Wrestlers, []);
+        $labels = resolve(RosterMemberSearch::class)->labels(RosterMemberKind::Wrestlers, [], null);
 
         // Assert
         expect($labels)->toBeEmpty();
