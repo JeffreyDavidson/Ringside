@@ -32,5 +32,16 @@ sync_integration: fast-forward   # develop fast-forwards to main after the relea
 
 Notes:
 
-- The pre-push hook runs the full suite on tag and branch pushes too; a timing flake in a browser test can block the push. Retry the push; do not bypass the hook.
+- The pre-push hook runs the full suite on branch pushes; a timing flake in a browser test can block the push. Retry the push; do not bypass the hook. Pushes that carry only tags or branch deletions skip the checks.
 - Deleting a merged remote branch through the GitHub API (`gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>`) avoids a full test run for a push that carries no code.
+
+## Known exceptions in the release history
+
+Releases before v0.5.0 predate parts of this workflow. Pushed history and existing tags are never rewritten, so these stay as they are:
+
+- **v0.2.0** was squash-merged into `main` (#1604) instead of merged with a merge commit.
+- **v0.2.1** (#1606), **v0.2.2** (#1610) and **v0.4.0** (#1705) kept GitHub's default "Merge pull request …" subject instead of `chore(release): release vX.Y.Z`.
+- **v0.2.2** was merged from `develop` straight into `main` without a `release/` branch.
+- **v0.4.0**'s tag is lightweight. Every tag from v0.5.0 on is annotated.
+- **v0.2.0, v0.2.1 and v0.3.0** were not tagged when they were released. Their annotated tags and GitHub releases, and the v0.1.0 GitHub release, were added on 2026-10-08 on the original release commits. Their tag messages say so.
+- Commits from before 2026-09-20, when the Conventional Commits rule was added, don't all follow it.
