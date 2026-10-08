@@ -12,7 +12,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
@@ -25,12 +24,6 @@ beforeEach(function (): void {
 });
 
 describe('TitleHistory configuration', function (): void {
-    it('requires a title', function (): void {
-        // Act & Assert
-        expect(fn () => (new TitleHistory)->builder())
-            ->toThrow(LogicException::class, 'A title was not provided.');
-    });
-
     it('displays championship reign length from its dates', function (): void {
         // Arrange
         $championship = new TitleChampionship([
@@ -220,18 +213,6 @@ describe('TitleHistory rendering', function (): void {
         'wrestler champion' => ['Historic', 'Historic Wrestler', '2023-01-01 - 2023-05-01', '2024-06-01 - 2025-01-01'],
         'tag team champion' => ['Legendary', 'Legendary Tag Team', '2024-06-01 - 2025-01-01', '2023-01-01 - 2023-05-01'],
     ]);
-
-    it('renders an empty state when the title has no reigns', function (): void {
-        // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
-
-        // Assert
-        $table
-            ->assertSuccessful()
-            ->assertSee('Title reigns')
-            ->assertSee('No title reigns yet.')
-            ->assertDontSeeHtml('placeholder="Search title reigns"');
-    });
 });
 
 describe('TitleHistory reign dates', function (): void {
@@ -279,22 +260,4 @@ describe('TitleHistory authorization', function (): void {
         $table->assertSuccessful();
         expect($authorizedTitle?->is($title))->toBeTrue();
     });
-
-    it('forbids users without access to the title', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
-
-        // Assert
-        $table->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });

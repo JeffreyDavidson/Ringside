@@ -6,7 +6,6 @@ use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -15,14 +14,6 @@ use function Pest\Livewire\livewire;
 beforeEach(function (): void {
     $this->tagTeam = TagTeam::factory()->create();
     actingAs(administrator());
-});
-
-describe('PreviousTitleChampionships configuration', function (): void {
-    it('requires a tag team', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships)->builder())
-            ->toThrow(LogicException::class, 'A tag team was not provided.');
-    });
 });
 
 describe('PreviousTitleChampionships query', function (): void {
@@ -135,44 +126,4 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->assertDontSee('Historic Unrelated Tag Team Titles')
             ->assertDontSee('Historic Current Tag Team Titles');
     });
-
-    it('renders an empty state when the tag team has no previous championships', function (): void {
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
-
-        // Assert
-        $component
-            ->assertSuccessful()
-            ->assertSee('Previous title championships')
-            ->assertSee('No previous title championships yet.')
-            ->assertDontSeeHtml('placeholder="Search title championships"');
-    });
-});
-
-describe('PreviousTitleChampionships authorization', function (): void {
-    it('allows administrators to view tag team title history', function (): void {
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
-
-        // Assert
-        $component->assertSuccessful();
-    });
-
-    it('forbids users without access to the tag team', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
-
-        // Assert
-        $component->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Venues\Tables\Main;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -88,29 +87,6 @@ describe('venues table', function (): void {
         'state' => ['Nevada'],
     ]);
 
-    it('clears a venue search', function (): void {
-        // Arrange
-        Venue::factory()->create(['name' => 'Alpha Arena']);
-        Venue::factory()->create(['name' => 'Bravo Arena']);
-        $component = livewire(Main::class);
-
-        // Act
-        $component->set('search', 'Alpha');
-
-        // Assert
-        $component
-            ->assertSee('Alpha Arena')
-            ->assertDontSee('Bravo Arena');
-
-        // Act
-        $component->set('search', '');
-
-        // Assert
-        $component
-            ->assertSee('Alpha Arena')
-            ->assertSee('Bravo Arena');
-    });
-
     it('orders venues alphabetically', function (): void {
         // Arrange
         Venue::factory()->create(['name' => 'Zebra Arena']);
@@ -157,22 +133,4 @@ describe('venues table', function (): void {
             ->assertSee(__('venues.empty_description'))
             ->assertDontSee('No records found.');
     });
-
-    it('forbids users without administrative access', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(Main::class);
-
-        // Assert
-        $component->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 });

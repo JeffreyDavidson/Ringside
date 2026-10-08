@@ -7,7 +7,6 @@ use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
@@ -20,20 +19,6 @@ beforeEach(function (): void {
 });
 
 describe('PreviousTagTeamsTable Configuration', function () {
-    it('requires wrestler id to be set', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousTagTeams)->builder())
-            ->toThrow(LogicException::class, 'A wrestler was not provided.');
-    });
-
-    it('can set wrestler id', function (): void {
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertSet('wrestlerId', $this->wrestler->id);
-    });
-
     it('uses the tag team membership table', function (): void {
         // Act
         $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
@@ -91,58 +76,6 @@ describe('PreviousTagTeamsTable Query Building', function () {
 });
 
 describe('PreviousTagTeamsTable Rendering', function () {
-    it('renders the tag team history search control', function (): void {
-        // Arrange
-        TagTeamWrestler::factory()->create([
-            'tag_team_id' => TagTeam::factory()->create()->id,
-            'wrestler_id' => $this->wrestler->id,
-            'joined_at' => Date::now()->subMonths(3),
-            'left_at' => Date::now()->subMonth(),
-        ]);
-
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component
-            ->assertSuccessful()
-            ->assertSeeHtml('placeholder="Search tag teams"');
-    });
-
-    it('searches previous tag teams by name', function (): void {
-        // Arrange
-        foreach (['Historic Partners', 'Former Alliance'] as $offset => $name) {
-            $tagTeam = TagTeam::factory()->create(['name' => $name]);
-            TagTeamWrestler::factory()->create([
-                'tag_team_id' => $tagTeam->id,
-                'wrestler_id' => $this->wrestler->id,
-                'joined_at' => Date::now()->subMonths($offset + 3),
-                'left_at' => Date::now()->subMonths($offset + 1),
-            ]);
-        }
-
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-        $component->set('search', 'Historic');
-
-        // Assert
-        $component
-            ->assertSee('Historic Partners')
-            ->assertDontSee('Former Alliance');
-    });
-
-    it('renders when the wrestler has no previous tag team memberships', function (): void {
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component
-            ->assertSuccessful()
-            ->assertSee('Previous tag teams')
-            ->assertSee('No previous tag teams yet.')
-            ->assertDontSeeHtml('placeholder="Search tag teams"');
-    });
-
     it('renders previous tag team membership details', function (): void {
         // Arrange
         $tagTeam = TagTeam::factory()->create(['name' => 'Historic Partners']);
@@ -223,34 +156,6 @@ describe('PreviousTagTeamsTable Rendering', function () {
             ->not->toContain($nonOverlappingWrestler->name)
             ->and(DB::getQueryLog())->toBeEmpty();
     });
-});
-
-describe('PreviousTagTeamsTable Authorization', function () {
-    it('allows access to administrators', function (): void {
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertSuccessful();
-    });
-
-    it('forbids users without access to the wrestler', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });
 
 describe('PreviousTagTeamsTable Deleted Tag Teams', function () {

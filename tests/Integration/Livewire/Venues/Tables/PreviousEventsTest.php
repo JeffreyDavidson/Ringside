@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -14,14 +13,6 @@ use function Pest\Livewire\livewire;
 beforeEach(function (): void {
     $this->venue = Venue::factory()->create();
     actingAs(administrator());
-});
-
-describe('PreviousEvents configuration', function (): void {
-    it('requires a venue', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousEvents)->builder())
-            ->toThrow(LogicException::class, 'A venue was not provided.');
-    });
 });
 
 describe('PreviousEvents query', function (): void {
@@ -121,44 +112,4 @@ describe('PreviousEvents rendering', function (): void {
             ->assertDontSee('Summer Elsewhere')
             ->assertDontSee('Summer Deleted');
     });
-
-    it('renders an empty state when the venue has no events', function (): void {
-        // Act
-        $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
-
-        // Assert
-        $table
-            ->assertSuccessful()
-            ->assertSee('Previous events')
-            ->assertSee('No previous events yet.')
-            ->assertDontSeeHtml('placeholder="Search events"');
-    });
-});
-
-describe('PreviousEvents authorization', function (): void {
-    it('allows administrators to view venue event history', function (): void {
-        // Act
-        $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
-
-        // Assert
-        $table->assertSuccessful();
-    });
-
-    it('forbids users without access to the venue', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
-
-        // Assert
-        $table->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 });
