@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Actions\Managers\DeleteAction;
+use App\Actions\Managers\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\ManagerBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
@@ -86,9 +89,15 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(EmploymentStatus::filterOptions())
+                ->options(DeletedFilter::appendTo(EmploymentStatus::filterOptions()))
                 ->filter(function (ManagerBuilder $builder, string $value): void {
                     /** @var ManagerBuilder<Manager> $builder */
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = EmploymentStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -102,5 +111,10 @@ class Main extends BaseTable
     public function delete(Manager $manager, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($manager, $deleteAction->handle(...), __('managers.actions.deleted'));
+    }
+
+    public function restore(int $managerId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(Manager::withTrashed()->findOrFail($managerId), $restoreAction->handle(...), __('managers.actions.restored'), RosterEntityType::Manager);
     }
 }

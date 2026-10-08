@@ -1,21 +1,25 @@
 {
     "agents": [
-        "codex"
+        "codex",
+        "claude_code"
     ],
     "cloud": false,
     "guidelines": true,
     "mcp": true,
     "nightwatch": true,
+    "packages": [
+        "pestphp/pest-plugin-agent"
+    ],
     "sail": false,
     "skills": [
         "infer-conventions",
         "laravel-best-practices",
+        "testing-best-practices",
         "configure-nightwatch",
-        "newdebugbar-local-development",
         "pennant-development",
         "livewire-development",
-        "pest-testing",
         "tailwindcss-development",
-        "pest-plugin-agent"
+        "pest-plugin-agent",
+        "newdebugbar-local-development"
     ]
 }

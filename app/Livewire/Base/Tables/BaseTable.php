@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Enums\Roster\RosterEntityType;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\ExecutesBusinessActions;
+use App\Livewire\Support\RosterErrorMessageResolver;
 use App\Livewire\Table\DataTableComponent;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -69,6 +72,33 @@ abstract class BaseTable extends DataTableComponent
         $this->executeBusinessAction(function () use ($deleteAction, $record): void {
             $deleteAction($record);
         }, $successMessage);
+
+        $this->forgetMetadata();
+    }
+
+    /**
+     * Restore a soft-deleted listed record through its Action, then drop the remembered status counts it may change.
+     *
+     * Roster entities pass their type so a refusal shows the translated roster message instead of the exception text.
+     *
+     * @template TRecord of Model
+     *
+     * @param  TRecord  $record
+     * @param  Closure(TRecord): mixed  $restoreAction
+     */
+    protected function restoreRecord(Model $record, Closure $restoreAction, string $successMessage, ?RosterEntityType $rosterEntityType = null): void
+    {
+        Gate::authorize('restore', $record);
+
+        $this->executeBusinessAction(
+            function () use ($restoreAction, $record): void {
+                $restoreAction($record);
+            },
+            $successMessage,
+            $rosterEntityType instanceof RosterEntityType
+                ? fn (BaseBusinessException $exception): string => __(RosterErrorMessageResolver::translationKey($exception, $rosterEntityType))
+                : null,
+        );
 
         $this->forgetMetadata();
     }

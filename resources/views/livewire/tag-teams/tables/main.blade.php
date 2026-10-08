@@ -51,10 +51,8 @@
                     @foreach ($rows as $row)
                         <tr wire:key="row-{{ $row->id }}" class="hover:bg-ringside-surface-hover/40 transition-colors">
                             <td class="px-4 py-4 align-top sm:px-5">
-                                <a
-                                    href="{{ route('tag-teams.show', $row) }}"
-                                    class="text-ringside-ink focus-visible:outline-ringside-ink font-semibold wrap-break-word underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-                                >{{ $row->name }}</a>
+                                <x-tables.record-name :record="$row" :href="route('tag-teams.show', $row)">
+                                    {{ $row->name }}</x-tables.record-name>
                                 <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 wrap-break-word">
                                     {{ __('tag-teams.partners') }}: {{ $row->currentWrestlers->pluck('name')->join(' & ') ?: '—' }}
                                 </p>

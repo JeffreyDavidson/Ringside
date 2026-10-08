@@ -11,13 +11,18 @@ trait ExecutesBusinessActions
 {
     use DispatchesActionFeedback;
 
-    /** @param Closure(): void $action */
-    protected function executeBusinessAction(Closure $action, ?string $successMessage = null): bool
+    /**
+     * @param  Closure(): void  $action
+     * @param  Closure(BaseBusinessException): string|null  $failureMessage  Resolves the message shown for a refused action; defaults to the exception message.
+     */
+    protected function executeBusinessAction(Closure $action, ?string $successMessage = null, ?Closure $failureMessage = null): bool
     {
         try {
             $action();
         } catch (BaseBusinessException $exception) {
-            $message = $exception->getMessage();
+            $message = $failureMessage instanceof Closure
+                ? $failureMessage($exception)
+                : $exception->getMessage();
 
             $this->dispatchActionFailure($message);
 

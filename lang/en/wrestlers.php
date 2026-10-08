@@ -35,6 +35,7 @@ return [
     'actions' => [
         'menu_label' => 'Wrestler actions',
         'deleted' => 'Wrestler successfully deleted.',
+        'restored' => 'Wrestler has been restored.',
         'employed' => 'Wrestler has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Wrestler has been retired.',
@@ -103,6 +104,10 @@ return [
         'clear_from_injury' => [
             'default' => 'Unable to clear this wrestler from injury.',
             'not_injured' => 'This wrestler is not currently injured.',
+        ],
+        'restore' => [
+            'default' => 'Unable to restore this wrestler.',
+            'not_deleted' => 'This wrestler has not been deleted.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],

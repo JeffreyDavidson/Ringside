@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
@@ -248,10 +249,14 @@ describe('titles table metadata', function (): void {
         $statuses = collect($metadata['statuses'])->keyBy('value');
 
         expect($metadata['total'])->toBe(3)
-            ->and($statuses->keys()->all())->toBe(array_map(
-                static fn (TitleStatus $status): string => $status->value,
-                TitleStatus::cases(),
-            ))
+            ->and($statuses->keys()->all())->toBe([
+                ...array_map(
+                    static fn (TitleStatus $status): string => $status->value,
+                    TitleStatus::cases(),
+                ),
+                DeletedFilter::Deleted->value,
+            ])
+            ->and(data_get($statuses->get(DeletedFilter::Deleted->value), 'count'))->toBe(1)
             ->and($statuses->get(TitleStatus::Active->value))->toBe([
                 'value' => TitleStatus::Active->value,
                 'label' => TitleStatus::Active->label(),
