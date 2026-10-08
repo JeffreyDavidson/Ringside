@@ -26,7 +26,17 @@ The two `CascadeLockOrderConcurrencyTest` cases that force PostgreSQL planner pl
 
 ## Running them
 
-Use a scratch database. The test commits its data so the child processes can see it and rebuilds the schema with `migrate:fresh` afterwards.
+Local development uses SQLite, which can't run these tests, so point them at a scratch MySQL or PostgreSQL database. MySQL is the production engine, so prefer it. The test commits its data so the child processes can see it and rebuilds the schema with `migrate:fresh` afterwards, so never point it at a database you want to keep.
+
+For MySQL, create a scratch database whose user has the `PROCESS` privilege and `SELECT` on `performance_schema` (the CI job grants both), make sure `SET GLOBAL innodb_monitor_enable = 'lock_deadlocks'` is in effect if the metric is disabled, then run:
+
+```bash
+DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_PORT=3306 DB_DATABASE=ringside_concurrency \
+DB_USERNAME=root DB_PASSWORD= RUN_CONCURRENCY_TESTS=1 \
+  vendor/bin/pest --group=concurrency --no-coverage
+```
+
+For PostgreSQL:
 
 ```bash
 createdb ringside_pg_concurrency
@@ -35,7 +45,5 @@ DB_USERNAME="$(whoami)" DB_PASSWORD= RUN_CONCURRENCY_TESTS=1 \
   vendor/bin/pest --group=concurrency --no-coverage
 dropdb ringside_pg_concurrency
 ```
-
-For MySQL, point `DB_CONNECTION=mysql` and the `DB_*` variables at a scratch database whose user has the `PROCESS` privilege and `SELECT` on `performance_schema` (the CI job grants both), and make sure `SET GLOBAL innodb_monitor_enable = 'lock_deadlocks'` is in effect if the metric is disabled.
 
 The CI `Postgres tests` and `MySQL tests` jobs run the same group as a separate step. Because the workers are released by a barrier rather than a fixed delay, a slow runner can only make the race window smaller (the loser then fails with a normal scheduling conflict); it cannot make the assertions fail. A regression to the old lock order shows up as a `deadlock detected` failure.
