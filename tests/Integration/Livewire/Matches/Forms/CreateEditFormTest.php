@@ -139,7 +139,6 @@ describe('match form validation feedback', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::TagTeam);
         $modal->set([
             'form.competitors' => [
@@ -163,7 +162,6 @@ describe('match form validation feedback', function (): void {
     ): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         $modal->set('form.matchType', $matchType);
 
         // Act

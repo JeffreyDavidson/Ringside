@@ -19,38 +19,10 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
-describe('modal lifecycle', function (): void {
-    it('opens the modal', function (): void {
-        // Arrange
-        $modal = livewire(FormModal::class)
-            ->assertSet('isModalOpen', false);
-
-        // Act
-        $modal->call('openModal');
-
-        // Assert
-        $modal->assertSet('isModalOpen', true);
-    });
-
-    it('closes the modal', function (): void {
-        // Arrange
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->assertSet('isModalOpen', true);
-
-        // Act
-        $modal->call('closeModal');
-
-        // Assert
-        $modal->assertSet('isModalOpen', false);
-    });
-});
-
 it('completes the shared form submission workflow', function (): void {
     // Arrange
     $modal = livewire(FormModal::class);
     $modal
-        ->call('openModal')
         ->set('form.name', 'Shared Modal Event')
         ->set('form.venue_id', null);
 
@@ -60,7 +32,6 @@ it('completes the shared form submission workflow', function (): void {
     // Assert
     $modal
         ->assertHasNoErrors()
-        ->assertSet('isModalOpen', false)
         ->assertDispatched('refreshDatatable')
         ->assertDispatched('closeModal');
 
@@ -75,8 +46,7 @@ describe('re-authorization when the form is saved', function (): void {
         $promotion = Promotion::factory()->create();
         $referee = Referee::factory()->for($promotion, 'promotion')->create(['first_name' => 'Earl', 'last_name' => 'Hebner']);
         $manager = actingAsPromotionMember($promotion, MembershipRole::Manager);
-        $modal = livewire(RefereeFormModal::class)
-            ->call('openModal', $referee->id)
+        $modal = livewire(RefereeFormModal::class, ['modelId' => $referee->id])
             ->set('form.first_name', 'Dave');
         changePromotionMembership($promotion, $manager, $role, $status);
 
@@ -94,7 +64,6 @@ describe('re-authorization when the form is saved', function (): void {
         $promotion = Promotion::factory()->create();
         $manager = actingAsPromotionMember($promotion, MembershipRole::Manager);
         $modal = livewire(RefereeFormModal::class)
-            ->call('openModal')
             ->set('form.first_name', 'Dave')
             ->set('form.last_name', 'Hebner');
         changePromotionMembership($promotion, $manager, $role, $status);
@@ -118,7 +87,6 @@ describe('inherited form hooks', function (): void {
     it('requires modals relying on the shared workflow to define createForm', function (): void {
         // Arrange
         $modal = livewire(StubFormModal::class)
-            ->call('openModal')
             ->set('form.name', 'Stub Arena')
             ->set('form.street_address', '1 Main Street')
             ->set('form.city', 'Springfield')
@@ -135,8 +103,7 @@ describe('inherited form hooks', function (): void {
     it('requires modals relying on the shared workflow to define updateForm', function (): void {
         // Arrange
         $venue = Venue::factory()->create(['zipcode' => '62701']);
-        $modal = livewire(StubFormModal::class)
-            ->call('openModal', $venue->getKey());
+        $modal = livewire(StubFormModal::class, ['modelId' => $venue->getKey()]);
 
         // Act
         $save = fn () => $modal->call('save');

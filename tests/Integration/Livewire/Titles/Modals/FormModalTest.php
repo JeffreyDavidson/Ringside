@@ -31,10 +31,7 @@ describe('authorized title form interactions', function () {
     it('opens an empty form for creating a title', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', '')
             ->assertSet('form.type', '')
             ->assertSet('form.start_date', '')
@@ -44,13 +41,11 @@ describe('authorized title form interactions', function () {
     it('loads an existing title for editing', function () {
         $title = Title::factory()->singles()->create(['name' => 'World Championship Title']);
         $title->activityPeriods()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
-        $modal->call('openModal', $title->id);
         $modal->set('form.name', 'World Championship Title');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'World Championship Title')
             ->assertSet('form.type', TitleType::Singles->value)
             ->assertSet('form.start_date', '2024-01-15')
@@ -58,15 +53,13 @@ describe('authorized title form interactions', function () {
     });
 
     it('responds not found when opening a missing title', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
     it('creates and debuts a singles title', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'World Championship Title',
             'form.type' => TitleType::Singles->value,
@@ -80,14 +73,12 @@ describe('authorized title form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('creates an undebuted tag team title', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'World Tag Team Titles',
             'form.type' => TitleType::TagTeam->value,
@@ -103,9 +94,8 @@ describe('authorized title form interactions', function () {
     it('updates a title while preserving its existing activity period', function () {
         $title = Title::factory()->singles()->create(['name' => 'Original Championship Title']);
         $activityPeriod = $title->activityPeriods()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
-        $modal->call('openModal', $title->id);
         $modal->set([
             'form.name' => 'Updated Tag Team Titles',
             'form.type' => TitleType::TagTeam->value,
@@ -120,13 +110,12 @@ describe('authorized title form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('requires a title name and type', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
@@ -134,15 +123,13 @@ describe('authorized title form interactions', function () {
                 'form.name' => 'required',
                 'form.type' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Title::query()->doesntExist())->toBeTrue();
     });
 
     it('uses the friendly title type name in validation messages', function () {
         // Arrange
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set('form.name', 'Valid Championship Title');
 
         // Act
@@ -163,7 +150,6 @@ describe('authorized title form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Championship Title',
             'form.type' => TitleType::Singles->value,
@@ -188,7 +174,6 @@ describe('authorized title form interactions', function () {
         Title::factory()->singles()->create(['name' => 'Existing Championship Title']);
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Existing Championship Title',
             'form.type' => TitleType::Singles->value,
@@ -201,9 +186,8 @@ describe('authorized title form interactions', function () {
 
     it('allows a title to retain its current name', function () {
         $title = Title::factory()->singles()->create(['name' => 'Current Championship Title']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
-        $modal->call('openModal', $title->id);
         $modal->call('save');
 
         $modal->assertHasNoErrors();
@@ -213,9 +197,8 @@ describe('authorized title form interactions', function () {
     it('rejects another title name while editing', function () {
         Title::factory()->singles()->create(['name' => 'Existing Championship Title']);
         $title = Title::factory()->singles()->create(['name' => 'Current Championship Title']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
-        $modal->call('openModal', $title->id);
         $modal->set('form.name', 'Existing Championship Title');
         $modal->call('save');
 
@@ -226,27 +209,13 @@ describe('authorized title form interactions', function () {
     it('prevents changing the debut date of an active title', function () {
         $title = Title::factory()->singles()->create(['name' => 'Active Championship Title']);
         $title->activityPeriods()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
-        $modal->call('openModal', $title->id);
         $modal->set('form.start_date', '2024-02-01');
         $modal->call('save');
 
         $modal->assertHasErrors(['form.start_date']);
         expect($title->firstActivityPeriod?->started_at->toDateString())->toBe('2024-01-15');
-    });
-
-    it('resets edited title data when reopening in create mode', function () {
-        $title = Title::factory()->active()->create();
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $title->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.name', '')
-            ->assertSet('form.type', '')
-            ->assertSet('form.start_date', '');
     });
 
     it('fills dummy data with the type and start date chosen by the random outcome', function (bool $outcome, TitleType $type, bool $hasStartDate) {
@@ -255,7 +224,6 @@ describe('authorized title form interactions', function () {
         $modal = livewire(FormModal::class);
 
         // Act
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
 
         // Assert
@@ -269,14 +237,13 @@ describe('authorized title form interactions', function () {
     it('generates valid dummy data that can create a title', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(Title::query()->count())->toBe(1);
     });
 });
@@ -306,8 +273,7 @@ describe('title type locking', function () {
         $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
         TitleChampionship::factory()->for($title)->current()->create();
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $title->id);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
         $modal
             ->assertSee(__('titles.type_locked'))
@@ -317,15 +283,13 @@ describe('title type locking', function () {
     it('keeps the type editable for a title without reigns or bookings', function () {
         $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $title->id);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
         $modal->assertDontSee(__('titles.type_locked'));
     });
 
     it('does not lock the type while creating a title', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
 
         $modal->assertDontSee(__('titles.type_locked'));
     });
@@ -333,8 +297,7 @@ describe('title type locking', function () {
     it('reports a forced type change as a type error and keeps the title unchanged', function () {
         $title = Title::factory()->active()->create(['type' => TitleType::Singles, 'name' => 'World Title']);
         TitleChampionship::factory()->for($title)->current()->create();
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $title->id);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
 
         $modal->set('form.type', TitleType::TagTeam->value);
         $modal->call('save');

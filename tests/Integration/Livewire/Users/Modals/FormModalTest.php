@@ -39,10 +39,7 @@ describe('authorized user form interactions', function () {
     it('opens an empty form for creating a user', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', '')
             ->assertSet('form.last_name', '')
             ->assertSet('form.email', '')
@@ -59,13 +56,11 @@ describe('authorized user form interactions', function () {
             'email' => 'jane@example.com',
             'password' => 'secret-password',
         ]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
-        $modal->call('openModal', $user->id);
         $modal->set('form.first_name', 'Jane');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', 'Jane')
             ->assertSet('form.last_name', 'Smith')
             ->assertSet('form.email', 'jane@example.com')
@@ -76,15 +71,13 @@ describe('authorized user form interactions', function () {
     });
 
     it('responds not found when opening a missing user', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
     it('creates a user with its credentials and role', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'John',
             'form.last_name' => 'Doe',
@@ -104,22 +97,20 @@ describe('authorized user form interactions', function () {
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
             ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false)
             ->assertSet('form.first_name', '')
             ->assertSet('form.email', '');
     });
 
     it('does not let the last active administrator be demoted', function () {
         $administrator = User::query()->where('role', Role::Administrator)->firstOrFail();
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $administrator->id]);
 
-        $modal->call('openModal', $administrator->id);
         $modal->set('form.role', Role::Basic->value);
         $modal->call('save');
 
         $modal
             ->assertHasErrors('form.role')
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
 
         expect($administrator->refresh()->role)->toBe(Role::Administrator);
@@ -133,9 +124,8 @@ describe('authorized user form interactions', function () {
             'password' => 'original-password',
         ]);
         $originalPassword = $user->password;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
-        $modal->call('openModal', $user->id);
         $modal->set([
             'form.first_name' => 'Updated',
             'form.last_name' => 'Administrator',
@@ -153,14 +143,13 @@ describe('authorized user form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('updates a user password when a confirmed replacement is provided', function () {
         $user = User::factory()->create(['password' => 'original-password']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
-        $modal->call('openModal', $user->id);
         $modal->set([
             'form.password' => 'replacement-password',
             'form.password_confirmation' => 'replacement-password',
@@ -175,10 +164,9 @@ describe('authorized user form interactions', function () {
         // Arrange
         $administrator = auth()->user();
         $user = User::factory()->create(['password' => 'original-password']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
         // Act
-        $modal->call('openModal', $user->id);
         $modal->set([
             'form.password' => 'replacement-password',
             'form.password_confirmation' => 'replacement-password',
@@ -191,10 +179,9 @@ describe('authorized user form interactions', function () {
 
     it('signs the administrator in with their updated account after editing themselves', function () {
         // Arrange
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => auth()->id()]);
 
         // Act
-        $modal->call('openModal', auth()->id());
         $modal->set([
             'form.password' => 'replacement-password',
             'form.password_confirmation' => 'replacement-password',
@@ -210,9 +197,8 @@ describe('authorized user form interactions', function () {
 
     it('allows a user to retain their current email address', function () {
         $user = User::factory()->create(['email' => 'current@example.com']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
-        $modal->call('openModal', $user->id);
         $modal->call('save');
 
         $modal->assertHasNoErrors();
@@ -222,7 +208,6 @@ describe('authorized user form interactions', function () {
     it('requires complete account data when creating a user', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
@@ -233,8 +218,7 @@ describe('authorized user form interactions', function () {
                 'form.password' => 'required',
                 'form.password_confirmation' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(User::query()->count())->toBe(1);
     });
 
@@ -252,7 +236,6 @@ describe('authorized user form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Valid',
             'form.last_name' => 'User',
@@ -279,9 +262,8 @@ describe('authorized user form interactions', function () {
     it('rejects another user email while editing', function () {
         User::factory()->create(['email' => 'existing@example.com']);
         $user = User::factory()->create(['email' => 'current@example.com']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
 
-        $modal->call('openModal', $user->id);
         $modal->set('form.email', 'existing@example.com');
         $modal->call('save');
 
@@ -289,47 +271,16 @@ describe('authorized user form interactions', function () {
         expect($user->refresh()->email)->toBe('current@example.com');
     });
 
-    it('clears entered data when the modal is closed', function () {
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal');
-        $modal->set([
-            'form.first_name' => 'Entered',
-            'form.email' => 'entered@example.com',
-        ]);
-        $modal->call('closeModal');
-
-        $modal
-            ->assertSet('isModalOpen', false)
-            ->assertSet('form.first_name', '')
-            ->assertSet('form.email', '');
-    });
-
-    it('resets edited user data when reopening in create mode', function () {
-        $user = User::factory()->administrator()->create();
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $user->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.first_name', '')
-            ->assertSet('form.last_name', '')
-            ->assertSet('form.email', '')
-            ->assertSet('form.role', Role::Basic->value);
-    });
-
     it('generates valid dummy data that can create a user', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(User::query()->count())->toBe(2);
     });
 });
@@ -364,8 +315,7 @@ describe('email change invitation warning', function () {
             ->create(['promotion_id' => Promotion::factory()->create(['name' => 'Expired Federation'])]);
 
         // Act
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $user->id);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
         $modal->set('form.email', $typedEmail);
         $modal->call('save');
 
@@ -387,8 +337,7 @@ describe('email change invitation warning', function () {
         PromotionInvitation::factory()->forEmail('elsewhere@example.com')->create();
 
         // Act
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $user->id);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
         $modal->set('form.email', 'new@example.com');
         $modal->call('save');
 
@@ -403,8 +352,7 @@ describe('email change invitation warning', function () {
         PromotionInvitation::factory()->forEmail('same@example.com')->create();
 
         // Act
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $user->id);
+        $modal = livewire(FormModal::class, ['modelId' => $user->id]);
         $modal->set('form.first_name', 'Renamed');
         $modal->set('form.email', $typedEmail);
         $modal->call('save');

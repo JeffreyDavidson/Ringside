@@ -64,11 +64,4 @@ class FormModal extends BaseFormModal
     {
         $this->createAction->handle($this->form->toData());
     }
-
-    #[\Override]
-    public function closeModal(): void
-    {
-        parent::closeModal();
-        $this->form->reset();
-    }
 }

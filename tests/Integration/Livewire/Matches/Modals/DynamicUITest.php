@@ -31,7 +31,6 @@ describe('dynamic match type UI', function (): void {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $component->call('openModal');
 
         // Assert
         $component->assertSee('Select a match type to configure competitors');
@@ -46,7 +45,6 @@ describe('dynamic match type UI', function (): void {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $component->call('openModal');
         $component->set('form.matchType', $matchType);
 
         // Assert
@@ -90,7 +88,6 @@ describe('dynamic match type UI', function (): void {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
         $component->set('form.matchType', MatchType::TagTeam);
@@ -106,7 +103,6 @@ describe('dynamic match type UI', function (): void {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $component->call('openModal');
 
         // Assert
         $component->assertSet('matchTypeAllowsTagTeams', false);
@@ -115,7 +111,6 @@ describe('dynamic match type UI', function (): void {
     it('resets competitors when the match type arrives as its string value', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
 
@@ -131,7 +126,6 @@ describe('dynamic match type UI', function (): void {
     it('keeps competitors when the match type is cleared', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
 
@@ -147,7 +141,6 @@ describe('dynamic match type UI', function (): void {
     it('rejects a tampered match type value', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
 
         // Act / Assert
         expect(fn () => $component->set('form.matchType', 'not-a-match-type'))
@@ -159,7 +152,6 @@ describe('accessible competitor fields', function (): void {
     it('describes each roster search box with its usage hint', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
 
         // Act
         $component->set('form.matchType', MatchType::Singles);
@@ -175,7 +167,6 @@ describe('accessible competitor fields', function (): void {
     it('links a single competitor error to its search box', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::Singles);
 
         // Act
@@ -192,7 +183,6 @@ describe('accessible competitor fields', function (): void {
     it('groups each tag team side under its own name', function (): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::TagTeam);
 
         // Act
@@ -210,7 +200,6 @@ describe('accessible competitor fields', function (): void {
     it('names each side of a :dataset match', function (MatchType $matchType, array $legends): void {
         // Arrange
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
 
         // Act
         $component->set('form.matchType', $matchType);

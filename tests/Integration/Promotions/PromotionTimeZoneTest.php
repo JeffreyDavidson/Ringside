@@ -102,7 +102,6 @@ it('saves an event date entered in the current promotion zone as UTC', function 
 
     // Act
     livewire(FormModal::class)
-        ->call('openModal')
         ->set([
             'form.name' => 'West Coast Show',
             'form.date' => '2027-01-15T20:00',
@@ -124,7 +123,7 @@ it('fills the edit form with the date in the promotion zone', function () {
     ]);
 
     // Act
-    $modal = livewire(FormModal::class)->call('openModal', $event->id);
+    $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
     // Assert
     $modal->assertSet('form.date', '2027-01-15T20:00');
@@ -138,8 +137,7 @@ it('reads a rescheduled date in the event promotion zone', function () {
     ]);
 
     // Act
-    livewire(FormModal::class)
-        ->call('openModal', $event->id)
+    livewire(FormModal::class, ['modelId' => $event->id])
         ->set('form.date', '2027-01-16T21:00')
         ->call('save')
         ->assertHasNoErrors();
@@ -206,7 +204,6 @@ describe('clock changes', function () {
 
         // Act
         $modal = livewire(FormModal::class)
-            ->call('openModal')
             ->set([
                 'form.name' => 'Spring Forward Show',
                 'form.date' => '2027-03-14T02:30',
@@ -228,8 +225,7 @@ describe('clock changes', function () {
         ]);
 
         // Act
-        $modal = livewire(FormModal::class)
-            ->call('openModal', $event->id)
+        $modal = livewire(FormModal::class, ['modelId' => $event->id])
             ->set('form.date', '2027-03-14T02:30')
             ->call('save');
 
@@ -247,8 +243,7 @@ describe('clock changes', function () {
         ]);
 
         // Act
-        livewire(FormModal::class)
-            ->call('openModal', $event->id)
+        livewire(FormModal::class, ['modelId' => $event->id])
             ->assertSet('form.date', '2026-11-01T01:30')
             ->set('form.name', 'Fall Back Spectacular')
             ->call('save')
@@ -267,8 +262,7 @@ describe('clock changes', function () {
         travelTo('2026-12-01 12:00:00');
 
         // Act
-        livewire(FormModal::class)
-            ->call('openModal', $event->id)
+        livewire(FormModal::class, ['modelId' => $event->id])
             ->set('form.name', 'Renamed After The Fact')
             ->call('save')
             ->assertHasNoErrors();
@@ -284,8 +278,7 @@ describe('clock changes', function () {
         $event = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-11-01 15:00:00']);
 
         // Act
-        livewire(FormModal::class)
-            ->call('openModal', $event->id)
+        livewire(FormModal::class, ['modelId' => $event->id])
             ->set('form.date', '2026-11-01T01:30')
             ->call('save')
             ->assertHasNoErrors();

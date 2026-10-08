@@ -23,8 +23,6 @@ abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
 
-    public bool $isModalOpen = false;
-
     protected ?string $createdEventName = null;
 
     protected ?string $updatedEventName = null;
@@ -33,19 +31,6 @@ abstract class BaseFormModal extends BaseModal
 
     /** The form field that shows a business rule failure from the Action; null lets the exception propagate. */
     protected ?string $businessErrorField = null;
-
-    public function openModal(int|string|null $modelId = null): void
-    {
-        $this->mount($modelId);
-        $this->authorizeFormAccess();
-        $this->isModalOpen = true;
-    }
-
-    #[\Override]
-    public function closeModal(): void
-    {
-        $this->isModalOpen = false;
-    }
 
     public function save(): void
     {
@@ -63,7 +48,6 @@ abstract class BaseFormModal extends BaseModal
         }
 
         $this->dispatch('refreshDatatable');
-        $this->closeModal();
         $this->dispatch('closeModal');
 
         $eventName = $wasCreating

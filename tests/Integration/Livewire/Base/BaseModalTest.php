@@ -38,7 +38,6 @@ describe('clearing modal forms', function (): void {
     it('clears an unsaved creation form', function (): void {
         // Arrange
         $component = livewire(FormModal::class)
-            ->call('openModal')
             ->set('form.name', 'Unsaved Team');
 
         // Act
@@ -53,8 +52,7 @@ describe('clearing modal forms', function (): void {
     it('restores the persisted model when clearing an edit form', function (): void {
         // Arrange
         $tagTeam = TagTeam::factory()->create(['name' => 'The Originals']);
-        $component = livewire(FormModal::class)
-            ->call('openModal', $tagTeam->id)
+        $component = livewire(FormModal::class, ['modelId' => $tagTeam->id])
             ->set('form.name', 'Unsaved Rename');
 
         // Act
@@ -83,27 +81,13 @@ describe('base modal titles', function (): void {
         $model = $makeModel();
 
         // Act
-        $editing = livewire($modal)->call('openModal', $model->id);
-        $creating = livewire($modal)->call('openModal');
+        $editing = livewire($modal, ['modelId' => $model->id]);
+        $creating = livewire($modal);
 
         // Assert
         $editing->assertSee("Edit {$name}");
         $creating->assertSee($addTitle);
     })->with('base modal titles');
-
-    it('shows the add title when the modal is reopened for a new record', function (): void {
-        // Arrange
-        $wrestler = Wrestler::factory()->create(['name' => 'Rey Mysterio']);
-        $component = livewire(WrestlerFormModal::class)->call('openModal', $wrestler->id);
-
-        // Act
-        $component->call('openModal');
-
-        // Assert
-        $component
-            ->assertDontSee('Edit Rey Mysterio')
-            ->assertSee('Add Wrestler');
-    });
 });
 
 describe('localized modal titles', function (): void {
@@ -126,8 +110,8 @@ describe('localized modal titles', function (): void {
         $model = $makeModel();
 
         // Act
-        $creating = livewire($modal)->call('openModal');
-        $editing = livewire($modal)->call('openModal', $model->id);
+        $creating = livewire($modal);
+        $editing = livewire($modal, ['modelId' => $model->id]);
 
         // Assert
         $creating->assertSeeHtml(">{$createTitle}</h2>");
@@ -139,7 +123,7 @@ describe('localized modal titles', function (): void {
         $venue = Venue::factory()->create(['name' => "O'Neil & Sons"]);
 
         // Act
-        $editing = livewire(VenueFormModal::class)->call('openModal', $venue->id);
+        $editing = livewire(VenueFormModal::class, ['modelId' => $venue->id]);
 
         // Assert
         $editing->assertSeeHtml('>Edit O&#039;Neil &amp; Sons</h2>');
@@ -150,8 +134,8 @@ describe('localized modal titles', function (): void {
         $match = EventMatch::factory()->create();
 
         // Act
-        $creating = livewire(MatchFormModal::class, ['eventId' => $match->event_id])->call('openModal');
-        $editing = livewire(MatchFormModal::class, ['eventId' => $match->event_id])->call('openModal', $match->id);
+        $creating = livewire(MatchFormModal::class, ['eventId' => $match->event_id]);
+        $editing = livewire(MatchFormModal::class, ['eventId' => $match->event_id, 'modelId' => $match->id]);
 
         // Assert
         $creating->assertSee('Add Match');

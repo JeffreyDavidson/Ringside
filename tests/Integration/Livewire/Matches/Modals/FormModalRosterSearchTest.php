@@ -111,8 +111,7 @@ describe('searching the roster from the match form', function (): void {
         $otherEvent = Event::factory()->for($otherPromotion, 'promotion')->create();
         Wrestler::factory()->for($promotion, 'promotion')->bookable()->create(['name' => 'Our Wrestler']);
         Wrestler::factory()->for($otherPromotion, 'promotion')->bookable()->create(['name' => 'Their Wrestler']);
-        $modal = livewire(FormModal::class, ['eventId' => $otherEvent->id]);
-        $modal->call('openModal', $match->id);
+        $modal = livewire(FormModal::class, ['eventId' => $otherEvent->id, 'modelId' => $match->id]);
 
         // Act
         $options = $modal->instance()->searchRoster('wrestlers', 'Wrestler');
@@ -151,8 +150,7 @@ describe('rendering the selected records', function (): void {
         $trashedWrestler->delete();
 
         // Act
-        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
-        $modal->call('openModal', $match->id);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id, 'modelId' => $match->id]);
 
         // Assert
         $labels = $modal->instance()->selectedRosterLabels;
@@ -172,7 +170,6 @@ describe('rendering the selected records', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $modal->call('openModal');
 
         // Assert
         expect($modal->instance()->selectedRosterLabels)->toBe([
@@ -187,7 +184,7 @@ describe('rendering the selected records', function (): void {
         $event = Event::factory()->create();
         Wrestler::factory()->bookable()->count(5)->create();
         $small = livewire(FormModal::class, ['eventId' => $event->id]);
-        $small->call('openModal')->set('form.matchType', MatchType::BattleRoyal);
+        $small->set('form.matchType', MatchType::BattleRoyal);
         $smallHtml = $small->html();
 
         Wrestler::factory()->bookable()->count(55)->create();
@@ -196,7 +193,7 @@ describe('rendering the selected records', function (): void {
 
         // Act
         $large = livewire(FormModal::class, ['eventId' => $event->id]);
-        $large->call('openModal')->set('form.matchType', MatchType::BattleRoyal);
+        $large->set('form.matchType', MatchType::BattleRoyal);
         $largeHtml = $large->html();
 
         // Assert
@@ -215,7 +212,6 @@ describe('server-side validation stays the authority', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set('form.competitors.0.wrestlers', [$bookable->id]);
         $modal->set('form.competitors.1.wrestlers', [$forged->id]);
@@ -240,7 +236,6 @@ describe('server-side validation stays the authority', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set('form.competitors.0.wrestlers', [$ours->id]);
         $modal->set('form.competitors.1.wrestlers', [$theirs->id]);
@@ -260,7 +255,6 @@ describe('server-side validation stays the authority', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set('form.competitors.0.wrestlers', [$first->id]);
         $modal->set('form.competitors.1.wrestlers', [$second->id]);
@@ -280,7 +274,6 @@ describe('server-side validation stays the authority', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::TagTeam);
         $modal->set('form.competitors.0.tag_teams', [$forgedTagTeam->id]);
         $modal->set('form.competitors.1.wrestlers', $wrestlers->modelKeys());
