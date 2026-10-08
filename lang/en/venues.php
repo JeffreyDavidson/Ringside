@@ -26,4 +26,11 @@ return [
             'zip_code' => 'zip code',
         ],
     ],
+
+    'errors' => [
+        'restored' => [
+            'name_conflict' => ':context cannot be restored because the name conflicts with existing venue \':conflicting_name\'. Resolve the conflict before restoration.',
+            'not_deleted' => ':context cannot be restored because it is not deleted.',
+        ],
+    ],
 ];
