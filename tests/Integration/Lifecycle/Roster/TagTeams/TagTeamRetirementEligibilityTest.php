@@ -54,7 +54,7 @@ test('future employment does not block unretiring a duplicate tag-team name', fu
         ->employments()
         ->create(['started_at' => now()->addDay()]);
 
-    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))
         ->toBeTrue();
 });
 

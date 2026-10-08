@@ -33,10 +33,10 @@ final class TagTeamRetirementEligibility
         }
     }
 
-    public function canUnretire(TagTeam $tagTeam, bool $requireAvailablePartners = true): bool
+    public function canUnretire(TagTeam $tagTeam): bool
     {
         try {
-            $this->ensureCanUnretire($tagTeam, $requireAvailablePartners);
+            $this->ensureCanUnretire($tagTeam);
 
             return true;
         } catch (CannotBeUnretiredException) {
@@ -44,7 +44,7 @@ final class TagTeamRetirementEligibility
         }
     }
 
-    public function ensureCanUnretire(TagTeam $tagTeam, bool $requireAvailablePartners = true): void
+    public function ensureCanUnretire(TagTeam $tagTeam): void
     {
         if (! $tagTeam->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($tagTeam);
@@ -57,10 +57,6 @@ final class TagTeamRetirementEligibility
 
         if ($conflictingTeam) {
             throw CannotBeUnretiredException::nameConflict($tagTeam, $conflictingTeam->name);
-        }
-
-        if (! $requireAvailablePartners) {
-            return;
         }
 
         $currentPartners = $tagTeam->currentWrestlers;
