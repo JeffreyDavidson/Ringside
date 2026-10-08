@@ -6,6 +6,9 @@ use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\from;
+
 function attachActivePromotionMembership(User $user, Promotion $promotion): void
 {
     $promotion->users()->attach($user, [
@@ -21,8 +24,7 @@ test('a user can switch to another active promotion', function () {
     attachActivePromotionMembership($user, $firstPromotion);
     attachActivePromotionMembership($user, $secondPromotion);
 
-    $response = $this
-        ->from(route('dashboard'))
+    $response = from(route('dashboard'))
         ->actingAs($user)
         ->post(route('promotions.switch'), ['promotion_id' => $secondPromotion->id]);
 
@@ -39,8 +41,7 @@ test('a user cannot switch to a promotion without an active membership', functio
     $otherPromotion = Promotion::factory()->create();
     attachActivePromotionMembership($user, $promotion);
 
-    $this
-        ->actingAs($user)
+    actingAs($user)
         ->post(route('promotions.switch'), ['promotion_id' => $otherPromotion->id])
         ->assertForbidden();
 
@@ -52,8 +53,7 @@ test('the authenticated layout displays active promotions', function () {
     $promotion = Promotion::factory()->create(['name' => 'Ringside Wrestling']);
     attachActivePromotionMembership($user, $promotion);
 
-    $this
-        ->actingAs($user)
+    actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Ringside Wrestling')

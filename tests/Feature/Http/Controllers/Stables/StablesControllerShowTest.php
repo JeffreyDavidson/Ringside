@@ -112,7 +112,7 @@ describe('Stables Controller', function () {
 
         // Assert
         foreach ($stables as $stable) {
-            $this->get(route('stables.show', $stable))
+            get(route('stables.show', $stable))
                 ->assertOk();
         }
     });
