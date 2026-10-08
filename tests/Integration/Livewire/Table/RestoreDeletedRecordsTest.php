@@ -196,7 +196,7 @@ describe('listing deleted records', function (): void {
             ->assertSee('Restore')
             ->assertDontSeeHtml('wire:click="delete(')
             ->assertDontSeeHtml("modelId: {$record->getKey()}")
-            ->assertDontSee('View');
+            ->assertDontSeeHtml('<span>'.__('core.row_actions.view').'</span>');
     })->with('tables with a deleted option');
 
     test('a deleted row shows its name as plain text because its show page does not exist', function (string $component, string $filterKey, Closure $make): void {
