@@ -6,6 +6,8 @@ use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+
 const LOWEST_TABLE_FIELD_BORDER_CONTRAST = <<<'JS'
 () => {
     const channels = (color) => color.match(/[\d.]+/g).slice(0, 3).map(Number);
@@ -49,7 +51,7 @@ JS;
 test('table search, filter and paging fields have borders with at least 3:1 contrast', function (string $route, Closure $arrange, ?string $filtersToggle): void {
     // Arrange
     $arrange();
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route($route));
     $page->resize(390, 844)
         ->waitForText(__('core.rows_per_page'));

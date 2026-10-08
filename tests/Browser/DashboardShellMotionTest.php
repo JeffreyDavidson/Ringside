@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Pest\Browser\Api\PendingAwaitablePage;
 
+use function Pest\Laravel\actingAs;
+
 /**
  * Click a sidebar toggle and assert that each element starts a running animation while the menu icon stays pinned.
  *
@@ -46,7 +48,7 @@ function assertClickStartsMotion(PendingAwaitablePage $page, string $button, arr
 }
 
 test('dashboard shell renders at its expanded offset and content reflows without sliding', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('dashboard'));
     $page->resize(1440, 1000);
@@ -107,7 +109,7 @@ test('dashboard shell renders at its expanded offset and content reflows without
 });
 
 test('sidebar expanded state persists through page navigation', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('dashboard'));
     $page->resize(1440, 1000);

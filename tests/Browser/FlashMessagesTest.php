@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use function Pest\Laravel\actingAs;
+
 test('flash messages are readable and announced through permanent live regions', function (string $type, string $region): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('dashboard'));
     $page->resize(1440, 900);
     $page->assertPresent("[data-test=flash-{$region}-region]")
@@ -27,7 +29,7 @@ test('flash messages are readable and announced through permanent live regions',
 
 test('a repeated flash message is announced again', function (): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('dashboard'));
     $page->resize(1440, 900);
     $dispatch = "window.dispatchEvent(new CustomEvent('flash-message', { detail: { type: 'status', message: 'Wrestler has been hired.' } }))";

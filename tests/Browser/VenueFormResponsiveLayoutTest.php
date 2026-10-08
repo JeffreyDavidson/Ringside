@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use function Pest\Laravel\actingAs;
+
 test('venue address fields use responsive columns without horizontal overflow', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('venues.index'));
     $page->resize(390, 844);

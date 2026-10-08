@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Models\Roster\Stables\Stable;
 
+use function Pest\Laravel\actingAs;
+
 test('stable index filters and table fit narrow and wide viewports', function (): void {
     // Arrange
     Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('stables.index'));

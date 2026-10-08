@@ -10,6 +10,11 @@ use App\Models\Users\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertGuest;
+use function Pest\Laravel\travel;
+
 test('login screen displays correctly', function () {
     $page = visit(route('login'));
 
@@ -188,7 +193,7 @@ test('authenticated users are redirected away from login page', function () {
         'status' => MembershipStatus::Active->value,
     ]);
 
-    $this->actingAs($user);
+    actingAs($user);
 
     $page = visit(route('login'));
 
@@ -267,8 +272,8 @@ test('registration submits from the branded form', function (): void {
     // Assert
     $page->assertPathIs('/login')
         ->assertSee(__('auth-forms.account_pending'));
-    $this->assertGuest();
-    $this->assertDatabaseHas('users', ['email' => 'taylor@example.com']);
+    assertGuest();
+    assertDatabaseHas('users', ['email' => 'taylor@example.com']);
 });
 
 test('login exposes password visibility and associates validation errors', function (): void {
@@ -359,7 +364,7 @@ test('recovery confirmation prevents resending until the cooldown ends', functio
     Notification::assertSentToTimes($user, ResetPassword::class, 1);
 
     // Arrange
-    $this->travel(61)->seconds();
+    travel(61)->seconds();
 
     // Act
     $page->script('const actualNow = Date.now; Date.now = () => actualNow() + 61000; window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));');

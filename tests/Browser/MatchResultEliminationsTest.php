@@ -8,6 +8,8 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function (): void {
     $this->event = Event::factory()->past()->create();
     $this->match = EventMatch::factory()
@@ -18,7 +20,7 @@ beforeEach(function (): void {
             ['name' => 'Charlie Contender'],
         )->create()->all())
         ->create(['match_type' => MatchType::BattleRoyal]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 test('the eliminations table is readable on the dark modal', function (): void {

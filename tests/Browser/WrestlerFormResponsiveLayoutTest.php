@@ -6,6 +6,8 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 test('wrestler form fields stack on narrow screens and use responsive rows on wider screens', function (): void {
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
@@ -13,7 +15,7 @@ test('wrestler form fields stack on narrow screens and use responsive rows on wi
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('wrestlers.index'));
     $page->resize(390, 844);

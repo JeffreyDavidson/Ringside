@@ -9,6 +9,8 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function () {
     $this->event = Event::factory()->past()->create();
     $this->match = EventMatch::factory()->for($this->event)->create();
@@ -29,7 +31,7 @@ beforeEach(function () {
     }
 
     $this->winningSide = $this->match->sides()->firstOrFail();
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 test('administrator can record a match result', function () {

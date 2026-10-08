@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Pest\Browser\Api\PendingAwaitablePage;
 
+use function Pest\Laravel\actingAs;
+
 const OPEN_NAVIGATION = 'button[aria-label="Open navigation"]';
 
 /**
@@ -17,7 +19,7 @@ function waitForNavigationState(PendingAwaitablePage $page, bool $open): void
 }
 
 beforeEach(function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 test('the closed mobile navigation stays out of the tab order', function (): void {
