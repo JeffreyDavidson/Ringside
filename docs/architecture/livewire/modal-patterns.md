@@ -30,8 +30,6 @@ hard-code English titles in the modal.
 
 `BaseFormModal` adds the shared form submission lifecycle:
 
-- `openModal($modelId)` mounts create or edit state, authorizes, and marks the modal
-  open;
 - `submitForm()` (also reachable as `save()`) authorizes, calls `storeForm()`, and on
   success dispatches `refreshDatatable`, closes the modal, and dispatches the optional
   `$createdEventName` / `$updatedEventName` (only Promotions sets them, for a page reload); and

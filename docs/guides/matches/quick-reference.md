@@ -36,7 +36,6 @@ public function getTagTeams(): Collection
 ```php
 it('adapts UI when match type changes', function () {
     $component = Livewire::test(FormModal::class, ['eventId' => $event->id])
-        ->call('openModal')
         ->set('form.matchTypeId', $matchTypeId)
         ->assertSee('expected UI element');
 });

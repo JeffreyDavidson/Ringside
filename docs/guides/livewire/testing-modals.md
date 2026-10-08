@@ -3,7 +3,7 @@
 ## Overview
 
 Domain modals extend `App\Livewire\Base\BaseFormModal` (which extends `BaseModal`, a
-`LivewireUI\Modal\ModalComponent`). The base classes provide `openModal()`, `closeModal()`, `submitForm()`
+`LivewireUI\Modal\ModalComponent`). The base classes provide `submitForm()`
 (also `save()`), authorization, titles, and the success events. Domain modals add their Actions through
 `boot()` and implement `getModelClass()`, `createForm()`, and `updateForm()`.
 
@@ -11,24 +11,11 @@ Modal tests live in `tests/Integration/Livewire/{Domain}/Modals/FormModalTest.ph
 covered once in `tests/Integration/Livewire/Base/BaseFormModalTest.php` and `BaseModalTest.php`; domain tests
 cover what is specific to the domain.
 
-## Lifecycle
+## Mounting
 
-```php
-it('opens and closes the modal', function (): void {
-    // Arrange
-    $modal = livewire(FormModal::class)
-        ->assertSet('isModalOpen', false);
-
-    // Act
-    $modal->call('openModal');
-
-    // Assert
-    $modal->assertSet('isModalOpen', true);
-});
-```
-
-Pass a model id to enter edit mode: `livewire(FormModal::class, ['modelId' => $wrestler->id])` or
-`$modal->call('openModal', $wrestler->id)`. Reopening with no id resets the form to create state.
+The modal package only ever calls `mount()`, so tests mount the component with `livewire()`. Pass a model id to
+enter edit mode: `livewire(FormModal::class, ['modelId' => $wrestler->id])`. The match modal takes `eventId`.
+Create mode is `livewire(FormModal::class)`.
 
 ## Titles
 
@@ -61,22 +48,20 @@ $component->set('form.name', 'Test Wrestler')
 expect(Wrestler::where('name', 'Test Wrestler')->exists())->toBeTrue();
 ```
 
-A successful submission dispatches `refreshDatatable` and `closeModal`, closes the modal
-(`isModalOpen` is `false`), and dispatches the modal's optional `$createdEventName` / `$updatedEventName`
+A successful submission dispatches `refreshDatatable` and `closeModal`, and dispatches the modal's optional `$createdEventName` / `$updatedEventName`
 (only the Promotions modal sets them, as `promotion-saved`):
 
 ```php
 $modal
     ->assertHasNoErrors()
-    ->assertSet('isModalOpen', false)
     ->assertDispatched('refreshDatatable')
     ->assertDispatched('closeModal');
 ```
 
 Source: `tests/Integration/Livewire/Base/BaseFormModalTest.php`.
 
-Validation failures throw inside `storeForm()`, so the modal does not close and no events fire. Modals that
-translate a `BaseBusinessException` into a field error (Events, Matches) return `false` from `storeForm()`;
+Validation failures throw inside `storeForm()`, so the modal does not close (`assertNotDispatched('closeModal')`) and no events fire. Modals that
+translate a `BaseBusinessException` into a field error (Events, Matches) return `false` from `storeForm()` via `reportBusinessErrors()`;
 assert the error with `assertHasErrors()` and that the record was not saved.
 
 `createForm()` and `updateForm()` throw `LogicException` unless overridden. `StubFormModal`
@@ -84,7 +69,7 @@ assert the error with `assertHasErrors()` and that the record was not saved.
 
 ## Authorization
 
-`BaseFormModal` authorizes on `openModal()` and again on `submitForm()`: the `create` ability on the model class
+`BaseFormModal` authorizes on `mount()` and again on `submitForm()`: the `create` ability on the model class
 in create mode, `update` on the model in edit mode. Assert with `assertForbidden()`:
 
 ```php
@@ -93,10 +78,8 @@ it('forbids users without administrative access from opening the venue form', fu
         actingAs(basicUser());
     }
 
-    $modal = livewire(FormModal::class);
-    $modal->call('openModal');
-
-    $modal->assertForbidden();
+    livewire(FormModal::class)
+        ->assertForbidden();
 })->with([
     'guest' => ['guest'],
     'basic user' => ['basic user'],
