@@ -31,6 +31,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Tag team actions',
         'employed' => 'Tag team has been hired.',
         'released' => 'Tag team contract has been terminated.',
         'retired' => 'Tag team has been retired.',

@@ -6,6 +6,7 @@ return [
     'last_name' => 'Last Name',
     'index_description' => 'Manage your promotion’s referees, assignments, and officiating records.',
     'index_title' => 'Referees',
+    'add' => 'Add Referee',
     'all' => 'All referees',
     'filter_status' => 'Filter referees by status',
     'search' => 'Search referees',
@@ -29,6 +30,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Referee actions',
         'employed' => 'Referee has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Referee has been retired.',

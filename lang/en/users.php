@@ -23,4 +23,11 @@ return [
             'password_confirmation' => 'password confirmation',
         ],
     ],
+
+    'actions' => [
+        'activate' => 'Activate account',
+        'deactivate' => 'Deactivate account',
+        'reactivate' => 'Reactivate account',
+        'menu_label' => 'User actions',
+    ],
 ];

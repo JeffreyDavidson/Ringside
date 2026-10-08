@@ -104,6 +104,7 @@ return [
     ],
 
     'actions' => [
+        'menu_label' => 'Stable actions',
         'deleted' => 'Stable successfully deleted.',
         'disbanded' => 'Stable successfully disbanded.',
         'established' => 'Stable successfully established.',

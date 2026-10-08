@@ -53,7 +53,11 @@ return [
         ],
     ],
 
+    'add_event_match' => 'Add Event Match',
+
     'actions' => [
+        'correct_result' => 'Correct Result',
+        'record_result' => 'Record Result',
         'edit' => 'Edit Match',
         'remove' => 'Remove',
         'remove_match' => 'Remove Match :number',
@@ -61,5 +65,21 @@ return [
         'deleted' => 'Match successfully deleted.',
         'menu' => 'More actions for match :number',
         'menu_label' => 'Match actions',
+    ],
+
+    'result_modal' => [
+        'competitor' => 'Competitor',
+        'elimination_order_for' => 'Elimination order for :name',
+        'eliminated_by' => 'Eliminated By',
+        'eliminations' => 'Eliminations',
+        'eliminations_hint' => 'Record each eliminated competitor in order. Leave the winner without an elimination order.',
+        'eliminator_for' => 'Eliminator for :name',
+        'finish' => 'Finish',
+        'no_winning_side' => 'No winning side',
+        'not_recorded' => 'Not recorded',
+        'order' => 'Order',
+        'save_result' => 'Save Result',
+        'select_finish' => 'Select a finish',
+        'winning_side' => 'Winning Side',
     ],
 ];

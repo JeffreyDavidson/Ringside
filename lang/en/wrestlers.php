@@ -33,6 +33,7 @@ return [
     'inches' => 'Inches',
 
     'actions' => [
+        'menu_label' => 'Wrestler actions',
         'deleted' => 'Wrestler successfully deleted.',
         'employed' => 'Wrestler has been hired.',
         'released' => 'Contract has been terminated.',

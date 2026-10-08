@@ -76,12 +76,12 @@ class Main extends BaseTable
     {
         return match ($user->status) {
             UserStatus::Unverified => [
-                'label' => 'Activate account',
+                'label' => __('users.actions.activate'),
                 'status' => UserStatus::Active,
                 'confirmation' => $this->activationConfirmationFor($user),
             ],
-            UserStatus::Active => ['label' => 'Deactivate account', 'status' => UserStatus::Inactive, 'confirmation' => null],
-            UserStatus::Inactive => ['label' => 'Reactivate account', 'status' => UserStatus::Active, 'confirmation' => null],
+            UserStatus::Active => ['label' => __('users.actions.deactivate'), 'status' => UserStatus::Inactive, 'confirmation' => null],
+            UserStatus::Inactive => ['label' => __('users.actions.reactivate'), 'status' => UserStatus::Active, 'confirmation' => null],
         };
     }
 

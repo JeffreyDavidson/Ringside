@@ -65,6 +65,7 @@ return [
     ],
 
     'actions' => [
+        'menu_label' => 'Title actions',
         'deleted' => 'Title successfully deleted.',
         'debuted' => 'Title successfully debuted.',
         'retired' => 'Title successfully retired.',

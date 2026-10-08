@@ -1,7 +1,7 @@
 <x-tables.entity-actions
     :model="$user"
     :name="$user->full_name"
-    menu-label="User actions"
+    :menu-label="__('users.actions.menu_label')"
     :show-url="route('users.show', $user)"
     form-modal="users.modals.form-modal"
     gate-view

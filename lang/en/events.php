@@ -45,6 +45,7 @@ return [
     ],
 
     'actions' => [
+        'menu_label' => 'Event actions',
         'deleted' => 'Event successfully deleted.',
     ],
 
