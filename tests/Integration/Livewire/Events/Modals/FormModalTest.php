@@ -31,10 +31,8 @@ describe('authorized event form interactions', function () {
 
     it('opens an empty form for creating an event', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', '')
             ->assertSet('form.date', '')
             ->assertSet('form.venue_id', 0)
@@ -51,12 +49,10 @@ describe('authorized event form interactions', function () {
             'preview' => 'A championship showcase.',
         ]);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $event->id);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
         $modal->set('form.name', 'Summer Showcase');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'Summer Showcase')
             ->assertSet('form.date', $eventDate->format('Y-m-d\\TH:i'))
             ->assertSet('form.venue_id', $venue->id)
@@ -66,8 +62,7 @@ describe('authorized event form interactions', function () {
     });
 
     it('responds not found when opening a missing event', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
@@ -76,7 +71,6 @@ describe('authorized event form interactions', function () {
         $eventDate = now()->addMonth()->startOfMinute();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'WrestleMania 40',
             'form.date' => $eventDate->format('Y-m-d\\TH:i'),
@@ -92,14 +86,12 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('creates an unscheduled event without a venue', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Future Announcement',
             'form.date' => null,
@@ -119,7 +111,6 @@ describe('authorized event form interactions', function () {
         $eventDate = today()->subDay();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Historical Event',
             'form.date' => $eventDate->toDateString(),
@@ -140,9 +131,8 @@ describe('authorized event form interactions', function () {
             'preview' => null,
         ]);
         $updatedDate = now()->addMonths(2)->startOfMinute();
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
-        $modal->call('openModal', $event->id);
         $modal->set([
             'form.name' => 'Updated Event',
             'form.date' => $updatedDate->format('Y-m-d\\TH:i'),
@@ -159,7 +149,7 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('keeps the edit form open after a venue scheduling conflict and allows recovery', function () {
@@ -172,9 +162,8 @@ describe('authorized event form interactions', function () {
             'date' => $originalDate,
         ]);
         Event::factory()->for($conflictingVenue)->create(['date' => $conflictingDate]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
-        $modal->call('openModal', $event->id);
         $modal->set([
             'form.name' => 'Rescheduled Event',
             'form.date' => $conflictingDate->format('Y-m-d\\TH:i'),
@@ -184,7 +173,6 @@ describe('authorized event form interactions', function () {
 
         $modal
             ->assertHasErrors(['form.venue_id'])
-            ->assertSet('isModalOpen', true)
             ->assertSee("Venue [{$conflictingVenue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
             ->assertNotDispatched('closeModal');
         expect($event->refresh()->name)->toBe('Original Event')
@@ -197,7 +185,6 @@ describe('authorized event form interactions', function () {
 
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false)
             ->assertDispatched('closeModal');
         expect($event->refresh()->name)->toBe('Rescheduled Event')
             ->and($event->date?->toDateTimeString())->toBe($availableDate->toDateTimeString())
@@ -207,21 +194,18 @@ describe('authorized event form interactions', function () {
     it('requires an event name', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set('form.name', '');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.name' => 'required'])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Event::query()->count())->toBe(0);
     });
 
     it('rejects invalid event field values', function (string $field, mixed $value, string $rule) {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set('form.name', 'Valid Event');
         $modal->set($field, $value);
         $modal->call('save');
@@ -237,9 +221,8 @@ describe('authorized event form interactions', function () {
     it('rejects an event name already used by another event', function () {
         Event::factory()->create(['name' => 'Existing Event']);
         $event = Event::factory()->create(['name' => 'Editable Event']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
-        $modal->call('openModal', $event->id);
         $modal->set('form.name', 'Existing Event');
         $modal->call('save');
 
@@ -250,9 +233,8 @@ describe('authorized event form interactions', function () {
     it('keeps the date of an occurred event immutable', function () {
         $event = Event::factory()->past()->create();
         $originalDate = $event->date;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
-        $modal->call('openModal', $event->id);
         $modal->set('form.date', today()->addMonth()->toDateString());
         $modal->call('save');
 
@@ -261,32 +243,17 @@ describe('authorized event form interactions', function () {
             ->toBe($originalDate?->toDateTimeString());
     });
 
-    it('resets existing event data when reopening in create mode', function () {
-        $event = Event::factory()->future()->withPreview()->withVenue()->create();
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $event->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.name', '')
-            ->assertSet('form.date', '')
-            ->assertSet('form.venue_id', 0)
-            ->assertSet('form.preview', '');
-    });
-
     it('generates valid dummy data that can create an event', function () {
         Venue::factory()->create();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(Event::query()->count())->toBe(1);
     });
 });

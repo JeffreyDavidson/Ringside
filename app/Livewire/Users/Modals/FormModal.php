@@ -107,13 +107,6 @@ class FormModal extends BaseFormModal
         $this->createAction->handle($this->form->toData());
     }
 
-    #[\Override]
-    public function closeModal(): void
-    {
-        parent::closeModal();
-        $this->form->reset();
-    }
-
     public function render(): View
     {
         return view('livewire.users.modals.form-modal');

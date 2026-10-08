@@ -206,9 +206,8 @@ describe('FormModal Form Integration', function () {
     it('rejects changing an active wrestler employment date', function () {
         $wrestler = Wrestler::factory()->create();
         $wrestler->employments()->create(['started_at' => '2024-01-15']);
-        $component = livewire(FormModal::class);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
-        $component->call('openModal', $wrestler->id);
         $component->set('form.employment_date', '2024-01-01');
         $component->call('submitForm');
 
@@ -316,10 +315,9 @@ describe('FormModal employment history', function () {
         giveEmploymentHistory($wrestler, $state);
         $employmentsBefore = employmentSnapshot($wrestler);
         $statusBefore = $wrestler->fresh()?->status;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Act
-        $modal->call('openModal', $wrestler->id);
         $modal->set('form.name', 'Renamed Wrestler');
         $modal->set('form.employment_date', $submittedDate);
         $modal->call('save');
@@ -327,7 +325,7 @@ describe('FormModal employment history', function () {
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         $wrestler->refresh();
         expect($wrestler->name)->toBe('Renamed Wrestler')
             ->and(employmentSnapshot($wrestler))->toBe($employmentsBefore)
@@ -345,10 +343,9 @@ describe('FormModal employment history', function () {
         // Arrange
         $wrestler = Wrestler::factory()->create();
         giveEmploymentHistory($wrestler, $state);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Act
-        $modal->call('openModal', $wrestler->id);
 
         // Assert
         $modal
@@ -360,10 +357,9 @@ describe('FormModal employment history', function () {
     it('still employs a never-employed wrestler from the submitted date', function () {
         // Arrange
         $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Act
-        $modal->call('openModal', $wrestler->id);
         $modal->set('form.name', 'Renamed Wrestler');
         $modal->set('form.employment_date', '2024-02-01');
         $modal->call('save');
@@ -386,17 +382,16 @@ describe('FormModal employment history', function () {
         $action = Double::for(UpdateAction::class);
         $action->expects('handle')->throws(CannotBeEmployedException::retired($wrestler));
         app()->instance(UpdateAction::class, $action);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Act
-        $modal->call('openModal', $wrestler->id);
         $modal->set('form.name', 'Renamed Wrestler');
         $modal->call('save');
 
         // Assert
         $modal
             ->assertHasErrors(['form.name'])
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
         expect($wrestler->fresh()?->name)->toBe('Original Name');
         $action->verify();

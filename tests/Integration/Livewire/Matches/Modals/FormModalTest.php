@@ -101,12 +101,10 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
 
         // Assert
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.competitors', [
                 ['wrestlers' => [], 'tag_teams' => []],
                 ['wrestlers' => [], 'tag_teams' => []],
@@ -121,7 +119,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
 
         // Assert
         $modal
@@ -134,7 +131,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set('form.matchType', '');
 
@@ -161,10 +157,9 @@ describe('authorized match form interactions', function (): void {
             ]);
         $match->referees()->attach($referee);
         $match->titles()->attach($title);
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id, 'modelId' => $match->id]);
 
         // Act
-        $modal->call('openModal', $match->id);
         $modal->set('form.preview', 'Original preview.');
 
         // Assert
@@ -201,10 +196,9 @@ describe('authorized match form interactions', function (): void {
         $match->referees()->attach($firstReferee);
         $match->titles()->attach($secondTitle);
         $match->titles()->attach($firstTitle);
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id, 'modelId' => $match->id]);
 
         // Act
-        $modal->call('openModal', $match->id);
 
         // Assert
         $modal
@@ -218,10 +212,9 @@ describe('authorized match form interactions', function (): void {
 
     it('responds not found when opening a missing match', function (): void {
         // Arrange
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id, 'modelId' => PHP_INT_MAX]);
 
         // Act
-        $modal->call('openModal', PHP_INT_MAX);
 
         // Assert
         $modal->assertNotFound();
@@ -237,7 +230,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.matchStipulationId' => $stipulation->id,
@@ -265,7 +257,6 @@ describe('authorized match form interactions', function (): void {
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
             ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false)
             ->assertSet('form.matchType', null);
     });
 
@@ -277,7 +268,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::TagTeam);
         $modal->set([
             'form.competitors' => [
@@ -304,7 +294,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', $matchType);
         $modal->set('form.competitors.0.wrestlers', $wrestlers->modelKeys());
         $modal->set('form.referees', [$referee->id]);
@@ -326,7 +315,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->call('save');
 
         // Assert
@@ -335,15 +323,13 @@ describe('authorized match form interactions', function (): void {
                 'form.matchType' => 'required',
                 'form.referees' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(EventMatch::query()->whereBelongsTo($this->event)->doesntExist())->toBeTrue();
     });
 
     it('uses the friendly match stipulation name in validation messages', function (): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         $modal->set('form.matchStipulationId', PHP_INT_MAX);
 
         // Act
@@ -365,7 +351,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -382,7 +367,7 @@ describe('authorized match form interactions', function (): void {
             ->assertHasErrors(['form.titles'])
             ->assertHasNoErrors(['form.configuration'])
             ->assertNotDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect($modal->instance()->getErrorBag()->first('form.titles'))
             ->toBe('The current champion of [World Heavyweight Title] must compete in the title match.');
         $action->verify();
@@ -398,7 +383,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -415,7 +399,6 @@ describe('authorized match form interactions', function (): void {
             ->assertHasNoErrors(['form.titles'])
             ->assertNotDispatched('refreshDatatable')
             ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.referees', [$referee->id]);
         expect($modal->instance()->getErrorBag()->first('form.configuration'))
             ->toBe('Wrestler [John Cena] is already booked at this event time.')
@@ -433,7 +416,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -448,7 +430,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertHasErrors(['form.configuration'])
             ->assertNotDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         $action->verify();
     });
 
@@ -460,7 +442,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -487,7 +468,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::TagTeam);
         $modal->set([
             'form.competitors' => [
@@ -513,7 +493,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.matchStipulationId' => $inactiveStipulation->id,
@@ -540,7 +519,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -565,7 +543,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::SixManTagTeam);
         $modal->set([
             'form.competitors' => [
@@ -591,7 +568,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->set('form.matchType', $matchType);
         $modal->set('form.competitors.0.wrestlers', $wrestlers->modelKeys());
         $modal->set('form.referees', [$referee->id]);
@@ -616,10 +592,9 @@ describe('authorized match form interactions', function (): void {
         $newWrestlers = Wrestler::factory()->count(4)->bookable()->create();
         $newReferee = Referee::factory()->bookable()->create();
         $newStipulation = MatchStipulation::factory()->active()->create();
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $this->event->id, 'modelId' => $match->id]);
 
         // Act
-        $modal->call('openModal', $match->id);
         $modal->set('form.matchType', MatchType::TagTeam);
         $modal->set([
             'form.matchStipulationId' => $newStipulation->id,
@@ -643,29 +618,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
-    });
-
-    it('resets an edited match when reopening in create mode', function (): void {
-        // Arrange
-        $match = EventMatch::factory()->for($this->event)->create([
-            'match_type' => MatchType::Singles,
-            'preview' => 'Unsaved edit.',
-        ]);
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-
-        // Act
-        $modal->call('openModal', $match->id);
-        $modal->call('openModal');
-
-        // Assert
-        $modal
-            ->assertSet('form.matchType', null)
-            ->assertSet('form.matchStipulationId', null)
-            ->assertSet('form.competitors', [])
-            ->assertSet('form.referees', [])
-            ->assertSet('form.titles', [])
-            ->assertSet('form.preview', '');
+            ->assertDispatched('closeModal');
     });
 
     it('generates valid dummy data that can create a match', function (): void {
@@ -675,7 +628,6 @@ describe('authorized match form interactions', function (): void {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         // Act
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
@@ -683,7 +635,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(EventMatch::query()->whereBelongsTo($this->event)->count())->toBe(1);
     });
 });
@@ -720,7 +672,6 @@ describe('booking for a global administrator without a promotion context', funct
     it('rejects :dataset of another promotion', function (Closure $matchData, string $entityType, string $field): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
 
         // Act
@@ -737,7 +688,6 @@ describe('booking for a global administrator without a promotion context', funct
         $referee = Referee::factory()->bookable()->for($this->promotion, 'promotion')->create();
         $title = Title::factory()->active()->singles()->for($this->promotion, 'promotion')->create();
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => [
@@ -763,8 +713,7 @@ describe('booking for a global administrator without a promotion context', funct
         $match = EventMatch::factory()->for($this->event)->create(['match_type' => MatchType::Singles]);
         $foreignWrestlers = Wrestler::factory()->bookable()->for($this->foreignPromotion, 'promotion')->count(2)->create();
         $foreignReferee = Referee::factory()->bookable()->for($this->foreignPromotion, 'promotion')->create();
-        $modal = livewire(FormModal::class, ['eventId' => $foreignEvent->id]);
-        $modal->call('openModal', $match->id);
+        $modal = livewire(FormModal::class, ['eventId' => $foreignEvent->id, 'modelId' => $match->id]);
         $modal->set([
             'form.competitors' => [
                 ['wrestlers' => [$foreignWrestlers->modelKeys()[0]]],
@@ -811,7 +760,6 @@ describe('booking for a global administrator without a promotion context', funct
         // Arrange
         $referee = Referee::factory()->bookable()->for($this->promotion, 'promotion')->create();
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         $modal->set('form.matchType', MatchType::Singles);
         $modal->set([
             'form.competitors' => $competitors,
@@ -835,7 +783,6 @@ describe('booking for a global administrator without a promotion context', funct
     it('leaves the card readable for the event promotion members after :dataset was refused', function (Closure $matchData): void {
         // Arrange
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $modal->call('openModal');
         selectMatchDataInForm($modal, $matchData($this->promotion, $this->foreignPromotion));
         $modal->call('save');
         $member = basicUser();

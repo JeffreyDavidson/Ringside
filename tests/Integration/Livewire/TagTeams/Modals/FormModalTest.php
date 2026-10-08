@@ -44,19 +44,21 @@ describe('authorized tag team form interactions', function () {
     });
 
     it('shows the current wrestlers and managers of an edited tag team as selected labels', function () {
-        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlers = Wrestler::factory()
+            ->count(2)
+            ->sequence(['name' => 'Ricky Morton'], ['name' => 'Robert Gibson'])
+            ->create();
         Wrestler::factory()->create(['name' => 'Unrelated Wrestler']);
         $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
         $tagTeam = TagTeam::factory()->create();
         $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
         $tagTeam->managers()->attach($manager, ['hired_at' => now()->subYear()]);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $tagTeam->id);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
         $modal
-            ->assertSee($wrestlers->firstOrFail()->name)
-            ->assertSee($wrestlers->skip(1)->firstOrFail()->name)
+            ->assertSee('Ricky Morton')
+            ->assertSee('Robert Gibson')
             ->assertSee('Bobby Heenan')
             ->assertDontSee('Unrelated Wrestler');
     });
@@ -78,8 +80,7 @@ describe('authorized tag team form interactions', function () {
     it('searches the roster while editing an existing tag team', function () {
         $tagTeam = TagTeam::factory()->create();
         Wrestler::factory()->create(['name' => 'Ricky Morton']);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $tagTeam->id);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
         $options = $modal->instance()->searchRoster('wrestlers', 'morton');
 
@@ -116,10 +117,7 @@ describe('authorized tag team form interactions', function () {
     it('opens an empty form for creating a tag team', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', '')
             ->assertSet('form.signature_move', '')
             ->assertSet('form.wrestlerA', null)
@@ -141,13 +139,11 @@ describe('authorized tag team form interactions', function () {
         $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
         $tagTeam->managers()->attach($manager, ['hired_at' => now()->subYear()]);
         $tagTeam->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
-        $modal->call('openModal', $tagTeam->id);
         $modal->set('form.name', 'The Midnight Express');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'The Midnight Express')
             ->assertSet('form.signature_move', 'Veg-O-Matic')
             ->assertSet('form.wrestlerA', $wrestlerA->id)
@@ -162,9 +158,7 @@ describe('authorized tag team form interactions', function () {
         $second = Wrestler::factory()->create();
         $tagTeam = TagTeam::factory()->create();
         $tagTeam->wrestlers()->attach([$second->id, $first->id], ['joined_at' => now()->subYear()]);
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $tagTeam->id);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
         $modal
             ->assertSet('form.wrestlerA', $first->id)
@@ -172,8 +166,7 @@ describe('authorized tag team form interactions', function () {
     });
 
     it('responds not found when opening a missing tag team', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
@@ -184,7 +177,6 @@ describe('authorized tag team form interactions', function () {
         $manager = Manager::factory()->create();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'The Road Warriors',
             'form.signature_move' => 'Doomsday Device',
@@ -204,8 +196,7 @@ describe('authorized tag team form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('shows a form error and keeps the modal open when the action rejects a wrestler claimed by another tag team', function () {
@@ -230,7 +221,6 @@ describe('authorized tag team form interactions', function () {
         });
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'The Latecomers',
             'form.wrestlerA' => $wrestlers->firstOrFail()->id,
@@ -240,7 +230,7 @@ describe('authorized tag team form interactions', function () {
 
         $modal
             ->assertHasErrors(['form.wrestlerA'])
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
     });
 
@@ -250,7 +240,6 @@ describe('authorized tag team form interactions', function () {
         $wrestlerB = $wrestlers->skip(1)->firstOrFail();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'The Rockers',
             'form.wrestlerA' => $wrestlerA->id,
@@ -275,9 +264,8 @@ describe('authorized tag team form interactions', function () {
         $tagTeam = TagTeam::factory()->create(['name' => 'Original Team', 'signature_move' => 'Original Move']);
         $tagTeam->wrestlers()->attach($originalWrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
         $tagTeam->managers()->attach($originalManager, ['hired_at' => now()->subYear()]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
-        $modal->call('openModal', $tagTeam->id);
         $modal->set([
             'form.name' => 'Updated Team',
             'form.signature_move' => 'Updated Move',
@@ -299,7 +287,7 @@ describe('authorized tag team form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('rejects changing an active tag team employment date', function () {
@@ -307,21 +295,19 @@ describe('authorized tag team form interactions', function () {
         $tagTeam = TagTeam::factory()->create();
         $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => '2024-01-15']);
         $tagTeam->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
-        $modal->call('openModal', $tagTeam->id);
         $modal->set('form.employment_date', '2024-01-01');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.employment_date'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
     });
 
     it('requires a name and two wrestlers', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
@@ -330,8 +316,7 @@ describe('authorized tag team form interactions', function () {
                 'form.wrestlerA' => 'required',
                 'form.wrestlerB' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(TagTeam::query()->doesntExist())->toBeTrue();
     });
 
@@ -351,7 +336,6 @@ describe('authorized tag team form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Team',
             'form.wrestlerA' => $wrestlerA->id,
@@ -379,7 +363,6 @@ describe('authorized tag team form interactions', function () {
         TagTeam::factory()->create(['name' => 'Existing Team', 'signature_move' => 'Existing Move']);
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'New Team',
             'form.signature_move' => 'New Move',
@@ -406,7 +389,6 @@ describe('authorized tag team form interactions', function () {
         $availableWrestler = Wrestler::factory()->create();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Invalid Team',
             'form.wrestlerA' => $unavailableWrestler->id,
@@ -422,9 +404,8 @@ describe('authorized tag team form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $tagTeam = TagTeam::factory()->create(['name' => 'The Hart Foundation']);
         $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
-        $modal->call('openModal', $tagTeam->id);
         $modal->set('form.signature_move', 'Hart Attack');
         $modal->call('save');
 
@@ -434,38 +415,17 @@ describe('authorized tag team form interactions', function () {
             ->toBe($wrestlers->modelKeys());
     });
 
-    it('resets edited tag team data when reopening in create mode', function () {
-        $wrestlers = Wrestler::factory()->count(2)->create();
-        $manager = Manager::factory()->create();
-        $tagTeam = TagTeam::factory()->create(['name' => 'Existing Team', 'signature_move' => 'Existing Move']);
-        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()]);
-        $tagTeam->managers()->attach($manager, ['hired_at' => now()]);
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $tagTeam->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.name', '')
-            ->assertSet('form.signature_move', '')
-            ->assertSet('form.wrestlerA', null)
-            ->assertSet('form.wrestlerB', null)
-            ->assertSet('form.managers', [])
-            ->assertSet('form.employment_date', '');
-    });
-
     it('generates valid dummy data that can create a tag team', function () {
         Wrestler::factory()->count(5)->create();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(TagTeam::query()->count())->toBe(1)
             ->and(Wrestler::query()->count())->toBe(5);
     });
@@ -484,17 +444,16 @@ describe('tag team form employment history', function () {
         giveEmploymentHistory($tagTeam, $state);
         $employmentsBefore = employmentSnapshot($tagTeam);
         $statusBefore = $tagTeam->fresh()?->status;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
         // Act
-        $modal->call('openModal', $tagTeam->id);
         $modal->set('form.name', 'Renamed Team');
         $modal->call('save');
 
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         $tagTeam->refresh();
         expect($tagTeam->name)->toBe('Renamed Team')
             ->and(employmentSnapshot($tagTeam))->toBe($employmentsBefore)
@@ -505,10 +464,9 @@ describe('tag team form employment history', function () {
         // Arrange
         $tagTeam = TagTeam::factory()->create(['name' => 'Original Team']);
         $tagTeam->wrestlers()->attach(Wrestler::factory()->count(2)->create()->modelKeys(), ['joined_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
 
         // Act
-        $modal->call('openModal', $tagTeam->id);
         $modal->set('form.name', 'Renamed Team');
         $modal->set('form.employment_date', '2024-02-01');
         $modal->call('save');
