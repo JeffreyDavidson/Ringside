@@ -105,7 +105,7 @@ class Main extends BaseTable
 
         if ($targetStatus === null) {
             throw ValidationException::withMessages([
-                'status' => 'Select a valid user status.',
+                'status' => __('users.invalid_status'),
             ]);
         }
 
@@ -120,7 +120,7 @@ class Main extends BaseTable
         }
 
         $this->forgetMetadata();
-        $this->dispatchActionSuccess("User account status changed to {$targetStatus->label()}.");
+        $this->dispatchActionSuccess(__('users.status_changed', ['status' => $targetStatus->label()]));
     }
 
     /** @return array<Column> */

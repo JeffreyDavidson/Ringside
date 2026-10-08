@@ -14,21 +14,21 @@ final class CannotBeDeletedException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be deleted because it is already deleted.");
+        return new self(__('core.delete_rejections.already_deleted', ['context' => $context]));
     }
 
     public static function stillRetired(TagTeam $tagTeam): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be deleted because it is retired. Unretire the tag team before deletion.");
+        return new self(__('core.delete_rejections.tag_team_retired', ['context' => $context]));
     }
 
     public static function stillEmployed(TagTeam $tagTeam): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be deleted because it is still employed. Release the tag team from employment before deletion.");
+        return new self(__('core.delete_rejections.tag_team_employed', ['context' => $context]));
     }
 
     public static function bookedInUpcomingMatch(TagTeam $tagTeam): static

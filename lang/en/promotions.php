@@ -17,6 +17,7 @@ return [
     'empty_description' => 'Promotions created on the platform will appear here.',
     'decline' => 'Decline',
     'empty_title' => 'No promotions yet',
+    'last_owner' => ':name must keep at least one active owner. Make another member an active owner first.',
     'invitation_accepted' => 'You joined :promotion as :role.',
     'invitation_cancelled' => 'The invitation was cancelled.',
     'invitation_declined' => 'Invitation declined.',

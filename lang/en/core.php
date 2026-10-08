@@ -22,6 +22,9 @@ return [
         'unknown' => 'Selected record',
     ],
     'delete_rejections' => [
+        'already_deleted' => ':context cannot be deleted because it is already deleted.',
+        'tag_team_employed' => ':context cannot be deleted because it is still employed. Release the tag team from employment before deletion.',
+        'tag_team_retired' => ':context cannot be deleted because it is retired. Unretire the tag team before deletion.',
         'booked_in_match' => ':context cannot be deleted because it is booked in a match that is upcoming or has no result. Remove it from the match or record the result first.',
     ],
     'lifecycle_actions' => [
