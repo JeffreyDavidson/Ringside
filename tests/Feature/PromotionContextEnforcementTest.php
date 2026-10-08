@@ -12,6 +12,7 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\withSession;
 
 function attachActivePromotion(User $user, Promotion $promotion): void
 {
@@ -32,8 +33,7 @@ test('promotion middleware establishes the selected active promotion', function 
         'promotion_id' => app(PromotionContextService::class)->required()->id,
     ]));
 
-    $response = $this
-        ->withSession(['active_promotion_id' => $secondPromotion->id])
+    $response = withSession(['active_promotion_id' => $secondPromotion->id])
         ->actingAs($user)
         ->get('/promotion-context-test');
 

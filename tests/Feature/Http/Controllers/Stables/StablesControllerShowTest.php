@@ -20,22 +20,20 @@ use function Pest\Laravel\get;
  * @see StablesController
  */
 describe('Stables Controller', function () {
-    beforeEach(function () {
-        $this->stable = Stable::factory()->create();
-    });
-
     /**
      * @see StablesController::show()
      */
     test('show returns a view', function () {
+        $stable = Stable::factory()->create();
+
         $response = actingAs(administrator())
-            ->get(route('stables.show', $this->stable));
+            ->get(route('stables.show', $stable));
 
         $response->assertOk();
         $response->assertViewIs('stables.show')
-            ->assertSee($this->stable->name)
+            ->assertSee($stable->name)
             ->assertSee('Status')
-            ->assertViewHas('stable', $this->stable)
+            ->assertViewHas('stable', $stable)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)
@@ -46,14 +44,16 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('show leaves the summary relationships to the general info component', function () {
+        $stable = Stable::factory()->create();
+
         $startedAt = today()->subDay();
         ActivityPeriod::factory()
-            ->for($this->stable, 'activeable')
+            ->for($stable, 'activeable')
             ->started($startedAt)
             ->create();
 
         actingAs(administrator())
-            ->get(route('stables.show', $this->stable))
+            ->get(route('stables.show', $stable))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
             ->assertSeeLivewire(GeneralInfo::class)
@@ -64,8 +64,10 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('show renders the lifecycle actions component', function () {
+        $stable = Stable::factory()->create();
+
         actingAs(administrator())
-            ->get(route('stables.show', $this->stable))
+            ->get(route('stables.show', $stable))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
     });
@@ -74,8 +76,10 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('a basic user cannot view stable profiles', function () {
+        $stable = Stable::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('stables.show', $this->stable))
+            ->get(route('stables.show', $stable))
             ->assertForbidden();
     });
 
@@ -83,7 +87,9 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('a guest cannot view a stable profile', function () {
-        get(route('stables.show', $this->stable))
+        $stable = Stable::factory()->create();
+
+        get(route('stables.show', $stable))
             ->assertRedirect(route('login'));
     });
 
@@ -91,6 +97,8 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('returns 404 when stable does not exist', function () {
+        Stable::factory()->create();
+
         actingAs(administrator())
             ->get(route('stables.show', 999999))
             ->assertNotFound();
@@ -100,6 +108,8 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('administrators can view stable profiles in every lifecycle state', function () {
+        Stable::factory()->create();
+
         // Arrange
         $stables = [
             Stable::factory()->active()->create(),

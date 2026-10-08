@@ -17,20 +17,18 @@ use function Pest\Laravel\get;
  * @see RefereesController
  */
 describe('Referees Controller', function () {
-    beforeEach(function () {
-        $this->referee = Referee::factory()->create();
-    });
-
     /**
      * @see RefereesController::show()
      */
     test('show returns a view', function () {
+        $referee = Referee::factory()->create();
+
         actingAs(administrator())
-            ->get(route('referees.show', $this->referee))
+            ->get(route('referees.show', $referee))
             ->assertViewIs('referees.show')
-            ->assertSee($this->referee->full_name)
+            ->assertSee($referee->full_name)
             ->assertSee('Status')
-            ->assertViewHas('referee', $this->referee)
+            ->assertViewHas('referee', $referee)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousMatches::class);
     });
@@ -39,8 +37,10 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('show renders the lifecycle actions component', function () {
+        $referee = Referee::factory()->create();
+
         actingAs(administrator())
-            ->get(route('referees.show', $this->referee))
+            ->get(route('referees.show', $referee))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
     });
@@ -49,17 +49,21 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('show renders the general info component', function () {
+        $referee = Referee::factory()->create();
+
         actingAs(administrator())
-            ->get(route('referees.show', $this->referee))
+            ->get(route('referees.show', $referee))
             ->assertOk()
             ->assertSeeLivewire(GeneralInfo::class)
-            ->assertSee($this->referee->status->label());
+            ->assertSee($referee->status->label());
     });
 
     /**
      * @see RefereesController::show()
      */
     test('show renders the start date displayed by the referee summary', function () {
+        Referee::factory()->create();
+
         $referee = Referee::factory()->employed()->create();
 
         actingAs(administrator())
@@ -72,8 +76,10 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('a basic user cannot view a referee profile', function () {
+        $referee = Referee::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('referees.show', $this->referee))
+            ->get(route('referees.show', $referee))
             ->assertForbidden();
     });
 
@@ -81,7 +87,9 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('a guest cannot view a referee profile', function () {
-        get(route('referees.show', $this->referee))
+        $referee = Referee::factory()->create();
+
+        get(route('referees.show', $referee))
             ->assertRedirect(route('login'));
     });
 
@@ -89,6 +97,8 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('an administrator can view referees in every lifecycle state', function () {
+        Referee::factory()->create();
+
         // Arrange
         $administrator = administrator();
         $referees = [
@@ -115,6 +125,8 @@ describe('Referees Controller', function () {
      * @see RefereesController::show()
      */
     test('returns 404 when referee does not exist', function () {
+        Referee::factory()->create();
+
         actingAs(administrator())
             ->get(route('referees.show', 999999))
             ->assertNotFound();

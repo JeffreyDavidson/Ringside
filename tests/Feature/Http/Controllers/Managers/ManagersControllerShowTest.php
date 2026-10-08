@@ -21,21 +21,19 @@ use function Pest\Laravel\get;
  * @see ManagersController
  */
 describe('Managers Controller', function () {
-    beforeEach(function () {
-        $this->manager = Manager::factory()->create();
-    });
-
     /**
      * @see ManagersController::show()
      */
     test('show returns a view', function () {
+        $manager = Manager::factory()->create();
+
         actingAs(administrator())
-            ->get(route('managers.show', $this->manager))
+            ->get(route('managers.show', $manager))
             ->assertOk()
             ->assertViewIs('managers.show')
-            ->assertSee($this->manager->full_name)
+            ->assertSee($manager->full_name)
             ->assertSee('Status')
-            ->assertViewHas('manager', $this->manager)
+            ->assertViewHas('manager', $manager)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)
@@ -46,8 +44,10 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('show renders the lifecycle actions component', function () {
+        $manager = Manager::factory()->create();
+
         actingAs(administrator())
-            ->get(route('managers.show', $this->manager))
+            ->get(route('managers.show', $manager))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
     });
@@ -56,17 +56,21 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('show renders the general info component', function () {
+        $manager = Manager::factory()->create();
+
         actingAs(administrator())
-            ->get(route('managers.show', $this->manager))
+            ->get(route('managers.show', $manager))
             ->assertOk()
             ->assertSeeLivewire(GeneralInfo::class)
-            ->assertSee($this->manager->status->label());
+            ->assertSee($manager->status->label());
     });
 
     /**
      * @see ManagersController::show()
      */
     test('show renders the related data displayed by the manager summary', function () {
+        Manager::factory()->create();
+
         $manager = Manager::factory()->employed()->create();
         $wrestler = Wrestler::factory()->create(['name' => "Sean O'Neil"]);
         $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team Alpha']);
@@ -85,8 +89,10 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('a basic user cannot view manager profiles', function () {
+        $manager = Manager::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('managers.show', $this->manager))
+            ->get(route('managers.show', $manager))
             ->assertForbidden();
     });
 
@@ -94,7 +100,9 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('a guest cannot view a manager profile', function () {
-        get(route('managers.show', $this->manager))
+        $manager = Manager::factory()->create();
+
+        get(route('managers.show', $manager))
             ->assertRedirect(route('login'));
     });
 
@@ -102,6 +110,8 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('an administrator can view managers in every lifecycle state', function () {
+        Manager::factory()->create();
+
         // Arrange
         $administrator = administrator();
         $managers = [
@@ -128,6 +138,8 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('returns 404 when manager does not exist', function () {
+        Manager::factory()->create();
+
         actingAs(administrator())
             ->get(route('managers.show', 999999))
             ->assertNotFound();
