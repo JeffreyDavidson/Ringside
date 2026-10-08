@@ -57,7 +57,7 @@ must have relationship eager-loading and `BelongsTo` regression tests.
 ### Builder scopes and relationship queries
 
 **Priority:** Medium  
-**Status:** Ongoing; the promotion-scoped name-conflict query (`FiltersByNameInPromotion`) and the stable-join constraints (`joinableToStable()`, `mergeCandidatesFor()`) are shared builder scopes (see `builders.md`).
+**Status:** Ongoing; the promotion-scoped name-conflict query (`FiltersByNameInPromotion`) and the stable-join constraints (`joinableToStable()`, `mergeCandidatesFor()`) are shared builder scopes (#1890), and the inline Livewire queries moved into named builder scopes (#1896; see `builders.md`).
 
 Prefer typed Eloquent Builders and Laravel relationship constraints for reused
 database predicates. Keep collection-level comparisons in lifecycle validation
@@ -224,7 +224,7 @@ a new uncovered line as either a missing behavior test or dead code.
 ### Dead application code cleanup (phase 1)
 
 **Priority:** Medium  
-**Status:** Completed.
+**Status:** Completed (#1886, #1889, #1910).
 
 Removed code that only tests called: the `TitleChampionshipQuery` reporting
 methods beyond `currentChampion()` and `reignLengthInDays()`, `Promotion::hasActiveMember()`
@@ -237,14 +237,14 @@ Promotion `forceDelete` and User `changeUserRoles`/`viewAuditLogs` policy abilit
 Livewire events nothing listens to. The `'promotion_context'` closure scopes became the
 `PromotionContextScope` and `EventMatchPromotionContextScope` classes.
 
-Open follow-up: `BaseFormModal::openModal()` and `isModalOpen` are only called by tests
-(the modal package mounts components with `mount()`), but about 250 modal test call sites
-depend on them; remove them together with a rewrite of those tests.
+`BaseFormModal::openModal()`, `isModalOpen` and the state-only `closeModal()` override were also removed (#1910):
+the modal package only calls `mount()`, so tests mount the modal with `livewire(FormModal::class, ['modelId' => $id])`
+and assert `assertDispatched('closeModal')` after a save.
 
 ### Form modal business errors (phase 3)
 
 **Priority:** Medium  
-**Status:** Completed.
+**Status:** Completed (#1897, #1910).
 
 `BaseFormModal` now owns the catch-and-report handling for domain failures
 (`reportBusinessErrors()` plus a `$businessErrorField` property or `businessErrorField()` override); the eight
@@ -256,7 +256,7 @@ runs its transitions through one `perform()` like Stables.
 ### Shared table bases (phase 3)
 
 **Priority:** Medium  
-**Status:** Completed.
+**Status:** Completed (#1894, #1898). The shared row-actions and status-badge table components landed in #1894.
 
 History tables share `ShowTableTrait::authorizeContextRecord()` (resolve the locked parent id, authorize `view`) and
 `UsesRosterRouteResolver`. `BasePreviousMembersTable` (stable wrestlers, stable tag teams, tag team wrestlers) and
@@ -270,7 +270,7 @@ columns (stable managers, manager stables, venue events, title history, matches)
 ### Dead application code cleanup (phase 2)
 
 **Priority:** Medium  
-**Status:** Step 5 completed.
+**Status:** Completed (#1891, #1892, #1906).
 
 Step 5 extracted the period-closing sequence the wrestler, manager, referee, and tag team
 `Release` and `Retire` Actions each repeated into `CareerPeriodCloser`
@@ -281,9 +281,7 @@ title `Retire` Actions close only an activity period and were left alone. The te
 `retireMembers` flag on the tag team `RetireAction`, the `unretireMembers`, `employImmediately`
 and `requireAvailablePartners` flags on the tag team `UnretireAction`, and the
 `establishImmediately` and `requireFormerMembers` flags on the stable `UnretireAction` were
-removed. Follow-up: the `requireAvailablePartners` and `requireFormerMembers` parameters on
-`TagTeamRetirementEligibility` and `StableRetirementEligibility` are now only exercised by
-eligibility tests; remove them after the in-flight eligibility query changes land.
+removed. The test-only `requireAvailablePartners` and `requireFormerMembers` eligibility options followed in #1906.
 
 Activity period history: `StartActivityPeriodAction` and `EndActivityPeriodAction` now accept an
 optional `LifecycleTransitionType` (and a context array for notes or the planned end date) and
@@ -293,6 +291,21 @@ title `Debut`, `Pull`, and `Reinstate` no longer call `RecordLifecycleTransition
 `MergeStablesAction` and `SplitStableAction` keep their manual calls: each records a pair of related
 `Merged` or `Split` transitions on two stables, and only the secondary stable's activity period is
 touched by a merge, so moving that one record onto the period end would reorder the pair.
+
+### Roster search, translations and test consolidation
+
+**Priority:** Medium  
+**Status:** Completed (#1895, #1900, #1901, #1907, #1902 to #1905, #1908, #1909, #1911).
+
+- The tag team and stable forms search the roster through `RosterMemberSearch` instead of embedding it (#1895), and
+  the search is scoped to the form's promotion, not just the current promotion context (#1907). The unused
+  `PresentsWrestlersList`, `PresentsManagersList` and `PresentsTagTeamsList` traits were deleted.
+- Roster error messages are aligned, and a test asserts every reachable error has translated text (#1900). Remaining
+  hard-coded user-facing text, and the match, scheduling, date-range and venue-restore error messages, moved into
+  `lang/en` (#1901, #1909).
+- The repeated Action tests (employ, release, retire, unretire, suspend, reinstate, injure, clear from injury) are
+  shared across wrestlers, managers and referees, and policy, index page, Livewire table and component tests are
+  driven from datasets (#1902 to #1905, #1908, #1911).
 
 ### Promotion gate extraction
 
@@ -359,6 +372,15 @@ GitHub API, while `develop` reported "Branch not protected". Protection lives in
 GitHub settings and cannot be verified from the repository; see
 `docs/workflows/git-workflow.md`. Confirm the intended `develop` rules there. Since October 2026 `main` requires every
 Application Quality job (including `MySQL tests`) and the `Ward security scan` job.
+
+## Open follow-ups
+
+- **Restoring soft-deleted records has no UI.** Show routes do not use `withTrashed()` and the restore buttons were
+  removed (#1888), so the roster, title, stable and other `RestoreAction` classes and the `CannotBeRestoredException`
+  roster mappings are unused by the application. Product decision pending: add a restore UI, or delete them.
+- **`$this->` sweep in tests.** Pest tests still use `$this->` in some files; replacing it with global helpers per the
+  testing rules is in progress.
+- **Booked members can still be retired or released**, and the other items under the audit rounds below.
 
 ## Deferred from audit round 2
 
