@@ -9,13 +9,15 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 test('administrator can book a singles match through the event page', function (): void {
     $event = Event::factory()->scheduled()->withVenue()->create();
     Referee::factory()->bookable()->create(['first_name' => 'Rowdy', 'last_name' => 'Official']);
     Wrestler::factory()->bookable()->create(['name' => 'First Browser Competitor']);
     Wrestler::factory()->bookable()->create(['name' => 'Second Browser Competitor']);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.show', $event));
 
@@ -63,7 +65,7 @@ test('administrator can edit an unresulted match from the event page', function 
         ]);
     $match->referees()->attach($referee);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.show', $event));
 
@@ -101,7 +103,7 @@ test('administrator can remove a match from the event page', function (): void {
         ->withCompetitors([$firstWrestler, $secondWrestler])
         ->create(['match_type' => MatchType::Singles]);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.show', $event));
 
@@ -121,7 +123,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
     $event = Event::factory()->scheduled()->withVenue()->create();
     Wrestler::factory()->bookable()->create(['name' => 'Responsive Multi Competitor']);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.show', $event));
 
@@ -153,7 +155,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
 
 test('administrator can create and edit an event with a showtime', function (): void {
     $venue = Venue::factory()->create();
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $eventDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
 
     $page = visit(route('events.index'));
@@ -195,7 +197,7 @@ test('administrator can recover from a venue scheduling conflict in the event fo
     $conflictingDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
     Event::factory()->for($venue)->create(['date' => $conflictingDate]);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.index'));
 
@@ -235,7 +237,7 @@ test('administrator can recover from a venue scheduling conflict while editing a
     ]);
     Event::factory()->for($conflictingVenue)->create(['date' => $conflictingDate]);
 
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.index'));
 

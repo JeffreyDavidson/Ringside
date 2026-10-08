@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\TagTeams\SuspendAction;
 use App\Models\Roster\TagTeams\TagTeam;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it suspends an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
@@ -18,7 +20,7 @@ test('it suspends an employed tag team', function () {
         ->and($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Verify suspension record was created
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
@@ -36,7 +38,7 @@ test('it suspends tag team with specific suspension date', function () {
     expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Verify suspension started with specific date
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
@@ -59,7 +61,7 @@ test('it persists the suspension lifecycle', function () {
         ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
@@ -132,7 +134,7 @@ test('it uses the provided date', function () {
     $tagTeam->refresh();
 
     // Verify the provided date was persisted
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => $customSuspensionDate->toDateTimeString(),
@@ -245,7 +247,7 @@ test('it handles suspension with cascade effects', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Suspension should be active
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),

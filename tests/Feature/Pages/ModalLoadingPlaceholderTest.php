@@ -6,6 +6,8 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 test('resource pages include an accessible placeholder for modal form loading', function (): void {
     $administrator = administrator();
     $promotion = Promotion::factory()->create();
@@ -14,7 +16,7 @@ test('resource pages include an accessible placeholder for modal form loading', 
         'status' => MembershipStatus::Active->value,
     ]);
 
-    $this->actingAs($administrator)
+    actingAs($administrator)
         ->get(route('wrestlers.index'))
         ->assertOk()
         ->assertSeeHtml('data-test="modal-loading-placeholder"')

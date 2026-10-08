@@ -13,6 +13,7 @@ use App\Models\Roster\Referees\Referee;
 use Tests\Integration\Livewire\Base\StubFormModal;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -35,7 +36,7 @@ it('completes the shared form submission workflow', function (): void {
         ->assertDispatched('refreshDatatable')
         ->assertDispatched('closeModal');
 
-    $this->assertDatabaseHas('events', [
+    assertDatabaseHas('events', [
         'name' => 'Shared Modal Event',
     ]);
 });

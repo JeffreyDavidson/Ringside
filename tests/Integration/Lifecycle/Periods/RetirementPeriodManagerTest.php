@@ -13,6 +13,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it starts a retirement period on the effective date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $effectiveDate = now()->subDay();
@@ -23,7 +25,7 @@ test('it starts a retirement period on the effective date', function () {
         LifecycleTransitionType::Retired,
     );
 
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
         'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
@@ -47,7 +49,7 @@ test('it ends and preserves the active retirement period', function () {
         LifecycleTransitionType::Unretired,
     );
 
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'id' => $retirementId,
         'retirable_id' => $wrestler->id,
         'retirable_type' => $wrestler->getMorphClass(),

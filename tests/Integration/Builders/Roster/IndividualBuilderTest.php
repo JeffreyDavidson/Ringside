@@ -7,6 +7,8 @@ use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\expectsDatabaseQueryCount;
+
 /**
  * Integration tests for IndividualBuilder abstract base class.
  *
@@ -24,23 +26,16 @@ use App\Models\Roster\Wrestlers\Wrestler;
  * @see IndividualBuilder
  */
 describe('IndividualBuilder Integration Tests', function () {
-    beforeEach(function () {
-        // Create wrestlers in all possible states for comprehensive scope testing
-        // Using Wrestler model since WrestlerBuilder extends IndividualBuilder
-        $this->futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-        $this->suspendedWrestler = Wrestler::factory()->suspended()->create();
-        $this->retiredWrestler = Wrestler::factory()->retired()->create();
-        $this->releasedWrestler = Wrestler::factory()->released()->create();
-        $this->unemployedWrestler = Wrestler::factory()->unemployed()->create();
-        $this->injuredWrestler = Wrestler::factory()->injured()->create();
-
-        // Create a single employed wrestler that will be considered "available"
-        // (employed, not injured, not suspended, not retired)
-        $this->availableWrestler = Wrestler::factory()->employed()->create();
-    });
-
     describe('abstract class architecture', function () {
         test('wrestler builder extends individual builder', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Arrange
             $builder = Wrestler::query();
 
@@ -53,6 +48,14 @@ describe('IndividualBuilder Integration Tests', function () {
 
     describe('employment status scopes', function () {
         test('employed wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            $suspendedWrestler = Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            $injuredWrestler = Wrestler::factory()->injured()->create();
+            $availableWrestler = Wrestler::factory()->employed()->create();
+
             // Act
             $employedWrestlers = Wrestler::employed()->get();
 
@@ -60,57 +63,97 @@ describe('IndividualBuilder Integration Tests', function () {
             // because factories create employment records for wrestlers in different states
             expect($employedWrestlers)
                 ->toHaveCount(3)
-                ->and($employedWrestlers->contains($this->availableWrestler))->toBeTrue()
-                ->and($employedWrestlers->contains($this->suspendedWrestler))->toBeTrue()
-                ->and($employedWrestlers->contains($this->injuredWrestler))->toBeTrue();
+                ->and($employedWrestlers->contains($availableWrestler))->toBeTrue()
+                ->and($employedWrestlers->contains($suspendedWrestler))->toBeTrue()
+                ->and($employedWrestlers->contains($injuredWrestler))->toBeTrue();
         });
 
         test('unemployed wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $unemployedWrestlers = Wrestler::unemployed()->get();
 
             // Assert
             expect($unemployedWrestlers)
                 ->toHaveCount(1)
-                ->and($unemployedWrestlers->contains($this->unemployedWrestler))->toBeTrue();
+                ->and($unemployedWrestlers->contains($unemployedWrestler))->toBeTrue();
         });
 
         test('released wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            $releasedWrestler = Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $releasedWrestlers = Wrestler::released()->get();
 
             // Assert
             expect($releasedWrestlers)
                 ->toHaveCount(1)
-                ->and($releasedWrestlers->contains($this->releasedWrestler))->toBeTrue();
+                ->and($releasedWrestlers->contains($releasedWrestler))->toBeTrue();
         });
 
         test('future employed wrestlers can be retrieved', function () {
+            $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $futureEmployedWrestlers = Wrestler::futureEmployed()->get();
 
             // Assert
             expect($futureEmployedWrestlers)
                 ->toHaveCount(1)
-                ->and($futureEmployedWrestlers->contains($this->futureEmployedWrestler))->toBeTrue();
+                ->and($futureEmployedWrestlers->contains($futureEmployedWrestler))->toBeTrue();
         });
     });
 
     describe('individual roster member status scopes', function () {
         test('retired wrestlers can be retrieved', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            $retiredWrestler = Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $retiredWrestlers = Wrestler::retired()->get();
 
             // Assert
             expect($retiredWrestlers)
                 ->toHaveCount(1)
-                ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
+                ->and($retiredWrestlers->contains($retiredWrestler))->toBeTrue();
         });
     });
 
     test('projected employment status does not query per wrestler', function () {
+        $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
+        $suspendedWrestler = Wrestler::factory()->suspended()->create();
+        $retiredWrestler = Wrestler::factory()->retired()->create();
+        $releasedWrestler = Wrestler::factory()->released()->create();
+        $unemployedWrestler = Wrestler::factory()->unemployed()->create();
+        $injuredWrestler = Wrestler::factory()->injured()->create();
+        $availableWrestler = Wrestler::factory()->employed()->create();
+
         // Arrange
-        $this->expectsDatabaseQueryCount(1);
+        expectsDatabaseQueryCount(1);
 
         // Act
         $query = Wrestler::query();
@@ -121,18 +164,26 @@ describe('IndividualBuilder Integration Tests', function () {
 
         // Assert
         expect($statuses->all())->toBe([
-            $this->futureEmployedWrestler->id => EmploymentStatus::FutureEmployment,
-            $this->suspendedWrestler->id => EmploymentStatus::Employed,
-            $this->retiredWrestler->id => EmploymentStatus::Retired,
-            $this->releasedWrestler->id => EmploymentStatus::Released,
-            $this->unemployedWrestler->id => EmploymentStatus::Unemployed,
-            $this->injuredWrestler->id => EmploymentStatus::Employed,
-            $this->availableWrestler->id => EmploymentStatus::Employed,
+            $futureEmployedWrestler->id => EmploymentStatus::FutureEmployment,
+            $suspendedWrestler->id => EmploymentStatus::Employed,
+            $retiredWrestler->id => EmploymentStatus::Retired,
+            $releasedWrestler->id => EmploymentStatus::Released,
+            $unemployedWrestler->id => EmploymentStatus::Unemployed,
+            $injuredWrestler->id => EmploymentStatus::Employed,
+            $availableWrestler->id => EmploymentStatus::Employed,
         ]);
     });
 
     describe('query builder inheritance verification', function () {
         test('query scope methods return correct builder instance', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $builder = Wrestler::employed();
 
@@ -142,6 +193,14 @@ describe('IndividualBuilder Integration Tests', function () {
         });
 
         test('chained scopes maintain builder type', function () {
+            Wrestler::factory()->withFutureEmployment()->create();
+            Wrestler::factory()->suspended()->create();
+            Wrestler::factory()->retired()->create();
+            Wrestler::factory()->released()->create();
+            Wrestler::factory()->unemployed()->create();
+            Wrestler::factory()->injured()->create();
+            Wrestler::factory()->employed()->create();
+
             // Act
             $builder = Wrestler::employed()
                 ->whereNotNull('name');

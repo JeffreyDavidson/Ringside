@@ -13,6 +13,48 @@ use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;
 
 /**
+ * @return array{
+ *     venue: Venue,
+ * }
+ */
+function eventsLifecycleVenueFixtures(): array
+{
+    $venue = Venue::factory()->create();
+
+    return [
+        'venue' => $venue,
+    ];
+}
+
+/**
+ * @return array{
+ *     event: Event,
+ * }
+ */
+function eventsLifecycleEventFixtures(): array
+{
+    $event = Event::factory()->unscheduled()->create(['name' => 'Original Event']);
+
+    return [
+        'event' => $event,
+    ];
+}
+
+/**
+ * @return array{
+ *     event: Event,
+ * }
+ */
+function eventsLifecycleEventFixtures2(): array
+{
+    $event = Event::factory()->scheduled()->create(['name' => 'Deletable Event']);
+
+    return [
+        'event' => $event,
+    ];
+}
+
+/**
  * Integration tests for Event scheduling and lifecycle management actions.
  *
  * This test suite validates the complete workflow of event lifecycle management
@@ -21,12 +63,10 @@ use Illuminate\Support\Carbon;
  * handle event scheduling, venue associations, and match dependencies.
  */
 describe('Event Activation Action Integration', function () {
-    beforeEach(function () {
-        $this->venue = Venue::factory()->create();
-    });
-
     describe('create action workflow', function () {
         test('create action creates unscheduled event by default', function () {
+            eventsLifecycleVenueFixtures();
+
             $eventData = new EventData(
                 name: 'Test Event',
                 date: null,
@@ -45,12 +85,14 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('create action creates scheduled event with date and venue', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $scheduledDate = Carbon::now()->addMonths(3);
 
             $eventData = new EventData(
                 name: 'Scheduled Event',
                 date: $scheduledDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'A scheduled event'
             );
 
@@ -61,17 +103,19 @@ describe('Event Activation Action Integration', function () {
                 ->and($event->status)->not->toBe(EventStatus::Unscheduled)
                 ->toBe(EventStatus::Scheduled)
                 ->and(requiredDate($event->date)->format('Y-m-d H:i:s'))->toBe($scheduledDate->format('Y-m-d H:i:s'))
-                ->and($event->venue_id)->toBe($this->venue->id)
-                ->and($event->venue()->firstOrFail()->name)->toBe($this->venue->name);
+                ->and($event->venue_id)->toBe($venue->id)
+                ->and($event->venue()->firstOrFail()->name)->toBe($venue->name);
         });
 
         test('create action handles past date events correctly', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $pastDate = Carbon::now()->subMonths(1);
 
             $eventData = new EventData(
                 name: 'Past Event',
                 date: $pastDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'An event that happened'
             );
 
@@ -83,6 +127,8 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('create action creates event without venue', function () {
+            eventsLifecycleVenueFixtures();
+
             $eventData = new EventData(
                 name: 'No Venue Event',
                 date: Carbon::now()->addWeeks(2),
@@ -100,98 +146,109 @@ describe('Event Activation Action Integration', function () {
     });
 
     describe('update action workflow', function () {
-        beforeEach(function () {
-            $this->event = Event::factory()->unscheduled()->create(['name' => 'Original Event']);
-        });
-
         test('update action can schedule an unscheduled event', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures();
+
             $scheduledDate = Carbon::now()->addMonths(2);
 
             $eventData = new EventData(
                 name: 'Scheduled Event',
                 date: $scheduledDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Now scheduled'
             );
 
-            resolve(UpdateAction::class)->handle($this->event, $eventData);
+            resolve(UpdateAction::class)->handle($event, $eventData);
 
-            $refreshedEvent = freshModel($this->event);
+            $refreshedEvent = freshModel($event);
             expect($refreshedEvent->name)->toBe('Scheduled Event')
                 ->and($refreshedEvent->status)->not->toBe(EventStatus::Unscheduled)
                 ->toBe(EventStatus::Scheduled)
-                ->and($refreshedEvent->venue_id)->toBe($this->venue->id)
+                ->and($refreshedEvent->venue_id)->toBe($venue->id)
                 ->and($refreshedEvent->preview)->toBe('Now scheduled');
         });
 
         test('update action can change event date', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures();
+
             $originalDate = Carbon::now()->addMonth();
             $newDate = Carbon::now()->addMonths(3);
 
-            $this->event->update(['date' => $originalDate]);
+            $event->update(['date' => $originalDate]);
 
             $eventData = new EventData(
-                name: $this->event->name,
+                name: $event->name,
                 date: $newDate,
-                venue: $this->venue,
-                preview: $this->event->preview
+                venue: $venue,
+                preview: $event->preview
             );
 
-            resolve(UpdateAction::class)->handle($this->event, $eventData);
+            resolve(UpdateAction::class)->handle($event, $eventData);
 
-            $refreshedEvent = freshModel($this->event);
+            $refreshedEvent = freshModel($event);
             expect(requiredDate($refreshedEvent->date)->format('Y-m-d H:i:s'))->toBe($newDate->format('Y-m-d H:i:s'))
                 ->and($refreshedEvent->status)->toBe(EventStatus::Scheduled);
         });
 
         test('update action can change venue', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures();
+
             $newVenue = Venue::factory()->create();
-            $this->event->update(['venue_id' => $this->venue->id]);
+            $event->update(['venue_id' => $venue->id]);
 
             $eventData = new EventData(
-                name: $this->event->name,
-                date: $this->event->date,
+                name: $event->name,
+                date: $event->date,
                 venue: $newVenue,
-                preview: $this->event->preview
+                preview: $event->preview
             );
 
-            resolve(UpdateAction::class)->handle($this->event, $eventData);
+            resolve(UpdateAction::class)->handle($event, $eventData);
 
-            $refreshedEvent = freshModel($this->event);
+            $refreshedEvent = freshModel($event);
             expect($refreshedEvent->venue_id)->toBe($newVenue->id)
                 ->and($refreshedEvent->venue()->firstOrFail()->name)->toBe($newVenue->name);
         });
 
         test('update action can remove venue from event', function () {
-            $this->event->update(['venue_id' => $this->venue->id]);
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures();
+
+            $event->update(['venue_id' => $venue->id]);
 
             $eventData = new EventData(
-                name: $this->event->name,
-                date: $this->event->date,
+                name: $event->name,
+                date: $event->date,
                 venue: null,
-                preview: $this->event->preview
+                preview: $event->preview
             );
 
-            resolve(UpdateAction::class)->handle($this->event, $eventData);
+            resolve(UpdateAction::class)->handle($event, $eventData);
 
-            $refreshedEvent = freshModel($this->event);
+            $refreshedEvent = freshModel($event);
             expect($refreshedEvent->venue_id)->toBeNull()
                 ->and($refreshedEvent->venue)->toBeNull();
         });
 
         test('update action can unschedule an event', function () {
-            $this->event->update(['date' => Carbon::now()->addWeeks(3)]);
+            eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures();
+
+            $event->update(['date' => Carbon::now()->addWeeks(3)]);
 
             $eventData = new EventData(
-                name: $this->event->name,
+                name: $event->name,
                 date: null,
                 venue: null,
                 preview: 'Unscheduled again'
             );
 
-            resolve(UpdateAction::class)->handle($this->event, $eventData);
+            resolve(UpdateAction::class)->handle($event, $eventData);
 
-            $refreshedEvent = freshModel($this->event);
+            $refreshedEvent = freshModel($event);
             expect($refreshedEvent->status)->toBe(EventStatus::Unscheduled)
                 ->and($refreshedEvent->date)->toBeNull()
                 ->and($refreshedEvent->preview)->toBe('Unscheduled again');
@@ -199,39 +256,44 @@ describe('Event Activation Action Integration', function () {
     });
 
     describe('delete and restore workflow', function () {
-        beforeEach(function () {
-            $this->event = Event::factory()->scheduled()->create(['name' => 'Deletable Event']);
-        });
-
         test('delete action soft deletes event', function () {
-            resolve(DeleteAction::class)->handle($this->event);
+            eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures2();
 
-            expect(Event::find($this->event->id))->toBeNull()
-                ->and(Event::onlyTrashed()->find($this->event->id))->not()
+            resolve(DeleteAction::class)->handle($event);
+
+            expect(Event::find($event->id))->toBeNull()
+                ->and(Event::onlyTrashed()->find($event->id))->not()
                 ->toBeNull()
-                ->and(freshModel($this->event)->deleted_at)->not()
+                ->and(freshModel($event)->deleted_at)->not()
                 ->toBeNull();
         });
 
         test('restore action recovers deleted event', function () {
-            resolve(DeleteAction::class)->handle($this->event);
-            expect(Event::find($this->event->id))->toBeNull();
+            eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures2();
 
-            resolve(RestoreAction::class)->handle($this->event);
+            resolve(DeleteAction::class)->handle($event);
+            expect(Event::find($event->id))->toBeNull();
 
-            $restoredEvent = Event::findOrFail($this->event->id);
+            resolve(RestoreAction::class)->handle($event);
+
+            $restoredEvent = Event::findOrFail($event->id);
             expect($restoredEvent->name)->toBe('Deletable Event')
                 ->and($restoredEvent->deleted_at)->toBeNull();
         });
 
         test('restore action maintains event scheduling information', function () {
-            $originalDate = $this->event->date;
-            $originalVenueId = $this->event->venue_id;
+            eventsLifecycleVenueFixtures();
+            ['event' => $event] = eventsLifecycleEventFixtures2();
 
-            resolve(DeleteAction::class)->handle($this->event);
-            resolve(RestoreAction::class)->handle($this->event);
+            $originalDate = $event->date;
+            $originalVenueId = $event->venue_id;
 
-            $restoredEvent = Event::findOrFail($this->event->id);
+            resolve(DeleteAction::class)->handle($event);
+            resolve(RestoreAction::class)->handle($event);
+
+            $restoredEvent = Event::findOrFail($event->id);
             expect(requiredDate($restoredEvent->date)->format('Y-m-d H:i:s'))->toBe(requiredDate($originalDate)->format('Y-m-d H:i:s'))
                 ->and($restoredEvent->venue_id)->toBe($originalVenueId)
                 ->and($restoredEvent->status)->not->toBe(EventStatus::Unscheduled);
@@ -240,6 +302,8 @@ describe('Event Activation Action Integration', function () {
 
     describe('complex event lifecycle scenarios', function () {
         test('event can go through complete lifecycle', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             // Create unscheduled event
             $eventData = new EventData(
                 name: 'Lifecycle Event',
@@ -255,7 +319,7 @@ describe('Event Activation Action Integration', function () {
             $updateData = new EventData(
                 name: 'Scheduled Lifecycle Event',
                 date: $scheduledDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Scheduled event'
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
@@ -268,7 +332,7 @@ describe('Event Activation Action Integration', function () {
             $finalUpdateData = new EventData(
                 name: 'Final Event Name',
                 date: $scheduledDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Updated preview'
             );
             resolve(UpdateAction::class)->handle($event, $finalUpdateData);
@@ -276,7 +340,7 @@ describe('Event Activation Action Integration', function () {
             $finalEvent = $event->refresh();
             expect($finalEvent->name)->toBe('Final Event Name')
                 ->and($finalEvent->preview)->toBe('Updated preview')
-                ->and($finalEvent->venue_id)->toBe($this->venue->id);
+                ->and($finalEvent->venue_id)->toBe($venue->id);
 
             // Delete and restore
             resolve(DeleteAction::class)->handle($event);
@@ -289,28 +353,30 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('multiple events can be scheduled at same venue', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $date1 = Carbon::now()->addMonths(1);
             $date2 = Carbon::now()->addMonths(2);
 
             $event1Data = new EventData(
                 name: 'Event One',
                 date: $date1,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'First event'
             );
 
             $event2Data = new EventData(
                 name: 'Event Two',
                 date: $date2,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Second event'
             );
 
             $event1 = resolve(CreateAction::class)->handle($event1Data);
             $event2 = resolve(CreateAction::class)->handle($event2Data);
 
-            expect($event1->venue_id)->toBe($this->venue->id)
-                ->and($event2->venue_id)->toBe($this->venue->id)
+            expect($event1->venue_id)->toBe($venue->id)
+                ->and($event2->venue_id)->toBe($venue->id)
                 ->and($event1->status)->not->toBe(EventStatus::Unscheduled)
                 ->and($event2->status)->not->toBe(EventStatus::Unscheduled)
                 ->and($event1->status)->toBe(EventStatus::Scheduled)
@@ -318,6 +384,8 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('event scheduling with venue changes', function () {
+            eventsLifecycleVenueFixtures();
+
             $venue1 = Venue::factory()->create(['name' => 'Venue One']);
             $venue2 = Venue::factory()->create(['name' => 'Venue Two']);
 
@@ -361,6 +429,8 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('event timing transitions work correctly', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $futureDate = Carbon::now()->addWeeks(2);
             $pastDate = Carbon::now()->subWeeks(1);
 
@@ -368,7 +438,7 @@ describe('Event Activation Action Integration', function () {
             $eventData = new EventData(
                 name: 'Timing Event',
                 date: $futureDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Future event'
             );
             $event = resolve(CreateAction::class)->handle($eventData);
@@ -378,7 +448,7 @@ describe('Event Activation Action Integration', function () {
             $updateData = new EventData(
                 name: $event->name,
                 date: $pastDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Past event'
             );
             resolve(UpdateAction::class)->handle($event, $updateData);
@@ -390,12 +460,14 @@ describe('Event Activation Action Integration', function () {
 
     describe('venue relationship integration', function () {
         test('event maintains venue relationship through updates', function () {
-            $event = Event::factory()->scheduled()->atVenue($this->venue)->create();
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
+            $event = Event::factory()->scheduled()->atVenue($venue)->create();
 
             $updateData = new EventData(
                 name: 'Updated Event Name',
                 date: $event->date,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Updated preview'
             );
 
@@ -405,11 +477,13 @@ describe('Event Activation Action Integration', function () {
             $refreshedEvent->load('venue');
 
             expect($refreshedEvent->venue)->not()->toBeNull()
-                ->and($refreshedEvent->venue()->firstOrFail()->id)->toBe($this->venue->id)
-                ->and($refreshedEvent->venue()->firstOrFail()->name)->toBe($this->venue->name);
+                ->and($refreshedEvent->venue()->firstOrFail()->id)->toBe($venue->id)
+                ->and($refreshedEvent->venue()->firstOrFail()->name)->toBe($venue->name);
         });
 
         test('multiple venue changes maintain referential integrity', function () {
+            eventsLifecycleVenueFixtures();
+
             $venue1 = Venue::factory()->create();
             $venue2 = Venue::factory()->create();
             $venue3 = Venue::factory()->create();
@@ -445,6 +519,8 @@ describe('Event Activation Action Integration', function () {
 
     describe('business rule validation', function () {
         test('events can be created without any date or venue', function () {
+            eventsLifecycleVenueFixtures();
+
             $eventData = new EventData(
                 name: 'Minimal Event',
                 date: null,
@@ -462,6 +538,8 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('events can have date without venue', function () {
+            eventsLifecycleVenueFixtures();
+
             $eventData = new EventData(
                 name: 'Date Only Event',
                 date: Carbon::now()->addMonths(1),
@@ -477,10 +555,12 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('events maintain consistency through delete and restore', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $eventData = new EventData(
                 name: 'Consistency Event',
                 date: Carbon::now()->addWeeks(4),
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Consistency test'
             );
 
@@ -505,6 +585,8 @@ describe('Event Activation Action Integration', function () {
 
     describe('status determination logic', function () {
         test('scheduling status is determined correctly by date presence', function () {
+            eventsLifecycleVenueFixtures();
+
             // Unscheduled event
             $unscheduledEvent = Event::factory()->unscheduled()->create();
             expect($unscheduledEvent->status)->toBe(EventStatus::Unscheduled);
@@ -519,13 +601,15 @@ describe('Event Activation Action Integration', function () {
         });
 
         test('date timing logic works across timezone boundaries', function () {
+            ['venue' => $venue] = eventsLifecycleVenueFixtures();
+
             $futureDate = Carbon::now()->addHours(1);
             $pastDate = Carbon::now()->subHours(1);
 
             $eventData = new EventData(
                 name: 'Timezone Event',
                 date: $futureDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Future event'
             );
             $event = resolve(CreateAction::class)->handle($eventData);
@@ -535,7 +619,7 @@ describe('Event Activation Action Integration', function () {
             $updateData = new EventData(
                 name: $event->name,
                 date: $pastDate,
-                venue: $this->venue,
+                venue: $venue,
                 preview: 'Past event'
             );
             resolve(UpdateAction::class)->handle($event, $updateData);

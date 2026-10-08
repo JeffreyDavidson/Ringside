@@ -18,8 +18,10 @@ use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+
 test('administrator can create a basic user with unverified status', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('users.index'));
 
@@ -66,7 +68,7 @@ test('administrator can edit a user role without changing account status', funct
         'email' => 'browser.user@example.com',
         'status' => UserStatus::Unverified,
     ]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('users.index'));
 
@@ -101,7 +103,7 @@ test('administrator can activate a user from the actions menu', function (): voi
         'last_name' => 'Account',
         'email' => 'pending.account@example.com',
     ]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('users.index'));
 
@@ -123,7 +125,7 @@ test('administrator can create a wrestler from the roster page', function (): vo
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('wrestlers.index'));
 
@@ -189,7 +191,7 @@ test('wrestler roster status filters reset pagination and recover from empty sea
     ]);
     Wrestler::factory()->employed()->count(11)->create(['promotion_id' => $promotion->id]);
     Wrestler::factory()->retired()->create(['name' => 'Retired Legend', 'promotion_id' => $promotion->id]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     // Act / Assert
     $page = visit(route('wrestlers.index'));
@@ -223,7 +225,7 @@ test('mobile wrestler roster keeps long names actions and empty-state recovery i
     ]);
     $name = 'The Unstoppable International Heavyweight Champion';
     Wrestler::factory()->employed()->create(['name' => $name, 'promotion_id' => $promotion->id]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     // Act / Assert
     $page = visit(route('wrestlers.index'));
@@ -276,7 +278,7 @@ test('administrator can create and edit a tag team from the roster page', functi
         'name' => 'Browser Team Replacement Member',
         'promotion_id' => $promotion->id,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('tag-teams.index'));
 
@@ -337,7 +339,7 @@ test('administrator can create and edit a tag team from the roster page', functi
 
 test('administrator can create and edit a venue from the venue directory', function (): void {
     $administrator = administrator();
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('venues.index'));
 
@@ -386,7 +388,7 @@ test('administrator can create and edit a manager from the roster page', functio
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('managers.index'));
 
@@ -421,7 +423,7 @@ test('administrator can create and edit a referee from the roster page', functio
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('referees.index'));
 
@@ -469,7 +471,7 @@ test('administrator can create and edit a stable from the roster page', function
         'name' => 'Browser Stable Member',
         'promotion_id' => $promotion->id,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('stables.index'));
 
@@ -508,7 +510,7 @@ test('administrator can create and edit a title from the title directory', funct
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('titles.index'));
 
@@ -554,7 +556,7 @@ test('administrator can create and edit a title from the title directory', funct
 });
 
 test('platform administrator can create and edit a promotion from the directory', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('promotions.index'));
     $page

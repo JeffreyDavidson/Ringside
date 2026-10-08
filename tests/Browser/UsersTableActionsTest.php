@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+
 test('each user row has a labelled keyboard-operable actions menu', function (): void {
     // Arrange
     User::factory()->create([
@@ -12,7 +14,7 @@ test('each user row has a labelled keyboard-operable actions menu', function ():
         'last_name' => 'Member',
         'status' => UserStatus::Active,
     ]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('users.index'));
     $page->resize(1440, 900);
 

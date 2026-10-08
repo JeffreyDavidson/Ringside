@@ -15,21 +15,19 @@ use function Pest\Laravel\get;
  * @see VenuesController
  */
 describe('Venues Controller', function () {
-    beforeEach(function () {
-        $this->venue = Venue::factory()->create();
-    });
-
     /**
      * @see VenuesController::show()
      */
     test('show returns a view', function () {
+        $venue = Venue::factory()->create();
+
         actingAs(administrator())
-            ->get(route('venues.show', $this->venue))
+            ->get(route('venues.show', $venue))
             ->assertOk()
             ->assertViewIs('venues.show')
-            ->assertSee($this->venue->name)
+            ->assertSee($venue->name)
             ->assertSee('Address')
-            ->assertViewHas('venue', $this->venue)
+            ->assertViewHas('venue', $venue)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousEvents::class);
     });
@@ -38,8 +36,10 @@ describe('Venues Controller', function () {
      * @see VenuesController::show()
      */
     test('a basic user cannot view a venue', function () {
+        $venue = Venue::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('venues.show', $this->venue))
+            ->get(route('venues.show', $venue))
             ->assertForbidden();
     });
 
@@ -47,7 +47,9 @@ describe('Venues Controller', function () {
      * @see VenuesController::show()
      */
     test('a guest cannot view a venue', function () {
-        get(route('venues.show', $this->venue))
+        $venue = Venue::factory()->create();
+
+        get(route('venues.show', $venue))
             ->assertRedirect(route('login'));
     });
 
@@ -55,6 +57,8 @@ describe('Venues Controller', function () {
      * @see VenuesController::show()
      */
     test('returns 404 when venue does not exist', function () {
+        Venue::factory()->create();
+
         actingAs(administrator())
             ->get(route('venues.show', 999999))
             ->assertNotFound();

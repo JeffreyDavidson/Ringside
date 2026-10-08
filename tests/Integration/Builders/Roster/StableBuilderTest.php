@@ -9,6 +9,8 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\expectsDatabaseQueryCount;
+
 test('established stables can be retrieved', function () {
     // Arrange
     $activeStable = Stable::factory()->active()->create();
@@ -97,7 +99,7 @@ test('projected activity status does not query per stable', function () {
     $pending = Stable::factory()->withFutureActivation()->create();
     $inactive = Stable::factory()->inactive()->create();
     $initial = Stable::factory()->unactivated()->create();
-    $this->expectsDatabaseQueryCount(1);
+    expectsDatabaseQueryCount(1);
 
     // Act
     $query = Stable::query();

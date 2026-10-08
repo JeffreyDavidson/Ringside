@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\Date;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
-    $this->stable = Stable::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousWrestlers query', function (): void {
     it('returns only ended wrestler memberships for the requested stable in newest-first order', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $otherStable = Stable::factory()->create();
         $recentWrestler = Wrestler::factory()->create();
@@ -25,19 +26,19 @@ describe('PreviousWrestlers query', function (): void {
         $otherWrestler = Wrestler::factory()->create();
 
         StableWrestler::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'wrestler_id' => $olderWrestler->id,
             'joined_at' => Date::now()->subMonths(4),
             'left_at' => Date::now()->subMonths(3),
         ]);
         StableWrestler::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'wrestler_id' => $recentWrestler->id,
             'joined_at' => Date::now()->subMonths(2),
             'left_at' => Date::now()->subMonth(),
         ]);
         StableWrestler::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'wrestler_id' => $currentWrestler->id,
             'joined_at' => Date::now()->subWeek(),
             'left_at' => null,
@@ -50,7 +51,7 @@ describe('PreviousWrestlers query', function (): void {
         ]);
 
         $table = new PreviousWrestlers;
-        $table->stableId = $this->stable->id;
+        $table->stableId = $stable->id;
 
         // Act
         $memberships = $table->builder()->get();

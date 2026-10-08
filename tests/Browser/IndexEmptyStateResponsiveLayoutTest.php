@@ -6,9 +6,11 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 test('empty states remain within the viewport across resource indexes on phones', function (): void {
     $administrator = administrator();
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $promotionDirectory = visit(route('promotions.index'));
 

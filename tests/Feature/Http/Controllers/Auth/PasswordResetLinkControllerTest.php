@@ -8,12 +8,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 
+use function Pest\Laravel\freezeTime;
+use function Pest\Laravel\from;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
+use function Pest\Laravel\travel;
+
 test('password reset link screen can be rendered', function () {
     // Arrange
     $passwordResetUrl = route('password.request');
 
     // Act
-    $response = $this->get($passwordResetUrl);
+    $response = get($passwordResetUrl);
 
     // Assert
     $response->assertSuccessful();
@@ -24,7 +30,7 @@ test('password reset link requires a valid email address', function () {
     $invalidData = ['email' => 'not-an-email'];
 
     // Act
-    $response = $this->from(route('password.request'))
+    $response = from(route('password.request'))
         ->post(route('password.email'), $invalidData);
 
     // Assert
@@ -41,7 +47,7 @@ test('password reset link can be requested', function (string $email) {
     $requestData = ['email' => $email];
 
     // Act
-    $response = $this->post(route('password.email'), $requestData);
+    $response = post(route('password.email'), $requestData);
 
     // Assert
     $response->assertSessionHasNoErrors();
@@ -54,11 +60,11 @@ test('password reset form can be rendered', function () {
     $user = User::factory()->create();
 
     // Act
-    $this->post(route('password.email'), ['email' => $user->email]);
+    post(route('password.email'), ['email' => $user->email]);
 
     // Assert
     Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user): bool {
-        $response = $this->get(route('password.reset', [
+        $response = get(route('password.reset', [
             'token' => $notification->token,
             'email' => $user->email,
         ]));
@@ -76,11 +82,11 @@ test('password can be reset with a valid token', function (string $email) {
     $user = User::factory()->create(['email' => 'promoter@example.com']);
 
     // Act
-    $this->post(route('password.email'), ['email' => $user->email]);
+    post(route('password.email'), ['email' => $user->email]);
 
     // Assert
     Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($email): bool {
-        $response = $this->post(route('password.update'), [
+        $response = post(route('password.update'), [
             'token' => $notification->token,
             'email' => $email,
             'password' => 'new-password',
@@ -100,11 +106,11 @@ test('registered and unregistered emails receive the same response', function (s
     // Arrange
     Notification::fake();
     config(['auth.passwords.users.throttle' => 90]);
-    $this->freezeTime();
+    freezeTime();
     User::factory()->create(['email' => 'promoter@example.com']);
 
     // Act
-    $response = $this->from(route('password.request'))
+    $response = from(route('password.request'))
         ->post(route('password.email'), ['email' => $email]);
 
     // Assert
@@ -122,8 +128,8 @@ test('only a registered email is sent a reset notification', function (): void {
     $user = User::factory()->create(['email' => 'promoter@example.com']);
 
     // Act
-    $this->post(route('password.email'), ['email' => 'nobody@example.com']);
-    $this->post(route('password.email'), ['email' => $user->email]);
+    post(route('password.email'), ['email' => 'nobody@example.com']);
+    post(route('password.email'), ['email' => $user->email]);
 
     // Assert
     Notification::assertSentTimes(ResetPassword::class, 1);
@@ -134,13 +140,13 @@ test('a throttled request looks the same as a sent one and sends nothing', funct
     // Arrange
     Notification::fake();
     config(['auth.passwords.users.throttle' => 90]);
-    $this->freezeTime();
+    freezeTime();
     $user = User::factory()->create();
     $data = ['email' => $user->email];
-    $this->post(route('password.email'), $data);
+    post(route('password.email'), $data);
 
     // Act
-    $throttled = $this->from(route('password.request'))
+    $throttled = from(route('password.request'))
         ->post(route('password.email'), $data);
 
     // Assert
@@ -157,16 +163,16 @@ test('a reset link can be resent after the broker cooldown', function (): void {
     // Arrange
     Notification::fake();
     config(['auth.passwords.users.throttle' => 90]);
-    $this->freezeTime();
+    freezeTime();
     $user = User::factory()->create();
     $data = ['email' => $user->email];
-    $this->post(route('password.email'), $data);
-    $this->post(route('password.email'), $data);
+    post(route('password.email'), $data);
+    post(route('password.email'), $data);
     Notification::assertSentToTimes($user, ResetPassword::class, 1);
-    $this->travel(91)->seconds();
+    travel(91)->seconds();
 
     // Act
-    $resent = $this->post(route('password.email'), $data);
+    $resent = post(route('password.email'), $data);
 
     // Assert
     $resent->assertSessionHas('recovery_email', $user->email)
@@ -181,7 +187,7 @@ test('password reset works for a legacy user stored with a mixed-case email', fu
     DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
 
     // Act
-    $this->post(route('password.email'), ['email' => 'legacy.promoter@example.com']);
+    post(route('password.email'), ['email' => 'legacy.promoter@example.com']);
 
     // Assert
     Notification::assertSentTo($user->refresh(), ResetPassword::class);

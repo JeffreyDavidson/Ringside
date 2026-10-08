@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+
 test('authenticated user can access dashboard', function () {
     $user = User::factory()->administrator()->create([
         'email' => 'dashboard@test.com',
@@ -12,7 +14,7 @@ test('authenticated user can access dashboard', function () {
         'status' => UserStatus::Active,
     ]);
 
-    $this->actingAs($user);
+    actingAs($user);
 
     $page = visit('/dashboard');
 
@@ -36,7 +38,7 @@ test('dashboard page loads without errors', function () {
         'status' => UserStatus::Active,
     ]);
 
-    $this->actingAs($user);
+    actingAs($user);
 
     $page = visit('/dashboard');
 
@@ -54,7 +56,7 @@ test('dashboard has basic navigation structure', function () {
         'status' => UserStatus::Active,
     ]);
 
-    $this->actingAs($user);
+    actingAs($user);
 
     $page = visit('/dashboard');
 

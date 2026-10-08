@@ -11,6 +11,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
+use function Pest\Laravel\actingAs;
+
 function openRosterMatchForm(Event $event, MatchType $matchType): PendingAwaitablePage
 {
     $page = visit(route('events.show', $event));
@@ -74,7 +76,7 @@ describe('roster combobox search box', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         Referee::factory()->bookable()->create(['first_name' => 'Rita', 'last_name' => 'Ref']);
         Referee::factory()->bookable()->create(['first_name' => 'Rory', 'last_name' => 'Ref']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $referees = rosterInput('form.referees');
 
         $page = openRosterMatchForm($event, MatchType::Singles);
@@ -107,7 +109,7 @@ describe('roster combobox search box', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         Wrestler::factory()->bookable()->create(['name' => 'Tabbing Wrestler']);
         TagTeam::factory()->bookable()->create(['name' => 'Tabbing Team']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $wrestlers = rosterInput('form.competitors.0.wrestlers');
         $tagTeams = rosterInput('form.competitors.0.tag_teams');
 
@@ -138,7 +140,7 @@ describe('roster combobox search box', function (): void {
         Wrestler::factory()->bookable()->create(['name' => 'Rerender Second']);
         $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Rerender Team']);
         $referee = Referee::factory()->bookable()->create(['first_name' => 'Rerender', 'last_name' => 'Official']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $teamA = rosterInput('form.competitors.0.wrestlers');
         $teamB = rosterInput('form.competitors.1.tag_teams');
         $referees = rosterInput('form.referees');
@@ -187,7 +189,7 @@ describe('roster combobox loading state', function (): void {
             Wrestler::factory()->bookable()->create(['name' => sprintf('Abe Filler %02d', $number)]);
         }
         $target = Wrestler::factory()->bookable()->create(['name' => 'Zed Target']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $field = 'form.competitors.0.wrestlers.0';
         $input = rosterInput($field);
 
@@ -217,7 +219,7 @@ describe('roster combobox loading state', function (): void {
     test('a failed search request does not leave the combobox searching forever', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         Wrestler::factory()->bookable()->create(['name' => 'Offline Wrestler']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $field = 'form.competitors.0.wrestlers.0';
         $input = rosterInput($field);
 
@@ -244,7 +246,7 @@ describe('roster combobox keyboard and pointer use', function (): void {
     test('the list opens on click and Escape closes the list before the modal', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         Wrestler::factory()->bookable()->create(['name' => 'Escape Artist']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $field = 'form.competitors.0.wrestlers.0';
         $input = rosterInput($field);
 
@@ -268,7 +270,7 @@ describe('roster combobox keyboard and pointer use', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         Referee::factory()->bookable()->create(['first_name' => 'Rita', 'last_name' => 'Ref']);
         Referee::factory()->bookable()->create(['first_name' => 'Rory', 'last_name' => 'Ref']);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $referees = rosterInput('form.referees');
 
         $page = openRosterMatchForm($event, MatchType::Singles);
@@ -296,7 +298,7 @@ describe('roster combobox keyboard and pointer use', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
         $longName = 'Maximilian Bartholomew Supercalifragilisticexpialidociousness Montgomery-Fitzgerald';
         Wrestler::factory()->bookable()->create(['name' => $longName]);
-        $this->actingAs(administrator());
+        actingAs(administrator());
         $field = 'form.competitors.0.wrestlers';
         $input = rosterInput($field);
 
@@ -319,7 +321,7 @@ describe('roster combobox keyboard and pointer use', function (): void {
 
     test('tag team sides have unique accessible names', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
-        $this->actingAs(administrator());
+        actingAs(administrator());
 
         $page = openRosterMatchForm($event, MatchType::TagTeam);
 
@@ -343,7 +345,7 @@ test('typing into the next field right after choosing an option stays in that fi
     $event = Event::factory()->future()->create();
     Wrestler::factory()->bookable()->create(['name' => 'Focus Opponent']);
     Referee::factory()->bookable()->create(['first_name' => 'Rowdy', 'last_name' => 'Focus']);
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = openRosterMatchForm($event, MatchType::Singles);
 
     // Act

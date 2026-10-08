@@ -11,6 +11,8 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it starts an employment period on the effective date', function () {
     $wrestler = Wrestler::factory()->unemployed()->create();
     $effectiveDate = now()->subDay();
@@ -21,7 +23,7 @@ test('it starts an employment period on the effective date', function () {
         LifecycleTransitionType::Employed,
     );
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'employable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
@@ -45,7 +47,7 @@ test('it ends and preserves the active employment period', function () {
         LifecycleTransitionType::Released,
     );
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'id' => $employmentId,
         'employable_id' => $wrestler->id,
         'employable_type' => $wrestler->getMorphClass(),

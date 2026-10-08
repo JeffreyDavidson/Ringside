@@ -7,6 +7,8 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it restores a soft-deleted referee', function () {
     $referee = Referee::factory()->create();
     $originalId = $referee->id;
@@ -19,7 +21,7 @@ test('it restores a soft-deleted referee', function () {
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
 
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'id' => $originalId,
         'first_name' => $referee->first_name,
         'last_name' => $referee->last_name,
@@ -141,11 +143,11 @@ test('it preserves historical relationships', function () {
     expect($referee->employments()->count())->toBe(1);
     expect($referee->injuries()->count())->toBe(1);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
     ]);
 
-    $this->assertDatabaseHas('injuries', [
+    assertDatabaseHas('injuries', [
         'injurable_id' => $referee->id,
         'injurable_type' => $referee->getMorphClass(),
     ]);

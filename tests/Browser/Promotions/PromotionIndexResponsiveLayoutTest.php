@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 test('promotion table exposes horizontal overflow on narrow screens', function (): void {
     // Arrange
     Promotion::factory()->create(['name' => 'Ringside Local Demo']);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('promotions.index'));

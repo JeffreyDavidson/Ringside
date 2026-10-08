@@ -7,6 +7,8 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use Pest\Browser\Api\PendingAwaitablePage;
 
+use function Pest\Laravel\actingAs;
+
 const HEADER_SEARCH_TOGGLE = 'button[aria-label="Search navigation"]';
 const HEADER_SEARCH_LINKS = '() => [...document.querySelectorAll("[data-test=header-search-results] a")].filter((link) => link.checkVisibility()).map((link) => link.dataset.section)';
 
@@ -21,7 +23,7 @@ function waitForHeaderSearch(PendingAwaitablePage $page, bool $open): void
 }
 
 beforeEach(function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 test('the keyboard shortcut opens the search with focus in the field', function (string $shortcut): void {
@@ -93,7 +95,7 @@ test('members only see the sections they can open', function (): void {
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($member);
+    actingAs($member);
     $page = visit(route('dashboard'));
     $page->resize(1440, 900);
 

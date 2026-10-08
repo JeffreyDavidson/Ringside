@@ -12,6 +12,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+use function Pest\Laravel\travelTo;
+
 /**
  * @param  Builder<Employment>  $query
  * @return array<int, mixed>
@@ -37,7 +39,7 @@ test('lifecycle period models use the shared builder', function (string $modelCl
 ]);
 
 test('lifecycle periods can be queried by temporal state', function () {
-    $this->travelTo(now()->startOfDay());
+    travelTo(now()->startOfDay());
 
     $currentEmployment = Employment::factory()
         ->for(Wrestler::factory(), 'employable')

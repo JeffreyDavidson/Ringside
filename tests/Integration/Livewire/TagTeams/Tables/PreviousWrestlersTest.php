@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\Date;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
-    $this->tagTeam = TagTeam::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousWrestlers query', function (): void {
     it('returns only ended memberships for the requested tag team in newest-first order', function (): void {
+        $tagTeam = TagTeam::factory()->create();
+
         // Arrange
         $otherTagTeam = TagTeam::factory()->create();
         $recentWrestler = Wrestler::factory()->create();
@@ -25,19 +26,19 @@ describe('PreviousWrestlers query', function (): void {
         $otherWrestler = Wrestler::factory()->create();
 
         TagTeamWrestler::query()->create([
-            'tag_team_id' => $this->tagTeam->id,
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $olderWrestler->id,
             'joined_at' => Date::now()->subMonths(3),
             'left_at' => Date::now()->subMonths(2),
         ]);
         TagTeamWrestler::query()->create([
-            'tag_team_id' => $this->tagTeam->id,
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $recentWrestler->id,
             'joined_at' => Date::now()->subMonth(),
             'left_at' => Date::now()->subWeek(),
         ]);
         TagTeamWrestler::query()->create([
-            'tag_team_id' => $this->tagTeam->id,
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $currentWrestler->id,
             'joined_at' => Date::now()->subDays(3),
             'left_at' => null,
@@ -49,7 +50,7 @@ describe('PreviousWrestlers query', function (): void {
             'left_at' => Date::now()->subDay(),
         ]);
         $table = new PreviousWrestlers;
-        $table->tagTeamId = $this->tagTeam->id;
+        $table->tagTeamId = $tagTeam->id;
 
         // Act
         $memberships = $table->builder()->get();
@@ -62,22 +63,24 @@ describe('PreviousWrestlers query', function (): void {
     });
 
     it('keeps separate historical memberships for a returning wrestler', function (): void {
+        $tagTeam = TagTeam::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         TagTeamWrestler::query()->create([
-            'tag_team_id' => $this->tagTeam->id,
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $wrestler->id,
             'joined_at' => Date::now()->subMonths(4),
             'left_at' => Date::now()->subMonths(3),
         ]);
         TagTeamWrestler::query()->create([
-            'tag_team_id' => $this->tagTeam->id,
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $wrestler->id,
             'joined_at' => Date::now()->subMonths(2),
             'left_at' => Date::now()->subMonth(),
         ]);
         $table = new PreviousWrestlers;
-        $table->tagTeamId = $this->tagTeam->id;
+        $table->tagTeamId = $tagTeam->id;
 
         // Act
         $memberships = $table->builder()->get();

@@ -6,6 +6,9 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
 test('resource index pages render a table loading placeholder in the initial response', function (): void {
     $administrator = administrator();
     $promotion = Promotion::factory()->create();
@@ -14,7 +17,7 @@ test('resource index pages render a table loading placeholder in the initial res
         'status' => MembershipStatus::Active->value,
     ]);
 
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     foreach ([
         'events.index',
@@ -28,7 +31,7 @@ test('resource index pages render a table loading placeholder in the initial res
         'venues.index',
         'wrestlers.index',
     ] as $routeName) {
-        $response = $this->get(route($routeName));
+        $response = get(route($routeName));
 
         $response->assertOk()
             ->assertSeeHtml('data-test="table-loading-placeholder"')

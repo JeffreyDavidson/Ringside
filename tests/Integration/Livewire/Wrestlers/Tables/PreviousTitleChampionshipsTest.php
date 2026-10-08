@@ -14,14 +14,15 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->wrestler = Wrestler::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousTitleChampionshipsTable Configuration', function () {
     it('uses the title championship table', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component->assertSet('databaseTableName', 'titles_championships');
@@ -30,16 +31,18 @@ describe('PreviousTitleChampionshipsTable Configuration', function () {
 
 describe('PreviousTitleChampionshipsTable Query Building', function () {
     it('returns the wrestler previous title championships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $formerChampionship = TitleChampionship::factory()
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn('2024-01-01')
             ->lostOn('2024-06-01')
             ->create();
 
         // Act
-        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -47,6 +50,8 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
     });
 
     it('excludes previous championships belonging to another wrestler', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $otherChampionship = TitleChampionship::factory()
             ->forWrestler()
@@ -54,8 +59,8 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
             ->create();
 
         // Act
-        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -63,15 +68,17 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
     });
 
     it('excludes current title championships', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $currentChampionship = TitleChampionship::factory()
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->current()
             ->create();
 
         // Act
-        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table): void {
-            $table->wrestlerId = $this->wrestler->id;
+        $championships = tap(app(PreviousTitleChampionships::class), function (PreviousTitleChampionships $table) use ($wrestler): void {
+            $table->wrestlerId = $wrestler->id;
         })->builder()->get();
 
         // Assert
@@ -81,6 +88,8 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
 
 describe('PreviousTitleChampionshipsTable Rendering', function () {
     it('links to the champion who held the title before the wrestler', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $title = Title::factory()->create(['name' => 'Historic Championship']);
         $previousChampion = TagTeam::factory()->create(['name' => 'Previous Champions']);
@@ -92,13 +101,13 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->create();
         TitleChampionship::factory()
             ->for($title)
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn('2020-06-01')
             ->lostOn('2021-01-01')
             ->create();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component
@@ -115,6 +124,8 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         string $championClass,
         string $showRoute,
     ): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $title = Title::factory()->create();
         $previousChampion = $championClass::factory()->create(['name' => 'Deleted Champion']);
@@ -126,14 +137,14 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         ]);
         TitleChampionship::factory()
             ->for($title)
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn('2020-06-01')
             ->lostOn('2021-01-01')
             ->create();
         $previousChampion->delete();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component
@@ -146,16 +157,18 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
     ]);
 
     it('renders the title championship history search control', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         TitleChampionship::factory()
             ->for(Title::factory()->singles())
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn(now()->subMonths(3)->toDateString())
             ->lostOn(now()->subMonth()->toDateString())
             ->create();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component
@@ -164,12 +177,14 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
     });
 
     it('searches previous championships by title name', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         foreach (['Historic Singles Title', 'Former Singles Title'] as $offset => $name) {
             $title = Title::factory()->singles()->create(['name' => $name]);
             TitleChampionship::factory()
                 ->for($title)
-                ->forWrestler($this->wrestler)
+                ->forWrestler($wrestler)
                 ->wonOn(now()->subMonths($offset + 3)->toDateString())
                 ->lostOn(now()->subMonths($offset + 1)->toDateString())
                 ->create();
@@ -183,13 +198,13 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->create();
         TitleChampionship::factory()
             ->for(Title::factory()->singles()->create(['name' => 'Historic Current Singles Title']))
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn('2025-01-01')
             ->current()
             ->create();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
         $component->set('search', 'Historic');
 
         // Assert
@@ -203,6 +218,8 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
 
 describe('PreviousTitleChampionshipsTable Reign Dates', function () {
     it('shows reign dates as the day in the title promotion time zone', function (): void {
+        Wrestler::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
@@ -228,18 +245,20 @@ describe('PreviousTitleChampionshipsTable Reign Dates', function () {
 
 describe('PreviousTitleChampionshipsTable Deleted Titles', function () {
     it('renders a championship without a link when its title was deleted', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
         // Arrange
         $title = Title::factory()->singles()->create(['name' => 'Vanished Singles Title']);
         TitleChampionship::factory()
             ->for($title)
-            ->forWrestler($this->wrestler)
+            ->forWrestler($wrestler)
             ->wonOn('2024-01-01')
             ->lostOn('2024-06-01')
             ->create();
         $title->delete();
 
         // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
 
         // Assert
         $component

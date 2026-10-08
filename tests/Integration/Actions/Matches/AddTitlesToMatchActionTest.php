@@ -17,6 +17,9 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+
 function createSinglesMatchWithCompetitors(): EventMatch
 {
     return EventMatch::factory()
@@ -33,7 +36,7 @@ test('it adds a single title to a match', function () {
     resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Should create title-match relationship
-    $this->assertDatabaseHas('events_matches_titles', [
+    assertDatabaseHas('events_matches_titles', [
         'match_id' => $match->id,
         'title_id' => $title->id,
     ]);
@@ -59,12 +62,12 @@ test('it adds multiple titles to a match', function () {
     resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Should create relationships for both titles
-    $this->assertDatabaseHas('events_matches_titles', [
+    assertDatabaseHas('events_matches_titles', [
         'match_id' => $match->id,
         'title_id' => $title1->id,
     ]);
 
-    $this->assertDatabaseHas('events_matches_titles', [
+    assertDatabaseHas('events_matches_titles', [
         'match_id' => $match->id,
         'title_id' => $title2->id,
     ]);
@@ -153,7 +156,7 @@ test('it handles transaction consistency', function () {
     expect($match->refresh()->titles)->toHaveCount(2);
 
     // Verify both database records exist
-    $this->assertDatabaseCount('events_matches_titles', 2);
+    assertDatabaseCount('events_matches_titles', 2);
 });
 
 test('it rejects a title already assigned on the event card', function () {

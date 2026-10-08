@@ -11,12 +11,13 @@ use Illuminate\Support\Facades\Date;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
-    $this->stable = Stable::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousTagTeams query', function (): void {
     it('returns only ended tag team memberships for the requested stable in newest-first order', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $otherStable = Stable::factory()->create();
         $recentTagTeam = TagTeam::factory()->create();
@@ -25,19 +26,19 @@ describe('PreviousTagTeams query', function (): void {
         $otherTagTeam = TagTeam::factory()->create();
 
         StableTagTeam::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'tag_team_id' => $olderTagTeam->id,
             'joined_at' => Date::now()->subMonths(4),
             'left_at' => Date::now()->subMonths(3),
         ]);
         StableTagTeam::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'tag_team_id' => $recentTagTeam->id,
             'joined_at' => Date::now()->subMonths(2),
             'left_at' => Date::now()->subMonth(),
         ]);
         StableTagTeam::query()->create([
-            'stable_id' => $this->stable->id,
+            'stable_id' => $stable->id,
             'tag_team_id' => $currentTagTeam->id,
             'joined_at' => Date::now()->subWeek(),
             'left_at' => null,
@@ -50,7 +51,7 @@ describe('PreviousTagTeams query', function (): void {
         ]);
 
         $table = new PreviousTagTeams;
-        $table->stableId = $this->stable->id;
+        $table->stableId = $stable->id;
 
         // Act
         $memberships = $table->builder()->get();

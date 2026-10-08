@@ -18,6 +18,79 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * @return array{
+ *     title: Title,
+ *     wrestler: Wrestler,
+ *     tagTeam: TagTeam,
+ *     secondTitle: Title,
+ *     secondWrestler: Wrestler,
+ *     secondTagTeam: TagTeam,
+ * }
+ */
+function titlesTitleChampionshipTitleFixtures(): array
+{
+    Carbon::setTestNow(Carbon::parse('2024-01-15 12:00:00'));
+
+    // Create test entities with realistic factory states
+    $title = Title::factory()->active()->create([
+        'name' => 'World Championship',
+    ]);
+
+    $wrestler = Wrestler::factory()->employed()->create([
+        'name' => 'Stone Cold Steve Austin',
+        'hometown' => 'Austin, Texas',
+    ]);
+
+    $tagTeam = TagTeam::factory()->employed()->create([
+        'name' => 'The Hardy Boyz',
+    ]);
+
+    $secondTitle = Title::factory()->active()->create([
+        'name' => 'Intercontinental Championship',
+    ]);
+
+    $secondWrestler = Wrestler::factory()->employed()->create([
+        'name' => 'The Rock',
+        'hometown' => 'Miami, Florida',
+    ]);
+
+    $secondTagTeam = TagTeam::factory()->employed()->create([
+        'name' => 'The Dudley Boyz',
+    ]);
+
+    // Note: EventMatch creation moved to individual tests when needed
+    // since won_match_id is now nullable and not required for basic championship testing
+
+    return [
+        'title' => $title,
+        'wrestler' => $wrestler,
+        'tagTeam' => $tagTeam,
+        'secondTitle' => $secondTitle,
+        'secondWrestler' => $secondWrestler,
+        'secondTagTeam' => $secondTagTeam,
+    ];
+}
+
+function titlesTitleChampionshipTitleSetupFixtures(Title $title, Wrestler $wrestler, Wrestler $secondWrestler): void
+{
+    // Set up complex championship scenario
+    TitleChampionship::factory()
+        ->for($title, 'title')
+        ->for($wrestler, 'champion')
+        ->create([
+            'won_at' => Carbon::now()->subYear(),
+            'lost_at' => Carbon::now()->subMonths(6),
+        ]);
+
+    TitleChampionship::factory()
+        ->for($title, 'title')
+        ->for($secondWrestler, 'champion')
+        ->create([
+            'won_at' => Carbon::now()->subMonths(3),
+        ]);
+}
+
+/**
  * Integration tests for TitleChampionship model functionality.
  *
  * This test suite validates the complete workflow of title championships
@@ -31,70 +104,40 @@ use Illuminate\Support\Facades\DB;
  * @see TitleChampionship
  */
 describe('TitleChampionship Model', function () {
-    beforeEach(function () {
-        Carbon::setTestNow(Carbon::parse('2024-01-15 12:00:00'));
-
-        // Create test entities with realistic factory states
-        $this->title = Title::factory()->active()->create([
-            'name' => 'World Championship',
-        ]);
-
-        $this->wrestler = Wrestler::factory()->employed()->create([
-            'name' => 'Stone Cold Steve Austin',
-            'hometown' => 'Austin, Texas',
-        ]);
-
-        $this->tagTeam = TagTeam::factory()->employed()->create([
-            'name' => 'The Hardy Boyz',
-        ]);
-
-        $this->secondTitle = Title::factory()->active()->create([
-            'name' => 'Intercontinental Championship',
-        ]);
-
-        $this->secondWrestler = Wrestler::factory()->employed()->create([
-            'name' => 'The Rock',
-            'hometown' => 'Miami, Florida',
-        ]);
-
-        $this->secondTagTeam = TagTeam::factory()->employed()->create([
-            'name' => 'The Dudley Boyz',
-        ]);
-
-        // Note: EventMatch creation moved to individual tests when needed
-        // since won_match_id is now nullable and not required for basic championship testing
-    });
-
     afterEach(function () {
         Carbon::setTestNow(null);
     });
 
     describe('Championship Creation', function () {
         test('creates championship with factory correctly', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             $championship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
-            expect($championship->title_id)->toBe($this->title->id)
-                ->and($championship->champion_id)->toBe($this->wrestler->id)
+            expect($championship->title_id)->toBe($title->id)
+                ->and($championship->champion_id)->toBe($wrestler->id)
                 ->and($championship->champion_type)->toBe('wrestler')
                 ->and($championship->lost_at)->toBeNull();
         });
 
         test('supports polymorphic champion relationships', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'tagTeam' => $tagTeam, 'secondTitle' => $secondTitle] = titlesTitleChampionshipTitleFixtures();
+
             $wrestlerChampionship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
             $tagTeamChampionship = TitleChampionship::factory()
-                ->for($this->secondTitle, 'title')
-                ->for($this->tagTeam, 'champion')
+                ->for($secondTitle, 'title')
+                ->for($tagTeam, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
@@ -103,20 +146,22 @@ describe('TitleChampionship Model', function () {
                 ->and($tagTeamChampionship->champion)->toBeInstanceOf(TagTeam::class)
                 ->and($wrestlerChampionship->champion_type)->toBe('wrestler')
                 ->and($tagTeamChampionship->champion_type)->toBe('tag_team')
-                ->and($wrestlerChampionship->champion()->firstOrFail()->getKey())->toBe($this->wrestler->id)
-                ->and($tagTeamChampionship->champion()->firstOrFail()->getKey())->toBe($this->tagTeam->id);
+                ->and($wrestlerChampionship->champion()->firstOrFail()->getKey())->toBe($wrestler->id)
+                ->and($tagTeamChampionship->champion()->firstOrFail()->getKey())->toBe($tagTeam->id);
         });
     });
 
     describe('Championship Workflow', function () {
         test('championship succession workflow', function ($fromChampionType, $toChampionType, $fromName, $toName) {
+            ['title' => $title] = titlesTitleChampionshipTitleFixtures();
+
             // Create initial champion
             $fromChampion = $fromChampionType::factory()->employed()->create(['name' => $fromName]);
             $toChampion = $toChampionType::factory()->employed()->create(['name' => $toName]);
 
             // Create initial championship
             $initialChampionship = TitleChampionship::factory()
-                ->for($this->title, 'title')
+                ->for($title, 'title')
                 ->for($fromChampion, 'champion')
                 ->create([
                     'won_at' => Carbon::now()->subMonths(6),
@@ -127,14 +172,14 @@ describe('TitleChampionship Model', function () {
 
             // Create new championship
             $newChampionship = TitleChampionship::factory()
-                ->for($this->title, 'title')
+                ->for($title, 'title')
                 ->for($toChampion, 'champion')
                 ->create([
                     'won_at' => Carbon::now(),
                 ]);
 
             // Verify succession
-            expect(freshModel($this->title)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($toChampion->id);
+            expect(freshModel($title)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($toChampion->id);
             expect($fromChampion->refresh()->currentChampionships()->exists())->toBeFalse()
                 ->and($toChampion->refresh()->currentChampionships()->exists())->toBeTrue();
         })->with([
@@ -144,12 +189,14 @@ describe('TitleChampionship Model', function () {
         ]);
 
         test('championship duration calculations', function ($days, $period) {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             $wonDate = Carbon::now()->subDays($days);
             $lostDate = Carbon::now();
 
             $championship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'won_at' => $wonDate,
                     'lost_at' => $lostDate,
@@ -172,53 +219,46 @@ describe('TitleChampionship Model', function () {
     });
 
     describe('Championship Queries', function () {
-        beforeEach(function () {
-            // Set up complex championship scenario
-            TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
-                ->create([
-                    'won_at' => Carbon::now()->subYear(),
-                    'lost_at' => Carbon::now()->subMonths(6),
-                ]);
-
-            TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->secondWrestler, 'champion')
-                ->create([
-                    'won_at' => Carbon::now()->subMonths(3),
-                ]);
-        });
-
         test('current championship query returns only active championship', function () {
-            $currentChampionship = $this->title->currentChampionship()->firstOrFail();
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+            titlesTitleChampionshipTitleSetupFixtures($title, $wrestler, $secondWrestler);
 
-            expect($currentChampionship->champion()->firstOrFail()->getKey())->toBe($this->secondWrestler->id)
+            $currentChampionship = $title->currentChampionship()->firstOrFail();
+
+            expect($currentChampionship->champion()->firstOrFail()->getKey())->toBe($secondWrestler->id)
                 ->and($currentChampionship->lost_at)->toBeNull();
         });
 
         test('championship history includes all reigns', function () {
-            $allChampionships = $this->title->championships()->get();
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+            titlesTitleChampionshipTitleSetupFixtures($title, $wrestler, $secondWrestler);
+
+            $allChampionships = $title->championships()->get();
 
             expect($allChampionships)->toHaveCount(2);
 
             $championIds = $allChampionships->pluck('champion_id')->toArray();
-            expect($championIds)->toContain($this->wrestler->id)
-                ->toContain($this->secondWrestler->id);
+            expect($championIds)->toContain($wrestler->id)
+                ->toContain($secondWrestler->id);
         });
 
         test('championships are properly ordered by won_at', function () {
-            $championshipsChronological = $this->title->championships()
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+            titlesTitleChampionshipTitleSetupFixtures($title, $wrestler, $secondWrestler);
+
+            $championshipsChronological = $title->championships()
                 ->orderBy('won_at', 'asc')
                 ->get();
 
-            expect($championshipsChronological->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($this->wrestler->id)
-                ->and($championshipsChronological->reverse()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($this->secondWrestler->id);
+            expect($championshipsChronological->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($wrestler->id)
+                ->and($championshipsChronological->reverse()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($secondWrestler->id);
         });
     });
 
     describe('Table Operations', function () {
         test('handles bulk championship creation efficiently', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $wrestlers = Wrestler::factory()->count(5)->employed()->create();
             $titles = Title::factory()->count(3)->active()->create();
 
@@ -239,9 +279,11 @@ describe('TitleChampionship Model', function () {
         });
 
         test('eager loading relationships works correctly', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->current()
                 ->create();
 
@@ -256,18 +298,20 @@ describe('TitleChampionship Model', function () {
         });
 
         test('complex filtering scenarios work correctly', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'tagTeam' => $tagTeam, 'secondTitle' => $secondTitle] = titlesTitleChampionshipTitleFixtures();
+
             // Create multiple championships across different time periods
             TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'won_at' => Carbon::now()->subYear(),
                     'lost_at' => Carbon::now()->subMonths(6),
                 ]);
 
             TitleChampionship::factory()
-                ->for($this->secondTitle, 'title')
-                ->for($this->tagTeam, 'champion')
+                ->for($secondTitle, 'title')
+                ->for($tagTeam, 'champion')
                 ->create([
                     'won_at' => Carbon::now()->subMonths(3),
                 ]);
@@ -289,28 +333,32 @@ describe('TitleChampionship Model', function () {
 
     describe('Business Rule Validation', function () {
         test('title cannot have multiple simultaneous champions', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create first championship
             TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->current()
                 ->create();
 
             // The database refuses a second open reign for the same title
             expect(fn () => DB::transaction(fn () => TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->secondWrestler, 'champion')
+                ->for($title, 'title')
+                ->for($secondWrestler, 'champion')
                 ->current()
                 ->create()))->toThrow(QueryException::class);
         });
 
         test('the database rejects a lost date before the won date', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             $wonDate = Carbon::now()->subMonths(3);
             $lostDate = Carbon::now()->subMonths(6);
 
             expect(fn () => DB::transaction(fn () => TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'won_at' => $wonDate,
                     'lost_at' => $lostDate,
@@ -320,7 +368,9 @@ describe('TitleChampionship Model', function () {
 
     describe('Complex Championship Scenarios', function () {
         test('championship can change hands multiple times', function () {
-            $champions = [$this->wrestler, $this->secondWrestler, $this->wrestler]; // Wrestler regains title
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+
+            $champions = [$wrestler, $secondWrestler, $wrestler]; // Wrestler regains title
             $baseDate = Carbon::now()->subYear();
 
             foreach ($champions as $index => $champion) {
@@ -328,7 +378,7 @@ describe('TitleChampionship Model', function () {
                 $lostDate = $index < count($champions) - 1 ? $wonDate->copy()->addMonths(2) : null;
 
                 TitleChampionship::factory()
-                    ->for($this->title, 'title')
+                    ->for($title, 'title')
                     ->for($champion, 'champion')
                     ->create([
                         'won_at' => $wonDate,
@@ -337,28 +387,30 @@ describe('TitleChampionship Model', function () {
             }
 
             // Verify total championships
-            expect($this->title->championships()->count())->toBe(3);
+            expect($title->championships()->count())->toBe(3);
 
             // Verify current champion is the wrestler (who regained the title)
-            $currentChampion = $this->title->currentChampionship()->firstOrFail()->champion;
-            expect($currentChampion->id)->toBe($this->wrestler->id);
+            $currentChampion = $title->currentChampionship()->firstOrFail()->champion;
+            expect($currentChampion->id)->toBe($wrestler->id);
 
             // Verify championship history includes both wrestlers
-            $allChampions = $this->title->championships()->with('champion')->get();
+            $allChampions = $title->championships()->with('champion')->get();
             $uniqueChampions = $allChampions->pluck('champion.id')->unique();
             expect($uniqueChampions)->toHaveCount(2);
         });
 
         test('championship statistics and analytics', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create championship history
             $championships = [
-                ['champion' => $this->wrestler, 'won_at' => Carbon::now()->subYear(), 'lost_at' => Carbon::now()->subMonths(6)],
-                ['champion' => $this->secondWrestler, 'won_at' => Carbon::now()->subMonths(3), 'lost_at' => null],
+                ['champion' => $wrestler, 'won_at' => Carbon::now()->subYear(), 'lost_at' => Carbon::now()->subMonths(6)],
+                ['champion' => $secondWrestler, 'won_at' => Carbon::now()->subMonths(3), 'lost_at' => null],
             ];
 
             foreach ($championships as $championshipData) {
                 TitleChampionship::factory()
-                    ->for($this->title, 'title')
+                    ->for($title, 'title')
                     ->for($championshipData['champion'], 'champion')
                     ->create([
                         'won_at' => $championshipData['won_at'],
@@ -367,8 +419,8 @@ describe('TitleChampionship Model', function () {
             }
 
             // Calculate statistics
-            $completedChampionships = $this->title->championships()->whereNotNull('lost_at')->get();
-            $currentChampionships = $this->title->championships()->whereNull('lost_at')->get();
+            $completedChampionships = $title->championships()->whereNotNull('lost_at')->get();
+            $currentChampionships = $title->championships()->whereNull('lost_at')->get();
 
             expect($completedChampionships)->toHaveCount(1)
                 ->and($currentChampionships)->toHaveCount(1);
@@ -387,38 +439,42 @@ describe('TitleChampionship Model', function () {
 
     describe('Performance Optimization', function () {
         test('efficiently counts championships without loading them', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'secondTitle' => $secondTitle, 'secondWrestler' => $secondWrestler] = titlesTitleChampionshipTitleFixtures();
+
             TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->current()
                 ->create();
 
             TitleChampionship::factory()
-                ->for($this->secondTitle, 'title')
-                ->for($this->secondWrestler, 'champion')
+                ->for($secondTitle, 'title')
+                ->for($secondWrestler, 'champion')
                 ->current()
                 ->create();
 
             // Count without loading
             expect(TitleChampionship::count())->toBe(2);
-            expect($this->title->championships()->count())->toBe(1)
-                ->and($this->wrestler->titleChampionships()->count())->toBe(1);
+            expect($title->championships()->count())->toBe(1)
+                ->and($wrestler->titleChampionships()->count())->toBe(1);
 
             // Verify relationships are not loaded
-            expect($this->title->relationLoaded('championships'))->toBeFalse();
-            expect($this->wrestler->relationLoaded('championships'))->toBeFalse();
+            expect($title->relationLoaded('championships'))->toBeFalse();
+            expect($wrestler->relationLoaded('championships'))->toBeFalse();
         });
 
         test('polymorphic relationships work efficiently', function () {
+            ['title' => $title, 'wrestler' => $wrestler, 'tagTeam' => $tagTeam, 'secondTitle' => $secondTitle] = titlesTitleChampionshipTitleFixtures();
+
             $wrestlerChampionship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->current()
                 ->create();
 
             $tagTeamChampionship = TitleChampionship::factory()
-                ->for($this->secondTitle, 'title')
-                ->for($this->tagTeam, 'champion')
+                ->for($secondTitle, 'title')
+                ->for($tagTeam, 'champion')
                 ->current()
                 ->create();
 
@@ -433,24 +489,26 @@ describe('TitleChampionship Model', function () {
 
     describe('Championship Business Rules and Lifecycle', function () {
         test('wrestler retirement while holding championship', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create championship
             $championship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
             // Verify wrestler is champion
-            expect(freshModel($this->wrestler)->titleChampionships)->toHaveCount(1);
-            expect(freshModel($this->title)->currentChampionship)->not()->toBeNull();
+            expect(freshModel($wrestler)->titleChampionships)->toHaveCount(1);
+            expect(freshModel($title)->currentChampionship)->not()->toBeNull();
 
             // Retire wrestler
-            resolve(WrestlerRetireAction::class)->handle($this->wrestler, Carbon::now());
+            resolve(WrestlerRetireAction::class)->handle($wrestler, Carbon::now());
 
             // Business rule: Champion retirement should vacate title
-            $refreshedWrestler = freshModel($this->wrestler);
-            $refreshedTitle = freshModel($this->title);
+            $refreshedWrestler = freshModel($wrestler);
+            $refreshedTitle = freshModel($title);
 
             expect($refreshedWrestler->currentRetirement()->exists())->toBeTrue();
 
@@ -463,18 +521,20 @@ describe('TitleChampionship Model', function () {
         });
 
         test('wrestler injury while holding championship', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create championship
             TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
             // Injure wrestler
-            resolve(InjureAction::class)->handle($this->wrestler, Carbon::now());
+            resolve(InjureAction::class)->handle($wrestler, Carbon::now());
 
-            $refreshedWrestler = freshModel($this->wrestler);
+            $refreshedWrestler = freshModel($wrestler);
 
             expect($refreshedWrestler->currentInjury()->exists())->toBeTrue()
                 ->and(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
@@ -485,18 +545,20 @@ describe('TitleChampionship Model', function () {
         });
 
         test('wrestler employment loss while holding championship', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create championship
             $championship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
             // Release wrestler from employment
-            resolve(ReleaseAction::class)->handle($this->wrestler, Carbon::now());
+            resolve(ReleaseAction::class)->handle($wrestler, Carbon::now());
 
-            $refreshedWrestler = freshModel($this->wrestler);
+            $refreshedWrestler = freshModel($wrestler);
 
             expect($refreshedWrestler->status)->toBe(EmploymentStatus::Released)
                 ->and(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
@@ -507,18 +569,20 @@ describe('TitleChampionship Model', function () {
         });
 
         test('title retirement while championship is active', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create championship
             $championship = TitleChampionship::factory()
-                ->for($this->title, 'title')
-                ->for($this->wrestler, 'champion')
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
                 ->create([
                     'lost_at' => null,
                 ]);
 
             // Retire title
-            resolve(RetireAction::class)->handle($this->title, Carbon::now());
+            resolve(RetireAction::class)->handle($title, Carbon::now());
 
-            $refreshedTitle = freshModel($this->title);
+            $refreshedTitle = freshModel($title);
 
             expect($refreshedTitle->currentRetirement()->exists())->toBeTrue();
 
@@ -527,20 +591,22 @@ describe('TitleChampionship Model', function () {
             expect($championship->lost_at)->not()->toBeNull();
 
             // Wrestler should no longer have current championships for this title
-            $refreshedWrestler = freshModel($this->wrestler);
-            expect($refreshedWrestler->titleChampionships()->where('title_id', $this->title->id)->whereNull('lost_at')->count())->toBe(0);
+            $refreshedWrestler = freshModel($wrestler);
+            expect($refreshedWrestler->titleChampionships()->where('title_id', $title->id)->whereNull('lost_at')->count())->toBe(0);
         });
 
         test('championship unification scenario', function () {
+            ['title' => $title, 'wrestler' => $wrestler] = titlesTitleChampionshipTitleFixtures();
+
             // Create two titles that will be unified
             $title2 = Title::factory()->active()->create(['name' => 'Secondary Championship']);
 
-            $champion1 = $this->wrestler;
+            $champion1 = $wrestler;
             $champion2 = Wrestler::factory()->employed()->create(['name' => 'Champion 2']);
 
             // Each holds one title
             TitleChampionship::factory()
-                ->for($this->title, 'title')
+                ->for($title, 'title')
                 ->for($champion1, 'champion')
                 ->create([
                     'lost_at' => null,
@@ -576,6 +642,8 @@ describe('TitleChampionship Model', function () {
 
     describe('Edge Cases and Data Integrity', function () {
         test('handles wrestler with zero championships', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Never Champion']);
 
             // Verify proper handling of wrestler with no championships
@@ -585,6 +653,8 @@ describe('TitleChampionship Model', function () {
         });
 
         test('handles title with no championship history', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $title = Title::factory()->active()->create(['name' => 'Never Held Title']);
 
             // Verify proper handling of title with no championships
@@ -594,6 +664,8 @@ describe('TitleChampionship Model', function () {
         });
 
         test('handles championship reign ending in the past without replacement', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $title = Title::factory()->active()->create(['name' => 'Vacant Title']);
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Former Champion']);
 
@@ -615,6 +687,8 @@ describe('TitleChampionship Model', function () {
         });
 
         test('handles championship on exact same timestamp', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $title = Title::factory()->active()->create(['name' => 'Timestamp Test Title']);
             $wrestler1 = Wrestler::factory()->employed()->create(['name' => 'Wrestler 1']);
             $wrestler2 = Wrestler::factory()->employed()->create(['name' => 'Wrestler 2']);
@@ -644,6 +718,8 @@ describe('TitleChampionship Model', function () {
         });
 
         test('handles extremely long championship reigns', function () {
+            titlesTitleChampionshipTitleFixtures();
+
             $title = Title::factory()->active()->create(['name' => 'Long Reign Title']);
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Long Reigning Champion']);
 

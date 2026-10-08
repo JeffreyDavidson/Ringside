@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use function Pest\Laravel\actingAs;
+
 test('the first tab stop skips the navigation to the main content', function (): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('wrestlers.index'));
     $page->resize(1440, 900);
     $page->assertScript('document.querySelector("[data-test=skip-link]") === document.querySelector("a[href], button, input, select, textarea, [tabindex]:not([tabindex=\\"-1\\"])")')
@@ -21,7 +23,7 @@ test('the first tab stop skips the navigation to the main content', function ():
 
 test('the skip link becomes visible when it receives focus', function (): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('dashboard'));
     $page->resize(375, 812);
 

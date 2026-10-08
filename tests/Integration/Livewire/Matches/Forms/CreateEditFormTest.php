@@ -129,14 +129,15 @@ describe('match form side labels', function (): void {
 describe('match form validation feedback', function (): void {
     beforeEach(function (): void {
         actingAs(administrator());
-        $this->event = Event::factory()->create();
     });
 
     it('books a tag team match when the comboboxes send an empty wrestler list for each side', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
         $tagTeamIds = TagTeam::factory()->count(2)->bookable()->create()->modelKeys();
         $referee = Referee::factory()->bookable()->create();
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
         $modal->set('form.matchType', MatchType::TagTeam);
@@ -151,7 +152,7 @@ describe('match form validation feedback', function (): void {
 
         // Assert
         $modal->assertHasNoErrors();
-        expect(EventMatch::query()->whereBelongsTo($this->event)->sole()->tagTeams()->count())->toBe(2);
+        expect(EventMatch::query()->whereBelongsTo($event)->sole()->tagTeams()->count())->toBe(2);
     });
 
     it('explains what a :dataset is missing in plain words', function (
@@ -160,8 +161,10 @@ describe('match form validation feedback', function (): void {
         array $expectedMessages,
         array $absentErrors,
     ): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
         $modal->set('form.matchType', $matchType);
 
         // Act

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use function Pest\Laravel\actingAs;
+
 test('the app starts and the sidebar still toggles when browser storage is blocked', function (): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('dashboard'));
     $page->resize(1440, 900);
     $page->page()->context()->addInitScript(<<<'JS'

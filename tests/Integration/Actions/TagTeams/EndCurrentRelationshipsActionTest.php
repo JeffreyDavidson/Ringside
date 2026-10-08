@@ -9,6 +9,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it ends only the tag teams current relationships', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
@@ -39,18 +41,18 @@ test('it ends only the tag teams current relationships', function () {
         ->and($tagTeam->currentManagers)->toBeEmpty()
         ->and($championship->refresh()->lost_at?->toDateTimeString())->toBe($effectiveDate->toDateTimeString());
 
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
+    assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestler->id,
         'left_at' => $formerMembershipEndedAt->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
+    assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestler->id,
         'joined_at' => $currentMembershipStartedAt->toDateTimeString(),
         'left_at' => $effectiveDate->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'tag_team_id' => $tagTeam->id,
         'manager_id' => $manager->id,
         'fired_at' => $effectiveDate->toDateTimeString(),

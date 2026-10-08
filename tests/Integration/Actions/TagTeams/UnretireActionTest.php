@@ -9,6 +9,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it unretires a retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
@@ -22,14 +24,14 @@ test('it unretires a retired tag team', function () {
         ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement record was ended
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify employment record was created
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -105,14 +107,14 @@ test('it unretires tag team with specific unretirement date', function () {
         ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement ended with specific date
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 
     // Verify employment started with same date
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => $unretirementDate->toDateTimeString(),
         'ended_at' => null,
@@ -165,7 +167,7 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify original retirement record was properly ended
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'id' => $originalRetirementId,
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),
@@ -221,13 +223,13 @@ test('it uses the provided date', function () {
     $tagTeam->refresh();
 
     // Verify the provided date was used across all operations
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $customUnretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => $customUnretirementDate->toDateTimeString(),
         'ended_at' => null,
@@ -301,14 +303,14 @@ test('it handles unretirement with cascade effects', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Retirement should be ended
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Employment should be active
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,

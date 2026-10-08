@@ -8,22 +8,25 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function (): void {
-    $this->event = Event::factory()->past()->create();
-    $this->match = EventMatch::factory()
-        ->for($this->event)
+    actingAs(administrator());
+});
+
+test('the eliminations table is readable on the dark modal', function (): void {
+    $event = Event::factory()->past()->create();
+    EventMatch::factory()
+        ->for($event)
         ->withCompetitors(Wrestler::factory()->count(3)->sequence(
             ['name' => 'Alpha Contender'],
             ['name' => 'Bravo Contender'],
             ['name' => 'Charlie Contender'],
         )->create()->all())
         ->create(['match_type' => MatchType::BattleRoyal]);
-    $this->actingAs(administrator());
-});
 
-test('the eliminations table is readable on the dark modal', function (): void {
     // Arrange
-    $page = visit(route('events.show', $this->event));
+    $page = visit(route('events.show', $event));
     $page->resize(1440, 900);
 
     // Act
@@ -40,8 +43,18 @@ test('the eliminations table is readable on the dark modal', function (): void {
 });
 
 test('elimination order errors are linked to their inputs', function (): void {
+    $event = Event::factory()->past()->create();
+    EventMatch::factory()
+        ->for($event)
+        ->withCompetitors(Wrestler::factory()->count(3)->sequence(
+            ['name' => 'Alpha Contender'],
+            ['name' => 'Bravo Contender'],
+            ['name' => 'Charlie Contender'],
+        )->create()->all())
+        ->create(['match_type' => MatchType::BattleRoyal]);
+
     // Arrange
-    $page = visit(route('events.show', $this->event));
+    $page = visit(route('events.show', $event));
     $page->resize(1440, 900);
 
     // Act
@@ -63,9 +76,19 @@ test('elimination order errors are linked to their inputs', function (): void {
 });
 
 test('a rejected result is announced in a readable alert', function (): void {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()
+        ->for($event)
+        ->withCompetitors(Wrestler::factory()->count(3)->sequence(
+            ['name' => 'Alpha Contender'],
+            ['name' => 'Bravo Contender'],
+            ['name' => 'Charlie Contender'],
+        )->create()->all())
+        ->create(['match_type' => MatchType::BattleRoyal]);
+
     // Arrange
-    $winningSide = $this->match->sides()->orderBy('position')->firstOrFail();
-    $page = visit(route('events.show', $this->event));
+    $winningSide = $match->sides()->orderBy('position')->firstOrFail();
+    $page = visit(route('events.show', $event));
     $page->resize(1440, 900);
 
     // Act

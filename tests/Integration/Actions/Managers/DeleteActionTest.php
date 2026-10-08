@@ -8,6 +8,9 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertSoftDeleted;
+
 test('it soft deletes an unemployed manager', function () {
     $manager = Manager::factory()->create();
 
@@ -16,7 +19,7 @@ test('it soft deletes an unemployed manager', function () {
     resolve(DeleteAction::class)->handle($manager);
 
     // Manager should be soft deleted
-    $this->assertSoftDeleted('managers', ['id' => $manager->id]);
+    assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Fresh without trashed should return null
     expect(Manager::find($manager->id))->toBeNull();
@@ -56,10 +59,10 @@ test('it soft deletes an employed manager and ends employment', function () {
     resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
-    $this->assertSoftDeleted('managers', ['id' => $manager->id]);
+    assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Employment should be ended
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
@@ -77,7 +80,7 @@ test('it ends manager relationships with wrestlers when deleted', function () {
     ]);
 
     // Verify relationship exists before deletion
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'manager_id' => $manager->id,
         'wrestler_id' => $wrestler->id,
         'fired_at' => null,
@@ -87,10 +90,10 @@ test('it ends manager relationships with wrestlers when deleted', function () {
     resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
-    $this->assertSoftDeleted('managers', ['id' => $manager->id]);
+    assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Manager-wrestler relationship should be ended
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'manager_id' => $manager->id,
         'wrestler_id' => $wrestler->id,
         'hired_at' => $hiredDate->toDateTimeString(),
@@ -110,7 +113,7 @@ test('it ends manager relationships with tag teams when deleted', function () {
     ]);
 
     // Verify relationship exists before deletion
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'manager_id' => $manager->id,
         'tag_team_id' => $tagTeam->id,
         'fired_at' => null,
@@ -120,10 +123,10 @@ test('it ends manager relationships with tag teams when deleted', function () {
     resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
-    $this->assertSoftDeleted('managers', ['id' => $manager->id]);
+    assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Manager-tag team relationship should be ended
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'manager_id' => $manager->id,
         'tag_team_id' => $tagTeam->id,
         'hired_at' => $hiredDate->toDateTimeString(),
@@ -141,7 +144,7 @@ test('it handles deletion with specific date', function () {
     expect($trashedManager->deleted_at)->not->toBeNull();
 
     // Employment should end on the custom date
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
         'ended_at' => $customDeletionDate->toDateTimeString(),
     ]);

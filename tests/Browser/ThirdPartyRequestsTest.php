@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use function Pest\Laravel\actingAs;
+
 test('loading the application keeps every request on the application host', function (): void {
     // Arrange
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('dashboard'));

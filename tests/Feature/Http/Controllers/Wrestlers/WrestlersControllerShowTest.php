@@ -28,21 +28,19 @@ use function Pest\Laravel\get;
  * @see WrestlersController
  */
 describe('Wrestlers Controller', function () {
-    beforeEach(function () {
-        $this->wrestler = Wrestler::factory()->create();
-    });
-
     /**
      * @see WrestlersController::show()
      */
     test('show returns a view', function () {
+        $wrestler = Wrestler::factory()->create();
+
         actingAs(administrator())
-            ->get(route('wrestlers.show', $this->wrestler))
+            ->get(route('wrestlers.show', $wrestler))
             ->assertOk()
             ->assertViewIs('wrestlers.show')
-            ->assertSee($this->wrestler->name)
+            ->assertSee($wrestler->name)
             ->assertSee('Status')
-            ->assertViewHas('wrestler', $this->wrestler)
+            ->assertViewHas('wrestler', $wrestler)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
@@ -55,6 +53,8 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('show labels injured and suspended wrestlers', function (bool $injured, bool $suspended) {
+        Wrestler::factory()->create();
+
         $wrestler = Wrestler::factory()->employed()->create();
 
         if ($injured) {
@@ -86,8 +86,10 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('show renders the lifecycle actions component', function () {
+        $wrestler = Wrestler::factory()->create();
+
         actingAs(administrator())
-            ->get(route('wrestlers.show', $this->wrestler))
+            ->get(route('wrestlers.show', $wrestler))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
     });
@@ -96,17 +98,21 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('show renders the general info component', function () {
+        $wrestler = Wrestler::factory()->create();
+
         actingAs(administrator())
-            ->get(route('wrestlers.show', $this->wrestler))
+            ->get(route('wrestlers.show', $wrestler))
             ->assertOk()
             ->assertSeeLivewire(GeneralInfo::class)
-            ->assertSee($this->wrestler->status->label());
+            ->assertSee($wrestler->status->label());
     });
 
     /**
      * @see WrestlersController::show()
      */
     test('show renders the related data displayed by the wrestler summary', function () {
+        Wrestler::factory()->create();
+
         $wrestler = Wrestler::factory()->employed()->onCurrentTagTeam(TagTeam::factory()->create(['name' => 'Tag Team Alpha']))->create();
         $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
@@ -130,6 +136,8 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('show loads the summary relationships only once', function () {
+        Wrestler::factory()->create();
+
         $wrestler = Wrestler::factory()->employed()->create();
         $wrestler->managers()->attach(Manager::factory()->create(), ['hired_at' => now()->subDay()]);
         actingAs(administrator());
@@ -150,8 +158,10 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('a basic user cannot view wrestler profiles', function () {
+        $wrestler = Wrestler::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('wrestlers.show', $this->wrestler))
+            ->get(route('wrestlers.show', $wrestler))
             ->assertForbidden();
     });
 
@@ -159,7 +169,9 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('a guest cannot view a wrestler profile', function () {
-        get(route('wrestlers.show', $this->wrestler))
+        $wrestler = Wrestler::factory()->create();
+
+        get(route('wrestlers.show', $wrestler))
             ->assertRedirect(route('login'));
     });
 
@@ -167,6 +179,8 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('returns 404 when wrestler does not exist', function () {
+        Wrestler::factory()->create();
+
         actingAs(administrator())
             ->get(route('wrestlers.show', 999999))
             ->assertNotFound();

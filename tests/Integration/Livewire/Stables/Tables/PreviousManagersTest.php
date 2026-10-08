@@ -14,12 +14,13 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->stable = Stable::factory()->create();
     actingAs(administrator());
 });
 
 describe('PreviousManagers query', function (): void {
     it('returns distinct previous managers associated through stable roster members in name order', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $tagTeam = TagTeam::factory()->create();
@@ -34,7 +35,7 @@ describe('PreviousManagers query', function (): void {
         $nonOverlappingManager = Manager::factory()->create();
         $currentManager = Manager::factory()->create();
 
-        $this->stable->wrestlers()->attach($wrestler, [
+        $stable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::now()->subYears(3),
             'left_at' => Date::now()->subYear(),
         ]);
@@ -47,7 +48,7 @@ describe('PreviousManagers query', function (): void {
             'fired_at' => Date::now()->subMonths(3),
         ]);
 
-        $this->stable->tagTeams()->attach($tagTeam, [
+        $stable->tagTeams()->attach($tagTeam, [
             'joined_at' => Date::now()->subYears(2),
             'left_at' => Date::now()->subMonths(6),
         ]);
@@ -57,14 +58,14 @@ describe('PreviousManagers query', function (): void {
         ]);
 
         $currentWrestler = Wrestler::factory()->create();
-        $this->stable->wrestlers()->attach($currentWrestler, [
+        $stable->wrestlers()->attach($currentWrestler, [
             'joined_at' => Date::now()->subMonths(3),
         ]);
         $currentWrestler->managers()->attach($currentManager, [
             'hired_at' => Date::now()->subMonths(2),
         ]);
         $table = new PreviousManagers;
-        $table->stableId = $this->stable->id;
+        $table->stableId = $stable->id;
 
         // Act
         $managers = $table->builder()->get();
@@ -77,6 +78,8 @@ describe('PreviousManagers query', function (): void {
     });
 
     it('includes associations whose membership and manager periods touch at an endpoint', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $boundary = Date::parse('2024-01-01');
         $wrestler = Wrestler::factory()->create();
@@ -84,7 +87,7 @@ describe('PreviousManagers query', function (): void {
         $membershipBoundaryManager = Manager::factory()->create();
         $assignmentBoundaryManager = Manager::factory()->create();
 
-        $this->stable->wrestlers()->attach($wrestler, [
+        $stable->wrestlers()->attach($wrestler, [
             'joined_at' => $boundary->copy()->subMonth(),
             'left_at' => $boundary,
         ]);
@@ -93,7 +96,7 @@ describe('PreviousManagers query', function (): void {
             'fired_at' => $boundary->copy()->addMonth(),
         ]);
 
-        $this->stable->tagTeams()->attach($tagTeam, [
+        $stable->tagTeams()->attach($tagTeam, [
             'joined_at' => $boundary,
             'left_at' => $boundary->copy()->addMonth(),
         ]);
@@ -102,7 +105,7 @@ describe('PreviousManagers query', function (): void {
             'fired_at' => $boundary,
         ]);
         $table = new PreviousManagers;
-        $table->stableId = $this->stable->id;
+        $table->stableId = $stable->id;
 
         // Act
         $managers = $table->builder()->get();
@@ -117,6 +120,8 @@ describe('PreviousManagers query', function (): void {
 
 describe('PreviousManagers rendering', function (): void {
     it('renders manager names, statuses, and search controls', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $historicManager = Manager::factory()->create([
@@ -127,7 +132,7 @@ describe('PreviousManagers rendering', function (): void {
             'first_name' => 'Former',
             'last_name' => 'Advisor',
         ]);
-        $this->stable->wrestlers()->attach($wrestler, [
+        $stable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::now()->subYears(2),
             'left_at' => Date::now()->subYear(),
         ]);
@@ -141,7 +146,7 @@ describe('PreviousManagers rendering', function (): void {
         ]);
 
         // Act
-        $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
+        $table = livewire(PreviousManagers::class, ['stableId' => $stable->id]);
 
         // Assert
         $table
@@ -153,6 +158,8 @@ describe('PreviousManagers rendering', function (): void {
     });
 
     it('searches previous managers by name', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $historicManager = Manager::factory()->create([
@@ -163,7 +170,7 @@ describe('PreviousManagers rendering', function (): void {
             'first_name' => 'Former',
             'last_name' => 'Advisor',
         ]);
-        $this->stable->wrestlers()->attach($wrestler, [
+        $stable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::now()->subYears(2),
             'left_at' => Date::now()->subYear(),
         ]);
@@ -177,7 +184,7 @@ describe('PreviousManagers rendering', function (): void {
         ]);
 
         // Act
-        $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
+        $table = livewire(PreviousManagers::class, ['stableId' => $stable->id]);
         $table->set('search', 'Historic');
 
         // Assert
@@ -189,9 +196,11 @@ describe('PreviousManagers rendering', function (): void {
 
 describe('PreviousManagers query count', function (): void {
     it('runs the same number of queries regardless of how many managers it lists', function (): void {
+        $stable = Stable::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create();
-        $this->stable->wrestlers()->attach($wrestler, [
+        $stable->wrestlers()->attach($wrestler, [
             'joined_at' => Date::now()->subYears(2),
             'left_at' => Date::now()->subYear(),
         ]);
@@ -203,10 +212,10 @@ describe('PreviousManagers query count', function (): void {
                 ])
             );
         };
-        $countQueries = function (): int {
+        $countQueries = function () use ($stable): int {
             DB::flushQueryLog();
             DB::enableQueryLog();
-            livewire(PreviousManagers::class, ['stableId' => $this->stable->id])->assertSee('Employed');
+            livewire(PreviousManagers::class, ['stableId' => $stable->id])->assertSee('Employed');
             $count = count(DB::getQueryLog());
             DB::disableQueryLog();
 

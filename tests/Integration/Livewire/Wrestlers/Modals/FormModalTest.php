@@ -16,8 +16,7 @@ use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = administrator();
-    actingAs($this->admin);
+    actingAs(administrator());
 });
 
 describe('FormModal Configuration', function () {

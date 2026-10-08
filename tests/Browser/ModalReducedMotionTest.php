@@ -6,6 +6,8 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 test('modals open without animating when reduced motion is requested', function (): void {
     // Arrange
     $event = Event::factory()->past()->create();
@@ -13,7 +15,7 @@ test('modals open without animating when reduced motion is requested', function 
         ->for($event)
         ->withCompetitors(Wrestler::factory()->count(2)->create()->all())
         ->create();
-    $this->actingAs(administrator());
+    actingAs(administrator());
     $page = visit(route('events.show', $event), ['reducedMotion' => 'reduce']);
     $page->resize(1440, 900);
 

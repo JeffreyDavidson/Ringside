@@ -7,6 +7,9 @@ use App\Data\Wrestlers\WrestlerData;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+
 test('it updates wrestler basic information', function () {
     $wrestler = Wrestler::factory()->create([
         'name' => 'Original Name',
@@ -35,7 +38,7 @@ test('it updates wrestler basic information', function () {
         ->and($result->hometown)->toBe('Updated Town')
         ->and($result->signature_move)->toBe('Updated Move');
 
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'name' => 'Updated Name',
         'height' => 75,
@@ -98,7 +101,7 @@ test('it updates wrestler and employs them when employment date provided', funct
         ->and($result->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created via EmployAction
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -127,7 +130,7 @@ test('it updates wrestler without employing when no employment date', function (
         ->and($result->currentEmployment()->exists())->toBeFalse();
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('employments', [
+    assertDatabaseMissing('employments', [
         'employable_id' => $wrestler->id,
     ]);
 });
@@ -194,13 +197,13 @@ test('it employs managers when wrestler gets employed', function () {
     expect($manager2->currentEmployment()->exists())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $manager1->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -226,7 +229,7 @@ test('it uses the provided employment date', function () {
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     // The provided employment date should be persisted
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => null,
@@ -252,12 +255,12 @@ test('it maintains transaction boundaries', function () {
     $result->refresh();
 
     // Both wrestler update and employment should succeed together
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'name' => 'Transaction Test',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
@@ -344,7 +347,7 @@ test('it handles null signature move', function () {
 
     expect($result->signature_move)->toBeNull();
 
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'signature_move' => null,
     ]);

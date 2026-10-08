@@ -12,6 +12,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Date;
 
+use function Pest\Laravel\freezeSecond;
+
 it('retrieves matches for selected events', function () {
     // Arrange
     $selectedEvent = Event::factory()->create();
@@ -62,7 +64,7 @@ it('retrieves matches for one event by id', function () {
 
 it('retrieves matches for past events and eager loads their events', function () {
     // Arrange
-    $this->freezeSecond();
+    freezeSecond();
     $pastEvent = Event::factory()->create(['date' => Date::now()->subSecond()]);
     $currentEvent = Event::factory()->create(['date' => Date::now()]);
     $scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
@@ -88,7 +90,7 @@ it('retrieves matches for past events and eager loads their events', function ()
 
 it('retrieves match history with its display relationships eager loaded and ordered', function () {
     // Arrange
-    $this->freezeSecond();
+    freezeSecond();
     $pastEvent = Event::factory()->past()->create();
     $olderEvent = Event::factory()->create(['date' => Date::now()->subDays(2)]);
     $scheduledEvent = Event::factory()->scheduled()->create();
@@ -301,7 +303,7 @@ it('retrieves matches assigned to any selected title', function () {
 
 it('orders matches by event date, card, and match number', function () {
     // Arrange
-    $this->freezeSecond();
+    freezeSecond();
     $oldestEvent = Event::factory()->create(['date' => Date::now()->subDays(3)]);
     $laterEvent = Event::factory()->create(['date' => Date::yesterday()->setTime(20, 0)]);
     $latestEvent = Event::factory()->create(['date' => Date::yesterday()->setTime(19, 0)]);
