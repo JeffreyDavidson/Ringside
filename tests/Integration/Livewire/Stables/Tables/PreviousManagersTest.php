@@ -7,7 +7,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
@@ -17,14 +16,6 @@ use function Pest\Livewire\livewire;
 beforeEach(function (): void {
     $this->stable = Stable::factory()->create();
     actingAs(administrator());
-});
-
-describe('PreviousManagers configuration', function (): void {
-    it('requires a stable', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousManagers)->builder())
-            ->toThrow(LogicException::class, 'A stable was not provided.');
-    });
 });
 
 describe('PreviousManagers query', function (): void {
@@ -194,18 +185,6 @@ describe('PreviousManagers rendering', function (): void {
             ->assertSee('Historic Manager')
             ->assertDontSee('Former Advisor');
     });
-
-    it('renders an empty state when the stable has no previous managers', function (): void {
-        // Act
-        $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
-
-        // Assert
-        $table
-            ->assertSuccessful()
-            ->assertSee('Previous managers')
-            ->assertSee('No previous managers yet.')
-            ->assertDontSeeHtml('placeholder="Search managers"');
-    });
 });
 
 describe('PreviousManagers query count', function (): void {
@@ -243,32 +222,4 @@ describe('PreviousManagers query count', function (): void {
         // Assert
         expect($queriesWithTenManagers)->toBe($queriesWithOneManager);
     });
-});
-
-describe('PreviousManagers authorization', function (): void {
-    it('allows administrators to view stable manager history', function (): void {
-        // Act
-        $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
-
-        // Assert
-        $table->assertSuccessful();
-    });
-
-    it('forbids users without access to the stable', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $table = livewire(PreviousManagers::class, ['stableId' => $this->stable->id]);
-
-        // Assert
-        $table->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });

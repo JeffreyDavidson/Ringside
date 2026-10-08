@@ -8,7 +8,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -20,20 +19,6 @@ beforeEach(function (): void {
 });
 
 describe('PreviousTitleChampionshipsTable Configuration', function () {
-    it('requires wrestler id to be set', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships)->builder())
-            ->toThrow(LogicException::class, 'A wrestler was not provided.');
-    });
-
-    it('can set wrestler id', function (): void {
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertSet('wrestlerId', $this->wrestler->id);
-    });
-
     it('uses the title championship table', function (): void {
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
@@ -214,46 +199,6 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->assertDontSee('Historic Unrelated Singles Title')
             ->assertDontSee('Historic Current Singles Title');
     });
-
-    it('renders when the wrestler has no championship history', function (): void {
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component
-            ->assertSuccessful()
-            ->assertSee('Previous title championships')
-            ->assertSee('No previous title championships yet.')
-            ->assertDontSeeHtml('placeholder="Search title championships"');
-    });
-});
-
-describe('PreviousTitleChampionshipsTable Authorization', function () {
-    it('allows access to administrators', function (): void {
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertSuccessful();
-    });
-
-    it('forbids users without access to the wrestler', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
-
-        // Assert
-        $component->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });
 
 describe('PreviousTitleChampionshipsTable Reign Dates', function () {

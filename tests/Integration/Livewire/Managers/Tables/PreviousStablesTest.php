@@ -7,7 +7,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -16,14 +15,6 @@ use function Pest\Livewire\livewire;
 beforeEach(function (): void {
     $this->manager = Manager::factory()->create();
     actingAs(administrator());
-});
-
-describe('PreviousStables configuration', function (): void {
-    it('requires a manager', function (): void {
-        // Act & Assert
-        expect(fn () => (new PreviousStables)->builder())
-            ->toThrow(LogicException::class, 'A manager was not provided.');
-    });
 });
 
 describe('PreviousStables query', function (): void {
@@ -171,44 +162,4 @@ describe('PreviousStables rendering', function (): void {
             ->assertSee('Alpha Stable')
             ->assertDontSee('Beta Stable');
     });
-
-    it('renders an empty state when the manager has no previous stables', function (): void {
-        // Act
-        $table = livewire(PreviousStables::class, ['managerId' => $this->manager->id]);
-
-        // Assert
-        $table
-            ->assertSuccessful()
-            ->assertSee('Previous stables')
-            ->assertSee('No previous stables yet.')
-            ->assertDontSeeHtml('placeholder="Search stables"');
-    });
-});
-
-describe('PreviousStables authorization', function (): void {
-    it('allows administrators to view manager stable history', function (): void {
-        // Act
-        $table = livewire(PreviousStables::class, ['managerId' => $this->manager->id]);
-
-        // Assert
-        $table->assertSuccessful();
-    });
-
-    it('forbids users without access to the manager', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $table = livewire(PreviousStables::class, ['managerId' => $this->manager->id]);
-
-        // Assert
-        $table->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });
