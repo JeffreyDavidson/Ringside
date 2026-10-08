@@ -161,7 +161,7 @@ class CreateEditForm extends BaseForm
 
     /** A match has no promotion of its own: it books the roster and titles of its event's promotion. */
     #[\Override]
-    protected function formPromotionId(): ?int
+    public function formPromotionId(): ?int
     {
         return $this->eventPromotionId;
     }
