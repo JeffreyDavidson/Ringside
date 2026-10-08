@@ -13,35 +13,35 @@ final class CannotBeReunitedException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be reunited because it is deleted. Restore the stable first.");
+        return new self(__('stables.errors.reunited.deleted', ['context' => $context]));
     }
 
     public static function neverActive(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} has never been active and cannot be reunited. Use establishment instead.");
+        return new self(__('stables.errors.reunited.never_active', ['context' => $context]));
     }
 
     public static function currentlyActive(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is currently active and doesn't need reunion.");
+        return new self(__('stables.errors.reunited.currently_active', ['context' => $context]));
     }
 
     public static function retired(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is retired and cannot be reunited. Consider unretirement instead.");
+        return new self(__('stables.errors.reunited.retired', ['context' => $context]));
     }
 
     public static function insufficientFormerMembers(Stable $stable, int $availableCount, int $minimumRequired): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be reunited: only {$availableCount} former members available, but {$minimumRequired} required.");
+        return new self(__('stables.errors.reunited.insufficient_former_members', ['context' => $context, 'available_count' => $availableCount, 'minimum_required' => $minimumRequired]));
     }
 
     /** @param array<int, string> $memberNames */
@@ -49,13 +49,13 @@ final class CannotBeReunitedException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be reunited: these members are not available former members: ".implode(', ', $memberNames).'.');
+        return new self(__('stables.errors.reunited.members_not_available', ['context' => $context, 'members' => implode(', ', $memberNames)]));
     }
 
     public static function belowMinimum(Stable $stable, int $memberCount, int $minimumRequired): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be reunited: the returning members count as {$memberCount}, but at least {$minimumRequired} are required.");
+        return new self(__('stables.errors.reunited.below_minimum', ['context' => $context, 'member_count' => $memberCount, 'minimum_required' => $minimumRequired]));
     }
 }

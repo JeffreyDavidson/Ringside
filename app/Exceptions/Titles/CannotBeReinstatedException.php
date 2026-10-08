@@ -13,20 +13,20 @@ final class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} is already active and cannot be reinstated.");
+        return new self(__('titles.errors.reinstated.active', ['context' => $context]));
     }
 
     public static function retired(Title $title): static
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} is retired and cannot be reinstated.");
+        return new self(__('titles.errors.reinstated.retired', ['context' => $context]));
     }
 
     public static function neverActivated(Title $title): static
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} has never been activated and cannot be reinstated. Use debut workflow instead.");
+        return new self(__('titles.errors.reinstated.never_activated', ['context' => $context]));
     }
 }

@@ -32,6 +32,75 @@ return [
 
     'errors' => [
         'members_changed_concurrently' => 'This stable or one of its members was changed at the same time. Refresh the page and try again.',
+        'deleted' => [
+            'already_deleted' => ':context cannot be deleted because it is already deleted.',
+            'currently_active' => ':context is currently active and cannot be deleted. Use disband action first.',
+            'future_establishment_scheduled' => ':context has a future establishment scheduled and cannot be deleted.',
+            'has_current_members' => '{1} :context has :count current member and cannot be deleted. Remove members first or use disband action.|[0,*] :context has :count current members and cannot be deleted. Remove members first or use disband action.',
+        ],
+        'disbanded' => [
+            'deleted' => ':context cannot be disbanded because it is deleted. Restore the stable first.',
+            'unactivated' => ':context is not active and cannot be disbanded.',
+            'disbanded' => ':context is already disbanded.',
+            'has_future_activation' => ':context has not been officially activated and cannot be disbanded.',
+        ],
+        'established' => [
+            'deleted' => ':context cannot be established because it is deleted. Restore the stable first.',
+            'established' => ':context is already established and cannot be re-established.',
+            'insufficient_members' => ':context has :current_members members but requires at least :minimum_members members to be established.',
+            'with_end_date' => ':context cannot be established with an end date. Establish it, then disband it when it ends.',
+        ],
+        'merged' => [
+            'self_merge' => ':context cannot be merged with itself.',
+            'different_promotions' => ':primary_context and :secondary_context belong to different promotions and cannot be merged.',
+            'primary_retired' => ':context is retired and cannot receive merged members.',
+            'secondary_retired' => ':context is retired and cannot be merged.',
+            'primary_not_active' => ':context is not currently active and cannot receive merged members.',
+            'secondary_not_active' => ':context is not currently active and cannot be merged.',
+            'members_unavailable' => 'Cannot merge stables: these secondary stable members are unavailable: :members.',
+        ],
+        'restored' => [
+            'not_deleted' => ':context is not deleted and cannot be restored.',
+            'name_conflict' => ':context cannot be restored: name conflicts with existing stable \':conflicting_stable_name\'.',
+        ],
+        'retired' => [
+            'deleted' => ':context cannot be retired because it is deleted. Restore the stable first.',
+            'not_active' => ':context is not currently active and cannot be retired.',
+            'already_retired' => ':context is already retired.',
+        ],
+        'reunited' => [
+            'deleted' => ':context cannot be reunited because it is deleted. Restore the stable first.',
+            'never_active' => ':context has never been active and cannot be reunited. Use establishment instead.',
+            'currently_active' => ':context is currently active and doesn\'t need reunion.',
+            'retired' => ':context is retired and cannot be reunited. Consider unretirement instead.',
+            'insufficient_former_members' => ':context cannot be reunited: only :available_count former members available, but :minimum_required required.',
+            'members_not_available' => ':context cannot be reunited: these members are not available former members: :members.',
+            'below_minimum' => ':context cannot be reunited: the returning members count as :member_count, but at least :minimum_required are required.',
+        ],
+        'split' => [
+            'retired' => ':context is retired and cannot be split.',
+            'not_active' => ':context is not currently active and cannot be split.',
+            'insufficient_members' => ':context has only :current_members members but requires at least :minimum_required members to split.',
+            'no_members_to_move' => 'Cannot split stable: at least one member must be moved to the new stable.',
+            'all_members_moving' => 'Cannot split stable: at least one member must remain in the original stable.',
+            'members_do_not_belong_to_stable' => 'Cannot split stable: these selected members do not belong to the original stable: :members.',
+            'members_unavailable' => 'Cannot split stable: these selected members are unavailable: :members.',
+            'separates_tag_team_from_wrestlers' => 'Cannot split stable: tag team \':tag_team_name\' and its wrestlers (:names) must move together, otherwise they would be current members of both stables.',
+            'name_taken' => 'Cannot split stable: an active stable named \':name\' already exists in this promotion.',
+            'resulting_stable_below_minimum' => 'Cannot split stable: the :stable stable would have :member_count members but requires at least :minimum_required.',
+        ],
+        'unretired' => [
+            'deleted' => ':context cannot be unretired because it is deleted. Restore the stable first.',
+            'not_retired' => ':context is not retired and cannot be unretired.',
+            'no_available_former_members' => ':context cannot be unretired: no former members are currently available.',
+            'insufficient_former_members' => ':context cannot be unretired: only :available_count former members available, but :minimum_required required.',
+            'key_members_unavailable' => ':context cannot be unretired: key former members unavailable: :unavailable_members.',
+        ],
+        'updated' => [
+            'start_date_locked' => ':context has been active in more than one period, so its start date cannot be changed.',
+            'ends_open_period' => ':context is active, so it cannot be given an end date here. Disband it instead.',
+            'inactive_with_members' => ':context is disbanded and cannot have members. Reunite it instead.',
+        ],
     ],
 
     'actions' => [
