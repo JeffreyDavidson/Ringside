@@ -8,6 +8,12 @@ return [
     'actions' => 'Actions',
     'clear_search' => 'Clear search',
     'clear_filters' => 'Clear filters',
+    'deleted' => 'Deleted',
+    'deleted_filter' => [
+        'hide' => 'Hide deleted',
+        'label' => 'Deleted records',
+        'show' => 'Show deleted',
+    ],
     'dismiss_notification' => 'Dismiss notification',
     'combobox' => [
         'capped' => 'Showing the first :count matches. Keep typing to narrow the list.',
@@ -55,6 +61,7 @@ return [
         'release' => 'Release :name?',
         'release_booked' => 'Release :name? Booked in upcoming or unresulted events: :events.',
         'remove' => 'Remove :name?',
+        'restore' => 'Restore :name?',
         'retire' => 'Retire :name?',
         'retire_booked' => 'Retire :name? Booked in upcoming or unresulted events: :events.',
         'suspend' => 'Suspend :name?',
@@ -166,6 +173,7 @@ return [
         'actions_for' => 'Actions for :name',
         'edit' => 'Edit',
         'remove' => 'Remove',
+        'restore' => 'Restore',
         'view' => 'View',
     ],
 

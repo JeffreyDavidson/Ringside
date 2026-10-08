@@ -40,6 +40,7 @@ return [
         'injured' => 'Injury has been recorded.',
         'cleared_from_injury' => 'Referee has been cleared from injury.',
         'deleted' => 'Referee has been removed from the roster.',
+        'restored' => 'Referee has been restored to the roster.',
     ],
 
     'errors' => [
@@ -81,6 +82,10 @@ return [
         'clear_from_injury' => [
             'default' => 'Unable to clear this referee from injury.',
             'not_injured' => 'This referee is not currently injured.',
+        ],
+        'restore' => [
+            'default' => 'Unable to restore this referee.',
+            'not_deleted' => 'This referee has not been deleted.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],

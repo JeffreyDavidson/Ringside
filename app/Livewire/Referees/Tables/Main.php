@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Tables;
 
 use App\Actions\Referees\DeleteAction;
+use App\Actions\Referees\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\RefereeBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
@@ -80,9 +83,15 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(EmploymentStatus::filterOptions())
+                ->options(DeletedFilter::appendTo(EmploymentStatus::filterOptions()))
                 ->filter(function (RefereeBuilder $builder, string $value): void {
                     /** @var RefereeBuilder<Referee> $builder */
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = EmploymentStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -96,5 +105,10 @@ class Main extends BaseTable
     public function delete(Referee $referee, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($referee, $deleteAction->handle(...), __('referees.actions.deleted'));
+    }
+
+    public function restore(int $refereeId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(Referee::withTrashed()->findOrFail($refereeId), $restoreAction->handle(...), __('referees.actions.restored'), RosterEntityType::Referee);
     }
 }

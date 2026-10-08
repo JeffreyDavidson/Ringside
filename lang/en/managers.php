@@ -42,6 +42,7 @@ return [
         'injured' => 'Manager injury has been recorded.',
         'cleared_from_injury' => 'Manager has been cleared from injury.',
         'deleted' => 'Manager has been deleted.',
+        'restored' => 'Manager has been restored.',
     ],
 
     'errors' => [
@@ -83,6 +84,10 @@ return [
         'clear_from_injury' => [
             'default' => 'Unable to clear this manager from injury.',
             'not_injured' => 'This manager is not currently injured.',
+        ],
+        'restore' => [
+            'default' => 'Unable to restore this manager.',
+            'not_deleted' => 'This manager has not been deleted.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],

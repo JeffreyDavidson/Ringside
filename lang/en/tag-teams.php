@@ -39,6 +39,7 @@ return [
         'suspended' => 'Tag team has been suspended.',
         'reinstated' => 'Tag team has been reinstated.',
         'deleted' => 'Tag team has been deleted.',
+        'restored' => 'Tag team has been restored.',
     ],
 
     'errors' => [
@@ -68,6 +69,10 @@ return [
         'reinstate' => [
             'default' => 'Unable to reinstate this tag team.',
             'not_suspended' => 'This tag team is not currently suspended.',
+        ],
+        'restore' => [
+            'default' => 'Unable to restore this tag team. Another active tag team may already use its name.',
+            'not_deleted' => 'This tag team has not been deleted.',
         ],
         'general' => 'An unexpected error occurred. Please try again.',
     ],

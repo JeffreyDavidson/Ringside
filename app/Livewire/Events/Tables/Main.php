@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\DeleteAction;
+use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Builders\Events\VenueBuilder;
 use App\Enums\EventStatus;
+use App\Enums\Shared\DeletedFilter;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Table\Column;
@@ -116,8 +118,14 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(EventStatus::filterOptions())
+                ->options(DeletedFilter::appendTo(EventStatus::filterOptions()))
                 ->filter(function (EventBuilder $builder, string $value): void {
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = EventStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -165,5 +173,10 @@ class Main extends BaseTable
     public function delete(Event $event, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($event, $deleteAction->handle(...), __('events.actions.deleted'));
+    }
+
+    public function restore(int $eventId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(Event::withTrashed()->findOrFail($eventId), $restoreAction->handle(...), __('events.actions.restored'));
     }
 }

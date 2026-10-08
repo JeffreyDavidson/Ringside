@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Actions\Wrestlers\DeleteAction;
+use App\Actions\Wrestlers\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\Roster\RosterEntityType;
+use App\Enums\Shared\DeletedFilter;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
@@ -85,8 +88,14 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(EmploymentStatus::filterOptions())
+                ->options(DeletedFilter::appendTo(EmploymentStatus::filterOptions()))
                 ->filter(function (WrestlerBuilder $builder, string $value): void {
+                    if (DeletedFilter::tryFrom($value) !== null) {
+                        $builder->onlyTrashed();
+
+                        return;
+                    }
+
                     $status = EmploymentStatus::tryFrom($value);
 
                     if ($status !== null) {
@@ -100,5 +109,10 @@ class Main extends BaseTable
     public function delete(Wrestler $wrestler, DeleteAction $deleteAction): void
     {
         $this->deleteRecord($wrestler, $deleteAction->handle(...), __('wrestlers.actions.deleted'));
+    }
+
+    public function restore(int $wrestlerId, RestoreAction $restoreAction): void
+    {
+        $this->restoreRecord(Wrestler::withTrashed()->findOrFail($wrestlerId), $restoreAction->handle(...), __('wrestlers.actions.restored'), RosterEntityType::Wrestler);
     }
 }
