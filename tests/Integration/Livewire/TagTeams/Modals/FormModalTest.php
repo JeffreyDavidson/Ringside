@@ -44,10 +44,10 @@ describe('authorized tag team form interactions', function () {
     });
 
     it('shows the current wrestlers and managers of an edited tag team as selected labels', function () {
-        $wrestlers = collect([
-            Wrestler::factory()->create(['name' => 'Ricky Morton']),
-            Wrestler::factory()->create(['name' => 'Robert Gibson']),
-        ]);
+        $wrestlers = Wrestler::factory()
+            ->count(2)
+            ->sequence(['name' => 'Ricky Morton'], ['name' => 'Robert Gibson'])
+            ->create();
         Wrestler::factory()->create(['name' => 'Unrelated Wrestler']);
         $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
         $tagTeam = TagTeam::factory()->create();
