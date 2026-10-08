@@ -8,272 +8,81 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 
-test('it retires an employed manager', function () {
-    $manager = Manager::factory()->employed()->create();
+use function Pest\Laravel\assertDatabaseHas;
 
-    expect($manager->currentEmployment()->exists())->toBeTrue()
-        ->and($manager->currentRetirement()->exists())->toBeFalse();
+// The rules shared with wrestlers and referees are in tests/Integration/Actions/Individuals/RetireActionTest.php.
 
-    resolve(RetireAction::class)->handle($manager);
-
-    $manager->refresh();
-    expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and($manager->currentEmployment()->exists())->toBeFalse();
-
-    // Verify retirement record was created
-    $this->assertDatabaseHas('retirements', [
-        'retirable_id' => $manager->id,
-        'retirable_type' => $manager->getMorphClass(),
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-
-    // Verify employment was ended
-    $this->assertDatabaseHas('employments', [
-        'employable_id' => $manager->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-});
-
-test('it retires manager with specific retirement date', function () {
-    $manager = Manager::factory()->employed()->create();
-    $retirementDate = now()->startOfDay();
-
-    resolve(RetireAction::class)->handle($manager, $retirementDate);
-
-    $manager->refresh();
-    expect($manager->currentRetirement()->exists())->toBeTrue();
-
-    // Verify retirement and employment ended with specific date
-    $this->assertDatabaseHas('retirements', [
-        'retirable_id' => $manager->id,
-        'retirable_type' => $manager->getMorphClass(),
-        'started_at' => $retirementDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-
-    $this->assertDatabaseHas('employments', [
-        'employable_id' => $manager->id,
-        'ended_at' => $retirementDate->toDateTimeString(),
-    ]);
-});
-
-test('it retires suspended manager and ends suspension', function () {
-    $manager = Manager::factory()->suspended()->create();
-
-    expect($manager->currentSuspension()->exists())->toBeTrue()
-        ->and($manager->currentEmployment()->exists())->toBeTrue();
-
-    resolve(RetireAction::class)->handle($manager);
-
-    $manager->refresh();
-    expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and($manager->currentSuspension()->exists())->toBeFalse()
-        ->and($manager->currentEmployment()->exists())->toBeFalse();
-
-    // Verify suspension was ended
-    $this->assertDatabaseHas('suspensions', [
-        'suspendable_id' => $manager->id,
-        'suspendable_type' => $manager->getMorphClass(),
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Verify retirement was created
-    $this->assertDatabaseHas('retirements', [
-        'retirable_id' => $manager->id,
-        'retirable_type' => $manager->getMorphClass(),
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-});
-
-test('it retires injured manager and ends injury', function () {
-    $manager = Manager::factory()->injured()->create();
-
-    expect($manager->currentInjury()->exists())->toBeTrue()
-        ->and($manager->currentEmployment()->exists())->toBeTrue();
-
-    resolve(RetireAction::class)->handle($manager);
-
-    $manager->refresh();
-    expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and($manager->currentInjury()->exists())->toBeFalse()
-        ->and($manager->currentEmployment()->exists())->toBeFalse();
-
-    // Verify injury was ended
-    $this->assertDatabaseHas('injuries', [
-        'injurable_id' => $manager->id,
-        'injurable_type' => $manager->getMorphClass(),
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Verify retirement was created
-    $this->assertDatabaseHas('retirements', [
-        'retirable_id' => $manager->id,
-        'retirable_type' => $manager->getMorphClass(),
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-});
-
-test('it ends current management relationships', function () {
+test('it ends current management relationships with the wrestlers and tag teams', function () {
+    // Arrange
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $tagTeam = TagTeam::factory()->create();
-
-    // Assign manager to wrestler and tag team
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDays(30)]);
     $manager->tagTeams()->attach($tagTeam->id, ['hired_at' => now()->subDays(20)]);
 
-    expect($manager->currentWrestlers)->toHaveCount(1)
-        ->and($manager->currentTagTeams)->toHaveCount(1);
-
+    // Act
     resolve(RetireAction::class)->handle($manager);
 
-    $manager->refresh();
-
-    expect($manager->currentWrestlers)->toBeEmpty()
+    // Assert
+    expect($manager->refresh()->currentWrestlers)->toBeEmpty()
         ->and($manager->currentTagTeams)->toBeEmpty();
 
-    // Verify relationships were ended with retirement date
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'manager_id' => $manager->id,
         'wrestler_id' => $wrestler->id,
         'fired_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'manager_id' => $manager->id,
         'tag_team_id' => $tagTeam->id,
         'fired_at' => now()->toDateTimeString(),
     ]);
 });
 
-test('it persists retirement and ends current relationships', function () {
+test('it ends the current management relationship on the given retirement date', function () {
+    // Arrange
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
-
-    // Set up management relationship
+    $retirementDate = now()->startOfDay();
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    expect($manager->currentRetirement)->toBeNull()
-        ->and($manager->currentWrestlers)->toHaveCount(1);
+    // Act
+    resolve(RetireAction::class)->handle($manager, $retirementDate);
 
-    resolve(RetireAction::class)->handle($manager);
-
-    $manager->refresh();
-
-    // Verify retirement period was created
-    expect($manager->currentRetirement)->not()->toBeNull();
-    expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and($manager->currentWrestlers)->toBeEmpty();
-});
-
-test('it prevents retiring already retired manager', function () {
-    $manager = Manager::factory()->retired()->create();
-
-    expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and(fn () => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
-});
-
-test('it prevents retiring unemployed manager', function () {
-    $manager = Manager::factory()->create();
-
-    expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn () => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
-});
-
-test('it handles database transactions correctly', function () {
-    $manager = Manager::factory()->employed()->create();
-    $wrestler = Wrestler::factory()->employed()->create();
-    $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
-
-    resolve(RetireAction::class)->handle($manager);
-
-    $manager->refresh();
-
-    // Verify transaction was successful - all operations completed
-    expect($manager->currentRetirement()->exists())->toBeTrue();
-    expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and($manager->currentWrestlers)->toBeEmpty();
-
-    // Verify all database changes are consistent
-    $retirement = $manager->currentRetirement()->firstOrFail();
-    expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
-        ->and($retirement->ended_at)->toBeNull();
-});
-
-test('it uses the provided date', function () {
-    $manager = Manager::factory()->employed()->create();
-    $customRetirementDate = now()->startOfDay();
-
-    resolve(RetireAction::class)->handle($manager, $customRetirementDate);
-
-    $manager->refresh();
-
-    // Verify the provided date was used across all operations
-    $this->assertDatabaseHas('retirements', [
-        'retirable_id' => $manager->id,
-        'retirable_type' => $manager->getMorphClass(),
-        'started_at' => $customRetirementDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-
-    $this->assertDatabaseHas('employments', [
-        'employable_id' => $manager->id,
-        'ended_at' => $customRetirementDate->toDateTimeString(),
+    // Assert
+    assertDatabaseHas('wrestlers_managers', [
+        'manager_id' => $manager->id,
+        'wrestler_id' => $wrestler->id,
+        'fired_at' => $retirementDate->toDateTimeString(),
     ]);
 });
 
-test('it preserves management history during retirement', function () {
+test('it keeps earlier management relationships when retiring', function () {
+    // Arrange
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
-
-    // Create historical and current management relationships
     $manager->wrestlers()->attach($wrestler->id, [
         'hired_at' => now()->subDays(30),
-        'fired_at' => now()->subDays(20), // Historical relationship
+        'fired_at' => now()->subDays(20),
     ]);
-    $manager->wrestlers()->attach($wrestler->id, [
-        'hired_at' => now()->subDays(10), // Current relationship
-    ]);
+    $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDays(10)]);
 
-    expect($manager->wrestlers()->count())->toBe(2); // Total relationships
-    expect($manager->currentWrestlers)->toHaveCount(1); // Current relationships
-
+    // Act
     resolve(RetireAction::class)->handle($manager);
 
-    $manager->refresh();
-
-    // Should preserve all historical relationships while ending current ones
-    expect($manager->wrestlers()->count())->toBe(2); // Historical preserved
-    expect($manager->currentWrestlers)->toBeEmpty(); // Current ended
-
-    // Verify the current relationship was ended with retirement date
+    // Assert
     $currentRelationship = WrestlerManager::query()
         ->whereBelongsTo($manager)
         ->where('hired_at', now()->subDays(10))
         ->firstOrFail();
+    $earlierRelationship = WrestlerManager::query()
+        ->whereBelongsTo($manager)
+        ->where('hired_at', now()->subDays(30))
+        ->firstOrFail();
 
-    expect(requiredDate($currentRelationship->fired_at)->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect($manager->refresh()->wrestlers()->count())->toBe(2)
+        ->and($manager->currentWrestlers)->toBeEmpty()
+        ->and(requiredDate($currentRelationship->fired_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and(requiredDate($earlierRelationship->fired_at)->toDateTimeString())->toBe(now()->subDays(20)->toDateTimeString());
 });
-
-test('it ends employment and an open suspension or injury on their own start dates when retired before they began', function (string $relation) {
-    // Arrange
-    $manager = Manager::factory()->create();
-    $employmentStartedAt = now()->subDays(10)->startOfSecond();
-    $periodStartedAt = now()->subDays(2)->startOfSecond();
-    $employment = $manager->employments()->create(['started_at' => $employmentStartedAt]);
-    $period = $manager->{$relation}()->create(['started_at' => $periodStartedAt]);
-
-    // Act
-    resolve(RetireAction::class)->handle($manager, now()->subDays(20));
-
-    // Assert
-    expect($employment->refresh()->ended_at?->toDateTimeString())->toBe($employmentStartedAt->toDateTimeString())
-        ->and($period->refresh()->ended_at?->toDateTimeString())->toBe($periodStartedAt->toDateTimeString())
-        ->and($manager->currentRetirement()->exists())->toBeTrue();
-})->with([
-    'suspension' => 'suspensions',
-    'injury' => 'injuries',
-]);
