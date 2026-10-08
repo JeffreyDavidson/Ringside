@@ -9,56 +9,84 @@ use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-beforeEach(function () {
-    $this->title = Title::factory()->create();
-    $this->firstChampion = Wrestler::factory()->create();
-    $this->previousChampion = Wrestler::factory()->create();
-    $this->currentChampion = Wrestler::factory()->create();
+/**
+ * @return array{
+ *     title: Title,
+ *     firstChampion: Wrestler,
+ *     previousChampion: Wrestler,
+ *     currentChampion: Wrestler,
+ *     firstChampionship: TitleChampionship,
+ *     previousChampionship: TitleChampionship,
+ *     currentChampionship: TitleChampionship,
+ * }
+ */
+function queriesTitlesTitleChampionshipQueryFixtures(): array
+{
+    $title = Title::factory()->create();
+    $firstChampion = Wrestler::factory()->create();
+    $previousChampion = Wrestler::factory()->create();
+    $currentChampion = Wrestler::factory()->create();
 
-    $this->firstChampionship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->firstChampion)
+    $firstChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($firstChampion)
         ->wonOn(now()->subYears(3)->toDateString())
         ->lostOn(now()->subYears(2)->toDateString())
         ->create();
 
-    $this->previousChampionship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->previousChampion)
+    $previousChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($previousChampion)
         ->wonOn(now()->subYears(2)->toDateString())
         ->lostOn(now()->subMonth()->toDateString())
         ->create();
 
-    $this->currentChampionship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->currentChampion)
+    $currentChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($currentChampion)
         ->wonOn(now()->subWeek()->toDateString())
         ->current()
         ->create();
-});
+
+    return [
+        'title' => $title,
+        'firstChampion' => $firstChampion,
+        'previousChampion' => $previousChampion,
+        'currentChampion' => $currentChampion,
+        'firstChampionship' => $firstChampionship,
+        'previousChampionship' => $previousChampionship,
+        'currentChampionship' => $currentChampionship,
+    ];
+}
 
 test('returns the current champion', function () {
-    expect(TitleChampionshipQuery::currentChampion($this->title)?->is($this->currentChampion))->toBeTrue();
+    ['title' => $title, 'currentChampion' => $currentChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
+    expect(TitleChampionshipQuery::currentChampion($title)?->is($currentChampion))->toBeTrue();
 });
 
 test('uses the eager-loaded current championship', function () {
+    ['title' => $titleFixture, 'currentChampion' => $currentChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
     $title = Title::query()
         ->with('currentChampionship.champion')
-        ->findOrFail($this->title->id);
+        ->findOrFail($titleFixture->id);
 
     DB::enableQueryLog();
     DB::flushQueryLog();
 
     $champion = TitleChampionshipQuery::currentChampion($title);
 
-    expect($champion?->is($this->currentChampion))->toBeTrue()
+    expect($champion?->is($currentChampion))->toBeTrue()
         ->and(DB::getQueryLog())->toBeEmpty();
 });
 
 test('calculates the length of an ended championship reign', function () {
+    ['title' => $title, 'firstChampion' => $firstChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
     $championship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->firstChampion)
+        ->for($title)
+        ->forWrestler($firstChampion)
         ->wonOn('2025-01-01')
         ->lostOn('2025-01-11')
         ->make();
@@ -67,11 +95,13 @@ test('calculates the length of an ended championship reign', function () {
 });
 
 test('calculates the length of a current championship reign', function () {
+    ['title' => $title, 'firstChampion' => $firstChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
     Carbon::setTestNow('2025-01-11');
 
     $championship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->firstChampion)
+        ->for($title)
+        ->forWrestler($firstChampion)
         ->wonOn('2025-01-01')
         ->current()
         ->make();
@@ -82,9 +112,11 @@ test('calculates the length of a current championship reign', function () {
 });
 
 test('calculates current reign length from an explicit as-of date', function () {
+    ['title' => $title, 'firstChampion' => $firstChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
     $championship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->firstChampion)
+        ->for($title)
+        ->forWrestler($firstChampion)
         ->wonOn('2025-01-01')
         ->current()
         ->make();
@@ -93,13 +125,17 @@ test('calculates current reign length from an explicit as-of date', function () 
 });
 
 test('returns no champion for a title without reigns', function () {
+    queriesTitlesTitleChampionshipQueryFixtures();
+
     expect(TitleChampionshipQuery::currentChampion(Title::factory()->create()))->toBeNull();
 });
 
 test('never reports a negative reign length for a reign dated in the future', function () {
+    ['title' => $title, 'firstChampion' => $firstChampion] = queriesTitlesTitleChampionshipQueryFixtures();
+
     $championship = TitleChampionship::factory()
-        ->for($this->title)
-        ->forWrestler($this->firstChampion)
+        ->for($title)
+        ->forWrestler($firstChampion)
         ->wonOn(now()->addDays(10)->toDateTimeString())
         ->current()
         ->make();
