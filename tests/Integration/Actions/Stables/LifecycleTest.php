@@ -237,17 +237,14 @@ describe('Stable Activation Action Integration', function () {
             expect(requiredDate($retirement->ended_at)->format('Y-m-d H:i:s'))->toBe($unretireDate->format('Y-m-d H:i:s'));
         });
 
-        test('unretire eligibility respects the former member option', function () {
+        test('unretire eligibility requires available former members', function () {
             $stable = Stable::factory()
                 ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
                 ->create();
 
             expect(resolve(StableRetirementEligibility::class)->canUnretire($stable))->toBeFalse()
-                ->and(resolve(StableRetirementEligibility::class)->canUnretire($stable, requireFormerMembers: false))->toBeTrue()
                 ->and(fn () => resolve(StableRetirementEligibility::class)->ensureCanUnretire($stable))
-                ->toThrow(CannotBeUnretiredException::class)
-                ->and(fn () => resolve(StableRetirementEligibility::class)->ensureCanUnretire($stable, requireFormerMembers: false))
-                ->not->toThrow(CannotBeUnretiredException::class);
+                ->toThrow(CannotBeUnretiredException::class);
         });
 
         test('unretire action rejects a deleted stable', function () {
