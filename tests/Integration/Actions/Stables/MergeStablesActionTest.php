@@ -12,6 +12,8 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Roster\Stables\StableMembershipService;
 
+use function Pest\Laravel\assertSoftDeleted;
+
 it('moves current members to the primary stable and preserves secondary history', function () {
     $primaryStable = Stable::factory()->active()->create();
     $secondaryStable = Stable::factory()->active()->create();
@@ -44,7 +46,7 @@ it('moves current members to the primary stable and preserves secondary history'
         ->and(requiredDate($secondaryStable->previousActivityPeriods()->firstOrFail()->ended_at)->format('Y-m-d H:i:s'))
         ->toBe($mergeDate->format('Y-m-d H:i:s'));
 
-    $this->assertSoftDeleted($secondaryStable);
+    assertSoftDeleted($secondaryStable);
 });
 
 it('rejects unavailable secondary members without changing either stable', function () {

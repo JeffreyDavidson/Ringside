@@ -9,6 +9,9 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+
 test('it creates a wrestler with basic information', function () {
     $data = new WrestlerData(
         name: 'John Cena',
@@ -29,7 +32,7 @@ test('it creates a wrestler with basic information', function () {
         ->and($result->weight->toPounds())->toBe(251)
         ->and($result->signature_move)->toBe('Attitude Adjustment');
 
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'name' => 'John Cena',
         'hometown' => 'West Newbury, Massachusetts',
         'weight' => 251,
@@ -37,7 +40,7 @@ test('it creates a wrestler with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('employments', [
+    assertDatabaseMissing('employments', [
         'employable_id' => $result->id,
     ]);
 });
@@ -59,7 +62,7 @@ test('it creates a wrestler with employment when employment date is provided', f
     expect($result->name)->toBe('The Rock')
         ->and($result->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'name' => 'The Rock',
         'hometown' => 'Miami, Florida',
         'weight' => 260,
@@ -67,7 +70,7 @@ test('it creates a wrestler with employment when employment date is provided', f
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -97,7 +100,7 @@ test('it creates wrestler with all optional fields', function () {
         ->and($result->signature_move)->toBe('Stone Cold Stunner');
 
     // Verify database state
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $result->id,
         'name' => 'Stone Cold Steve Austin',
         'hometown' => 'Austin, Texas',
@@ -105,7 +108,7 @@ test('it creates wrestler with all optional fields', function () {
         'signature_move' => 'Stone Cold Stunner',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -166,7 +169,7 @@ test('it employs assigned managers through the wrestler employment cascade', fun
     expect($wrestler->currentEmployment()->exists())->toBeTrue()
         ->and($manager->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,

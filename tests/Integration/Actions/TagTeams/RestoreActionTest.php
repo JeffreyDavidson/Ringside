@@ -8,6 +8,8 @@ use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it restores a soft-deleted tag team', function () {
     $tagTeam = TagTeam::factory()->create();
     $originalName = $tagTeam->name;
@@ -25,7 +27,7 @@ test('it restores a soft-deleted tag team', function () {
         ->and($tagTeam->name)->toBe($originalName);
 
     // Verify restoration in database
-    $this->assertDatabaseHas('tag_teams', [
+    assertDatabaseHas('tag_teams', [
         'id' => $tagTeam->id,
         'name' => $originalName,
         'deleted_at' => null,

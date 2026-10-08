@@ -7,6 +7,8 @@ use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\expectsDatabaseQueryCount;
+
 /**
  * Integration tests for IndividualBuilder abstract base class.
  *
@@ -110,7 +112,7 @@ describe('IndividualBuilder Integration Tests', function () {
 
     test('projected employment status does not query per wrestler', function () {
         // Arrange
-        $this->expectsDatabaseQueryCount(1);
+        expectsDatabaseQueryCount(1);
 
         // Act
         $query = Wrestler::query();

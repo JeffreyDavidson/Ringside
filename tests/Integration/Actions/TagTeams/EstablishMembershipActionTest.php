@@ -12,6 +12,8 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 it('accepts omitted membership groups', function () {
     $tagTeam = TagTeam::factory()->create();
 
@@ -44,7 +46,7 @@ it('establishes wrestler and manager memberships with the same date', function (
         ->toEqualCanonicalizing($managers->modelKeys());
 
     foreach ($wrestlers as $wrestler) {
-        $this->assertDatabaseHas('tag_teams_wrestlers', [
+        assertDatabaseHas('tag_teams_wrestlers', [
             'tag_team_id' => $this->tagTeam->id,
             'wrestler_id' => $wrestler->id,
             'joined_at' => $this->membershipDate->toDateTimeString(),
@@ -53,7 +55,7 @@ it('establishes wrestler and manager memberships with the same date', function (
     }
 
     foreach ($managers as $manager) {
-        $this->assertDatabaseHas('tag_teams_managers', [
+        assertDatabaseHas('tag_teams_managers', [
             'tag_team_id' => $this->tagTeam->id,
             'manager_id' => $manager->id,
             'hired_at' => $this->membershipDate->toDateTimeString(),
@@ -92,12 +94,12 @@ it('synchronizes memberships while preserving relationship history', function ()
         ->and($this->tagTeam->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing([$addedManager->id]);
 
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
+    assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $this->tagTeam->id,
         'wrestler_id' => $removedWrestler->id,
         'left_at' => $changeDate->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'tag_team_id' => $this->tagTeam->id,
         'manager_id' => $removedManager->id,
         'fired_at' => $changeDate->toDateTimeString(),

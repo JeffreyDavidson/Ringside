@@ -6,6 +6,7 @@ use App\Livewire\Venues\Tables\Main;
 use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -118,7 +119,7 @@ describe('venues table', function (): void {
                 type: 'status',
                 message: __('venues.actions.deleted'),
             );
-        $this->assertSoftDeleted($venue);
+        assertSoftDeleted($venue);
     });
 
     it('renders an empty state when there are no venues', function (): void {

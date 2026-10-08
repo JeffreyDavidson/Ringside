@@ -8,6 +8,8 @@ use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertSoftDeleted;
+
 test('it soft deletes a tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
@@ -21,7 +23,7 @@ test('it soft deletes a tag team', function () {
         ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse();
 
     // Verify soft delete in database
-    $this->assertSoftDeleted('tag_teams', [
+    assertSoftDeleted('tag_teams', [
         'id' => $tagTeam->id,
     ]);
 });
@@ -69,7 +71,7 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->trashed())->toBeTrue();
 
     // Verify record still exists but is soft deleted
-    $this->assertSoftDeleted('tag_teams', [
+    assertSoftDeleted('tag_teams', [
         'id' => $originalId,
     ]);
 });

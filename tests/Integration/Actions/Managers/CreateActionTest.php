@@ -6,6 +6,9 @@ use App\Actions\Managers\CreateAction;
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+
 test('it creates a manager with basic information', function () {
     $data = new ManagerData('Taylor', 'Otwell', null);
 
@@ -15,13 +18,13 @@ test('it creates a manager with basic information', function () {
         ->and($result->first_name)->toBe('Taylor')
         ->and($result->last_name)->toBe('Otwell');
 
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'first_name' => 'Taylor',
         'last_name' => 'Otwell',
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('employments', [
+    assertDatabaseMissing('employments', [
         'employable_id' => $result->id,
     ]);
 });
@@ -36,13 +39,13 @@ test('it creates a manager with employment when employment date is provided', fu
         ->and($result->first_name)->toBe('Jeffrey')
         ->and($result->last_name)->toBe('Davidson');
 
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -67,13 +70,13 @@ test('it creates manager with all optional fields', function () {
         ->and($result->last_name)->toBe('Doe');
 
     // Verify database state
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'id' => $result->id,
         'first_name' => 'John',
         'last_name' => 'Doe',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,

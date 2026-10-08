@@ -9,6 +9,8 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it creates a new tag team', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
@@ -27,7 +29,7 @@ test('it creates a new tag team', function () {
         ->and($tagTeam->signature_move)->toBe('Double Suplex');
 
     // Verify tag team was created in database
-    $this->assertDatabaseHas('tag_teams', [
+    assertDatabaseHas('tag_teams', [
         'name' => 'The Test Team',
         'signature_move' => 'Double Suplex',
     ]);
@@ -50,7 +52,7 @@ test('it creates tag team with minimal data', function () {
     expect($tagTeam->name)->toBe('Minimal Team')
         ->and($tagTeam->signature_move)->toBeNull();
 
-    $this->assertDatabaseHas('tag_teams', [
+    assertDatabaseHas('tag_teams', [
         'name' => 'Minimal Team',
         'signature_move' => null,
     ]);
@@ -71,13 +73,13 @@ test('it creates partnerships for both wrestlers', function () {
     $tagTeam = resolve(CreateAction::class)->handle($data);
 
     // Verify partnerships were created
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
+    assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestlerA->id,
         'left_at' => null,
     ]);
 
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
+    assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestlerB->id,
         'left_at' => null,

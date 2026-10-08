@@ -7,6 +7,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it retires eligible current wrestlers and managers', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
@@ -25,13 +27,13 @@ test('it retires eligible current wrestlers and managers', function () {
     expect($wrestler->currentRetirement()->exists())->toBeTrue()
         ->and($manager->currentRetirement()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
         'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $manager->id,
         'retirable_type' => $manager->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),

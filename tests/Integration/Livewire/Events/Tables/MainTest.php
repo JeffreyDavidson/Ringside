@@ -11,6 +11,7 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -330,7 +331,7 @@ describe('events table', function (): void {
                 type: 'status',
                 message: __('events.actions.deleted'),
             );
-        $this->assertSoftDeleted($event);
+        assertSoftDeleted($event);
     });
 
     it('renders an empty state when there are no events', function (): void {

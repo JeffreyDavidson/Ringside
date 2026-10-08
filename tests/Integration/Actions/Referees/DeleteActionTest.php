@@ -6,6 +6,9 @@ use App\Actions\Referees\DeleteAction;
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertSoftDeleted;
+
 test('it soft deletes an unemployed referee', function () {
     $referee = Referee::factory()->create();
 
@@ -18,7 +21,7 @@ test('it soft deletes an unemployed referee', function () {
     expect($referee->trashed())->toBeTrue();
 
     // Verify referee is soft deleted
-    $this->assertSoftDeleted('referees', [
+    assertSoftDeleted('referees', [
         'id' => $referee->id,
         'first_name' => $referee->first_name,
         'last_name' => $referee->last_name,
@@ -56,7 +59,7 @@ test('it soft deletes referee with specific deletion date', function () {
 
     // Note: Laravel soft deletes use current timestamp, so we can't directly test custom dates
     // The custom date is used to close active lifecycle periods
-    $this->assertSoftDeleted('referees', [
+    assertSoftDeleted('referees', [
         'id' => $referee->id,
     ]);
 });
@@ -77,7 +80,7 @@ test('it ends employment before deletion', function () {
         ->and($employment->ended_at)->not->toBeNull();
 
     // Verify employment was ended
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'id' => $employment->id,
         'employable_id' => $referee->id,
         'ended_at' => now()->toDateTimeString(),
@@ -100,7 +103,7 @@ test('it ends suspension before deletion', function () {
         ->and($suspension->ended_at)->not->toBeNull();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
         'suspendable_id' => $referee->id,
         'suspendable_type' => $referee->getMorphClass(),
@@ -124,7 +127,7 @@ test('it ends injury before deletion', function () {
         ->and($injury->ended_at)->not->toBeNull();
 
     // Verify injury was ended
-    $this->assertDatabaseHas('injuries', [
+    assertDatabaseHas('injuries', [
         'id' => $injury->id,
         'injurable_id' => $referee->id,
         'injurable_type' => $referee->getMorphClass(),
@@ -148,7 +151,7 @@ test('it ends retirement before deletion', function () {
         ->and($retirement->ended_at)->not->toBeNull();
 
     // Verify retirement was ended
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'id' => $retirement->id,
         'retirable_id' => $referee->id,
         'retirable_type' => $referee->getMorphClass(),
@@ -166,7 +169,7 @@ test('it uses the provided deletion date', function () {
     expect($referee->trashed())->toBeTrue();
 
     // The provided deletion date should end related records
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
@@ -209,7 +212,7 @@ test('it preserves historical data after deletion', function () {
     $employment->refresh();
 
     // Historical employment record should be preserved with ended_at set
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'id' => $employment->id,
         'employable_id' => $referee->id,
         'started_at' => requiredDate($employment->started_at)->toDateTimeString(),
@@ -217,7 +220,7 @@ test('it preserves historical data after deletion', function () {
     ]);
 
     // Referee record should be soft deleted but preserved
-    $this->assertSoftDeleted('referees', [
+    assertSoftDeleted('referees', [
         'id' => $referee->id,
         'first_name' => $referee->first_name,
         'last_name' => $referee->last_name,

@@ -7,6 +7,8 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\assertSoftDeleted;
+
 test('it soft deletes a match while preserving its historical records', function () {
     $eventMatch = EventMatch::factory()->complete()->withReferees()->create();
     $competitorIds = $eventMatch->competitors()->pluck('id');
@@ -17,7 +19,7 @@ test('it soft deletes a match while preserving its historical records', function
 
     resolve(DeleteAction::class)->handle($eventMatch);
 
-    $this->assertSoftDeleted($eventMatch);
+    assertSoftDeleted($eventMatch);
 
     expect(EventMatch::query()->find($eventMatch->id))->toBeNull()
         ->and(EventMatch::withTrashed()->find($eventMatch->id))->not->toBeNull()

@@ -9,6 +9,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\travel;
 
 beforeEach(function () {
@@ -37,7 +38,7 @@ test('it updates tag team basic information', function () {
     expect($this->tagTeam->name)->toBe('Updated Team')
         ->and($this->tagTeam->signature_move)->toBe('Updated Move');
 
-    $this->assertDatabaseHas('tag_teams', [
+    assertDatabaseHas('tag_teams', [
         'id' => $this->tagTeam->id,
         'name' => 'Updated Team',
         'signature_move' => 'Updated Move',

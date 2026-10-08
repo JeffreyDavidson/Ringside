@@ -6,6 +6,9 @@ use App\Actions\Referees\CreateAction;
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+
 test('it creates a referee with basic information', function () {
     $data = new RefereeData(
         first_name: 'Earl',
@@ -19,13 +22,13 @@ test('it creates a referee with basic information', function () {
         ->and($result->first_name)->toBe('Earl')
         ->and($result->last_name)->toBe('Hebner');
 
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'first_name' => 'Earl',
         'last_name' => 'Hebner',
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('employments', [
+    assertDatabaseMissing('employments', [
         'employable_id' => $result->id,
     ]);
 });
@@ -45,13 +48,13 @@ test('it creates a referee with employment when employment date is provided', fu
         ->and($result->last_name)->toBe('Chioda')
         ->and($result->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'first_name' => 'Mike',
         'last_name' => 'Chioda',
     ]);
 
     // Should create employment record using EmployAction
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -74,13 +77,13 @@ test('it creates referee with proper database transactions', function () {
         ->and($result->last_name)->toBe('Robinson');
 
     // Verify database state is consistent
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'id' => $result->id,
         'first_name' => 'Charles',
         'last_name' => 'Robinson',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,

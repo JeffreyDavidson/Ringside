@@ -10,13 +10,15 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it starts an injury period on the effective date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $effectiveDate = now()->subDay();
 
     resolve(InjuryPeriodManager::class)->start($wrestler, $effectiveDate, LifecycleTransitionType::Injured);
 
-    $this->assertDatabaseHas('injuries', [
+    assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
         'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
@@ -36,7 +38,7 @@ test('it ends and preserves the active injury period', function () {
 
     resolve(InjuryPeriodManager::class)->end($wrestler, $effectiveDate, LifecycleTransitionType::ClearedFromInjury);
 
-    $this->assertDatabaseHas('injuries', [
+    assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'injurable_id' => $wrestler->id,
         'injurable_type' => $wrestler->getMorphClass(),

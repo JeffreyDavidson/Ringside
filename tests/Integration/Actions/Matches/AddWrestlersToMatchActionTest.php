@@ -11,6 +11,8 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 function wrestlerMatchSide(EventMatch $match, int $position): MatchSide
 {
     return MatchSide::factory()->for($match, 'match')->create(compact('position'));
@@ -26,7 +28,7 @@ test('it adds a single wrestler to a match', function () {
     resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
 
     // Should create competitor record
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler->id,
         'competitor_type' => $wrestler->getMorphClass(),
@@ -49,14 +51,14 @@ test('it adds multiple wrestlers to the same side', function () {
     resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
 
     // Should create competitor records for both wrestlers
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler1->id,
         'competitor_type' => $wrestler1->getMorphClass(),
         'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
     ]);
 
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler2->id,
         'competitor_type' => $wrestler2->getMorphClass(),
@@ -79,14 +81,14 @@ test('it adds wrestlers to different sides', function () {
     resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler2]), 2);
 
     // Should create competitor records with different side numbers
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler1->id,
         'competitor_type' => $wrestler1->getMorphClass(),
         'match_side_id' => $match->sides()->where('position', 1)->firstOrFail()->id,
     ]);
 
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler2->id,
         'competitor_type' => $wrestler2->getMorphClass(),

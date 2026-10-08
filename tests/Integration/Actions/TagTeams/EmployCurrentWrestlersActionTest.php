@@ -6,6 +6,8 @@ use App\Actions\TagTeams\EmployCurrentWrestlersAction;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it skips retired current wrestlers and employs the rest', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
     $retiredWrestler = Wrestler::factory()->retired()->create();
@@ -43,7 +45,7 @@ test('it employs unemployed current wrestlers', function () {
 
         expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
-        $this->assertDatabaseHas('employments', [
+        assertDatabaseHas('employments', [
             'employable_id' => $wrestler->id,
             'started_at' => $employmentDate->toDateTimeString(),
             'ended_at' => null,

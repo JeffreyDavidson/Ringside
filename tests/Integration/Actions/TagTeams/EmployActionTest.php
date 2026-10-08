@@ -6,6 +6,8 @@ use App\Actions\TagTeams\EmployAction;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it employs an unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
 
@@ -17,7 +19,7 @@ test('it employs an unemployed tag team', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -45,7 +47,7 @@ test('it employs tag team with specific employment date', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment started with specific date
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -74,7 +76,7 @@ test('it persists the employment lifecycle', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -131,7 +133,7 @@ test('it uses the provided date', function () {
     $tagTeam->refresh();
 
     // Verify the provided date was persisted
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => $customEmploymentDate->toDateTimeString(),
         'ended_at' => null,

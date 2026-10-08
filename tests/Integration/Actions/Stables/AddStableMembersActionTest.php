@@ -12,6 +12,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 beforeEach(function () {
     $this->addMembers = resolve(AddStableMembersAction::class);
     $this->removeMembers = resolve(RemoveStableMembersAction::class);
@@ -35,7 +37,7 @@ it('adds wrestlers and tag teams with the same membership date', function () {
         ->toEqualCanonicalizing($tagTeams->modelKeys());
 
     foreach ($wrestlers as $wrestler) {
-        $this->assertDatabaseHas('stables_wrestlers', [
+        assertDatabaseHas('stables_wrestlers', [
             'stable_id' => $this->stable->id,
             'wrestler_id' => $wrestler->id,
             'joined_at' => $this->membershipDate->toDateTimeString(),
@@ -44,7 +46,7 @@ it('adds wrestlers and tag teams with the same membership date', function () {
     }
 
     foreach ($tagTeams as $tagTeam) {
-        $this->assertDatabaseHas('stables_tag_teams', [
+        assertDatabaseHas('stables_tag_teams', [
             'stable_id' => $this->stable->id,
             'tag_team_id' => $tagTeam->id,
             'joined_at' => $this->membershipDate->toDateTimeString(),

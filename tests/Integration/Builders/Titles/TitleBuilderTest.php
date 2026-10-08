@@ -7,6 +7,8 @@ use App\Enums\Titles\TitleStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 
+use function Pest\Laravel\expectsDatabaseQueryCount;
+
 test('active titles can be retrieved', function () {
     // Arrange
     $activeTitle = Title::factory()->active()->create();
@@ -86,7 +88,7 @@ test('projected activity status does not query per title', function () {
     $pending = Title::factory()->withFutureActivation()->create();
     $inactive = Title::factory()->inactive()->create();
     $initial = Title::factory()->unactivated()->create();
-    $this->expectsDatabaseQueryCount(1);
+    expectsDatabaseQueryCount(1);
 
     // Act
     $query = Title::query();

@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use Illuminate\Support\Facades\Date;
 
+use function Pest\Laravel\freezeSecond;
+
 describe('event timing queries', function () {
     beforeEach(function () {
         // Arrange
-        $this->freezeSecond();
+        freezeSecond();
         $this->scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
         $this->startingEvent = Event::factory()->create(['date' => Date::now()]);
         $this->unscheduledEvent = Event::factory()->unscheduled()->create();
