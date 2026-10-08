@@ -16,7 +16,7 @@ final class CannotBeDeletedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} cannot be deleted because it is already deleted.");
+        return new self(__('core.delete_rejections.already_deleted', ['context' => $context]));
     }
 
     public static function bookedInUpcomingMatch(Wrestler|Referee $individual): static

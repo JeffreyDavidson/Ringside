@@ -11,11 +11,11 @@ final class CannotBeRescheduledException extends BaseBusinessException
 {
     public static function alreadyOccurred(Event $event): self
     {
-        return new self("Event [{$event->name}] cannot be rescheduled because it has already occurred.");
+        return new self(__('events.errors.reschedule.already_occurred', ['name' => $event->name]));
     }
 
     public static function hasTitleReigns(Event $event): self
     {
-        return new self("Event [{$event->name}] cannot be rescheduled because its matches have created or ended title reigns.");
+        return new self(__('events.errors.reschedule.has_title_reigns', ['name' => $event->name]));
     }
 }

@@ -31,6 +31,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Tag team actions',
         'employed' => 'Tag team has been hired.',
         'released' => 'Tag team contract has been terminated.',
         'retired' => 'Tag team has been retired.',
@@ -45,17 +46,14 @@ return [
             'default' => 'Unable to hire this tag team at this time.',
             'already_employed' => 'This tag team is already hired.',
             'retired' => 'Retired tag teams cannot be hired without unretiring first.',
-            'suspended' => 'Cannot hire suspended tag teams.',
         ],
         'release' => [
             'default' => 'Unable to release this tag team.',
-            'suspended' => 'Tag team must be reinstated before being released.',
             'unemployed' => 'This tag team is not currently employed.',
         ],
         'retire' => [
             'default' => 'Unable to retire this tag team.',
             'already_retired' => 'This tag team is already retired.',
-            'suspended' => 'Suspended tag teams must be reinstated before retiring.',
             'unemployed' => 'Only employed tag teams can retire.',
         ],
         'unretire' => [
@@ -71,10 +69,18 @@ return [
             'default' => 'Unable to reinstate this tag team.',
             'not_suspended' => 'This tag team is not currently suspended.',
         ],
-        'restore' => [
-            'default' => 'Unable to restore this tag team.',
-            'not_deleted' => 'This tag team has not been deleted.',
+        'general' => 'An unexpected error occurred. Please try again.',
+    ],
+
+    'validation' => [
+        'attributes' => [
+            'signature_move' => 'signature move',
+            'first_wrestler' => 'first wrestler',
+            'second_wrestler' => 'second wrestler',
+            'managers' => 'managers',
+            'manager' => 'manager',
+            'employment_date' => 'employment date',
         ],
-        'general' => 'An unexpected error occurred with this tag team action. Please try again.',
+        'not_bookable' => 'This tag team is not available for booking.',
     ],
 ];

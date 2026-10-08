@@ -13,34 +13,34 @@ final class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be unretired because it is deleted. Restore the stable first.");
+        return new self(__('stables.errors.unretired.deleted', ['context' => $context]));
     }
 
     public static function notRetired(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is not retired and cannot be unretired.");
+        return new self(__('stables.errors.unretired.not_retired', ['context' => $context]));
     }
 
     public static function noAvailableFormerMembers(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be unretired: no former members are currently available.");
+        return new self(__('stables.errors.unretired.no_available_former_members', ['context' => $context]));
     }
 
     public static function insufficientFormerMembers(Stable $stable, int $availableCount, int $minimumRequired): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be unretired: only {$availableCount} former members available, but {$minimumRequired} required.");
+        return new self(__('stables.errors.unretired.insufficient_former_members', ['context' => $context, 'available_count' => $availableCount, 'minimum_required' => $minimumRequired]));
     }
 
     public static function keyMembersUnavailable(Stable $stable, string $unavailableMembers): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be unretired: key former members unavailable: {$unavailableMembers}.");
+        return new self(__('stables.errors.unretired.key_members_unavailable', ['context' => $context, 'unavailable_members' => $unavailableMembers]));
     }
 }

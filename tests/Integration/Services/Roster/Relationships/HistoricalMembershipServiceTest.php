@@ -11,6 +11,8 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 it('adds memberships with an open historical period', function () {
     $tagTeam = TagTeam::factory()->create();
     $wrestlers = Wrestler::factory()->count(2)->create();
@@ -26,7 +28,7 @@ it('adds memberships with an open historical period', function () {
         ->toEqualCanonicalizing($wrestlers->modelKeys());
 
     foreach ($wrestlers as $wrestler) {
-        $this->assertDatabaseHas('tag_teams_wrestlers', [
+        assertDatabaseHas('tag_teams_wrestlers', [
             'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $wrestler->id,
             'joined_at' => $joinedAt->toDateTimeString(),

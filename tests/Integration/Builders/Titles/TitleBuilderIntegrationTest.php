@@ -7,16 +7,14 @@ use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Date;
 
 describe('TitleBuilder Query Scopes', function () {
-    beforeEach(function () {
-        $this->undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
-        $this->activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
-        $this->inactiveTitle = Title::factory()->inactive()->create(['name' => 'Inactive Title']);
-        $this->retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
-        $this->futureDebutTitle = Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
-    });
-
     describe('activity state scopes', function () {
         test('future activated titles can be retrieved', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
 
             $futureActivatedTitles = Title::query()->withPendingDebut()->get();
@@ -28,52 +26,88 @@ describe('TitleBuilder Query Scopes', function () {
 
     describe('basic activity scopes', function () {
         test('undebuted scope returns titles without activity periods', function () {
+            $undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            $inactiveTitle = Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            $futureDebutTitle = Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $undebutedTitles = Title::query()->undebuted()->get();
 
-            expect($undebutedTitles->pluck('id'))->toContain($this->undebutedTitle->id)
-                ->and($undebutedTitles->pluck('id'))->not->toContain($this->activeTitle->id)
-                ->and($undebutedTitles->pluck('id'))->not->toContain($this->inactiveTitle->id)
-                ->and($undebutedTitles->pluck('id'))->not->toContain($this->futureDebutTitle->id);
+            expect($undebutedTitles->pluck('id'))->toContain($undebutedTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($activeTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($inactiveTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($futureDebutTitle->id);
         });
 
         test('active scope returns titles with current activity periods', function () {
+            $undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            $inactiveTitle = Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $activeTitles = Title::query()->active()->get();
 
-            expect($activeTitles->pluck('id'))->toContain($this->activeTitle->id)
-                ->and($activeTitles->pluck('id'))->not->toContain($this->undebutedTitle->id)
-                ->and($activeTitles->pluck('id'))->not->toContain($this->inactiveTitle->id);
+            expect($activeTitles->pluck('id'))->toContain($activeTitle->id)
+                ->and($activeTitles->pluck('id'))->not->toContain($undebutedTitle->id)
+                ->and($activeTitles->pluck('id'))->not->toContain($inactiveTitle->id);
         });
 
         test('inactive scope returns titles with past but no current activity', function () {
+            $undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            $inactiveTitle = Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $inactiveTitles = Title::query()->inactive()->get();
 
-            expect($inactiveTitles->pluck('id'))->toContain($this->inactiveTitle->id)
-                ->and($inactiveTitles->pluck('id'))->not->toContain($this->activeTitle->id)
-                ->and($inactiveTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
+            expect($inactiveTitles->pluck('id'))->toContain($inactiveTitle->id)
+                ->and($inactiveTitles->pluck('id'))->not->toContain($activeTitle->id)
+                ->and($inactiveTitles->pluck('id'))->not->toContain($undebutedTitle->id);
         });
 
         test('withPendingDebut scope returns titles with future activity', function () {
+            $undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            $futureDebutTitle = Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $pendingTitles = Title::query()->withPendingDebut()->get();
 
-            expect($pendingTitles->pluck('id'))->toContain($this->futureDebutTitle->id)
-                ->and($pendingTitles->pluck('id'))->not->toContain($this->activeTitle->id)
-                ->and($pendingTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
+            expect($pendingTitles->pluck('id'))->toContain($futureDebutTitle->id)
+                ->and($pendingTitles->pluck('id'))->not->toContain($activeTitle->id)
+                ->and($pendingTitles->pluck('id'))->not->toContain($undebutedTitle->id);
         });
     });
 
     describe('scope method chaining', function () {
         test('can chain scopes with additional filters', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $filteredTitles = Title::query()
                 ->active()
                 ->where('name', 'like', '%Active%')
                 ->get();
 
-            expect($filteredTitles->pluck('id'))->toContain($this->activeTitle->id);
+            expect($filteredTitles->pluck('id'))->toContain($activeTitle->id);
         });
     });
 
     describe('activity history filtering', function () {
         test('undebuted scope excludes deleted titles and every title with activity history', function () {
+            $undebutedTitle = Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             // Arrange
             Title::factory()->undebuted()->trashed()->create();
 
@@ -83,13 +117,19 @@ describe('TitleBuilder Query Scopes', function () {
             $titles = $query->get();
 
             // Assert
-            expect($titles->modelKeys())->toBe([$this->undebutedTitle->id]);
+            expect($titles->modelKeys())->toBe([$undebutedTitle->id]);
         });
 
         test('active scope returns a reactivated title once despite previous activity periods', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             // Arrange
             ActivityPeriod::factory()
-                ->for($this->activeTitle, 'activeable')
+                ->for($activeTitle, 'activeable')
                 ->started(Date::now()->subMonths(2))
                 ->ended(Date::now()->subMonth())
                 ->create();
@@ -100,13 +140,19 @@ describe('TitleBuilder Query Scopes', function () {
             $titles = $query->get();
 
             // Assert
-            expect($titles->modelKeys())->toBe([$this->activeTitle->id]);
+            expect($titles->modelKeys())->toBe([$activeTitle->id]);
         });
 
     });
 
     describe('scope edge cases', function () {
         test('scopes work with soft deleted titles', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $deletedTitle = Title::factory()->active()->create();
             $deletedTitle->delete();
 
@@ -118,6 +164,12 @@ describe('TitleBuilder Query Scopes', function () {
         });
 
         test('scopes handle empty database gracefully', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             Title::query()->delete();
 
             expect(Title::query()->active()->count())->toBe(0)
@@ -127,6 +179,12 @@ describe('TitleBuilder Query Scopes', function () {
 
     describe('scope return types and fluency', function () {
         test('all scopes return static for proper chaining', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             $builder = Title::query();
 
             expect($builder->undebuted())->toBeInstanceOf($builder::class)
@@ -136,6 +194,12 @@ describe('TitleBuilder Query Scopes', function () {
         });
 
         test('scopes maintain query builder functionality', function () {
+            Title::factory()->undebuted()->create(['name' => 'Undebuted Title']);
+            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
+            Title::factory()->inactive()->create(['name' => 'Inactive Title']);
+            Title::factory()->retired()->create(['name' => 'Retired Title']);
+            Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
+
             // Arrange
             Title::factory()->singles()->active()->create(['name' => 'Zonal Title']);
             $nationalTitle = Title::factory()->singles()->active()->create(['name' => 'National Title']);
@@ -150,7 +214,7 @@ describe('TitleBuilder Query Scopes', function () {
             $titles = $query->get();
 
             // Assert
-            expect($titles->modelKeys())->toBe([$this->activeTitle->id, $nationalTitle->id])
+            expect($titles->modelKeys())->toBe([$activeTitle->id, $nationalTitle->id])
                 ->and($titles->pluck('name')->all())->toBe(['Active Title', 'National Title'])
                 ->and($titles->firstOrFail()->getAttributes())->toHaveKeys(['id', 'name'])
                 ->toHaveCount(2);

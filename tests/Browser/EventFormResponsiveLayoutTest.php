@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
+use function Pest\Laravel\actingAs;
+
 test('event schedule fields stack on narrow screens and share a row on wider screens', function (): void {
     Venue::factory()->create();
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('events.index'));
     $page->resize(390, 844);
@@ -26,7 +28,7 @@ test('event index filters and table fit a narrow viewport', function (): void {
     // Arrange
     $venue = Venue::factory()->create(['name' => 'Riverside Hall']);
     Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Summer Showdown']);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('events.index'));

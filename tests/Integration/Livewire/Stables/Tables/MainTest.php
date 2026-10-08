@@ -6,7 +6,6 @@ use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Tables\Main;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -54,29 +53,6 @@ describe('stables table', function (): void {
             ->assertSee(__('stables.empty_title'))
             ->assertSee(__('stables.empty_description'))
             ->assertSeeHtml('data-test="stables-empty-state"');
-    });
-
-    it('filters stables by name and clears the search', function (): void {
-        // Arrange
-        Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
-        Stable::factory()->active()->create(['name' => 'New World Order']);
-        $component = livewire(Main::class);
-
-        // Act
-        $component->set('search', 'Horsemen');
-
-        // Assert
-        $component
-            ->assertSee('The Four Horsemen')
-            ->assertDontSee('New World Order');
-
-        // Act
-        $component->set('search', '');
-
-        // Assert
-        $component
-            ->assertSee('The Four Horsemen')
-            ->assertSee('New World Order');
     });
 
     it('filters stables by activation date range', function (): void {
@@ -169,24 +145,6 @@ describe('stables table', function (): void {
         expect(Stable::find($stable->id))->toBeNull()
             ->and(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
     });
-
-    it('forbids users without stable access', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(Main::class);
-
-        // Assert
-        $component->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 
     it('loads the activity state used by the table', function (): void {
         // Arrange

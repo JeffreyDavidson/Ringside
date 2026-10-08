@@ -7,6 +7,8 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 
+use function Pest\Laravel\actingAs;
+
 test('administrator can disband and retire a stable from the detail page', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
@@ -16,7 +18,7 @@ test('administrator can disband and retire a stable from the detail page', funct
         'status' => MembershipStatus::Active->value,
     ]);
     $stable = Stable::factory()->active()->create(['promotion_id' => $promotion->id]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     // Act / Assert
     $statusCell = 'Array.from(document.querySelectorAll("tr")).find(row => row.firstElementChild.textContent.trim() === "Status:").lastElementChild.textContent.trim()';
@@ -53,7 +55,7 @@ test('owner can merge another stable into a stable from the detail page', functi
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($owner);
+    actingAs($owner);
 
     // Act / Assert
     $page = visit(route('stables.show', $stable));

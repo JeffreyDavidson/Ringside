@@ -9,7 +9,7 @@
                 data-test="add-event-match"
                 onclick="Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {{ $event->id }} } })"
             >
-                Add Event Match
+                {{ __('matches.add_event_match') }}
             </x-buttons.primary>
         </div>
     @endcan

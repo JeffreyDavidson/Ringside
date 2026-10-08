@@ -11,13 +11,16 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
 use function Pest\Laravel\assertGuest;
+use function Pest\Laravel\from;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
 test('registration screen can be rendered', function () {
     // Arrange
     $registrationUrl = route('register');
 
     // Act
-    $response = $this->get($registrationUrl);
+    $response = get($registrationUrl);
 
     // Assert
     $response->assertSuccessful();
@@ -34,7 +37,7 @@ test('a user can register with their account details', function (string $email):
     ];
 
     // Act
-    $response = $this->post(route('register'), $registrationData);
+    $response = post(route('register'), $registrationData);
 
     // Assert
     $response->assertRedirect(route('login'))
@@ -62,7 +65,7 @@ test('registration requires valid account details', function () {
     ];
 
     // Act
-    $response = $this->from(route('register'))
+    $response = from(route('register'))
         ->post(route('register'), $registrationData);
 
     // Assert
@@ -86,9 +89,9 @@ test('registration answers the same for a taken and an unknown email', function 
     ];
 
     // Act
-    $taken = $this->from(route('register'))
+    $taken = from(route('register'))
         ->post(route('register'), $registration($takenEmail));
-    $unknown = $this->from(route('register'))
+    $unknown = from(route('register'))
         ->post(route('register'), $registration('unknown@example.com'));
 
     // Assert
@@ -110,7 +113,7 @@ test('registration creates nothing for the email of a deleted user', function ()
     User::factory()->create(['email' => 'gone@example.com'])->delete();
 
     // Act
-    $response = $this->post(route('register'), [
+    $response = post(route('register'), [
         'first_name' => 'Taylor',
         'last_name' => 'Promoter',
         'email' => 'gone@example.com',
@@ -129,7 +132,7 @@ test('registration still validates the other fields for a taken email', function
     User::factory()->create(['email' => 'existing@example.com']);
 
     // Act
-    $response = $this->from(route('register'))
+    $response = from(route('register'))
         ->post(route('register'), [
             'first_name' => '',
             'last_name' => 'Promoter',
@@ -152,7 +155,7 @@ test('registration answers as pending when the database rejects a duplicate emai
     Event::fake([Registered::class]);
 
     // Act
-    $response = $this->post(route('register'), [
+    $response = post(route('register'), [
         'first_name' => 'Taylor',
         'last_name' => 'Promoter',
         'email' => 'new@example.com',

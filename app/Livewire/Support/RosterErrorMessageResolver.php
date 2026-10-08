@@ -11,14 +11,12 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException as TagTeamCannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException as TagTeamCannotBeReleasedException;
-use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
@@ -45,8 +43,6 @@ final class RosterErrorMessageResolver
             TagTeamCannotBeReinstatedException::class => 'reinstate',
             CannotBeInjuredException::class => 'injure',
             CannotBeClearedFromInjuryException::class => 'clear_from_injury',
-            CannotBeRestoredException::class,
-            TagTeamCannotBeRestoredException::class => 'restore',
             default => null,
         };
 

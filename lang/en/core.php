@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'all' => 'All',
+    'all_resource' => 'All :resource',
     'actions' => 'Actions',
     'clear_search' => 'Clear search',
     'clear_filters' => 'Clear filters',
+    'dismiss_notification' => 'Dismiss notification',
     'combobox' => [
         'capped' => 'Showing the first :count matches. Keep typing to narrow the list.',
         'empty' => 'No bookable matches',
@@ -22,6 +24,9 @@ return [
         'unknown' => 'Selected record',
     ],
     'delete_rejections' => [
+        'already_deleted' => ':context cannot be deleted because it is already deleted.',
+        'tag_team_employed' => ':context cannot be deleted because it is still employed. Release the tag team from employment before deletion.',
+        'tag_team_retired' => ':context cannot be deleted because it is retired. Unretire the tag team before deletion.',
         'booked_in_match' => ':context cannot be deleted because it is booked in a match that is upcoming or has no result. Remove it from the match or record the result first.',
     ],
     'lifecycle_actions' => [
@@ -109,4 +114,66 @@ return [
     'wrestlers' => 'Wrestlers',
     'tag-teams' => 'Tag Teams',
     'managers' => 'Managers',
+
+    'validation' => [
+        'debut_date_active' => 'The debut date cannot be changed while :name is currently active.',
+        'debut_date_invalid' => 'The debut date must be a valid date.',
+        'debut_date_multiple_periods' => 'The debut date cannot be changed because :name has been active in more than one period.',
+        'employment_date_employed' => 'The employment date cannot be changed while :name is currently employed.',
+        'employment_date_invalid' => 'The employment date must be a valid date.',
+    ],
+
+    'general_info' => [
+        'account_status' => 'Account Status',
+        'address' => 'Address',
+        'created' => 'Created',
+        'current_champion' => 'Current Champion',
+        'current_managers' => 'Current Manager(s)',
+        'current_stable' => 'Current Stable',
+        'current_tag_team' => 'Current Tag Team',
+        'current_tag_team_partners' => 'Current Tag Team Partners',
+        'current_tag_teams' => 'Current Tag Team(s)',
+        'current_title_championships' => 'Current Title Championship(s)',
+        'current_wrestlers' => 'Current Wrestler(s)',
+        'date' => 'Date',
+        'date_introduced' => 'Date Introduced',
+        'email' => 'Email',
+        'email_verification' => 'Email Verification',
+        'height' => 'Height',
+        'hometown' => 'Hometown',
+        'members' => 'Members',
+        'name' => 'Name',
+        'no_preview_added' => 'No Preview Added',
+        'no_start_date_set' => 'No Start Date Set',
+        'no_venue_chosen' => 'No Venue Chosen',
+        'not_verified' => 'Not verified',
+        'phone' => 'Phone',
+        'preview' => 'Preview',
+        'role' => 'Role',
+        'signature_move' => 'Signature Move',
+        'slug' => 'Slug',
+        'start_date' => 'Start Date',
+        'status' => 'Status',
+        'title' => 'General Info',
+        'type' => 'Type',
+        'unscheduled' => 'Unscheduled',
+        'venue' => 'Venue',
+        'verified' => 'Verified',
+        'weight' => 'Weight',
+    ],
+
+    'row_actions' => [
+        'actions_for' => 'Actions for :name',
+        'edit' => 'Edit',
+        'remove' => 'Remove',
+        'view' => 'View',
+    ],
+
+    'errors' => [
+        'date_range' => [
+            'end_before_start' => 'Invalid date range: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',
+            'end_before_start_for_context' => 'Invalid date range for :context: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',
+            'future_not_allowed' => ':context date (:date) cannot be in the future. Use current or past date only.',
+        ],
+    ],
 ];

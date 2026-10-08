@@ -7,6 +7,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 
 test('administrator can employ and retire a wrestler from the detail page', function (): void {
@@ -21,7 +22,7 @@ test('administrator can employ and retire a wrestler from the detail page', func
         'status' => MembershipStatus::Active->value,
     ]);
     $wrestler = Wrestler::factory()->unemployed()->create(['promotion_id' => $promotion->id]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));
@@ -58,7 +59,7 @@ test('retiring a wrestler waits for the administrator to confirm it', function (
         'status' => MembershipStatus::Active->value,
     ]);
     $wrestler = Wrestler::factory()->bookable()->create(['name' => "Ann D'Arcy", 'promotion_id' => $promotion->id]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     // Act / Assert
     $page = visit(route('wrestlers.show', $wrestler));

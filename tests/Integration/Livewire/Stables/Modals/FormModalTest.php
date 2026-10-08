@@ -50,8 +50,7 @@ describe('authorized stable form interactions', function () {
         $stable->wrestlers()->attach($wrestler, ['joined_at' => '2024-01-01']);
         $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2024-01-01']);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
 
         $modal
             ->assertSee('Ric Flair')
@@ -85,10 +84,7 @@ describe('authorized stable form interactions', function () {
     it('opens an empty form for creating a stable', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', '')
             ->assertSet('form.started_at', null)
             ->assertSet('form.ended_at', null)
@@ -107,13 +103,11 @@ describe('authorized stable form interactions', function () {
         ]);
         $stable->wrestlers()->attach($wrestler, ['joined_at' => '2024-01-01']);
         $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2024-01-01']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
 
-        $modal->call('openModal', $stable->id);
         $modal->set('form.name', 'The Four Horsemen');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'The Four Horsemen')
             ->assertSet('form.started_at', '2024-01-01')
             ->assertSet('form.ended_at', '2024-12-31')
@@ -123,8 +117,7 @@ describe('authorized stable form interactions', function () {
     });
 
     it('responds not found when opening a missing stable', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
@@ -134,7 +127,6 @@ describe('authorized stable form interactions', function () {
         $startedAt = now()->toDateString();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'The Dangerous Alliance',
             'form.started_at' => $startedAt,
@@ -152,14 +144,12 @@ describe('authorized stable form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('creates an unestablished stable without members', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set('form.name', 'Future Faction');
         $modal->call('save');
 
@@ -179,9 +169,8 @@ describe('authorized stable form interactions', function () {
         $stable->activityPeriods()->create(['started_at' => now()]);
         $stable->wrestlers()->attach($originalWrestler, ['joined_at' => now()]);
         $stable->tagTeams()->attach($originalTagTeam, ['joined_at' => now()]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
 
-        $modal->call('openModal', $stable->id);
         $modal->set([
             'form.name' => 'Updated Stable',
             'form.wrestlers' => [$newWrestler->id],
@@ -198,7 +187,7 @@ describe('authorized stable form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('rejects changing an active stable start date', function () {
@@ -206,22 +195,20 @@ describe('authorized stable form interactions', function () {
         $stable = Stable::factory()->create();
         $stable->activityPeriods()->create(['started_at' => '2024-01-15']);
         $stable->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
 
-        $modal->call('openModal', $stable->id);
         $modal->set('form.started_at', '2024-02-01');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.started_at'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
     });
 
     it('rejects an end date when creating a stable', function () {
         // Arrange
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Ended Before It Began',
             'form.started_at' => '2024-01-01',
@@ -235,7 +222,7 @@ describe('authorized stable form interactions', function () {
         // Assert
         $modal
             ->assertHasErrors(['form.ended_at' => 'prohibited'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Stable::query()->whereName('Ended Before It Began')->doesntExist())->toBeTrue()
             ->and($wrestlers->firstOrFail()->stables()->doesntExist())->toBeTrue();
     });
@@ -246,8 +233,7 @@ describe('authorized stable form interactions', function () {
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
         $stable->activityPeriods()->create(['started_at' => '2024-01-15']);
         $stable->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set('form.ended_at', '2024-06-01');
 
         // Act
@@ -256,7 +242,7 @@ describe('authorized stable form interactions', function () {
         // Assert
         $modal
             ->assertHasErrors(['form.ended_at' => 'prohibited'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect($stable->activityPeriods()->sole()->ended_at)->toBeNull()
             ->and($stable->currentWrestlers()->count())->toBe(3);
     });
@@ -265,8 +251,7 @@ describe('authorized stable form interactions', function () {
         // Arrange
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
         $stable = Stable::factory()->create(['name' => 'Unformed Stable']);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set([
             'form.started_at' => '2024-01-01',
             'form.ended_at' => '2024-06-01',
@@ -287,8 +272,7 @@ describe('authorized stable form interactions', function () {
         $stable = Stable::factory()->create(['name' => 'Reunited Stable']);
         $first = $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
         $second = $stable->activityPeriods()->create(['started_at' => '2022-01-01', 'ended_at' => '2023-01-01']);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set('form.started_at', $newStart);
 
         // Act
@@ -298,7 +282,7 @@ describe('authorized stable form interactions', function () {
         $modal->assertOk();
         $modal
             ->assertHasErrors(['form.started_at'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect($first->refresh()->started_at->toDateString())->toBe('2020-01-01')
             ->and($first->ended_at?->toDateString())->toBe('2021-01-01')
             ->and($second->refresh()->started_at->toDateString())->toBe('2022-01-01')
@@ -312,8 +296,7 @@ describe('authorized stable form interactions', function () {
         // Arrange
         $stable = Stable::factory()->create(['name' => 'Disbanded Stable']);
         $period = $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set('form.name', 'Renamed Disbanded Stable');
 
         // Act
@@ -322,7 +305,7 @@ describe('authorized stable form interactions', function () {
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect($stable->refresh()->name)->toBe('Renamed Disbanded Stable')
             ->and($period->refresh()->ended_at?->toDateString())->toBe('2021-01-01')
             ->and($stable->currentWrestlers()->doesntExist())->toBeTrue()
@@ -335,8 +318,7 @@ describe('authorized stable form interactions', function () {
         $stable->activityPeriods()->create(['started_at' => '2020-01-01', 'ended_at' => '2021-01-01']);
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
         $tagTeam = TagTeam::factory()->employed()->create();
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set([
             'form.name' => 'Renamed Disbanded Stable',
             'form.wrestlers' => $wrestlers->modelKeys(),
@@ -349,7 +331,7 @@ describe('authorized stable form interactions', function () {
         // Assert
         $modal
             ->assertHasErrors(['form.wrestlers' => 'prohibited', 'form.tag_teams' => 'prohibited'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect($stable->refresh()->name)->toBe('Disbanded Stable')
             ->and($stable->currentWrestlers()->doesntExist())->toBeTrue()
             ->and($stable->currentTagTeams()->doesntExist())->toBeTrue();
@@ -369,8 +351,7 @@ describe('authorized stable form interactions', function () {
                 throw $this->failure;
             }
         });
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $stable->id);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
         $modal->set('form.name', 'Renamed Stable');
 
         // Act
@@ -379,20 +360,18 @@ describe('authorized stable form interactions', function () {
         // Assert
         $modal
             ->assertHasErrors(['form.started_at'])
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
     });
 
     it('requires a stable name', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.name' => 'required'])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Stable::query()->doesntExist())->toBeTrue();
     });
 
@@ -409,7 +388,6 @@ describe('authorized stable form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Stable',
             'form.started_at' => '2024-01-01',
@@ -433,7 +411,6 @@ describe('authorized stable form interactions', function () {
         // Arrange
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Stable',
             'form.started_at' => '2024-01-01',
@@ -457,7 +434,6 @@ describe('authorized stable form interactions', function () {
         $deletedStable->delete();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set('form.name', 'Active Stable');
         $modal->call('save');
 
@@ -474,7 +450,6 @@ describe('authorized stable form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Undersized Stable',
             'form.started_at' => now()->toDateString(),
@@ -504,7 +479,6 @@ describe('authorized stable form interactions', function () {
         }
 
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set('form.name', 'Invalid Stable');
         $modal->set('form.wrestlers', $wrestler === null ? [] : [$wrestler->id]);
         $modal->set('form.tag_teams', $tagTeam === null ? [] : [$tagTeam->id]);
@@ -525,7 +499,6 @@ describe('authorized stable form interactions', function () {
         $representedWrestler = $tagTeam->currentWrestlers()->firstOrFail();
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Duplicate Representation',
             'form.wrestlers' => [$representedWrestler->id],
@@ -541,9 +514,8 @@ describe('authorized stable form interactions', function () {
         $wrestler = Wrestler::factory()->suspended()->create();
         $stable = Stable::factory()->create(['name' => 'Original Stable']);
         $stable->wrestlers()->attach($wrestler, ['joined_at' => now()->subDay()]);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
 
-        $modal->call('openModal', $stable->id);
         $modal->set('form.name', 'Renamed Stable');
         $modal->call('save');
 
@@ -552,25 +524,9 @@ describe('authorized stable form interactions', function () {
             ->and($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$wrestler->id]);
     });
 
-    it('resets edited stable data when reopening in create mode', function () {
-        $stable = Stable::factory()->active()->create(['name' => 'Existing Stable']);
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $stable->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.name', '')
-            ->assertSet('form.started_at', null)
-            ->assertSet('form.ended_at', null)
-            ->assertSet('form.wrestlers', [])
-            ->assertSet('form.tag_teams', []);
-    });
-
     it('generates dummy profile data without persisting a stable', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
 
         expect($modal->get('form.name'))->not->toBeEmpty()

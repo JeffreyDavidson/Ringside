@@ -10,6 +10,8 @@ use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it changes a user status without changing email verification', function (UserStatus $status): void {
     $user = User::factory()->unverified()->create([
         'email_verified_at' => null,
@@ -20,7 +22,7 @@ test('it changes a user status without changing email verification', function (U
     expect($updatedUser->status)->toBe($status)
         ->and($updatedUser->email_verified_at)->toBeNull();
 
-    $this->assertDatabaseHas('users', [
+    assertDatabaseHas('users', [
         'id' => $user->getKey(),
         'status' => $status->value,
         'email_verified_at' => null,

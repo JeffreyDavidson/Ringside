@@ -9,6 +9,7 @@ use App\Models\Users\User;
 use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 
+use function Pest\Laravel\assertModelExists;
 use function Pest\Livewire\livewire;
 
 describe('data table component', function (): void {
@@ -112,7 +113,7 @@ describe('data table component', function (): void {
             ->assertSet('sortField', '')
             ->assertSet('sortDirection', 'asc')
             ->assertSee('Surviving User');
-        $this->assertModelExists($user);
+        assertModelExists($user);
     });
 
     test('per page values are restricted to configured options', function (): void {

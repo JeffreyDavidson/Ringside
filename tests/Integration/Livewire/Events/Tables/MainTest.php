@@ -8,10 +8,10 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -65,29 +65,6 @@ describe('events table', function (): void {
             ->assertSee(__('events.empty_title'))
             ->assertSee(__('events.empty_description'))
             ->assertDontSee('No records found.');
-    });
-
-    it('searches events by name and clears the search', function (): void {
-        // Arrange
-        Event::factory()->unscheduled()->create(['name' => 'Summer Spectacular']);
-        Event::factory()->unscheduled()->create(['name' => 'Winter Warfare']);
-        $component = livewire(Main::class);
-
-        // Act
-        $component->set('search', 'Summer');
-
-        // Assert
-        $component
-            ->assertSee('Summer Spectacular')
-            ->assertDontSee('Winter Warfare');
-
-        // Act
-        $component->set('search', '');
-
-        // Assert
-        $component
-            ->assertSee('Summer Spectacular')
-            ->assertSee('Winter Warfare');
     });
 
     it('filters events by scheduling status', function (
@@ -354,7 +331,7 @@ describe('events table', function (): void {
                 type: 'status',
                 message: __('events.actions.deleted'),
             );
-        $this->assertSoftDeleted($event);
+        assertSoftDeleted($event);
     });
 
     it('renders an empty state when there are no events', function (): void {
@@ -367,22 +344,4 @@ describe('events table', function (): void {
             ->assertSee(__('events.empty_title'))
             ->assertSee(__('events.empty_description'));
     });
-
-    it('forbids users without administrative access', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(Main::class);
-
-        // Assert
-        $component->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 });

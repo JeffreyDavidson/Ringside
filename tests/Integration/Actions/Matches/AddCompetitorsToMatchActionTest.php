@@ -12,6 +12,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 
+use function Pest\Laravel\instance;
+
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $wrestlerA = Wrestler::factory()->bookable()->create();
@@ -29,8 +31,8 @@ test('it adds wrestler competitors to a match', function () {
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
     $addWrestlersAction->expects('handleWithinTransaction')->times(2);
 
-    $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
-    $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
+    instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
+    instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
@@ -55,8 +57,8 @@ test('it adds tag team competitors to a match', function () {
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
     $addTagTeamsAction->expects('handleWithinTransaction')->times(2);
 
-    $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
-    $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
+    instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
+    instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 

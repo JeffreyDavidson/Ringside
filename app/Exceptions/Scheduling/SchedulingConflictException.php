@@ -10,21 +10,21 @@ final class SchedulingConflictException extends BaseBusinessException
 {
     public static function competitorAlreadyBooked(string $competitorType, string $competitorName): static
     {
-        return new self("{$competitorType} [{$competitorName}] is already booked at this event time.");
+        return new self(__('matches.errors.scheduling.competitor_already_booked', ['type' => $competitorType, 'name' => $competitorName]));
     }
 
     public static function refereeAlreadyAssigned(string $refereeName): static
     {
-        return new self("Referee [{$refereeName}] is already assigned to another event at this time.");
+        return new self(__('matches.errors.scheduling.referee_already_assigned', ['name' => $refereeName]));
     }
 
     public static function titleAlreadyAssigned(string $titleName): static
     {
-        return new self("Title [{$titleName}] is already assigned at this event time.");
+        return new self(__('matches.errors.scheduling.title_already_assigned', ['name' => $titleName]));
     }
 
     public static function venueAlreadyBooked(string $venueName, string $venueLocalDate): static
     {
-        return new self("Venue [{$venueName}] is already booked on {$venueLocalDate} (venue time).");
+        return new self(__('matches.errors.scheduling.venue_already_booked', ['name' => $venueName, 'date' => $venueLocalDate]));
     }
 }

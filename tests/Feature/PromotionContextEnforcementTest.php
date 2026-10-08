@@ -11,6 +11,9 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Route;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\withSession;
+
 function attachActivePromotion(User $user, Promotion $promotion): void
 {
     $promotion->users()->attach($user, [
@@ -30,8 +33,7 @@ test('promotion middleware establishes the selected active promotion', function 
         'promotion_id' => app(PromotionContextService::class)->required()->id,
     ]));
 
-    $response = $this
-        ->withSession(['active_promotion_id' => $secondPromotion->id])
+    $response = withSession(['active_promotion_id' => $secondPromotion->id])
         ->actingAs($user)
         ->get('/promotion-context-test');
 
@@ -90,8 +92,7 @@ test('promotion middleware rejects users without an active membership', function
 
     Route::middleware(['web', 'promotion.context'])->get('/promotion-context-test', fn () => response()->noContent());
 
-    $this
-        ->actingAs($user)
+    actingAs($user)
         ->get('/promotion-context-test')
         ->assertForbidden();
 });

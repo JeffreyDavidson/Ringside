@@ -11,6 +11,8 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\TagTeams\TagTeam;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 function tagTeamMatchSide(EventMatch $match, int $position): MatchSide
 {
     return MatchSide::factory()->for($match, 'match')->create(compact('position'));
@@ -22,7 +24,7 @@ test('it adds a tag team to a match as a polymorphic competitor', function () {
 
     resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), 1);
 
-    $this->assertDatabaseHas('events_matches_competitors', [
+    assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $tagTeam->id,
         'competitor_type' => $tagTeam->getMorphClass(),

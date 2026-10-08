@@ -6,6 +6,7 @@ return [
     'last_name' => 'Last Name',
     'index_description' => 'Manage your promotion’s referees, assignments, and officiating records.',
     'index_title' => 'Referees',
+    'add' => 'Add Referee',
     'all' => 'All referees',
     'filter_status' => 'Filter referees by status',
     'search' => 'Search referees',
@@ -29,6 +30,7 @@ return [
     'page' => ':current / :last',
 
     'actions' => [
+        'menu_label' => 'Referee actions',
         'employed' => 'Referee has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Referee has been retired.',
@@ -44,8 +46,7 @@ return [
         'employ' => [
             'default' => 'Unable to hire this referee at this time.',
             'already_employed' => 'This referee is already hired.',
-            'retired' => 'Retired referees cannot be hired.',
-            'suspended' => 'Cannot hire suspended referees.',
+            'retired' => 'Retired referees cannot be hired without unretiring first.',
         ],
         'release' => [
             'default' => 'Unable to release this referee.',
@@ -63,6 +64,7 @@ return [
         'suspend' => [
             'default' => 'Unable to suspend this referee.',
             'already_suspended' => 'This referee is already suspended.',
+            'injured' => 'Injured referees cannot be suspended.',
             'unemployed' => 'Only employed referees can be suspended.',
         ],
         'reinstate' => [
@@ -73,16 +75,22 @@ return [
         'injure' => [
             'default' => 'Unable to record injury for this referee.',
             'already_injured' => 'This referee is already injured.',
+            'suspended' => 'Suspended referees cannot be injured.',
             'unemployed' => 'Only employed referees can be injured.',
         ],
         'clear_from_injury' => [
             'default' => 'Unable to clear this referee from injury.',
             'not_injured' => 'This referee is not currently injured.',
         ],
-        'restore' => [
-            'default' => 'Unable to restore this referee.',
-            'not_deleted' => 'This referee has not been deleted.',
-        ],
         'general' => 'An unexpected error occurred. Please try again.',
+    ],
+
+    'validation' => [
+        'attributes' => [
+            'first_name' => 'first name',
+            'last_name' => 'last name',
+            'employment_date' => 'employment date',
+        ],
+        'not_bookable' => 'This referee is not available to officiate matches.',
     ],
 ];

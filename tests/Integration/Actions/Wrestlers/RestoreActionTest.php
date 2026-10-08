@@ -6,6 +6,8 @@ use App\Actions\Wrestlers\RestoreAction;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it restores a soft-deleted wrestler', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete
@@ -18,7 +20,7 @@ test('it restores a soft-deleted wrestler', function () {
     expect($wrestler->trashed())->toBeFalse();
 
     // Verify wrestler is restored
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'name' => $wrestler->name,
         'deleted_at' => null,
@@ -50,7 +52,7 @@ test('it restores wrestler with specific restore date', function () {
 
     // Note: Laravel restore() always sets deleted_at to null
     // The custom date would be used for business logic, not the actual deleted_at field
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'deleted_at' => null,
     ]);
@@ -66,7 +68,7 @@ test('it uses the current time when no date is provided', function () {
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'deleted_at' => null,
     ]);
@@ -95,13 +97,13 @@ test('it restores wrestler without automatically restoring relationships', funct
         ->and($wrestler->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // Verify wrestler is restored but relationships remain ended
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'deleted_at' => null,
     ]);
 
     // Employment should still be ended
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -129,13 +131,13 @@ test('it maintains historical data integrity', function () {
     expect($wrestler->trashed())->toBeFalse();
 
     // All historical records should be preserved
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(100)->toDateTimeString(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(50)->toDateTimeString(),
         'ended_at' => now()->subDays(10)->toDateTimeString(),
@@ -254,7 +256,7 @@ test('it handles wrestler with no relationships', function () {
     expect($wrestler->trashed())->toBeFalse();
 
     // Should successfully restore even with no relationships
-    $this->assertDatabaseHas('wrestlers', [
+    assertDatabaseHas('wrestlers', [
         'id' => $wrestler->id,
         'deleted_at' => null,
     ]);

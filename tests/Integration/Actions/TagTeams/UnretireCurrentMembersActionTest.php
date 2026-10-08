@@ -13,6 +13,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 use JMac\Testing\Matching\Argument;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it unretires retired current wrestlers and managers without employing them', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $manager = Manager::factory()->retired()->create();
@@ -30,7 +32,7 @@ test('it unretires retired current wrestlers and managers without employing them
         expect($wrestler->currentRetirement()->exists())->toBeFalse()
             ->and($wrestler->currentEmployment()->exists())->toBeFalse();
 
-        $this->assertDatabaseHas('retirements', [
+        assertDatabaseHas('retirements', [
             'retirable_id' => $wrestler->id,
             'retirable_type' => $wrestler->getMorphClass(),
             'ended_at' => $unretirementDate->toDateTimeString(),
@@ -42,7 +44,7 @@ test('it unretires retired current wrestlers and managers without employing them
     expect($manager->currentRetirement()->exists())->toBeFalse()
         ->and($manager->currentEmployment()->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $manager->id,
         'retirable_type' => $manager->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),

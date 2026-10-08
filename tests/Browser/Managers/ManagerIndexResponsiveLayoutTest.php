@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 use App\Models\Roster\Managers\Manager;
 
+use function Pest\Laravel\actingAs;
+
 test('manager index filters and table fit narrow and wide viewports', function (): void {
     // Arrange
     Manager::factory()->employed()->create([
         'first_name' => 'Bobby',
         'last_name' => 'Heenan',
     ]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('managers.index'));
@@ -48,7 +50,7 @@ test('manager index filters and table fit narrow and wide viewports', function (
 });
 
 test('manager empty-state help uses the available width on desktop', function (): void {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     $page = visit(route('managers.index'));
     $page->resize(1440, 900);

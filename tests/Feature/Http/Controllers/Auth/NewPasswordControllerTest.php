@@ -6,12 +6,15 @@ use App\Models\Users\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
+use function Pest\Laravel\from;
+use function Pest\Laravel\post;
+
 test('a failed reset gives the same error for a registered and an unknown email', function (string $email): void {
     // Arrange
     User::factory()->create(['email' => 'registered@example.com']);
 
     // Act
-    $response = $this->from(route('password.reset', 'bogus-token'))
+    $response = from(route('password.reset', 'bogus-token'))
         ->post(route('password.update'), [
             'token' => 'bogus-token',
             'email' => $email,
@@ -35,7 +38,7 @@ test('a valid token resets the password', function (): void {
     $token = Password::createToken($user);
 
     // Act
-    $response = $this->post(route('password.update'), [
+    $response = post(route('password.update'), [
         'token' => $token,
         'email' => $user->email,
         'password' => 'new-password-12345',

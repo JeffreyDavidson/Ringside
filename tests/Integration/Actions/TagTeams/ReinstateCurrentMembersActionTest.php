@@ -10,6 +10,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it skips members that are not eligible for reinstatement and reinstates the rest', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $injuredSuspendedWrestler = Wrestler::factory()
@@ -66,7 +68,7 @@ test('it reinstates suspended current wrestlers and managers', function () {
         expect($transition->transition)->toBe(LifecycleTransitionType::Reinstated)
             ->and($transition->effective_at->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
 
-        $this->assertDatabaseHas('suspensions', [
+        assertDatabaseHas('suspensions', [
             'suspendable_id' => $wrestler->id,
             'suspendable_type' => $wrestler->getMorphClass(),
             'ended_at' => $reinstatementDate->toDateTimeString(),
@@ -85,7 +87,7 @@ test('it reinstates suspended current wrestlers and managers', function () {
     expect($managerTransition->transition)->toBe(LifecycleTransitionType::Reinstated)
         ->and($activeManager->lifecycleTransitions()->count())->toBe(0);
 
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $manager->id,
         'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),

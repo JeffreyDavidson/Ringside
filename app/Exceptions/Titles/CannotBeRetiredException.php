@@ -13,20 +13,20 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} has never been activated and cannot be retired.");
+        return new self(__('titles.errors.retired.unactivated', ['context' => $context]));
     }
 
     public static function hasFutureDebut(Title $title): static
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} has future debut scheduled and cannot be retired before activation.");
+        return new self(__('titles.errors.retired.has_future_debut', ['context' => $context]));
     }
 
     public static function alreadyRetired(Title $title): static
     {
         $context = self::formatModelContext($title);
 
-        return new self("{$context} is already retired and cannot be retired again.");
+        return new self(__('titles.errors.retired.already_retired', ['context' => $context]));
     }
 }

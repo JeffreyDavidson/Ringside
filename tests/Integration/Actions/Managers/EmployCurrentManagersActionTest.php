@@ -7,6 +7,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it skips retired managers and employs the rest', function () {
     $tagTeam = TagTeam::factory()->create();
     $retiredManager = Manager::factory()->retired()->create();
@@ -47,12 +49,12 @@ test('it employs unemployed managers for each manageable roster type', function 
         ->and($futureManager->currentEmployment()->exists())->toBeFalse()
         ->and($futureManager->futureEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestlerManager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $tagTeamManager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,

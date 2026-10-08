@@ -1,0 +1,333 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Integration\Models\Concerns;
+
+use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Titles\Title;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
+
+/**
+ * @return array{
+ *     model: Title,
+ * }
+ */
+function concernsHasActivityPeriodsTraitFixtures(): array
+{
+    // Use the real Title model which implements the trait
+    $model = Title::factory()->create();
+
+    return [
+        'model' => $model,
+    ];
+}
+
+describe('HasActivityPeriods Trait Integration Tests', function () {
+    describe('basic relationships', function () {
+        test('activityPeriods relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->activityPeriods())->toBeInstanceOf(MorphMany::class);
+        });
+
+        test('model can have activity periods', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $activityPeriod = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subMonth(),
+                'ended_at' => null,
+            ]);
+            $model->refresh();
+            expect($model->activityPeriods->pluck('id'))->toContain($activityPeriod->id);
+        });
+
+    });
+
+    describe('current activity period', function () {
+        test('model can have current activity period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $current = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            $model->load('currentActivityPeriod');
+            expect($model->currentActivityPeriod)->not->toBeNull()->not->toBeNull()->ended_at->toBeNull();
+        });
+
+        test('model without current activity period returns null', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            // No current period
+            $model->load('currentActivityPeriod');
+            expect($model->currentActivityPeriod)->toBeNull();
+        });
+
+        test('currentActivityPeriod relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->currentActivityPeriod())->toBeInstanceOf(MorphOne::class);
+        });
+    });
+
+    describe('future activity period', function () {
+        test('model can have future activity period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $future = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->addWeek(),
+                'ended_at' => null,
+            ]);
+            $model->load('futureActivityPeriod');
+            expect($model->futureActivityPeriod)->not->toBeNull()
+                ->and(requiredModel($model->futureActivityPeriod)->started_at->gt(now()))->toBeTrue();
+        });
+
+        test('model without future activity period returns null', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $model->load('futureActivityPeriod');
+            expect($model->futureActivityPeriod)->toBeNull();
+        });
+
+        test('futureActivityPeriod relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->futureActivityPeriod())->toBeInstanceOf(MorphOne::class);
+        });
+    });
+
+    describe('previous activity periods', function () {
+        test('model can have previous activity periods', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $previous = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subYear(),
+                'ended_at' => now()->subMonth(),
+            ]);
+            $model->load('previousActivityPeriods');
+            expect($model->previousActivityPeriods)->toHaveCount(1)
+                ->and($model->previousActivityPeriods->pluck('id'))->toContain($previous->id);
+        });
+
+        test('previousActivityPeriods relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->previousActivityPeriods())->toBeInstanceOf(MorphMany::class);
+        });
+
+        test('previousActivityPeriod relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->previousActivityPeriod())->toBeInstanceOf(MorphOne::class);
+        });
+
+        test('model can have previous activity period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $previous = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subYear(),
+                'ended_at' => now()->subMonth(),
+            ]);
+            $model->load('previousActivityPeriod');
+            expect($model->previousActivityPeriod)->not->toBeNull()->not->toBeNull()->ended_at->not->toBeNull();
+        });
+    });
+
+    describe('first activity period', function () {
+        test('firstActivityPeriod relationship returns correct type', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->firstActivityPeriod())->toBeInstanceOf(MorphOne::class);
+        });
+
+        test('model can have first activity period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $first = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subYear(),
+                'ended_at' => now()->subMonth(),
+            ]);
+            $second = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            $model->load('firstActivityPeriod');
+            expect($model->firstActivityPeriod)->not->toBeNull()->not->toBeNull()->id->toBe($first->id);
+        });
+    });
+
+    describe('status checking methods', function () {
+        test('activity periods relationship exists when model has periods', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            expect($model->activityPeriods()->exists())->toBeTrue();
+        });
+
+        test('activity periods relationship is empty when model has no periods', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->activityPeriods()->exists())->toBeFalse();
+        });
+
+        test('isCurrentlyActive returns true when model has current period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            expect($model->currentActivityPeriod()->exists())->toBeTrue();
+        });
+
+        test('isCurrentlyActive returns false when model has no current period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->currentActivityPeriod()->exists())->toBeFalse();
+        });
+
+        test('future activity relationship exists when model has future period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->addWeek(),
+                'ended_at' => null,
+            ]);
+            expect($model->futureActivityPeriod()->exists())->toBeTrue();
+        });
+
+        test('future activity relationship is empty when model has no future period', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->futureActivityPeriod()->exists())->toBeFalse();
+        });
+
+        test('current activity period is absent when model is inactive', function () {
+            concernsHasActivityPeriodsTraitFixtures();
+
+            $model = Title::factory()->unactivated()->create();
+
+            expect($model->currentActivityPeriod()->exists())->toBeFalse();
+        });
+
+        test('current activity period exists when model is active', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+
+            expect($model->currentActivityPeriod()->exists())->toBeTrue();
+        });
+
+    });
+
+    describe('utility methods', function () {
+        test('first activity period is absent when no periods exist', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->firstActivityPeriod)->toBeNull();
+        });
+
+        test('first activity period exposes its start date', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $startDate = Carbon::parse('2024-01-15');
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => $startDate,
+                'ended_at' => null,
+            ]);
+            expect($model->firstActivityPeriod?->started_at?->toDateString())->toBe('2024-01-15');
+        });
+    });
+
+    describe('complex scenarios', function () {
+        test('model with multiple activity periods handles current correctly', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            // Past period
+            ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subYear(),
+                'ended_at' => now()->subMonth(),
+            ]);
+            // Current period
+            $current = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            $model->load(['activityPeriods', 'currentActivityPeriod']);
+            expect($model->activityPeriods)->toHaveCount(2)
+                ->and($model->currentActivityPeriod)->not->toBeNull()->not->toBeNull()->ended_at->toBeNull();
+        });
+
+        test('model can exist without activity periods', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->activityPeriods()->count())->toBe(0)
+                ->and($model->currentActivityPeriod)->toBeNull();
+        });
+
+        test('model maintains relationship integrity when activity periods are deleted', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            $activityPeriod = ActivityPeriod::factory()->for($model, 'activeable')->create([
+                'started_at' => now()->subWeek(),
+                'ended_at' => null,
+            ]);
+            $model->refresh();
+
+            expect($model->activityPeriods->pluck('id'))->toContain($activityPeriod->id);
+
+            $activityPeriod->delete();
+            $model->refresh();
+
+            expect($model->activityPeriods()->count())->toBe(0);
+        });
+
+        test('model can be associated with new activity periods after creation', function () {
+            ['model' => $modelFixture] = concernsHasActivityPeriodsTraitFixtures();
+
+            $model = $modelFixture;
+            expect($model->activityPeriods)->toBeEmpty();
+
+            $activityPeriod = ActivityPeriod::factory()->for($model, 'activeable')->create();
+            $model->refresh();
+
+            expect($model->activityPeriods->pluck('id'))->toContain($activityPeriod->id);
+        });
+    });
+});

@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Backs the tag team and stable forms' searchable selects.
  *
- * Search offers every non-deleted record visible in the current promotion context. It is a convenience:
+ * Search offers every non-deleted record of the form's promotion (see BaseForm::formPromotionId()), so a global
+ * administrator without an enforced promotion context never sees another promotion's roster. It is a convenience:
  * the forms' validation rules and the actions remain the authority on who may join.
  */
 final class RosterMemberSearch
@@ -26,7 +27,7 @@ final class RosterMemberSearch
      *
      * @return array<int, array{id: int|string, name: string}>
      */
-    public function search(RosterMemberKind $kind, string $term): array
+    public function search(RosterMemberKind $kind, string $term, ?int $promotionId): array
     {
         $column = $this->nameColumn($kind);
         // Names never contain LIKE wildcards, so drop them rather than depend on database-specific escaping.
@@ -34,6 +35,7 @@ final class RosterMemberSearch
 
         return $this->options(
             $this->query($kind)
+                ->where('promotion_id', $promotionId)
                 ->when($needle !== '', fn (Builder $builder): Builder => $builder->whereLike($column, "%{$needle}%", caseSensitive: false))
                 ->orderBy($column)
                 ->orderBy('id')
@@ -48,7 +50,7 @@ final class RosterMemberSearch
      * @param  array<int, mixed>  $ids
      * @return array<int, array{id: int|string, name: string}>
      */
-    public function labels(RosterMemberKind $kind, array $ids): array
+    public function labels(RosterMemberKind $kind, array $ids, ?int $promotionId): array
     {
         $ids = collect($ids)->filter(fn (mixed $id): bool => is_numeric($id))->unique()->values()->all();
 
@@ -64,7 +66,7 @@ final class RosterMemberSearch
             RosterMemberKind::Managers => Manager::query()->withTrashed(),
         };
 
-        return $this->options($query->whereKey($ids)->orderBy($column)->orderBy('id'), $column);
+        return $this->options($query->where('promotion_id', $promotionId)->whereKey($ids)->orderBy($column)->orderBy('id'), $column);
     }
 
     /** @return Builder<covariant Model> */

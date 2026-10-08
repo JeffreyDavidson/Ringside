@@ -12,6 +12,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 it('assigns managers to a wrestler without employing them', function () {
     $wrestler = Wrestler::factory()->create();
     $managers = Manager::factory()->count(2)->create();
@@ -25,7 +27,7 @@ it('assigns managers to a wrestler without employing them', function () {
         ->toBeTrue();
 
     foreach ($managers as $manager) {
-        $this->assertDatabaseHas('wrestlers_managers', [
+        assertDatabaseHas('wrestlers_managers', [
             'wrestler_id' => $wrestler->id,
             'manager_id' => $manager->id,
             'hired_at' => $assignmentDate->toDateTimeString(),
@@ -47,7 +49,7 @@ it('assigns managers to a tag team through the same boundary', function () {
 
     expect($tagTeam->currentManagers()->whereKey($manager->id)->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'tag_team_id' => $tagTeam->id,
         'manager_id' => $manager->id,
         'hired_at' => $assignmentDate->toDateTimeString(),
@@ -80,7 +82,7 @@ it('synchronizes current managers while preserving relationship history', functi
         ->and($wrestler->previousManagers()->whereKey($removedManager->id)->exists())
         ->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $removedManager->id,
         'fired_at' => $changeDate->toDateTimeString(),

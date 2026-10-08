@@ -35,10 +35,7 @@ describe('authorized referee form interactions', function () {
     it('opens an empty form for creating a referee', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', '')
             ->assertSet('form.last_name', '')
             ->assertSet('form.employment_date', null)
@@ -51,13 +48,11 @@ describe('authorized referee form interactions', function () {
             'last_name' => 'Hebner',
         ]);
         $referee->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
-        $modal->call('openModal', $referee->id);
         $modal->set('form.first_name', 'Earl');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', 'Earl')
             ->assertSet('form.last_name', 'Hebner')
             ->assertSet('form.employment_date', null)
@@ -67,15 +62,13 @@ describe('authorized referee form interactions', function () {
     });
 
     it('responds not found when opening a missing referee', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
     it('creates an employed referee', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Mike',
             'form.last_name' => 'Chioda',
@@ -91,14 +84,12 @@ describe('authorized referee form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('creates a referee without optional employment data', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Charles',
             'form.last_name' => 'Robinson',
@@ -119,9 +110,8 @@ describe('authorized referee form interactions', function () {
             'last_name' => 'Patrick',
         ]);
         $employment = $referee->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
-        $modal->call('openModal', $referee->id);
         $modal->set([
             'form.first_name' => 'Nicholas',
             'form.last_name' => 'Patrick',
@@ -136,27 +126,25 @@ describe('authorized referee form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('rejects changing an active referee employment date', function () {
         $referee = Referee::factory()->create();
         $referee->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
-        $modal->call('openModal', $referee->id);
         $modal->set('form.employment_date', '2024-01-01');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.employment_date'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
     });
 
     it('requires both referee names', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
@@ -164,8 +152,7 @@ describe('authorized referee form interactions', function () {
                 'form.first_name' => 'required',
                 'form.last_name' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Referee::query()->doesntExist())->toBeTrue();
     });
 
@@ -178,7 +165,6 @@ describe('authorized referee form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Valid',
             'form.last_name' => 'Referee',
@@ -197,7 +183,6 @@ describe('authorized referee form interactions', function () {
     it('clears entered values when creating a referee', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Entered',
             'form.last_name' => 'Name',
@@ -217,9 +202,8 @@ describe('authorized referee form interactions', function () {
             'last_name' => 'Referee',
         ]);
         $referee->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
-        $modal->call('openModal', $referee->id);
         $modal->set([
             'form.first_name' => 'Changed',
             'form.last_name' => 'Name',
@@ -233,33 +217,16 @@ describe('authorized referee form interactions', function () {
             ->assertSet('form.employment_date', null);
     });
 
-    it('resets edited referee data when reopening in create mode', function () {
-        $referee = Referee::factory()->employed()->create([
-            'first_name' => 'Existing',
-            'last_name' => 'Referee',
-        ]);
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $referee->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.first_name', '')
-            ->assertSet('form.last_name', '')
-            ->assertSet('form.employment_date', null);
-    });
-
     it('generates valid dummy data that can create a referee', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(Referee::query()->count())->toBe(1);
     });
 });
@@ -279,10 +246,9 @@ describe('Referee form employment history', function () {
         giveEmploymentHistory($referee, $state);
         $employmentsBefore = employmentSnapshot($referee);
         $statusBefore = $referee->fresh()?->status;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
         // Act
-        $modal->call('openModal', $referee->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->set('form.employment_date', $submittedDate);
         $modal->call('save');
@@ -290,7 +256,7 @@ describe('Referee form employment history', function () {
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         $referee->refresh();
         expect($referee->first_name)->toBe('Renamed')
             ->and(employmentSnapshot($referee))->toBe($employmentsBefore)
@@ -308,10 +274,9 @@ describe('Referee form employment history', function () {
         // Arrange
         $referee = Referee::factory()->create();
         giveEmploymentHistory($referee, $state);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
         // Act
-        $modal->call('openModal', $referee->id);
 
         // Assert
         $modal
@@ -323,10 +288,9 @@ describe('Referee form employment history', function () {
     it('still employs a never-employed referee from the submitted date', function () {
         // Arrange
         $referee = Referee::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
         // Act
-        $modal->call('openModal', $referee->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->set('form.employment_date', '2024-02-01');
         $modal->call('save');
@@ -349,17 +313,16 @@ describe('Referee form employment history', function () {
         $action = Double::for(UpdateAction::class);
         $action->expects('handle')->throws(CannotBeEmployedException::retired($referee));
         app()->instance(UpdateAction::class, $action);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
 
         // Act
-        $modal->call('openModal', $referee->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->call('save');
 
         // Assert
         $modal
             ->assertHasErrors(['form.first_name'])
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
         expect($referee->fresh()?->first_name)->toBe('Original');
         $action->verify();

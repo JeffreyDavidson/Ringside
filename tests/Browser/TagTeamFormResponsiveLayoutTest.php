@@ -6,6 +6,8 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 test('tag-team form groups related fields responsively and keeps managers full-width', function (): void {
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
@@ -13,7 +15,7 @@ test('tag-team form groups related fields responsively and keeps managers full-w
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 
     $page = visit(route('tag-teams.index'));
     $page->resize(390, 844);

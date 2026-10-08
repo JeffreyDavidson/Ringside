@@ -10,18 +10,16 @@ use JMac\Testing\Double;
 use Livewire\Component;
 
 describe('venue form data', function (): void {
-    beforeEach(function (): void {
-        $this->form = new CreateEditForm(Double::for(Component::class), 'form');
-    });
-
     it('maps venue fields to validated application data', function (): void {
-        $this->form->name = 'Madison Square Garden';
-        $this->form->street_address = '4 Pennsylvania Plaza';
-        $this->form->city = 'New York';
-        $this->form->state = UnitedStatesState::NewYork->value;
-        $this->form->zipcode = '10001';
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
 
-        $data = $this->form->toData();
+        $form->name = 'Madison Square Garden';
+        $form->street_address = '4 Pennsylvania Plaza';
+        $form->city = 'New York';
+        $form->state = UnitedStatesState::NewYork->value;
+        $form->zipcode = '10001';
+
+        $data = $form->toData();
 
         expect($data)->toBeInstanceOf(VenueData::class)
             ->and($data->name)->toBe('Madison Square Garden')
@@ -32,10 +30,12 @@ describe('venue form data', function (): void {
     });
 
     it('resolves the venue selected for editing', function (): void {
-        $venue = Venue::factory()->create();
-        $this->form->setModel($venue);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
 
-        $selectedVenue = $this->form->venue();
+        $venue = Venue::factory()->create();
+        $form->setModel($venue);
+
+        $selectedVenue = $form->venue();
 
         expect($selectedVenue->is($venue))->toBeTrue();
     });

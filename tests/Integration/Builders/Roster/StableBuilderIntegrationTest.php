@@ -21,54 +21,69 @@ use App\Models\Roster\Stables\Stable;
  * @see StableBuilder
  */
 describe('StableQueryBuilder Integration Tests', function () {
-    beforeEach(function () {
-        // Create stables in all possible states for comprehensive scope testing
-        $this->activeStable = Stable::factory()->active()->create();
-        $this->futureActivatedStable = Stable::factory()->withFutureActivation()->create();
-        $this->inactiveStable = Stable::factory()->inactive()->create();
-        $this->retiredStable = Stable::factory()->retired()->create();
-        $this->unactivatedStable = Stable::factory()->unactivated()->create();
-    });
-
     describe('activity period scopes', function () {
         test('active stables can be retrieved', function () {
+            $activeStable = Stable::factory()->active()->create();
+            Stable::factory()->withFutureActivation()->create();
+            Stable::factory()->inactive()->create();
+            Stable::factory()->retired()->create();
+            Stable::factory()->unactivated()->create();
+
             // Act
             $activeStables = Stable::query()->established()->get();
 
             // Assert
             expect($activeStables)
                 ->toHaveCount(1)
-                ->and($activeStables->contains($this->activeStable))->toBeTrue();
+                ->and($activeStables->contains($activeStable))->toBeTrue();
         });
 
         test('future activated stables can be retrieved', function () {
+            Stable::factory()->active()->create();
+            $futureActivatedStable = Stable::factory()->withFutureActivation()->create();
+            Stable::factory()->inactive()->create();
+            Stable::factory()->retired()->create();
+            Stable::factory()->unactivated()->create();
+
             // Act
             $futureActivatedStables = Stable::query()->withFutureEstablishment()->get();
 
             // Assert
             expect($futureActivatedStables)
                 ->toHaveCount(1)
-                ->and($futureActivatedStables->contains($this->futureActivatedStable))->toBeTrue();
+                ->and($futureActivatedStables->contains($futureActivatedStable))->toBeTrue();
         });
 
         test('inactive stables can be retrieved', function () {
+            Stable::factory()->active()->create();
+            Stable::factory()->withFutureActivation()->create();
+            $inactiveStable = Stable::factory()->inactive()->create();
+            Stable::factory()->retired()->create();
+            Stable::factory()->unactivated()->create();
+
             // Act
             $inactiveStables = Stable::query()->disbanded()->get();
 
             // Assert
             expect($inactiveStables)
                 ->toHaveCount(1)
-                ->and($inactiveStables->contains($this->inactiveStable))->toBeTrue();
+                ->and($inactiveStables->contains($inactiveStable))->toBeTrue();
         });
 
         test('unactivated stables can be retrieved', function () {
+            Stable::factory()->active()->create();
+            Stable::factory()->withFutureActivation()->create();
+            Stable::factory()->inactive()->create();
+            Stable::factory()->retired()->create();
+            $unactivatedStable = Stable::factory()->unactivated()->create();
+
             // Act
             $unactivatedStables = Stable::query()->unestablished()->get();
 
             // Assert
             expect($unactivatedStables)
                 ->toHaveCount(1)
-                ->and($unactivatedStables->contains($this->unactivatedStable))->toBeTrue();
+                ->and($unactivatedStables->contains($unactivatedStable))->toBeTrue();
         });
     });
 

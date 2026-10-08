@@ -40,10 +40,10 @@ final readonly class StableRetirementEligibility
         }
     }
 
-    public function canUnretire(Stable $stable, bool $requireFormerMembers = true): bool
+    public function canUnretire(Stable $stable): bool
     {
         try {
-            $this->ensureCanUnretire($stable, $requireFormerMembers);
+            $this->ensureCanUnretire($stable);
 
             return true;
         } catch (CannotBeUnretiredException) {
@@ -51,7 +51,7 @@ final readonly class StableRetirementEligibility
         }
     }
 
-    public function ensureCanUnretire(Stable $stable, bool $requireFormerMembers = true): void
+    public function ensureCanUnretire(Stable $stable): void
     {
         if ($stable->trashed()) {
             throw CannotBeUnretiredException::deleted($stable);
@@ -59,10 +59,6 @@ final readonly class StableRetirementEligibility
 
         if (! $stable->hasCurrentRetirement()) {
             throw CannotBeUnretiredException::notRetired($stable);
-        }
-
-        if (! $requireFormerMembers) {
-            return;
         }
 
         $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);

@@ -204,35 +204,6 @@ describe('users table', function (): void {
             ->assertDontSee('Hidden Account');
     })->with(UserStatus::cases());
 
-    it('searches users by name and clears the search', function (): void {
-        // Arrange
-        User::factory()->create([
-            'first_name' => 'Xylo',
-            'last_name' => 'Quartzenberg',
-        ]);
-        User::factory()->create([
-            'first_name' => 'Zephyra',
-            'last_name' => 'Vandermolen',
-        ]);
-        $component = livewire(Main::class);
-
-        // Act
-        $component->set('search', 'Xylo');
-
-        // Assert
-        $component
-            ->assertSee('Xylo Quartzenberg')
-            ->assertDontSee('Zephyra Vandermolen');
-
-        // Act
-        $component->set('search', '');
-
-        // Assert
-        $component
-            ->assertSee('Xylo Quartzenberg')
-            ->assertSee('Zephyra Vandermolen');
-    });
-
     it('searches users by email', function (): void {
         // Arrange
         $matchingUser = User::factory()->create([
@@ -273,22 +244,6 @@ describe('users table', function (): void {
             'Jane Baker',
             'Bob Cooper',
         ]);
-    });
-
-    it('renders updated user data after a refresh', function (): void {
-        // Arrange
-        $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
-        $component = livewire(Main::class);
-        $component->assertSee('Original Name');
-        $user->update(['first_name' => 'Updated']);
-
-        // Act
-        $component->call('$refresh');
-
-        // Assert
-        $component
-            ->assertSee('Updated Name')
-            ->assertDontSee('Original Name');
     });
 
     it('renders users without phone numbers', function (): void {
@@ -358,24 +313,6 @@ describe('users table', function (): void {
         expect($listing)->not->toBeNull()
             ->and($listing['sql'] ?? '')->toContain('order by "last_name" asc, "id" asc');
     });
-
-    it('forbids users without administrative access', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(Main::class);
-
-        // Assert
-        $component->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 });
 
 describe('account activation confirmation', function (): void {

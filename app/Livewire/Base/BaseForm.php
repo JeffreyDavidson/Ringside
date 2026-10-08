@@ -76,7 +76,7 @@ abstract class BaseForm extends Form
      * promotion the BelongsToPromotion creating hook will assign (the enforced context). A global administrator
      * without an enforced context creates unowned records, so null then compares against unowned records.
      */
-    protected function formPromotionId(): ?int
+    public function formPromotionId(): ?int
     {
         if ($this->isEditing()) {
             return $this->modelPromotionId;

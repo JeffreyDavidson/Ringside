@@ -6,6 +6,8 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function (): void {
     $promotion = Promotion::factory()->create();
     $administrator = administrator();
@@ -13,7 +15,7 @@ beforeEach(function (): void {
         'role' => MembershipRole::Owner->value,
         'status' => MembershipStatus::Active->value,
     ]);
-    $this->actingAs($administrator);
+    actingAs($administrator);
 });
 
 test('the wrestler form opens with the first field focused', function (): void {

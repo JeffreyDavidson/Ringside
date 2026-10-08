@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\actingAs;
+
 test('referee index filters and table fit narrow and wide viewports', function (): void {
     // Arrange
     Referee::factory()->employed()->create([
         'first_name' => 'Earl',
         'last_name' => 'Hebner',
     ]);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('referees.index'));

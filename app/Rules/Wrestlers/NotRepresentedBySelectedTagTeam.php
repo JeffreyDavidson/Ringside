@@ -23,7 +23,7 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
         }
 
         if (! is_int($value) && ! is_string($value)) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
@@ -31,7 +31,7 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
         $wrestler = Wrestler::query()->whereKey($value)->first();
 
         if (! $wrestler instanceof Wrestler) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
@@ -45,7 +45,7 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
         $currentTagTeamKey = $currentTagTeam->getKey();
 
         if ((is_int($currentTagTeamKey) || is_string($currentTagTeamKey)) && $this->tagTeamIds->contains($currentTagTeamKey)) {
-            $fail('This wrestler is already represented in the stable through their tag team.');
+            $fail(__('wrestlers.validation.represented_through_tag_team'));
         }
     }
 }

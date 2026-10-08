@@ -161,7 +161,7 @@ class CreateEditForm extends BaseForm
 
     /** A match has no promotion of its own: it books the roster and titles of its event's promotion. */
     #[\Override]
-    protected function formPromotionId(): ?int
+    public function formPromotionId(): ?int
     {
         return $this->eventPromotionId;
     }
@@ -238,15 +238,15 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         $attributes = [
-            'preview' => 'match preview',
-            'matchType' => 'match type',
-            'matchStipulationId' => 'match stipulation',
-            'competitors' => 'competitors',
+            'preview' => __('matches.validation.attributes.match_preview'),
+            'matchType' => __('matches.validation.attributes.match_type'),
+            'matchStipulationId' => __('matches.validation.attributes.match_stipulation'),
+            'competitors' => __('matches.validation.attributes.competitors'),
             'competitors.*.wrestlers.*' => __('matches.validation.attributes.wrestler'),
             'competitors.*.tag_teams.*' => __('matches.validation.attributes.tag_team'),
-            'referees' => 'referees',
+            'referees' => __('matches.validation.attributes.referees'),
             'referees.*' => __('matches.validation.attributes.referee'),
-            'titles' => 'championship titles',
+            'titles' => __('matches.validation.attributes.championship_titles'),
             'titles.*' => __('matches.validation.attributes.title'),
         ];
 

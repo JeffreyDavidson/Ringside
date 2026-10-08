@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\TagTeams\ReinstateAction;
 use App\Models\Roster\TagTeams\TagTeam;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it reinstates a suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
@@ -18,7 +20,7 @@ test('it reinstates a suspended tag team', function () {
         ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify suspension record was ended
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
@@ -35,7 +37,7 @@ test('it reinstates tag team with specific reinstatement date', function () {
     expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension ended with specific date
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
@@ -86,7 +88,7 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify original suspension record was properly ended
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'id' => $originalSuspensionId,
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
@@ -119,7 +121,7 @@ test('it uses the provided date', function () {
     $tagTeam->refresh();
 
     // Verify the provided date was persisted
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $customReinstatementDate->toDateTimeString(),
@@ -211,7 +213,7 @@ test('it handles reinstatement with cascade effects', function () {
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Suspension should be ended
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),

@@ -15,7 +15,7 @@ class CanJoinTagTeam implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_int($value) && ! is_string($value)) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
@@ -23,13 +23,13 @@ class CanJoinTagTeam implements ValidationRule
         $wrestler = Wrestler::query()->whereKey($value)->first();
 
         if (! $wrestler) {
-            $fail('The selected wrestler is invalid.');
+            $fail(__('wrestlers.validation.invalid'));
 
             return;
         }
 
         if ($wrestler->currentSuspension()->exists() || $wrestler->currentInjury()->exists()) {
-            $fail('This wrestler cannot join the tag team.');
+            $fail(__('wrestlers.validation.cannot_join_tag_team'));
 
             return;
         }
@@ -42,7 +42,7 @@ class CanJoinTagTeam implements ValidationRule
         }
 
         if ($currentTagTeams->exists()) {
-            $fail('This wrestler is already a member of another tag team.');
+            $fail(__('wrestlers.validation.already_in_tag_team'));
         }
     }
 }

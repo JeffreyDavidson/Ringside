@@ -35,10 +35,7 @@ describe('authorized manager form interactions', function () {
     it('opens an empty form for creating a manager', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', '')
             ->assertSet('form.last_name', '')
             ->assertSet('form.employment_date', null)
@@ -51,13 +48,11 @@ describe('authorized manager form interactions', function () {
             'last_name' => 'Heenan',
         ]);
         $manager->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
-        $modal->call('openModal', $manager->id);
         $modal->set('form.first_name', 'Bobby');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.first_name', 'Bobby')
             ->assertSet('form.last_name', 'Heenan')
             ->assertSet('form.employment_date', null)
@@ -67,15 +62,13 @@ describe('authorized manager form interactions', function () {
     });
 
     it('responds not found when opening a missing manager', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
     it('creates an employed manager', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Paul',
             'form.last_name' => 'Dangerously',
@@ -91,14 +84,12 @@ describe('authorized manager form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertDispatched('closeModal')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('creates a manager without optional employment data', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Jimmy',
             'form.last_name' => 'Hart',
@@ -119,9 +110,8 @@ describe('authorized manager form interactions', function () {
             'last_name' => 'Dillon',
         ]);
         $employment = $manager->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
-        $modal->call('openModal', $manager->id);
         $modal->set([
             'form.first_name' => 'J. J.',
             'form.last_name' => 'Dillon',
@@ -136,27 +126,25 @@ describe('authorized manager form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
     });
 
     it('rejects changing an active manager employment date', function () {
         $manager = Manager::factory()->create();
         $manager->employments()->create(['started_at' => '2024-01-15']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
-        $modal->call('openModal', $manager->id);
         $modal->set('form.employment_date', '2024-01-01');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.employment_date'])
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
     });
 
     it('requires both manager names', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal
@@ -164,8 +152,7 @@ describe('authorized manager form interactions', function () {
                 'form.first_name' => 'required',
                 'form.last_name' => 'required',
             ])
-            ->assertNotDispatched('closeModal')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
         expect(Manager::query()->doesntExist())->toBeTrue();
     });
 
@@ -178,7 +165,6 @@ describe('authorized manager form interactions', function () {
         };
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->set([
             'form.first_name' => 'Valid',
             'form.last_name' => 'Manager',
@@ -194,33 +180,16 @@ describe('authorized manager form interactions', function () {
         'invalid employment date',
     ]);
 
-    it('resets edited manager data when reopening in create mode', function () {
-        $manager = Manager::factory()->employed()->create([
-            'first_name' => 'Existing',
-            'last_name' => 'Manager',
-        ]);
-        $modal = livewire(FormModal::class);
-
-        $modal->call('openModal', $manager->id);
-        $modal->call('openModal');
-
-        $modal
-            ->assertSet('form.first_name', '')
-            ->assertSet('form.last_name', '')
-            ->assertSet('form.employment_date', null);
-    });
-
     it('generates valid dummy data that can create a manager', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(Manager::query()->count())->toBe(1);
     });
 });
@@ -240,10 +209,9 @@ describe('Manager form employment history', function () {
         giveEmploymentHistory($manager, $state);
         $employmentsBefore = employmentSnapshot($manager);
         $statusBefore = $manager->fresh()?->status;
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
         // Act
-        $modal->call('openModal', $manager->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->set('form.employment_date', $submittedDate);
         $modal->call('save');
@@ -251,7 +219,7 @@ describe('Manager form employment history', function () {
         // Assert
         $modal
             ->assertHasNoErrors()
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         $manager->refresh();
         expect($manager->first_name)->toBe('Renamed')
             ->and(employmentSnapshot($manager))->toBe($employmentsBefore)
@@ -269,10 +237,9 @@ describe('Manager form employment history', function () {
         // Arrange
         $manager = Manager::factory()->create();
         giveEmploymentHistory($manager, $state);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
         // Act
-        $modal->call('openModal', $manager->id);
 
         // Assert
         $modal
@@ -284,10 +251,9 @@ describe('Manager form employment history', function () {
     it('still employs a never-employed manager from the submitted date', function () {
         // Arrange
         $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
         // Act
-        $modal->call('openModal', $manager->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->set('form.employment_date', '2024-02-01');
         $modal->call('save');
@@ -310,17 +276,16 @@ describe('Manager form employment history', function () {
         $action = Double::for(UpdateAction::class);
         $action->expects('handle')->throws(CannotBeEmployedException::retired($manager));
         app()->instance(UpdateAction::class, $action);
-        $modal = livewire(FormModal::class);
+        $modal = livewire(FormModal::class, ['modelId' => $manager->id]);
 
         // Act
-        $modal->call('openModal', $manager->id);
         $modal->set('form.first_name', 'Renamed');
         $modal->call('save');
 
         // Assert
         $modal
             ->assertHasErrors(['form.first_name'])
-            ->assertSet('isModalOpen', true)
+            ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
         expect($manager->fresh()?->first_name)->toBe('Original');
         $action->verify();

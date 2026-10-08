@@ -34,8 +34,7 @@ describe('title list presentation', function (): void {
         ]);
 
         // Act
-        $component = livewire(FormModal::class, ['eventId' => $event->id])
-            ->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Assert
         $component
@@ -52,8 +51,7 @@ describe('title list presentation', function (): void {
         $title->delete();
 
         // Act
-        $component = livewire(FormModal::class, ['eventId' => $event->id])
-            ->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Assert
         $component->assertDontSee('Deleted Championship Title');

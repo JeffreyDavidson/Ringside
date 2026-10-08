@@ -13,7 +13,7 @@ final class CannotBeMergedException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be merged with itself.");
+        return new self(__('stables.errors.merged.self_merge', ['context' => $context]));
     }
 
     public static function differentPromotions(Stable $primaryStable, Stable $secondaryStable): static
@@ -21,40 +21,40 @@ final class CannotBeMergedException extends BaseBusinessException
         $primaryContext = self::formatModelContext($primaryStable);
         $secondaryContext = self::formatModelContext($secondaryStable);
 
-        return new self("{$primaryContext} and {$secondaryContext} belong to different promotions and cannot be merged.");
+        return new self(__('stables.errors.merged.different_promotions', ['primary_context' => $primaryContext, 'secondary_context' => $secondaryContext]));
     }
 
     public static function primaryRetired(Stable $primaryStable): static
     {
         $context = self::formatModelContext($primaryStable);
 
-        return new self("{$context} is retired and cannot receive merged members.");
+        return new self(__('stables.errors.merged.primary_retired', ['context' => $context]));
     }
 
     public static function secondaryRetired(Stable $secondaryStable): static
     {
         $context = self::formatModelContext($secondaryStable);
 
-        return new self("{$context} is retired and cannot be merged.");
+        return new self(__('stables.errors.merged.secondary_retired', ['context' => $context]));
     }
 
     public static function primaryNotActive(Stable $primaryStable): static
     {
         $context = self::formatModelContext($primaryStable);
 
-        return new self("{$context} is not currently active and cannot receive merged members.");
+        return new self(__('stables.errors.merged.primary_not_active', ['context' => $context]));
     }
 
     public static function secondaryNotActive(Stable $secondaryStable): static
     {
         $context = self::formatModelContext($secondaryStable);
 
-        return new self("{$context} is not currently active and cannot be merged.");
+        return new self(__('stables.errors.merged.secondary_not_active', ['context' => $context]));
     }
 
     /** @param array<int, string> $memberNames */
     public static function membersUnavailable(array $memberNames): static
     {
-        return new self('Cannot merge stables: these secondary stable members are unavailable: '.implode(', ', $memberNames).'.');
+        return new self(__('stables.errors.merged.members_unavailable', ['members' => implode(', ', $memberNames)]));
     }
 }

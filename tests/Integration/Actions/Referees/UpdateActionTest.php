@@ -6,6 +6,9 @@ use App\Actions\Referees\UpdateAction;
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+
 test('it updates referee basic information', function () {
     $referee = Referee::factory()->create([
         'first_name' => 'Original',
@@ -24,7 +27,7 @@ test('it updates referee basic information', function () {
         ->and($result->first_name)->toBe('Updated')
         ->and($result->last_name)->toBe('Name');
 
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'id' => $referee->id,
         'first_name' => 'Updated',
         'last_name' => 'Name',
@@ -51,7 +54,7 @@ test('it updates referee and employs them when employment date provided', functi
         ->and($result->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created via EmployAction
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -101,7 +104,7 @@ test('it updates referee without employing when no employment date', function ()
         ->and($result->currentEmployment()->exists())->toBeFalse();
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('employments', [
+    assertDatabaseMissing('employments', [
         'employable_id' => $referee->id,
     ]);
 });
@@ -145,7 +148,7 @@ test('it uses the provided employment date', function () {
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     // The provided employment date should be persisted
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => null,
@@ -167,13 +170,13 @@ test('it maintains transaction boundaries', function () {
     $result->refresh();
 
     // Both referee update and employment should succeed together
-    $this->assertDatabaseHas('referees', [
+    assertDatabaseHas('referees', [
         'id' => $referee->id,
         'first_name' => 'Transaction',
         'last_name' => 'Test',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'ended_at' => null,
     ]);

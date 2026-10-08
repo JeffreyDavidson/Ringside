@@ -10,7 +10,7 @@
         data-test="match-result-action"
         wire:click="$dispatch('openModal', { component: 'matches.modals.result-modal', arguments: { matchId: {{ $row->id }} } })"
     >
-        {{ $row->match_finish === null ? 'Record Result' : 'Correct Result' }}
+        {{ $row->match_finish === null ? __('matches.actions.record_result') : __('matches.actions.correct_result') }}
     </x-buttons.light>
 
     @if ($canEdit || $canRemove)

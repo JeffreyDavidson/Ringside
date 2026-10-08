@@ -27,8 +27,7 @@ use function Pest\Livewire\livewire;
  */
 function saveUsersFormThroughHttp(User $user, array $formState, ?Cookie $recaller = null): TestResponse
 {
-    $snapshot = livewire(FormModal::class)
-        ->call('openModal', $user->id)
+    $snapshot = livewire(FormModal::class, ['modelId' => $user->id])
         ->set($formState)
         ->__get('snapshot');
 

@@ -7,6 +7,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it ends only the managers current relationships', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
@@ -31,18 +33,18 @@ test('it ends only the managers current relationships', function () {
     expect($manager->currentWrestlers)->toBeEmpty()
         ->and($manager->currentTagTeams)->toBeEmpty();
 
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'manager_id' => $manager->id,
         'wrestler_id' => $wrestler->id,
         'fired_at' => $historicalFireDate->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'manager_id' => $manager->id,
         'wrestler_id' => $wrestler->id,
         'hired_at' => $currentHireDate->toDateTimeString(),
         'fired_at' => $effectiveDate->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('tag_teams_managers', [
+    assertDatabaseHas('tag_teams_managers', [
         'manager_id' => $manager->id,
         'tag_team_id' => $tagTeam->id,
         'fired_at' => $effectiveDate->toDateTimeString(),

@@ -7,6 +7,9 @@ use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertSoftDeleted;
+
 test('it soft deletes an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
@@ -19,7 +22,7 @@ test('it soft deletes an unemployed wrestler', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify wrestler is soft deleted
-    $this->assertSoftDeleted('wrestlers', [
+    assertSoftDeleted('wrestlers', [
         'id' => $wrestler->id,
         'name' => $wrestler->name,
     ]);
@@ -48,7 +51,7 @@ test('it soft deletes wrestler with specific deletion date', function () {
 
     // Note: Laravel soft deletes use current timestamp, so we can't directly test custom dates
     // The custom date would be used for ending relationships, not the deleted_at timestamp
-    $this->assertSoftDeleted('wrestlers', [
+    assertSoftDeleted('wrestlers', [
         'id' => $wrestler->id,
     ]);
 });
@@ -66,7 +69,7 @@ test('it ends employment before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment was ended before deletion
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
         'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -86,7 +89,7 @@ test('it ends retirement before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify retirement was ended before deletion
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
         'retirable_id' => $wrestler->id,
         'retirable_type' => $wrestler->getMorphClass(),
@@ -107,7 +110,7 @@ test('it ends suspension before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify suspension was ended before deletion
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'id' => $currentSuspension->id,
         'suspendable_id' => $wrestler->id,
         'suspendable_type' => $wrestler->getMorphClass(),
@@ -128,7 +131,7 @@ test('it ends injury before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify injury was ended before deletion
-    $this->assertDatabaseHas('injuries', [
+    assertDatabaseHas('injuries', [
         'id' => $currentInjury->id,
         'injurable_id' => $wrestler->id,
         'injurable_type' => $wrestler->getMorphClass(),
@@ -156,13 +159,13 @@ test('it closes lifecycle periods and applies relationship cascades', function (
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment period was ended
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Verify the current manager relationship ended
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'fired_at' => now()->toDateTimeString(),
@@ -179,7 +182,7 @@ test('it uses the current time when no date is provided', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment ended with current timestamp
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -216,7 +219,7 @@ test('it maintains relationship history integrity', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Old relationship should remain unchanged
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'hired_at' => now()->subDays(30)->toDateTimeString(),
@@ -224,7 +227,7 @@ test('it maintains relationship history integrity', function () {
     ]);
 
     // Current relationship should be ended
-    $this->assertDatabaseHas('wrestlers_managers', [
+    assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'hired_at' => now()->subDays(10)->toDateTimeString(),
@@ -255,12 +258,12 @@ test('it handles wrestler with no active relationships', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Historical relationships should remain unchanged
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('retirements', [
+    assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
         'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),

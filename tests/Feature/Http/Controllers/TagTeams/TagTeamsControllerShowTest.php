@@ -25,21 +25,19 @@ use function Pest\Laravel\get;
  * @see TagTeamsController
  */
 describe('TagTeams Controller', function () {
-    beforeEach(function () {
-        $this->tagTeam = TagTeam::factory()->create();
-    });
-
     /**
      * @see TagTeamsController::show()
      */
     test('show returns a view', function () {
+        $tagTeam = TagTeam::factory()->create();
+
         actingAs(administrator())
-            ->get(route('tag-teams.show', $this->tagTeam))
+            ->get(route('tag-teams.show', $tagTeam))
             ->assertOk()
             ->assertViewIs('tag-teams.show')
-            ->assertSee($this->tagTeam->name)
+            ->assertSee($tagTeam->name)
             ->assertSee('Status')
-            ->assertViewHas('tagTeam', $this->tagTeam)
+            ->assertViewHas('tagTeam', $tagTeam)
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
@@ -52,8 +50,10 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('show renders the lifecycle actions component', function () {
+        $tagTeam = TagTeam::factory()->create();
+
         actingAs(administrator())
-            ->get(route('tag-teams.show', $this->tagTeam))
+            ->get(route('tag-teams.show', $tagTeam))
             ->assertOk()
             ->assertSeeLivewire(Actions::class);
     });
@@ -62,17 +62,21 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('show renders the general info component', function () {
+        $tagTeam = TagTeam::factory()->create();
+
         actingAs(administrator())
-            ->get(route('tag-teams.show', $this->tagTeam))
+            ->get(route('tag-teams.show', $tagTeam))
             ->assertOk()
             ->assertSeeLivewire(GeneralInfo::class)
-            ->assertSee($this->tagTeam->status->label());
+            ->assertSee($tagTeam->status->label());
     });
 
     /**
      * @see TagTeamsController::show()
      */
     test('show renders the related data displayed by the tag team summary', function () {
+        TagTeam::factory()->create();
+
         $tagTeam = TagTeam::factory()->employed()->create();
         $tagTeam->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
         $tagTeam->currentWrestlers->skip(1)->firstOrFail()->update(['name' => "D'Angelo & Sons"]);
@@ -98,8 +102,10 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('a basic user cannot view tag team profiles', function () {
+        $tagTeam = TagTeam::factory()->create();
+
         actingAs(basicUser())
-            ->get(route('tag-teams.show', $this->tagTeam))
+            ->get(route('tag-teams.show', $tagTeam))
             ->assertForbidden();
     });
 
@@ -107,6 +113,8 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('a guest cannot view a tag team profile', function () {
+        TagTeam::factory()->create();
+
         $tagTeam = TagTeam::factory()->create();
 
         get(route('tag-teams.show', $tagTeam))
@@ -117,6 +125,8 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('returns 404 when tag team does not exist', function () {
+        TagTeam::factory()->create();
+
         actingAs(administrator())
             ->get(route('tag-teams.show', 999999))
             ->assertNotFound();

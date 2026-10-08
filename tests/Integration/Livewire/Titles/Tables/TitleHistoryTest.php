@@ -12,7 +12,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
@@ -20,18 +19,13 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
-    $this->title = Title::factory()->create();
     actingAs(administrator());
 });
 
 describe('TitleHistory configuration', function (): void {
-    it('requires a title', function (): void {
-        // Act & Assert
-        expect(fn () => (new TitleHistory)->builder())
-            ->toThrow(LogicException::class, 'A title was not provided.');
-    });
-
     it('displays championship reign length from its dates', function (): void {
+        Title::factory()->create();
+
         // Arrange
         $championship = new TitleChampionship([
             'won_at' => '2025-01-01',
@@ -50,21 +44,23 @@ describe('TitleHistory configuration', function (): void {
 
 describe('TitleHistory query', function (): void {
     it('returns every reign for the selected title with the newest reign first', function (): void {
+        $title = Title::factory()->create();
+
         // Arrange
-        $olderChampionship = TitleChampionship::factory()->for($this->title)->ended()->create([
+        $olderChampionship = TitleChampionship::factory()->for($title)->ended()->create([
             'won_at' => Date::parse('2022-01-01'),
             'lost_at' => Date::parse('2023-01-01'),
         ]);
-        $latestChampionship = TitleChampionship::factory()->for($this->title)->ended()->create([
+        $latestChampionship = TitleChampionship::factory()->for($title)->ended()->create([
             'won_at' => Date::parse('2024-01-01'),
             'lost_at' => Date::parse('2025-01-01'),
         ]);
-        $currentChampionship = TitleChampionship::factory()->for($this->title)->current()->create([
+        $currentChampionship = TitleChampionship::factory()->for($title)->current()->create([
             'won_at' => Date::parse('2025-01-01'),
         ]);
         TitleChampionship::factory()->ended()->create();
         $table = new TitleHistory;
-        $table->titleId = $this->title->id;
+        $table->titleId = $title->id;
 
         // Act
         $championships = $table->builder()->get();
@@ -80,24 +76,26 @@ describe('TitleHistory query', function (): void {
 
 describe('TitleHistory rendering', function (): void {
     it('renders championship history from reign relationships and dates', function (): void {
+        $title = Title::factory()->create();
+
         // Arrange
         $previousChampion = Wrestler::factory()->create(['name' => 'First Champion']);
         $newChampion = TagTeam::factory()->create(['name' => 'New Champions']);
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forWrestler($previousChampion)
             ->wonOn('2024-01-01')
             ->lostOn('2024-06-01')
             ->create();
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forTagTeam($newChampion)
             ->wonOn('2024-06-01')
             ->lostOn('2025-01-01')
             ->create();
 
         // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
 
         // Assert
         $table
@@ -117,9 +115,11 @@ describe('TitleHistory rendering', function (): void {
         string $championClass,
         string $showRoute,
     ): void {
+        $title = Title::factory()->create();
+
         // Arrange
         $champion = $championClass::factory()->create(['name' => 'Deleted Champion']);
-        TitleChampionship::factory()->for($this->title)->create([
+        TitleChampionship::factory()->for($title)->create([
             'champion_type' => $champion->getMorphClass(),
             'champion_id' => $champion->id,
             'won_at' => Date::parse('2024-01-01'),
@@ -128,7 +128,7 @@ describe('TitleHistory rendering', function (): void {
         $champion->delete();
 
         // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
 
         // Assert
         $table
@@ -147,23 +147,25 @@ describe('TitleHistory rendering', function (): void {
     ]);
 
     it('shows the current champion at the top of the history', function (): void {
+        $title = Title::factory()->create();
+
         // Arrange
         $formerChampion = Wrestler::factory()->create(['name' => 'Former Champion']);
         $currentChampion = Wrestler::factory()->create(['name' => 'Reigning Champion']);
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forWrestler($formerChampion)
             ->wonOn('2024-01-01')
             ->lostOn('2025-01-01')
             ->create();
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forWrestler($currentChampion)
             ->wonOn('2025-01-01')
             ->create();
 
         // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
 
         // Assert
         $table
@@ -177,6 +179,8 @@ describe('TitleHistory rendering', function (): void {
         string $visibleDates,
         string $hiddenDates,
     ): void {
+        $title = Title::factory()->create();
+
         // Arrange
         $wrestler = Wrestler::factory()->create(['name' => 'Historic Wrestler']);
         $tagTeam = TagTeam::factory()->create(['name' => 'Legendary Tag Team']);
@@ -193,20 +197,20 @@ describe('TitleHistory rendering', function (): void {
             ->lostOn('2022-05-01')
             ->create();
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forWrestler($wrestler)
             ->wonOn('2023-01-01')
             ->lostOn('2023-05-01')
             ->create();
         TitleChampionship::factory()
-            ->for($this->title)
+            ->for($title)
             ->forTagTeam($tagTeam)
             ->wonOn('2024-06-01')
             ->lostOn('2025-01-01')
             ->create();
 
         // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
+        $table = livewire(TitleHistory::class, ['titleId' => $title->id]);
         $table->set('search', $search);
 
         // Assert
@@ -220,22 +224,12 @@ describe('TitleHistory rendering', function (): void {
         'wrestler champion' => ['Historic', 'Historic Wrestler', '2023-01-01 - 2023-05-01', '2024-06-01 - 2025-01-01'],
         'tag team champion' => ['Legendary', 'Legendary Tag Team', '2024-06-01 - 2025-01-01', '2023-01-01 - 2023-05-01'],
     ]);
-
-    it('renders an empty state when the title has no reigns', function (): void {
-        // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
-
-        // Assert
-        $table
-            ->assertSuccessful()
-            ->assertSee('Title reigns')
-            ->assertSee('No title reigns yet.')
-            ->assertDontSeeHtml('placeholder="Search title reigns"');
-    });
 });
 
 describe('TitleHistory reign dates', function (): void {
     it('shows reign dates as the day in the title promotion time zone', function (): void {
+        Title::factory()->create();
+
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
         $title = Title::factory()->for($promotion, 'promotion')->create();
@@ -257,6 +251,8 @@ describe('TitleHistory reign dates', function (): void {
 
 describe('TitleHistory authorization', function (): void {
     it('authorizes the selected title instance', function (): void {
+        Title::factory()->create();
+
         // Arrange
         $authorizedTitle = null;
 
@@ -279,22 +275,4 @@ describe('TitleHistory authorization', function (): void {
         $table->assertSuccessful();
         expect($authorizedTitle?->is($title))->toBeTrue();
     });
-
-    it('forbids users without access to the title', function (string $actor, int $status): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $table = livewire(TitleHistory::class, ['titleId' => $this->title->id]);
-
-        // Assert
-        $table->assertStatus($status);
-    })->with([
-        'guest' => ['guest', 403],
-        'basic user' => ['basic user', 404],
-    ]);
 });

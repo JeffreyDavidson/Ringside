@@ -30,26 +30,13 @@ describe('authorized venue form interactions', function () {
 
     it('opens an empty form for creating a venue', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', '')
             ->assertSet('form.street_address', '')
             ->assertSet('form.city', '')
             ->assertSet('form.state', '')
             ->assertSet('form.zipcode', '');
-    });
-
-    it('closes the modal and clears unsaved venue data', function () {
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal');
-        $modal->set('form.name', 'Unsaved Arena');
-        $modal->call('closeModal');
-
-        $modal
-            ->assertSet('isModalOpen', false)
-            ->assertSet('form.name', '');
     });
 
     it('loads an existing venue for editing', function () {
@@ -62,12 +49,10 @@ describe('authorized venue form interactions', function () {
             'timezone' => 'America/New_York',
         ]);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $venue->id);
+        $modal = livewire(FormModal::class, ['modelId' => $venue->id]);
         $modal->set('form.name', 'Madison Square Garden');
 
         $modal
-            ->assertSet('isModalOpen', true)
             ->assertSet('form.name', 'Madison Square Garden')
             ->assertSet('form.street_address', '4 Pennsylvania Plaza')
             ->assertSet('form.city', 'New York')
@@ -78,14 +63,12 @@ describe('authorized venue form interactions', function () {
     });
 
     it('responds not found when opening a missing venue', function () {
-        livewire(FormModal::class)
-            ->call('openModal', PHP_INT_MAX)
+        livewire(FormModal::class, ['modelId' => PHP_INT_MAX])
             ->assertNotFound();
     });
 
     it('creates a venue and resets the modal', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'New Wrestling Arena',
             'form.street_address' => '789 Wrestling Way',
@@ -105,7 +88,7 @@ describe('authorized venue form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false)
+            ->assertDispatched('closeModal')
             ->assertSet('form.name', '');
     });
 
@@ -115,8 +98,7 @@ describe('authorized venue form interactions', function () {
             'state' => 'California',
         ]);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $venue->id);
+        $modal = livewire(FormModal::class, ['modelId' => $venue->id]);
         $modal->set([
             'form.name' => 'Updated Arena',
             'form.street_address' => '456 Oak Avenue',
@@ -136,13 +118,12 @@ describe('authorized venue form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false)
+            ->assertDispatched('closeModal')
             ->assertSet('form.name', '');
     });
 
     it('requires complete venue data', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->call('save');
 
         $modal->assertHasErrors([
@@ -156,7 +137,6 @@ describe('authorized venue form interactions', function () {
 
     it('rejects invalid venue field values', function (string $field, mixed $value, string $rule) {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Arena',
             'form.street_address' => '123 Valid Street',
@@ -183,27 +163,25 @@ describe('authorized venue form interactions', function () {
         Venue::factory()->create(['name' => 'Existing Arena']);
         $venue = Venue::factory()->create(['name' => 'Editable Arena']);
 
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $venue->id);
+        $modal = livewire(FormModal::class, ['modelId' => $venue->id]);
         $modal->set('form.name', 'Existing Arena');
         $modal->call('save');
 
         $modal
             ->assertHasErrors(['form.name' => 'unique'])
             ->assertSet('form.name', 'Existing Arena')
-            ->assertSet('isModalOpen', true);
+            ->assertNotDispatched('closeModal');
     });
 
     it('generates valid dummy data that can create a venue', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->call('fillDummyFields');
         $modal->call('save');
 
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
-            ->assertSet('isModalOpen', false);
+            ->assertDispatched('closeModal');
         expect(Venue::query()->count())->toBe(1);
     });
 });

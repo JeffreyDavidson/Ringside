@@ -84,7 +84,7 @@
     <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">
         <button @click="$store.sidebar && $store.sidebar.openMobile($el)"
             type="button"
-            aria-label="Open navigation"
+            aria-label="{{ __('navigation.open') }}"
             aria-controls="app-sidebar"
             aria-expanded="false"
             :aria-expanded="$store.sidebar && $store.sidebar.mobileOpen ? 'true' : 'false'"
@@ -92,7 +92,7 @@
         >
             <x-heroicon-o-bars-3 class="size-5" />
         </button>
-        <nav class="flex min-w-0 items-center gap-2 text-sm" aria-label="Breadcrumb">
+        <nav class="flex min-w-0 items-center gap-2 text-sm" aria-label="{{ __('navigation.breadcrumb') }}">
             <span class="bg-ringside-signal hidden size-1.5 shrink-0 sm:block" aria-hidden="true"></span>
             <span
                 class="text-ringside-muted truncate text-xs font-semibold tracking-[0.08em] uppercase"

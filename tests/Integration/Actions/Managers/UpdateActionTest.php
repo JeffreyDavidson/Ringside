@@ -6,6 +6,8 @@ use App\Actions\Managers\UpdateAction;
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it updates a manager with new information', function () {
     $manager = Manager::factory()->create([
         'first_name' => 'Original',
@@ -21,7 +23,7 @@ test('it updates a manager with new information', function () {
         ->and($result->first_name)->toBe('Updated')
         ->and($result->last_name)->toBe('Manager');
 
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'id' => $manager->id,
         'first_name' => 'Updated',
         'last_name' => 'Manager',
@@ -60,13 +62,13 @@ test('it updates manager and creates employment when employment date is provided
     expect($result->last_name)->toBe('Updated')
         ->and($result->currentEmployment()->exists())->toBeTrue();
 
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'id' => $manager->id,
         'first_name' => 'John',
         'last_name' => 'Updated',
     ]);
 
-    $this->assertDatabaseHas('employments', [
+    assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
@@ -89,7 +91,7 @@ test('it updates manager without affecting existing employment', function () {
         ->and($result->last_name)->toBe('Employed')
         ->and($result->currentEmployment()->exists())->toBeTrue(); // Should still be employed
 
-    $this->assertDatabaseHas('managers', [
+    assertDatabaseHas('managers', [
         'id' => $manager->id,
         'first_name' => 'Still',
         'last_name' => 'Employed',

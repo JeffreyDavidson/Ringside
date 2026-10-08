@@ -22,11 +22,8 @@ describe('promotion form interactions', function () {
     it('renders and opens the promotion form', function () {
         $modal = livewire(FormModal::class);
 
-        $modal->call('openModal');
-
         $modal->assertSuccessful();
         $modal->assertViewIs('livewire.promotions.modals.form-modal');
-        $modal->assertSet('isModalOpen', true);
         $modal->assertSeeHtml('wire:model="form.name"');
         $modal->assertSeeHtml('wire:model="form.slug"');
         $modal->assertSee('Add Promotion');
@@ -41,7 +38,6 @@ describe('promotion form interactions', function () {
 
     it('creates a promotion and refreshes the directory', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Ringside Championship Wrestling',
             'form.slug' => 'ringside-championship-wrestling',
@@ -53,7 +49,7 @@ describe('promotion form interactions', function () {
         $modal
             ->assertHasNoErrors()
             ->assertDispatched('promotion-saved')
-            ->assertSet('isModalOpen', false)
+            ->assertDispatched('closeModal')
             ->assertSet('form.name', '')
             ->assertSet('form.slug', '');
     });
@@ -63,8 +59,7 @@ describe('promotion form interactions', function () {
             'name' => 'Old Promotion Name',
             'slug' => 'old-promotion-name',
         ]);
-        $modal = livewire(FormModal::class);
-        $modal->call('openModal', $promotion->id);
+        $modal = livewire(FormModal::class, ['modelId' => $promotion->id]);
         $modal->set('form.name', 'Updated Promotion Name');
         $modal->call('save');
 
@@ -76,7 +71,6 @@ describe('promotion form interactions', function () {
     it('rejects duplicate and invalid slugs', function (string $slug, string $rule) {
         Promotion::factory()->create(['slug' => 'already-used']);
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Promotion',
             'form.slug' => $slug,
@@ -91,7 +85,6 @@ describe('promotion form interactions', function () {
 
     it('saves the selected time zone', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Tokyo Pro',
             'form.slug' => 'tokyo-pro',
@@ -109,7 +102,7 @@ describe('promotion form interactions', function () {
         Event::factory()->for($promotion, 'promotion')->create();
 
         // Act
-        $modal = livewire(FormModal::class)->call('openModal', $promotion->id);
+        $modal = livewire(FormModal::class, ['modelId' => $promotion->id]);
 
         // Assert
         $modal->assertSee('Existing event times keep their moment in time and will be shown in the new time zone.');
@@ -121,8 +114,8 @@ describe('promotion form interactions', function () {
         Event::factory()->for(Promotion::factory()->create(), 'promotion')->create();
 
         // Act
-        $creating = livewire(FormModal::class)->call('openModal');
-        $editing = livewire(FormModal::class)->call('openModal', $promotion->id);
+        $creating = livewire(FormModal::class);
+        $editing = livewire(FormModal::class, ['modelId' => $promotion->id]);
 
         // Assert
         $creating->assertDontSee('Existing event times keep their moment in time');
@@ -131,7 +124,6 @@ describe('promotion form interactions', function () {
 
     it('rejects a time zone that does not exist', function (string $timezone) {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Promotion',
             'form.slug' => 'valid-promotion',
@@ -147,7 +139,6 @@ describe('promotion form interactions', function () {
 
     it('fills dummy data with a name and its matching slug that can create a promotion', function () {
         $modal = livewire(FormModal::class);
-        $modal->call('openModal');
 
         $modal->call('fillDummyFields');
         $name = $modal->get('form.name');
@@ -169,7 +160,6 @@ describe('promotion form interactions', function () {
         $modal = livewire(FormModal::class);
 
         // Act
-        $modal->call('openModal');
         $modal->set([
             'form.name' => 'Valid Promotion',
             'form.slug' => 'valid-promotion',

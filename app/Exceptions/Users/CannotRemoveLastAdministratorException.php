@@ -10,6 +10,6 @@ final class CannotRemoveLastAdministratorException extends BaseBusinessException
 {
     public static function lastActiveAdministrator(): static
     {
-        return new self('The platform must keep at least one active administrator. Make another user an active administrator first.');
+        return new self(__('users.last_administrator'));
     }
 }

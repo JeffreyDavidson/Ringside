@@ -11,6 +11,8 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it starts a suspension period on the effective date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $effectiveDate = now()->subDay();
@@ -21,7 +23,7 @@ test('it starts a suspension period on the effective date', function () {
         LifecycleTransitionType::Suspended,
     );
 
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
         'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
@@ -45,7 +47,7 @@ test('it ends and preserves the active suspension period', function () {
         LifecycleTransitionType::Reinstated,
     );
 
-    $this->assertDatabaseHas('suspensions', [
+    assertDatabaseHas('suspensions', [
         'id' => $suspensionId,
         'suspendable_id' => $wrestler->id,
         'suspendable_type' => $wrestler->getMorphClass(),

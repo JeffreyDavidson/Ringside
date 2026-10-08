@@ -98,8 +98,8 @@ for confirmation before it discards changes (typed, auto-filled, or kept after a
 save).
 
 A form modal's Cancel button closes through the modal host with `wire:click="$dispatch('closeModal')"`, like the
-header's close button. Do not call the component's `closeModal()` from a view: `BaseFormModal::closeModal()` only
-clears `isModalOpen` and never dispatches the package's `closeModal` event, so the dialog would stay open.
+header's close button. The modal components have no open state of their own: the modal package mounts a fresh
+component each time a dialog opens, and `submitForm()` dispatches the package's `closeModal` event.
 
 `BaseFormModal::storeForm()` validates and runs `createForm()` / `updateForm()` inside `reportBusinessErrors()`,
 which turns a `BaseBusinessException` from the Action into an error on the field named by the modal's

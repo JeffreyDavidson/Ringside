@@ -29,7 +29,7 @@ class CanChangeEmploymentDate implements ValidationRule
         }
 
         if (! $value instanceof DateTimeInterface && ! is_float($value) && ! is_int($value) && ! is_string($value)) {
-            $fail('The employment date must be a valid date.');
+            $fail(__('core.validation.employment_date_invalid'));
 
             return;
         }
@@ -45,7 +45,7 @@ class CanChangeEmploymentDate implements ValidationRule
 
         if (! $query->exists()) {
             $modelName = $this->getModelName($this->model);
-            $fail("The employment date cannot be changed while {$modelName} is currently employed.");
+            $fail(__('core.validation.employment_date_employed', ['name' => $modelName]));
         }
     }
 

@@ -226,7 +226,6 @@ it('updates competitor fields when match type changes', function () {
     $tagTeamType = MatchType::factory()->create(['name' => 'Tag Team']);
     
     $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
-        ->call('openModal')
         ->set('form.matchTypeId', $singlesType->id)
         ->assertSee('Competitor 1')
         ->assertSee('Competitor 2')

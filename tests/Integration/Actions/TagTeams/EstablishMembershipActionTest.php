@@ -12,7 +12,15 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 it('accepts omitted membership groups', function () {
+    resolve(EstablishMembershipAction::class);
+    resolve(SynchronizeMembershipAction::class);
+    resolve(EndMembershipsAction::class);
+    TagTeam::factory()->create();
+    now()->subDay();
+
     $tagTeam = TagTeam::factory()->create();
 
     resolve(EstablishMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData, now());
@@ -20,66 +28,70 @@ it('accepts omitted membership groups', function () {
     expect($tagTeam->wrestlers()->exists())->toBeFalse();
 });
 
-beforeEach(function () {
-    $this->establishMembership = resolve(EstablishMembershipAction::class);
-    $this->synchronizeMembership = resolve(SynchronizeMembershipAction::class);
-    $this->endMemberships = resolve(EndMembershipsAction::class);
-    $this->tagTeam = TagTeam::factory()->create();
-    $this->membershipDate = now()->subDay();
-});
-
 it('establishes wrestler and manager memberships with the same date', function () {
+    $establishMembership = resolve(EstablishMembershipAction::class);
+    resolve(SynchronizeMembershipAction::class);
+    resolve(EndMembershipsAction::class);
+    $tagTeam = TagTeam::factory()->create();
+    $membershipDate = now()->subDay();
+
     $wrestlers = Wrestler::factory()->count(2)->create();
     $managers = Manager::factory()->count(2)->create();
 
-    $this->establishMembership->handle(
-        $this->tagTeam,
+    $establishMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData($wrestlers, $managers),
-        $this->membershipDate,
+        $membershipDate,
     );
 
-    expect($this->tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
+    expect($tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing($wrestlers->modelKeys())
-        ->and($this->tagTeam->currentManagers()->pluck('managers.id')->all())
+        ->and($tagTeam->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys());
 
     foreach ($wrestlers as $wrestler) {
-        $this->assertDatabaseHas('tag_teams_wrestlers', [
-            'tag_team_id' => $this->tagTeam->id,
+        assertDatabaseHas('tag_teams_wrestlers', [
+            'tag_team_id' => $tagTeam->id,
             'wrestler_id' => $wrestler->id,
-            'joined_at' => $this->membershipDate->toDateTimeString(),
+            'joined_at' => $membershipDate->toDateTimeString(),
             'left_at' => null,
         ]);
     }
 
     foreach ($managers as $manager) {
-        $this->assertDatabaseHas('tag_teams_managers', [
-            'tag_team_id' => $this->tagTeam->id,
+        assertDatabaseHas('tag_teams_managers', [
+            'tag_team_id' => $tagTeam->id,
             'manager_id' => $manager->id,
-            'hired_at' => $this->membershipDate->toDateTimeString(),
+            'hired_at' => $membershipDate->toDateTimeString(),
             'fired_at' => null,
         ]);
     }
 });
 
 it('synchronizes memberships while preserving relationship history', function () {
+    $establishMembership = resolve(EstablishMembershipAction::class);
+    $synchronizeMembership = resolve(SynchronizeMembershipAction::class);
+    resolve(EndMembershipsAction::class);
+    $tagTeam = TagTeam::factory()->create();
+    $membershipDate = now()->subDay();
+
     $retainedWrestler = Wrestler::factory()->create();
     $removedWrestler = Wrestler::factory()->create();
     $addedWrestler = Wrestler::factory()->create();
     $removedManager = Manager::factory()->create();
     $addedManager = Manager::factory()->create();
-    $this->establishMembership->handle(
-        $this->tagTeam,
+    $establishMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(
             new Collection([$retainedWrestler, $removedWrestler]),
             new Collection([$removedManager]),
         ),
-        $this->membershipDate,
+        $membershipDate,
     );
     $changeDate = now();
 
-    $this->synchronizeMembership->handle(
-        $this->tagTeam,
+    $synchronizeMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(
             new Collection([$retainedWrestler, $addedWrestler]),
             new Collection([$addedManager]),
@@ -87,42 +99,54 @@ it('synchronizes memberships while preserving relationship history', function ()
         $changeDate,
     );
 
-    expect($this->tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
+    expect($tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
-        ->and($this->tagTeam->currentManagers()->pluck('managers.id')->all())
+        ->and($tagTeam->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing([$addedManager->id]);
 
-    $this->assertDatabaseHas('tag_teams_wrestlers', [
-        'tag_team_id' => $this->tagTeam->id,
+    assertDatabaseHas('tag_teams_wrestlers', [
+        'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $removedWrestler->id,
         'left_at' => $changeDate->toDateTimeString(),
     ]);
-    $this->assertDatabaseHas('tag_teams_managers', [
-        'tag_team_id' => $this->tagTeam->id,
+    assertDatabaseHas('tag_teams_managers', [
+        'tag_team_id' => $tagTeam->id,
         'manager_id' => $removedManager->id,
         'fired_at' => $changeDate->toDateTimeString(),
     ]);
 });
 
 it('leaves an omitted membership group unchanged', function () {
+    $establishMembership = resolve(EstablishMembershipAction::class);
+    $synchronizeMembership = resolve(SynchronizeMembershipAction::class);
+    resolve(EndMembershipsAction::class);
+    $tagTeam = TagTeam::factory()->create();
+    $membershipDate = now()->subDay();
+
     $wrestlers = Wrestler::factory()->count(2)->create();
     $manager = Manager::factory()->create();
-    $this->establishMembership->handle(
-        $this->tagTeam,
+    $establishMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData($wrestlers, new Collection([$manager])),
-        $this->membershipDate,
+        $membershipDate,
     );
 
-    $this->synchronizeMembership->handle(
-        $this->tagTeam,
+    $synchronizeMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         now(),
     );
 
-    expect($this->tagTeam->currentManagers()->whereKey($manager->id)->exists())->toBeTrue();
+    expect($tagTeam->currentManagers()->whereKey($manager->id)->exists())->toBeTrue();
 });
 
 it('preserves each wrestler membership when a wrestler rejoins', function () {
+    $establishMembership = resolve(EstablishMembershipAction::class);
+    $synchronizeMembership = resolve(SynchronizeMembershipAction::class);
+    resolve(EndMembershipsAction::class);
+    $tagTeam = TagTeam::factory()->create();
+    now()->subDay();
+
     $wrestler = Wrestler::factory()->create();
     $wrestlers = new Collection([$wrestler]);
     $noWrestlers = new Collection;
@@ -131,29 +155,29 @@ it('preserves each wrestler membership when a wrestler rejoins', function () {
     $secondJoinedAt = now()->subDays(2)->startOfSecond();
     $secondLeftAt = now()->subDay()->startOfSecond();
 
-    $this->establishMembership->handle(
-        $this->tagTeam,
+    $establishMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         $firstJoinedAt,
     );
-    $this->synchronizeMembership->handle(
-        $this->tagTeam,
+    $synchronizeMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(wrestlers: $noWrestlers),
         $firstLeftAt,
     );
-    $this->establishMembership->handle(
-        $this->tagTeam,
+    $establishMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         $secondJoinedAt,
     );
-    $this->synchronizeMembership->handle(
-        $this->tagTeam,
+    $synchronizeMembership->handle(
+        $tagTeam,
         new TagTeamMembershipData(wrestlers: $noWrestlers),
         $secondLeftAt,
     );
 
     $memberships = TagTeamWrestler::query()
-        ->whereBelongsTo($this->tagTeam, 'tagTeam')
+        ->whereBelongsTo($tagTeam, 'tagTeam')
         ->whereBelongsTo($wrestler)
         ->orderBy('joined_at')
         ->get();
@@ -165,5 +189,5 @@ it('preserves each wrestler membership when a wrestler rejoins', function () {
         ->and($firstMembership->left_at?->equalTo($firstLeftAt))->toBeTrue()
         ->and($secondMembership->joined_at->equalTo($secondJoinedAt))->toBeTrue()
         ->and($secondMembership->left_at?->equalTo($secondLeftAt))->toBeTrue()
-        ->and($this->tagTeam->currentWrestlers()->exists())->toBeFalse();
+        ->and($tagTeam->currentWrestlers()->exists())->toBeFalse();
 });

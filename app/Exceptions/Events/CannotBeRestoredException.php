@@ -14,13 +14,13 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($venue);
 
-        return self::forReason(BusinessRuleReason::NotDeleted, "{$context} cannot be restored because it is not deleted.");
+        return self::forReason(BusinessRuleReason::NotDeleted, __('venues.errors.restored.not_deleted', ['context' => $context]));
     }
 
     public static function nameConflict(Venue $venue, string $conflictingName): static
     {
         $context = self::formatModelContext($venue);
 
-        return new self("{$context} cannot be restored because the name conflicts with existing venue '{$conflictingName}'. Resolve the conflict before restoration.");
+        return new self(__('venues.errors.restored.name_conflict', ['context' => $context, 'conflicting_name' => $conflictingName]));
     }
 }

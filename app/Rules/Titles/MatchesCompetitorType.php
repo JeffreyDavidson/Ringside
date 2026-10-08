@@ -25,7 +25,7 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_int($value) && (! is_string($value) || ! ctype_digit($value))) {
-            $fail('The selected title is invalid.');
+            $fail(__('titles.validation.invalid'));
 
             return;
         }
@@ -33,7 +33,7 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
         $title = Title::query()->find((int) $value);
 
         if (! $title instanceof Title) {
-            $fail('The selected title is invalid.');
+            $fail(__('titles.validation.invalid'));
 
             return;
         }
@@ -45,7 +45,7 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
             return;
         }
 
-        $fail("The {$title->name} may only be contested by {$title->type->competitorLabel()}.");
+        $fail(__('titles.validation.competitor_type', ['title' => $title->name, 'competitors' => $title->type->competitorLabel()]));
     }
 
     private function hasCompetitors(string $competitorKey): bool

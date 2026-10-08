@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
+
 test('availability badges keep readable contrast on the dark theme', function (string $state, string $badge): void {
     // Arrange
     $wrestler = Wrestler::factory()->{$state}()->create(['name' => 'Badge Contrast']);
-    $this->actingAs(administrator());
+    actingAs(administrator());
 
     // Act
     $page = visit(route('wrestlers.show', $wrestler));

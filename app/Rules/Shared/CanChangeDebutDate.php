@@ -29,7 +29,7 @@ class CanChangeDebutDate implements ValidationRule
         }
 
         if (! $value instanceof DateTimeInterface && ! is_float($value) && ! is_int($value) && ! is_string($value)) {
-            $fail('The debut date must be a valid date.');
+            $fail(__('core.validation.debut_date_invalid'));
 
             return;
         }
@@ -43,11 +43,11 @@ class CanChangeDebutDate implements ValidationRule
         }
 
         if ($hasSeveralStablePeriods) {
-            $fail("The debut date cannot be changed because {$this->model->name} has been active in more than one period.");
+            $fail(__('core.validation.debut_date_multiple_periods', ['name' => $this->model->name]));
 
             return;
         }
 
-        $fail("The debut date cannot be changed while {$this->model->name} is currently active.");
+        $fail(__('core.validation.debut_date_active', ['name' => $this->model->name]));
     }
 }

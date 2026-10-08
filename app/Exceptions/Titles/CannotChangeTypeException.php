@@ -11,6 +11,6 @@ final class CannotChangeTypeException extends BaseBusinessException
 {
     public static function hasChampionshipsOrMatches(Title $title): self
     {
-        return new self("Title [{$title->name}] type cannot be changed because it has championship reigns or is booked in a match.");
+        return new self(__('titles.errors.change_type.has_championships_or_matches', ['title' => $title->name]));
     }
 }

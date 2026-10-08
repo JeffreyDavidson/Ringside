@@ -8,6 +8,8 @@ use App\Enums\Users\Role;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Hash;
 
+use function Pest\Laravel\assertDatabaseHas;
+
 test('it updates a user', function () {
     $user = User::factory()->create();
 
@@ -21,7 +23,7 @@ test('it updates a user', function () {
         ->and($updatedUser->email)->toBe('updated@example.com')
         ->and($updatedUser->role)->toBe(Role::Administrator);
 
-    $this->assertDatabaseHas('users', [
+    assertDatabaseHas('users', [
         'id' => $user->getKey(),
         'email' => 'updated@example.com',
         'role' => Role::Administrator->value,

@@ -13,20 +13,20 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} cannot be retired because it is deleted. Restore the stable first.");
+        return new self(__('stables.errors.retired.deleted', ['context' => $context]));
     }
 
     public static function notActive(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is not currently active and cannot be retired.");
+        return new self(__('stables.errors.retired.not_active', ['context' => $context]));
     }
 
     public static function alreadyRetired(Stable $stable): static
     {
         $context = self::formatModelContext($stable);
 
-        return new self("{$context} is already retired.");
+        return new self(__('stables.errors.retired.already_retired', ['context' => $context]));
     }
 }

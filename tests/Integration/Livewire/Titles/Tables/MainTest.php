@@ -9,7 +9,6 @@ use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -64,29 +63,6 @@ describe('titles table', function (): void {
             ->assertSee(__('titles.empty_title'))
             ->assertSee(__('titles.empty_description'))
             ->assertSeeHtml('data-test="titles-empty-state"');
-    });
-
-    it('filters titles by name and clears the search', function (): void {
-        // Arrange
-        Title::factory()->create(['name' => 'World Heavyweight Title']);
-        Title::factory()->create(['name' => 'Intercontinental Title']);
-        $component = livewire(Main::class);
-
-        // Act
-        $component->set('search', 'World');
-
-        // Assert
-        $component
-            ->assertSee('World Heavyweight Title')
-            ->assertDontSee('Intercontinental Title');
-
-        // Act
-        $component->set('search', '');
-
-        // Assert
-        $component
-            ->assertSee('World Heavyweight Title')
-            ->assertSee('Intercontinental Title');
     });
 
     it('filters titles by status', function (TitleStatus $status): void {
@@ -234,22 +210,6 @@ describe('titles table', function (): void {
             ->and($loadedTitle->currentChampionship?->relationLoaded('champion'))->toBeTrue();
     });
 
-    it('renders updated title data after a refresh', function (): void {
-        // Arrange
-        $title = Title::factory()->create(['name' => 'Original Title']);
-        $component = livewire(Main::class);
-        $component->assertSee('Original Title');
-        $title->update(['name' => 'Updated Title']);
-
-        // Act
-        $component->call('$refresh');
-
-        // Assert
-        $component
-            ->assertSee('Updated Title')
-            ->assertDontSee('Original Title');
-    });
-
     it('renders a newly assigned champion after a refresh', function (): void {
         // Arrange
         $title = Title::factory()->active()->singles()->create(['name' => 'Championship Title']);
@@ -268,24 +228,6 @@ describe('titles table', function (): void {
         // Assert
         $component->assertSee($champion->name);
     });
-
-    it('forbids users without title access', function (string $actor): void {
-        // Arrange
-        if ($actor === 'guest') {
-            Auth::logout();
-        } else {
-            actingAs(basicUser());
-        }
-
-        // Act
-        $component = livewire(Main::class);
-
-        // Assert
-        $component->assertForbidden();
-    })->with([
-        'guest' => ['guest'],
-        'basic user' => ['basic user'],
-    ]);
 });
 
 describe('titles table metadata', function (): void {

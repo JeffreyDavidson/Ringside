@@ -12,14 +12,15 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
     actingAs(administrator());
-    $this->event = Event::factory()->create();
 });
 
 describe('dynamic match type UI', function (): void {
     it('locks the event context against client-side changes', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
         $otherEvent = Event::factory()->create();
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act / Assert
         expect(fn () => $component->set('eventId', $otherEvent->id))
@@ -27,11 +28,12 @@ describe('dynamic match type UI', function (): void {
     });
 
     it('shows helper text when no match type is selected', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $component->call('openModal');
 
         // Assert
         $component->assertSee('Select a match type to configure competitors');
@@ -42,11 +44,12 @@ describe('dynamic match type UI', function (): void {
         array $visibleText,
         array $hiddenText,
     ): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $component->call('openModal');
         $component->set('form.matchType', $matchType);
 
         // Assert
@@ -86,11 +89,12 @@ describe('dynamic match type UI', function (): void {
     ]);
 
     it('clears competitor data when the match type changes', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $component->call('openModal');
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
         $component->set('form.matchType', MatchType::TagTeam);
@@ -102,20 +106,22 @@ describe('dynamic match type UI', function (): void {
     });
 
     it('does not allow tag teams before a match type is selected', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
-        $component->call('openModal');
 
         // Assert
         $component->assertSet('matchTypeAllowsTagTeams', false);
     });
 
     it('resets competitors when the match type arrives as its string value', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
 
@@ -129,9 +135,10 @@ describe('dynamic match type UI', function (): void {
     });
 
     it('keeps competitors when the match type is cleared', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
         $component->set('form.matchType', MatchType::Singles);
         $component->set('form.competitors.0.wrestlers', [123]);
 
@@ -145,9 +152,10 @@ describe('dynamic match type UI', function (): void {
     });
 
     it('rejects a tampered match type value', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act / Assert
         expect(fn () => $component->set('form.matchType', 'not-a-match-type'))
@@ -157,9 +165,10 @@ describe('dynamic match type UI', function (): void {
 
 describe('accessible competitor fields', function (): void {
     it('describes each roster search box with its usage hint', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
         $component->set('form.matchType', MatchType::Singles);
@@ -173,9 +182,10 @@ describe('accessible competitor fields', function (): void {
     });
 
     it('links a single competitor error to its search box', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
         $component->set('form.matchType', MatchType::Singles);
 
         // Act
@@ -190,9 +200,10 @@ describe('accessible competitor fields', function (): void {
     });
 
     it('groups each tag team side under its own name', function (): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
         $component->set('form.matchType', MatchType::TagTeam);
 
         // Act
@@ -208,9 +219,10 @@ describe('accessible competitor fields', function (): void {
     });
 
     it('names each side of a :dataset match', function (MatchType $matchType, array $legends): void {
+        $event = Event::factory()->create();
+
         // Arrange
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
-        $component->call('openModal');
+        $component = livewire(FormModal::class, ['eventId' => $event->id]);
 
         // Act
         $component->set('form.matchType', $matchType);
