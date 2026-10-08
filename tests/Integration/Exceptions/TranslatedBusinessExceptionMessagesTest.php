@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
@@ -43,6 +44,10 @@ dataset('translated exceptions', [
 ]);
 
 it('resolves every factory message to translated text', function (string $exceptionClass): void {
+    if (! is_subclass_of($exceptionClass, BaseBusinessException::class)) {
+        throw new InvalidArgumentException("{$exceptionClass} is not a business exception.");
+    }
+
     $arguments = [
         Stable::class => Stable::factory()->make(['name' => 'Evolution']),
         Title::class => Title::factory()->make(['name' => 'World']),
@@ -51,7 +56,7 @@ it('resolves every factory message to translated text', function (string $except
         'array' => ['Ric', 'Dave'],
     ];
 
-    $methods = (new ReflectionClass($exceptionClass))->getMethods(ReflectionMethod::IS_STATIC | ReflectionMethod::IS_PUBLIC);
+    $methods = new ReflectionClass($exceptionClass)->getMethods(ReflectionMethod::IS_STATIC | ReflectionMethod::IS_PUBLIC);
 
     foreach ($methods as $method) {
         if ($method->getDeclaringClass()->getName() !== $exceptionClass) {
@@ -59,16 +64,20 @@ it('resolves every factory message to translated text', function (string $except
         }
 
         $parameters = array_map(
-            fn (ReflectionParameter $parameter): mixed => $arguments[$parameter->getType()->getName()],
+            fn (ReflectionParameter $parameter): mixed => $arguments[(string) $parameter->getType()],
             $method->getParameters(),
         );
 
-        $message = $method->invoke(null, ...$parameters)->getMessage();
+        $exception = $method->invoke(null, ...$parameters);
 
-        expect($message)
-            ->not->toStartWith('stables.')
-            ->not->toStartWith('titles.')
-            ->not->toMatch('/:[a-z_]+/');
+        expect($exception)->toBeInstanceOf(BaseBusinessException::class);
+
+        if ($exception instanceof BaseBusinessException) {
+            expect($exception->getMessage())
+                ->not->toStartWith('stables.')
+                ->not->toStartWith('titles.')
+                ->not->toMatch('/:[a-z_]+/');
+        }
     }
 })->with('translated exceptions');
 
