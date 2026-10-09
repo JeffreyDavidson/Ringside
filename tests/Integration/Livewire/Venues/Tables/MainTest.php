@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Livewire\Venues\Tables\Main;
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
@@ -120,6 +122,24 @@ describe('venues table', function (): void {
                 message: __('venues.actions.deleted'),
             );
         assertSoftDeleted($venue);
+    });
+
+    it('shows the refusal as an error toast and keeps a venue with upcoming events', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Garden Arena']);
+        Event::factory()->create(['venue_id' => $venue->id, 'date' => now()->addDay()]);
+        $component = livewire(Main::class);
+
+        // Act
+        $component->call('delete', $venue);
+
+        // Assert
+        $component->assertDispatched(
+            'flash-message',
+            type: 'error',
+            message: "Venue 'Garden Arena' has 1 upcoming event and cannot be deleted. Move it to another venue or delete it first.",
+        );
+        assertNotSoftDeleted($venue);
     });
 
     it('renders an empty state when there are no venues', function (): void {
