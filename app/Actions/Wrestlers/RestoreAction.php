@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Lifecycle\Periods\DeletionPeriodCloser;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class RestoreAction
 {
     public function __construct(
+        private readonly DeletionPeriodCloser $periods,
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
     ) {}
@@ -38,6 +40,7 @@ class RestoreAction
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedWrestler);
+            $this->periods->reopenRetirement($lockedWrestler);
             $this->deletionState->restore($lockedWrestler, $effectiveDate);
         });
     }
