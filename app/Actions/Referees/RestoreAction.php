@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Lifecycle\Periods\DeletionPeriodCloser;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Referees\Referee;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class RestoreAction
 {
     public function __construct(
+        private readonly DeletionPeriodCloser $periods,
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
     ) {}
@@ -37,6 +39,7 @@ class RestoreAction
             $lockedReferee = $referee->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedReferee);
+            $this->periods->reopenRetirement($lockedReferee);
             $this->deletionState->restore($lockedReferee, $effectiveDate);
         });
     }
