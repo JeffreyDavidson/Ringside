@@ -316,3 +316,50 @@ describe('restoring a deleted record', function (): void {
         $table->assertNotDispatched('flash-message', type: 'status');
     })->with('tables with a refusable restore');
 });
+
+describe('restoring around a deleted venue', function (): void {
+    beforeEach(fn () => actingAs(administrator()));
+
+    test('the events table tells the user to restore the venue first', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Madison Square Garden']);
+        $event = Event::factory()->for($venue)->scheduled()->create();
+        $event->delete();
+        $venue->delete();
+        $table = livewire(EventsTable::class)->set('filterValues.status', 'deleted');
+
+        // Act
+        $table->call('restore', $event->getKey());
+
+        // Assert
+        $table->assertDispatched(
+            'flash-message',
+            fn (string $name, array $params): bool => ($params['type'] ?? null) === 'error'
+                && str_contains((string) ($params['message'] ?? ''), "its venue 'Madison Square Garden' is deleted. Restore the venue first."),
+        );
+
+        expect(isStillDeleted($event))->toBeTrue();
+    });
+
+    test('the venues table names the date a venue hosts more than one event', function (): void {
+        // Arrange
+        $date = now()->addWeek();
+        $venue = Venue::factory()->create();
+        Event::factory()->for($venue)->create(['date' => $date]);
+        Event::factory()->for($venue)->create(['date' => $date->copy()->setTime(20, 0)]);
+        $venue->delete();
+        $table = livewire(VenuesTable::class)->set('filterValues.deleted', 'deleted');
+
+        // Act
+        $table->call('restore', $venue->getKey());
+
+        // Assert
+        $table->assertDispatched(
+            'flash-message',
+            fn (string $name, array $params): bool => ($params['type'] ?? null) === 'error'
+                && str_contains((string) ($params['message'] ?? ''), "hosts more than one event on {$date->format('M j, Y')}"),
+        );
+
+        expect(isStillDeleted($venue))->toBeTrue();
+    });
+});
