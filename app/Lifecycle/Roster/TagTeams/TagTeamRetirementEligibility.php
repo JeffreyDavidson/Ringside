@@ -7,7 +7,10 @@ namespace App\Lifecycle\Roster\TagTeams;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 final class TagTeamRetirementEligibility
 {
@@ -59,23 +62,43 @@ final class TagTeamRetirementEligibility
             throw CannotBeUnretiredException::nameConflict($tagTeam, $conflictingTeam->name);
         }
 
-        $currentPartners = $tagTeam->currentWrestlers;
+        $partners = $this->membersAtRetirement($tagTeam);
 
-        if ($currentPartners->isEmpty()) {
+        if ($partners->isEmpty()) {
             throw CannotBeUnretiredException::noAvailablePartners($tagTeam);
         }
 
         $minimumPartners = TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS;
 
-        if (! TagTeamMembershipRequirements::hasMinimumCurrentWrestlers($currentPartners)) {
+        if (! TagTeamMembershipRequirements::hasMinimumCurrentWrestlers($partners)) {
             throw CannotBeUnretiredException::insufficientPartners(
                 $tagTeam,
-                $currentPartners->count(),
+                $partners->count(),
                 $minimumPartners,
             );
         }
 
-        $unavailablePartners = $currentPartners->filter(
+        foreach ($partners as $partner) {
+            if ($partner->trashed()) {
+                throw CannotBeUnretiredException::partnerDeleted($tagTeam, $partner->name);
+            }
+
+            $otherMembership = TagTeamWrestler::query()
+                ->current()
+                ->forWrestlerId($partner->id)
+                ->excludingTagTeamId($tagTeam->id)
+                ->first();
+
+            if ($otherMembership) {
+                throw CannotBeUnretiredException::partnerOnAnotherTagTeam(
+                    $tagTeam,
+                    $partner->name,
+                    TagTeam::query()->withTrashed()->findOrFail($otherMembership->tag_team_id)->name,
+                );
+            }
+        }
+
+        $unavailablePartners = $partners->filter(
             fn (Wrestler $wrestler): bool => $wrestler->currentInjury()->exists(),
         );
 
@@ -89,5 +112,26 @@ final class TagTeamRetirementEligibility
                 $unavailablePartnerNames,
             );
         }
+    }
+
+    /**
+     * The wrestlers whose membership was open when the tag team's current retirement started: still on the
+     * team, or ended on or after that date because they came back alone. Includes soft-deleted wrestlers.
+     *
+     * @return Collection<int, Wrestler>
+     */
+    public function membersAtRetirement(TagTeam $tagTeam): Collection
+    {
+        $retiredAt = $tagTeam->currentRetirement()->value('started_at');
+
+        return Wrestler::query()
+            ->withTrashed()
+            ->whereIn('id', TagTeamWrestler::query()
+                ->forTagTeamId($tagTeam->id)
+                ->where('joined_at', '<=', $retiredAt)
+                ->where(fn (Builder $query) => $query->whereNull('left_at')->orWhere('left_at', '>=', $retiredAt))
+                ->select('wrestler_id'))
+            ->inLockOrder()
+            ->get();
     }
 }

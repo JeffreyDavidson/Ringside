@@ -26,6 +26,11 @@ use Illuminate\Support\Facades\Lang;
 
 final class RosterErrorMessageResolver
 {
+    public static function message(BaseBusinessException $exception, RosterEntityType $entityType): string
+    {
+        return __(self::translationKey($exception, $entityType), $exception->translationReplacements());
+    }
+
     public static function translationKey(BaseBusinessException $exception, RosterEntityType $entityType): string
     {
         $namespace = "{$entityType->translationNamespace()}.errors";

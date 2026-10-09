@@ -6,6 +6,8 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('retirement predicate stays aligned with its guard', function (string $factoryState, bool $canRetire) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
@@ -64,4 +66,35 @@ test('a retired tag team without current partners cannot be unretired', function
 
     expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam->refresh()))
         ->toThrow(CannotBeUnretiredException::class, 'no current partners are available');
+});
+
+test('a retired tag team with fewer than two members at retirement cannot be unretired', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    TagTeamWrestler::query()->forTagTeamId($tagTeam->id)->firstOrFail()->update(['left_at' => now()->subDays(3)]);
+
+    expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam))
+        ->toThrow(CannotBeUnretiredException::class, 'only 1 partners available');
+});
+
+test('a retired tag team cannot be unretired while a partner is injured', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    $partner = $tagTeam->currentWrestlers()->firstOrFail();
+    $partner->injuries()->create(['started_at' => now()->subDay()]);
+
+    expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam))
+        ->toThrow(CannotBeUnretiredException::class, $partner->name);
+});
+
+test('members at retirement include those who left on or after retirement and exclude earlier leavers and later joiners', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    [$stayed, $leftAfter] = $tagTeam->currentWrestlers()->orderBy('wrestlers.id')->get()->all();
+    TagTeamWrestler::query()->forWrestlerId($leftAfter->id)->update(['left_at' => now()]);
+    $leftBefore = Wrestler::factory()->create();
+    $tagTeam->wrestlers()->attach($leftBefore, ['joined_at' => now()->subDays(10), 'left_at' => now()->subDays(5)]);
+    $joinedLater = Wrestler::factory()->create();
+    $tagTeam->wrestlers()->attach($joinedLater, ['joined_at' => now()]);
+
+    $members = resolve(TagTeamRetirementEligibility::class)->membersAtRetirement($tagTeam);
+
+    expect($members->modelKeys())->toBe(collect([$stayed->id, $leftAfter->id])->sort()->values()->all());
 });

@@ -6,8 +6,11 @@ namespace App\Actions\Wrestlers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +29,7 @@ class UnretireAction
      * This handles the complete wrestler comeback workflow with flexible employment options:
      * - Validates the wrestler can come out of retirement (business rule compliance)
      * - Ends the current retirement period through RetirementPeriodManager
+     * - Ends membership of a retired tag team, since the wrestler leaves it by coming back alone
      * - Optionally employs the wrestler immediately or leaves unemployed for manual employment
      * - Restores the wrestler to available status for match bookings
      * - Makes the wrestler available for new career opportunities
@@ -46,6 +50,15 @@ class UnretireAction
 
             $this->eligibility->ensureCanUnretire($lockedWrestler);
             $this->retirementPeriods->end($lockedWrestler, $effectiveDate, LifecycleTransitionType::Unretired);
+
+            OpenPeriodEnder::end(
+                TagTeamWrestler::query()
+                    ->forWrestlerId($lockedWrestler->id)
+                    ->whereIn('tag_team_id', TagTeam::query()->whereHas('currentRetirement')->select('id')),
+                'joined_at',
+                'left_at',
+                $effectiveDate,
+            );
 
             if ($employImmediately) {
                 $this->employ->handle($lockedWrestler, $effectiveDate);

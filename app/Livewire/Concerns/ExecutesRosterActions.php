@@ -49,7 +49,7 @@ trait ExecutesRosterActions
 
             return true;
         } catch (BaseBusinessException $exception) {
-            $message = __(RosterErrorMessageResolver::translationKey($exception, $entityType));
+            $message = RosterErrorMessageResolver::message($exception, $entityType);
 
             $this->dispatchActionFailure($message);
 

@@ -16,12 +16,13 @@ class UnretireAction
     public function __construct(
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly TagTeamRetirementEligibility $eligibility,
+        private readonly RejoinMembersAction $rejoinMembers,
         private readonly UnretireCurrentMembersAction $unretireCurrentMembers,
         private readonly EmployAction $employ,
     ) {}
 
     /**
-     * Unretire a tag team, its current members, and return it to employment when it has current wrestlers.
+     * Unretire a tag team, bring back the wrestlers it retired with, its current members, and return it to employment when it has current wrestlers.
      */
     public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
     {
@@ -31,8 +32,11 @@ class UnretireAction
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedTagTeam);
+            $membersAtRetirement = $this->eligibility->membersAtRetirement($lockedTagTeam);
+
             $this->retirementPeriods->end($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Unretired);
 
+            $this->rejoinMembers->handle($lockedTagTeam, $membersAtRetirement, $effectiveDate);
             $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
 
             if (! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
