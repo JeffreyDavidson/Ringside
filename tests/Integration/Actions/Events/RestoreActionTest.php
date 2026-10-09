@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
+use App\Actions\Venues\DeleteAction as DeleteVenueAction;
+use App\Actions\Venues\RestoreAction as RestoreVenueAction;
+use App\Exceptions\Events\CannotBeRestoredException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
@@ -44,6 +48,47 @@ test('it restores a soft-deleted event', function (): void {
 
     expect(Event::query()->find($event->id))->not->toBeNull()
         ->and(Event::withTrashed()->findOrFail($event->id)->deleted_at)->toBeNull();
+});
+
+test('it restores an event that has no venue', function (): void {
+    $event = Event::factory()->scheduled()->create(['venue_id' => null]);
+    $deletedEvent = deleteEvent($event);
+
+    resolve(RestoreAction::class)->handle($deletedEvent);
+
+    expect(Event::query()->find($event->id))->not->toBeNull();
+});
+
+test('it restores an event whose venue is live and free that day', function (): void {
+    $venue = Venue::factory()->create();
+    $event = Event::factory()->atVenue($venue)->scheduledOn(now()->addWeek()->toDateString())->create();
+    $deletedEvent = deleteEvent($event);
+
+    resolve(RestoreAction::class)->handle($deletedEvent);
+
+    expect(Event::query()->find($event->id))->not->toBeNull();
+});
+
+test('it refuses to restore an event while its venue is deleted, so a restore cannot double-book the venue', function (): void {
+    // Arrange: event B is deleted, event A takes its day at the venue, then the venue is deleted.
+    $date = now()->addWeek();
+    $venue = Venue::factory()->create(['name' => 'Madison Square Garden']);
+    $eventB = Event::factory()->for($venue)->create(['date' => $date]);
+    $deletedEventB = deleteEvent($eventB);
+    $eventA = Event::factory()->for($venue)->create(['date' => $date]);
+    resolve(DeleteVenueAction::class)->handle($venue);
+
+    // Act
+    $act = fn () => resolve(RestoreAction::class)->handle($deletedEventB);
+
+    // Assert
+    expect($act)->toThrow(CannotBeRestoredException::class, "Event '{$eventB->name}' cannot be restored because its venue 'Madison Square Garden' is deleted. Restore the venue first.")
+        ->and(Event::onlyTrashed()->whereKey($eventB->id)->exists())->toBeTrue();
+
+    // The venue can still be restored, and it then holds only event A that day.
+    resolve(RestoreVenueAction::class)->handle(Venue::withTrashed()->findOrFail($venue->id));
+
+    expect($venue->events()->pluck('id')->all())->toBe([$eventA->id]);
 });
 
 describe('event restore scheduling conflicts', function (): void {

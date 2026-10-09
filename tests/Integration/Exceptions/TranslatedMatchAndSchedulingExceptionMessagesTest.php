@@ -11,6 +11,7 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -35,6 +36,7 @@ it('resolves every factory message to translated text', function (string $except
         MatchType::class => MatchType::Singles,
         TitleType::class => TitleType::Singles,
         Title::class => Title::factory()->make(['name' => 'World']),
+        Event::class => Event::factory()->make(['name' => 'Summer Slam']),
         Venue::class => Venue::factory()->make(['name' => 'Garden']),
         Wrestler::class => Wrestler::factory()->make(['name' => 'Ric']),
         TagTeam::class => TagTeam::factory()->make(['name' => 'Dudleys']),
@@ -74,6 +76,7 @@ it('resolves every factory message to translated text', function (string $except
                     ->not->toStartWith('matches.')
                     ->not->toStartWith('core.')
                     ->not->toStartWith('venues.')
+                    ->not->toStartWith('events.')
                     ->not->toMatch('/:[a-z_]+/');
             }
         }
@@ -96,4 +99,6 @@ it('renders the original English text', function (Closure $factory, string $expe
     'range with context' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01'), 'stable'), 'Invalid date range for stable: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
     'future' => [fn () => InvalidDateRangeException::futureNotAllowed(Carbon::parse('2026-02-01'), 'Debut'), 'Debut date (2026-02-01) cannot be in the future. Use current or past date only.'],
     'venue name conflict' => [fn () => VenueCannotBeRestoredException::nameConflict(Venue::factory()->make(['name' => 'Garden']), 'Arena'), "Venue 'Garden' cannot be restored because the name conflicts with existing venue 'Arena'. Resolve the conflict before restoration."],
+    'event venue deleted' => [fn () => VenueCannotBeRestoredException::venueDeleted(Event::factory()->make(['name' => 'Summer Slam']), Venue::factory()->make(['name' => 'Garden'])), "Event 'Summer Slam' cannot be restored because its venue 'Garden' is deleted. Restore the venue first."],
+    'venue double booked' => [fn () => VenueCannotBeRestoredException::venueDoubleBooked(Venue::factory()->make(['name' => 'Garden']), 'Jan 1, 2026'), "Venue 'Garden' cannot be restored because it hosts more than one event on Jan 1, 2026. Move or delete the extra events first."],
 ]);

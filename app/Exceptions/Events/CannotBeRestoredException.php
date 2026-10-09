@@ -6,6 +6,7 @@ namespace App\Exceptions\Events;
 
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 final class CannotBeRestoredException extends BaseBusinessException
@@ -22,5 +23,15 @@ final class CannotBeRestoredException extends BaseBusinessException
         $context = self::formatModelContext($venue);
 
         return new self(__('venues.errors.restored.name_conflict', ['context' => $context, 'conflicting_name' => $conflictingName]));
+    }
+
+    public static function venueDeleted(Event $event, Venue $venue): static
+    {
+        return new self(__('events.errors.restored.venue_deleted', ['context' => self::formatModelContext($event), 'venue' => $venue->name]));
+    }
+
+    public static function venueDoubleBooked(Venue $venue, string $venueLocalDate): static
+    {
+        return new self(__('venues.errors.restored.double_booked', ['context' => self::formatModelContext($venue), 'date' => $venueLocalDate]));
     }
 }
