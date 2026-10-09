@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\QueryException;
 use Illuminate\Database\SQLiteConnection;
 use Illuminate\Support\Facades\DB;
 
@@ -36,9 +37,31 @@ function sqliteFileConnection(): array
     return ['connection' => $connection, 'path' => $path];
 }
 
+/**
+ * Open a second, plain connection to the same file that gives up at once instead of waiting for a lock.
+ */
+function otherSqliteWriter(string $path): SQLiteConnection
+{
+    config(['database.connections.sqlite_other_writer' => [
+        'driver' => 'sqlite',
+        'database' => $path,
+        'prefix' => '',
+        'busy_timeout' => 0,
+    ]]);
+
+    $connection = DB::connection('sqlite_other_writer');
+
+    if (! $connection instanceof SQLiteConnection) {
+        throw new LogicException('The other writer must use the sqlite driver.');
+    }
+
+    return $connection;
+}
+
 function removeSqliteFile(string $path): void
 {
     DB::purge('sqlite_file_probe');
+    DB::purge('sqlite_other_writer');
 
     foreach ([$path, "{$path}-wal", "{$path}-shm"] as $file) {
         if (is_file($file)) {
@@ -67,18 +90,16 @@ test('the sqlite connection uses wal, a busy timeout and normal sync', function 
 test('sqlite transactions take the write lock when they begin', function () {
     // Arrange
     ['connection' => $connection, 'path' => $path] = sqliteFileConnection();
-    $otherWriter = new PDO("sqlite:{$path}");
-    $otherWriter->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $otherWriter->exec('pragma busy_timeout = 0');
+    $otherWriter = otherSqliteWriter($path);
     $otherWriterBlocked = false;
 
     // Act
     $connection->beginTransaction();
 
     try {
-        $otherWriter->exec('begin immediate');
-        $otherWriter->exec('rollback');
-    } catch (PDOException) {
+        $otherWriter->statement('begin immediate');
+        $otherWriter->statement('rollback');
+    } catch (QueryException) {
         $otherWriterBlocked = true;
     }
 
