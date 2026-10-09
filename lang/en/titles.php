@@ -45,6 +45,7 @@ return [
             'active' => ':context is already active and cannot be reinstated.',
             'retired' => ':context is retired and cannot be reinstated.',
             'never_activated' => ':context has never been activated and cannot be reinstated. Use debut workflow instead.',
+            'scheduled_debut' => ':context has a scheduled debut and cannot be reinstated. Change the debut date instead.',
         ],
         'restored' => [
             'name_conflict' => ':context cannot be restored because the name conflicts with existing title \':conflicting_name\'. Resolve the conflict before restoration.',

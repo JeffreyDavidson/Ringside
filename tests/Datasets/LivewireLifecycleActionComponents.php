@@ -210,6 +210,7 @@ function livewireLifecycleActionCatalog(): array
                 'undebuted' => ['undebuted', ['debut'], ['retire', 'unretire', 'deactivate', 'reinstate']],
                 'active' => ['active', ['retire', 'deactivate'], ['debut', 'unretire', 'reinstate']],
                 'inactive' => ['inactive', ['retire', 'reinstate'], ['debut', 'unretire', 'deactivate']],
+                'scheduled debut' => ['withFutureDebut', [], ['debut', 'retire', 'unretire', 'deactivate', 'reinstate']],
                 'retired' => ['retired', ['unretire'], ['debut', 'retire', 'deactivate', 'reinstate']],
             ],
             'transitions' => ['undebuted', [['debut', 'deactivate', 'debut']]],
