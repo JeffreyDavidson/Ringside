@@ -63,7 +63,10 @@ Local development uses SQLite: a single file, `database/database.sqlite`, and no
 database server to install. `composer setup` creates the file and runs the
 migrations; on an existing checkout, run
 `touch database/database.sqlite && php artisan migrate --seed`. Automated tests
-also run on SQLite, in memory.
+also run on SQLite, in memory. The `sqlite` connection in `config/database.php`
+uses WAL, a 5-second busy timeout and IMMEDIATE transactions, so the web server,
+queue and scheduler can write at the same time without "database is locked"
+errors.
 
 Production runs MySQL 8. CI runs the test suite on SQLite, PostgreSQL and MySQL
 (see [CI/CD](../workflows/ci-cd.md)). To develop against the production engine
