@@ -60,6 +60,8 @@ return [
         'unretire' => [
             'default' => 'Unable to bring this tag team out of retirement.',
             'not_retired' => 'This tag team is not currently retired.',
+            'partner_deleted' => ':wrestler was deleted, so this tag team can\'t come back without them.',
+            'partner_on_another_tag_team' => ':wrestler is now on :tag_team, so this tag team can\'t come back without them.',
         ],
         'suspend' => [
             'default' => 'Unable to suspend this tag team.',

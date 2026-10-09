@@ -7,6 +7,7 @@ use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -244,6 +245,9 @@ test('it handles multiple retirement history correctly', function () {
     $tagTeam->retirements()->create(['started_at' => now()->subDays(30), 'ended_at' => now()->subDays(25)]);
     $tagTeam->retirements()->create(['started_at' => now()->subDays(20), 'ended_at' => null]); // Current
 
+    // The partners were on the team before it retired
+    TagTeamWrestler::query()->forTagTeamId($tagTeam->id)->update(['joined_at' => now()->subDays(60)]);
+
     $tagTeam->refresh();
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
         ->and($tagTeam->retirements()->count())->toBe(3);
@@ -274,6 +278,9 @@ test('it preserves employment and retirement history', function () {
     $tagTeam->retirements()->create(['started_at' => now()->subDays(45), 'ended_at' => now()->subDays(40)]);
     $tagTeam->employments()->create(['started_at' => now()->subDays(40), 'ended_at' => now()->subDays(35)]);
     $tagTeam->retirements()->create(['started_at' => now()->subDays(35), 'ended_at' => null]); // Current
+
+    // The partners were on the team before it retired
+    TagTeamWrestler::query()->forTagTeamId($tagTeam->id)->update(['joined_at' => now()->subDays(60)]);
 
     $originalEmploymentCount = $tagTeam->employments()->count();
     $originalRetirementCount = $tagTeam->retirements()->count();

@@ -59,23 +59,38 @@ directly in `package.json`.
 
 ## Database
 
-Production runs MySQL 8. The application supports MySQL, PostgreSQL, and
-SQLite, and CI runs the test suite on all three (see
-[CI/CD](../workflows/ci-cd.md)). Local development defaults to PostgreSQL
-(`.env.example`); set `DB_CONNECTION=mysql` and the matching `DB_*` values to
-develop against the production engine. Automated tests use SQLite in memory by
-default for fast isolated runs.
+Local development uses SQLite: a single file, `database/database.sqlite`, and no
+database server to install. `composer setup` creates the file and runs the
+migrations; on an existing checkout, run
+`touch database/database.sqlite && php artisan migrate --seed`. Automated tests
+also run on SQLite, in memory. The `sqlite` connection in `config/database.php`
+uses WAL, a 5-second busy timeout and IMMEDIATE transactions, so the web server,
+queue and scheduler can write at the same time without "database is locked"
+errors.
 
-To use PostgreSQL on macOS with Homebrew, install and start it, create the
-application database, and set `DB_USERNAME` in `.env` to the local PostgreSQL
-role:
+Production runs MySQL 8. CI runs the test suite on SQLite, PostgreSQL and MySQL
+(see [CI/CD](../workflows/ci-cd.md)). To develop against the production engine
+instead, set `DB_CONNECTION=mysql` and the `DB_*` values in `.env` (see the
+commented lines in `.env.example`).
 
-```bash
-brew install postgresql@17
-brew services start postgresql@17
-createdb ringside
-php artisan migrate
-```
+### What SQLite won't show you
+
+SQLite behaves like MySQL for almost everything in Ringside. These differences
+can't show up locally; the CI **MySQL tests** job catches them before a pull
+request can merge:
+
+- **Row locks.** SQLite ignores `lockForUpdate()`, so locking and deadlock
+  behaviour only exists on MySQL and PostgreSQL. The `concurrency` test group
+  proves it there; see [Concurrency tests](../testing/postgres-concurrency-tests.md)
+  to run it locally against a real MySQL or PostgreSQL database.
+- **Active stable names.** SQLite and PostgreSQL enforce one active stable per
+  name with a partial unique index. MySQL has no partial indexes, so it relies on
+  `StableNameLock` and validation instead.
+- **Text comparison.** MySQL's collation ignores case and accents, so "Foo" and
+  "foo", or "Café" and "Cafe", count as the same name and surface as a
+  validation error. SQLite treats them as different names.
+- **Row order.** A query without `ORDER BY` can return rows in a different order
+  on each engine; never rely on it.
 
 ### Database Commands
 - `php artisan migrate` - Run database migrations

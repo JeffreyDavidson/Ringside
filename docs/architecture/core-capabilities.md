@@ -29,6 +29,12 @@ Core capabilities define what each entity type can do within the wrestling promo
 - **Eligible**: Wrestlers, Managers, Referees, TagTeams, Titles, Stables
 - **Rationale**: Any entity can cease active participation
 
+### Tag Team Retirement and Unretirement
+
+- **Retiring a tag team** retires the team and its eligible wrestlers and managers. The wrestlers stay current members of the retired team; only their other relationships (stable memberships, manager assignments, championship reigns) end.
+- **A wrestler can come out of retirement alone.** If the wrestler is a current member of a retired tag team, unretiring them ends that membership on the unretire date, leaving them free to wrestle singles or join another team. A wrestler retired on their own (not through the team) leaves the team when retired, as before.
+- **Unretiring a tag team** requires every wrestler who was on the team when it retired (membership open at the start of the current retirement: still open, or ended on or after that date because they came back alone) to be able to return with it. Each must not be soft-deleted, must not be a current member of another tag team and must not be injured. Retired wrestlers still on the team are unretired with it; a wrestler who came back alone rejoins with a new membership starting on the unretire date. If any cannot return, the team stays retired and the error names that wrestler. Fewer than two such wrestlers also blocks unretirement, along with the existing name-conflict rule.
+
 ## Employment Capability
 
 ### Employment Rules
@@ -59,6 +65,7 @@ projections when status is rendered from list queries.
 - **Eligible**: Titles, Stables
 - **Not Eligible**: Wrestlers, Managers, Referees, TagTeams
 - **Rationale**: Debuts represent the first time a title is contested or a stable is formed
+- **Scheduled title debut**: A title whose debut is in the future is moved by changing its debut date (edit form), not by Reinstate; Reinstate is only for titles that were pulled
 
 ## Booking Capability
 

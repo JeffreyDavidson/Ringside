@@ -9,6 +9,7 @@ use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Lifecycle\Periods\CareerPeriodCloser;
 use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -35,14 +36,15 @@ class RetireAction
      *
      * @param  Wrestler  $wrestler  The wrestler to retire
      * @param  Carbon|null  $retirementDate  The retirement start date (defaults to now)
+     * @param  TagTeam|null  $retainedTagTeam  A retiring tag team the wrestler stays a member of
      *
      * @throws CannotBeRetiredException When wrestler cannot be retired due to business rules
      */
-    public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
+    public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null, ?TagTeam $retainedTagTeam = null): void
     {
         $effectiveDate = $retirementDate ?? now();
 
-        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+        DB::transaction(function () use ($wrestler, $effectiveDate, $retainedTagTeam): void {
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedWrestler);
@@ -50,7 +52,7 @@ class RetireAction
             $this->careerPeriods->retire($lockedWrestler, $effectiveDate);
 
             $this->retirementPeriods->start($lockedWrestler, $effectiveDate, LifecycleTransitionType::Retired);
-            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate, $retainedTagTeam);
         });
     }
 }

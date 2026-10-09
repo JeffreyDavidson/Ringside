@@ -20,6 +20,27 @@ abstract class BaseBusinessException extends Exception
         parent::__construct($message, $code, $previous);
     }
 
+    /** @var array<string, string> */
+    private array $translationReplacements = [];
+
+    /**
+     * Placeholder values for the translated message of this failure's reason.
+     *
+     * @return array<string, string>
+     */
+    public function translationReplacements(): array
+    {
+        return $this->translationReplacements;
+    }
+
+    /** @param array<string, string> $replacements */
+    protected function withTranslationReplacements(array $replacements): static
+    {
+        $this->translationReplacements = $replacements;
+
+        return $this;
+    }
+
     public function reason(): BusinessRuleReason
     {
         return $this->reason;

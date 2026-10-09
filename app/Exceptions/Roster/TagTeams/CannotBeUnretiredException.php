@@ -44,4 +44,20 @@ final class CannotBeUnretiredException extends BaseBusinessException
 
         return new self("{$context} cannot be unretired: key partners unavailable: {$unavailablePartners}.");
     }
+
+    public static function partnerDeleted(TagTeam $tagTeam, string $partnerName): static
+    {
+        $context = self::formatModelContext($tagTeam);
+
+        return self::forReason(BusinessRuleReason::PartnerDeleted, "{$context} cannot be unretired: partner {$partnerName} has been deleted.")
+            ->withTranslationReplacements(['wrestler' => $partnerName]);
+    }
+
+    public static function partnerOnAnotherTagTeam(TagTeam $tagTeam, string $partnerName, string $otherTagTeamName): static
+    {
+        $context = self::formatModelContext($tagTeam);
+
+        return self::forReason(BusinessRuleReason::PartnerOnAnotherTagTeam, "{$context} cannot be unretired: partner {$partnerName} is now on tag team '{$otherTagTeamName}'.")
+            ->withTranslationReplacements(['wrestler' => $partnerName, 'tag_team' => $otherTagTeamName]);
+    }
 }

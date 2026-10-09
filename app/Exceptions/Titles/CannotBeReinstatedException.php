@@ -29,4 +29,11 @@ final class CannotBeReinstatedException extends BaseBusinessException
 
         return new self(__('titles.errors.reinstated.never_activated', ['context' => $context]));
     }
+
+    public static function scheduledDebut(Title $title): static
+    {
+        $context = self::formatModelContext($title);
+
+        return new self(__('titles.errors.reinstated.scheduled_debut', ['context' => $context]));
+    }
 }
