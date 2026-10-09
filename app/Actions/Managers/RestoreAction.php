@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Lifecycle\Periods\DeletionPeriodCloser;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 class RestoreAction
 {
     public function __construct(
+        private readonly DeletionPeriodCloser $periods,
         private readonly EndManagerAssignmentsForManagerAction $endManagerAssignmentsAction,
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
@@ -39,6 +41,7 @@ class RestoreAction
             $lockedManager = $manager->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedManager);
+            $this->periods->reopenRetirement($lockedManager);
             $this->deletionState->restore($lockedManager, $effectiveDate);
 
             OpenPeriodEnder::end($lockedManager->employments()->getQuery(), 'started_at', 'ended_at', $effectiveDate);

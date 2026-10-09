@@ -6,6 +6,7 @@ use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\Events\CannotBeRestoredException;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
@@ -39,7 +40,7 @@ test('it rejects restoring a venue whose live events share a date, naming the da
     $venue = Venue::factory()->create();
     Event::factory()->for($venue)->create(['date' => $date]);
     Event::factory()->for($venue)->create(['date' => $date->copy()->setTime(20, 0)]);
-    resolve(DeleteAction::class)->handle($venue);
+    resolve(DeletionStateManager::class)->delete($venue, now());
 
     $act = fn () => resolve(RestoreAction::class)->handle(Venue::withTrashed()->findOrFail($venue->id));
 
@@ -53,7 +54,7 @@ test('it restores a venue whose live events are on different days and ignores de
     Event::factory()->for($venue)->create(['date' => $date]);
     Event::factory()->for($venue)->create(['date' => $date->copy()->addDay()]);
     Event::factory()->for($venue)->create(['date' => $date])->delete();
-    resolve(DeleteAction::class)->handle($venue);
+    resolve(DeletionStateManager::class)->delete($venue, now());
 
     resolve(RestoreAction::class)->handle(Venue::withTrashed()->findOrFail($venue->id));
 
