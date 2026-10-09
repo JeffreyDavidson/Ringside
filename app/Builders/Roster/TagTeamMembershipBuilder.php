@@ -22,6 +22,13 @@ class TagTeamMembershipBuilder extends MembershipPeriodBuilder
         return $this;
     }
 
+    public function excludingTagTeamId(int $tagTeamId): static
+    {
+        $this->where('tag_team_id', '!=', $tagTeamId);
+
+        return $this;
+    }
+
     public function forWrestlerId(int $wrestlerId): static
     {
         $this->where('wrestler_id', $wrestlerId);

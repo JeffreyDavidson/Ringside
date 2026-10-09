@@ -71,6 +71,8 @@ $tagTeamFailures = [
     'retire already_retired' => [TagTeamCannotBeRetiredException::alreadyRetired(...), 'retire.already_retired'],
     'unretire not_retired' => [TagTeamCannotBeUnretiredException::notRetired(...), 'unretire.not_retired'],
     'unretire name conflict' => [fn (TagTeam $member): BaseBusinessException => TagTeamCannotBeUnretiredException::nameConflict($member, 'Other Team'), 'unretire.default'],
+    'unretire partner deleted' => [fn (TagTeam $member): BaseBusinessException => TagTeamCannotBeUnretiredException::partnerDeleted($member, 'Some Wrestler'), 'unretire.default'],
+    'unretire partner on another tag team' => [fn (TagTeam $member): BaseBusinessException => TagTeamCannotBeUnretiredException::partnerOnAnotherTagTeam($member, 'Some Wrestler', 'Other Team'), 'unretire.default'],
     'suspend unemployed' => [TagTeamCannotBeSuspendedException::notEmployed(...), 'suspend.unemployed'],
     'suspend already_suspended' => [TagTeamCannotBeSuspendedException::alreadySuspended(...), 'suspend.already_suspended'],
     'reinstate not_suspended' => [TagTeamCannotBeReinstatedException::notSuspended(...), 'reinstate.not_suspended'],
