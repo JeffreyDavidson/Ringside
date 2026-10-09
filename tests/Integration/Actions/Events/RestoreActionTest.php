@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
-use App\Actions\Venues\DeleteAction as DeleteVenueAction;
 use App\Actions\Venues\RestoreAction as RestoreVenueAction;
 use App\Exceptions\Events\CannotBeRestoredException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -76,7 +76,7 @@ test('it refuses to restore an event while its venue is deleted, so a restore ca
     $eventB = Event::factory()->for($venue)->create(['date' => $date]);
     $deletedEventB = deleteEvent($eventB);
     $eventA = Event::factory()->for($venue)->create(['date' => $date]);
-    resolve(DeleteVenueAction::class)->handle($venue);
+    resolve(DeletionStateManager::class)->delete($venue, now());
 
     // Act
     $act = fn () => resolve(RestoreAction::class)->handle($deletedEventB);
