@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
@@ -128,4 +129,68 @@ test('it allows changing the type once the only booking was deleted and no reign
     resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', TitleType::TagTeam, null));
 
     expect($title->refresh()->type)->toBe(TitleType::TagTeam);
+});
+
+describe('changing a scheduled debut date', function (): void {
+    test('it moves the scheduled debut without adding a second period or transition', function (int $daysFromNow, bool $isActive): void {
+        // Arrange
+        $title = Title::factory()->unactivated()->create();
+        resolve(DebutAction::class)->handle($title, now()->addDays(10));
+        $newDebut = now()->addDays($daysFromNow);
+
+        // Act
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $newDebut));
+
+        // Assert
+        $transition = $title->lifecycleTransitions()->sole();
+        expect($title->activityPeriods()->count())->toBe(1)
+            ->and($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
+            ->and($transition->transition)->toBe(LifecycleTransitionType::Debuted)
+            ->and($transition->effective_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
+            ->and($title->currentActivityPeriod()->exists())->toBe($isActive)
+            ->and($title->lifecycleTransitions()->where('transition', LifecycleTransitionType::Reinstated)->exists())->toBeFalse();
+    })->with([
+        'a later future date' => [20, false],
+        'an earlier future date' => [2, false],
+        'a past date' => [-40, true],
+    ]);
+
+    test('it leaves the scheduled debut alone when the date is unchanged', function (): void {
+        $title = Title::factory()->unactivated()->create();
+        $debutAt = now()->addDays(10)->setTime(15, 30);
+        resolve(DebutAction::class)->handle($title, $debutAt);
+
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $debutAt->copy()->startOfDay()));
+
+        expect($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($debutAt->toDateTimeString())
+            ->and($title->lifecycleTransitions()->sole()->effective_at->toDateTimeString())->toBe($debutAt->toDateTimeString());
+    });
+
+    test('it leaves the scheduled debut alone when no debut date is sent', function (): void {
+        $title = Title::factory()->withFutureDebut()->create();
+        $startedAt = $title->futureActivityPeriod()->firstOrFail()->started_at;
+
+        resolve(UpdateAction::class)->handle($title, new TitleData('Renamed Title', $title->type, null));
+
+        expect($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+    });
+
+    test('it does not move the debut of a title that is already active', function (): void {
+        $title = Title::factory()->active()->create();
+        $startedAt = $title->activityPeriods()->sole()->started_at;
+
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, now()->addDays(5)));
+
+        expect($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+    });
+
+    test('it does not move a scheduled reinstatement of a pulled title', function (): void {
+        $title = Title::factory()->inactive()->create();
+        $scheduled = $title->activityPeriods()->create(['started_at' => now()->addDays(5)]);
+
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, now()->addDays(9)));
+
+        expect($scheduled->refresh()->started_at->isSameDay(now()->addDays(5)))->toBeTrue()
+            ->and($title->activityPeriods()->count())->toBe(2);
+    });
 });

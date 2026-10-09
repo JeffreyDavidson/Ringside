@@ -65,6 +65,7 @@ projections when status is rendered from list queries.
 - **Eligible**: Titles, Stables
 - **Not Eligible**: Wrestlers, Managers, Referees, TagTeams
 - **Rationale**: Debuts represent the first time a title is contested or a stable is formed
+- **Scheduled title debut**: A title whose debut is in the future is moved by changing its debut date (edit form), not by Reinstate; Reinstate is only for titles that were pulled
 
 ## Booking Capability
 

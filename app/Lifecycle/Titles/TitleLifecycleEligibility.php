@@ -54,6 +54,11 @@ final class TitleLifecycleEligibility
             throw CannotBeReinstatedException::active($title);
         }
 
+        // A debut that has not started yet is moved by changing the debut date, not by reinstating.
+        if ($title->hasFutureActivityPeriod() && ! $title->previousActivityPeriods()->exists()) {
+            throw CannotBeReinstatedException::scheduledDebut($title);
+        }
+
         if ($title->hasCurrentRetirement()) {
             throw CannotBeReinstatedException::retired($title);
         }

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Actions\Titles\DebutAction;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -111,6 +113,30 @@ describe('authorized title form interactions', function () {
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
             ->assertDispatched('closeModal');
+    });
+
+    it('moves a scheduled debut to the date entered when editing', function () {
+        $title = Title::factory()->singles()->create(['name' => 'World Championship Title']);
+        resolve(DebutAction::class)->handle($title, Date::parse('2026-12-01'));
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
+
+        $modal->set('form.start_date', '2026-11-15');
+        $modal->call('save');
+
+        $modal->assertHasNoErrors();
+        expect($title->activityPeriods()->count())->toBe(1)
+            ->and($title->activityPeriods()->sole()->started_at->toDateString())->toBe('2026-11-15')
+            ->and($title->lifecycleTransitions()->sole()->effective_at->toDateString())->toBe('2026-11-15');
+    });
+
+    it('still refuses a new debut date for a title that is already active', function () {
+        $title = Title::factory()->singles()->active()->create(['name' => 'World Championship Title']);
+        $modal = livewire(FormModal::class, ['modelId' => $title->id]);
+
+        $modal->set('form.start_date', now()->addDays(20)->toDateString());
+        $modal->call('save');
+
+        $modal->assertHasErrors('form.start_date');
     });
 
     it('requires a title name and type', function () {
