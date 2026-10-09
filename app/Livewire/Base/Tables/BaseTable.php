@@ -96,7 +96,7 @@ abstract class BaseTable extends DataTableComponent
             },
             $successMessage,
             $rosterEntityType instanceof RosterEntityType
-                ? fn (BaseBusinessException $exception): string => __(RosterErrorMessageResolver::translationKey($exception, $rosterEntityType))
+                ? fn (BaseBusinessException $exception): string => RosterErrorMessageResolver::message($exception, $rosterEntityType)
                 : null,
         );
 

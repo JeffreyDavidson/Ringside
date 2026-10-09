@@ -14,6 +14,8 @@ enum BusinessRuleReason: string
     case CurrentChampionMissing = 'current_champion_missing';
     case General = 'general';
     case Injured = 'injured';
+    case PartnerDeleted = 'partner_deleted';
+    case PartnerOnAnotherTagTeam = 'partner_on_another_tag_team';
     case NotDeleted = 'not_deleted';
     case NotInjured = 'not_injured';
     case NotRetired = 'not_retired';
