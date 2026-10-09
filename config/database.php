@@ -7,6 +7,28 @@ return [
     'connections' => [
 
         /*
+         * Local development and the test suite run on SQLite. The framework's SQLite connection, tuned for the web
+         * server, queue and scheduler writing at the same time: WAL lets reads continue during a write, the busy timeout
+         * waits up to five seconds instead of failing with "database is locked", NORMAL sync is safe under WAL, and
+         * IMMEDIATE transactions take the write lock at BEGIN, so a transaction that reads first never fails when it
+         * later writes. The in-memory test database ignores WAL.
+         */
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'url' => env('DB_URL'),
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'prefix' => '',
+            'prefix_indexes' => null,
+            'mask_bindings_in_exception_messages' => env('DB_MASK_BINDINGS', false),
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            'busy_timeout' => 5000,
+            'journal_mode' => 'wal',
+            'synchronous' => 'normal',
+            'transaction_mode' => 'IMMEDIATE',
+            'pragmas' => [],
+        ],
+
+        /*
          * Production runs MySQL 8. The framework's MySQL connection, plus READ COMMITTED isolation: the scheduling and
          * lifecycle locks are designed for PostgreSQL's default READ COMMITTED, where every statement sees the latest
          * committed rows once a lock has been granted. Under MySQL's default REPEATABLE READ a transaction that read
