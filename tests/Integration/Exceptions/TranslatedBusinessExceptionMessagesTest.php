@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\Roster\Stables\CannotBeCreatedException;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
@@ -24,6 +25,7 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 
 dataset('translated exceptions', [
+    CannotBeCreatedException::class,
     CannotBeDeletedException::class,
     CannotBeDisbandedException::class,
     CannotBeEstablishedException::class,

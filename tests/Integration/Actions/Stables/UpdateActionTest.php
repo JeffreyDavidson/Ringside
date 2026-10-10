@@ -9,6 +9,8 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
+use App\Lifecycle\Roster\Stables\StableNameLock;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Query\Builder;
@@ -298,4 +300,63 @@ test('it removes members left on a disbanded stable when the edit selects none',
     // Assert
     expect($stable->currentWrestlers()->exists())->toBeFalse()
         ->and($stable->previousWrestlers()->whereKey($wrestler->getKey())->exists())->toBeTrue();
+});
+
+test('it locks the new name of a stable without a promotion before the stable row', function () {
+    // Arrange
+    $stable = Stable::factory()->create(['name' => 'Original Name']);
+    $data = new StableData(name: '  Updated Name  ', start_date: null, members: new StableMembershipData);
+    $nameKey = resolve(StableNameLock::class)->key('Updated Name');
+
+    // Act
+    $statements = recordStatements(fn () => resolve(UpdateAction::class)->handle($stable, $data));
+
+    // Assert
+    $lockPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "stable_name_locks"'));
+    $stableLockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "stables"'));
+
+    expect($statements[$lockPosition]['bindings'])->toBe([$nameKey])
+        ->and($lockPosition)->toBeLessThan($stableLockPosition);
+});
+
+test('it takes no name lock for a stable of a promotion', function () {
+    // Arrange
+    $stable = Stable::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'Original Name']);
+    $data = new StableData(name: 'Updated Name', start_date: null, members: new StableMembershipData);
+
+    // Act
+    resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect(DB::table('stable_name_locks')->exists())->toBeFalse();
+});
+
+test('it rejects a name another active stable already uses', function (bool $inPromotion) {
+    // Arrange
+    $promotion = $inPromotion ? Promotion::factory()->create() : null;
+    Stable::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'Taken Name'])->create();
+    $stable = Stable::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'Original Name'])->create();
+    $data = new StableData(name: ' Taken Name ', start_date: null, members: new StableMembershipData);
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeUpdatedException::class, "an active stable named 'Taken Name' already exists")
+        ->and($stable->refresh()->name)->toBe('Original Name');
+})->with([
+    'without a promotion' => [false],
+    'in a promotion' => [true],
+]);
+
+test('it keeps the name of the stable being updated', function () {
+    // Arrange
+    $stable = Stable::factory()->create(['name' => 'Same Name']);
+    $data = new StableData(name: 'Same Name', start_date: null, members: new StableMembershipData);
+
+    // Act
+    $updated = resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($updated->name)->toBe('Same Name');
 });
