@@ -13,7 +13,10 @@ declare(strict_types=1);
  * new_name through Stables\UpdateAction. A create_tag_team_name creates a tag team of the two wrestler_ids (comma-separated) with that
  * name and signature_move through TagTeams\CreateAction, an update_tag_team_id renames that tag team to new_name through
  * TagTeams\UpdateAction, and a create_title_name creates a singles title with that name through Titles\CreateAction. A
- * promotion_id makes the worker act inside that promotion, as a request with an enforced promotion context does.
+ * promotion_id makes the worker act inside that promotion, as a request with an enforced promotion context does. A
+ * create_wrestler_name creates a wrestler with that name and signature_move through Wrestlers\CreateAction, an update_wrestler_id
+ * renames that wrestler to new_name through Wrestlers\UpdateAction, a create_event_name creates an unscheduled event with that
+ * name through Events\CreateAction, and a create_venue_name creates a venue with that name through Venues\CreateAction.
  *
  * Usage: php booking-worker.php '<json spec>'
  *
@@ -35,12 +38,17 @@ use App\Actions\Stables\UpdateAction as UpdateStableAction;
 use App\Actions\TagTeams\CreateAction as CreateTagTeamAction;
 use App\Actions\TagTeams\UpdateAction as UpdateTagTeamAction;
 use App\Actions\Titles\CreateAction as CreateTitleAction;
+use App\Actions\Venues\CreateAction as CreateVenueAction;
+use App\Actions\Wrestlers\CreateAction as CreateWrestlerAction;
+use App\Actions\Wrestlers\UpdateAction as UpdateWrestlerAction;
 use App\Data\Events\EventData;
+use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Data\TagTeams\TagTeamData;
 use App\Data\Titles\TitleData;
+use App\Data\Wrestlers\WrestlerData;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Titles\TitleType;
@@ -75,7 +83,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -131,6 +139,23 @@ try {
         );
     } elseif (isset($spec['create_title_name'])) {
         resolve(CreateTitleAction::class)->handle(new TitleData($spec['create_title_name'], TitleType::Singles, null));
+    } elseif (isset($spec['create_wrestler_name'])) {
+        resolve(CreateWrestlerAction::class)->handle(
+            new WrestlerData($spec['create_wrestler_name'], 73, 220, 'Concurrent City, Ohio', $spec['signature_move'] ?: null, null),
+        );
+    } elseif (isset($spec['update_wrestler_id'])) {
+        $wrestler = Wrestler::query()->findOrFail($spec['update_wrestler_id']);
+
+        resolve(UpdateWrestlerAction::class)->handle(
+            $wrestler,
+            new WrestlerData($spec['new_name'], $wrestler->height, $wrestler->weight, $wrestler->hometown, $wrestler->signature_move, null),
+        );
+    } elseif (isset($spec['create_event_name'])) {
+        resolve(CreateAction::class)->handle(new EventData($spec['create_event_name'], null, null, null));
+    } elseif (isset($spec['create_venue_name'])) {
+        resolve(CreateVenueAction::class)->handle(
+            new VenueData($spec['create_venue_name'], '1 Concurrent Way', 'Columbus', 'Ohio', '43004'),
+        );
     } elseif (isset($spec['create_event_at_venue_id'])) {
         resolve(CreateAction::class)->handle(
             new EventData('Concurrent Venue Event', Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),
