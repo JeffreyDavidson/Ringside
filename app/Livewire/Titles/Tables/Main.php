@@ -7,7 +7,6 @@ namespace App\Livewire\Titles\Tables;
 use App\Actions\Titles\DeleteAction;
 use App\Actions\Titles\RestoreAction;
 use App\Builders\Titles\TitleBuilder;
-use App\Enums\Shared\DeletedFilter;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Base\Tables\BaseTable;
@@ -84,9 +83,9 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(DeletedFilter::appendTo(TitleStatus::filterOptions()))
+                ->options($this->statusOptionsWithDeleted(TitleStatus::filterOptions()))
                 ->filter(function (TitleBuilder $builder, string $value): void {
-                    if (DeletedFilter::tryFrom($value) !== null) {
+                    if ($this->isDeletedFilterValue($value)) {
                         $builder->onlyTrashed();
 
                         return;

@@ -9,7 +9,6 @@ use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Builders\Events\VenueBuilder;
 use App\Enums\EventStatus;
-use App\Enums\Shared\DeletedFilter;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Table\Column;
@@ -118,9 +117,9 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(DeletedFilter::appendTo(EventStatus::filterOptions()))
+                ->options($this->statusOptionsWithDeleted(EventStatus::filterOptions()))
                 ->filter(function (EventBuilder $builder, string $value): void {
-                    if (DeletedFilter::tryFrom($value) !== null) {
+                    if ($this->isDeletedFilterValue($value)) {
                         $builder->onlyTrashed();
 
                         return;

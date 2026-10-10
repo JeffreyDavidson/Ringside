@@ -7,7 +7,6 @@ namespace App\Livewire\Stables\Tables;
 use App\Actions\Stables\DeleteAction;
 use App\Actions\Stables\RestoreAction;
 use App\Builders\Roster\StableBuilder;
-use App\Enums\Shared\DeletedFilter;
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
@@ -85,7 +84,7 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(DeletedFilter::appendTo([
+                ->options($this->statusOptionsWithDeleted([
                     '' => 'All',
                     StableStatus::Unformed->value => StableStatus::Unformed->label(),
                     StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
@@ -95,7 +94,7 @@ class Main extends BaseTable
                 ]))
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var StableBuilder<Stable> $builder */
-                    if (DeletedFilter::tryFrom($value) !== null) {
+                    if ($this->isDeletedFilterValue($value)) {
                         $builder->onlyTrashed();
 
                         return;

@@ -9,7 +9,6 @@ use App\Actions\Wrestlers\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Roster\RosterEntityType;
-use App\Enums\Shared\DeletedFilter;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
@@ -88,9 +87,9 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'), 'status')
-                ->options(DeletedFilter::appendTo(EmploymentStatus::filterOptions()))
+                ->options($this->statusOptionsWithDeleted(EmploymentStatus::filterOptions()))
                 ->filter(function (WrestlerBuilder $builder, string $value): void {
-                    if (DeletedFilter::tryFrom($value) !== null) {
+                    if ($this->isDeletedFilterValue($value)) {
                         $builder->onlyTrashed();
 
                         return;
