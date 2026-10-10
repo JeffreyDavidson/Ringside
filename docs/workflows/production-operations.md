@@ -55,6 +55,9 @@ Fixed on 2026-10-06 and 2026-10-07:
       for a domain verified in Resend, with its DNS records in Cloudflare), `MAIL_FROM_ADDRESS` on that domain and
       `MAIL_FROM_NAME=Ringside`. The `resend/resend-php` package provides the transport. With `MAIL_MAILER=log`,
       password reset links are written to the log file instead of being sent.
+- [ ] `MAIL_REPLY_TO_ADDRESS` is set to a monitored inbox (optionally `MAIL_REPLY_TO_NAME`). The from address is not
+      read by anyone, so without it a reply to an invitation or a password reset email is lost. `config/mail.php`
+      reads both; unset means no Reply-To header.
 - [x] `QUEUE_CONNECTION=database` needs the `jobs`, `failed_jobs` and `job_batches` tables; the last two are created
       by the `create_failed_jobs_and_job_batches_tables` migration. Run a queue worker as soon as the app dispatches
       queued jobs (it does not yet).
