@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\Events\NameTakenException as EventNameTakenException;
 use App\Exceptions\Roster\Stables\CannotBeCreatedException;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
@@ -14,6 +15,8 @@ use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
+use App\Exceptions\Roster\TagTeams\NameTakenException as TagTeamNameTakenException;
+use App\Exceptions\Roster\Wrestlers\NameTakenException as WrestlerNameTakenException;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Exceptions\Titles\CannotBePulledException;
 use App\Exceptions\Titles\CannotBeReinstatedException;
@@ -21,6 +24,8 @@ use App\Exceptions\Titles\CannotBeRestoredException as TitleCannotBeRestoredExce
 use App\Exceptions\Titles\CannotBeRetiredException as TitleCannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException as TitleCannotBeUnretiredException;
 use App\Exceptions\Titles\CannotChangeTypeException;
+use App\Exceptions\Titles\NameTakenException as TitleNameTakenException;
+use App\Exceptions\Venues\NameTakenException as VenueNameTakenException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 
@@ -43,6 +48,11 @@ dataset('translated exceptions', [
     TitleCannotBeRetiredException::class,
     TitleCannotBeUnretiredException::class,
     CannotChangeTypeException::class,
+    TagTeamNameTakenException::class,
+    TitleNameTakenException::class,
+    WrestlerNameTakenException::class,
+    EventNameTakenException::class,
+    VenueNameTakenException::class,
 ]);
 
 it('resolves every factory message to translated text', function (string $exceptionClass): void {

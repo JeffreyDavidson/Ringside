@@ -6,10 +6,12 @@ use App\Actions\Stables\UpdateAction;
 use App\Data\Stables\StableData;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Livewire\Stables\Modals\FormModal;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Promotions\PromotionContextService;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -362,6 +364,29 @@ describe('authorized stable form interactions', function () {
             ->assertHasErrors(['form.started_at'])
             ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
+    });
+
+    it('shows the name as taken and keeps the modal open when a concurrent save wins the promotion name', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+        Stable::creating(function () use ($promotion): void {
+            Stable::withoutEvents(fn () => Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']));
+        });
+        $modal = livewire(FormModal::class);
+        $modal->set('form.name', 'The Alliance');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.started_at'])
+            ->assertSee("an active stable named 'The Alliance' already exists")
+            ->assertNotDispatched('closeModal');
+        $context->clear();
     });
 
     it('requires a stable name', function () {

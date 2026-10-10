@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Events;
 
+use App\Builders\Concerns\FiltersByName;
+use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Enums\EventStatus;
 use App\Models\Events\Event;
 use Carbon\CarbonInterface;
@@ -16,6 +18,9 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EventBuilder extends Builder
 {
+    use FiltersByName;
+    use FiltersByNameInPromotion;
+
     public function forVenueId(int $venueId): static
     {
         $this->where('venue_id', $venueId);

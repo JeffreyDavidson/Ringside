@@ -22,6 +22,7 @@ return [
     ],
 
     'validation' => [
+        'name_taken' => "A venue named ':name' already exists.",
         'attributes' => [
             'street_address' => 'street address',
             'zip_code' => 'zip code',

@@ -20,6 +20,9 @@ use Illuminate\View\View;
 class FormModal extends BaseFormModal
 {
     #[\Override]
+    protected ?string $businessErrorField = 'form.name';
+
+    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     public CreateEditForm $form;

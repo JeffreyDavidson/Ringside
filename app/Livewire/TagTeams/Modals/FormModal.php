@@ -6,7 +6,9 @@ namespace App\Livewire\TagTeams\Modals;
 
 use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\UpdateAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterMemberKind;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
@@ -57,6 +59,17 @@ class FormModal extends BaseFormModal
         $this->form->employment_date = $this->generateOptionalEmploymentDate();
         $this->form->wrestlerA = $wrestlers->get(0)?->id;
         $this->form->wrestlerB = $wrestlers->get(1)?->id;
+    }
+
+    /** A name or signature move taken since validation shows on its own field; any other failure on the first wrestler. */
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return match ($exception->reason()) {
+            BusinessRuleReason::NameTaken => 'form.name',
+            BusinessRuleReason::SignatureMoveTaken => 'form.signature_move',
+            default => parent::businessErrorField($exception),
+        };
     }
 
     protected function updateForm(): void

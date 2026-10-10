@@ -6,7 +6,9 @@ namespace App\Livewire\Titles\Modals;
 
 use App\Actions\Titles\CreateAction;
 use App\Actions\Titles\UpdateAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\Titles\TitleType;
+use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Titles\Forms\CreateEditForm;
@@ -63,6 +65,15 @@ class FormModal extends BaseFormModal
     public function isTypeLocked(): bool
     {
         return $this->form->isEditing() && TitleTypeEligibility::isLocked($this->form->title());
+    }
+
+    /** A name taken since validation shows on the name field; any other failure on the type. */
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return $exception->reason() === BusinessRuleReason::NameTaken
+            ? 'form.name'
+            : parent::businessErrorField($exception);
     }
 
     protected function updateForm(): void

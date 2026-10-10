@@ -6,6 +6,8 @@ namespace App\Livewire\Events\Modals;
 
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
+use App\Enums\BusinessRuleReason;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
@@ -53,6 +55,16 @@ class FormModal extends BaseFormModal
             $this->form->venue_id = $venue->id;
         }
         $this->form->preview = Str::of(fake()->text())->value();
+    }
+
+    /** A name taken since validation shows on the name field; any other failure on the venue. */
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return match ($exception->reason()) {
+            BusinessRuleReason::NameTaken => 'form.name',
+            default => parent::businessErrorField($exception),
+        };
     }
 
     protected function updateForm(): void

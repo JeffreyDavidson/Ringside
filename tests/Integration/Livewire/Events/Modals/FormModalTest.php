@@ -273,3 +273,29 @@ it('forbids users without administrative access from opening the event form', fu
     'guest updating' => ['guest', 'update', 403],
     'basic user updating' => ['basic user', 'update', 404],
 ]);
+
+describe('event name races past the form rule', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('shows a name that only differs by leading space as taken on the name field', function () {
+        // Arrange
+        Event::factory()->create(['name' => 'Summer Slam']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->set([
+            'form.name' => ' Summer Slam',
+            'form.venue_id' => null,
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSee("An event named 'Summer Slam' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
+        expect(Event::query()->where('name', 'Summer Slam')->count())->toBe(1);
+    });
+});

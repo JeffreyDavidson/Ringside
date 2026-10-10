@@ -11,6 +11,7 @@ use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,8 @@ class CreateAction
      * Create a stable.
      *
      * This handles the complete stable creation workflow:
-     * - Rejects a name another active stable of the same promotion already uses; a stable without a promotion has
+     * - Rejects a name another active stable of the same promotion already uses, also when a concurrent request takes it
+     *   between the check and the insert (the unique index refuses it); a stable without a promotion has
      *   no database-level name guard on MySQL, so it first takes the name lock, before anything else is written
      * - Creates the stable record with name and description
      * - Adds wrestlers, tag teams, and managers as founding members
@@ -72,7 +74,12 @@ class CreateAction
                 throw CannotBeEstablishedException::withEndDate($stable);
             }
 
-            $stable->save();
+            try {
+                $stable->save();
+            } catch (UniqueConstraintViolationException) {
+                // A concurrent request took the name of this promotion after the check above; the unique index refused the insert.
+                throw CannotBeCreatedException::nameTaken($name);
+            }
 
             // Use enhanced DTO methods
             $joinDate = $stableData->getJoinDate();

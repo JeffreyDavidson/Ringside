@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Enums\Naming\GuardedName;
+use App\Exceptions\Roster\TagTeams\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -314,4 +318,89 @@ test('it does not employ a tag team when no employment date is given', function 
     expect($updatedTagTeam->name)->toBe('Renamed Team')
         ->and($updatedTagTeam->employments()->exists())->toBeFalse()
         ->and($wrestlerA->employments()->exists())->toBeFalse();
+});
+
+function renamingTagTeamData(TagTeam $tagTeam, string $name, ?string $signatureMove): TagTeamData
+{
+    return new TagTeamData(
+        name: $name,
+        signature_move: $signatureMove,
+        employment_date: null,
+        wrestlerA: $tagTeam->wrestlers->firstOrFail(),
+        wrestlerB: $tagTeam->wrestlers->skip(1)->firstOrFail(),
+    );
+}
+
+describe('tag team name guard', function (): void {
+    test('it locks the new name and signature move of the promotion before the tag team row', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $tagTeam = TagTeam::factory()->employed()->for($promotion, 'promotion')->create(['name' => 'Original Team']);
+        $lock = resolve(RecordNameLock::class);
+
+        // Act
+        $statements = recordStatements(fn () => resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, ' Updated Team ', 'Royal Flush')));
+
+        // Assert
+        $lockPositions = array_keys(array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"')));
+        $tagTeamLockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "tag_teams"'));
+
+        expect(array_map(fn (int $position): array => $statements[$position]['bindings'], $lockPositions))->toBe([
+            [$lock->key(GuardedName::TagTeamName, $promotion->id, 'Updated Team')],
+            [$lock->key(GuardedName::TagTeamSignatureMove, $promotion->id, 'Royal Flush')],
+        ])
+            ->and(array_last($lockPositions))->toBeLessThan($tagTeamLockPosition);
+    });
+
+    test('it rejects a name another tag team of the same promotion already uses, even with surrounding space or deleted', function (bool $inPromotion, string $name, bool $deleted) {
+        // Arrange
+        $promotion = $inPromotion ? Promotion::factory()->create() : null;
+        $other = TagTeam::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'The Kings'])->create();
+        $tagTeam = TagTeam::factory()->employed()->state(['promotion_id' => $promotion?->id, 'name' => 'Original Team'])->create();
+
+        if ($deleted) {
+            $other->delete();
+        }
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, $name, null));
+
+        // Assert
+        expect($update)->toThrow(NameTakenException::class, "A tag team named 'The Kings' already exists in this promotion.")
+            ->and($tagTeam->refresh()->name)->toBe('Original Team');
+    })->with([
+        'without a promotion' => [false, 'The Kings', false],
+        'in a promotion' => [true, 'The Kings', false],
+        'leading space' => [true, ' The Kings', false],
+        'deleted' => [true, 'The Kings', true],
+    ]);
+
+    test('it rejects a signature move another tag team already uses and writes nothing', function () {
+        // Arrange
+        TagTeam::factory()->create(['name' => 'The Kings', 'signature_move' => 'Royal Flush']);
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Original Team', 'signature_move' => 'Original Move']);
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, 'Renamed Team', 'Royal Flush'));
+
+        // Assert
+        expect($update)->toThrow(NameTakenException::class, "A tag team with the signature move 'Royal Flush' already exists in this promotion.")
+            ->and($tagTeam->refresh()->name)->toBe('Original Team')
+            ->and($tagTeam->signature_move)->toBe('Original Move');
+    });
+
+    test('it keeps the name and signature move of the tag team being updated and allows ones only another promotion uses', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        TagTeam::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'Other Team', 'signature_move' => 'Other Move']);
+        $tagTeam = TagTeam::factory()->employed()->for($promotion, 'promotion')->create(['name' => 'Same Team', 'signature_move' => 'Same Move']);
+
+        // Act
+        resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, 'Same Team', 'Same Move'));
+        resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, 'Other Team', 'Other Move'));
+
+        // Assert
+        expect($tagTeam->refresh()->name)->toBe('Other Team')
+            ->and($tagTeam->signature_move)->toBe('Other Move');
+    });
 });
