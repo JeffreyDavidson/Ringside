@@ -47,6 +47,8 @@ return [
     ],
 
     'validation' => [
+        'name_taken' => "A wrestler named ':name' already exists in this promotion.",
+        'signature_move_taken' => "A wrestler with the signature move ':signature_move' already exists in this promotion.",
         'attributes' => [
             'height_in_feet' => 'height in feet',
             'height_in_inches' => 'height in inches',

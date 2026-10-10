@@ -490,7 +490,7 @@ test('renaming and creating a stable to the same name at once admit only one', f
 
 /**
  * Run workers that each try to leave a live record with the same guarded value, and assert that exactly one succeeds
- * and that exactly one record has the value, without a deadlock. Neither tag teams nor titles have a unique index
+ * and that exactly one record has the value, without a deadlock. Neither tag teams, titles, wrestlers, events nor venues have a unique index
  * over their names on any engine, so only the name lock can decide these races.
  *
  * @param  array<int, array<string, int|string>>  $specs
@@ -590,4 +590,83 @@ test('two titles created with the same name at once admit only one', function (b
     });
 })->with(['in a promotion' => true, 'without a promotion' => false])
     ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two wrestlers created with the same name at once admit only one', function (bool $owned) {
+    withCommittedData(function () use ($owned): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Wrestler {$run}";
+            $promotion = $owned ? Promotion::factory()->create() : null;
+            $creation = ['create_wrestler_name' => $name, 'signature_move' => '', ...($promotion instanceof Promotion ? ['promotion_id' => $promotion->id] : [])];
+
+            // Act and assert
+            expectOneRecordToWin([$creation, $creation], fn (): int => Wrestler::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->with(['in a promotion' => true, 'without a promotion' => false])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two wrestlers created with the same signature move at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $move = "Concurrent Wrestler Move {$run}";
+
+            // Act and assert
+            expectOneRecordToWin([
+                ['create_wrestler_name' => "First Wrestler {$run}", 'signature_move' => $move],
+                ['create_wrestler_name' => "Second Wrestler {$run}", 'signature_move' => $move],
+            ], fn (): int => Wrestler::query()->withoutGlobalScopes()->where('signature_move', $move)->count(), resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('renaming and creating a wrestler to the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Wrestler Rename {$run}";
+            $existing = Wrestler::factory()->create(['name' => "Before Wrestler Rename {$run}"]);
+
+            // Act and assert
+            expectOneRecordToWin([
+                ['update_wrestler_id' => $existing->id, 'new_name' => $name],
+                ['create_wrestler_name' => $name, 'signature_move' => ''],
+            ], fn (): int => Wrestler::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two events created with the same name at once admit only one', function (bool $owned) {
+    withCommittedData(function () use ($owned): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Event {$run}";
+            $promotion = $owned ? Promotion::factory()->create() : null;
+            $creation = ['create_event_name' => $name, ...($promotion instanceof Promotion ? ['promotion_id' => $promotion->id] : [])];
+
+            // Act and assert
+            expectOneRecordToWin([$creation, $creation], fn (): int => Event::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->with(['in a promotion' => true, 'without a promotion' => false])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two venues created with the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Arena {$run}";
+            $creation = ['create_venue_name' => $name];
+
+            // Act and assert
+            expectOneRecordToWin([$creation, $creation], fn (): int => Venue::query()->withTrashed()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
     ->group('concurrency', 'postgres-concurrency');

@@ -282,24 +282,31 @@ values. An administrator creating without a context creates unowned records,
 so the rules then compare against unowned records. The match form scopes its
 rules to the booked event's promotion instead (see
 [Match System](match-system.md)). Promotion slugs and venue names stay global.
-Tag team `name` and `signature_move` and title `name` are also guarded inside
-their Actions, because the form rule alone cannot be race-free and no engine has
-a unique index over them. `TagTeams\CreateAction`/`UpdateAction` and
-`Titles\CreateAction`/`UpdateAction` first take `RecordNameLock`
-(`app/Lifecycle/Naming`) inside their transaction, before the record's own row
-lock: an upsert of a row of `record_name_locks` keyed by the sha256 of the
+Tag team, wrestler `name` and `signature_move`, and event, title and venue
+`name` are also guarded inside their Actions, because the form rule alone cannot
+be race-free and no engine has a unique index over them. The `CreateAction` and
+`UpdateAction` of `TagTeams`, `Wrestlers`, `Events`, `Titles` and `Venues` first
+take `RecordNameLock` (`app/Lifecycle/Naming`) inside their transaction, before
+the record's own row lock (`Venues\CreateAction` runs in a transaction for it):
+an upsert of a row of `record_name_locks` keyed by the sha256 of the
 `GuardedName` kind, the promotion (a fixed marker for none) and the trimmed,
 lower-cased, transliterated value, which holds an exclusive row lock until the
 transaction ends and works the same on MySQL, PostgreSQL and SQLite. A tag team
-locks its name, then its signature move (always in that order). The check that
-follows enforces exactly the form rule's scope: another record of the same
-promotion (or, without one, of no promotion) with the same value, soft-deleted
-records included, ignoring the record itself on update. A taken value raises
-`NameTakenException` (tag teams and titles each have one), which the form modal
-shows on the name or signature move field. The Actions store and compare the
-trimmed tag team name, so " The Kings" can no longer slip past the form rule,
-which validates the raw value. A further guarded value (wrestler, event or venue
-names) is one more `GuardedName` case.
+or wrestler locks its name, then its signature move (always in that order). The
+check that follows enforces exactly the form rule's scope: another record of the
+same promotion (or, without one, of no promotion) with the same value,
+soft-deleted records included, ignoring the record itself on update. A venue
+name is the exception that mirrors its form rule: it is unique across all
+promotions (venues belong to none), so its lock key and its check have no
+promotion. A taken value raises `NameTakenException` (each of the five domains
+has one), which the form modal shows on the name or signature move field. The
+Actions store and compare the trimmed name of tag teams, wrestlers, events and
+venues, so " The Kings" can no longer slip past the form rule, which validates
+the raw value. A further guarded value is one more `GuardedName` case.
+Every Action takes its name locks before any other lock of its transaction
+(`Events\UpdateAction` even before the date-slot locks, see
+[Match System](match-system.md)), so a transaction waiting for a name lock holds
+nothing else and no name lock can be part of a deadlock cycle.
 At the database level, `stables_active_name_unique` is unique on
 `(promotion_id, name) WHERE deleted_at IS NULL`; because NULLs are distinct in
 unique indexes, a second filtered index

@@ -12,14 +12,15 @@ use Illuminate\Support\Str;
 /**
  * Serializes saves that choose the same unique value for a record, even while no record has that value yet.
  *
- * Nothing in the database keeps tag team names, tag team signature moves or title names unique on any engine, and a
- * row lock cannot lock a record that does not exist yet, so two concurrent saves would each pass the name check and
- * both commit. A create or update takes this lock first, before any row lock of its record, and the name check that
+ * Nothing in the database keeps tag team, wrestler, event, title or venue names (or tag team and wrestler signature
+ * moves) unique on any engine, and a row lock cannot lock a record that does not exist yet, so two concurrent saves
+ * would each pass the name check and both commit. A create or update takes this lock first, before any row lock of its record, and the name check that
  * follows then observes the other transaction's committed record.
  *
  * The lock is a row of the record_name_locks table, so it works the same way on MySQL, PostgreSQL and SQLite. The
  * rows only coordinate transactions; they hold no domain data and nothing reads them. The key covers the kind of
- * value, the promotion and the value, so wrestler, event and venue names can be added as further GuardedName cases.
+ * value, the promotion (none for a venue, whose name is unique across all promotions) and the value, so a further
+ * guarded value is one more GuardedName case.
  */
 final readonly class RecordNameLock
 {
