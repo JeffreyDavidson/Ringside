@@ -6,9 +6,13 @@ use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Naming\GuardedName;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Titles\CannotChangeTypeException;
+use App\Exceptions\Titles\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
@@ -192,5 +196,60 @@ describe('changing a scheduled debut date', function (): void {
 
         expect($scheduled->refresh()->started_at->isSameDay(now()->addDays(5)))->toBeTrue()
             ->and($title->activityPeriods()->count())->toBe(2);
+    });
+});
+
+describe('title name guard', function (): void {
+    test('it locks the new title name of the promotion before the title row', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $title = Title::factory()->for($promotion, 'promotion')->create(['name' => 'Original Title']);
+        $nameKey = resolve(RecordNameLock::class)->key(GuardedName::TitleName, $promotion->id, 'Updated Title');
+
+        // Act
+        $statements = recordStatements(fn () => resolve(UpdateAction::class)->handle($title, new TitleData('Updated Title', TitleType::Singles, null)));
+
+        // Assert
+        $lockPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"'));
+        $titleLockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "titles"'));
+
+        expect($statements[$lockPosition]['bindings'])->toBe([$nameKey])
+            ->and($lockPosition)->toBeLessThan($titleLockPosition);
+    });
+
+    test('it rejects a name another title of the same promotion already uses, even a deleted one', function (bool $inPromotion, bool $deleted) {
+        // Arrange
+        $promotion = $inPromotion ? Promotion::factory()->create() : null;
+        $other = Title::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'Taken Title'])->create();
+        $title = Title::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'Original Title'])->create();
+
+        if ($deleted) {
+            $other->delete();
+        }
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($title, new TitleData('Taken Title', TitleType::Singles, null));
+
+        // Assert
+        expect($update)->toThrow(NameTakenException::class, "A title named 'Taken Title' already exists in this promotion.")
+            ->and($title->refresh()->name)->toBe('Original Title');
+    })->with([
+        'without a promotion' => [false, false],
+        'in a promotion' => [true, false],
+        'deleted' => [true, true],
+    ]);
+
+    test('it keeps the name of the title being updated and allows a name only another promotion uses', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Title::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'Other Title']);
+        $title = Title::factory()->for($promotion, 'promotion')->create(['name' => 'Same Title']);
+
+        // Act
+        resolve(UpdateAction::class)->handle($title, new TitleData('Same Title', TitleType::Singles, null));
+        resolve(UpdateAction::class)->handle($title, new TitleData('Other Title', TitleType::Singles, null));
+
+        // Assert
+        expect($title->refresh()->name)->toBe('Other Title');
     });
 });

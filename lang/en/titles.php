@@ -77,6 +77,7 @@ return [
     ],
 
     'validation' => [
+        'name_taken' => "A title named ':name' already exists in this promotion.",
         'attributes' => [
             'title_type' => 'title type',
             'start_date' => 'start date',

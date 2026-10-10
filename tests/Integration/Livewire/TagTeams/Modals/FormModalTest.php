@@ -8,10 +8,13 @@ use App\Actions\TagTeams\EstablishMembershipAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
+use App\Exceptions\Roster\TagTeams\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
 use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -203,14 +206,16 @@ describe('authorized tag team form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $claimingTagTeam = TagTeam::factory()->create(['name' => 'The Claimers']);
         $failure = CannotBeEstablishedException::wrestlerOnAnotherTagTeam($wrestlers->firstOrFail(), $claimingTagTeam);
-        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
         {
             public function __construct(
                 private readonly CannotBeEstablishedException $failure,
                 EstablishMembershipAction $establishMembershipAction,
                 EmployAction $employAction,
+                RecordNameLock $nameLock,
+                PromotionContextService $promotionContext,
             ) {
-                parent::__construct($establishMembershipAction, $employAction);
+                parent::__construct($establishMembershipAction, $employAction, $nameLock, $promotionContext);
             }
 
             #[Override]
@@ -499,3 +504,64 @@ it('forbids users without administrative access from opening the tag team form',
     'guest updating' => ['guest', 'update', 403],
     'basic user updating' => ['basic user', 'update', 404],
 ]);
+
+describe('tag team name races past the form rule', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('shows a name that only differs by leading space as taken on the name field', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        TagTeam::factory()->create(['name' => 'The Kings']);
+        $modal = livewire(FormModal::class);
+
+        $modal->set([
+            'form.name' => ' The Kings',
+            'form.wrestlerA' => $wrestlers->firstOrFail()->id,
+            'form.wrestlerB' => $wrestlers->skip(1)->firstOrFail()->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSee("A tag team named 'The Kings' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
+        expect(TagTeam::query()->where('name', 'The Kings')->count())->toBe(1);
+    });
+
+    it('shows a signature move taken after validation on the signature move field', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $failure = NameTakenException::signatureMove('Royal Flush');
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
+        {
+            public function __construct(
+                private readonly NameTakenException $failure,
+                EstablishMembershipAction $establishMembershipAction,
+                EmployAction $employAction,
+                RecordNameLock $nameLock,
+                PromotionContextService $promotionContext,
+            ) {
+                parent::__construct($establishMembershipAction, $employAction, $nameLock, $promotionContext);
+            }
+
+            #[Override]
+            public function handle(TagTeamData $tagTeamData): never
+            {
+                throw $this->failure;
+            }
+        });
+        $modal = livewire(FormModal::class);
+
+        $modal->set([
+            'form.name' => 'The Queens',
+            'form.signature_move' => 'Royal Flush',
+            'form.wrestlerA' => $wrestlers->firstOrFail()->id,
+            'form.wrestlerB' => $wrestlers->skip(1)->firstOrFail()->id,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.signature_move'])
+            ->assertNotDispatched('closeModal');
+    });
+});
