@@ -99,6 +99,11 @@ their show routes 404 for trashed models.
   builder for that value, so the promotion scope still applies. Venues have no status filter, so they get a
   `deleted` select filter (`core.deleted_filter.*`). The default view keeps hiding deleted rows, and the status chips
   show a Deleted count because the metadata counts every option through the same closure.
+- Only people who may restore the table's records see the Deleted list. `BaseTable::statusOptionsWithDeleted()` adds
+  the option only when `Gate::allows('restore', $modelClass)` passes (PromotionGate: administrators, and members whose
+  role allows `restore`), so view-only members get no Deleted option and no Deleted count. The filter closure uses
+  `BaseTable::isDeletedFilterValue()`, so a forced `deleted` value from a view-only member lists no deleted rows.
+  Venues need no guard: only administrators may open the venues table.
 - `x-tables.entity-actions` renders a Restore-only menu for a trashed model (`@can('restore', $model)`, with a
   `core.lifecycle_confirmations.restore` `wire:confirm` that names the record) instead of View, Edit and Remove.
   Deleted names render through `x-tables.record-name` as plain text, not a link to the missing show page.

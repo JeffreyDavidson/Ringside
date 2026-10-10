@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Shared\DeletedFilter;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\ExecutesBusinessActions;
@@ -55,6 +56,31 @@ abstract class BaseTable extends DataTableComponent
             'perPageOptions' => $this->perPageAccepted,
             'beforeWrapperView' => $this->beforeWrapperView,
         ]);
+    }
+
+    /**
+     * Status filter options, with Deleted appended only for people who may restore the table's records.
+     *
+     * @param  array<string, string>  $options
+     * @return array<string, string>
+     */
+    protected function statusOptionsWithDeleted(array $options): array
+    {
+        return $this->canRestoreRecords() ? DeletedFilter::appendTo($options) : $options;
+    }
+
+    /**
+     * Whether a status filter value asks for the Deleted list. Anyone who may not restore gets no deleted rows, even
+     * when they force the value into the filter, so the closure falls through to the normal status handling.
+     */
+    protected function isDeletedFilterValue(string $value): bool
+    {
+        return $this->canRestoreRecords() && DeletedFilter::tryFrom($value) !== null;
+    }
+
+    private function canRestoreRecords(): bool
+    {
+        return Gate::allows('restore', $this->modelClass);
     }
 
     /**
