@@ -14,7 +14,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -485,3 +487,107 @@ test('renaming and creating a stable to the same name at once admit only one', f
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
     ->group('concurrency');
+
+/**
+ * Run workers that each try to leave a live record with the same guarded value, and assert that exactly one succeeds
+ * and that exactly one record has the value, without a deadlock. Neither tag teams nor titles have a unique index
+ * over their names on any engine, so only the name lock can decide these races.
+ *
+ * @param  array<int, array<string, int|string>>  $specs
+ * @param  Closure(): int  $recordsWithTheValue
+ */
+function expectOneRecordToWin(array $specs, Closure $recordsWithTheValue, int $deadlocksBefore): void
+{
+    $results = bookConcurrently($specs);
+
+    expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
+        ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+        ->and(collect($results)->where('ok', true))->toHaveCount(1)
+        ->and($recordsWithTheValue())->toBe(1);
+}
+
+/**
+ * A tag team creation spec with two fresh wrestlers of the promotion (or of none).
+ *
+ * @return array<string, int|string>
+ */
+function tagTeamCreation(string $name, ?string $signatureMove, ?Promotion $promotion): array
+{
+    $wrestlers = Wrestler::factory()->bookable()->count(2)->create(
+        $promotion instanceof Promotion ? ['promotion_id' => $promotion->id] : [],
+    );
+
+    return [
+        'create_tag_team_name' => $name,
+        'signature_move' => $signatureMove ?? '',
+        'wrestler_ids' => $wrestlers->pluck('id')->implode(','),
+        ...($promotion instanceof Promotion ? ['promotion_id' => $promotion->id] : []),
+    ];
+}
+
+test('two tag teams created with the same name at once admit only one', function (bool $owned) {
+    withCommittedData(function () use ($owned): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Tag Team {$run}";
+            $promotion = $owned ? Promotion::factory()->create() : null;
+
+            // Act and assert
+            expectOneRecordToWin([
+                tagTeamCreation($name, null, $promotion),
+                tagTeamCreation($name, null, $promotion),
+            ], fn (): int => TagTeam::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->with(['in a promotion' => true, 'without a promotion' => false])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two tag teams created with the same signature move at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $move = "Concurrent Move {$run}";
+
+            // Act and assert
+            expectOneRecordToWin([
+                tagTeamCreation("First Team {$run}", $move, null),
+                tagTeamCreation("Second Team {$run}", $move, null),
+            ], fn (): int => TagTeam::query()->withoutGlobalScopes()->where('signature_move', $move)->count(), resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('renaming and creating a tag team to the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Tag Rename {$run}";
+            $existing = TagTeam::factory()->employed()->create(['name' => "Before Tag Rename {$run}"]);
+
+            // Act and assert
+            expectOneRecordToWin([
+                ['update_tag_team_id' => $existing->id, 'new_name' => $name],
+                tagTeamCreation($name, null, null),
+            ], fn (): int => TagTeam::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('two titles created with the same name at once admit only one', function (bool $owned) {
+    withCommittedData(function () use ($owned): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent {$run} Title";
+            $promotion = $owned ? Promotion::factory()->create() : null;
+            $creation = ['create_title_name' => $name, ...($promotion instanceof Promotion ? ['promotion_id' => $promotion->id] : [])];
+
+            // Act and assert
+            expectOneRecordToWin([$creation, $creation], fn (): int => Title::query()->withoutGlobalScopes()->where('name', $name)->count(), resolvedDeadlocks());
+        }
+    });
+})->with(['in a promotion' => true, 'without a promotion' => false])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
