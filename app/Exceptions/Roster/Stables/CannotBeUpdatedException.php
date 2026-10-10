@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\Stables;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Roster\Stables\Stable;
 
@@ -32,6 +33,6 @@ final class CannotBeUpdatedException extends BaseBusinessException
 
     public static function nameTaken(string $name): static
     {
-        return new self(__('stables.errors.updated.name_taken', ['name' => $name]));
+        return self::forReason(BusinessRuleReason::NameTaken, __('stables.errors.updated.name_taken', ['name' => $name]));
     }
 }
