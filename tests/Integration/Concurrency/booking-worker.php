@@ -10,7 +10,10 @@ declare(strict_types=1);
  * with a split_stable_id splits that stable through SplitStableAction, moving the listed wrestlers (comma-separated ids) into a new
  * stable named new_name. A create_stable_name creates an unformed stable with that name through Stables\CreateAction, a
  * restore_stable_id restores that deleted stable through Stables\RestoreAction, and an update_stable_id renames that stable to
- * new_name through Stables\UpdateAction.
+ * new_name through Stables\UpdateAction. A create_tag_team_name creates a tag team of the two wrestler_ids (comma-separated) with that
+ * name and signature_move through TagTeams\CreateAction, an update_tag_team_id renames that tag team to new_name through
+ * TagTeams\UpdateAction, and a create_title_name creates a singles title with that name through Titles\CreateAction. A
+ * promotion_id makes the worker act inside that promotion, as a request with an enforced promotion context does.
  *
  * Usage: php booking-worker.php '<json spec>'
  *
@@ -29,21 +32,29 @@ use App\Actions\Stables\CreateAction as CreateStableAction;
 use App\Actions\Stables\RestoreAction as RestoreStableAction;
 use App\Actions\Stables\SplitStableAction;
 use App\Actions\Stables\UpdateAction as UpdateStableAction;
+use App\Actions\TagTeams\CreateAction as CreateTagTeamAction;
+use App\Actions\TagTeams\UpdateAction as UpdateTagTeamAction;
+use App\Actions\Titles\CreateAction as CreateTitleAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
+use App\Data\TagTeams\TagTeamData;
+use App\Data\Titles\TitleData;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;
@@ -64,7 +75,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -77,6 +88,12 @@ while (microtime(true) < $startAt) {
 }
 
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
+
+if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
+    $context = resolve(PromotionContextService::class);
+    $context->set(Promotion::query()->findOrFail($spec['promotion_id']));
+    $context->enforce();
+}
 
 try {
     if (isset($spec['split_stable_id'])) {
@@ -97,6 +114,23 @@ try {
             Stable::query()->findOrFail($spec['update_stable_id']),
             new StableData($spec['new_name'], null, new StableMembershipData),
         );
+    } elseif (isset($spec['create_tag_team_name'])) {
+        $wrestlers = Wrestler::query()->whereKey(explode(',', $spec['wrestler_ids']))->orderBy('id')->get();
+
+        resolve(CreateTagTeamAction::class)->handle(
+            new TagTeamData($spec['create_tag_team_name'], $spec['signature_move'] ?: null, null, $wrestlers->firstOrFail(), $wrestlers->skip(1)->firstOrFail()),
+        );
+    } elseif (isset($spec['update_tag_team_id'])) {
+        $tagTeam = TagTeam::query()->findOrFail($spec['update_tag_team_id']);
+
+        $partners = $tagTeam->wrestlers;
+
+        resolve(UpdateTagTeamAction::class)->handle(
+            $tagTeam,
+            new TagTeamData($spec['new_name'], $tagTeam->signature_move, null, $partners->firstOrFail(), $partners->skip(1)->firstOrFail()),
+        );
+    } elseif (isset($spec['create_title_name'])) {
+        resolve(CreateTitleAction::class)->handle(new TitleData($spec['create_title_name'], TitleType::Singles, null));
     } elseif (isset($spec['create_event_at_venue_id'])) {
         resolve(CreateAction::class)->handle(
             new EventData('Concurrent Venue Event', Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),

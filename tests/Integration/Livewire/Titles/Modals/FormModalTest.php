@@ -2,11 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Actions\Titles\CreateAction;
 use App\Actions\Titles\DebutAction;
+use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
+use App\Exceptions\Titles\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -332,5 +337,40 @@ describe('title type locking', function () {
             ->assertHasErrors(['form.type'])
             ->assertNotDispatched('refreshDatatable');
         expect($title->refresh()->type)->toBe(TitleType::Singles);
+    });
+});
+
+describe('title name races past the form rule', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('shows a name taken after validation on the name field', function () {
+        $failure = NameTakenException::name('Existing Championship Title');
+        app()->instance(CreateAction::class, new class($failure, resolve(DebutAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
+        {
+            public function __construct(private readonly NameTakenException $failure, DebutAction $debut, RecordNameLock $nameLock, PromotionContextService $promotionContext)
+            {
+                parent::__construct($debut, $nameLock, $promotionContext);
+            }
+
+            #[Override]
+            public function handle(TitleData $titleData): never
+            {
+                throw $this->failure;
+            }
+        });
+        $modal = livewire(FormModal::class);
+
+        $modal->set([
+            'form.name' => 'Existing Championship Title',
+            'form.type' => TitleType::Singles->value,
+        ]);
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSee("A title named 'Existing Championship Title' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
     });
 });
