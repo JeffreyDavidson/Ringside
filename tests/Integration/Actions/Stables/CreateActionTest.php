@@ -141,3 +141,18 @@ test('it allows a name only a deleted stable or another promotion uses', functio
     expect($stable->name)->toBe('The Alliance')
         ->and($stable->promotion_id)->toBeNull();
 });
+
+test('it reports a name taken when a concurrent create wins the promotion name between the check and the insert', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $data = new StableData(name: 'The Alliance', start_date: null, members: new StableMembershipData);
+    Stable::creating(function () use ($promotion): void {
+        Stable::withoutEvents(fn () => Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']));
+    });
+
+    // Act
+    $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
+
+    // Assert
+    expect($create)->toThrow(CannotBeCreatedException::class, "an active stable named 'The Alliance' already exists");
+});
