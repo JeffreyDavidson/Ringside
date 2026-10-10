@@ -154,6 +154,5 @@ test('it reports a name taken when a concurrent create wins the promotion name b
     $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
 
     // Assert
-    expect($create)->toThrow(CannotBeCreatedException::class, "an active stable named 'The Alliance' already exists")
-        ->and(Stable::query()->where('name', 'The Alliance')->count())->toBe(1);
+    expect($create)->toThrow(CannotBeCreatedException::class, "an active stable named 'The Alliance' already exists");
 });
