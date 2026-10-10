@@ -29,4 +29,9 @@ final class CannotBeUpdatedException extends BaseBusinessException
 
         return new self(__('stables.errors.updated.inactive_with_members', ['context' => $context]));
     }
+
+    public static function nameTaken(string $name): static
+    {
+        return new self(__('stables.errors.updated.name_taken', ['name' => $name]));
+    }
 }

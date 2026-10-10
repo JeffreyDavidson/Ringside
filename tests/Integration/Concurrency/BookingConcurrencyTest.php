@@ -402,3 +402,86 @@ test('two stables without a promotion split to the same new name at once admit o
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
     ->group('concurrency');
+
+/**
+ * Run workers that each try to leave a live unowned stable named $name, and assert that exactly one succeeds and
+ * that exactly one live stable has the name, without a deadlock.
+ *
+ * @param  array<int, array<string, int|string>>  $specs
+ */
+function expectOneStableToWin(array $specs, string $name, int $deadlocksBefore): void
+{
+    $results = bookConcurrently($specs);
+
+    expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
+        ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+        ->and(collect($results)->where('ok', true))->toHaveCount(1)
+        ->and(Stable::query()->where('name', $name)->count())->toBe(1);
+}
+
+test('two stables without a promotion created with the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Create {$run}";
+
+            // Act and assert
+            expectOneStableToWin([
+                ['create_stable_name' => $name],
+                ['create_stable_name' => $name],
+            ], $name, resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
+    ->group('concurrency');
+
+test('creating and splitting to the same stable name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Create Split {$run}";
+
+            // Act and assert
+            expectOneStableToWin([
+                ['create_stable_name' => $name],
+                [...splittableUnownedStable(), 'new_name' => $name],
+            ], $name, resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
+    ->group('concurrency');
+
+test('restoring and creating a stable with the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Restore {$run}";
+            $deleted = Stable::factory()->create(['name' => $name]);
+            $deleted->delete();
+
+            // Act and assert
+            expectOneStableToWin([
+                ['restore_stable_id' => $deleted->id],
+                ['create_stable_name' => $name],
+            ], $name, resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
+    ->group('concurrency');
+
+test('renaming and creating a stable to the same name at once admit only one', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 5) as $run) {
+            // Arrange
+            $name = "Concurrent Rename {$run}";
+            $existing = Stable::factory()->create(['name' => "Before Rename {$run}"]);
+
+            // Act and assert
+            expectOneStableToWin([
+                ['update_stable_id' => $existing->id, 'new_name' => $name],
+                ['create_stable_name' => $name],
+            ], $name, resolvedDeadlocks());
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled() || ! runsOnDriver('mysql'), MYSQL_CONCURRENT_STABLE_SPLITS)
+    ->group('concurrency');
