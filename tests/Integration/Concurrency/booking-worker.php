@@ -157,8 +157,9 @@ try {
             new VenueData($spec['create_venue_name'], '1 Concurrent Way', 'Columbus', 'Ohio', '43004'),
         );
     } elseif (isset($spec['create_event_at_venue_id'])) {
+        // A name of its own per worker: two events of one name are refused by the name guard, and this race is about the venue day.
         resolve(CreateAction::class)->handle(
-            new EventData('Concurrent Venue Event', Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),
+            new EventData('Concurrent Venue Event '.getmypid(), Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),
         );
     } elseif (isset($spec['demote_user_id'])) {
         resolve(UpdatePromotionMemberRoleAction::class)->handle(
