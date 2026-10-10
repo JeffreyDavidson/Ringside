@@ -16,11 +16,13 @@ enum BusinessRuleReason: string
     case Injured = 'injured';
     case PartnerDeleted = 'partner_deleted';
     case PartnerOnAnotherTagTeam = 'partner_on_another_tag_team';
+    case NameTaken = 'name_taken';
     case NotDeleted = 'not_deleted';
     case NotInjured = 'not_injured';
     case NotRetired = 'not_retired';
     case NotSuspended = 'not_suspended';
     case Retired = 'retired';
+    case SignatureMoveTaken = 'signature_move_taken';
     case Suspended = 'suspended';
     case Unemployed = 'unemployed';
 }

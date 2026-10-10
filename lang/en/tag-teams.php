@@ -80,6 +80,8 @@ return [
     ],
 
     'validation' => [
+        'name_taken' => "A tag team named ':name' already exists in this promotion.",
+        'signature_move_taken' => "A tag team with the signature move ':signature_move' already exists in this promotion.",
         'attributes' => [
             'signature_move' => 'signature move',
             'first_wrestler' => 'first wrestler',
