@@ -6,9 +6,9 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('browser tab and home screen icons', function (): void {
-    it('links the Ringside icons from every page layout', function (Closure $visit): void {
+    it('links the Ringside icons from every page layout', function (Closure $request): void {
         // Act
-        $response = $visit();
+        $response = $request();
 
         // Assert
         $response
