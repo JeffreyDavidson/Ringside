@@ -219,21 +219,53 @@ describe('listing deleted records', function (): void {
         // Assert
         $table->assertDontSeeHtml('data-test="deleted-record-name"');
     })->with('tables with a linked record name');
+});
 
-    test('a viewer who may not restore sees no row actions for a deleted record', function (): void {
+describe('who sees the deleted list', function (): void {
+    test('a member who may only view gets no Deleted option, count or rows', function (string $component, string $filterKey, Closure $make): void {
         // Arrange
         $promotion = Promotion::factory()->create();
-        Wrestler::factory()->for($promotion, 'promotion')->create(['name' => 'Removed Record'])->delete();
+        $make('Active Record', $promotion);
+        $make('Removed Record', $promotion)->delete();
         actingAsPromotionMember($promotion, MembershipRole::Member);
-        $table = livewire(WrestlersTable::class);
 
         // Act
-        $table->set('filterValues.status', 'deleted');
+        $table = livewire($component)->set("filterValues.{$filterKey}", 'deleted');
 
         // Assert
         $table
+            ->assertSet('metadataSnapshot.statuses', fn (array $statuses): bool => ! in_array('deleted', array_column($statuses, 'value'), true))
+            ->assertSet('metadataSnapshot.total', 1)
+            ->assertDontSee('Removed Record');
+    })->with('tables with a linked record name');
+
+    test('a member who may restore still gets the Deleted option, count and rows', function (string $component, string $filterKey, Closure $make): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $make('Active Record', $promotion);
+        $make('Removed Record', $promotion)->delete();
+        actingAsPromotionMember($promotion, MembershipRole::Manager);
+
+        // Act
+        $table = livewire($component)->set("filterValues.{$filterKey}", 'deleted');
+
+        // Assert
+        $table
+            ->assertSet('metadataSnapshot.statuses', fn (array $statuses): bool => in_array(['value' => 'deleted', 'label' => 'Deleted', 'count' => 1], $statuses, true))
             ->assertSee('Removed Record')
-            ->assertDontSeeHtml('wire:click="restore(');
+            ->assertDontSee('Active Record');
+    })->with('tables with a linked record name');
+
+    test('only administrators open the venues table, so only they see its deleted venues', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        actingAsPromotionMember($promotion, MembershipRole::Owner);
+
+        // Act
+        $table = livewire(VenuesTable::class);
+
+        // Assert
+        $table->assertForbidden();
     });
 });
 

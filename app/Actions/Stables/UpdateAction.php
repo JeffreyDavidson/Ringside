@@ -9,8 +9,10 @@ use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -23,13 +25,15 @@ class UpdateAction
         protected EstablishAction $establishAction,
         protected SynchronizeStableMembersAction $synchronizeStableMembersAction,
         protected StableActivityEligibility $eligibility,
+        protected StableNameLock $nameLock,
     ) {}
 
     /**
      * Update a stable.
      *
      * This handles the complete stable update workflow:
-     * - Updates the stable name
+     * - Updates the stable name, rejecting one another active stable of the promotion already uses; a stable without a
+     *   promotion has no database-level name guard on MySQL, so it first takes the name lock, before its own row lock
      * - Establishes a stable that has no activity history when a start date is given
      * - Moves the dates of a disbanded stable's only activity period
      * - Updates stable membership (wrestlers, tag teams)
@@ -42,7 +46,7 @@ class UpdateAction
      * @param  StableData  $stableData  The updated stable information
      * @return Stable The updated stable instance
      *
-     * @throws CannotBeUpdatedException When the data would end an open period, move a locked start date, or give a disbanded stable members
+     * @throws CannotBeUpdatedException When the data would end an open period, move a locked start date, give a disbanded stable members, or use a name another active stable has
      * @throws CannotBeEstablishedException When an end date is given while establishing the stable
      */
     public function handle(Stable $stable, StableData $stableData): Stable
@@ -56,14 +60,30 @@ class UpdateAction
         }
 
         return DB::transaction(function () use ($stable, $stableData): Stable {
+            $name = $stableData->getTrimmedName();
+
+            if ($stable->promotion_id === null) {
+                $this->nameLock->lock($name);
+            }
+
             $lockedStable = $stable->refreshForUpdate();
 
             if ($stableData->members->isNotEmpty() && ! $this->eligibility->canHaveMembers($lockedStable)) {
                 throw CannotBeUpdatedException::inactiveWithMembers($lockedStable);
             }
 
+            $nameTaken = Stable::query()
+                ->withoutGlobalScope(PromotionContextScope::class)
+                ->whereNameInPromotion($name, $lockedStable->promotion_id)
+                ->whereKeyNot($lockedStable->getKey())
+                ->exists();
+
+            if ($nameTaken) {
+                throw CannotBeUpdatedException::nameTaken($name);
+            }
+
             $lockedStable->update([
-                'name' => $stableData->getTrimmedName(),
+                'name' => $name,
             ]);
 
             $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());

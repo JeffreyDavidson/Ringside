@@ -85,7 +85,8 @@ request can merge:
   to run it locally against a real MySQL or PostgreSQL database.
 - **Active stable names.** SQLite and PostgreSQL enforce one active stable per
   name with a partial unique index. MySQL has no partial indexes, so it relies on
-  `StableNameLock` and validation instead.
+  `StableNameLock` (taken when creating, renaming, restoring and splitting a stable
+  without a promotion) and validation instead.
 - **Text comparison.** MySQL's collation ignores case and accents, so "Foo" and
   "foo", or "Café" and "Cafe", count as the same name and surface as a
   validation error. SQLite treats them as different names.
