@@ -12,7 +12,6 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -210,13 +209,6 @@ function newTagTeamData(string $name, ?string $signatureMove = null): TagTeamDat
         wrestlerA: Wrestler::factory()->create(),
         wrestlerB: Wrestler::factory()->create(),
     );
-}
-
-function enforcePromotionContext(Promotion $promotion): void
-{
-    $context = resolve(PromotionContextService::class);
-    $context->set($promotion);
-    $context->enforce();
 }
 
 describe('tag team name guard', function (): void {

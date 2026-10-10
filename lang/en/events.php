@@ -54,6 +54,7 @@ return [
     ],
 
     'validation' => [
+        'name_taken' => "An event named ':name' already exists in this promotion.",
         'attributes' => [
             'event_name' => 'event name',
             'event_date' => 'event date',

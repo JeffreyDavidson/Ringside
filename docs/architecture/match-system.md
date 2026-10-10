@@ -63,6 +63,7 @@ Match assignment actions lock the complete scheduling event set, then the match,
 
 Every scheduling operation acquires locks in this order. `MatchAssignmentConflictService` owns the row-lock helpers (`lockEventSet()`, `lockMatchWithEventSet()`) and `SchedulingSlotLock` owns the date-slot lock:
 
+-1. Only for `Events\CreateAction` and `Events\UpdateAction`: the event name lock (`RecordNameLock`, see [Core Capabilities](core-capabilities.md)), before everything below. It rejects a name another event of the promotion already uses, which no index enforces. Every Action that takes name locks takes them before any other lock of its transaction, and no booking action ever waits for one, so a name-lock waiter holds nothing and the lock cannot join a deadlock cycle with the slot, event, venue and competitor locks.
 0. Only for actions that move an event to a date or bring one back at its date (`Events\UpdateAction`, `Events\RestoreAction`): the date-slot lock of the old and new date, ascending by timestamp (see below). Booking actions never take it.
 1. The complete scheduling event set in one statement ordered by ascending id: the action's own event plus every other event on the same exact date and time (an unscheduled event's set is itself alone, because unscheduled events conflict only within their own card).
 2. The match row (inserted last for `AddMatchForEventAction`, so nobody else can lock it first).

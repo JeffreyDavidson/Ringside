@@ -196,3 +196,33 @@ it('forbids users without administrative access from opening the venue form', fu
     'guest' => ['guest'],
     'basic user' => ['basic user'],
 ]);
+
+describe('venue name races past the form rule', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('shows a name that only differs by leading space as taken on the name field', function () {
+        // Arrange
+        Venue::factory()->create(['name' => 'Madison Square Garden']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->set([
+            'form.name' => ' Madison Square Garden',
+            'form.street_address' => '4 Pennsylvania Plaza',
+            'form.city' => 'New York',
+            'form.state' => 'New York',
+            'form.zipcode' => '10001',
+            'form.timezone' => 'America/New_York',
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSee("A venue named 'Madison Square Garden' already exists.")
+            ->assertNotDispatched('closeModal');
+        expect(Venue::query()->where('name', 'Madison Square Garden')->count())->toBe(1);
+    });
+});

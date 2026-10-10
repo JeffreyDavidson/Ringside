@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
+use App\Builders\Concerns\FiltersByName;
+use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 /**
@@ -13,6 +15,9 @@ use App\Models\Roster\Wrestlers\Wrestler;
  */
 class WrestlerBuilder extends IndividualBuilder
 {
+    use FiltersByName;
+    use FiltersByNameInPromotion;
+
     /**
      * Restrict to wrestlers that can be added to a stable: bookable (employed, not retired, suspended or injured)
      * and not a current member of another stable.

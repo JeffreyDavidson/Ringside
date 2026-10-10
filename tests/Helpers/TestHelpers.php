@@ -122,6 +122,16 @@ function changePromotionMembership(Promotion $promotion, User $user, MembershipR
 }
 
 /**
+ * Act as a request inside the promotion: the records created next belong to it and its name checks are scoped to it.
+ */
+function enforcePromotionContext(Promotion $promotion): void
+{
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+}
+
+/**
  * Record every SQL statement issued while the callback runs, flagging row-locking statements.
  *
  * SQLite discards row-lock clauses, so its grammar is swapped for one that renders the lock as a

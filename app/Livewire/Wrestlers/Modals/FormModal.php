@@ -6,7 +6,9 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Actions\Wrestlers\UpdateAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\Shared\UnitedStatesState;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -48,6 +50,16 @@ class FormModal extends BaseFormModal
         $this->form->weight = fake()->numberBetween(180, 350);
         $this->form->signature_move = Str::of(fake()->optional(0.8)->sentence(3))->title()->value();
         $this->form->employment_date = $this->generateOptionalEmploymentDate();
+    }
+
+    /** A signature move taken since validation shows on its own field; any other failure on the name. */
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return match ($exception->reason()) {
+            BusinessRuleReason::SignatureMoveTaken => 'form.signature_move',
+            default => parent::businessErrorField($exception),
+        };
     }
 
     protected function updateForm(): void

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\Wrestlers\WrestlerData;
+use App\Enums\Naming\GuardedName;
+use App\Exceptions\Roster\Wrestlers\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 
@@ -351,4 +355,91 @@ test('it handles null signature move', function () {
         'id' => $wrestler->id,
         'signature_move' => null,
     ]);
+});
+
+function renamingWrestlerData(string $name, ?string $signatureMove): WrestlerData
+{
+    return new WrestlerData(
+        name: $name,
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: $signatureMove,
+        employment_date: null,
+    );
+}
+
+describe('wrestler name guard', function (): void {
+    test('it locks the new name and signature move of the promotion before the wrestler row', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create(['name' => 'Original Name']);
+        $lock = resolve(RecordNameLock::class);
+
+        // Act
+        $statements = recordStatements(fn () => resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData(' Updated Name ', 'Rock Bottom')));
+
+        // Assert
+        $lockPositions = array_keys(array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"')));
+        $wrestlerLockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "wrestlers"'));
+
+        expect(array_map(fn (int $position): array => $statements[$position]['bindings'], $lockPositions))->toBe([
+            [$lock->key(GuardedName::WrestlerName, $promotion->id, 'Updated Name')],
+            [$lock->key(GuardedName::WrestlerSignatureMove, $promotion->id, 'Rock Bottom')],
+        ])
+            ->and(array_last($lockPositions))->toBeLessThan($wrestlerLockPosition)
+            ->and($wrestler->refresh()->name)->toBe('Updated Name');
+    });
+
+    test('it rejects a name another wrestler of the same promotion already uses, even with surrounding space or deleted', function (bool $inPromotion, string $name, bool $deleted) {
+        // Arrange
+        $promotion = $inPromotion ? Promotion::factory()->create() : null;
+        $other = Wrestler::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'The Rock'])->create();
+        $wrestler = Wrestler::factory()->state(['promotion_id' => $promotion?->id, 'name' => 'Original Name'])->create();
+
+        if ($deleted) {
+            $other->delete();
+        }
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData($name, null));
+
+        // Assert
+        expect($update)->toThrow(NameTakenException::class, "A wrestler named 'The Rock' already exists in this promotion.")
+            ->and($wrestler->refresh()->name)->toBe('Original Name');
+    })->with([
+        'without a promotion' => [false, 'The Rock', false],
+        'in a promotion' => [true, 'The Rock', false],
+        'leading space' => [true, ' The Rock', false],
+        'deleted' => [true, 'The Rock', true],
+    ]);
+
+    test('it rejects a signature move another wrestler already uses and writes nothing', function () {
+        // Arrange
+        Wrestler::factory()->create(['name' => 'The Rock', 'signature_move' => 'Rock Bottom']);
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name', 'signature_move' => 'Original Move']);
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData('Renamed', 'Rock Bottom'));
+
+        // Assert
+        expect($update)->toThrow(NameTakenException::class, "A wrestler with the signature move 'Rock Bottom' already exists in this promotion.")
+            ->and($wrestler->refresh()->name)->toBe('Original Name')
+            ->and($wrestler->signature_move)->toBe('Original Move');
+    });
+
+    test('it keeps the name and signature move of the wrestler being updated and allows ones only another promotion uses', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Wrestler::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'Other Name', 'signature_move' => 'Other Move']);
+        $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create(['name' => 'Same Name', 'signature_move' => 'Same Move']);
+
+        // Act
+        resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData('Same Name', 'Same Move'));
+        resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData('Other Name', 'Other Move'));
+
+        // Assert
+        expect($wrestler->refresh()->name)->toBe('Other Name')
+            ->and($wrestler->signature_move)->toBe('Other Move');
+    });
 });

@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\Wrestlers\WrestlerData;
+use App\Enums\Naming\GuardedName;
+use App\Exceptions\Roster\Wrestlers\NameTakenException;
+use App\Lifecycle\Naming\RecordNameLock;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -174,4 +179,120 @@ test('it employs assigned managers through the wrestler employment cascade', fun
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
+});
+
+function namedWrestlerData(string $name, ?string $signatureMove = null): WrestlerData
+{
+    return new WrestlerData(
+        name: $name,
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: $signatureMove,
+        employment_date: null,
+    );
+}
+
+describe('wrestler name guard', function (): void {
+    test('it locks the name and the signature move of the promotion before inserting the wrestler', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        enforcePromotionContext($promotion);
+        $data = namedWrestlerData('  The Rock ', 'Rock Bottom');
+        $lock = resolve(RecordNameLock::class);
+
+        // Act
+        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+
+        // Assert
+        $lockPositions = array_keys(array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"')));
+        $insertPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "wrestlers"'));
+
+        expect(array_map(fn (int $position): array => $statements[$position]['bindings'], $lockPositions))->toBe([
+            [$lock->key(GuardedName::WrestlerName, $promotion->id, 'The Rock')],
+            [$lock->key(GuardedName::WrestlerSignatureMove, $promotion->id, 'Rock Bottom')],
+        ])
+            ->and(array_last($lockPositions))->toBeLessThan($insertPosition);
+    });
+
+    test('it takes no signature move lock for a wrestler without one', function () {
+        // Arrange
+        $data = namedWrestlerData('The Rock');
+
+        // Act
+        resolve(CreateAction::class)->handle($data);
+
+        // Assert
+        expect(DB::table('record_name_locks')->count())->toBe(1);
+    });
+
+    test('it stores the trimmed name', function () {
+        // Arrange
+        $data = namedWrestlerData('  The Rock ');
+
+        // Act
+        $wrestler = resolve(CreateAction::class)->handle($data);
+
+        // Assert
+        expect($wrestler->name)->toBe('The Rock');
+    });
+
+    test('it rejects a name another wrestler of the promotion already uses, even with surrounding space or deleted', function (string $name, bool $deleted) {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        enforcePromotionContext($promotion);
+        $existing = Wrestler::factory()->for($promotion, 'promotion')->create(['name' => 'The Rock']);
+
+        if ($deleted) {
+            $existing->delete();
+        }
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData($name));
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class, "A wrestler named 'The Rock' already exists in this promotion.")
+            ->and(Wrestler::query()->withoutGlobalScopes()->where('name', 'The Rock')->count())->toBe(1);
+    })->with([
+        'exact' => ['The Rock', false],
+        'leading space' => [' The Rock', false],
+        'deleted' => ['The Rock', true],
+    ]);
+
+    test('it rejects a name an unowned wrestler already uses when creating without a promotion', function () {
+        // Arrange
+        Wrestler::factory()->create(['name' => 'The Rock']);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('The Rock'));
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class)
+            ->and(Wrestler::query()->withoutGlobalScopes()->where('name', 'The Rock')->count())->toBe(1);
+    });
+
+    test('it rejects a signature move another wrestler of the promotion already uses', function () {
+        // Arrange
+        Wrestler::factory()->create(['name' => 'The Rock', 'signature_move' => 'Rock Bottom']);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('Stone Cold', 'Rock Bottom'));
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class, "A wrestler with the signature move 'Rock Bottom' already exists in this promotion.")
+            ->and(Wrestler::query()->where('name', 'Stone Cold')->exists())->toBeFalse();
+    });
+
+    test('it allows a name and signature move only another promotion uses', function () {
+        // Arrange
+        Wrestler::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'The Rock', 'signature_move' => 'Rock Bottom']);
+        $promotion = Promotion::factory()->create();
+        enforcePromotionContext($promotion);
+
+        // Act
+        $wrestler = resolve(CreateAction::class)->handle(namedWrestlerData('The Rock', 'Rock Bottom'));
+
+        // Assert
+        expect($wrestler->promotion_id)->toBe($promotion->id);
+    });
 });

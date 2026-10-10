@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\UpdateAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
+use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -393,6 +394,51 @@ describe('FormModal employment history', function () {
             ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
         expect($wrestler->fresh()?->name)->toBe('Original Name');
+        $action->verify();
+    });
+});
+
+describe('wrestler name races past the form rule', function () {
+    it('shows a name that only differs by leading space as taken on the name field', function () {
+        // Arrange
+        Wrestler::factory()->create(['name' => 'The Rock']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->set([
+            'form.name' => ' The Rock',
+            'form.hometown' => 'Test City, TX',
+            'form.height_feet' => 6,
+            'form.height_inches' => 2,
+            'form.weight' => 220,
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertSee("A wrestler named 'The Rock' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
+        expect(Wrestler::query()->where('name', 'The Rock')->count())->toBe(1);
+    });
+
+    it('shows a signature move taken after validation on the signature move field', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $action = Double::for(UpdateAction::class);
+        $action->expects('handle')->throws(NameTakenException::signatureMove('Rock Bottom'));
+        app()->instance(UpdateAction::class, $action);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.signature_move', 'Rock Bottom');
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.signature_move'])
+            ->assertSee("A wrestler with the signature move 'Rock Bottom' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
         $action->verify();
     });
 });
