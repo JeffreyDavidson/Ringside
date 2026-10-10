@@ -6,7 +6,9 @@ namespace App\Livewire\Stables\Modals;
 
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\UpdateAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterMemberKind;
+use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;
 use App\Livewire\Stables\Forms\CreateEditForm;
@@ -48,6 +50,16 @@ class FormModal extends BaseFormModal
     {
         $this->form->name = Str::of(fake()->sentence(2))->title()->value();
         $this->form->started_at = $this->generateOptionalStartDate();
+    }
+
+    /** A taken name belongs on the name field; every other business failure is about the dates. */
+    #[\Override]
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return match ($exception->reason()) {
+            BusinessRuleReason::NameTaken => 'form.name',
+            default => parent::businessErrorField($exception),
+        };
     }
 
     protected function updateForm(): void

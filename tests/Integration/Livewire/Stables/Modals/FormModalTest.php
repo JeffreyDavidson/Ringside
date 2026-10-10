@@ -383,9 +383,36 @@ describe('authorized stable form interactions', function () {
 
         // Assert
         $modal
-            ->assertHasErrors(['form.started_at'])
+            ->assertHasErrors(['form.name'])
+            ->assertHasNoErrors(['form.started_at'])
             ->assertSee("an active stable named 'The Alliance' already exists")
             ->assertNotDispatched('closeModal');
+        $context->clear();
+    });
+
+    it('shows the name as taken on the name field when a concurrent save wins a rename', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+        $stable = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Corporation']);
+        Stable::updating(function () use ($promotion): void {
+            Stable::withoutEvents(fn () => Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']));
+        });
+        $modal = livewire(FormModal::class, ['modelId' => $stable->id]);
+        $modal->set('form.name', 'The Alliance');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.name'])
+            ->assertHasNoErrors(['form.started_at'])
+            ->assertSee("an active stable named 'The Alliance' already exists")
+            ->assertNotDispatched('closeModal');
+        expect($stable->refresh()->name)->toBe('The Corporation');
         $context->clear();
     });
 
