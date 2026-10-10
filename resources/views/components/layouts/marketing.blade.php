@@ -22,6 +22,7 @@
         crossorigin
     />
     <title>{{ __('marketing.title') }}</title>
+    <x-favicons />
     @vite('resources/css/marketing.css')
 </head>
 <body>

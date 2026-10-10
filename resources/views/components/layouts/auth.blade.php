@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>{{ $title }} · Ringside</title>
+    <x-favicons />
     @vite('resources/js/auth.js')
 </head>
 <body class="bg-ringside-surface-deep font-body text-ringside-ink selection:bg-ringside-red selection:text-ringside-white m-0 min-h-dvh antialiased">
