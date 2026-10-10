@@ -34,6 +34,19 @@ The brief favored semantic color tokens introduced as components need them,
 utility classes within Blade components, and existing Livewire/Alpine behavior.
 Full dark mode was deferred.
 
+## Browser tab and home screen icons
+
+The `<x-favicons />` component links `favicon.ico` (16, 32 and 48px),
+`favicon.svg` and `apple-touch-icon.png` from `public/`. The application,
+authentication and marketing layouts all include it, so every page, including
+the error pages, shows the same icons.
+
+The icon is the "RS" compact mark from the accepted brand identity: a Paper R
+and a Signal red S on a Charcoal tile. The favicon uses larger letters than the
+phone icon because browser tabs do not mask the image. The files are copies of
+the accepted brand icons; when the brand changes, replace them from the newly
+accepted version instead of editing them in place.
+
 ## Component and page goals
 
 The proposed reusable inventory includes buttons, badges, cards, modals,

@@ -23,6 +23,7 @@
     </script>
 
     <title>{{ $documentTitle }}</title>
+    <x-favicons />
 
     @vite('resources/js/app.js')
     @livewireStyles
