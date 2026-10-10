@@ -360,3 +360,20 @@ test('it keeps the name of the stable being updated', function () {
     // Assert
     expect($updated->name)->toBe('Same Name');
 });
+
+test('it reports a name taken when a concurrent rename wins the promotion name between the check and the write', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $stable = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'Old Name']);
+    $data = new StableData(name: 'The Alliance', start_date: null, members: new StableMembershipData);
+    Stable::updating(function () use ($promotion): void {
+        Stable::withoutEvents(fn () => Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']));
+    });
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeUpdatedException::class, "an active stable named 'The Alliance' already exists")
+        ->and($stable->refresh()->name)->toBe('Old Name');
+});

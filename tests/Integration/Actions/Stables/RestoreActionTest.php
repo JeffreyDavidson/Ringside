@@ -98,3 +98,20 @@ test('it takes no name lock for a stable of a promotion', function () {
     // Assert
     expect(DB::table('stable_name_locks')->exists())->toBeFalse();
 });
+
+test('it reports a name conflict when a concurrent create wins the promotion name between the check and the restore', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $stable = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']);
+    $stable->delete();
+    Stable::restoring(function () use ($promotion): void {
+        Stable::withoutEvents(fn () => Stable::factory()->for($promotion, 'promotion')->create(['name' => 'The Alliance']));
+    });
+
+    // Act
+    $restore = fn () => resolve(RestoreAction::class)->handle($stable);
+
+    // Assert
+    expect($restore)->toThrow(CannotBeRestoredException::class)
+        ->and($stable->refresh()->trashed())->toBeTrue();
+});

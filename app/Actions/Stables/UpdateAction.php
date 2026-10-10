@@ -13,6 +13,7 @@ use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -82,9 +83,14 @@ class UpdateAction
                 throw CannotBeUpdatedException::nameTaken($name);
             }
 
-            $lockedStable->update([
-                'name' => $name,
-            ]);
+            try {
+                $lockedStable->update([
+                    'name' => $name,
+                ]);
+            } catch (UniqueConstraintViolationException) {
+                // A concurrent request took the name of this promotion after the check above; the unique index refused the write.
+                throw CannotBeUpdatedException::nameTaken($name);
+            }
 
             $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
 

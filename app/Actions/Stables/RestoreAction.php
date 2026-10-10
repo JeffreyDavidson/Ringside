@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Stables\StableDeletionEligibility;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Roster\Stables\Stable;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +43,13 @@ class RestoreAction
             $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedStable);
-            $this->deletionState->restore($lockedStable, $effectiveDate);
+
+            try {
+                $this->deletionState->restore($lockedStable, $effectiveDate);
+            } catch (UniqueConstraintViolationException) {
+                // A concurrent request took the name of this promotion after the check above; the unique index refused the restore.
+                throw CannotBeRestoredException::nameConflict($lockedStable, $lockedStable->name);
+            }
         });
     }
 }

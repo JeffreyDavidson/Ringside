@@ -83,7 +83,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -174,6 +174,12 @@ try {
         resolve(UpdateAction::class)->handle(
             $event,
             new EventData($event->name, Carbon::parse($spec['reschedule_date']), null, $event->preview),
+        );
+    } elseif (isset($spec['create_owned_stable_name'])) {
+        // Creates an unformed stable of the given promotion, which no name lock guards (StableNameConcurrencyTest).
+        resolve(CreateStableAction::class)->handle(
+            new StableData($spec['create_owned_stable_name'], null, new StableMembershipData),
+            $spec['owned_promotion_id'],
         );
     } else {
         resolve(AddMatchForEventAction::class)->handle(
