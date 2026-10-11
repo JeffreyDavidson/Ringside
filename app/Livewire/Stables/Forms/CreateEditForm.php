@@ -63,7 +63,8 @@ class CreateEditForm extends BaseForm
 
     protected function rules(): array
     {
-        $stableStartDate = $this->parseStartDate();
+        // Members of an existing stable join today (see UpdateAction); members of a new stable join on its start date.
+        $memberJoinDate = $this->isEditing() ? now() : $this->parseStartDate();
         $members = $this->selectedMembers();
         $stable = $this->isEditing() ? $this->stable() : null;
         $canHaveMembers = ! $stable instanceof Stable || app(StableActivityEligibility::class)->canHaveMembers($stable);
@@ -86,7 +87,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 $this->existsInPromotion('wrestlers'),
-                new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
+                new CanJoinStable(Wrestler::class, $this->stableId(), $memberJoinDate),
                 new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
@@ -95,7 +96,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 $this->existsInPromotion('tag_teams'),
-                new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
+                new CanJoinStable(TagTeam::class, $this->stableId(), $memberJoinDate),
             ],
         ];
 
