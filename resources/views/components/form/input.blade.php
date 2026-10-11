@@ -19,7 +19,7 @@
     $inputClasses = collect([
         // Base classes - matching .kt-input
         'block w-full appearance-none outline-none',
-        'border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-signal-soft',
+        'border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-error',
         'rounded-none transition-colors',
         'placeholder:text-ringside-muted',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-white',
@@ -30,7 +30,7 @@
     ])->filter()->implode(' ');
 
     if ($appearance === 'ringside') {
-        $inputClasses = 'block min-h-14 w-full min-w-0 appearance-none rounded-none border border-ringside-outline bg-ringside-surface-panel px-4 py-3 text-base leading-normal text-ringside-ink caret-ringside-signal placeholder:text-ringside-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white aria-invalid:border-ringside-signal-soft';
+        $inputClasses = 'block min-h-14 w-full min-w-0 appearance-none rounded-none border border-ringside-outline bg-ringside-surface-panel px-4 py-3 text-base leading-normal text-ringside-ink caret-ringside-signal placeholder:text-ringside-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white aria-invalid:border-ringside-error';
         if ($type === 'password') {
             $inputClasses .= ' pr-14';
         }

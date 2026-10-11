@@ -28,8 +28,6 @@
         <p id="{{ $name }}-hint" class="text-ringside-muted text-sm leading-relaxed">{{ $hint }}</p>
     @endif
     @error($name)
-        <p id="{{ $name }}-error" role="alert" class="text-ringside-signal-soft text-sm leading-relaxed">
-            {{ $message }}
-        </p>
+        <p id="{{ $name }}-error" role="alert" class="text-ringside-error text-sm leading-relaxed">{{ $message }}</p>
     @enderror
 </div>
