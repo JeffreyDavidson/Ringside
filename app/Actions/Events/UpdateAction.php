@@ -7,6 +7,7 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\NameTakenException;
+use App\Exceptions\Events\VenueDeletedException;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -33,6 +34,7 @@ class UpdateAction
      * date-slot locks and the event's own row lock.
      *
      * @throws NameTakenException When another event of the promotion already has the name
+     * @throws VenueDeletedException When the venue is deleted and not the event's existing one
      */
     public function handle(Event $event, EventData $eventData): Event
     {
@@ -65,6 +67,10 @@ class UpdateAction
 
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
             $venue = $eventData->venue?->refreshForUpdate();
+
+            if ($venue !== null && $venue->trashed() && $venue->id !== $lockedEvent->venue_id) {
+                throw VenueDeletedException::cannotBeChosen($venue);
+            }
 
             if (
                 $venue !== null

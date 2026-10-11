@@ -7,6 +7,7 @@ use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Data\Events\EventData;
+use App\Exceptions\Events\VenueDeletedException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
@@ -296,4 +297,35 @@ describe('venue day in the venue time zone', function () {
         'past local midnight on the same UTC date' => ['2030-06-11 04:30:00', true],
         'earlier on the same local day across the UTC date' => ['2030-06-10 20:00:00', false],
     ]);
+});
+
+test('it rejects creating an event at a deleted venue', function () {
+    $venue = Venue::factory()->trashed()->create();
+    $data = new EventData('Deleted Venue Event', now()->addWeek(), $venue, null);
+
+    expect(fn () => resolve(CreateAction::class)->handle($data))
+        ->toThrow(VenueDeletedException::class)
+        ->and(Event::query()->where('name', 'Deleted Venue Event')->exists())->toBeFalse();
+});
+
+test('it rejects moving an event to a deleted venue', function () {
+    $originalVenue = Venue::factory()->create();
+    $deletedVenue = Venue::factory()->trashed()->create();
+    $event = Event::factory()->for($originalVenue)->create(['date' => now()->subWeek()]);
+    $data = new EventData('Moved Event', $event->date, $deletedVenue, null);
+
+    expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
+        ->toThrow(VenueDeletedException::class)
+        ->and($event->refresh())->name->not->toBe('Moved Event')->venue_id->toBe($originalVenue->id);
+});
+
+test('it keeps the deleted venue of a past event when only its details change', function () {
+    $venue = Venue::factory()->create();
+    $event = Event::factory()->for($venue)->create(['date' => now()->subWeek()]);
+    $venue->delete();
+    $data = new EventData('Corrected Name', $event->date, Venue::withTrashed()->findOrFail($venue->id), 'New preview');
+
+    resolve(UpdateAction::class)->handle($event, $data);
+
+    expect($event->refresh())->name->toBe('Corrected Name')->preview->toBe('New preview')->venue_id->toBe($venue->id);
 });
