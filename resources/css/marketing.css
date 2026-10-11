@@ -129,6 +129,11 @@ summary svg {
 }
 
 .button-primary:hover {
+    background: var(--color-ringside-red-hover);
+    border-color: var(--color-ringside-red-hover);
+}
+
+.button-primary:active {
     background: var(--color-ringside-red-dark);
     border-color: var(--color-ringside-red-dark);
 }

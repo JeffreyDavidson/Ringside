@@ -4,6 +4,7 @@ description: A sharp, editorial wrestling operations system built for independen
 colors:
   signal: "#ff4b50"
   red: "#cb2028"
+  red-hover: "#b91c24"
   red-deep: "#a61920"
   surface: "#101112"
   surface-header: "#09090a"
@@ -13,6 +14,10 @@ colors:
   muted: "#bfc0c3"
   line: "#363638"
   signal-soft: "#ff8588"
+  error: "#ffa3bf"
+  error-surface: "#3b1826"
+  success: "#5fd38d"
+  warning: "#f5b83d"
 typography:
   display:
     fontFamily: "Anton, Arial Narrow, Arial, sans-serif"
@@ -93,7 +98,9 @@ The palette is deliberately narrow. Red carries action and emphasis; neutral gra
 
 - **Signal red** (#ff4b50): Small emphasis, highlighted display text, hover states, and the feature badge.
 - **Ringside red** (#cb2028): Primary buttons, selection, and the main action color.
-- **Deep red** (#a61920): Hover state for primary actions.
+- **Hover red** (#b91c24): Hover state for primary actions.
+- **Deep red** (#a61920): Pressed state for primary actions.
+- **Signal soft** (#ff8588): Destructive actions (delete buttons and menu items), the danger badge, the required-field marker, and text links on dark surfaces.
 
 ### Neutral
 
@@ -105,9 +112,18 @@ The palette is deliberately narrow. Red carries action and emphasis; neutral gra
 - **Rule gray** (#363638): Dividers, borders, and structural lines.
 - **Hover charcoal** (#272729): Outline-button and feature-row hover surface.
 
+### Status and feedback
+
+- **Error rose** (#ffa3bf): Validation and error messages, invalid-field borders, and the border and icon of error panels.
+- **Error surface** (#3b1826): Tinted background of an error panel.
+- **Success green** (#5fd38d): Confirmation messages.
+- **Warning amber** (#f5b83d): Cautions.
+
 ### Named Rules
 
 **The Signal Rule.** Red is an event marker, not a background color. Use it for the action, the selected emphasis, or a small brand cue; do not flood a section with it.
+
+**The Error Rule.** Errors are rose, never brand red or the destructive coral, so feedback about a mistake cannot be mistaken for a delete action. Every error also carries an icon and plain wording; color is never the only signal.
 
 ## Typography
 
@@ -125,6 +141,8 @@ The palette is deliberately narrow. Red carries action and emphasis; neutral gra
 - **Body** (400, 1.125rem, 1.75): Explanations and supporting marketing copy; keep paragraphs readable and short.
 - **Label** (700, 0.75rem, 1.2, `0.08em`): Badges, metadata, and small uppercase system labels.
 
+**In the app.** Authenticated screens use Inter for interface text (forms, tables, navigation) because it stays readable at small sizes in dense layouts. Anton is still reserved for short display headings.
+
 **The Type Contrast Rule.** Let Anton carry the voice and Arial carry the explanation. Never use Anton for long-form copy.
 
 ## Layout
@@ -141,7 +159,9 @@ The system is flat by default. Depth comes from tonal layering, photography, scr
 
 ## Shapes
 
-Controls are square and decisive: buttons, rows, and panels use no radius. The feature badge is the one recurring pill shape (`999px`) because it behaves as a compact label. Use thin `1px` rules for structure. Focus rings are high-contrast white, `3px`, with a `6px` offset.
+Controls are square and decisive: buttons, rows, and panels use no radius. The feature badge is the one recurring pill shape (`999px`) because it behaves as a compact label. Use thin `1px` rules for structure.
+
+Focus rings are always visible and high-contrast. Marketing pages use a white `3px` ring with a `6px` offset. The app uses a compact `2px` ring in text white (#f7f7f5), normally with a `2px` offset, so rings do not collide in dense tables and forms.
 
 ## Components
 
@@ -149,13 +169,19 @@ Controls are square and decisive: buttons, rows, and panels use no radius. The f
 
 - Anton, uppercase, tight tracking (`-0.035em`), approximately `2.75rem`.
 - “RING” uses the primary text color; “SIDE” uses Signal red.
+- On a light background, “RING” is Canvas (#101112) and “SIDE” is Ringside red (#cb2028).
 - Keep the wordmark compact and avoid adding an icon beside it.
+- Where the wordmark cannot fit (the browser tab and phone home screen icons), use the compact “RS” mark: a text-white R and a Signal red S on a Canvas tile.
+- The logo files, icons and the full token reference are kept in the private `ringside-meta` repository under `brand/`. Copy from there; do not redraw them.
 
 ### Buttons
 
-- **Primary:** Ringside red background, white text, square shape, minimum height `56px`.
+- **Primary:** Ringside red background, white text, square shape.
 - **Outline:** Transparent background, muted-white `1px` border, square shape.
-- **Hover:** Deep red for primary; charcoal fill and white border for outline.
+- **Destructive:** Transparent background, Signal soft text and border; fills deep red with white text on hover.
+- **Sizes:** `56px` minimum height for marketing and sign-in actions; `44px` for standard app actions; `36px` for compact actions inside tables. Use `44px` or larger wherever touch is the main input.
+- **Hover and pressed:** Hover red, then deep red when pressed, for primary; charcoal fill and white border for outline.
+- **Labels:** Bold.
 - **Icon:** A simple 20px line icon aligned after the label with about `1rem` gap.
 - **Focus:** Always preserve the global high-contrast focus ring.
 
@@ -182,8 +208,8 @@ Controls are square and decisive: buttons, rows, and panels use no radius. The f
 
 - Navigation is compact, text-led, and action-oriented.
 - Maintain at least a `44px` hit target for links and compact header actions.
-- Inputs use the same dark canvas, thin rules, square shape, and white focus ring.
-- Errors should use clear text and the red signal without relying on color alone.
+- Inputs use the same dark canvas, thin rules, square shape, and the app focus ring.
+- Errors follow the Error Rule: rose text with an icon beside the field, a rose border on the invalid field, and a rose-bordered tinted panel for form-level errors.
 
 ## Do's and Don'ts
 
