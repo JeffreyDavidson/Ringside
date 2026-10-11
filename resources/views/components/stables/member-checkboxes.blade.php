@@ -38,7 +38,7 @@
         </ul>
 
         @if ($errorMessages !== [])
-            <div id="{{ $errorId }}" class="text-ringside-signal-soft space-y-1 text-sm" role="alert">
+            <div id="{{ $errorId }}" class="text-ringside-error space-y-1 text-sm" role="alert">
                 @foreach ($errorMessages as $message)
                     <p>{{ $message }}</p>
                 @endforeach

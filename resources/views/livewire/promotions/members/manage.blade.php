@@ -45,7 +45,7 @@
                 </p>
 
                 @error('email')
-                    <p id="promotion-member-email-error" class="text-ringside-signal-soft mt-2 text-sm" role="alert">
+                    <p id="promotion-member-email-error" class="text-ringside-error mt-2 text-sm" role="alert">
                         {{ $message }}
                     </p>
                 @enderror
@@ -79,7 +79,7 @@
         </form>
 
         @error('member')
-            <p class="text-ringside-signal-soft border-ringside-line border-b px-5 py-3 text-sm lg:px-6" role="alert">
+            <p class="text-ringside-error border-ringside-line border-b px-5 py-3 text-sm lg:px-6" role="alert">
                 {{ $message }}
             </p>
         @enderror
@@ -149,9 +149,7 @@
                                             </button>
                                         </form>
                                         @error("memberRoles.{$membership->user_id}")
-                                            <p class="text-ringside-signal-soft mt-1 text-xs" role="alert">
-                                                {{ $message }}
-                                            </p>
+                                            <p class="text-ringside-error mt-1 text-xs" role="alert">{{ $message }}</p>
                                         @enderror
                                     @else
                                         <span class="text-ringside-muted">{{ $membership->role->label() }}</span>
