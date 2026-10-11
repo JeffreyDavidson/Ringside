@@ -309,6 +309,33 @@ test('it refuses a draw for a title when the champion of the event date is not i
         ->and(TitleChampionship::query()->count())->toBe($reignCount);
 });
 
+test('it does not check the champion for a title match at an event without a date', function (): void {
+    // Arrange
+    $title = Title::factory()->singles()->active()->create();
+    [$champion, $firstChallenger, $secondChallenger] = Wrestler::factory()->bookable()->count(3)->create()->all();
+    TitleChampionship::factory()->forWrestler($champion)->current()->wonOn('2026-08-01')->create(['title_id' => $title->id]);
+    $match = EventMatch::factory()->forEvent(Event::factory()->unscheduled()->create())->create();
+    $match->titles()->attach($title);
+    $firstSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    $secondSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+    $match->competitors()->createMany([
+        ['match_side_id' => $firstSide->id, 'competitor_type' => $firstChallenger->getMorphClass(), 'competitor_id' => $firstChallenger->id],
+        ['match_side_id' => $secondSide->id, 'competitor_type' => $secondChallenger->getMorphClass(), 'competitor_id' => $secondChallenger->id],
+    ]);
+
+    // Act
+    resolve(ApplyMatchTitleOutcomesAction::class)->handle(
+        $match,
+        new MatchResultData(MatchFinish::TimeLimitDraw, null, new Collection),
+        $match->competitors()->with('competitor')->get(),
+    );
+
+    // Assert
+    $reign = TitleChampionship::query()->sole();
+    expect($reign->champion->is($champion))->toBeTrue()
+        ->and($reign->lost_at)->toBeNull();
+});
+
 test('it refuses a tag team title result when the champion tag team is not in the match', function (): void {
     // Arrange
     travelTo(Carbon::parse('2026-10-04 12:00:00'));
