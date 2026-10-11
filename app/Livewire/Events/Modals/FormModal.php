@@ -69,7 +69,11 @@ class FormModal extends BaseFormModal
         };
     }
 
-    /** The edited event's own venue is listed even if it has since been deleted, so the select shows where the event is. */
+    /**
+     * The edited event's own venue is listed even if it has since been deleted, so the select shows where the event is.
+     *
+     * @return VenueBuilder<Venue>
+     */
     protected function venuesQuery(): VenueBuilder
     {
         $storedVenueId = isset($this->form) ? $this->form->storedVenueId() : null;
