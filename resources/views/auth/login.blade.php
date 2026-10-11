@@ -36,7 +36,7 @@
                 value="1"
                 data-test="remember"
                 @checked(old('remember'))
-                class="accent-ringside-red focus-visible:outline-ringside-white size-5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4"
+                class="accent-ringside-red focus-visible:outline-ringside-ink size-5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4"
             />
             {{ __('auth-forms.remember') }}
         </label>

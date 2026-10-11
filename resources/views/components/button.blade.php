@@ -23,7 +23,7 @@
     ];
 
     $roles = [
-        'primary' => 'border-ringside-red bg-ringside-red text-ringside-white hover:border-ringside-red-dark hover:bg-ringside-red-dark',
+        'primary' => 'border-ringside-red bg-ringside-red text-ringside-white hover:border-ringside-red-hover hover:bg-ringside-red-hover active:border-ringside-red-dark active:bg-ringside-red-dark',
         'secondary' => 'border-ringside-outline bg-transparent text-ringside-ink hover:border-ringside-white hover:bg-ringside-surface-hover',
         'destructive' => 'border-ringside-signal-border bg-transparent text-ringside-signal-soft hover:border-ringside-red-dark hover:bg-ringside-red-dark hover:text-ringside-white',
     ];
@@ -33,7 +33,7 @@
     {{
         $attributes->merge(['type' => $tag === 'button' ? 'button' : null])->class([
             'inline-flex cursor-pointer items-center justify-center rounded-none border font-bold transition-colors',
-            'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white',
+            'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-ink',
             'disabled:cursor-not-allowed disabled:opacity-50',
             $sizes[$size] ?? $sizes['md'],
             $roles[$role],

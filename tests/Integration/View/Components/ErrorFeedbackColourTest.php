@@ -25,6 +25,20 @@ describe('error feedback colour', function (): void {
         'roster search field' => ['form.wrestlers', '<x-form.inputs.roster-combobox wire:model="form.wrestlers" label="Wrestlers" :kind="\\App\\Enums\\Roster\\RosterMemberKind::Wrestlers" />'],
     ]);
 
+    it('pairs the sign-in field error with an icon so colour is never the only signal', function (): void {
+        // Arrange
+        view()->share('errors', new ViewErrorBag()->put('default', new MessageBag(['email' => 'Something needs fixing.'])));
+
+        // Act
+        $html = Blade::render('<x-auth.field name="email" label="Email" />');
+
+        // Assert
+        expect($html)
+            ->toContain('id="email-error"')
+            ->toContain('role="alert"')
+            ->toContain('<svg');
+    });
+
     it('tints error panels with the error surface', function (): void {
         // Arrange
         view()->share('errors', new ViewErrorBag()->put('default', new MessageBag(['stable' => 'Something needs fixing.'])));

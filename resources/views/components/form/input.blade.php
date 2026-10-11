@@ -22,7 +22,7 @@
         'border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-error',
         'rounded-none transition-colors',
         'placeholder:text-ringside-muted',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-white',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-ink',
         // Size variants using CSS variables (Metronic specifications) - add extra right padding for password fields
         $size === 'sm' ? ($type === 'password' ? 'h-[calc(var(--spacing)*7)] pl-[calc(var(--spacing)*2.5)] pr-[calc(var(--spacing)*8)] text-xs' : 'h-[calc(var(--spacing)*7)] px-[calc(var(--spacing)*2.5)] text-xs') : null,
         $size === 'md' ? ($type === 'password' ? 'h-[calc(var(--spacing)*8.5)] pl-[calc(var(--spacing)*3)] pr-[calc(var(--spacing)*10)] text-2sm' : 'h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm') : null,
@@ -30,14 +30,14 @@
     ])->filter()->implode(' ');
 
     if ($appearance === 'ringside') {
-        $inputClasses = 'block min-h-14 w-full min-w-0 appearance-none rounded-none border border-ringside-outline bg-ringside-surface-panel px-4 py-3 text-base leading-normal text-ringside-ink caret-ringside-signal placeholder:text-ringside-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-white aria-invalid:border-ringside-error';
+        $inputClasses = 'block min-h-14 w-full min-w-0 appearance-none rounded-none border border-ringside-outline bg-ringside-surface-panel px-4 py-3 text-base leading-normal text-ringside-ink caret-ringside-signal placeholder:text-ringside-muted focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ringside-ink aria-invalid:border-ringside-error';
         if ($type === 'password') {
             $inputClasses .= ' pr-14';
         }
     }
 
     $toggleClasses = $appearance === 'ringside'
-        ? 'absolute inset-y-0 right-0 flex w-12 items-center justify-center text-ringside-muted hover:text-ringside-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-white'
+        ? 'absolute inset-y-0 right-0 flex w-12 items-center justify-center text-ringside-muted hover:text-ringside-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-ink'
         : 'text-ringside-muted absolute inset-y-0 right-0 flex items-center justify-center pr-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
 
     $showPasswordLabel = __($fieldName === 'password_confirmation' ? 'auth-forms.show_password_confirmation' : 'auth-forms.show_password');

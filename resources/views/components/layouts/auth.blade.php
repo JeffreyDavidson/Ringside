@@ -17,7 +17,7 @@
             aria-label="Ringside"
         >
             <a
-                class="font-display focus-visible:outline-ringside-white w-fit text-5xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6"
+                class="font-display focus-visible:outline-ringside-ink w-fit text-5xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6"
                 href="{{ route('home') }}"
                 aria-label="{{ __('auth-forms.home') }}"
             >RING<span class="text-ringside-signal">SIDE</span></a>
@@ -42,7 +42,7 @@
         <main class="flex min-h-dvh items-center justify-center px-5 py-10 sm:px-10 lg:p-12 xl:p-16">
             <div class="w-full max-w-md">
                 <a
-                    class="font-display focus-visible:outline-ringside-white mb-10 inline-block text-4xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6 lg:hidden"
+                    class="font-display focus-visible:outline-ringside-ink mb-10 inline-block text-4xl leading-none tracking-tight focus-visible:outline-2 focus-visible:outline-offset-6 lg:hidden"
                     href="{{ route('home') }}"
                     aria-label="{{ __('auth-forms.home') }}"
                 >RING<span class="text-ringside-signal">SIDE</span></a>
