@@ -26,10 +26,9 @@ trait PresentsVenuesList
     }
 
     /**
+     * Which venues the list offers; every component that shows the list decides this for itself.
+     *
      * @return VenueBuilder<Venue>
      */
-    protected function venuesQuery(): VenueBuilder
-    {
-        return Venue::query();
-    }
+    abstract protected function venuesQuery(): VenueBuilder;
 }

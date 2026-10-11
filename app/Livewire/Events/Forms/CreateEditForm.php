@@ -6,7 +6,6 @@ namespace App\Livewire\Events\Forms;
 
 use App\Data\Events\EventData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
@@ -22,8 +21,6 @@ use Illuminate\Validation\Rules\Exists;
 /** @extends BaseForm<Event> */
 class CreateEditForm extends BaseForm
 {
-    use PresentsVenuesList;
-
     public string $name = '';
 
     public ?string $date = '';
