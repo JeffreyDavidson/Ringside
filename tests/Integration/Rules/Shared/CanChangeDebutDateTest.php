@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
+use Illuminate\Support\Facades\Date;
 
 test('allows a debut date when no model is being edited', function () {
     $failed = false;
@@ -141,4 +143,30 @@ test('rejects changing the start date of a disbanded stable with several periods
     'a date after the first period ends' => ['2021-06-01', true],
     'a date within the first period' => ['2020-06-01', true],
     'the existing start date' => ['2020-01-01', false],
+]);
+
+test('compares the debut day in the time zone of the promotion', function (string $timezone, string $startedAt, string $now) {
+    // Arrange
+    Date::setTestNow($now);
+    $promotion = Promotion::factory()->create(['timezone' => $timezone]);
+    $title = Title::factory()
+        ->for($promotion, 'promotion')
+        ->has(ActivityPeriod::factory()->started(Date::parse($startedAt)), 'activityPeriods')
+        ->create();
+    $failed = false;
+
+    // Act
+    new CanChangeDebutDate($title)->validate(
+        'debut_date',
+        '2026-10-11',
+        validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }),
+    );
+
+    // Assert
+    expect($failed)->toBeFalse();
+})->with([
+    'west of UTC in its evening' => ['America/Los_Angeles', '2026-10-12 01:00:00', '2026-10-12 02:00:00'],
+    'east of UTC in its morning' => ['Australia/Sydney', '2026-10-10 22:00:00', '2026-10-10 23:00:00'],
 ]);

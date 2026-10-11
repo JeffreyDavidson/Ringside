@@ -9,7 +9,6 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 
 /** @extends BaseForm<Manager> */
@@ -36,7 +35,7 @@ class CreateEditForm extends BaseForm
         return new ManagerData(
             first_name: $this->first_name,
             last_name: $this->last_name,
-            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+            employment_date: $this->employment_date ? $this->parseLocalDate($this->employment_date) : null,
         );
     }
 

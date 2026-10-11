@@ -102,6 +102,11 @@ final class InvalidMatchOutcomeException extends BaseBusinessException
         return new self(__('matches.errors.outcome.title_result_out_of_date_order', ['title' => $title->name]));
     }
 
+    public static function titleChampionNotInMatch(Title $title): self
+    {
+        return new self(__('matches.errors.outcome.title_champion_not_in_match', ['title' => $title->name]));
+    }
+
     public static function eventNotHeld(): self
     {
         return new self(__('matches.errors.outcome.event_not_held'));

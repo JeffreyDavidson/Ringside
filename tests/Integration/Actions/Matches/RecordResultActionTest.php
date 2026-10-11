@@ -585,13 +585,13 @@ it('rejects correcting a title result after later lineage exists', function () {
  * @param  Title|list<Title>  $titles
  * @return array{EventMatch, MatchSide}
  */
-function titleMatchOn(Carbon $date, Title|array $titles, Wrestler|TagTeam $winner): array
+function titleMatchOn(Carbon $date, Title|array $titles, Wrestler|TagTeam $winner, Wrestler|TagTeam|null $loser = null): array
 {
     $match = EventMatch::factory()
         ->for(Event::factory()->create(['date' => $date]))
         ->create();
     $winningSide = sideWithCompetitor($match, 1, competitor: $winner);
-    sideWithCompetitor($match, 2, competitor: $winner instanceof TagTeam ? TagTeam::factory()->bookable()->create() : Wrestler::factory()->bookable()->create());
+    sideWithCompetitor($match, 2, competitor: $loser ?? ($winner instanceof TagTeam ? TagTeam::factory()->bookable()->create() : Wrestler::factory()->bookable()->create()));
     $match->titles()->attach(Arr::wrap($titles));
 
     return [$match, $winningSide];
@@ -629,8 +629,9 @@ it('rejects a title result recorded before a later recorded result', function (T
 it('records title results in date order with consistent reigns', function (): void {
     // Arrange
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
-    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create());
-    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->bookable()->create());
+    $earlierWinner = Wrestler::factory()->bookable()->create();
+    [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, $earlierWinner);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, Wrestler::factory()->bookable()->create(), $earlierWinner);
 
     // Act
     resolve(RecordResultAction::class)->handle($earlierMatch, matchResult(MatchFinish::Pinfall, $earlierSide));
@@ -652,7 +653,7 @@ it('still corrects the result of the latest recorded title match', function (): 
     $firstWinner = Wrestler::factory()->bookable()->create();
     $secondWinner = Wrestler::factory()->bookable()->create();
     [$earlierMatch, $earlierSide] = titleMatchOn(now()->subDays(10), $title, $firstWinner);
-    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, $secondWinner);
+    [$laterMatch, $laterSide] = titleMatchOn(now()->subDays(5), $title, $secondWinner, $firstWinner);
     $otherSide = $laterMatch->sides()->where('id', '!=', $laterSide->id)->sole();
     resolve(RecordResultAction::class)->handle($earlierMatch, matchResult(MatchFinish::Pinfall, $earlierSide));
     resolve(RecordResultAction::class)->handle($laterMatch, matchResult(MatchFinish::Pinfall, $laterSide));
@@ -662,8 +663,8 @@ it('still corrects the result of the latest recorded title match', function (): 
 
     // Assert
     expect($title->championships()->current()->sole()->champion->is($otherSide->competitors()->sole()->competitor))->toBeTrue()
-        ->and($title->championships()->current()->sole()->won_match_id)->toBe($laterMatch->id)
-        ->and($title->championships()->count())->toBe(2);
+        ->and($title->championships()->current()->sole()->won_match_id)->toBe($earlierMatch->id)
+        ->and($title->championships()->count())->toBe(1);
 });
 
 it('allows a title result at the same instant as the latest recorded reign', function (): void {
@@ -923,7 +924,7 @@ it('leaves the title vacant when a corrected result cannot reopen the previous r
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $firstChampion = Wrestler::factory()->bookable()->create();
     [$firstMatch, $firstSide] = titleMatchOn(now()->subDays(20), $title, $firstChampion);
-    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create());
+    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create(), $firstChampion);
     resolve(RecordResultAction::class)->handle($firstMatch, matchResult(MatchFinish::Pinfall, $firstSide));
     resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $secondSide));
     $remove($firstChampion, $title);
@@ -950,7 +951,7 @@ it('crowns the corrected winner when the previous champion can no longer be rein
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $firstChampion = Wrestler::factory()->bookable()->create();
     [$firstMatch, $firstSide] = titleMatchOn(now()->subDays(20), $title, $firstChampion);
-    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create());
+    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create(), $firstChampion);
     $otherSide = $secondMatch->sides()->whereKeyNot($secondSide->id)->sole();
     resolve(RecordResultAction::class)->handle($firstMatch, matchResult(MatchFinish::Pinfall, $firstSide));
     resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $secondSide));

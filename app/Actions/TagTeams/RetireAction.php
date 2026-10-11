@@ -6,9 +6,11 @@ namespace App\Actions\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\Periods\CareerPeriodCloser;
+use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Lifecycle\Titles\ChampionshipReignManager;
+use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +41,8 @@ class RetireAction
 
             $this->retirementPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Retired);
             $this->championshipReigns->endCurrentReignsForChampion($lockedTagTeam, $effectiveDate);
+
+            OpenPeriodEnder::end(StableTagTeam::query()->whereBelongsTo($lockedTagTeam), 'joined_at', 'left_at', $effectiveDate);
 
             $this->retireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
         });

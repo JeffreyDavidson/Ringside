@@ -11,6 +11,7 @@ use App\Enums\Naming\GuardedName;
 use App\Exceptions\Titles\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Titles\TitleTypeEligibility;
+use App\Models\Promotions\Promotion;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -93,7 +94,11 @@ class UpdateAction
 
         $scheduledPeriod = $activityPeriods->first();
 
-        if ($activityPeriods->count() > 1 || ! $scheduledPeriod->started_at->isFuture() || $scheduledPeriod->started_at->isSameDay($debutDate)) {
+        // The debut date is a day in the promotion's time zone, so "same day" is judged there, not in UTC.
+        $isSameLocalDay = Promotion::toLocalTime($title->promotion, $scheduledPeriod->started_at)
+            ->isSameDay(Promotion::toLocalTime($title->promotion, $debutDate));
+
+        if ($activityPeriods->count() > 1 || ! $scheduledPeriod->started_at->isFuture() || $isSameLocalDay) {
             return;
         }
 

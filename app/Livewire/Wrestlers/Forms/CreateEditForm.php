@@ -53,7 +53,7 @@ class CreateEditForm extends BaseForm
             weight: $this->weight,
             hometown: $this->hometown,
             signature_move: $this->signature_move ?: null,
-            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+            employment_date: $this->employment_date ? $this->parseLocalDate((string) $this->employment_date) : null,
         );
     }
 
