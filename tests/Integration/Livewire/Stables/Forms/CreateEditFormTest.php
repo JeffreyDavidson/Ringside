@@ -133,3 +133,70 @@ describe('stable form activity end date', function (): void {
         expect($errorKeys)->toContain('form.ended_at');
     });
 });
+
+describe('stable form member join date', function (): void {
+    it('lets a member hired after the stable started join an existing stable', function (Closure $makeMember, string $property): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+        $stable->activityPeriods()->update(['started_at' => now()->subWeek()]);
+        $member = $makeMember();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($stable);
+        $form->{$property} = [...$form->{$property}, $member->id];
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBeEmpty();
+    })->with([
+        'wrestler' => [fn (): Wrestler => Wrestler::factory()->employed()->create(), 'wrestlers'],
+        'tag team' => [fn (): TagTeam => TagTeam::factory()->employed()->create(), 'tag_teams'],
+    ]);
+
+    it('refuses a member who is not employed yet on the day they would join an existing stable', function (): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+        $stable->activityPeriods()->update(['started_at' => now()->subWeek()]);
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($stable);
+        $form->wrestlers = [...$form->wrestlers, $wrestler->id];
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBe(['form.wrestlers.2']);
+    });
+
+    it('still refuses a member hired after the start date of a stable being created', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->employed()->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->name = 'Late Hires';
+        $form->started_at = now()->subWeek()->toDateString();
+        $form->wrestlers = [$wrestler->id];
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toContain('form.wrestlers.0');
+    });
+
+    it('does not re-judge existing members hired after the stable started when renaming it', function (): void {
+        // Arrange
+        $stable = Stable::factory()->active()->create();
+        $stable->activityPeriods()->update(['started_at' => now()->subWeek()]);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($stable);
+        $form->name = 'Renamed Faction';
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBeEmpty();
+    });
+});

@@ -18,7 +18,7 @@ Stable membership defines how wrestlers and tag teams can belong to stables.
 - **Membership History**: Wrestlers and tag teams can belong to multiple stables across non-overlapping historical periods
 - **Stable Leadership**: Stables can have designated leaders
 - **Member Availability**: New memberships require employed members who are not suspended; injured wrestlers cannot join
-- **Employment Timing**: A member's employment must begin on or before the stable membership period
+- **Employment Timing**: A member's employment must begin on or before the day the membership starts. A member added to a new stable joins on the stable's start date; a member added when editing an existing stable joins today (`UpdateAction` uses `now()`), so the form compares against today, not the stable's original start date
 - **Unformed Stables**: A stable may be created without members and assembled before establishment
 - **Minimum Size**: An active stable requires a headcount of at least three; an individual wrestler counts as one and a tag team counts as two
 - **Eligibility Boundary**: `StableMembershipData` calculates weighted headcount; `StableMembershipRequirements` owns the minimum-size decision shared by validation and lifecycle workflows
