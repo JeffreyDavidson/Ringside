@@ -15,6 +15,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Facades\Date;
 
 test('it updates a title', function () {
     $data = new TitleData('New Example Title', TitleType::Singles, null);
@@ -168,6 +169,21 @@ describe('changing a scheduled debut date', function (): void {
 
         expect($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($debutAt->toDateTimeString())
             ->and($title->lifecycleTransitions()->sole()->effective_at->toDateTimeString())->toBe($debutAt->toDateTimeString());
+    });
+
+    test('it compares the scheduled debut day in the promotion time zone', function (): void {
+        // Arrange
+        Date::setTestNow('2026-10-12 01:00:00');
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $title = Title::factory()->unactivated()->for($promotion, 'promotion')->create();
+        resolve(DebutAction::class)->handle($title, Date::parse('2026-10-13 01:00:00'));
+        $sameLocalDay = Promotion::parseLocalTime($promotion, '2026-10-12');
+
+        // Act
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $sameLocalDay));
+
+        // Assert
+        expect($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe('2026-10-13 01:00:00');
     });
 
     test('it leaves the scheduled debut alone when no debut date is sent', function (): void {

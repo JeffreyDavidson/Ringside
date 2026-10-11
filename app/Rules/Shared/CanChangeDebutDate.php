@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use Closure;
@@ -34,11 +35,14 @@ class CanChangeDebutDate implements ValidationRule
             return;
         }
 
-        $targetDate = Carbon::parse($value);
+        // A typed date means that day in the model's promotion (the application time zone without one), the way the form reads it.
+        $targetDate = is_string($value)
+            ? Promotion::parseLocalTime($this->model->promotion, $value)
+            : Carbon::parse($value);
 
         $debutDate = ($this->model->firstActivityPeriod ?? $currentActivityPeriod)?->started_at;
 
-        if ($debutDate === null || $debutDate->isSameDay($targetDate)) {
+        if ($debutDate === null || Promotion::toLocalTime($this->model->promotion, $debutDate)->isSameDay(Promotion::toLocalTime($this->model->promotion, $targetDate))) {
             return;
         }
 

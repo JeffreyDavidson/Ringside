@@ -38,8 +38,8 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
-        $this->started_at = $model->firstActivityPeriod?->started_at?->toDateString();
-        $this->ended_at = $model->firstActivityPeriod?->ended_at?->toDateString();
+        $this->started_at = $this->localDateString($model->firstActivityPeriod?->started_at);
+        $this->ended_at = $this->localDateString($model->firstActivityPeriod?->ended_at);
         $this->wrestlers = $model->currentWrestlers->modelKeys();
         $this->tag_teams = $model->currentTagTeams->modelKeys();
     }
@@ -50,9 +50,9 @@ class CreateEditForm extends BaseForm
 
         return new StableData(
             name: $this->name,
-            start_date: $this->started_at ? Carbon::parse($this->started_at) : null,
+            start_date: $this->started_at ? $this->parseLocalDate($this->started_at) : null,
             members: $members,
-            end_date: $this->ended_at ? Carbon::parse($this->ended_at) : null,
+            end_date: $this->ended_at ? $this->parseLocalDate($this->ended_at) : null,
         );
     }
 
@@ -137,7 +137,7 @@ class CreateEditForm extends BaseForm
             return null;
         }
 
-        return Carbon::parse($this->started_at);
+        return $this->parseLocalDate($this->started_at);
     }
 
     private function stableId(): ?int
