@@ -11,7 +11,8 @@ describe('button variants', function (): void {
         expect($html)
             ->toContain($brandClass)
             ->toContain('rounded-none')
-            ->toContain('focus-visible:outline-ringside-white')
+            ->toContain('focus-visible:outline-ringside-ink')
+            ->not->toContain('outline-ringside-white')
             ->not->toContain('rounded-md')
             ->not->toContain('btn-');
     })->with([
@@ -25,6 +26,16 @@ describe('button variants', function (): void {
         'destructive' => ['destructive', 'text-ringside-signal-soft'],
         'danger' => ['danger', 'text-ringside-signal-soft'],
     ]);
+
+    it('gives the primary button a lighter hover red and a deeper pressed red', function (): void {
+        $html = Blade::render('<x-button>Save</x-button>');
+
+        expect($html)
+            ->toContain('hover:bg-ringside-red-hover')
+            ->toContain('hover:border-ringside-red-hover')
+            ->toContain('active:bg-ringside-red-dark')
+            ->toContain('active:border-ringside-red-dark');
+    });
 
     it('falls back to the primary variant for unknown variants', function (): void {
         $html = Blade::render('<x-button variant="unknown">Save</x-button>');

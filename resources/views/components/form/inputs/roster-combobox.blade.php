@@ -21,7 +21,7 @@
     $describedBy = $hasError ? "{$hintId} {$errorId}" : $hintId;
     $accessibleLabel = trim("{$group} {$label}");
 
-    $inputClasses = 'block w-full appearance-none outline-none border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-error rounded-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-white h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm';
+    $inputClasses = 'block w-full appearance-none outline-none border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-error rounded-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-ink h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm';
 @endphp
 
 <div

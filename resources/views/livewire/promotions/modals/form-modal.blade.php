@@ -32,7 +32,7 @@
                     {{ __('core.form.cancel') }}
                 </x-buttons.light>
                 <x-buttons.primary
-                    class="!bg-ringside-red !text-ringside-white hover:!bg-ringside-red-dark !rounded-none"
+                    class="!bg-ringside-red !text-ringside-white hover:!bg-ringside-red-hover active:!bg-ringside-red-dark !rounded-none"
                     wire:click="save"
                     wire:loading.attr="disabled"
                     wire:target="save"

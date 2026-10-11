@@ -28,6 +28,13 @@
         <p id="{{ $name }}-hint" class="text-ringside-muted text-sm leading-relaxed">{{ $hint }}</p>
     @endif
     @error($name)
-        <p id="{{ $name }}-error" role="alert" class="text-ringside-error text-sm leading-relaxed">{{ $message }}</p>
+        <p
+            id="{{ $name }}-error"
+            role="alert"
+            class="text-ringside-error flex items-start gap-1.5 text-sm leading-relaxed"
+        >
+            <x-heroicon-s-exclamation-circle class="mt-0.5 size-4 shrink-0" aria-hidden="true" data-error-icon />
+            <span>{{ $message }}</span>
+        </p>
     @enderror
 </div>

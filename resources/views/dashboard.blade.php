@@ -60,7 +60,7 @@
                                 <div class="flex min-w-0 flex-col gap-1">
                                     <a
                                         href="{{ route('events.show', $event) }}"
-                                        class="text-ringside-ink decoration-ringside-line-bright hover:decoration-ringside-signal focus-visible:outline-ringside-white truncate font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                                        class="text-ringside-ink decoration-ringside-line-bright hover:decoration-ringside-signal focus-visible:outline-ringside-ink truncate font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                     >{{ $event->name }}</a>
                                     <span class="text-ringside-muted text-sm">
                                         {{ $event->local_date?->format('D, M j · g:i A') }} · {{ $event->venue->name ?? __('dashboard.no_venue') }}
@@ -92,11 +92,11 @@
                             <li @class(['border-ringside-line flex flex-col gap-1 px-5 py-4', 'border-t' => ! $loop->first])>
                                 <a
                                     href="{{ route('titles.show', $championedTitle) }}"
-                                    class="text-ringside-muted hover:text-ringside-ink focus-visible:outline-ringside-white text-xs font-bold tracking-[0.08em] uppercase focus-visible:outline-2 focus-visible:outline-offset-2"
+                                    class="text-ringside-muted hover:text-ringside-ink focus-visible:outline-ringside-ink text-xs font-bold tracking-[0.08em] uppercase focus-visible:outline-2 focus-visible:outline-offset-2"
                                 >{{ $championedTitle->name }}</a>
                                 <a
                                     href="{{ $dashboard->championUrl($championship) }}"
-                                    class="text-ringside-ink decoration-ringside-line-bright hover:decoration-ringside-signal focus-visible:outline-ringside-white font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                                    class="text-ringside-ink decoration-ringside-line-bright hover:decoration-ringside-signal focus-visible:outline-ringside-ink font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                 >{{ $championship->champion->name }}</a>
                                 <span class="text-ringside-muted text-sm">
                                     {{
