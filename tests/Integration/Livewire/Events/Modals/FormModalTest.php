@@ -299,3 +299,69 @@ describe('event name races past the form rule', function () {
         expect(Event::query()->where('name', 'Summer Slam')->count())->toBe(1);
     });
 });
+
+describe('events at deleted venues', function () {
+    beforeEach(function () {
+        actingAs(administrator());
+    });
+
+    it('saves a past event at a deleted venue and keeps that venue', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Old Arena']);
+        $event = Event::factory()->for($venue)->create(['name' => 'Old Show', 'date' => now()->subMonth()]);
+        $venue->delete();
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+
+        // Act
+        $modal->set('form.name', 'Renamed Show');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors()->assertDispatched('closeModal');
+        expect($event->refresh())->name->toBe('Renamed Show')->venue_id->toBe($venue->id);
+    });
+
+    it('offers the deleted venue of the edited event as an option', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Old Arena']);
+        $event = Event::factory()->for($venue)->create(['date' => now()->subMonth()]);
+        $venue->delete();
+        Venue::factory()->trashed()->create(['name' => 'Unrelated Deleted Arena']);
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+
+        // Assert
+        $modal->assertSee('Old Arena')->assertDontSee('Unrelated Deleted Arena');
+    });
+
+    it('refuses to create an event at a deleted venue', function () {
+        // Arrange
+        $venue = Venue::factory()->trashed()->create();
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->set(['form.name' => 'Ghost Show', 'form.date' => null, 'form.venue_id' => $venue->id]);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.venue_id'])->assertNotDispatched('closeModal');
+        expect(Event::query()->whereName('Ghost Show')->exists())->toBeFalse();
+    });
+
+    it('refuses to move an event to a deleted venue', function () {
+        // Arrange
+        $venue = Venue::factory()->create();
+        $event = Event::factory()->for($venue)->create(['date' => now()->subMonth()]);
+        $deleted = Venue::factory()->trashed()->create();
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+
+        // Act
+        $modal->set('form.venue_id', $deleted->id);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.venue_id']);
+        expect($event->refresh()->venue_id)->toBe($venue->id);
+    });
+});

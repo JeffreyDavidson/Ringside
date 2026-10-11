@@ -55,6 +55,7 @@ return [
 
     'validation' => [
         'name_taken' => "An event named ':name' already exists in this promotion.",
+        'venue_deleted' => "The venue ':venue' is deleted, so an event cannot be booked there. Choose another venue.",
         'attributes' => [
             'event_name' => 'event name',
             'event_date' => 'event date',

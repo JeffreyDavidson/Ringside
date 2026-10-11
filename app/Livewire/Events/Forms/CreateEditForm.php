@@ -14,8 +14,10 @@ use App\Rules\Events\DateCanBeChanged;
 use App\Rules\Events\LocalTimeExists;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 /** @extends BaseForm<Event> */
 class CreateEditForm extends BaseForm
@@ -41,7 +43,7 @@ class CreateEditForm extends BaseForm
         return new EventData(
             name: $this->name,
             date: $this->date ? $this->parseDate($this->date) : null,
-            venue: $this->venue_id ? Venue::query()->findOrFail($this->venue_id) : null,
+            venue: $this->venue_id ? Venue::query()->withTrashed()->findOrFail($this->venue_id) : null,
             preview: $this->preview ?: null,
         );
     }
@@ -68,6 +70,12 @@ class CreateEditForm extends BaseForm
         return $context->isEnforced() ? $context->current() : null;
     }
 
+    /** The venue the edited event is stored at, which may since have been deleted; null for a new event. */
+    public function storedVenueId(): ?int
+    {
+        return $this->isEditing() ? $this->event()->venue_id : null;
+    }
+
     public function event(): Event
     {
         return Event::query()->findOrFail($this->modelId);
@@ -79,9 +87,22 @@ class CreateEditForm extends BaseForm
         return [
             'name' => ['required', 'string', 'max:255', $this->uniqueInPromotion('events', 'name')],
             'date' => ['bail', 'nullable', 'date', new LocalTimeExists($this->promotion()), new DateCanBeChanged($this->isEditing() ? $this->event() : null)],
-            'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['nullable', 'integer', $this->venueRule()],
             'preview' => ['nullable', 'string'],
         ];
+    }
+
+    /** A deleted venue cannot be newly chosen, but the event's own deleted venue stays valid so its history can be edited. */
+    private function venueRule(): Exists
+    {
+        $storedVenueId = $this->storedVenueId();
+
+        return Rule::exists('venues', 'id')->where(
+            fn (Builder $query): Builder => $query->whereNull('deleted_at')->when(
+                $storedVenueId !== null,
+                fn (Builder $query): Builder => $query->orWhere('id', $storedVenueId),
+            ),
+        );
     }
 
     /** @return array<string, string> */
