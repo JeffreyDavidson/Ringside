@@ -121,6 +121,7 @@ return [
             'undated_title_match' => 'A title change cannot be recorded for an event without a date.',
             'title_lineage_has_advanced' => 'This result cannot be corrected because a later title reign depends on it.',
             'title_result_out_of_date_order' => 'Title [:title] already has a result recorded after this event; record results in date order.',
+            'title_champion_not_in_match' => 'The champion of title [:title] on this event date is not in the match, so no result can be recorded for it.',
             'event_not_held' => 'A result cannot be recorded for an event that has not taken place yet.',
             'title_not_active' => 'Title [:title] is no longer active and cannot change hands.',
             'title_deleted' => 'A deleted title cannot change hands.',

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Titles;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -18,6 +20,39 @@ use Illuminate\Support\Carbon;
 
 final class ChampionshipReignManager
 {
+    /**
+     * Booking only checks the champion at booking time, so recording re-checks that whoever held the title on the
+     * event date is competing: a result can never take the title off a champion who was not in the match. A title
+     * that was vacant on the event date has no champion to check, and a reign won at the same instant by another
+     * match is ignored because the order of two matches at one instant is not recorded.
+     *
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors
+     * @param  Collection<int, TitleChampionship>  $reigns
+     */
+    public function ensureChampionOnEventDateIsCompeting(
+        EventMatch $match,
+        Title $title,
+        MatchCompetitorsCollection $competitors,
+        Collection $reigns,
+    ): void {
+        $eventDate = $match->event->date;
+
+        if (! $eventDate instanceof Carbon) {
+            return;
+        }
+
+        $reignHeldOnEventDate = $this->activeReignsForTitle($title, $reigns)->first(
+            fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
+                && $reign->won_at->lessThan($eventDate)
+                && ($reign->lost_at === null || $reign->lost_at->greaterThan($eventDate) || $reign->lost_match_id === $match->id),
+        );
+
+        if ($reignHeldOnEventDate instanceof TitleChampionship
+            && ! $competitors->containsCompetitor($reignHeldOnEventDate->champion_type, $reignHeldOnEventDate->champion_id)) {
+            throw InvalidMatchOutcomeException::titleChampionNotInMatch($title);
+        }
+    }
+
     /** @param Collection<int, TitleChampionship> $reigns */
     public function ensureMatchCanBeReconciled(
         EventMatch $match,
