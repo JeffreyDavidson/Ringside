@@ -92,6 +92,7 @@ it('renders the original English text', function (Closure $factory, string $expe
     'side composition' => [fn () => InvalidMatchConfigurationException::invalidSideComposition(MatchType::Singles, [1, 1]), 'The [Singles] match requires a 1-on-1 roster-member composition.'],
     'promotion' => [fn () => InvalidMatchConfigurationException::outsideEventPromotion('wrestlers'), "Selected wrestlers must all belong to the event's promotion."],
     'title winner' => [fn () => InvalidMatchOutcomeException::invalidTitleWinner(TitleType::Singles), 'The winning side must contain exactly one singles championship competitor.'],
+    'champion not in match' => [fn () => InvalidMatchOutcomeException::titleChampionNotInMatch(Title::factory()->make(['name' => 'World Title'])), 'The champion of title [World Title] on this event date is not in the match, so no result can be recorded for it.'],
     'competitor booked' => [fn () => SchedulingConflictException::competitorAlreadyBooked('Wrestler', 'Ric'), 'Wrestler [Ric] is already booked at this event time.'],
     'venue booked' => [fn () => SchedulingConflictException::venueAlreadyBooked('Garden', 'Jan 1, 2026'), 'Venue [Garden] is already booked on Jan 1, 2026 (venue time).'],
     'not available' => [fn () => EntityNotAvailableException::forMatchAssignment('wrestlers'), 'Selected wrestlers must all be eligible for match assignment.'],
