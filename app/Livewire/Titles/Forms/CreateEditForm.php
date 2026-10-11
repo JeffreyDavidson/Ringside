@@ -10,7 +10,6 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Title> */
@@ -26,7 +25,7 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
-        $this->start_date = $model->firstActivityPeriod?->started_at?->toDateString();
+        $this->start_date = $this->localDateString($model->firstActivityPeriod?->started_at);
     }
 
     public function toData(): TitleData
@@ -34,7 +33,7 @@ class CreateEditForm extends BaseForm
         return new TitleData(
             name: $this->name,
             type: TitleType::from((string) $this->type),
-            debut_date: $this->start_date ? Carbon::parse($this->start_date) : null,
+            debut_date: $this->start_date ? $this->parseLocalDate($this->start_date) : null,
         );
     }
 

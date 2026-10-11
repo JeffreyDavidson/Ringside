@@ -6,6 +6,7 @@ namespace App\Rules\Shared;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
+use App\Models\Promotions\Promotion;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -34,7 +35,12 @@ class CanChangeEmploymentDate implements ValidationRule
             return;
         }
 
-        $targetDate = Carbon::parse($value);
+        $promotion = $this->model->getRelationValue('promotion');
+
+        // A typed date means that day in the model's promotion (the application time zone without one), the way the form reads it; other values are instants.
+        $targetDate = is_string($value)
+            ? Promotion::parseLocalTime($promotion instanceof Promotion ? $promotion : null, $value)
+            : Carbon::parse($value);
 
         if (! $this->model->currentEmployment()->exists()) {
             return;

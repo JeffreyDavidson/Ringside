@@ -12,7 +12,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 /** @extends BaseForm<TagTeam> */
 class CreateEditForm extends BaseForm
@@ -34,7 +33,7 @@ class CreateEditForm extends BaseForm
     protected function loadModelData(Model $model): void
     {
         if ($model->employments()->exists()) {
-            $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
+            $this->employment_date = $this->localDateString($model->firstEmployment?->started_at);
         }
 
         $currentWrestlers = $model->currentWrestlers->sortBy('id')->values();
@@ -51,7 +50,7 @@ class CreateEditForm extends BaseForm
         return new TagTeamData(
             name: $this->name,
             signature_move: $this->signature_move ?: null,
-            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+            employment_date: $this->employment_date ? $this->parseLocalDate($this->employment_date) : null,
             wrestlerA: Wrestler::query()->findOrFail($this->wrestlerA),
             wrestlerB: Wrestler::query()->findOrFail($this->wrestlerB),
             managers: Manager::query()->whereKey($this->managers)->get(),

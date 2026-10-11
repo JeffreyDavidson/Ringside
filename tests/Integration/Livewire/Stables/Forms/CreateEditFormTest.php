@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Data\Stables\StableData;
 use App\Livewire\Stables\Forms\CreateEditForm;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
@@ -131,6 +133,46 @@ describe('stable form activity end date', function (): void {
 
         // Assert
         expect($errorKeys)->toContain('form.ended_at');
+    });
+});
+
+describe('stable form start date time zone', function (): void {
+    it('reads the entered start day as the start of that day in the promotion time zone', function (
+        string $timezone,
+        string $enteredDay,
+        string $expectedInstant,
+    ): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => $timezone]);
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->name = 'The Alliance';
+        $form->started_at = $enteredDay;
+
+        // Act
+        $data = $form->toData();
+
+        // Assert
+        expect($data->start_date?->utc()->toDateTimeString())->toBe($expectedInstant);
+    })->with([
+        'west of UTC' => ['America/Los_Angeles', '2026-10-11', '2026-10-11 07:00:00'],
+        'east of UTC' => ['Australia/Sydney', '2026-10-11', '2026-10-10 13:00:00'],
+    ]);
+
+    it('shows the stored start day back as the promotion day', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->for($promotion, 'promotion')->create();
+        $stable->activityPeriods()->create(['started_at' => '2026-10-12 01:00:00']);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+
+        // Act
+        $form->setModel($stable);
+
+        // Assert
+        expect($form->started_at)->toBe('2026-10-11');
     });
 });
 
