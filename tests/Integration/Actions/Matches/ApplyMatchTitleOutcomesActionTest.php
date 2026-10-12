@@ -7,6 +7,8 @@ use App\Data\Matches\MatchResultData;
 use App\Enums\MatchFinish;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Events\Event;
+use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
 use App\Models\Promotions\Promotion;
@@ -401,4 +403,217 @@ test('it accepts the same title result again when the champion won the title at 
     // Assert
     expect(TitleChampionship::query()->where('title_id', $title->id)->count())->toBe(2)
         ->and(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($challenger->id);
+});
+
+test('it ends a back-filled reign on the date the winner was released', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
+    expect($reign->champion_id)->toBe($winner->id)
+        ->and($reign->won_match_id)->toBe($match->id)
+        ->and($reign->lost_at->toDateString())->toBe('2026-10-09')
+        ->and($reign->lost_match_id)->toBeNull()
+        ->and(TitleChampionship::query()->where('title_id', $title->id)->current()->exists())->toBeFalse();
+});
+
+test('it ends a back-filled reign on the date the winner was retired', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->has(Retirement::factory()->started(Carbon::parse('2026-10-09')), 'retirements')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
+    expect($reign->lost_at->toDateString())->toBe('2026-10-09')
+        ->and($reign->lost_match_id)->toBeNull();
+});
+
+test('it ends a back-filled reign on the date the winning tag team was released', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->tagTeam()->active()->create();
+    $winner = TagTeam::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->create();
+    $loser = TagTeam::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
+    expect($reign->champion_id)->toBe($winner->id)
+        ->and($reign->lost_at->toDateString())->toBe('2026-10-09');
+});
+
+test('it ends a back-filled reign when the winning tag team was retired', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->tagTeam()->active()->create();
+    $winner = TagTeam::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->has(Retirement::factory()->started(Carbon::parse('2026-10-09')), 'retirements')
+        ->create();
+    $loser = TagTeam::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
+});
+
+test('it ends a back-filled reign at the first release when the winner was rehired', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-08')), 'employments')
+        ->has(Employment::factory()->started(Carbon::parse('2026-10-10')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-08');
+});
+
+test('it ends a back-filled reign at the first retirement when the winner was unretired', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-08')), 'employments')
+        ->has(Retirement::factory()->started(Carbon::parse('2026-10-08'))->ended(Carbon::parse('2026-10-09')), 'retirements')
+        ->has(Employment::factory()->started(Carbon::parse('2026-10-09')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-08');
+});
+
+test('it ignores a release that happened before the event day when ending a back-filled reign', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-08-01'))->ended(Carbon::parse('2026-08-15')), 'employments')
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($winner->id);
+});
+
+test('it ends a back-filled reign at once when the winner was released on the event day in the promotion time zone', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+    $event = Event::factory()->create(['promotion_id' => $promotion->id, 'date' => Carbon::parse('2026-10-07 00:30:00')]);
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 12:00:00')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    $match = EventMatch::factory()->forEvent($event)->create();
+    $match->titles()->attach($title);
+    $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    $losingSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+    $match->competitors()->createMany([
+        ['match_side_id' => $winningSide->id, 'competitor_type' => $winner->getMorphClass(), 'competitor_id' => $winner->id],
+        ['match_side_id' => $losingSide->id, 'competitor_type' => $loser->getMorphClass(), 'competitor_id' => $loser->id],
+    ]);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
+    expect($reign->lost_at->equalTo($event->date))->toBeTrue();
+});
+
+test('it leaves a back-filled reign open for a winner who is still employed', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    [$winner, $loser] = Wrestler::factory()->bookable()->count(2)->create()->all();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($winner->id);
+});
+
+test('it keeps a released winner reign closed when the same result is recorded again', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+    recordTitleMatchResult($match, $winningSide);
+
+    // Act
+    recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
+});
+
+test('it treats the title as vacant from the release date for a later title match', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-09')), 'employments')
+        ->create();
+    [$loser, $nextWinner] = Wrestler::factory()->bookable()->count(2)->create()->all();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06', $winner, $loser);
+    recordTitleMatchResult($match, $winningSide);
+    [$laterMatch, $laterWinningSide] = titleMatchBetween($title, '2026-10-10', $nextWinner, $loser);
+
+    // Act
+    recordTitleMatchResult($laterMatch, $laterWinningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($nextWinner->id)
+        ->and(TitleChampionship::query()->where('won_match_id', $match->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
 });
