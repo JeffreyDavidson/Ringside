@@ -224,6 +224,18 @@ For full usage — backend examples, browser testing, screenshots, responsive ch
 - Use the Composer scripts defined by this repository for verification. Run `composer test:push` before pushing a completed change unless a narrower check is explicitly requested.
 - Laravel Pint must always run with Blade formatting enabled. Use `composer lint` to fix formatting or `composer test:lint` to check it; never invoke Pint without the `--blade` option.
 
+## Meta Repo
+
+Plans, the status list, and brand work for Ringside live in the private `ringside-meta` repository, checked out at `~/Projects/ringside-meta`, not in this repository. This replaces the global `tasks/todo.md`, `_plans/status.md`, and `branding/` locations for this project.
+
+- Write the plan for a piece of work to `cycles/YYYY-MM-DD-short-name/summary.md` there, keep its progress notes current, and finish with the review section in the same file.
+- Keep the status list at `status.md` there.
+- Keep brand rounds under `brand/` there.
+- Follow that repository's `README.md`: commit straight to `main` and push at the end of a task.
+- If the checkout is missing, say so and ask; do not fall back to creating `tasks/`, `_plans/`, or `branding/` here.
+
+This repository holds only what describes the application as it is today.
+
 ## Git workflow and Conventional Commits
 
 - Use `develop` as the integration branch and `main` as the release branch. Reserve `development` for environment names, not new branch names.

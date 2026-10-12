@@ -16,7 +16,7 @@
         </div>
         <a
             href="{{ route('promotions.index') }}"
-            class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-white text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+            class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-ink text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
         >
             {{ __('promotions.back_to_directory') }}
         </a>
@@ -45,8 +45,17 @@
                 </p>
 
                 @error('email')
-                    <p id="promotion-member-email-error" class="text-ringside-signal-soft mt-2 text-sm" role="alert">
-                        {{ $message }}
+                    <p
+                        id="promotion-member-email-error"
+                        class="text-ringside-error mt-2 flex items-start gap-1.5 text-sm"
+                        role="alert"
+                    >
+                        <x-heroicon-s-exclamation-circle
+                            class="mt-0.5 size-4 shrink-0"
+                            aria-hidden="true"
+                            data-error-icon
+                        />
+                        <span>{{ $message }}</span>
                     </p>
                 @enderror
             </div>
@@ -58,7 +67,7 @@
                 <select
                     id="new-member-role"
                     wire:model="newMemberRole"
-                    class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-white min-h-14 w-full border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                    class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-ink min-h-14 w-full border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     @foreach ($roleOptions as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
@@ -79,8 +88,12 @@
         </form>
 
         @error('member')
-            <p class="text-ringside-signal-soft border-ringside-line border-b px-5 py-3 text-sm lg:px-6" role="alert">
-                {{ $message }}
+            <p
+                class="text-ringside-error border-ringside-line flex items-start gap-1.5 border-b px-5 py-3 text-sm lg:px-6"
+                role="alert"
+            >
+                <x-heroicon-s-exclamation-circle class="mt-0.5 size-4 shrink-0" aria-hidden="true" data-error-icon />
+                <span>{{ $message }}</span>
             </p>
         @enderror
     @endif
@@ -128,7 +141,7 @@
                                             <select
                                                 wire:model="memberRoles.{{ $membership->user_id }}"
                                                 aria-label="{{ __('promotions.role_for', ['name' => $membership->user->full_name]) }}"
-                                                class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-white min-h-10 min-w-28 border px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                                                class="border-ringside-outline bg-ringside-surface-panel text-ringside-ink focus-visible:outline-ringside-ink min-h-10 min-w-28 border px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                                             >
                                                 @foreach ($roleOptions as $value => $label)
                                                     <option
@@ -143,14 +156,22 @@
                                                 type="submit"
                                                 wire:loading.attr="disabled"
                                                 wire:target="updateMemberRole"
-                                                class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-white min-h-10 px-2 text-xs whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                class="text-ringside-muted hover:text-ringside-white focus-visible:outline-ringside-ink min-h-10 px-2 text-xs whitespace-nowrap underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.save_role') }}
                                             </button>
                                         </form>
                                         @error("memberRoles.{$membership->user_id}")
-                                            <p class="text-ringside-signal-soft mt-1 text-xs" role="alert">
-                                                {{ $message }}
+                                            <p
+                                                class="text-ringside-error mt-1 flex items-start gap-1.5 text-xs"
+                                                role="alert"
+                                            >
+                                                <x-heroicon-s-exclamation-circle
+                                                    class="mt-0.5 size-4 shrink-0"
+                                                    aria-hidden="true"
+                                                    data-error-icon
+                                                />
+                                                <span>{{ $message }}</span>
                                             </p>
                                         @enderror
                                     @else
@@ -171,7 +192,7 @@
                                                 wire:confirm="{{ __('promotions.confirm_suspend', ['name' => $membership->user->full_name]) }}"
                                                 wire:loading.attr="disabled"
                                                 wire:target="updateMemberStatus"
-                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-ink min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.suspend') }}
                                             </button>
@@ -181,7 +202,7 @@
                                                 wire:click="updateMemberStatus({{ $membership->user_id }}, '{{ $activeStatus->value }}')"
                                                 wire:loading.attr="disabled"
                                                 wire:target="updateMemberStatus"
-                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                class="text-ringside-ink hover:text-ringside-signal focus-visible:outline-ringside-ink min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {{ __('promotions.reactivate') }}
                                             </button>
@@ -273,7 +294,7 @@
                                         wire:confirm="{{ __('promotions.confirm_cancel_invitation') }}"
                                         wire:loading.attr="disabled"
                                         wire:target="cancelInvitation"
-                                        class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-white min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        class="text-ringside-muted hover:text-ringside-signal-soft focus-visible:outline-ringside-ink min-h-10 px-2 text-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {{ __('promotions.cancel_invitation') }}
                                     </button>

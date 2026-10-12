@@ -378,6 +378,20 @@ leaves the date as prefilled keeps the event's stored instant (`Event::parseLoca
 renaming an event in the second occurrence neither moves it an hour nor trips the
 "already occurred" check.
 
+Roster and title start dates work the same way, but as whole days. The date typed into the
+wrestler, tag team, manager, referee, title and stable forms (employment, debut or start date) means
+that day in the record's promotion: the form reads it with `Promotion::parseLocalTime()` through
+`BaseForm::parseLocalDate()` (the edited record's promotion, or the enforced promotion context for a
+new record, or the application time zone without one) and stores the start of that local day as the
+matching UTC instant. The dates shown back in the edit forms use the promotion's local day
+(`BaseForm::localDateString()`), so a title debuted on a Los Angeles evening shows that evening's
+date. `CanChangeEmploymentDate` and `CanChangeDebutDate` read a typed date in the model's promotion
+zone, `CanChangeDebutDate` and the scheduled-debut check in `Titles\UpdateAction` compare days in that
+zone, and the "is it already employed or debuted" outcome follows from the stored instant against
+`now()`: a Los Angeles promotion at 6 pm that enters tomorrow's date schedules it, and a Sydney
+promotion at 9 am that enters today's date starts it immediately. Dates stored before this change are
+not migrated: they keep their UTC midnight instant.
+
 Reign dates (`titles_championships.won_at` and `lost_at`) are also stored in UTC and shown in the
 title's promotion zone through `TitleChampionship::local_won_at` and `local_lost_at`, so a 7 pm Los
 Angeles title change shows that evening's date. Every list that prints them eager-loads

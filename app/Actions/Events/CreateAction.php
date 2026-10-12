@@ -7,6 +7,7 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\NameTakenException;
+use App\Exceptions\Events\VenueDeletedException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
@@ -30,6 +31,7 @@ class CreateAction
      * venue row lock, and the check that follows sees the other transaction's committed event.
      *
      * @throws NameTakenException When another event of the promotion already has the name
+     * @throws VenueDeletedException When the venue is deleted
      */
     public function handle(EventData $eventData): Event
     {
@@ -50,6 +52,10 @@ class CreateAction
             }
 
             $venue = $eventData->venue?->refreshForUpdate();
+
+            if ($venue !== null && $venue->trashed()) {
+                throw VenueDeletedException::cannotBeChosen($venue);
+            }
 
             if ($venue !== null && $eventData->date instanceof Carbon) {
                 VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date);

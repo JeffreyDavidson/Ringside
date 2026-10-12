@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Modals;
 
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
+use App\Builders\Events\VenueBuilder;
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
@@ -13,6 +14,7 @@ use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -65,6 +67,24 @@ class FormModal extends BaseFormModal
             BusinessRuleReason::NameTaken => 'form.name',
             default => parent::businessErrorField($exception),
         };
+    }
+
+    /**
+     * The edited event's own venue is listed even if it has since been deleted, so the select shows where the event is.
+     *
+     * @return VenueBuilder<Venue>
+     */
+    protected function venuesQuery(): VenueBuilder
+    {
+        $storedVenueId = isset($this->form) ? $this->form->storedVenueId() : null;
+
+        if ($storedVenueId === null) {
+            return Venue::query();
+        }
+
+        return Venue::query()->withTrashed()->where(
+            fn (Builder $query): Builder => $query->whereNull('deleted_at')->orWhere('id', $storedVenueId),
+        );
     }
 
     protected function updateForm(): void

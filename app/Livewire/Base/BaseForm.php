@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
+use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use App\Support\ModelKey;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
@@ -85,6 +87,28 @@ abstract class BaseForm extends Form
         $context = app(PromotionContextService::class);
 
         return $context->isEnforced() ? $context->current()?->id : null;
+    }
+
+    /**
+     * Read a date typed into the form as that day in the form promotion's time zone (see formPromotionId()):
+     * the start of the local day, as the UTC instant to store. Without a promotion it is the application time zone.
+     */
+    protected function parseLocalDate(string $value): Carbon
+    {
+        return Promotion::parseLocalTime($this->formPromotion(), $value);
+    }
+
+    /** Show a stored instant back as its day in the form promotion's time zone, the way the date field expects it. */
+    protected function localDateString(?Carbon $date): ?string
+    {
+        return $date instanceof Carbon ? Promotion::toLocalTime($this->formPromotion(), $date)->toDateString() : null;
+    }
+
+    private function formPromotion(): ?Promotion
+    {
+        $promotionId = $this->formPromotionId();
+
+        return $promotionId === null ? null : Promotion::query()->find($promotionId);
     }
 
     /** @param TModel $model */

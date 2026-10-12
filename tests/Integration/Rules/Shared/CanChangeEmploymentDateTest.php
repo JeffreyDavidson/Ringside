@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Models\Lifecycle\Employment;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 /**
  * Return a manager with a controlled employment period for rule tests.
@@ -198,4 +200,37 @@ describe('CanChangeEmploymentDate validation rule', function () {
 
         expect($failed)->toBe(3);
     });
+
+    test('reads the entered day in the time zone of the promotion', function (
+        string $timezone,
+        string $startedAt,
+        string $enteredDay,
+        bool $fails,
+    ) {
+        // Arrange
+        Date::setTestNow('2026-10-12 12:00:00');
+        $promotion = Promotion::factory()->create(['timezone' => $timezone]);
+        $manager = Manager::factory()
+            ->for($promotion, 'promotion')
+            ->has(Employment::factory()->started(Date::parse($startedAt)), 'employments')
+            ->create();
+        $failed = false;
+
+        // Act
+        new CanChangeEmploymentDate($manager)->validate(
+            'employment_date',
+            $enteredDay,
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
+
+        // Assert
+        expect($failed)->toBe($fails);
+    })->with([
+        'west of UTC keeps the day employment started' => ['America/Los_Angeles', '2026-10-11 07:00:00', '2026-10-11', false],
+        'west of UTC rejects the local day before' => ['America/Los_Angeles', '2026-10-11 07:00:00', '2026-10-10', true],
+        'east of UTC keeps the day employment started' => ['Australia/Sydney', '2026-10-10 13:00:00', '2026-10-11', false],
+        'east of UTC rejects the local day before' => ['Australia/Sydney', '2026-10-10 13:00:00', '2026-10-10', true],
+    ]);
 });

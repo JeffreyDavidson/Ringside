@@ -13,7 +13,6 @@ use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
-use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -68,6 +67,7 @@ class ApplyMatchTitleOutcomesAction
             }
 
             $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $desiredChampions[$title->id], $reigns);
+            $this->championshipReigns->ensureChampionOnEventDateIsCompeting($match, $title, $competitors, $reigns);
         }
 
         foreach ($titles as $title) {
@@ -110,7 +110,7 @@ class ApplyMatchTitleOutcomesAction
     /** Live recordings re-check today's availability; back-filled results were validated when the match was booked. */
     private function ensureTitleCanChangeHands(EventMatch $match, Title $title, Wrestler|TagTeam $winner): void
     {
-        if ($this->isBackFill($match)) {
+        if ($this->championshipReigns->isBackFill($match)) {
             return;
         }
 
@@ -121,16 +121,6 @@ class ApplyMatchTitleOutcomesAction
         if (! $this->bookingEligibility->allows($winner)) {
             throw InvalidMatchOutcomeException::winnerNotEligible($winner);
         }
-    }
-
-    /** An event from an earlier day in its promotion's time zone is being back-filled rather than recorded live. */
-    private function isBackFill(EventMatch $match): bool
-    {
-        $event = $match->event;
-
-        return $event->local_date?->isBefore(
-            Promotion::toLocalTime($event->promotion, now())->startOfDay(),
-        ) ?? false;
     }
 
     /**

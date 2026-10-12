@@ -13,7 +13,8 @@ describe('general info links', function (): void {
             ->toContain('Riverside Armory')
             ->toContain('text-ringside-ink')
             ->toContain('underline')
-            ->toContain('focus-visible:outline-ringside-white')
+            ->toContain('focus-visible:outline-ringside-ink')
+            ->not->toContain('outline-ringside-white')
             ->not->toContain('text-gray-800');
     });
 

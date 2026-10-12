@@ -27,7 +27,7 @@
                         value="{{ $member['id'] }}"
                         {{ $attributes->whereStartsWith('wire:model') }}
                         @disabled($unavailability !== null)
-                        class="accent-ringside-red focus-visible:outline-ringside-white size-4 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="accent-ringside-red focus-visible:outline-ringside-ink size-4 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
                     />
                     <label for="{{ $inputId }}" class="text-ringside-ink flex-1 text-sm">{{ $member['name'] }}</label>
                     @if ($unavailability !== null)
@@ -38,7 +38,7 @@
         </ul>
 
         @if ($errorMessages !== [])
-            <div id="{{ $errorId }}" class="text-ringside-signal-soft space-y-1 text-sm" role="alert">
+            <div id="{{ $errorId }}" class="text-ringside-error space-y-1 text-sm" role="alert">
                 @foreach ($errorMessages as $message)
                     <p>{{ $message }}</p>
                 @endforeach

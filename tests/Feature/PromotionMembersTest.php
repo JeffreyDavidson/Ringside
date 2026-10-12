@@ -69,6 +69,20 @@ it('saves an invitation for the typed email to only the selected promotion with 
         ->and($user->promotions()->count())->toBe(0);
 });
 
+it('shows the member email error with an icon', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+
+    // Act
+    $component = Livewire::actingAs(administrator())
+        ->test(Manage::class, ['promotionId' => $promotion->id, 'email' => 'not-an-email'])
+        ->call('addMember');
+
+    // Assert
+    $component->assertHasErrors(['email'])
+        ->assertSeeHtmlInOrder(['id="promotion-member-email-error"', 'data-error-icon']);
+});
+
 it('stores the email trimmed and lowercase and treats other spellings of it as the same invitation', function () {
     // Arrange
     $promotion = Promotion::factory()->create();

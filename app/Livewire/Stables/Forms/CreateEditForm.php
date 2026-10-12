@@ -38,8 +38,8 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
-        $this->started_at = $model->firstActivityPeriod?->started_at?->toDateString();
-        $this->ended_at = $model->firstActivityPeriod?->ended_at?->toDateString();
+        $this->started_at = $this->localDateString($model->firstActivityPeriod?->started_at);
+        $this->ended_at = $this->localDateString($model->firstActivityPeriod?->ended_at);
         $this->wrestlers = $model->currentWrestlers->modelKeys();
         $this->tag_teams = $model->currentTagTeams->modelKeys();
     }
@@ -50,9 +50,9 @@ class CreateEditForm extends BaseForm
 
         return new StableData(
             name: $this->name,
-            start_date: $this->started_at ? Carbon::parse($this->started_at) : null,
+            start_date: $this->started_at ? $this->parseLocalDate($this->started_at) : null,
             members: $members,
-            end_date: $this->ended_at ? Carbon::parse($this->ended_at) : null,
+            end_date: $this->ended_at ? $this->parseLocalDate($this->ended_at) : null,
         );
     }
 
@@ -63,7 +63,8 @@ class CreateEditForm extends BaseForm
 
     protected function rules(): array
     {
-        $stableStartDate = $this->parseStartDate();
+        // Members of an existing stable join today (see UpdateAction); members of a new stable join on its start date.
+        $memberJoinDate = $this->isEditing() ? now() : $this->parseStartDate();
         $members = $this->selectedMembers();
         $stable = $this->isEditing() ? $this->stable() : null;
         $canHaveMembers = ! $stable instanceof Stable || app(StableActivityEligibility::class)->canHaveMembers($stable);
@@ -86,7 +87,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 $this->existsInPromotion('wrestlers'),
-                new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
+                new CanJoinStable(Wrestler::class, $this->stableId(), $memberJoinDate),
                 new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
@@ -95,7 +96,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 $this->existsInPromotion('tag_teams'),
-                new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
+                new CanJoinStable(TagTeam::class, $this->stableId(), $memberJoinDate),
             ],
         ];
 
@@ -137,7 +138,7 @@ class CreateEditForm extends BaseForm
             return null;
         }
 
-        return Carbon::parse($this->started_at);
+        return $this->parseLocalDate($this->started_at);
     }
 
     private function stableId(): ?int
