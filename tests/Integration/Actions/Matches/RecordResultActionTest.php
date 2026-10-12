@@ -961,10 +961,13 @@ it('crowns the corrected winner when the previous champion can no longer be rein
     resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $otherSide));
 
     // Assert
-    $currentReign = $title->championships()->current()->sole();
+    // The corrected winner is the retired champion, so the new reign ends at the retirement and the title is vacant.
+    $correctedReign = $title->championships()->where('won_match_id', $secondMatch->id)->sole();
 
-    expect($currentReign->won_match_id)->toBe($secondMatch->id)
-        ->and($currentReign->champion_id)->toBe($otherSide->competitors()->sole()->competitor_id)
+    expect($correctedReign->champion_id)->toBe($otherSide->competitors()->sole()->competitor_id)
+        ->and($correctedReign->lost_at)->not->toBeNull()
+        ->and($correctedReign->lost_match_id)->toBeNull()
+        ->and($title->championships()->current()->exists())->toBeFalse()
         ->and($title->championships()->where('won_match_id', $firstMatch->id)->sole()->lost_match_id)->toBe($secondMatch->id);
 });
 

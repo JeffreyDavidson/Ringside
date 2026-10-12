@@ -8,8 +8,11 @@ use App\Collections\MatchCompetitorsCollection;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
+use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -177,13 +180,52 @@ final class ChampionshipReignManager
             'lost_at' => $eventDate,
         ]);
 
-        TitleChampionship::query()->create([
+        $newReign = TitleChampionship::query()->create([
             'title_id' => $title->id,
             'champion_type' => $desiredChampion->getMorphClass(),
             'champion_id' => $desiredChampion->id,
             'won_match_id' => $match->id,
             'won_at' => $eventDate,
         ]);
+
+        if ($this->isBackFill($match)) {
+            $this->endReignIfChampionHasSinceLeft($newReign, $match, $desiredChampion);
+        }
+    }
+
+    /** An event from an earlier day in its promotion's time zone is being back-filled rather than recorded live. */
+    public function isBackFill(EventMatch $match): bool
+    {
+        $event = $match->event;
+
+        return $event->local_date?->isBefore(
+            Promotion::toLocalTime($event->promotion, now())->startOfDay(),
+        ) ?? false;
+    }
+
+    /**
+     * A back-filled win can be recorded after its winner was released or retired, when the release found no reign to
+     * close. The win stays in the title history but the reign ends where a release or retirement while champion
+     * would have ended it: on the first release or retirement day (in the promotion's time zone) on or after the
+     * event day, even if the winner has since been re-employed. A winner who never left keeps an open reign.
+     */
+    private function endReignIfChampionHasSinceLeft(TitleChampionship $reign, EventMatch $match, Wrestler|TagTeam $champion): void
+    {
+        $promotion = $match->event->promotion;
+        $eventDay = Promotion::toLocalTime($promotion, $reign->won_at)->startOfDay();
+
+        $leftAt = $champion->employments()->whereNotNull('ended_at')->get()
+            ->map(fn (Employment $employment): ?Carbon => $employment->ended_at)
+            ->merge($champion->retirements()->get()->map(fn (Retirement $retirement): Carbon => $retirement->started_at))
+            ->filter(fn (?Carbon $date): bool => $date instanceof Carbon
+                && Promotion::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
+            ->min();
+
+        if (! $leftAt instanceof Carbon) {
+            return;
+        }
+
+        $reign->update(['lost_at' => $this->reignEnd($reign, $leftAt)]);
     }
 
     public function endCurrentReign(Title $title, Carbon $endedAt): void
