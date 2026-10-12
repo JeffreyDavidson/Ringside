@@ -422,7 +422,7 @@ test('it ends a back-filled reign on the date the winner was released', function
     $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
     expect($reign->champion_id)->toBe($winner->id)
         ->and($reign->won_match_id)->toBe($match->id)
-        ->and($reign->lost_at->toDateString())->toBe('2026-10-09')
+        ->and($reign->lost_at?->toDateString())->toBe('2026-10-09')
         ->and($reign->lost_match_id)->toBeNull()
         ->and(TitleChampionship::query()->where('title_id', $title->id)->current()->exists())->toBeFalse();
 });
@@ -443,7 +443,7 @@ test('it ends a back-filled reign on the date the winner was retired', function 
 
     // Assert
     $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
-    expect($reign->lost_at->toDateString())->toBe('2026-10-09')
+    expect($reign->lost_at?->toDateString())->toBe('2026-10-09')
         ->and($reign->lost_match_id)->toBeNull();
 });
 
@@ -463,7 +463,7 @@ test('it ends a back-filled reign on the date the winning tag team was released'
     // Assert
     $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
     expect($reign->champion_id)->toBe($winner->id)
-        ->and($reign->lost_at->toDateString())->toBe('2026-10-09');
+        ->and($reign->lost_at?->toDateString())->toBe('2026-10-09');
 });
 
 test('it ends a back-filled reign when the winning tag team was retired', function (): void {
@@ -481,7 +481,7 @@ test('it ends a back-filled reign when the winning tag team was retired', functi
     recordTitleMatchResult($match, $winningSide);
 
     // Assert
-    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at?->toDateString())->toBe('2026-10-09');
 });
 
 test('it ends a back-filled reign at the first release when the winner was rehired', function (): void {
@@ -499,7 +499,7 @@ test('it ends a back-filled reign at the first release when the winner was rehir
     recordTitleMatchResult($match, $winningSide);
 
     // Assert
-    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-08');
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at?->toDateString())->toBe('2026-10-08');
 });
 
 test('it ends a back-filled reign at the first retirement when the winner was unretired', function (): void {
@@ -518,7 +518,7 @@ test('it ends a back-filled reign at the first retirement when the winner was un
     recordTitleMatchResult($match, $winningSide);
 
     // Assert
-    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-08');
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at?->toDateString())->toBe('2026-10-08');
 });
 
 test('it ignores a release that happened before the event day when ending a back-filled reign', function (): void {
@@ -563,7 +563,7 @@ test('it ends a back-filled reign at once when the winner was released on the ev
 
     // Assert
     $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
-    expect($reign->lost_at->equalTo($event->date))->toBeTrue();
+    expect($reign->lost_at?->toIso8601String())->toBe($event->date?->toIso8601String());
 });
 
 test('it leaves a back-filled reign open for a winner who is still employed', function (): void {
@@ -595,7 +595,7 @@ test('it keeps a released winner reign closed when the same result is recorded a
     recordTitleMatchResult($match, $winningSide);
 
     // Assert
-    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
+    expect(TitleChampionship::query()->where('title_id', $title->id)->sole()->lost_at?->toDateString())->toBe('2026-10-09');
 });
 
 test('it treats the title as vacant from the release date for a later title match', function (): void {
@@ -615,5 +615,5 @@ test('it treats the title as vacant from the release date for a later title matc
 
     // Assert
     expect(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($nextWinner->id)
-        ->and(TitleChampionship::query()->where('won_match_id', $match->id)->sole()->lost_at->toDateString())->toBe('2026-10-09');
+        ->and(TitleChampionship::query()->where('won_match_id', $match->id)->sole()->lost_at?->toDateString())->toBe('2026-10-09');
 });

@@ -8,6 +8,8 @@ use App\Collections\MatchCompetitorsCollection;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
+use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Promotions\Promotion;
@@ -212,11 +214,11 @@ final class ChampionshipReignManager
         $promotion = $match->event->promotion;
         $eventDay = Promotion::toLocalTime($promotion, $reign->won_at)->startOfDay();
 
-        $leftAt = $champion->employments()
-            ->whereNotNull('ended_at')
-            ->pluck('ended_at')
-            ->merge($champion->retirements()->pluck('started_at'))
-            ->filter(fn (Carbon $date): bool => Promotion::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
+        $leftAt = $champion->employments()->whereNotNull('ended_at')->get()
+            ->map(fn (Employment $employment): ?Carbon => $employment->ended_at)
+            ->merge($champion->retirements()->get()->map(fn (Retirement $retirement): Carbon => $retirement->started_at))
+            ->filter(fn (?Carbon $date): bool => $date instanceof Carbon
+                && Promotion::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
             ->min();
 
         if (! $leftAt instanceof Carbon) {
