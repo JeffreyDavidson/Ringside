@@ -99,6 +99,17 @@ function bookConcurrently(array $bookings): array
 }
 
 /**
+ * What every worker reported, as the failure message of an assertion about their exceptions: the class alone
+ * does not say which rule or query refused the worker.
+ *
+ * @param  array<int, array<mixed>>  $results
+ */
+function workerOutcomes(array $results): string
+{
+    return 'Worker results: '.json_encode($results, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
+/**
  * @return array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}
  */
 function bookingFor(Event $event, Wrestler $firstWrestler): array
@@ -164,7 +175,7 @@ test('concurrent bookings without a real conflict both succeed', function () {
 
             // Assert
             expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
-                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
+                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty(workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
         }
@@ -180,8 +191,9 @@ test('concurrent bookings without a real conflict both succeed', function () {
  */
 function rescheduleTwoEventsIntoTheSameEmptyDate(int $run, array $wrestlers): array
 {
-    $firstEvent = Event::factory()->create(['date' => now()->addWeeks($run)]);
-    $secondEvent = Event::factory()->create(['date' => now()->addWeeks($run)->addDay()]);
+    // Names of their own: an update refuses a name another event has, and two random factory names can match.
+    $firstEvent = Event::factory()->create(['name' => "First Rescheduled Event {$run}", 'date' => now()->addWeeks($run)]);
+    $secondEvent = Event::factory()->create(['name' => "Second Rescheduled Event {$run}", 'date' => now()->addWeeks($run)->addDay()]);
     EventMatch::factory()->forEvent($firstEvent)->withCompetitors([$wrestlers[0]])->create();
     EventMatch::factory()->forEvent($secondEvent)->withCompetitors([$wrestlers[1]])->create();
     $target = now()->addWeeks($run)->addDays(2);
@@ -215,7 +227,7 @@ test('concurrent reschedules of events sharing a wrestler into the same empty da
 
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
-                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class], workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($eventsBookingTheWrestlerAtTheTarget)->toBe(1);
         }
@@ -238,7 +250,7 @@ test('concurrent reschedules into the same empty date without a real conflict bo
             // Assert
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
-                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
+                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty(workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and($firstEvent->refresh()->date?->toDateTimeString())->toBe($target->toDateTimeString())
                 ->and($secondEvent->refresh()->date?->toDateTimeString())->toBe($target->toDateTimeString());
@@ -253,8 +265,8 @@ test('two events swapping dates at once never deadlock', function () {
             // Arrange
             $firstDate = now()->addWeeks($run);
             $secondDate = $firstDate->copy()->addDay();
-            $firstEvent = Event::factory()->create(['date' => $firstDate]);
-            $secondEvent = Event::factory()->create(['date' => $secondDate]);
+            $firstEvent = Event::factory()->create(['name' => "First Swapped Event {$run}", 'date' => $firstDate]);
+            $secondEvent = Event::factory()->create(['name' => "Second Swapped Event {$run}", 'date' => $secondDate]);
             $deadlocksBefore = resolvedDeadlocks();
 
             // Act
@@ -265,7 +277,7 @@ test('two events swapping dates at once never deadlock', function () {
 
             // Assert
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
-                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty()
+                ->and(collect($results)->pluck('exception')->filter()->all())->toBeEmpty(workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(2)
                 ->and($firstEvent->refresh()->date?->toDateTimeString())->toBe($secondDate->toDateTimeString())
                 ->and($secondEvent->refresh()->date?->toDateTimeString())->toBe($firstDate->toDateTimeString());
@@ -305,7 +317,7 @@ test('restoring an event while its wrestler is booked in another event at the sa
                 ->count('events.id');
 
             expect(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
-                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class], workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($liveEventsBookingTheWrestler)->toBe(1)
                 ->and(deadlocksResolvedSince($deadlocksBefore))->toBe(0);
@@ -330,7 +342,7 @@ test('concurrent events at the same venue on the same day admit only one', funct
 
             // Assert
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
-                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class])
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([SchedulingConflictException::class], workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and(Event::query()->whereBelongsTo($venue)->count())->toBe(1);
         }
@@ -358,7 +370,7 @@ test('two owners demoting each other at once always leave one owner', function (
 
             // Assert
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
-                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotRemoveLastOwnerException::class])
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotRemoveLastOwnerException::class], workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and($promotion->memberships()->withRole(MembershipRole::Owner)->count())->toBe(1);
         }
@@ -397,7 +409,7 @@ test('two stables without a promotion split to the same new name at once admit o
             // Assert
             expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
                 ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
-                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotBeSplitException::class])
+                ->and(collect($results)->pluck('exception')->filter()->values()->all())->toBe([CannotBeSplitException::class], workerOutcomes($results))
                 ->and(collect($results)->where('ok', true))->toHaveCount(1)
                 ->and(Stable::query()->where('name', $newName)->count())->toBe(1);
         }

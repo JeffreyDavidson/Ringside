@@ -198,7 +198,7 @@ try {
         );
     }
 } catch (BaseBusinessException $exception) {
-    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false];
+    $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false, 'message' => mb_substr($exception->getMessage(), 0, 400)];
 } catch (DeadlockException|QueryException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception), 'message' => mb_substr($exception->getMessage(), 0, 400)];
 }
