@@ -111,3 +111,37 @@ test('a changed pack blocks the next start but does not block finishing the curr
     expect(fn () => $action->handle($fixture['event'], 3, $fixture['run']->content['items'][1]['key'], LiveItemOperation::Start))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->content['items'][0]['state'])->toBe('finished');
 });
+
+test('a running item cannot be skipped instead of finished', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $action = resolve(TransitionLiveItemAction::class);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $before = $fixture['run']->refresh()->content;
+
+    // Act / Assert
+    expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Skip, 'Wrong item'))->toThrow(LiveShowException::class, __('live-show.transition_invalid'));
+    expect($fixture['run']->refresh()->version)->toBe(2)->and($fixture['run']->content)->toBe($before);
+});
+
+test('corrected times cannot overlap an earlier or later recorded item', function (bool $earlier): void {
+    // Arrange
+    $fixture = liveShowFixture(segment: true);
+    $action = resolve(TransitionLiveItemAction::class);
+    $firstStart = now();
+    $second = $fixture['run']->content['items'][1]['key'];
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    travel(10)->minutes();
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 3, $second, LiveItemOperation::Start);
+    travel(10)->minutes();
+    $action->handle($fixture['event'], 4, $second, LiveItemOperation::Finish);
+    $before = $fixture['run']->refresh()->content;
+    $key = $earlier ? $second : $fixture['key'];
+    $start = $earlier ? now()->subMinutes(11) : $firstStart;
+    $finish = $earlier ? now() : now()->subMinutes(9);
+
+    // Act / Assert
+    expect(fn () => $action->handle($fixture['event'], 5, $key, LiveItemOperation::Correct, 'Correct bell time', $start, $finish))->toThrow(LiveShowException::class, __('live-show.invalid_times'));
+    expect($fixture['run']->refresh()->version)->toBe(5)->and($fixture['run']->content)->toBe($before);
+})->with(['overlaps previous finish' => true, 'overlaps next start' => false]);

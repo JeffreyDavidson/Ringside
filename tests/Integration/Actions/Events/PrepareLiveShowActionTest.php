@@ -18,6 +18,7 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\ViewModels\EventPackViewModel;
+use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Laravel\actingAs;
 
@@ -157,3 +158,19 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $data['card']['fingerprint']))->toThrow(LiveShowException::class);
     expect($event->liveRun()->exists())->toBeFalse();
 })->with(['missing pack', 'undated', 'empty', 'unreviewed', 'old']);
+
+test('a stale preparation preview cannot create a run from a different pack', function (bool $staleVersion): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()]);
+    EventMatch::factory()->for($event)->create();
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    $version = $staleVersion ? 0 : 1;
+    $fingerprint = $staleVersion ? $data['card']['fingerprint'] : str_repeat('0', 64);
+
+    // Act / Assert
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $fingerprint))->toThrow(LiveShowException::class, __('live-show.conflict'));
+    expect($event->liveRun()->exists())->toBeFalse()
+        ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe(0);
+})->with(['outdated pack version' => true, 'different card fingerprint' => false]);

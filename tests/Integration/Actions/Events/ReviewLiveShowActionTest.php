@@ -7,7 +7,9 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 use App\Actions\Events\MarkLiveAttendanceAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
+use App\Actions\Events\TransitionLiveItemAction;
 use App\Enums\Events\LiveAttendanceMark;
+use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
 use App\Models\Matches\EventMatch;
 use App\ViewModels\EventPackViewModel;
@@ -40,4 +42,29 @@ test('review cannot adopt a source version that changed after the preview', func
     // Act / Assert
     expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 1, $pack->card_fingerprint, []))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->version)->toBe(1);
+});
+
+test('review refuses a removal reason for a key outside the removed pending items', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $pack = $fixture['event']->pack()->firstOrFail();
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Revised cues'], false);
+    $before = $fixture['run']->content;
+
+    // Act / Assert
+    expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 2, $pack->card_fingerprint, ['match:foreign' => 'Cancelled']))->toThrow(LiveShowException::class, __('live-show.unknown_item'));
+    expect($fixture['run']->refresh()->version)->toBe(1)->and($fixture['run']->content)->toBe($before);
+});
+
+test('review cannot discard a run when its replacement contains only already skipped items', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Skip, 'Cancelled match');
+    $pack = $fixture['event']->pack()->firstOrFail();
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Revised cues'], false);
+    $before = $fixture['run']->refresh()->content;
+
+    // Act / Assert
+    expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 2, 2, $pack->card_fingerprint, []))->toThrow(LiveShowException::class, __('live-show.prepare_required'));
+    expect($fixture['run']->refresh()->version)->toBe(2)->and($fixture['run']->content)->toBe($before);
 });

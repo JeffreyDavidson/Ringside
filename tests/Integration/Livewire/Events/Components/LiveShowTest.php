@@ -6,6 +6,7 @@ require_once __DIR__.'/../../../../Fixtures/live-show.php';
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
+use App\Enums\Events\LiveShowStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Components\LiveShow;
@@ -214,4 +215,33 @@ test('cancelling a correction or review leaves the saved run unchanged', functio
     $component->assertSet('reviewing', false);
     expect($fixture['run']->refresh()->version)->toBe(1)
         ->and($fixture['run']->content['items'][0]['state'])->toBe('pending');
+});
+
+test('a correction for an unknown item shows recovery feedback without opening a draft', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('beginCorrection', 'match:foreign', 'skip');
+
+    // Assert
+    $component->assertHasErrors('run')->assertSee(__('live-show.unknown_item'))->assertSet('draftKey', '');
+    expect($fixture['run']->refresh()->version)->toBe(1);
+});
+
+test('completing from the live screen saves a read only show and removes live controls', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+    $component->call('item', $fixture['key'], 'start');
+    $component->call('item', $fixture['key'], 'finish');
+
+    // Act
+    $component->call('complete');
+
+    // Assert
+    $component->assertHasNoErrors()->assertSee('Show completed')->assertDontSee('Start item')->assertDontSee('Finish item')->assertDontSee('Complete show');
+    expect($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Completed)
+        ->and($fixture['run']->completed_at)->not->toBeNull()->and($fixture['run']->version)->toBe(4);
 });
