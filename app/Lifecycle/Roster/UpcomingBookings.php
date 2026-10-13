@@ -29,12 +29,13 @@ final readonly class UpcomingBookings
      *
      * @return Collection<int, Event>
      */
-    public function events(Wrestler|Referee|TagTeam $rosterMember): Collection
+    public function events(Wrestler|Referee|TagTeam $rosterMember, ?int $promotionId = null): Collection
     {
         $matches = [$this->matches($rosterMember), ...$this->relatedMatches($rosterMember)];
 
         return Event::query()
             ->withoutGlobalScope(PromotionContextScope::class)
+            ->when($promotionId !== null, fn (Builder $query): Builder => $query->where('promotion_id', $promotionId))
             ->where(function (Builder $query) use ($matches): void {
                 foreach ($matches as $matchesQuery) {
                     $query->orWhereIn('id', $matchesQuery->select('event_id'));

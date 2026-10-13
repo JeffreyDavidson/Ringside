@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\Roster\Availability\CancelAction;
+use App\Actions\Roster\Availability\CreateAction;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -47,6 +51,32 @@ test('the bookable scope agrees with roster booking eligibility for individuals'
     'injured referee' => [Referee::class, 'injured', false],
     'suspended referee' => [Referee::class, 'suspended', false],
 ]);
+
+test('date-aware tag-team candidates agree with the authority for current and former members', function (bool $current, bool $cancelled): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $team = TagTeam::factory()->bookable()->for($promotion)->create();
+    $member = $team->currentWrestlers()->firstOrFail();
+    $member->forceFill(['promotion_id' => $promotion->id])->save();
+    $actor = administrator();
+    $entry = resolve(CreateAction::class)->handle($member, '2026-10-17', '2026-10-17', null, $actor);
+    if ($cancelled) {
+        resolve(CancelAction::class)->handle($member, $entry->id, $actor);
+    }
+    if (! $current) {
+        $team->wrestlers()->updateExistingPivot($member, ['left_at' => now()]);
+        $replacement = Wrestler::factory()->bookable()->for($promotion)->create();
+        $team->wrestlers()->attach($replacement, ['joined_at' => now()]);
+    }
+    $team->refresh();
+
+    // Act
+    $sql = TagTeam::query()->bookableOn('2026-10-17')->whereKey($team)->exists();
+    $authority = resolve(RosterBookingEligibility::class)->allows($team) && resolve(RosterDateAvailability::class)->allowsOn($team, '2026-10-17');
+
+    // Assert
+    expect($sql)->toBe($authority)->and($sql)->toBe(! $current || $cancelled);
+})->with([[true, false], [true, true], [false, false]]);
 
 test('the bookable scope agrees with roster booking eligibility for tag teams', function (string $state, bool $expected): void {
     // Arrange

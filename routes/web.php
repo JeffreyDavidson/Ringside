@@ -14,6 +14,7 @@ use App\Http\Controllers\Promotions\DeclinePromotionInvitationController;
 use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Controllers\Roster\ShowRosterAvailabilityController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
@@ -58,6 +59,7 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 
         Route::prefix('roster')->group(function () {
+            Route::get('availability', ShowRosterAvailabilityController::class)->can('viewAny', Wrestler::class)->name('availability.index');
             Route::get('stables', [StablesController::class, 'index'])->can('viewAny', Stable::class)->name('stables.index');
             Route::get('stables/{stable}', [StablesController::class, 'show'])->can('view', 'stable')->name('stables.show');
             Route::get('wrestlers', [WrestlersController::class, 'index'])->can('viewAny', Wrestler::class)->name('wrestlers.index');

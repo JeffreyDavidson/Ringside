@@ -14,6 +14,7 @@ use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Scopes\PromotionContextScope;
+use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class UpdateAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $assignmentConflicts,
+        private readonly EventRosterAvailabilityQuery $rosterAvailability,
         private readonly SchedulingSlotLock $slotLock,
         private readonly RecordNameLock $nameLock,
     ) {}
@@ -82,6 +84,7 @@ class UpdateAction
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
+                $this->rosterAvailability->ensureAt($lockedEvent, $eventData->date, lock: true);
             }
 
             $lockedEvent->update([

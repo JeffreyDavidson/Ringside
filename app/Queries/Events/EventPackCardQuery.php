@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Queries\Events;
 
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
@@ -24,6 +25,8 @@ use Illuminate\Support\Collection;
  */
 class EventPackCardQuery
 {
+    public function __construct(private readonly EventRosterAvailabilityQuery $calendar) {}
+
     /** @return Card */
     public function get(Event $event): array
     {
@@ -40,6 +43,7 @@ class EventPackCardQuery
             'tag_team' => TagTeam::query()->bookable()->whereKey($teams->modelKeys())->get()->map(fn (Wrestler|TagTeam|Referee $person): int => $person->id)->values()->all(),
             'referee' => Referee::query()->bookable()->whereKey($referees->pluck('id')->all())->get()->map(fn (Wrestler|TagTeam|Referee $person): int => $person->id)->values()->all(),
         ];
+        $calendarUnavailable = $this->calendar->unavailable($event)->map(RosterDateAvailability::key(...))->all();
         $rows = [];
         $roster = [];
         foreach ($matches as $match) {
@@ -47,20 +51,25 @@ class EventPackCardQuery
             $sides = $match->competitors->competitorModelsBySidePosition();
             foreach ($match->competitors as $assignment) {
                 $competitor = $assignment->competitor;
-                $warning = $warning || ! in_array($competitor->id, $available[$competitor->getMorphClass()], true);
+                $calendarRelevant = $match->match_finish === null || $event->date >= now();
+                $dateBlocked = $calendarRelevant && in_array(RosterDateAvailability::key($competitor), $calendarUnavailable, true);
+                $warning = $warning || $dateBlocked || ! in_array($competitor->id, $available[$competitor->getMorphClass()], true);
                 if ($competitor instanceof TagTeam) {
                     $team = $teams->firstOrFail(fn (TagTeam $team): bool => $team->id === $competitor->id);
                     foreach ($team->currentWrestlers as $wrestler) {
-                        $this->addPerson($roster, $wrestler, $competitor->name, $match->match_number, $available['wrestler']);
+                        $blocked = $calendarRelevant && in_array(RosterDateAvailability::key($wrestler), $calendarUnavailable, true);
+                        $warning = $warning || $blocked;
+                        $this->addPerson($roster, $wrestler, $competitor->name, $match->match_number, $available['wrestler'], $blocked);
                     }
 
                     continue;
                 }
-                $this->addPerson($roster, $competitor, __('event-pack.wrestler'), $match->match_number, $available['wrestler']);
+                $this->addPerson($roster, $competitor, __('event-pack.wrestler'), $match->match_number, $available['wrestler'], $dateBlocked);
             }
             foreach ($match->referees as $referee) {
-                $warning = $warning || ! in_array($referee->id, $available['referee'], true);
-                $this->addPerson($roster, $referee, __('event-pack.referee'), $match->match_number, $available['referee']);
+                $dateBlocked = ($match->match_finish === null || $event->date >= now()) && in_array(RosterDateAvailability::key($referee), $calendarUnavailable, true);
+                $warning = $warning || $dateBlocked || ! in_array($referee->id, $available['referee'], true);
+                $this->addPerson($roster, $referee, __('event-pack.referee'), $match->match_number, $available['referee'], $dateBlocked);
             }
             $rows[] = [
                 'id' => $match->id, 'number' => $match->match_number,
@@ -82,11 +91,12 @@ class EventPackCardQuery
      * @param  array<string, RosterRow>  $roster
      * @param  array<int, int>  $available
      */
-    private function addPerson(array &$roster, Wrestler|Referee $person, string $role, int $number, array $available): void
+    private function addPerson(array &$roster, Wrestler|Referee $person, string $role, int $number, array $available, bool $dateBlocked = false): void
     {
         $key = $person->getMorphClass().':'.$person->id;
         $roster[$key] ??= ['key' => $key, 'name' => $person instanceof Wrestler ? $person->name : $person->full_name,
-            'role' => $role, 'matches' => [], 'warning' => ! in_array($person->id, $available, true)];
+            'role' => $role, 'matches' => [], 'warning' => $dateBlocked || ! in_array($person->id, $available, true)];
+        $roster[$key]['warning'] = $roster[$key]['warning'] || $dateBlocked;
         $roster[$key]['role'] = implode(', ', array_unique([...explode(', ', $roster[$key]['role']), $role]));
         $roster[$key]['matches'] = array_values(array_unique([...$roster[$key]['matches'], $number]));
     }
