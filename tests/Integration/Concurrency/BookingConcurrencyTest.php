@@ -16,6 +16,7 @@ use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\Events\TalentBookingException;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -24,6 +25,7 @@ use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -738,6 +740,50 @@ test('concurrent live show commands commit once without replacing times or dupli
 })->with(['prepare', 'start', 'finish', 'attendance'])
     ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
     ->group('concurrency', 'postgres-concurrency');
+
+test('calendar writes serialize with direct team and rescheduled bookings without erasing prior bookings', function (string $mode): void {
+    withCommittedData(function () use ($mode): void {
+        foreach (range(1, 3) as $run) {
+            // Arrange
+            $promotion = Promotion::factory()->create();
+            $person = Wrestler::factory()->bookable()->for($promotion)->create();
+            $actor = administrator();
+            $target = now()->addWeeks($run)->startOfDay()->addHours(18);
+            $event = Event::factory()->for($promotion)->create(['name' => 'Availability race '.$mode.' '.$run, 'date' => $mode === 'reschedule' ? $target->copy()->subDay() : $target, 'venue_id' => null]);
+            $spec = ['event_id' => $event->id, 'first_wrestler_id' => $person->id,
+                'second_wrestler_id' => Wrestler::factory()->bookable()->for($promotion)->create()->id,
+                'referee_id' => Referee::factory()->bookable()->for($promotion)->create()->id];
+            if ($mode === 'team') {
+                $team = TagTeam::factory()->bookable()->for($promotion)->create();
+                $person = $team->currentWrestlers()->firstOrFail();
+                $person->forceFill(['promotion_id' => $promotion->id])->save();
+                $spec['team_id'] = $team->id;
+                $spec['opponent_team_id'] = TagTeam::factory()->bookable()->for($promotion)->create()->id;
+            }
+            if ($mode === 'reschedule') {
+                EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
+                $spec = ['event_id' => $event->id, 'reschedule_date' => $target->toDateTimeString()];
+            }
+            $availability = ['unavailability_person_id' => $person->id, 'unavailability_day' => $target->toDateString(), 'user_id' => $actor->id];
+
+            // Act
+            $results = bookConcurrently([$spec, $availability]);
+
+            // Assert
+            expect($results[1]['ok'])->toBeTrue(workerOutcomes($results))
+                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+                ->and($results[0]['exception'])->toBeIn([null, EntityNotAvailableException::class])
+                ->and(Unavailability::query()->where('person_id', $person->id)->count())->toBe(1);
+            if ($mode === 'reschedule') {
+                expect($event->refresh()->date?->toDateTimeString())->toBe(($results[0]['ok'] ? $target : $target->copy()->subDay())->toDateTimeString());
+            } else {
+                expect($event->matches()->count())->toBe($results[0]['ok'] ? 1 : 0);
+            }
+        }
+    });
+})->with(['direct', 'team', 'reschedule'])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency', 'availability-concurrency');
 
 test('concurrent talent changes never duplicate or overwrite agreements', function (string $operation): void {
     withCommittedData(function () use ($operation): void {

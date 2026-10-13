@@ -31,5 +31,22 @@
         </div>
     @endcan
 
+    @php
+        $calendarUnavailable = app(\App\Queries\Events\EventRosterAvailabilityQuery::class)->unavailable($event);
+    @endphp
+    @if ($event->date === null)
+        <p class="text-ringside-muted mb-5">{{ __('availability.not_checked') }}</p>
+    @elseif ($calendarUnavailable->isNotEmpty() && ($event->date >= now() || $event->matches()->whereNull('match_finish')->exists()))
+        <div class="border-ringside-line text-ringside-warning mb-5 flex gap-3 border p-4" role="status">
+            <x-heroicon-o-exclamation-triangle class="size-5 shrink-0" aria-hidden="true" />
+            <div>
+                <p class="font-semibold">{{ __('availability.card_warning') }}</p>
+                <p class="text-ringside-muted mt-2">
+                    {{ $calendarUnavailable->map(fn ($person) => $person instanceof \App\Models\Roster\Referees\Referee ? $person->full_name : $person->name)->join(', ') }} · {{ $event->local_date?->toDateString() }}
+                </p>
+            </div>
+        </div>
+    @endif
+
     <livewire:matches.tables.matches-table :eventId="$event->id" defer.bundle />
 </x-layouts.show-page>

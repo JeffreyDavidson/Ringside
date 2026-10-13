@@ -64,4 +64,16 @@ class TagTeamBuilder extends Builder
                 ),
             );
     }
+
+    public function bookableOn(?string $date): static
+    {
+        $this->bookable();
+        if ($date === null) {
+            return $this;
+        }
+
+        return $this->whereDoesntHave('currentWrestlers', fn (WrestlerBuilder $members): WrestlerBuilder => $members
+            ->whereHas('unavailabilities', fn (UnavailabilityBuilder $entries): UnavailabilityBuilder => $entries
+                ->covering($date)->whereColumn('roster_unavailabilities.promotion_id', 'wrestlers.promotion_id')));
+    }
 }
