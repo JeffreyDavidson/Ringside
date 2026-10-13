@@ -1,6 +1,7 @@
 <x-layouts.app :title="__('event-pack.title')">
     <div class="event-pack-editor">
         <a href="{{ route('events.show', $event) }}">&larr; {{ __('event-pack.back') }}</a>
+        <a href="{{ route('events.live-show.show', $event) }}">{{ __('live-show.title') }}</a>
         <header class="pack-heading">
             <div>
                 <p class="pack-eyebrow">{{ __('event-pack.title') }}</p>

@@ -3,11 +3,15 @@
         <x-events.show.general-info :$event />
     </x-slot:sidebar>
 
-    <div class="mb-6 flex justify-end">
+    <div class="mb-6 flex flex-wrap justify-end gap-3">
         <a
             href="{{ route('events.pack.show', $event) }}"
             class="border-ringside-line-bright border px-4 py-3 font-semibold"
         >{{ __('event-pack.title') }}</a>
+        <a
+            href="{{ route('events.live-show.show', $event) }}"
+            class="border-ringside-line-bright border px-4 py-3 font-semibold"
+        >{{ __('live-show.title') }}</a>
     </div>
 
     @can('create', \App\Models\Matches\EventMatch::class)

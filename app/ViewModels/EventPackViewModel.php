@@ -15,7 +15,7 @@ use App\Queries\Events\EventPackCardQuery;
  * @phpstan-import-type Segment from EventPack
  * @phpstan-import-type CardRow from EventPackCardQuery
  *
- * @phpstan-type RunningRow array{label: string, details: string, referees: string, warning: bool, timing: Timing|array{}}
+ * @phpstan-type RunningRow array{key: string, label: string, details: string, referees: string, warning: bool, timing: Timing|array{}}
  *
  * @phpstan-import-type Card from EventPackCardQuery
  */
@@ -35,13 +35,13 @@ class EventPackViewModel
         $segments = collect($content['segments']);
         $running = [];
         foreach ($segments->whereNull('after_match_id') as $segment) {
-            $running[] = ['label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
+            $running[] = ['key' => 'segment:'.$segment['id'], 'label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
         }
         foreach ($card['rows'] as $row) {
-            $running[] = ['label' => $row['number'].'. '.($row['label'] ?: __('event-pack.no_competitors')),
+            $running[] = ['key' => 'match:'.$row['id'], 'label' => $row['number'].'. '.($row['label'] ?: __('event-pack.no_competitors')),
                 'details' => $row['details'], 'referees' => $row['referees'], 'warning' => $row['warning'], 'timing' => $timings->get($row['id'], [])];
             foreach ($segments->where('after_match_id', $row['id']) as $segment) {
-                $running[] = ['label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
+                $running[] = ['key' => 'segment:'.$segment['id'], 'label' => $segment['label'], 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $segment];
             }
         }
 

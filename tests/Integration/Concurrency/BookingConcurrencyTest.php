@@ -2,13 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Actions\Events\PrepareLiveShowAction;
+use App\Actions\Events\SaveEventPackAction;
+use App\Actions\Events\TransitionLiveItemAction;
+use App\Enums\Events\LiveItemOperation;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
+use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
+use App\Models\Events\EventLiveRun;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
@@ -18,8 +24,10 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Models\Activity;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 
@@ -681,4 +689,44 @@ test('two venues created with the same name at once admit only one', function ()
         }
     });
 })->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('concurrent live show commands commit once without replacing times or duplicating audits', function (string $operation): void {
+    withCommittedData(function () use ($operation): void {
+        // Arrange
+        $user = administrator();
+        \Pest\Laravel\actingAs($user);
+        $event = Event::factory()->create(['name' => 'Live race '.$operation, 'date' => now()]);
+        EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
+        $data = resolve(EventPackViewModel::class)->data($event);
+        resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+        $version = 0;
+        $key = '';
+        if ($operation !== 'prepare') {
+            $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+            $version = 1;
+            $key = $operation === 'attendance' ? $run->content['roster'][0]['key'] : $run->content['items'][0]['key'];
+            if ($operation === 'finish') {
+                resolve(TransitionLiveItemAction::class)->handle($event, 1, $key, LiveItemOperation::Start);
+                $version = 2;
+            }
+        }
+        $auditCount = Activity::query()->where('log_name', 'live-show')->count();
+        $spec = ['live_event_id' => $event->id, 'user_id' => $user->id, 'live_operation' => $operation, 'version' => $version,
+            'pack_version' => 1, 'fingerprint' => $data['card']['fingerprint'], 'key' => $key, 'clock' => now()->toIso8601String()];
+
+        // Act
+        $results = bookConcurrently([$spec, $spec]);
+
+        // Assert
+        expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results));
+        expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([LiveShowException::class], workerOutcomes($results))
+            ->and(collect($results)->contains('deadlock', true))->toBeFalse(workerOutcomes($results));
+        $run = EventLiveRun::query()->where('event_id', $event->id)->firstOrFail();
+        expect($run->version)->toBe($version + 1)
+            ->and(EventLiveRun::query()->where('event_id', $event->id)->count())->toBe(1)
+            ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe($auditCount + 1);
+    });
+})->with(['prepare', 'start', 'finish', 'attendance'])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
     ->group('concurrency', 'postgres-concurrency');
