@@ -28,8 +28,7 @@ class EventPackViewModel
     {
         $card = $this->query->get($event);
         $pack = $event->pack()->first();
-        $content = $pack->content ?? ['timezone' => $card['timezone'], 'doors_at' => null,
-            'revision' => null, 'master' => null, 'notes' => null, 'follow_up' => null, 'matches' => [], 'segments' => []];
+        $content = $pack->content ?? ['timezone' => $card['timezone'], 'doors_at' => null, 'revision' => null, 'master' => null, 'notes' => null, 'follow_up' => null, 'matches' => [], 'segments' => []];
 
         $ids = array_column($card['rows'], 'id');
         $timings = collect($content['matches'])->keyBy('match_id');

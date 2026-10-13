@@ -8,7 +8,6 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use LogicException;
 
 /** @phpstan-import-type Content from EventPack */
 class UpdateEventPackRequest extends FormRequest
@@ -16,10 +15,8 @@ class UpdateEventPackRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        /** @var Event $event */
         $event = $this->route('event');
-        if (! $event instanceof Event) {
-            throw new LogicException('The event pack request requires a bound event.');
-        }
         $ownedMatch = Rule::exists('events_matches', 'id')->where('event_id', $event->id);
 
         return [
