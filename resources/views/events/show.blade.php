@@ -4,6 +4,12 @@
     </x-slot:sidebar>
 
     <div class="mb-6 flex flex-wrap justify-end gap-3">
+        @can('update', $event)
+            <a
+                href="{{ route('events.talent-bookings.show', $event) }}"
+                class="border-ringside-line-bright border px-4 py-3 font-semibold"
+            >{{ __('talent-bookings.title') }}</a>
+        @endcan
         <a
             href="{{ route('events.pack.show', $event) }}"
             class="border-ringside-line-bright border px-4 py-3 font-semibold"
