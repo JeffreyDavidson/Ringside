@@ -10,6 +10,7 @@ use App\Models\Events\Event;
 use App\Models\Users\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ try {
         default => throw new InvalidArgumentException('Unknown budget worker operation'),
     };
     $result = ['ok' => true, 'exception' => null];
-} catch (BaseBusinessException|QueryException|\Illuminate\Database\Eloquent\ModelNotFoundException|AuthorizationException $exception) {
+} catch (BaseBusinessException|QueryException|ModelNotFoundException|AuthorizationException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class];
 }
 fwrite(STDOUT, 'RESULT '.json_encode($result, JSON_THROW_ON_ERROR)."\n");
