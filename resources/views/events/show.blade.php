@@ -3,6 +3,13 @@
         <x-events.show.general-info :$event />
     </x-slot:sidebar>
 
+    <div class="mb-6 flex justify-end">
+        <a
+            href="{{ route('events.pack.show', $event) }}"
+            class="border-ringside-line-bright border px-4 py-3 font-semibold"
+        >{{ __('event-pack.title') }}</a>
+    </div>
+
     @can('create', \App\Models\Matches\EventMatch::class)
         <div class="mb-6 flex justify-end">
             <x-buttons.primary

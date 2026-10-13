@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -41,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property-read Venue|null $venue
  * @property-read Promotion|null $promotion
  * @property-read Collection<int, EventMatch> $matches
+ * @property-read EventPack|null $pack
  *
  * @method static \Database\Factories\Events\EventFactory factory($count = null, $state = [])
  * @method static EventBuilder<static>|Event latestDatedFirst()
@@ -95,6 +97,12 @@ class Event extends Model implements SoftDeletable
     public function matches(): HasMany
     {
         return $this->hasMany(EventMatch::class);
+    }
+
+    /** @return HasOne<EventPack, $this> */
+    public function pack(): HasOne
+    {
+        return $this->hasOne(EventPack::class);
     }
 
     /**
