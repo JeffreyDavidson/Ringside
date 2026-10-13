@@ -8,6 +8,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Storylines\Storyline;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,11 @@ class PromotionGate
 
         if ($subject instanceof Promotion) {
             return $this->authorizePromotionSubject($user, $ability, $subject);
+        }
+
+        // Creative planning has a stricter read boundary than ordinary promotion content.
+        if ($subject instanceof Storyline || $subject === Storyline::class) {
+            return null;
         }
 
         return $this->authorizePromotionOwnedSubject($user, $ability, $subject);

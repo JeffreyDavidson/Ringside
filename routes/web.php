@@ -15,6 +15,7 @@ use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
+use App\Http\Controllers\Storylines\StorylinesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Users\UsersController;
@@ -29,6 +30,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Storylines\Storyline;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::get('promotions/{promotion}', [PromotionsController::class, 'show'])
             ->can('view', 'promotion')
             ->name('promotions.show');
+
+        Route::get('storylines', [StorylinesController::class, 'index'])->can('viewAny', Storyline::class)->name('storylines.index');
+        Route::get('storylines/{storyline}', [StorylinesController::class, 'show'])->can('view', 'storyline')->name('storylines.show');
 
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 

@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\Storylines;
+
+use App\Data\Storylines\StepData;
+use App\Enums\Storylines\StepStatus;
+use App\Exceptions\Storylines\StorylineConflictException;
+use App\Models\Promotions\Promotion;
+use App\Models\Storylines\Storyline;
+use App\Models\Storylines\StorylineStep;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
+
+class SaveStepAction
+{
+    public function __construct(private readonly LockSourceAction $source, private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision) {}
+
+    public function handle(Storyline $storyline, int $version, StepData $data, ?int $stepId = null): StorylineStep
+    {
+        Gate::authorize('update', $storyline);
+        Validator::make(['heading' => $data->heading, 'description' => $data->description, 'sequence' => $data->sequence, 'submission' => $data->submissionId, 'reason' => $data->reason], [
+            'heading' => ['required', 'string', 'max:160'], 'description' => ['required', 'string', 'max:4000'],
+            'sequence' => ['required', 'integer', 'min:1', 'max:10000'], 'submission' => ['required', 'uuid'],
+            'reason' => [$stepId === null ? 'nullable' : 'required', 'string', 'max:2000'],
+        ])->validate();
+
+        return DB::transaction(function () use ($storyline, $version, $data, $stepId): StorylineStep {
+            $source = $this->source->handle($data->source, $storyline->promotion_id);
+            $story = $this->lock->handle($storyline, $version);
+            $step = $stepId === null ? new StorylineStep : $story->steps()->findOrFail($stepId);
+            if ($stepId !== null && $step->status === StepStatus::Happened) {
+                throw StorylineConflictException::state();
+            }
+            if ($stepId === null && $story->steps()->where('submission_id', $data->submissionId)->exists()) {
+                throw StorylineConflictException::changed();
+            }
+            $before = $step->attributesToArray();
+            $step->promotion_id = $story->promotion_id;
+            $step->storyline_id = $story->id;
+            $step->heading = $data->heading;
+            $step->description = $data->description;
+            $step->sequence = $data->sequence;
+            $step->event_id = $data->source->eventId;
+            $step->match_id = $data->source->matchId;
+            $step->segment_id = $data->source->segmentId;
+            $previousTarget = $step->target_on?->toDateString();
+            $step->target_on = $data->source->targetOn === null ? null : Carbon::parse($data->source->targetOn);
+            $step->timezone = $stepId === null || $previousTarget !== $data->source->targetOn ? Promotion::query()->findOrFail($story->promotion_id)->timezone : $step->timezone;
+            $step->target_at = $data->source->targetOn === null ? null : Carbon::parse($data->source->targetOn, $step->timezone)->utc();
+            $step->source_context = $source['context'];
+            $step->submission_id = $stepId === null ? $data->submissionId : $step->submission_id;
+            $step->version = $stepId === null ? 1 : $step->version + 1;
+            $step->save();
+            $this->revision->handle($story, $step, $stepId === null ? 'step_planned' : 'step_revised', $before, $data->reason);
+
+            return $step->refresh();
+        }, attempts: 3);
+    }
+}
