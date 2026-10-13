@@ -37,6 +37,8 @@ class MatchesTable extends DataTableComponent
      */
     protected array $unbookable = [];
 
+    protected ?string $bookingDay = null;
+
     protected string $databaseTableName = 'events_matches';
 
     #[\Override]
@@ -120,6 +122,8 @@ class MatchesTable extends DataTableComponent
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
+        $event = Event::query()->with('promotion')->findOrFail($this->eventId);
+        $this->bookingDay = $event->local_date?->toDateString();
         $booked = $rows->toBase()
             ->filter(fn (EventMatch $match): bool => $match->match_finish === null || $match->event->date >= now())
             ->flatMap(fn (EventMatch $match): Collection => $match->competitors->toBase()
@@ -155,7 +159,7 @@ class MatchesTable extends DataTableComponent
 
         return $type::query()
             ->whereKey($members->map->getKey())
-            ->bookable()
+            ->bookableOn($this->bookingDay)
             ->get()
             ->toBase()
             ->map(MatchTableFormatter::unbookableKey(...));

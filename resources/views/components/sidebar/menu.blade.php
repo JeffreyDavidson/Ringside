@@ -13,6 +13,12 @@
         </x-slot:icon>
         {{ __('navigation.sections.events') }}
     </x-sidebar.menu-item>
+    <x-sidebar.menu-item href="{{ route('availability.index') }}" :active="request()->routeIs('availability.*')">
+        <x-slot:icon>
+            <x-heroicon-o-calendar-days class="size-5" />
+        </x-slot:icon>
+        {{ __('availability.title') }}
+    </x-sidebar.menu-item>
     <x-sidebar.menu-item href="{{ route('wrestlers.index') }}" :active="request()->routeIs('wrestlers.*')">
         <x-slot:icon>
             <x-heroicon-o-user-group class="size-5" />
