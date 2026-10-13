@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Events\EventBudgetsController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
 use App\Http\Controllers\Events\EventsController;
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
+        Route::get('events/{event}/budget', [EventBudgetsController::class, 'show'])->can('viewBudget', 'event')->name('events.budget.show');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
 
         Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');
