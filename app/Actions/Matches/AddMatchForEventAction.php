@@ -8,6 +8,7 @@ use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Services\Matches\MatchAssignmentConflictService;
@@ -21,6 +22,7 @@ class AddMatchForEventAction
         private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
         private readonly MatchConfigurationRequirements $requirements,
         private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchRosterLock $rosterLock,
     ) {}
 
     /** @throws EntityNotAvailableException|InvalidMatchConfigurationException */
@@ -44,6 +46,7 @@ class AddMatchForEventAction
                 'preview' => $eventMatchData->preview,
             ]);
 
+            $this->rosterLock->forData($eventMatchData);
             $this->addRefereesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->referees);
 
             $this->addCompetitorsToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->sides);

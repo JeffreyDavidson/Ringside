@@ -12,4 +12,9 @@ final class EntityNotAvailableException extends BaseBusinessException
     {
         return new self(__('matches.errors.scheduling.not_available_for_match', ['entity_type' => $entityType]));
     }
+
+    public static function onDate(string $name, string $date): static
+    {
+        return new self(__('availability.unavailable', ['name' => $name, 'date' => $date]));
+    }
 }

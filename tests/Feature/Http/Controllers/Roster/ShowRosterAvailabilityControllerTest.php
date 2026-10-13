@@ -1,0 +1,58 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Roster\Availability\CreateAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
+use App\Models\Promotions\Promotion;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Users\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
+test('the calendar requires authentication', function (): void {
+    get(route('availability.index'))->assertRedirect(route('login'));
+});
+
+test('the calendar shows only the current promotions unavailable people and reasons', function (MembershipRole $role): void {
+    // Arrange
+    $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+    $foreign = Promotion::factory()->create();
+    $person = Wrestler::factory()->for($promotion)->create(['name' => 'Harbor Talent']);
+    $other = Wrestler::factory()->for($foreign)->create(['name' => 'Foreign Talent']);
+    $actor = administrator();
+    resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', 'Local commitment', $actor);
+    resolve(CreateAction::class)->handle($other, '2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON', $actor);
+    $member = User::factory()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($member, ['role' => $role, 'status' => MembershipStatus::Active]);
+
+    // Act
+    actingAs($member);
+    $response = get(route('availability.index', ['date' => '2026-10-17']));
+
+    // Assert
+    $response->assertOk()->assertSee('Harbor Talent')->assertSee('Local commitment')->assertSee('America/New_York')
+        ->assertDontSee('Foreign Talent')->assertDontSee('FOREIGN-PRIVATE-REASON');
+})->with([MembershipRole::Owner, MembershipRole::Manager, MembershipRole::Member]);
+
+test('a global administrator must choose a promotion for the calendar', function (): void {
+    actingAs(administrator());
+    get(route('availability.index'))->assertOk()->assertSee('Choose a promotion');
+});
+
+test('malformed initial calendar filters show a useful error rather than throwing', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $member = User::factory()->create(['status' => UserStatus::Active]);
+    $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+
+    // Act
+    actingAs($member);
+    $response = get(route('availability.index', ['date' => 'not-a-date', 'kind' => 'unknown']));
+
+    // Assert
+    $response->assertOk()->assertSee('Enter a valid calendar date');
+});

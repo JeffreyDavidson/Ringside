@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Events\EventTalentBookingsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Promotions\DeclinePromotionInvitationController;
 use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Controllers\Roster\ShowRosterAvailabilityController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Storylines\StorylinesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
@@ -63,6 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 
         Route::prefix('roster')->group(function () {
+            Route::get('availability', ShowRosterAvailabilityController::class)->can('viewAny', Wrestler::class)->name('availability.index');
             Route::get('stables', [StablesController::class, 'index'])->can('viewAny', Stable::class)->name('stables.index');
             Route::get('stables/{stable}', [StablesController::class, 'show'])->can('view', 'stable')->name('stables.show');
             Route::get('wrestlers', [WrestlersController::class, 'index'])->can('viewAny', Wrestler::class)->name('wrestlers.index');
@@ -83,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
+        Route::get('events/{event}/talent-bookings', [EventTalentBookingsController::class, 'show'])->can('update', 'event')->name('events.talent-bookings.show');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
 
         Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');
