@@ -40,6 +40,7 @@ use App\Actions\Events\TransitionLiveItemAction;
 use App\Actions\Events\UpdateAction;
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
+use App\Actions\Roster\Availability\CreateAction as CreateUnavailabilityAction;
 use App\Actions\Sponsors\SaveSponsorAction;
 use App\Actions\Stables\CreateAction as CreateStableAction;
 use App\Actions\Stables\RestoreAction as RestoreStableAction;
@@ -103,7 +104,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{sponsor_event_id: int, sponsor_id: int, promise_id: int, user_id: int, version: int, submission_key: string, sponsor_operation: string, fingerprint: string, pack_version: int, preview_hash: string, target_key: string, mode: string, clock: string}|array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{sponsor_event_id: int, sponsor_id: int, promise_id: int, user_id: int, version: int, submission_key: string, sponsor_operation: string, fingerprint: string, pack_version: int, preview_hash: string, target_key: string, mode: string, clock: string}|array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -124,7 +125,14 @@ if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
 }
 
 try {
-    if (isset($spec['talent_event_id'])) {
+    if (isset($spec['unavailability_person_id'])) {
+        resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), $spec['unavailability_day'], $spec['unavailability_day'], null, User::query()->findOrFail($spec['user_id']));
+    } elseif (isset($spec['team_id'])) {
+        resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
+            MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),
+            collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]]), null,
+        ));
+    } elseif (isset($spec['talent_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         Carbon::setTestNow($spec['clock']);
         resolve(SaveTalentBookingAction::class)->handle(Event::query()->findOrFail($spec['talent_event_id']), 'wrestler', $spec['person_id'],

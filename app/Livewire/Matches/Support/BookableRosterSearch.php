@@ -26,16 +26,16 @@ final class BookableRosterSearch
      *
      * @return array<int, array{id: int|string, name: string}>
      */
-    public function search(BookableRosterKind $kind, string $term, ?int $promotionId): array
+    public function search(BookableRosterKind $kind, string $term, ?int $promotionId, ?string $date = null): array
     {
         $column = $this->nameColumn($kind);
         // Names never contain LIKE wildcards, so drop them rather than depend on database-specific escaping.
         $needle = mb_trim(str_replace(['%', '_', '\\'], '', $term));
 
         $query = match ($kind) {
-            BookableRosterKind::Wrestlers => Wrestler::query()->bookable(),
-            BookableRosterKind::TagTeams => TagTeam::query()->bookable(),
-            BookableRosterKind::Referees => Referee::query()->bookable(),
+            BookableRosterKind::Wrestlers => Wrestler::query()->bookableOn($date),
+            BookableRosterKind::TagTeams => TagTeam::query()->bookableOn($date),
+            BookableRosterKind::Referees => Referee::query()->bookableOn($date),
         };
 
         return $this->options(
