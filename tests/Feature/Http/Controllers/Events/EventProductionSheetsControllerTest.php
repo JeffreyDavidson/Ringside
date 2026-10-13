@@ -50,7 +50,6 @@ test('long cue sheets retain full manual instructions and never print contact de
 
     // Assert
     $response->assertOk()->assertSee('Long cue 6')->assertDontSee('CONTACT-PHONE-7Q')->assertDontSee('CONTACT-NOTE-7Q');
-    file_put_contents('/private/tmp/ringside-crew-print-long.html', $response->getContent());
 });
 
 test('opening an empty production sheet creates no data and labels the plan unsaved', function (): void {
