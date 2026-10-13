@@ -49,7 +49,7 @@ test('review refuses a removal reason for a key outside the removed pending item
     $fixture = liveShowFixture();
     $pack = $fixture['event']->pack()->firstOrFail();
     resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Revised cues'], false);
-    $before = $fixture['run']->content;
+    $before = $fixture['run']->refresh()->content;
 
     // Act / Assert
     expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 2, $pack->card_fingerprint, ['match:foreign' => 'Cancelled']))->toThrow(LiveShowException::class, __('live-show.unknown_item'));
