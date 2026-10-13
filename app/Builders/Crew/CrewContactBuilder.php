@@ -14,6 +14,9 @@ class CrewContactBuilder extends Builder
     {
         $term = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower(mb_substr($term, 0, 160)));
 
-        return $this->whereRaw("LOWER(name) LIKE ? ESCAPE '!'", ["%{$term}%"]);
+        return $this->whereRaw(
+            "LOWER(name) LIKE ? ESCAPE '!'",
+            ["%{$term}%"],
+        );
     }
 }
