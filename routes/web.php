@@ -6,9 +6,15 @@ use App\Http\Controllers\Crew\CrewContactsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
+use App\Http\Controllers\Events\EventPosterController;
 use App\Http\Controllers\Events\EventProductionSheetsController;
+use App\Http\Controllers\Events\EventPublicPagesController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\EventTalentBookingsController;
+use App\Http\Controllers\Events\PreviewEventPosterController;
+use App\Http\Controllers\Events\PublicEventController;
+use App\Http\Controllers\Events\ReleaseEventPublicationController;
+use App\Http\Controllers\Events\UnpublishEventController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
@@ -41,6 +47,9 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/auth.php';
 
 Route::get('/', MarketingController::class)->name('home');
+Route::get('shows/{publicId}/{slug}', PublicEventController::class)->whereUuid('publicId')->name('shows.show');
+Route::get('shows/{publicId}/{slug}/results', PublicEventController::class)->whereUuid('publicId')->name('shows.results');
+Route::get('shows/{publicId}/{slug}/poster/{asset}', EventPosterController::class)->whereUuid('publicId')->where('asset', '[a-f0-9-]{36}\\.png')->name('shows.poster');
 
 Route::middleware('auth')->group(function () {
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
@@ -81,6 +90,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
         Route::get('production-crew', [CrewContactsController::class, 'index'])->can('viewAny', CrewContact::class)->name('crew.contacts.index');
+        Route::get('events/{event}/public-pages', [EventPublicPagesController::class, 'edit'])->can('preparePublication', 'event')->name('events.public-pages.edit');
+        Route::put('events/{event}/public-pages', [EventPublicPagesController::class, 'update'])->can('preparePublication', 'event')->name('events.public-pages.update');
+        Route::get('events/{event}/public-pages/preview', [EventPublicPagesController::class, 'show'])->can('preparePublication', 'event')->name('events.public-pages.show');
+        Route::get('events/{event}/public-pages/poster', PreviewEventPosterController::class)->can('uploadPublicationPoster', 'event')->name('events.public-pages.poster');
+        Route::post('events/{event}/public-pages/publish', ReleaseEventPublicationController::class)->can('publishPublication', 'event')->name('events.public-pages.publish');
+        Route::delete('events/{event}/public-pages/publish', UnpublishEventController::class)->can('unpublishPublication', 'event')->name('events.public-pages.unpublish');
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');

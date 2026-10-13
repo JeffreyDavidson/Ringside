@@ -16,6 +16,10 @@ enum MembershipRole: string
     private const array CONTENT_ABILITIES = [
         'viewProduction',
         'updateProduction',
+        'preparePublication',
+        'publishPublication',
+        'unpublishPublication',
+        'uploadPublicationPoster',
         'view',
         'viewAny',
         'create',

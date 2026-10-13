@@ -8,6 +8,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Crew\Components\Directory;
 use App\Livewire\Events\Components\Production;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Promotions\Promotion;
@@ -97,4 +98,36 @@ test('member forged production updates and directory edits write nothing', funct
         $event->pack()->firstOrFail()->card_fingerprint, $fixture['production'], false))
         ->toThrow(AuthorizationException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before);
+});
+
+test('published event cards and results omit crew contacts and production cues', function (): void {
+    // Arrange
+    $world = publicEventFixture();
+    $event = $world['event'];
+    $contact = CrewContact::factory()->create(['promotion_id' => $event->promotion_id,
+        'name' => 'PRIVATE-CREW-7Q', 'phone' => 'PRIVATE-PHONE-7Q',
+        'email' => 'private-crew-7q@example.test', 'notes' => 'PRIVATE-CONTACT-NOTE-7Q']);
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventProductionAction::class)->handle($event, 0, $data['card']['fingerprint'], [
+        'notes' => 'PRIVATE-NOTE-7Q',
+        'assignments' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC']],
+        'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$world['match']->id,
+            'subject' => 'PRIVATE-SUBJECT-7Q', 'trigger' => 'PRIVATE-TRIGGER-7Q', 'instruction' => 'PRIVATE-CUE-7Q',
+            'owner_id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001']],
+    ], false);
+
+    // Act
+    savePublicDraft($event);
+    releasePublicPage($event);
+    $publication = releasePublicPage($event, 'results');
+    $surfaces = publicEventSurfaces($event, $publication);
+
+    // Assert
+    $surfaces['snapshots'] = json_encode([$publication->card, $publication->results], JSON_THROW_ON_ERROR);
+    foreach ($surfaces as $surface) {
+        expect($surface)->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-PHONE-7Q', 'private-crew-7q@example.test',
+            'PRIVATE-CONTACT-NOTE-7Q', 'PRIVATE-NOTE-7Q', 'PRIVATE-SUBJECT-7Q', 'PRIVATE-TRIGGER-7Q', 'PRIVATE-CUE-7Q');
+    }
+    expect($surfaces['card'])->toContain('Robin North', 'Casey Shore')
+        ->and($surfaces['results'])->toContain('Robin North');
 });
