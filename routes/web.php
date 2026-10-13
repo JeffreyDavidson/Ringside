@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Crew\CrewContactsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
+use App\Http\Controllers\Events\EventProductionSheetsController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
@@ -20,6 +22,7 @@ use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -74,9 +77,11 @@ Route::middleware('auth')->group(function () {
         Route::get('titles/{title}', [TitlesController::class, 'show'])->can('view', 'title')->name('titles.show');
 
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
+        Route::get('production-crew', [CrewContactsController::class, 'index'])->can('viewAny', CrewContact::class)->name('crew.contacts.index');
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
+        Route::get('events/{event}/production-sheet', [EventProductionSheetsController::class, 'show'])->can('viewProduction', 'event')->name('events.production-sheet.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
 

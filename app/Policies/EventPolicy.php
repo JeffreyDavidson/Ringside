@@ -25,6 +25,16 @@ class EventPolicy
         return false;
     }
 
+    public function viewProduction(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function updateProduction(User $user, Event $event): bool
+    {
+        return false;
+    }
+
     public function create(User $user): bool
     {
         return false;

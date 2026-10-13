@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Events\CompleteLiveShowAction;
+use App\Actions\Events\MarkLiveAttendanceAction;
+use App\Actions\Events\PrepareLiveShowAction;
+use App\Actions\Events\ReviewLiveShowAction;
+use App\Actions\Events\SaveEventProductionAction;
+use App\Actions\Events\TransitionLiveItemAction;
+use App\Enums\Events\LiveAttendanceMark;
+use App\Enums\Events\LiveItemOperation;
+use App\Exceptions\Events\LiveShowException;
+use App\ViewModels\EventPackViewModel;
+use Spatie\Activitylog\Models\Activity;
+
+require_once __DIR__.'/../../../Fixtures/production.php';
+
+test('preparation snapshots crew and manual cues without copying private contact notes', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+
+    // Act
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
+    // Assert
+    expect(collect($run->content['roster'])->where('key', 'crew:'.$fixture['contact']->id))->toHaveCount(1)
+        ->and(data_get($run->content, 'items.0.cues.0.instruction'))->toBe('PRIVATE-CUE-7Q')
+        ->and(json_encode($run->content))->not->toContain('PRIVATE-NOTE-7Q');
+    resolve(MarkLiveAttendanceAction::class)->handle($event, 1, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true);
+    expect(data_get(collect($run->refresh()->content['roster'])->firstWhere('key', 'crew:'.$fixture['contact']->id), 'arrived'))->not->toBeNull();
+});
+
+test('source adoption preserves started cue owners and removed crew attendance', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    resolve(MarkLiveAttendanceAction::class)->handle($event, 1, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true);
+    resolve(TransitionLiveItemAction::class)->handle($event, 2, 'match:'.$fixture['match']->id, LiveItemOperation::Start);
+    $production = $fixture['production'];
+    $production['assignments'] = [];
+    $production['cues'][0]['instruction'] = 'Changed pending instructions';
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
+
+    // Act
+    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], []);
+
+    // Assert
+    $content = $run->refresh()->content;
+    expect(data_get($content, 'items.0.cues.0.instruction'))->toBe('PRIVATE-CUE-7Q')
+        ->and(data_get($content, 'items.0.cues.0.owner_name'))->toBe('PRIVATE-CREW-7Q')
+        ->and(collect($content['roster'])->firstWhere('key', 'crew:'.$fixture['contact']->id))->toMatchArray(['assigned' => false])
+        ->and(data_get(collect($content['roster'])->firstWhere('key', 'crew:'.$fixture['contact']->id), 'arrived'))->not->toBeNull();
+});
+
+test('live operation audit properties exclude private crew names and instructions', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
+    // Act
+    resolve(TransitionLiveItemAction::class)->handle($event, 1, 'match:'.$fixture['match']->id, LiveItemOperation::Start);
+
+    // Assert
+    expect(Activity::query()->where('log_name', 'live-show')->get()->pluck('properties')->toJson())
+        ->not->toContain('PRIVATE-CUE-7Q', 'PRIVATE-CREW-7Q');
+});
+
+test('several production roles create one crew attendance entry and completion freezes history', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $input = $fixture['production'];
+    $input['assignments'][] = [...$input['assignments'][0], 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051002', 'role' => 'announcer'];
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $input, false);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 2, $data['card']['fingerprint']);
+
+    // Act / Assert
+    expect(collect($run->content['roster'])->where('key', 'crew:'.$fixture['contact']->id))->toHaveCount(1);
+    resolve(TransitionLiveItemAction::class)->handle($event, 1, 'match:'.$fixture['match']->id, LiveItemOperation::Start);
+    resolve(TransitionLiveItemAction::class)->handle($event, 2, 'match:'.$fixture['match']->id, LiveItemOperation::Finish);
+    resolve(CompleteLiveShowAction::class)->handle($event, 3);
+    $before = $run->refresh()->content;
+    $input['cues'][0]['instruction'] = 'Later plan correction';
+    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], $input, false);
+    expect($run->refresh()->content)->toBe($before)
+        ->and(fn () => resolve(MarkLiveAttendanceAction::class)->handle($event, 4, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true))->toThrow(LiveShowException::class);
+});
