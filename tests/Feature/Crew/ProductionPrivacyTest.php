@@ -124,10 +124,7 @@ test('published event cards and results omit crew contacts and production cues',
 
     // Assert
     $surfaces['snapshots'] = json_encode([$publication->card, $publication->results], JSON_THROW_ON_ERROR);
-    foreach ($surfaces as $surface) {
-        expect($surface)->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-PHONE-7Q', 'private-crew-7q@example.test',
-            'PRIVATE-CONTACT-NOTE-7Q', 'PRIVATE-NOTE-7Q', 'PRIVATE-SUBJECT-7Q', 'PRIVATE-TRIGGER-7Q', 'PRIVATE-CUE-7Q');
-    }
-    expect($surfaces['card'])->toContain('Robin North', 'Casey Shore')
+    expect($surfaces)->each->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-PHONE-7Q', 'private-crew-7q@example.test', 'PRIVATE-CONTACT-NOTE-7Q', 'PRIVATE-NOTE-7Q', 'PRIVATE-SUBJECT-7Q', 'PRIVATE-TRIGGER-7Q', 'PRIVATE-CUE-7Q')
+        ->and($surfaces['card'])->toContain('Robin North', 'Casey Shore')
         ->and($surfaces['results'])->toContain('Robin North');
 });
