@@ -42,7 +42,9 @@ use Illuminate\Support\Carbon;
  * @property-read Venue|null $venue
  * @property-read Promotion|null $promotion
  * @property-read Collection<int, EventMatch> $matches
+ * @property-read EventLiveRun|null $liveRun
  * @property-read EventPack|null $pack
+ * @property-read Collection<int, EventTalentBooking> $talentBookings
  *
  * @method static \Database\Factories\Events\EventFactory factory($count = null, $state = [])
  * @method static EventBuilder<static>|Event latestDatedFirst()
@@ -103,6 +105,18 @@ class Event extends Model implements SoftDeletable
     public function pack(): HasOne
     {
         return $this->hasOne(EventPack::class);
+    }
+
+    /** @return HasOne<EventLiveRun, $this> */
+    public function liveRun(): HasOne
+    {
+        return $this->hasOne(EventLiveRun::class);
+    }
+
+    /** @return HasMany<EventTalentBooking, $this> */
+    public function talentBookings(): HasMany
+    {
+        return $this->hasMany(EventTalentBooking::class);
     }
 
     /**

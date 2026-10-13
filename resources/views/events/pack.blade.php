@@ -1,6 +1,7 @@
 <x-layouts.app :title="__('event-pack.title')">
     <x-layouts.workspace-canvas class="event-pack-editor">
         <a class="pack-back" href="{{ route('events.show', $event) }}">&larr; {{ __('event-pack.back') }}</a>
+        <a class="pack-back" href="{{ route('events.live-show.show', $event) }}">{{ __('live-show.title') }}</a>
         <header class="pack-heading">
             <div>
                 <h1>{{ $event->name }}</h1>

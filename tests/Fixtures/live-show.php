@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Events\PrepareLiveShowAction;
+use App\Actions\Events\SaveEventPackAction;
+use App\Models\Events\Event;
+use App\Models\Events\EventLiveRun;
+use App\Models\Matches\EventMatch;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\ViewModels\EventPackViewModel;
+
+use function Pest\Laravel\actingAs;
+
+/** @return array{event: Event, run: EventLiveRun, key: string, person: string} */
+function liveShowFixture(bool $segment = false, ?string $date = null): array
+{
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => $date ?? now()]);
+    $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+    $match = EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->withReferees()->create();
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $content = $data['content'];
+    if ($segment) {
+        $content['segments'] = [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Closing promo', 'after_match_id' => $match->id,
+            'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
+    }
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $content, false);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'])->refresh();
+
+    return ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
+}
