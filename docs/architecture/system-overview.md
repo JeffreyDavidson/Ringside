@@ -259,6 +259,18 @@ An event may therefore sit at a deleted venue. Editing such an event and leaving
 Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
 Restoring a soft-deleted title locks the title row and verifies that no active title has claimed its name. Restoration preserves the title's historical state without bypassing active-name uniqueness.
 
+### Saved event operations pack
+
+The event detail page links to an authenticated pack editor. `EventPacksController` uses the event's existing promotion-scoped `view` and `update` abilities: viewers can read and print, managers can save. GET requests never create a pack. The print preview uses saved operational fields with the current complete card and roster; attendance, briefing and actual times remain paper blanks.
+
+`event_packs` holds one record per event (unique foreign key), a version, a card fingerprint and a JSON content document. The document contains full local date/time strings with an explicit saved timezone, show notes, revision/master-copy labels, match entries keyed by match ID, and UUID segment entries anchored before the card or after a match. A promotion-timezone change does not convert saved times. The editor flags card/date/timezone changes for review. Removed-match entries survive edits and return when the match is restored; removed segment anchors must be repositioned. Soft deletion of the event retains the pack; permanent deletion cascades it.
+
+`UpdateEventPackRequest` validates nested match ownership, active segment anchors, dates and lengths. A trailing form-completion marker prevents a server-truncated form from partially saving. `SaveEventPackAction` locks the event, its matches in ID order and the pack inside one transaction, then checks the submitted version and current card fingerprint before writing. Repeated or stale submissions retain entered values and require reload/review. Existing match fields and assignments are never written by the pack.
+
+`EventPackCardQuery` batches current card/roster relationships, expands tag teams using current membership, deduplicates people and lists all assigned match numbers. Deleted or unavailable booked people remain visible with a warning. It does not reconstruct a historical tag-team lineup. `EventPackViewModel` merges timing rows and anchored segments for printing, and identifies retained removed entries.
+
+The dedicated print stylesheet repeats section/event headers and allows long packs to span pages. Users select running order, roster and/or notes, then use browser Print / Save as PDF. Unsaved editor changes trigger a leave warning; Save & preview persists first, while Preview saved pack explicitly offers to discard pending edits. No PDF package, generated-file storage or public sharing is involved. The light wordmark is copied unchanged from the accepted `ringside-meta/brand/charcoal-red-v7` artwork.
+
 ### Roster Management
 
 Dynamic competitor assignment from available talent:
