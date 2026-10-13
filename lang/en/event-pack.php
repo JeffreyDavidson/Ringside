@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'sponsor_setup' => 'Sponsor setup',
     'incomplete' => 'The form was incomplete. Your changes were not saved. Reload and try again; this show may exceed the server’s form size limit.',
     'title' => 'Event pack',
     'back' => 'Back to event',

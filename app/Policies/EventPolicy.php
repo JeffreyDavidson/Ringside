@@ -40,6 +40,11 @@ class EventPolicy
         return false;
     }
 
+    public function manageSponsors(User $user, Event $event): bool
+    {
+        return false;
+    }
+
     public function restore(User $user, Event $event): bool
     {
         return false;

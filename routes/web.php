@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Events\EventSponsorsController;
 use App\Http\Controllers\Events\EventTalentBookingsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Promotions\DeclinePromotionInvitationController;
 use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Controllers\Sponsors\SponsorsController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
@@ -30,6 +32,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Route;
@@ -75,11 +78,14 @@ Route::middleware('auth')->group(function () {
         Route::get('titles/{title}', [TitlesController::class, 'show'])->can('view', 'title')->name('titles.show');
 
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
+        Route::get('sponsors', [SponsorsController::class, 'index'])->can('manageSponsors', Sponsor::class)->name('sponsors.index');
+        Route::get('sponsors/{sponsor}', [SponsorsController::class, 'show'])->can('manageSponsors', 'sponsor')->name('sponsors.show');
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
         Route::get('events/{event}/talent-bookings', [EventTalentBookingsController::class, 'show'])->can('update', 'event')->name('events.talent-bookings.show');
+        Route::get('events/{event}/sponsors', [EventSponsorsController::class, 'show'])->can('manageSponsors', 'event')->withTrashed()->name('events.sponsors.show');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
 
         Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');

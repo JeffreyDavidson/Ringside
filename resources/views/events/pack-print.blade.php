@@ -11,7 +11,7 @@
         <a href="{{ route('events.pack.show', $event) }}">&larr; {{ __('event-pack.back_to_pack') }}</a>
         <fieldset>
             <legend>{{ __('event-pack.sections') }}</legend>
-            @foreach (['running_order', 'roster', 'notes'] as $section)
+            @foreach (['running_order', 'roster', 'notes', ...(($content['sponsor_tasks'] ?? []) === [] ? [] : ['sponsor_setup'])] as $section)
                 <label
                     ><input type="checkbox" data-print-section="{{ $section }}" checked />
                     {{ __('event-pack.'.$section) }}</label>
@@ -175,6 +175,40 @@
                 </tbody>
             </table>
         </section>
+        @if (($content['sponsor_tasks'] ?? []) !== [])
+            <section data-section="sponsor_setup">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>
+                                <x-events.pack.print-heading
+                                    :$event
+                                    :$content
+                                    :$pack
+                                    :section="__('sponsors.setup_title')"
+                                />
+                                <p class="pack-print-meta">{{ __('sponsors.plan_notice') }}</p>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($content['sponsor_tasks'] as $task)
+                            <tr>
+                                <td>
+                                    <strong>{{ $task['label'] }}</strong>
+                                    <p class="pack-preserve">{{ $task['instruction'] }}</p>
+                                    @if ($task['owner'])
+                                        <p>{{ __('sponsors.task_owner', ['name' => $task['owner']]) }}</p>
+                                    @endif
+                                    <p><span class="pack-checkbox"></span> {{ __('sponsors.completed') }}</p>
+                                    <div class="pack-write-line"></div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </section>
+        @endif
     </main>
 </body>
 </html>

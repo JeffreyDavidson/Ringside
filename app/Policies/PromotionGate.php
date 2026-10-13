@@ -6,8 +6,11 @@ namespace App\Policies;
 
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Concerns\BelongsToPromotion;
+use App\Models\Events\EventSponsorCommitment;
+use App\Models\Events\EventSponsorCommitmentRevision;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Sponsors\Sponsor;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +62,7 @@ class PromotionGate
 
         return match ($ability) {
             'view' => true,
+            'manageSponsors' => $role === MembershipRole::Owner || $role === MembershipRole::Manager,
             'manageMembers', 'update' => $role === MembershipRole::Owner,
             default => false,
         };
@@ -85,7 +89,13 @@ class PromotionGate
             return false;
         }
 
-        return $this->context->membershipRole($user, $promotion)?->allows($ability) ?? false;
+        $role = $this->context->membershipRole($user, $promotion);
+        if ($subject instanceof Sponsor || $subject instanceof EventSponsorCommitment || $subject instanceof EventSponsorCommitmentRevision
+            || in_array($subject, [Sponsor::class, EventSponsorCommitment::class, EventSponsorCommitmentRevision::class], true)) {
+            return ($role?->allows('manageSponsors') ?? false) && $role->allows($ability);
+        }
+
+        return $role?->allows($ability) ?? false;
     }
 
     /** Determine whether the model or class string belongs to a promotion. */
