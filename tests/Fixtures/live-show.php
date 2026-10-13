@@ -26,7 +26,7 @@ function liveShowFixture(bool $segment = false, ?string $date = null): array
             'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
     }
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $content, false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'])->refresh();
 
     return ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
 }
