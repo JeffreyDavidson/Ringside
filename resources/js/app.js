@@ -1,12 +1,14 @@
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import AlpineUI from '@alpinejs/ui';
 import rosterCombobox from './roster-combobox';
+import liveShow from './live-show';
 import '../css/app.css';
 import '../css/event-pack.css';
 import './event-pack';
 
 Alpine.plugin(AlpineUI);
 Alpine.data('rosterCombobox', rosterCombobox);
+Alpine.data('liveShow', liveShow);
 
 const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';
 

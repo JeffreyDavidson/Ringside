@@ -42,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property-read Venue|null $venue
  * @property-read Promotion|null $promotion
  * @property-read Collection<int, EventMatch> $matches
+ * @property-read EventLiveRun|null $liveRun
  * @property-read EventPack|null $pack
  *
  * @method static \Database\Factories\Events\EventFactory factory($count = null, $state = [])
@@ -103,6 +104,12 @@ class Event extends Model implements SoftDeletable
     public function pack(): HasOne
     {
         return $this->hasOne(EventPack::class);
+    }
+
+    /** @return HasOne<EventLiveRun, $this> */
+    public function liveRun(): HasOne
+    {
+        return $this->hasOne(EventLiveRun::class);
     }
 
     /**
