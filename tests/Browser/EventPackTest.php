@@ -29,6 +29,11 @@ test('an operator saves a segment reopens the pack and selects print sections', 
         ->screenshot(fullPage: false, filename: 'event-pack-mobile')
         ->resize(1440, 1000)
         ->screenshot(fullPage: false, filename: 'event-pack-desktop')
+        ->click('a[href="#running-order"]')
+        ->assertScript('document.querySelector(".pack-savebar").getBoundingClientRect().bottom <= innerHeight')
+        ->screenshot(fullPage: false, filename: 'event-pack-running-order')
+        ->click('a[href="#pack-notes"]')
+        ->screenshot(fullPage: false, filename: 'event-pack-notes')
         ->type('Show notes', 'Unsaved draft')
         ->assertScript('(() => { const event = new Event("beforeunload", {cancelable: true}); window.dispatchEvent(event); return event.defaultPrevented; })()')
         ->script('window.confirm = () => false');
