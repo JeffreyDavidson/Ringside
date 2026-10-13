@@ -73,40 +73,43 @@ class EventMatchBuilder extends Builder
     /**
      * Project known results without hydrating an entire career. A finish with malformed winner metadata is unknown.
      *
-     * @param  literal-string  $alias
-     * @return array{literal-string, list<string>}
+     * @param  Builder<*>  $query
      */
-    public static function recordedResultExpression(string $alias = 'events_matches'): array
+    public static function addRecordedResultFlag(Builder $query): void
     {
-        $decisive = array_values(array_map(
-            fn (MatchFinish $finish): string => $finish->value,
-            array_filter(MatchFinish::cases(), fn (MatchFinish $finish): bool => $finish->requiresWinningSide()),
-        ));
-        $placeholders = implode(', ', array_fill(0, count($decisive), '?'));
-
-        return [
-            "CASE WHEN (({$alias}.match_finish IN (?, ?) AND {$alias}.winning_side_id IS NULL) OR "
-            ."({$alias}.match_finish IN ({$placeholders}) AND EXISTS (SELECT 1 FROM events_matches_sides AS outcome_side "
-            ."WHERE outcome_side.id = {$alias}.winning_side_id AND outcome_side.match_id = {$alias}.id "
-            .'AND EXISTS (SELECT 1 FROM events_matches_competitors AS outcome_competitor '
-            ."WHERE outcome_competitor.match_side_id = outcome_side.id AND outcome_competitor.match_id = {$alias}.id)))) "
-            .'AND (SELECT COUNT(DISTINCT structural_entry.match_side_id) FROM events_matches_competitors AS structural_entry '
-            .'INNER JOIN events_matches_sides AS structural_side ON structural_side.id = structural_entry.match_side_id AND structural_side.match_id = structural_entry.match_id '
-            ."WHERE structural_entry.match_id = {$alias}.id) >= 2 "
-            ."AND NOT EXISTS (SELECT 1 FROM events_matches_competitors AS owned_entry WHERE owned_entry.match_id = {$alias}.id AND NOT ("
-            .'(owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM wrestlers WHERE wrestlers.id = owned_entry.competitor_id '
-            ."AND wrestlers.promotion_id = (SELECT promotion_id FROM events WHERE events.id = {$alias}.event_id))) OR "
-            .'(owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM tag_teams WHERE tag_teams.id = owned_entry.competitor_id '
-            ."AND tag_teams.promotion_id = (SELECT promotion_id FROM events WHERE events.id = {$alias}.event_id))))) THEN 1 ELSE 0 END",
-            [MatchFinish::TimeLimitDraw->value, MatchFinish::NoDecision->value, ...$decisive, (new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()],
-        ];
+        $query->addSelect('events_matches.*')->selectRaw(<<<'SQL'
+            CASE WHEN ((events_matches.match_finish IN (?, ?) AND events_matches.winning_side_id IS NULL) OR
+                (events_matches.match_finish IN (?, ?, ?, ?, ?, ?, ?) AND EXISTS (
+                    SELECT 1 FROM events_matches_sides AS outcome_side
+                    WHERE outcome_side.id = events_matches.winning_side_id AND outcome_side.match_id = events_matches.id
+                    AND EXISTS (SELECT 1 FROM events_matches_competitors AS outcome_competitor
+                        WHERE outcome_competitor.match_side_id = outcome_side.id AND outcome_competitor.match_id = events_matches.id))))
+                AND (SELECT COUNT(DISTINCT structural_entry.match_side_id) FROM events_matches_competitors AS structural_entry
+                    INNER JOIN events_matches_sides AS structural_side ON structural_side.id = structural_entry.match_side_id
+                        AND structural_side.match_id = structural_entry.match_id
+                    WHERE structural_entry.match_id = events_matches.id) >= 2
+                AND NOT EXISTS (SELECT 1 FROM events_matches_competitors AS owned_entry
+                    WHERE owned_entry.match_id = events_matches.id AND NOT (
+                        (owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM wrestlers
+                            WHERE wrestlers.id = owned_entry.competitor_id
+                            AND wrestlers.promotion_id = (SELECT promotion_id FROM events WHERE events.id = events_matches.event_id))) OR
+                        (owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM tag_teams
+                            WHERE tag_teams.id = owned_entry.competitor_id
+                            AND tag_teams.promotion_id = (SELECT promotion_id FROM events WHERE events.id = events_matches.event_id)))))
+                THEN 1 ELSE 0 END AS history_recorded
+            SQL, [
+            MatchFinish::TimeLimitDraw->value, MatchFinish::NoDecision->value,
+            MatchFinish::Pinfall->value, MatchFinish::Submission->value, MatchFinish::Knockout->value,
+            MatchFinish::Stipulation->value, MatchFinish::Forfeit->value, MatchFinish::Disqualification->value, MatchFinish::Countout->value,
+            (new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass(),
+        ]);
     }
 
     public function withRecordedResultFlag(): static
     {
-        [$expression, $bindings] = self::recordedResultExpression();
+        self::addRecordedResultFlag($this);
 
-        return $this->addSelect('events_matches.*')->selectRaw("{$expression} AS history_recorded", $bindings);
+        return $this;
     }
 
     public function forEventId(int $eventId): static

@@ -66,9 +66,8 @@ final class BookingHistoryQuery
         foreach ($subjects->groupBy(fn (Wrestler|TagTeam $subject): string => $subject->getMorphClass()) as $group) {
             new Collection($group->all())->load(['matches' => function (Relation $matches) use ($event, $reference, $excludedMatchId): void {
                 EventMatchBuilder::constrainToPromotionHistory($matches->getQuery(), $event->promotion_id, $reference, $excludedMatchId);
-                [$expression, $bindings] = EventMatchBuilder::recordedResultExpression();
-                $matches->addSelect('events_matches.*')->selectRaw("{$expression} AS history_recorded", $bindings)
-                    ->orderByDesc(Event::query()->select('date')->whereColumn('events.id', 'events_matches.event_id'))
+                EventMatchBuilder::addRecordedResultFlag($matches->getQuery());
+                $matches->orderByDesc(Event::query()->select('date')->whereColumn('events.id', 'events_matches.event_id'))
                     ->orderByDesc('events_matches.event_id')->orderBy('events_matches.match_number')->orderBy('events_matches.id')
                     ->with(['event.promotion', 'competitors' => function (Relation $entries): void {
                         $entries->orderBy('events_matches_competitors.id');
@@ -236,14 +235,17 @@ final class BookingHistoryQuery
                 ->orWhere(fn (QueryBuilder $sameType): QueryBuilder => $sameType
                     ->whereColumn('first_entry.competitor_type', 'second_entry.competitor_type')
                     ->whereColumn('first_entry.competitor_id', '<', 'second_entry.competitor_id')));
-        $this->selected($query, 'first_entry', $selection);
-        $this->selected($query, 'second_entry', $selection);
-        [$firstCase, $firstBindings] = $this->selectionSide('first_entry', $selection);
-        [$secondCase, $secondBindings] = $this->selectionSide('second_entry', $selection);
-        $query->whereRaw("({$firstCase}) <> ({$secondCase})", [...$firstBindings, ...$secondBindings])
-            ->select('first_entry.competitor_type as first_type', 'first_entry.competitor_id as first_id',
-                'second_entry.competitor_type as second_type', 'second_entry.competitor_id as second_id')
-            ->selectRaw('MAX(history.history_date) AS latest_date')->selectSub($latestPairMatch, 'latest_match_id')
+        $query->where(function (QueryBuilder $opposition) use ($selection): void {
+            foreach (array_unique(array_column($selection, 'side')) as $side) {
+                $opposition->orWhere(function (QueryBuilder $pair) use ($selection, $side): void {
+                    $this->selected($pair, 'first_entry', array_values(array_filter($selection, fn (array $entry): bool => $entry['side'] === $side)));
+                    $this->selected($pair, 'second_entry', array_values(array_filter($selection, fn (array $entry): bool => $entry['side'] !== $side)));
+                });
+            }
+        })->select('first_entry.competitor_type as first_type', 'first_entry.competitor_id as first_id',
+            'second_entry.competitor_type as second_type', 'second_entry.competitor_id as second_id')
+            ->selectRaw('MAX(history.history_date) AS latest_date')
+            ->selectSub($latestPairMatch, 'latest_match_id')
             ->selectRaw('COUNT(CASE WHEN history.history_recorded = 1 THEN 1 END) AS recorded')
             ->selectRaw('COUNT(CASE WHEN history.history_recorded = 0 THEN 1 END) AS incomplete')
             ->groupBy('first_entry.competitor_type', 'first_entry.competitor_id', 'second_entry.competitor_type', 'second_entry.competitor_id');
@@ -284,25 +286,6 @@ final class BookingHistoryQuery
                 $query->orWhere(fn (QueryBuilder $kind): QueryBuilder => $kind->where("{$alias}.competitor_type", $type)->whereIn("{$alias}.competitor_id", $ids));
             }
         });
-    }
-
-    /** @param list<array{type: string, id: int, side: int}> $selection
-     * @param  literal-string  $alias
-     * @return array{literal-string, list<int|string>}
-     */
-    private function selectionSide(string $alias, array $selection): array
-    {
-        $bindings = [];
-        $sql = 'CASE';
-
-        foreach ($selection as $entry) {
-            $sql .= " WHEN {$alias}.competitor_type = ? AND {$alias}.competitor_id = ? THEN ?";
-            $bindings[] = $entry['type'];
-            $bindings[] = $entry['id'];
-            $bindings[] = $entry['side'];
-        }
-
-        return [$sql.' END', $bindings];
     }
 
     private function directType(MatchType $type, string $alias): bool

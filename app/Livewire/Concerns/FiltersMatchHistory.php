@@ -43,7 +43,7 @@ trait FiltersMatchHistory
         $query = EventMatch::query()->forHistory()->forCompetitor($subject)->withRecordedResultFlag();
 
         if ($subject->promotion_id === null) {
-            return $query->whereRaw('0 = 1');
+            return $query->whereKey([]);
         }
 
         $query->forPromotionHistory($subject->promotion_id, now());
@@ -54,7 +54,7 @@ trait FiltersMatchHistory
 
         $opponent = $this->resolveOpponent();
 
-        return $opponent === null ? $query->whereRaw('0 = 1') : $query->opposedTo($subject, $opponent);
+        return $opponent === null ? $query->whereKey([]) : $query->opposedTo($subject, $opponent);
     }
 
     private function resolveOpponent(): Wrestler|TagTeam|null
