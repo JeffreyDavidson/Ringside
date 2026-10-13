@@ -45,3 +45,11 @@ A decisive `MatchFinish` requires a non-empty winning side belonging to the matc
 ## Querying
 
 Eager-load `sides.competitors.competitor` when rendering the full match structure. Eager-load `winningSide.competitors.competitor` when rendering results. Store competitor morph types through `getMorphClass()` so persisted values remain consistent with the application's enforced morph map.
+
+## Derived booking records
+
+Booking history derives wins from the stored winning side, including disqualifications, countouts and forfeits. Every other side loses a decisive match, but a multi-way loss never becomes a fabricated direct loss against each other participant. TimeLimitDraw counts as a draw; NoDecision is neutral and is counted separately from wins/losses/draws. There is no separately inferred NoContest outcome.
+
+A usable recorded outcome needs recognized finish metadata and at least two populated sides. Decisive outcomes require a populated winning side belonging to the match, and neutral outcomes require no winning side. Retained competitor references must belong to the source event's promotion. Missing or malformed outcomes remain incomplete. These reporting checks do not repair source rows or change RecordResultAction's authoritative validation.
+
+Direct records only include qualifying two-entity bouts (see match-system.md). Unresulted bookings and unavailable history are explicitly distinguished from known zero counts. Result corrections change the next read rather than appending duplicate winner/loser records.
