@@ -13,6 +13,8 @@ return [
     'review_required' => 'Review the changed event pack before starting the next item or completing the show.',
     'invalid_times' => 'Actual times must exist, be in order, not overlap other items, and not be in the future.',
     'unfinished' => 'Finish the running item and finish or explicitly skip every remaining item before completing the show.',
+    'not_prepared' => 'Not prepared', 'prepared' => 'Prepared', 'online' => 'Online', 'offline_short' => 'Offline', 'refresh_needed' => 'Refresh needed',
+    'show_section' => 'Show', 'roster_short' => 'Roster', 'order_short' => 'Order',
     'refresh_short' => 'Refresh', 'details' => 'Show details and print backup', 'sections' => 'Show sections',
     'back' => 'Back to event', 'pack' => 'Event pack / print backup',
     'intro' => 'Run the saved order, check in your assigned people, and record what happens on the night.',

@@ -4,7 +4,7 @@
     data-server-now="{{ now()->utc()->toIso8601String() }}"
     data-current-start="{{ $current['start'] ?? '' }}"
     @if (! $complete) wire:poll.5s.visible="refreshState" @endif
-    class="mx-auto flex max-w-6xl flex-col gap-4 pb-8"
+    class="mx-auto flex max-w-6xl flex-col gap-3 pb-8 lg:gap-4"
 >
     <nav class="flex flex-wrap gap-x-6 gap-y-3 text-sm">
         <a
@@ -16,29 +16,71 @@
             class="min-h-11 py-3 underline underline-offset-4"
         >{{ __('live-show.pack') }}</a>
     </nav>
-    <header class="border-ringside-line flex flex-wrap items-start justify-between gap-3 border-b pb-4">
-        <div class="min-w-0">
-            <h1 class="font-display text-2xl leading-tight lg:text-3xl">
-                {{ __('live-show.title') }} · {{ $event->name }}
-            </h1>
-            <p class="text-ringside-muted mt-2">
-                {{ $event->local_date?->format('M j, Y · H:i') }} · {{ $event->venue?->name }}
-            </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3 text-sm">
-            <span wire:loading.remove
-                >{{ __('live-show.refreshed') }}:
-                <time
-                    >{{ \Illuminate\Support\Carbon::parse($refreshedAt)->setTimezone($run?->content['timezone'] ?? $source['content']['timezone'] ?? 'UTC')->format('H:i:s') }}</time
-                ></span>
-            <span wire:loading role="status">{{ __('live-show.saving') }}</span>
+    <header>
+        <h1 class="font-display text-2xl leading-tight lg:text-3xl">
+            {{ __('live-show.title') }} · {{ $event->name }}
+        </h1>
+    </header>
+    <div data-live-toolbar class="border-ringside-line bg-ringside-surface sticky -top-4 z-20 border-y lg:-top-7">
+        <div class="flex min-h-11 items-center justify-between gap-2 py-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 tabular-nums">
+                <span class="font-semibold">{{ __('live-show.'.($complete ? 'completed_heading' : ($run?->status->value ?? 'not_prepared'))) }}</span>
+                @if ($current)
+                    <span
+                        aria-label="{{ __('live-show.elapsed') }}"
+                        x-text="Math.floor(elapsed / 60) + ':' + String(elapsed % 60).padStart(2, '0')"
+                    >0:00</span>
+                @endif
+                <span wire:loading.remove>
+                    <span
+                        x-show="online && ! requestFailed"
+                        class="text-ringside-muted"
+                    >{{ __('live-show.online') }}</span>
+                    <span
+                        x-show="! online"
+                        x-cloak
+                        class="text-ringside-warning"
+                    >{{ __('live-show.offline_short') }}</span>
+                    <span
+                        x-show="online && requestFailed"
+                        x-cloak
+                        class="text-ringside-error"
+                    >{{ __('live-show.refresh_needed') }}</span>
+                </span>
+                <span wire:loading role="status" class="text-ringside-muted">{{ __('live-show.saving') }}</span>
+            </div>
             <x-button
                 variant="secondary"
                 wire:click="refreshState"
                 wire:loading.attr="disabled"
-            >{{ __('live-show.refresh_short') }}</x-button>
+                aria-label="{{ __('live-show.refresh_short') }}"
+                title="{{ __('live-show.refresh') }}"
+                class="shrink-0 px-3"
+            >
+                <x-heroicon-o-arrow-path class="size-5" />
+                <span class="sr-only">{{ __('live-show.refresh_short') }}</span>
+            </x-button>
         </div>
-    </header>
+        @if ($run !== null)
+            <nav aria-label="{{ __('live-show.sections') }}" class="border-ringside-line grid grid-cols-3 border-t">
+                <a
+                    href="#live-show-controls"
+                    class="hover:bg-ringside-surface-hover flex min-h-14 items-center justify-center px-2 py-2 font-semibold underline underline-offset-4"
+                >{{ __('live-show.show_section') }}</a>
+                <a
+                    href="#live-roster"
+                    class="hover:bg-ringside-surface-hover flex min-h-14 flex-col items-center justify-center px-2 py-2"
+                >
+                    <span class="font-semibold underline underline-offset-4">{{ __('live-show.roster_short') }}</span>
+                    <span class="text-ringside-muted tabular-nums">{{ __('live-show.arrived_count', ['count' => collect($run->content['roster'])->whereNotNull('arrived')->count(), 'total' => count($run->content['roster'])]) }}</span>
+                </a>
+                <a
+                    href="#live-order"
+                    class="hover:bg-ringside-surface-hover flex min-h-14 items-center justify-center px-2 py-2 font-semibold underline underline-offset-4"
+                >{{ __('live-show.order_short') }}</a>
+            </nav>
+        @endif
+    </div>
     <p x-show="! online" x-cloak role="alert" class="border-ringside-warning text-ringside-warning border p-4">
         {{ __('live-show.offline') }}
     </p>
@@ -73,7 +115,7 @@
         </section>
     @else
         @if ($complete)
-            <section class="border-ringside-line border p-6">
+            <section id="live-show-controls" class="border-ringside-line scroll-mt-36 border p-6">
                 <h2 class="text-xl font-semibold">{{ __('live-show.completed_heading') }}</h2>
                 <p class="text-ringside-muted mt-2">{{ __('live-show.completed_help') }}</p>
             </section>
@@ -143,27 +185,29 @@
             </form>
         @endif
         @if (! $complete)
-            <div class="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-                <section class="bg-ringside-surface-panel p-4 lg:p-6" aria-labelledby="live-now">
-                    <h2 id="live-now" class="text-ringside-muted text-lg font-semibold">{{ __('live-show.now') }}</h2>
-                    <h3 class="mt-2 text-xl font-semibold break-words lg:text-2xl">
+            <div id="live-show-controls" class="grid scroll-mt-36 gap-3 lg:grid-cols-[1.3fr_1fr] lg:gap-4">
+                <section class="bg-ringside-surface-panel p-3 lg:p-6" aria-labelledby="live-now">
+                    <h2 id="live-now" class="text-ringside-muted text-base font-semibold lg:text-lg">
+                        {{ __('live-show.now') }}
+                    </h2>
+                    <h3 class="mt-1 text-xl leading-snug font-semibold break-words lg:mt-2 lg:text-2xl">
                         {{ $current['label'] ?? __('live-show.between') }}
                     </h3>
                     @if ($current)
-                        <p class="text-ringside-muted mt-2">{{ $current['details'] }}</p>
-                        <p class="text-ringside-muted mt-2">{{ $screen->comparison($current) }}</p>
+                        <p class="text-ringside-muted mt-1 lg:mt-2">{{ $current['details'] }}</p>
+                        <p class="text-ringside-muted mt-1 lg:mt-2">{{ $screen->comparison($current) }}</p>
                         @if ($current['warning'])
                             <p class="text-ringside-warning mt-3">{{ __('live-show.unavailable') }}</p>
                         @endif
-                        <p class="mt-3 text-lg tabular-nums">
-                            {{ __('live-show.elapsed') }}:
-                            <span x-text="Math.floor(elapsed / 60) + ':' + String(elapsed % 60).padStart(2, '0')">0:00</span>
-                        </p>
                         @if ($current['timing']['notes'] ?? null)
                             <p class="mt-4 whitespace-pre-wrap">{{ $current['timing']['notes'] }}</p>
                         @endif
                         @can('update', $event)
-                            <fieldset :disabled="requestFailed || ! online" wire:offline.attr="disabled" class="mt-4">
+                            <fieldset
+                                :disabled="requestFailed || ! online"
+                                wire:offline.attr="disabled"
+                                class="mt-3 lg:mt-4"
+                            >
                                 <x-buttons.primary
                                     wire:click="item('{{ $current['key'] }}', 'finish')"
                                     wire:loading.attr="disabled"
@@ -175,14 +219,16 @@
                         <p class="text-ringside-muted mt-2 max-w-lg">{{ __('live-show.no_running') }}</p>
                     @endif
                 </section>
-                <section class="border-ringside-line border p-4 lg:p-6" aria-labelledby="live-next">
-                    <h2 id="live-next" class="text-ringside-muted text-lg font-semibold">{{ __('live-show.next') }}</h2>
-                    <h3 class="mt-2 text-xl font-semibold break-words lg:text-2xl">
+                <section class="border-ringside-line border p-3 lg:p-6" aria-labelledby="live-next">
+                    <h2 id="live-next" class="text-ringside-muted text-base font-semibold lg:text-lg">
+                        {{ __('live-show.next') }}
+                    </h2>
+                    <h3 class="mt-1 text-xl leading-snug font-semibold break-words lg:mt-2 lg:text-2xl">
                         {{ $next['label'] ?? __('live-show.nothing_next') }}
                     </h3>
                     @if ($next)
-                        <p class="text-ringside-muted mt-2">{{ $next['details'] }}</p>
-                        <p class="text-ringside-muted mt-2">{{ $screen->comparison($next) }}</p>
+                        <p class="text-ringside-muted mt-1 lg:mt-2">{{ $next['details'] }}</p>
+                        <p class="text-ringside-muted mt-1 lg:mt-2">{{ $screen->comparison($next) }}</p>
                         @if ($next['timing']['notes'] ?? null)
                             <p class="mt-4 whitespace-pre-wrap">{{ $next['timing']['notes'] }}</p>
                         @endif
@@ -191,10 +237,10 @@
                         @endif
                         @can('update', $event)
                             <fieldset
-                                :disabled="requestFailed || ! online"
+                                :disabled="requestFailed || ! online || @js($current !== null || $needsReview)"
                                 wire:offline.attr="disabled"
                                 @disabled($current !== null || $needsReview)
-                                class="mt-4"
+                                class="mt-3 disabled:opacity-50 lg:mt-4"
                             >
                                 <x-buttons.primary
                                     wire:click="item('{{ $next['key'] }}', 'start')"
@@ -210,18 +256,19 @@
         <details class="border-ringside-line border-y py-3">
             <summary class="min-h-11 cursor-pointer py-3 font-semibold">{{ __('live-show.details') }}</summary>
             <div class="text-ringside-muted flex flex-col gap-3 pb-3 text-sm">
+                <p>
+                    {{ $event->local_date?->format('M j, Y · H:i') }}
+                    @if ($event->venue) ·{{ $event->venue->name }} @endif
+                </p>
+                <p>{{ __('live-show.refreshed') }}: {{ $screen->actual($refreshedAt, $run->content['timezone']) }}</p>
                 <p>{{ __('live-show.online_help') }}</p>
                 <p class="text-ringside-muted text-sm">
                     {{ __('live-show.revision') }}: {{ $run->content['revision'] ?: __('live-show.no_revision') }} · {{ __('live-show.timezone') }}: {{ $run->content['timezone'] }} · {{ __('live-show.saved') }}: {{ $screen->actual($run->updated_at->toIso8601String(), $run->content['timezone']) }}
                 </p>
             </div>
         </details>
-        <nav aria-label="{{ __('live-show.sections') }}" class="flex flex-wrap gap-3">
-            <x-button tag="a" variant="secondary" href="#live-roster">{{ __('live-show.roster') }}</x-button>
-            <x-button tag="a" variant="secondary" href="#live-order">{{ __('live-show.order') }}</x-button>
-        </nav>
         @if ($draftKey !== '')
-            <form wire:submit="saveCorrection" data-live-draft class="border-ringside-line scroll-mt-20 border p-5">
+            <form wire:submit="saveCorrection" data-live-draft class="border-ringside-line scroll-mt-36 border p-5">
                 <h2 class="text-xl font-semibold">{{ __('live-show.'.$draftOperation) }} · {{ $draftLabel }}</h2>
                 <fieldset
                     :disabled="requestFailed || ! online"
@@ -287,7 +334,7 @@
         <section aria-labelledby="live-roster" class="border-ringside-line border-t pt-6">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h2 id="live-roster" class="scroll-mt-20 text-xl font-semibold">{{ __('live-show.roster') }}</h2>
+                    <h2 id="live-roster" class="scroll-mt-36 text-xl font-semibold">{{ __('live-show.roster') }}</h2>
                     <p class="text-ringside-muted mt-2 text-sm">{{ __('live-show.roster_help') }}</p>
                     <p class="mt-3 tabular-nums">
                         {{ __('live-show.arrived_count', ['count' => collect($run->content['roster'])->whereNotNull('arrived')->count(), 'total' => count($run->content['roster'])]) }} · {{ __('live-show.briefed_count', ['count' => collect($run->content['roster'])->whereNotNull('briefed')->count(), 'total' => count($run->content['roster'])]) }}
@@ -375,7 +422,7 @@
             </div>
         </section>
         <section aria-labelledby="live-order" class="border-ringside-line border-t pt-6">
-            <h2 id="live-order" class="scroll-mt-20 text-xl font-semibold">{{ __('live-show.order') }}</h2>
+            <h2 id="live-order" class="scroll-mt-36 text-xl font-semibold">{{ __('live-show.order') }}</h2>
             <p class="text-ringside-muted mt-2 text-sm">{{ __('live-show.snapshot_help') }}</p>
             <ol class="divide-ringside-line mt-5 divide-y">
                 @foreach ($run->content['items'] as $item)

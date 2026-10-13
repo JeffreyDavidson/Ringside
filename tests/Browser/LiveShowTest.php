@@ -93,3 +93,36 @@ test('a failed request preserves confirmed state and refresh enables a safe retr
     $page->click('Refresh')->assertDontSee('Connection or request failed.')
         ->click('Start item')->assertSee('Finish item')->assertNoJavaScriptErrors();
 });
+
+test('phone show navigation keeps status visible and returns to the primary controls', function (): void {
+    // Arrange
+    $fixture = liveShowFixture(segment: true);
+    $page = visit(route('events.live-show.show', $fixture['event']));
+
+    // Act / Assert
+    $page->resize(390, 844)->click('Start item')->assertSee('Finish item')
+        ->assertScript('document.querySelector("section[aria-labelledby=live-next] button").matches(":disabled")')
+        ->assertScript('document.querySelector("section[aria-labelledby=live-next]").getBoundingClientRect().bottom < innerHeight - 58')
+        ->screenshot(fullPage: false, filename: 'live-show-phone-refined')
+        ->resize(1440, 1000)->screenshot(fullPage: false, filename: 'live-show-desktop-refined')
+        ->resize(390, 844)->click('a[href="#live-roster"]')
+        ->assertScript('document.getElementById("live-roster").getBoundingClientRect().top >= document.querySelector("[data-live-toolbar]").getBoundingClientRect().bottom')
+        ->assertScript('document.querySelector("[data-live-toolbar]").getBoundingClientRect().top >= 64 && document.querySelector("[data-live-toolbar]").getBoundingClientRect().top < 70')
+        ->click('article:first-child button:first-child')
+        ->assertSee('1 / 3 arrived')
+        ->screenshot(fullPage: false, filename: 'live-show-roster-refined')
+        ->click('a[href="#live-order"]')
+        ->assertScript('document.getElementById("live-order").getBoundingClientRect().top >= document.querySelector("[data-live-toolbar]").getBoundingClientRect().bottom')
+        ->click('a[href="#live-show-controls"]')
+        ->assertScript('document.querySelector("section[aria-labelledby=live-now]").getBoundingClientRect().top >= document.querySelector("[data-live-toolbar]").getBoundingClientRect().bottom')
+        ->resize(320, 700)->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->resize(844, 390)->assertScript('document.documentElement.scrollWidth <= innerWidth')
+        ->script('window.dispatchEvent(new Event("offline"))');
+    $page->assertSee('Offline — changes cannot be saved.')
+        ->assertScript('document.querySelector("[data-live-toolbar]").innerText.includes("Offline") && !document.querySelector("[data-live-toolbar]").innerText.includes("Online")')
+        ->script('window.dispatchEvent(new Event("online"))');
+    $page->assertDontSee('Offline — changes cannot be saved.')
+        ->click('Finish item')
+        ->assertScript('!document.querySelector("section[aria-labelledby=live-next] button").matches(":disabled")')
+        ->click('Start item')->assertSee('Finish item')->assertNoJavaScriptErrors();
+});
