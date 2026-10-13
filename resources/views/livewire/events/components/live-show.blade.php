@@ -50,23 +50,30 @@
                 </span>
                 <span wire:loading role="status" class="text-ringside-muted">{{ __('live-show.saving') }}</span>
             </div>
-            <x-button
-                variant="secondary"
-                wire:click="refreshState"
-                wire:loading.attr="disabled"
-                aria-label="{{ __('live-show.refresh_short') }}"
-                title="{{ __('live-show.refresh') }}"
-                class="shrink-0 px-3"
-            >
-                <x-heroicon-o-arrow-path class="size-5" />
-                <span class="sr-only">{{ __('live-show.refresh_short') }}</span>
-            </x-button>
+            <div class="flex shrink-0 items-center gap-2">
+                @if ($run !== null)
+                    @can('viewProduction', $event)
+                        <a
+                            href="{{ route('events.production-sheet.show', $event) }}"
+                            class="flex min-h-11 items-center px-2 font-semibold underline underline-offset-4"
+                        >{{ __('production.cues') }}</a>
+                    @endcan
+                @endif
+                <x-button
+                    variant="secondary"
+                    wire:click="refreshState"
+                    wire:loading.attr="disabled"
+                    aria-label="{{ __('live-show.refresh_short') }}"
+                    title="{{ __('live-show.refresh') }}"
+                    class="shrink-0 px-3"
+                >
+                    <x-heroicon-o-arrow-path class="size-5" />
+                    <span class="sr-only">{{ __('live-show.refresh_short') }}</span>
+                </x-button>
+            </div>
         </div>
         @if ($run !== null)
-            <nav
-                aria-label="{{ __('live-show.sections') }}"
-                @class(['border-ringside-line grid border-t', 'grid-cols-4' => auth()->user()->can('viewProduction', $event), 'grid-cols-3' => ! auth()->user()->can('viewProduction', $event)])
-            >
+            <nav aria-label="{{ __('live-show.sections') }}" class="border-ringside-line grid grid-cols-3 border-t">
                 <a
                     href="#live-show-controls"
                     class="hover:bg-ringside-surface-hover flex min-h-14 items-center justify-center px-2 py-2 font-semibold underline underline-offset-4"
@@ -82,12 +89,6 @@
                     href="#live-order"
                     class="hover:bg-ringside-surface-hover flex min-h-14 items-center justify-center px-2 py-2 font-semibold underline underline-offset-4"
                 >{{ __('live-show.order_short') }}</a>
-                @can('viewProduction', $event)
-                    <a
-                        href="{{ route('events.production-sheet.show', $event) }}"
-                        class="flex min-h-14 items-center justify-center px-2 py-2 font-semibold underline underline-offset-4"
-                    >{{ __('production.cues') }}</a>
-                @endcan
             </nav>
         @endif
     </div>
