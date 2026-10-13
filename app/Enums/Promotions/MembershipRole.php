@@ -14,6 +14,10 @@ enum MembershipRole: string
      * @var list<string>
      */
     private const array CONTENT_ABILITIES = [
+        'preparePublication',
+        'publishPublication',
+        'unpublishPublication',
+        'uploadPublicationPoster',
         'view',
         'viewAny',
         'create',

@@ -29,10 +29,13 @@ declare(strict_types=1);
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\MarkLiveAttendanceAction;
 use App\Actions\Events\PrepareLiveShowAction;
+use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Actions\Events\UnpublishEventPublicationAction;
 use App\Actions\Events\UpdateAction;
 use App\Actions\Matches\AddMatchForEventAction;
+use App\Actions\Matches\RecordResultAction;
 use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Stables\CreateAction as CreateStableAction;
 use App\Actions\Stables\RestoreAction as RestoreStableAction;
@@ -47,6 +50,7 @@ use App\Actions\Wrestlers\UpdateAction as UpdateWrestlerAction;
 use App\Data\Events\EventData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
+use App\Data\Matches\MatchResultData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Data\TagTeams\TagTeamData;
@@ -54,12 +58,15 @@ use App\Data\Titles\TitleData;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Events\PublicSection;
+use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -88,7 +95,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -109,7 +116,22 @@ if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
 }
 
 try {
-    if (isset($spec['live_event_id'])) {
+    if (isset($spec['public_event_id'])) {
+        $actor = User::query()->findOrFail($spec['public_actor_id']);
+        auth()->login($actor);
+        Carbon::setTestNow($spec['public_clock']);
+        $event = Event::query()->findOrFail($spec['public_event_id']);
+        if ($spec['public_operation'] === 'result') {
+            $match = EventMatch::query()->findOrFail($spec['public_match_id']);
+            resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::Submission, $match->sides()->firstOrFail(), collect()));
+        } elseif ($spec['public_operation'] === 'card-edit') {
+            resolve(UpdateAction::class)->handle($event, new EventData($event->name.' revised', $event->date, null, $event->preview));
+        } elseif ($spec['public_operation'] === 'unpublish') {
+            resolve(UnpublishEventPublicationAction::class)->handle($event, $actor, $spec['public_version'], $spec['public_fingerprint'], PublicSection::Card);
+        } else {
+            resolve(ReleaseEventPublicationAction::class)->handle($event, $actor, $spec['public_version'], $spec['public_fingerprint'], PublicSection::from($spec['public_operation']));
+        }
+    } elseif (isset($spec['live_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         Carbon::setTestNow($spec['clock']);
         $event = Event::query()->findOrFail($spec['live_event_id']);
