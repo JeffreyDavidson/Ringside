@@ -141,7 +141,10 @@ class FormModal extends BaseFormModal
             return [];
         }
 
-        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $this->bookedEvent()->promotion_id);
+        $event = $this->bookedEvent();
+        $event->loadMissing('promotion');
+
+        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString());
     }
 
     /**
