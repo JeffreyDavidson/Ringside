@@ -42,7 +42,9 @@ class RecordDevelopmentAction
             if ($step !== null && $developmentId === null && $step->status !== StepStatus::Planned) {
                 throw StorylineConflictException::state();
             }
-            if (($source['warnings'] !== [] || ($step !== null && $step->source_context !== $source['context'])) && mb_trim($data->reason ?? '') === '') {
+            // MySQL reorders JSON object keys; value types and list order still matter.
+            $contextChanged = $step !== null && collect($step->source_context)->sortKeys()->all() !== collect($source['context'])->sortKeys()->all();
+            if (($source['warnings'] !== [] || $contextChanged) && mb_trim($data->reason ?? '') === '') {
                 throw StorylineConflictException::source();
             }
             if ($data->source->eventId !== null) {

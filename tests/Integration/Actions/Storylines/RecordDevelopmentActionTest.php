@@ -118,3 +118,49 @@ test('a later promotion timezone change cannot move the date of an existing acco
     resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $corrected, $development->id);
     expect($development->refresh()->occurred_on->toDateString())->toBe('2026-10-13')->and($development->timezone)->toBe('America/New_York');
 });
+
+test('recording an unchanged linked source ignores saved JSON object key order', function () {
+    // Arrange
+    $fixture = storylineSourceFixture();
+    $story = $fixture['story'];
+    $source = new SourceData(eventId: $fixture['event']->id, matchId: $fixture['match']->id);
+    $step = plannedStorylineStep($story, $source);
+    $step->source_context = array_reverse($step->source_context, preserve_keys: true);
+    $step->save();
+    $data = new DevelopmentData('Actual confrontation', 'The planned confrontation happened.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id);
+
+    // Act
+    $development = resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect($development->storyline_step_id)->toBe($step->id)
+        ->and($step->refresh()->status)->toBe(StepStatus::Happened)
+        ->and($story->developments()->count())->toBe(1);
+});
+
+test('source context comparison retains strict scalar types and ordered lists', function (string $change) {
+    // Arrange
+    $fixture = storylineSourceFixture();
+    $story = $fixture['story'];
+    $source = new SourceData(eventId: $fixture['event']->id, matchId: $fixture['match']->id);
+    $step = plannedStorylineStep($story, $source);
+    $context = $step->source_context;
+    if ($change === 'scalar type') {
+        $context['event_deleted'] = 0;
+    }
+    if ($change === 'list order') {
+        $competitors = $context['competitors'];
+        if (! is_array($competitors)) {
+            throw new LogicException('The linked match fixture must contain a competitor list.');
+        }
+        $context['competitors'] = array_reverse($competitors);
+    }
+    $step->source_context = $context;
+    $step->save();
+    $data = new DevelopmentData('Actual confrontation', 'The confrontation happened.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id);
+
+    // Act / Assert
+    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(StorylineConflictException::class)
+        ->and($story->developments()->count())->toBe(0)
+        ->and($step->refresh()->status)->toBe(StepStatus::Planned);
+})->with(['scalar type', 'list order']);
