@@ -8,6 +8,7 @@ use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
 use App\Http\Controllers\Events\EventProductionSheetsController;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Events\EventTalentBookingsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
@@ -83,6 +84,7 @@ Route::middleware('auth')->group(function () {
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
         Route::get('events/{event}/production-sheet', [EventProductionSheetsController::class, 'show'])->can('viewProduction', 'event')->name('events.production-sheet.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
+        Route::get('events/{event}/talent-bookings', [EventTalentBookingsController::class, 'show'])->can('update', 'event')->name('events.talent-bookings.show');
         Route::get('events/{event}', [EventsController::class, 'show'])->can('view', 'event')->name('events.show');
 
         Route::get('venues', [VenuesController::class, 'index'])->can('viewAny', Venue::class)->name('venues.index');

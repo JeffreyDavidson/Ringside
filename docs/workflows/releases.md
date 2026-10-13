@@ -32,7 +32,7 @@ Each stage runs only when the owner gives its command. Releases are batched: a r
    - Cut `release/vX.Y.Z` at the exact tip of `develop`, push it and open a **draft** PR into `main` titled `chore(release): release vX.Y.Z`. List the commits, the user-visible changes, migrations and environment changes.
    - Draft the GitHub release notes.
    - From now until step 3, merge nothing into `develop` (including other sessions and Dependabot). An extra commit there blocks the fast-forward.
-   - If CI fails because a runner timed out or got stuck, rerun the failed jobs. If it is a real failure, fix it with a small PR into `develop`, then fast-forward the release branch to the new `develop` tip. Never recreate the branch or the PR.
+   - If CI fails because a runner timed out or got stuck, rerun the failed jobs using the retry guard below. If it is a real failure, fix it with a small PR into `develop`, then fast-forward the release branch to the new `develop` tip. Never recreate the branch or the PR.
 2. **"Merge it"**
    - If the release has migrations, take a database backup first.
    - Mark the PR ready, verify base `main`, head `release/vX.Y.Z`, head SHA and green checks, then merge with a regular merge commit pinned to the head SHA, subject `chore(release): release vX.Y.Z (#N)`.
@@ -44,6 +44,35 @@ Each stage runs only when the owner gives its command. Releases are batched: a r
    - Merges into `develop` can resume.
 4. **"Create the GitHub release"**
    - `gh release create vX.Y.Z --verify-tag --title "Ringside vX.Y.Z" --notes-file <notes>`, then confirm it is the latest release.
+
+### Wait for a CI retry
+
+Before requesting a retry, verify the parent CI run's `head_sha` equals the full
+candidate SHA and capture `run_attempt + 1`. Request the retry once, then use the
+shared bounded waiter with that recorded attempt. A SHA-only green result can
+still describe older checks while the new attempt is registering.
+
+Replace the quoted placeholders with the selected CI run ID and full candidate
+SHA. The commands stop if the run belongs to a different SHA or the retry request
+fails:
+
+```bash
+repo=JeffreyDavidson/Ringside
+run_id='<CI-run-id>'
+sha='<full-candidate-SHA>'
+run=$(gh api "repos/$repo/actions/runs/$run_id") &&
+jq -e --arg sha "$sha" '.head_sha == $sha' <<<"$run" &&
+next_attempt=$(jq -er '.run_attempt + 1' <<<"$run") &&
+gh run rerun "$run_id" --failed --repo "$repo" &&
+~/.agents/skills/merge-pr/scripts/wait-for-checks.sh "$sha" auto 2400 "$repo" --require-run "$run_id:$next_attempt"
+```
+
+For a cancelled whole run, omit `--failed`; for a single job, replace it with
+`--job <job-database-id>`. Capture the parent run's next attempt first in either
+case. Never calculate it after rerunning. Repeat `--require-run RUN_ID:ATTEMPT`
+when several CI runs must pass. The guard adds to the commit checks and waits
+through delayed registration; a missing or pending attempt cannot count as green.
+After success, freshly verify the PR head SHA, merge state and checks before merge.
 
 ### Hotfix
 

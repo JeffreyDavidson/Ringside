@@ -33,6 +33,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Actions\Events\SaveTalentBookingAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Actions\Events\UpdateAction;
 use App\Actions\Matches\AddMatchForEventAction;
@@ -48,6 +49,7 @@ use App\Actions\Venues\CreateAction as CreateVenueAction;
 use App\Actions\Wrestlers\CreateAction as CreateWrestlerAction;
 use App\Actions\Wrestlers\UpdateAction as UpdateWrestlerAction;
 use App\Data\Events\EventData;
+use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Stables\StableData;
@@ -57,6 +59,7 @@ use App\Data\Titles\TitleData;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Events\TalentBookingStatus;
 use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Titles\TitleType;
@@ -93,7 +96,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -126,6 +129,11 @@ try {
     } elseif (isset($spec['crew_archive_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         resolve(ArchiveCrewContactAction::class)->handle(CrewContact::query()->findOrFail($spec['crew_archive_id']), $spec['version']);
+    } elseif (isset($spec['talent_event_id'])) {
+        auth()->login(User::query()->findOrFail($spec['user_id']));
+        Carbon::setTestNow($spec['clock']);
+        resolve(SaveTalentBookingAction::class)->handle(Event::query()->findOrFail($spec['talent_event_id']), 'wrestler', $spec['person_id'],
+            $spec['version'], $spec['fingerprint'], new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'));
     } elseif (isset($spec['live_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         Carbon::setTestNow($spec['clock']);
