@@ -408,3 +408,7 @@ development, instead of becoming a hidden N+1. Load relationships explicitly wit
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
 - [Championship System](championship-system.md)
+
+## Private storyline planning
+
+Owners and Managers can plan creative steps across events, link existing matches and saved pack segments, and record what actually happened with retained cast and revision history. Members cannot read these plans. Storylines never change bookings, outcomes, championships or live operations. See [Storyline planning](storyline-planning.md) for state, history, privacy and source authority.

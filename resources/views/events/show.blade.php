@@ -50,6 +50,18 @@
         </div>
     @endcan
 
+    @if ($storylines->isNotEmpty())
+        <section class="border-ringside-line mb-6 border-y py-4">
+            <h2 class="mb-3 font-semibold">{{ __('storylines.related') }}</h2>
+            @foreach ($storylines as $storyline)
+                <a
+                    href="{{ route('storylines.show', $storyline) }}"
+                    class="block min-h-11 py-3 underline underline-offset-4"
+                >{{ $storyline->title }}</a>
+            @endforeach
+        </section>
+    @endif
+
     @php
         $calendarUnavailable = app(\App\Queries\Events\EventRosterAvailabilityQuery::class)->unavailable($event);
     @endphp

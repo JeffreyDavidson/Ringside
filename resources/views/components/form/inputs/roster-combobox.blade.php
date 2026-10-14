@@ -7,6 +7,7 @@
     'limit' => \App\Livewire\Matches\Support\BookableRosterSearch::LIMIT,
     'placeholder' => null,
     'errorName' => null,
+    'emptyMessage' => null,
     'required' => false,
 ])
 
@@ -33,7 +34,7 @@
         limit: @js($limit),
         messages: @js([
             'searching' => __('core.combobox.searching'),
-            'empty' => __('core.combobox.empty'),
+            'empty' => $emptyMessage ?? __('core.combobox.empty'),
             'capped' => __('core.combobox.capped', ['count' => $limit]),
             'one' => __('core.combobox.one_result'),
             'many' => __('core.combobox.results'),
@@ -119,7 +120,7 @@
                 role="presentation"
                 class="text-ringside-muted text-2sm px-3 py-2"
             >
-                {{ __('core.combobox.empty') }}
+                {{ $emptyMessage ?? __('core.combobox.empty') }}
             </li>
             <li
                 x-show="! loading && options.length >= limit"
