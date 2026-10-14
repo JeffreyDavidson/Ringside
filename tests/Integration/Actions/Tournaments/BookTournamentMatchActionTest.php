@@ -61,8 +61,10 @@ it('keeps calendar restrictions binding on a newly qualified same-card bout', fu
     $second = bookTournamentNode($world, $nodes->sole(fn (TournamentNode $node): bool => $node->round === 1 && $node->position === 2));
     recordTournamentWinner($first, $tournament);
     recordTournamentWinner($second, $tournament);
-    $competitor = $tournament->entries()->where('seed', 1)->firstOrFail()->competitor()->firstOrFail();
-    $person = $competitor instanceof TagTeam ? $competitor->currentWrestlers()->firstOrFail() : $competitor;
+    $entry = $tournament->entries()->where('seed', 1)->firstOrFail();
+    $person = $kind === EntrantKind::Wrestler
+        ? Wrestler::query()->findOrFail($entry->competitor_id)
+        : TagTeam::query()->findOrFail($entry->competitor_id)->currentWrestlers()->firstOrFail();
     $person->forceFill(['promotion_id' => $world['promotion']->id])->save();
     $day = $world['event']->local_date?->toDateString() ?? throw new LogicException('Expected a dated event');
     resolve(CreateAction::class)->handle($person, $day, $day, null, $actor);
