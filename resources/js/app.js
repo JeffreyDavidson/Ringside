@@ -3,6 +3,7 @@ import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.e
 import AlpineUI from '@alpinejs/ui';
 import rosterCombobox from './roster-combobox';
 import liveShow from './live-show';
+import eventBudget from './event-budget';
 import bookingHistory from './booking-history';
 import '../css/app.css';
 import '../css/event-pack.css';
@@ -11,6 +12,7 @@ import './event-pack';
 Alpine.plugin(AlpineUI);
 Alpine.data('rosterCombobox', rosterCombobox);
 Alpine.data('liveShow', liveShow);
+Alpine.data('eventBudget', eventBudget);
 Alpine.data('bookingHistory', bookingHistory);
 
 const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';

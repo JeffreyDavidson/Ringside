@@ -4,6 +4,12 @@
     </x-slot:sidebar>
 
     <div class="mb-6 flex flex-wrap justify-end gap-3">
+        @can('viewBudget', $event)
+            <a
+                href="{{ route('events.budget.show', $event) }}"
+                class="border-ringside-line-bright border px-4 py-3 font-semibold"
+            >{{ __('event-budget.title') }}</a>
+        @endcan
         @can('preparePublication', $event)
             <a
                 href="{{ route('events.public-pages.edit', $event) }}"
