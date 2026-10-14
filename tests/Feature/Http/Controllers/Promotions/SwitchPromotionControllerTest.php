@@ -24,10 +24,14 @@ test('a user can switch to another active promotion', function () {
         'status' => MembershipStatus::Active,
     ]);
 
+    actingAs($user);
+    withSession(['active_promotion_id' => $firstPromotion->id]);
+
+    $requestData = ['promotion_id' => $secondPromotion->id];
+
     // Act
     $response = from(route('dashboard'))
-        ->actingAs($user)
-        ->post(route('promotions.switch'), ['promotion_id' => $secondPromotion->id]);
+        ->post(route('promotions.switch'), $requestData);
 
     // Assert
     $response
@@ -48,8 +52,10 @@ test('a user cannot switch to a promotion without an active membership', functio
 
     actingAs($user);
 
+    $requestData = ['promotion_id' => $otherPromotion->id];
+
     // Act
-    $response = post(route('promotions.switch'), ['promotion_id' => $otherPromotion->id]);
+    $response = post(route('promotions.switch'), $requestData);
 
     // Assert
     $response
@@ -59,8 +65,10 @@ test('a user cannot switch to a promotion without an active membership', functio
 });
 
 test('a guest cannot switch promotions', function (): void {
+    $requestData = ['promotion_id' => 1];
+
     // Act
-    $response = post(route('promotions.switch'), ['promotion_id' => 1]);
+    $response = post(route('promotions.switch'), $requestData);
 
     // Assert
     $response
@@ -81,8 +89,10 @@ test('invalid selection keeps the previous promotion', function (mixed $id): voi
     actingAs($user);
     withSession(['active_promotion_id' => $promotion->id]);
 
+    $requestData = ['promotion_id' => $id];
+
     // Act
-    $response = from(route('dashboard'))->post(route('promotions.switch'), ['promotion_id' => $id]);
+    $response = from(route('dashboard'))->post(route('promotions.switch'), $requestData);
 
     // Assert
     $response
@@ -106,11 +116,42 @@ test('a refused selection keeps the previous promotion', function (): void {
     actingAs($user);
     withSession(['active_promotion_id' => $promotion->id]);
 
+    $requestData = ['promotion_id' => $other->id];
+
     // Act
-    $response = post(route('promotions.switch'), ['promotion_id' => $other->id]);
+    $response = post(route('promotions.switch'), $requestData);
 
     // Assert
     $response
         ->assertForbidden()
         ->assertSessionHas('active_promotion_id', $promotion->id);
+});
+
+test('a missing selection is refused without revealing promotion existence', function (): void {
+    // Arrange
+    actingAs(basicUser());
+    $requestData = ['promotion_id' => 999999];
+
+    // Act
+    $response = post(route('promotions.switch'), $requestData);
+
+    // Assert
+    $response
+        ->assertForbidden()
+        ->assertSessionMissing('active_promotion_id');
+});
+
+test('an account without memberships cannot select an existing promotion', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    actingAs(basicUser());
+    $requestData = ['promotion_id' => $promotion->id];
+
+    // Act
+    $response = post(route('promotions.switch'), $requestData);
+
+    // Assert
+    $response
+        ->assertForbidden()
+        ->assertSessionMissing('active_promotion_id');
 });

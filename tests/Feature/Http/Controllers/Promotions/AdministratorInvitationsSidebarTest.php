@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Promotions\AcceptPromotionInvitationAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\followingRedirects;
 use function Pest\Laravel\get;
 
 describe('pending invitations in the sidebar', function () {
@@ -32,9 +32,9 @@ describe('pending invitations in the sidebar', function () {
             ->assertSeeHtml(route('promotions.invitation.decline', $promotion));
     });
 
-    test('acceptance notes explain promotion scoping only to administrators', function (callable $makeUser, int $status, bool $seesNote): void {
+    test('administrators see promotion scoping notes', function (): void {
         // Arrange
-        $user = $makeUser();
+        $user = administrator();
         $promotion = Promotion::factory()->create();
         PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
 
@@ -45,14 +45,28 @@ describe('pending invitations in the sidebar', function () {
 
         // Assert
         $response
-            ->assertStatus($status)
-            ->assertSeeHtml('data-test="pending-invitations"');
+            ->assertOk()
+            ->assertSeeHtml('data-test="pending-invitations"')
+            ->assertSeeHtml('data-test="invitation-admin-note"');
+    });
 
-        expect(str_contains((string) $response->getContent(), 'data-test="invitation-admin-note"'))->toBe($seesNote);
-    })->with([
-        'administrator' => [administrator(...), 200, true],
-        'regular user' => [basicUser(...), 403, false],
-    ]);
+    test('regular users see invitations without administrator scoping notes', function (): void {
+        // Arrange
+        $user = basicUser();
+        $promotion = Promotion::factory()->create();
+        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertSeeHtml('data-test="pending-invitations"')
+            ->assertDontSeeHtml('data-test="invitation-admin-note"');
+    });
 
     test('an administrator accepting the invitation then gets the promotion in the switcher', function () {
         // Arrange
@@ -62,8 +76,10 @@ describe('pending invitations in the sidebar', function () {
 
         actingAs($admin);
 
+        resolve(AcceptPromotionInvitationAction::class)->handle($promotion, $admin);
+
         // Act
-        $response = followingRedirects()->post(route('promotions.invitation.accept', $promotion));
+        $response = get(route('dashboard'));
 
         // Assert
         $response

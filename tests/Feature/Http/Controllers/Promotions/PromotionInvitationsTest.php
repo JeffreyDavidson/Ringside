@@ -19,32 +19,59 @@ use function Pest\Laravel\withSession;
 require_once __DIR__.'/../../../../Fixtures/promotion-invitations.php';
 
 describe('an invitation grants nothing until it is accepted', function () {
-    test('an invited user with no other membership gets the no-membership page and no access to the inviting promotion', function (string $routeName) {
+    test('a pending invitation grants no access to the dashboard', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
-
         $invitee = basicUser();
         inviteTo($promotion, $invitee, MembershipRole::Owner);
-        $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
 
         actingAs($invitee);
 
         // Act
-        $response = get(match ($routeName) {
-            'dashboard' => route('dashboard'),
-            'wrestlers.show' => route('wrestlers.show', $wrestler),
-            default => route('promotions.show', $promotion),
-        });
+        $response = get(route('dashboard'));
 
         // Assert
-        $response->assertForbidden();
-    })->with([
-        'dashboard' => 'dashboard',
-        'wrestlers.show' => 'wrestlers.show',
-        'promotions.show' => 'promotions.show',
-    ]);
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
 
-    test('an invited user keeps their own promotion and cannot reach the inviting promotions records', function () {
+    test('a pending invitation grants no access to the wrestler profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $invitee = basicUser();
+        inviteTo($promotion, $invitee, MembershipRole::Owner);
+        $wrestler = Wrestler::factory()->for($promotion)->create();
+
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+
+    test('a pending invitation grants no access to the promotion profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $invitee = basicUser();
+        inviteTo($promotion, $invitee, MembershipRole::Owner);
+
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('promotions.show', $promotion));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+
+    test('a pending invitation cannot replace the active promotion', function (): void {
         // Arrange
         [$own, $inviting] = Promotion::factory()->count(2)->create()->all();
         $invitee = basicUser();
@@ -56,16 +83,54 @@ describe('an invitation grants nothing until it is accepted', function () {
         actingAs($invitee);
 
         // Act
-        $dashboard = get(route('dashboard'));
-        $foreignRecord = get(route('wrestlers.show', $foreignWrestler));
-        $foreignPage = get(route('promotions.show', $inviting));
+        $response = get(route('dashboard'));
 
         // Assert
-        $dashboard
-            ->assertSuccessful()
+        $response
+            ->assertOk()
             ->assertSessionHas('active_promotion_id', $own->id);
-        $foreignRecord->assertNotFound();
-        $foreignPage->assertForbidden();
+
+        expect(promotionHasActiveMember($inviting, $invitee))->toBeFalse();
+    });
+
+    test('a pending invitation cannot expose a foreign wrestler', function (): void {
+        // Arrange
+        [$own, $inviting] = Promotion::factory()->count(2)->create()->all();
+        $invitee = basicUser();
+        joinAs($own, $invitee);
+        inviteTo($inviting, $invitee, MembershipRole::Owner);
+        $foreignWrestler = Wrestler::factory()->for($inviting, 'promotion')->create();
+        withSession(['active_promotion_id' => $inviting->id]);
+
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('wrestlers.show', $foreignWrestler));
+
+        // Assert
+        $response
+            ->assertNotFound();
+
+        expect(promotionHasActiveMember($inviting, $invitee))->toBeFalse();
+    });
+
+    test('a pending invitation cannot authorize a foreign promotion page', function (): void {
+        // Arrange
+        [$own, $inviting] = Promotion::factory()->count(2)->create()->all();
+        $invitee = basicUser();
+        joinAs($own, $invitee);
+        inviteTo($inviting, $invitee, MembershipRole::Owner);
+        $foreignWrestler = Wrestler::factory()->for($inviting, 'promotion')->create();
+        withSession(['active_promotion_id' => $inviting->id]);
+
+        actingAs($invitee);
+
+        // Act
+        $response = get(route('promotions.show', $inviting));
+
+        // Assert
+        $response
+            ->assertForbidden();
 
         expect(promotionHasActiveMember($inviting, $invitee))->toBeFalse();
     });
@@ -79,11 +144,14 @@ describe('an invitation grants nothing until it is accepted', function () {
 
         actingAs($invitee);
 
+        $requestData = ['promotion_id' => $inviting->id];
+
         // Act
-        $response = post(route('promotions.switch'), ['promotion_id' => $inviting->id]);
+        $response = post(route('promotions.switch'), $requestData);
 
         // Assert
-        $response->assertForbidden();
+        $response
+            ->assertForbidden();
 
         expect(session('active_promotion_id'))->toBeNull();
     });
@@ -217,7 +285,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertSee('Invitation Championship Wrestling');
+        $response
+            ->assertSee('Invitation Championship Wrestling');
     })->with([
         'upper case' => ['TYPED@EXAMPLE.TEST'],
         'whitespace' => ['  typed@example.test  '],
@@ -241,7 +310,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertSeeInOrder(['Older Invitation Wrestling', 'Newer Invitation Wrestling']);
+        $response
+            ->assertSeeInOrder(['Older Invitation Wrestling', 'Newer Invitation Wrestling']);
     });
 });
 
@@ -283,41 +353,68 @@ describe('feedback for a user without a membership', function () {
 });
 
 describe('promotion existence is not revealed', function () {
-    test('a missing promotion answers an invitation action like an existing one without an invitation', function (string $routeName, bool $promotionExists) {
+    test('accept returns unavailable for a missing promotion without an invitation', function (): void {
         // Arrange
         $user = basicUser();
-        $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+        $promotionId = 999999;
 
         actingAs($user);
 
         // Act
-        $response = post(route($routeName, ['promotion' => $promotionId]));
+        $response = post(route('promotions.invitation.accept', ['promotion' => $promotionId]));
 
         // Assert
         $response
             ->assertRedirect(route('dashboard'))
             ->assertSessionHas('error', __('promotions.invitation_unavailable'));
-    })->with([
-        'accept, missing' => ['promotions.invitation.accept', false],
-        'accept, existing' => ['promotions.invitation.accept', true],
-        'decline, missing' => ['promotions.invitation.decline', false],
-        'decline, existing' => ['promotions.invitation.decline', true],
-    ]);
+    });
 
-    test('switching to a missing promotion answers like switching to one the user is not a member of', function (bool $promotionExists) {
+    test('accept returns unavailable for a existing promotion without an invitation', function (): void {
         // Arrange
         $user = basicUser();
-        $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+        $promotionId = Promotion::factory()->create()->id;
 
         actingAs($user);
 
         // Act
-        $response = post(route('promotions.switch'), ['promotion_id' => $promotionId]);
+        $response = post(route('promotions.invitation.accept', ['promotion' => $promotionId]));
 
         // Assert
-        $response->assertForbidden();
-    })->with([
-        'missing' => [false],
-        'existing, not a member' => [true],
-    ]);
+        $response
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    });
+
+    test('decline returns unavailable for a missing promotion without an invitation', function (): void {
+        // Arrange
+        $user = basicUser();
+        $promotionId = 999999;
+
+        actingAs($user);
+
+        // Act
+        $response = post(route('promotions.invitation.decline', ['promotion' => $promotionId]));
+
+        // Assert
+        $response
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    });
+
+    test('decline returns unavailable for a existing promotion without an invitation', function (): void {
+        // Arrange
+        $user = basicUser();
+        $promotionId = Promotion::factory()->create()->id;
+
+        actingAs($user);
+
+        // Act
+        $response = post(route('promotions.invitation.decline', ['promotion' => $promotionId]));
+
+        // Assert
+        $response
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    });
+
 });

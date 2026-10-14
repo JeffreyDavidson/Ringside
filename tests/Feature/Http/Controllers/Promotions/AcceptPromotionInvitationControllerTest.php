@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Promotions\AcceptPromotionInvitationAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
@@ -57,15 +58,18 @@ test('gives the new member access to the promotion records', function () {
     $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
 
     actingAs($invitee);
-    $beforeAccepting = get(route('wrestlers.show', $wrestler));
-    post(route('promotions.invitation.accept', $promotion));
+    resolve(AcceptPromotionInvitationAction::class)->handle($promotion, $invitee);
 
     // Act
-    $afterAccepting = get(route('wrestlers.show', $wrestler));
+    $response = get(route('wrestlers.show', $wrestler));
 
     // Assert
-    $beforeAccepting->assertForbidden();
-    $afterAccepting->assertOk();
+    $response
+        ->assertOk()
+        ->assertViewIs('wrestlers.show')
+        ->assertViewHas('wrestler', $wrestler);
+
+    expect(promotionHasActiveMember($promotion, $invitee))->toBeTrue();
 });
 
 test('cannot be done for another email by forging the promotion of someone elses invitation', function () {
@@ -104,7 +108,8 @@ test('is not possible for a suspended member, keeps the suspension and deletes t
     $response = post(route('promotions.invitation.accept', $promotion));
 
     // Assert
-    $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    $response
+        ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
     $membership = $promotion->memberships()->sole();
 
@@ -127,7 +132,8 @@ test('is not possible once the invitation has expired', function () {
     $response = post(route('promotions.invitation.accept', $promotion));
 
     // Assert
-    $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    $response
+        ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
     expect($promotion->memberships()->count())->toBe(0);
 });
@@ -144,7 +150,8 @@ test('is not possible after the invitation is gone', function () {
     $response = post(route('promotions.invitation.accept', $promotion));
 
     // Assert
-    $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+    $response
+        ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
     expect($promotion->memberships()->count())->toBe(0);
 });
@@ -157,7 +164,8 @@ test('requires a signed-in user', function () {
     $response = post(route('promotions.invitation.accept', $promotion));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
 });
 
 test('is refused for an inactive account', function () {
@@ -173,8 +181,51 @@ test('is refused for an inactive account', function () {
     $response = post(route('promotions.invitation.accept', $promotion));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
 
     expect(promotionHasActiveMember($promotion, $user))->toBeFalse()
         ->and($invitation->fresh())->not->toBeNull();
+});
+
+test('a pending invitation alone cannot grant access to promotion records', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $invitee = basicUser();
+    inviteTo($promotion, $invitee, MembershipRole::Member);
+    $wrestler = Wrestler::factory()->for($promotion)->create();
+
+    actingAs($invitee);
+
+    // Act
+    $response = get(route('wrestlers.show', $wrestler));
+
+    // Assert
+    $response
+        ->assertForbidden();
+
+    expect(promotionHasActiveMember($promotion, $invitee))->toBeFalse();
+});
+
+test('an administrator can accept an invitation through the HTTP endpoint', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create(['name' => 'Accepted Wrestling']);
+    $admin = administrator();
+    $invitation = inviteTo($promotion, $admin, MembershipRole::Manager);
+
+    actingAs($admin);
+
+    // Act
+    $response = post(route('promotions.invitation.accept', $promotion));
+
+    // Assert
+    $response
+        ->assertRedirect(route('dashboard'))
+        ->assertSessionHas('status', __('promotions.invitation_accepted', [
+            'promotion' => 'Accepted Wrestling',
+            'role' => MembershipRole::Manager->label(),
+        ]));
+
+    expect(promotionHasMemberWithRole($promotion, $admin, MembershipRole::Manager))->toBeTrue()
+        ->and($invitation->fresh())->toBeNull();
 });
