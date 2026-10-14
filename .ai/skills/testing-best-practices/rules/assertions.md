@@ -2,7 +2,19 @@
 
 ## Arrange, Act, Assert
 
-Write each test in three parts: setup, one action, and assertions. Put one blank line between them so readers can identify each part without comments.
+Write each test around one named behavior: Arrange the state, Act on one target operation, then Assert its response and meaningful outcomes. Preserve explicit phase comments when the project uses them. Separate the phases with a blank line.
+
+Group Arrange statements by meaning: target records and relationships, contrast/foreign fixtures, actor and authentication context, relevant fakes, and payload or baseline preparation. Use a blank line when the subject changes. Keep dependent records together and preserve creation order; do not insert a blank line after every statement or impose one universal setup order.
+
+Prepare payloads and prerequisite lookups before Act. For an HTTP test, assign the target response to `$response`, with assertions in Assert. Follow the project's response-chain format: group consecutive assertions on that response, then separate state/authentication/event assertions with a blank line. Do not make requests inside assertion callbacks.
+
+Separate independent save, reopen, delete, restore or publication behaviors that repeat Arrange/Act/Assert cycles. Do not conceal those cycles in a helper. Read fixture helpers: a method named as setup may issue requests and assertions.
+
+Retain a sequence only when the named defect needs it, such as replaying a submission, challenging a stale form after an earlier save, or comparing query counts before and after growth. Make the baseline or first operation visible as setup and the challenged operation the target; explain why the sequence is necessary. Do not create tests that depend on another test's state. A long test named 'workflow' is not an exemption.
+
+Several assertions about one response, saved record and dispatched event are one contract, not several test scenarios. Split changes in scenario or target behavior, not complementary outcome assertions.
+
+A type/null guard is usually a prerequisite assertion, not a new business case. Prefer a suitable runtime assertion with supported static type narrowing over a hand-written exception. Loops that build fixtures or check one uniform collection are not automatically mixed scenarios.
 
 Keep each test self-contained. Do not use values created by another test.
 
@@ -26,7 +38,7 @@ Use the assertion in this table for each subject.
 
 Use a PHPUnit assertion only if no Pest expectation and no Laravel assertion exists for the subject.
 
-Assert each fact once. Do not assert a 200 status before `assertSee`, because `assertSee` already shows that the page rendered.
+Assert each meaningful fact once. Content and status are different facts: `assertSee()` checks response content and does not establish a successful status. Keep the appropriate named status assertion alongside content, view or payload assertions.
 
 ## Named Response Assertions
 

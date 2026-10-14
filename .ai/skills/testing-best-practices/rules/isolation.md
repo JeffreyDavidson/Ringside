@@ -18,7 +18,7 @@ Identify the dependency, then choose the first applicable option. A framework fa
 - Create each fake inside the test that needs it. Do not create fakes in a file-level `beforeEach()`.
 - Pass class names to `Event::fake()` and `Queue::fake()` when you know which classes the code dispatches. A fake without class names can hide an unexpected dispatch.
 - Use a fake without class names only when the test asserts the complete result, including a call to `assertNothingPushed()`.
-- Write one assertion for each fake. The assertion states that the code dispatches the item, or that the code does not dispatch the item.
+- Assert meaningful dispatch or non-dispatch for each fake. Add payload and exact-count checks when those facts protect the contract; one assertion per fake is not a maximum.
 - Assert the data of a job or of an event if that data is part of the behavior.
 - Use `Exceptions::fake()` to assert that the application reports the correct exception. Do not use `withoutExceptionHandling()`, because it changes the response under test.
 

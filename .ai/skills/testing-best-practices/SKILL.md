@@ -8,6 +8,8 @@ metadata:
 
 # Testing Best Practices
 
+This is the project-maintained override of the Laravel testing guidance. Keep generic test design here and read the repository's scoped rules for controller formatting and matching-test requirements.
+
 This skill provides rules for designing Laravel tests. Each rule file explains what to do and why. Use `search-docs` for Laravel and Pest API syntax.
 This project uses Pest. Follow the corresponding guidance in each rule.
 
@@ -15,9 +17,9 @@ This project uses Pest. Follow the corresponding guidance in each rule.
 
 Read nearby tests before you choose syntax and organization.
 
-A pattern repeated throughout the project is a convention, and project conventions take precedence over this skill. Follow them and give new tests the same structure.
+Read explicit project rules and the user's approved conventions before copying nearby patterns. Those rules take precedence over legacy examples; repeated code alone does not override an agreed standard.
 
-These rules govern the tests you write now. An existing test that follows a project convention is not defective merely because it conflicts with this skill. Do not delete or rewrite it. If the convention has drawbacks, explain them and let the user decide.
+Use these rules for writing and reviewing tests. Style alone does not make an existing test defective: identify the relevant agreed convention or protected contract. Explain a proposed convention change and work only within the user's approved refactor scope; an audit does not grant permission to rewrite or delete tests.
 
 ## What to Test
 
@@ -27,19 +29,21 @@ Read this section before you write a test.
 - Cover every changed decision and each applicable high-value failure mode. A decision is a branch, a validation, a calculation, or an authorization.
 - Exercise declarations through behavior instead of repeating their text.
 - Leave framework behavior to framework tests. Testing project configuration is not testing the framework. A constrained relationship, cast, scope, or validation rule belongs to this project.
-- Keep every test that can detect a distinct defect. When two tests detect the same defect, trim the higher-layer test to one case and report the duplication. Do not delete an existing test.
+- Keep coverage of distinct defects and boundaries. Similar assertions in an Action test and an HTTP test can protect different wiring. Report genuine duplication and recommend a focused consolidation; do not automatically trim or delete existing coverage.
 - Write a feature test first. Write a unit test only for logic that does not use the framework.
 - Write a browser test only for behavior in JavaScript that a feature test cannot reach. Put a browser test in `tests/Browser`, and call `assertNoJavaScriptErrors()` in it.
 - Judge an architecture test by the convention it protects, not by the rules above. An `arch()` test declares a rule for an entire directory, such as the parent class of every model, the classes that may use an enum, or the methods every factory declares. It intentionally checks declarations and fails when a new file breaks the convention.
 - Use the test tools that the project installs. Add a new test dependency, plugin, or browser only after the user asks for it.
 
-## How to Apply
+## Choose the Mode
 
-1. Read the code under test. Read the tests in the same directory. Identify every decision in the code.
-2. Select every applicable branch in the rule index. Read every selected rule file.
-3. Report each defect in the code before you write a test. Examples are a method with no body, a policy that no action calls, and a write action with no validation. Test the actual behavior. Report the defect to the user.
-4. Write the tests. Run the smallest set of tests that covers the change. The tests must pass.
-5. Check every applicable item in `rules/review.md` and every selected rule file. Resolve every mismatch before completion.
+Read the code under test, its callers, applicable scoped rules, nearby tests and setup helpers before choosing an approach. Identify the decision and defect each scenario protects, then load only the relevant references below.
+
+- **Write:** cover the changed behavior and meaningful failure paths. Keep one target action and one coherent assertion phase per scenario; run the affected tests.
+- **Audit:** remain read-only. Use `rules/review.md` to inventory tests and dataset cases, identify missing or overlapping contracts, and recommend keep/consolidate/rewrite/remove with evidence. Passing CI is validation evidence, not proof of test value.
+- **Refactor:** work only within the approved files and changes. Preserve original scenarios, input combinations, fixture identity and meaningful assertions. Splitting mixed scenarios can increase the number of test declarations; compare protected contracts rather than raw counts. Run the affected tests and required project checks.
+
+Report confirmed code defects and uncertain product decisions separately from test-style findings. A review request does not authorize fixes, test removal, new dependencies, coverage exclusions or weaker security/CI gates. Record what was inspected or executed and what remains unknown; do not describe proposed changes as implemented.
 
 ## Rule Index
 

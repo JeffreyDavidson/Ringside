@@ -30,6 +30,8 @@ it('does not include deployments from deleted environments', function () { ... }
 it('falls back to the default region when none is configured', function () { ... });
 ```
 
+A name that joins independent operations (for example saves, reopens and restores) is a prompt to review whether those operations need separate tests. A long name alone does not prove duplication.
+
 Use a verb that describes a result, such as `returns`, `renders`, `creates`, `dispatches`, `rejects`, `forbids`, `falls back`, or `does not`.
 
 Do not write `it('works correctly')` or `it('returns data')`, because neither specifies a meaningful result. Do not write `it('handleMethod creates record')`, because it names a method rather than behavior.
@@ -38,8 +40,12 @@ Do not write `it('works correctly')` or `it('returns data')`, because neither sp
 
 Use `describe()` if one file covers separate actions in a lifecycle. An example is a controller with the actions `index`, `show`, `store`, `update`, and `destroy`.
 
-Do not use `describe()` in these cases:
+Prefer flat tests for a small single-action file when a wrapper only repeats its filename. Keep a group when it distinguishes meaningful behavior or setup and improves navigation.
 
-- The file covers one action or one flow.
-- The tests are different only in the input value. Use a dataset instead.
-- The group adds a level but does not make the file easier to read.
+Do not add a group merely for different input values that belong to a homogeneous dataset, or when the extra level does not improve readability.
+
+## Separate Scenarios
+
+Split a test when conditional setup or assertions select different scenarios: guests versus signed-in actors, allowed versus refused roles, valid versus invalid input, or different expected side effects/statuses. Do not hide the same branching behind `match`, a ternary, a callable assertion dataset or a generic expected-status parameter.
+
+Named datasets belong to one contract with the same setup/action/assertion structure. Owners and managers allowed to edit can share a dataset; guest login redirects, member refusals and foreign-record 404s get separate tests. See `test-data.md` for fixture and dataset choices and `assertions.md` for necessary sequences.
