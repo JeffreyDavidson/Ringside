@@ -7,14 +7,17 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 describe('browser tab titles', function (): void {
     it('names each promoter page in the browser tab', function (Closure $url, string $pageTitle): void {
         // Arrange
         $user = administrator();
 
+        actingAs($user);
+
         // Act
-        $response = actingAs($user)->get($url());
+        $response = get($url());
 
         // Assert
         $response
@@ -41,8 +44,10 @@ describe('browser tab titles', function (): void {
         // Arrange
         $wrestler = Wrestler::factory()->create(['name' => "Shane O'Neil & Co"]);
 
+        actingAs(administrator());
+
         // Act
-        $response = actingAs(administrator())->get(route('wrestlers.show', $wrestler));
+        $response = get(route('wrestlers.show', $wrestler));
 
         // Assert
         $response->assertSeeHtml('<title>Shane O&#039;Neil &amp; Co · Ringside</title>');

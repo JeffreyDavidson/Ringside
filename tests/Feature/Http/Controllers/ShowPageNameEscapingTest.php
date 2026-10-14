@@ -14,6 +14,7 @@ use Illuminate\Http\Response;
 use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 /**
  * @param  array<int, string>  $names
@@ -32,6 +33,7 @@ function assertNamesRenderEscapedOnce(TestResponse $response, array $names): voi
 
 describe('Show pages escape related names exactly once', function () {
     test('the wrestler page escapes its tag team, manager, stable and title links', function () {
+        // Arrange
         $wrestler = Wrestler::factory()
             ->employed()
             ->onCurrentTagTeam(TagTeam::factory()->create(['name' => "O'Neil & Sons"]))
@@ -45,8 +47,13 @@ describe('Show pages escape related names exactly once', function () {
             ->current()
             ->create();
 
-        $response = actingAs(administrator())
-            ->get(route('wrestlers.show', $wrestler))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, [
@@ -58,18 +65,25 @@ describe('Show pages escape related names exactly once', function () {
     });
 
     test('the manager page escapes its wrestler and tag team links', function () {
+        // Arrange
         $manager = Manager::factory()->employed()->create();
         $manager->wrestlers()->attach(Wrestler::factory()->create(['name' => "Sean O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
         $manager->tagTeams()->attach(TagTeam::factory()->create(['name' => "O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
 
-        $response = actingAs(administrator())
-            ->get(route('managers.show', $manager))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('managers.show', $manager));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, ["Sean O'Neil & Sons", "O'Neil & Sons"]);
     });
 
     test('the tag team page escapes its wrestler, manager, stable and title links', function () {
+        // Arrange
         $tagTeam = TagTeam::factory()->employed()->create();
         $tagTeam->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
         $tagTeam->currentWrestlers->skip(1)->firstOrFail()->update(['name' => "D'Angelo & Sons"]);
@@ -84,8 +98,13 @@ describe('Show pages escape related names exactly once', function () {
             ->current()
             ->create();
 
-        $response = actingAs(administrator())
-            ->get(route('tag-teams.show', $tagTeam))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tag-teams.show', $tagTeam));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, [
@@ -98,28 +117,41 @@ describe('Show pages escape related names exactly once', function () {
     });
 
     test('the stable page escapes its wrestler and tag team links', function () {
+        // Arrange
         $stable = Stable::factory()->active()->create();
         $stable->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
         $stable->currentTagTeams->firstOrFail()->update(['name' => "Hart & O'Hara"]);
 
-        $response = actingAs(administrator())
-            ->get(route('stables.show', $stable))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('stables.show', $stable));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, ["O'Neil & Sons", "Hart & O'Hara"]);
     });
 
     test('the event page escapes its venue link', function () {
+        // Arrange
         $event = Event::factory()->atVenue(Venue::factory()->create(['name' => "O'Neil & Sons Arena"]))->create();
 
-        $response = actingAs(administrator())
-            ->get(route('events.show', $event))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('events.show', $event));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, ["O'Neil & Sons Arena"]);
     });
 
     test('the title page escapes its current champion link', function () {
+        // Arrange
         $title = Title::factory()->create();
         TitleChampionship::factory()
             ->for($title, 'title')
@@ -127,8 +159,13 @@ describe('Show pages escape related names exactly once', function () {
             ->current()
             ->create();
 
-        $response = actingAs(administrator())
-            ->get(route('titles.show', $title))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('titles.show', $title));
+
+        // Assert
+        $response
             ->assertOk();
 
         assertNamesRenderEscapedOnce($response, ["O'Neil & Sons"]);

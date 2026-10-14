@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
@@ -12,6 +13,7 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -62,4 +64,7 @@ test('a soft-deleted record has no show page', function (string $modelClass, str
     'tag team' => [TagTeam::class, 'tag-teams.show'],
     'stable' => [Stable::class, 'stables.show'],
     'title' => [Title::class, 'titles.show'],
+    'event' => [Event::class, 'events.show'],
+    'venue' => [Venue::class, 'venues.show'],
+    'user' => [User::class, 'users.show'],
 ]);

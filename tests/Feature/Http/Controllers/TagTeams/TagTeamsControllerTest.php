@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Livewire\Components\GeneralInfo;
 use App\Livewire\TagTeams\Components\Actions;
+use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\PreviousManagers;
 use App\Livewire\TagTeams\Tables\PreviousMatches;
 use App\Livewire\TagTeams\Tables\PreviousStables;
 use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
 use App\Livewire\TagTeams\Tables\PreviousWrestlers;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -29,15 +33,24 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('show returns a view', function () {
+        // Arrange
         $tagTeam = TagTeam::factory()->create();
 
-        actingAs(administrator())
-            ->get(route('tag-teams.show', $tagTeam))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tag-teams.show', $tagTeam));
+
+        // Assert
+        $response
             ->assertOk()
             ->assertViewIs('tag-teams.show')
             ->assertSee($tagTeam->name)
             ->assertSee('Status')
             ->assertViewHas('tagTeam', $tagTeam)
+            ->assertSeeLivewire(Actions::class)
+            ->assertSeeLivewire(GeneralInfo::class)
+            ->assertSee($tagTeam->status->label())
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
@@ -49,32 +62,8 @@ describe('TagTeams Controller', function () {
     /**
      * @see TagTeamsController::show()
      */
-    test('show renders the lifecycle actions component', function () {
-        $tagTeam = TagTeam::factory()->create();
-
-        actingAs(administrator())
-            ->get(route('tag-teams.show', $tagTeam))
-            ->assertOk()
-            ->assertSeeLivewire(Actions::class);
-    });
-
-    /**
-     * @see TagTeamsController::show()
-     */
-    test('show renders the general info component', function () {
-        $tagTeam = TagTeam::factory()->create();
-
-        actingAs(administrator())
-            ->get(route('tag-teams.show', $tagTeam))
-            ->assertOk()
-            ->assertSeeLivewire(GeneralInfo::class)
-            ->assertSee($tagTeam->status->label());
-    });
-
-    /**
-     * @see TagTeamsController::show()
-     */
     test('show renders the related data displayed by the tag team summary', function () {
+        // Arrange
         TagTeam::factory()->create();
 
         $tagTeam = TagTeam::factory()->employed()->create();
@@ -88,8 +77,13 @@ describe('TagTeams Controller', function () {
             ->current()
             ->create();
 
-        $response = actingAs(administrator())
-            ->get(route('tag-teams.show', $tagTeam))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tag-teams.show', $tagTeam));
+
+        // Assert
+        $response
             ->assertOk()
             ->assertSee($manager->full_name)
             ->assertSee('Tag Team Belt');
@@ -101,11 +95,17 @@ describe('TagTeams Controller', function () {
     /**
      * @see TagTeamsController::show()
      */
-    test('a basic user cannot view tag team profiles', function () {
+    test('a user without a promotion membership cannot view tag team profiles', function () {
+        // Arrange
         $tagTeam = TagTeam::factory()->create();
 
-        actingAs(basicUser())
-            ->get(route('tag-teams.show', $tagTeam))
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('tag-teams.show', $tagTeam));
+
+        // Assert
+        $response
             ->assertForbidden();
     });
 
@@ -113,11 +113,16 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('a guest cannot view a tag team profile', function () {
+        // Arrange
         TagTeam::factory()->create();
 
         $tagTeam = TagTeam::factory()->create();
 
-        get(route('tag-teams.show', $tagTeam))
+        // Act
+        $response = get(route('tag-teams.show', $tagTeam));
+
+        // Assert
+        $response
             ->assertRedirect(route('login'));
     });
 
@@ -125,10 +130,63 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::show()
      */
     test('returns 404 when tag team does not exist', function () {
+        // Arrange
         TagTeam::factory()->create();
 
-        actingAs(administrator())
-            ->get(route('tag-teams.show', 999999))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tag-teams.show', 999999));
+
+        // Assert
+        $response
             ->assertNotFound();
     });
+});
+
+test('an administrator receives the tag-teams index view and table', function (): void {
+    // Arrange
+    actingAs(administrator());
+
+    // Act
+    $response = get(route('tag-teams.index'));
+
+    // Assert
+    $response->assertOk()->assertViewIs('tag-teams.index')
+        ->assertSeeHtml('aria-label="Content workspace"')
+        ->assertSeeLivewire(Main::class);
+});
+
+test('a guest cannot open the tag-teams index', function (): void {
+    // Act
+    $response = get(route('tag-teams.index'));
+
+    // Assert
+    $response->assertRedirect(route('login'));
+});
+
+test('a user without membership cannot open the tag-teams index', function (): void {
+    // Arrange
+    actingAs(basicUser());
+
+    // Act
+    $response = get(route('tag-teams.index'));
+
+    // Assert
+    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+});
+
+test('an active promotion member receives the correct tagTeam profile', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $record = TagTeam::factory()->for($promotion, 'promotion')->create();
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('tag-teams.show', $record));
+
+    // Assert
+    $response->assertOk()->assertViewIs('tag-teams.show')->assertViewHas('tagTeam', $record);
 });
