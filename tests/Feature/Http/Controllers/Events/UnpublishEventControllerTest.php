@@ -236,3 +236,52 @@ test('outsider cannot unpublish a private publication', function (): void {
     expect($publication->refresh()
         ->getAttributes())->toBe($original);
 });
+
+test('invalid unpublish controls preserve the released card', function (string $field, mixed $value): void {
+    // Arrange
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create();
+    $publication->draft = [
+        ...$publication->draft,
+        'matches' => [
+            [
+                'id' => $fixture['match']->id,
+                'type' => true,
+                'stipulation' => false,
+                'titles' => false,
+            ],
+        ],
+    ];
+    $publication->save();
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $original = $publication->getRawOriginal();
+    $source = app(PublicEventSourceQuery::class)->get($event);
+
+    $requestData = [
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card', $field => $value,
+    ];
+
+    // Act
+    $response = from(route('events.public-pages.edit', $event))
+        ->delete(route('events.public-pages.unpublish', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasErrors($field)
+        ->assertSessionMissing('success');
+
+    expect($publication->refresh()->getRawOriginal())->toBe($original);
+})->with([
+    'zero version' => ['version', 0],
+    'short fingerprint' => ['fingerprint', 'short'],
+    'unknown section' => ['section', 'unknown'],
+    'nonboolean review' => ['reviewed', 'yes'],
+]);

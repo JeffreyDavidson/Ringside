@@ -267,3 +267,39 @@ test('outsider cannot publish a private publication', function (): void {
     expect($publication->refresh()
         ->getAttributes())->toBe($original);
 });
+
+test('invalid release controls preserve the existing draft', function (string $field, mixed $value): void {
+    // Arrange
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create()
+        ->refresh();
+    $original = $publication->getRawOriginal();
+    $source = app(PublicEventSourceQuery::class)->get($event);
+
+    $requestData = [
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card',
+        'reviewed' => 1, $field => $value,
+    ];
+
+    // Act
+    $response = from(route('events.public-pages.edit', $event))
+        ->post(route('events.public-pages.publish', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasErrors($field)
+        ->assertSessionMissing('success');
+
+    expect($publication->refresh()->getRawOriginal())->toBe($original);
+})->with([
+    'zero version' => ['version', 0],
+    'short fingerprint' => ['fingerprint', 'short'],
+    'unknown section' => ['section', 'unknown'],
+    'unaccepted review' => ['reviewed', '0'],
+]);
