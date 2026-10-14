@@ -100,7 +100,9 @@ test('an administrator receives the venues index view and table', function (): v
     $response = get(route('venues.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('venues.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('venues.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -121,7 +123,9 @@ test('a user without membership cannot open the venues index', function (): void
     $response = get(route('venues.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member cannot open the platform venue profile', function (): void {

@@ -27,7 +27,13 @@ test('an event pack opens from the saved event without creating data', function 
 
     // Assert
 
-    $response->assertOk()->assertViewIs('events.pack')->assertViewHas('event', $event)->assertSee('Harbor Showcase')->assertSee('Event pack');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.pack')
+        ->assertViewHas('event', $event)
+        ->assertSee('Harbor Showcase')
+        ->assertSee('Event pack');
+
     expect($event->pack()->exists())->toBeFalse();
 });
 
@@ -57,7 +63,11 @@ test('saved pack timings and notes reopen for their event including midnight dat
 
     // Assert
 
-    $response->assertSessionHasNoErrors()->assertRedirect(route('events.pack.show', $event))->assertSessionHas('success', __('event-pack.saved'));
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('events.pack.show', $event))
+        ->assertSessionHas('success', __('event-pack.saved'));
+
     expect($event->pack()->firstOrFail()->content)->toMatchArray(['timezone' => 'America/New_York', 'notes' => 'Confirm the replacement before doors.', 'master' => 'Morgan Ellis']);
 
     // Act
@@ -65,8 +75,11 @@ test('saved pack timings and notes reopen for their event including midnight dat
 
     // Assert
     $response
-        ->assertOk()->assertSee('Confirm the replacement before doors.')
-        ->assertSee('2026-11-15T00:10')->assertSee('Morgan Ellis');
+        ->assertOk()
+        ->assertSee('Confirm the replacement before doors.')
+        ->assertSee('2026-11-15T00:10')
+        ->assertSee('Morgan Ellis');
+
     expect(EventPack::query()->count())->toBe(1);
 });
 
@@ -85,6 +98,7 @@ test('the pack uses the complete ordered card and preserves removed match notes'
 
     // Assert
     $response->assertSessionHasNoErrors();
+
     $later->delete();
     $page = get(route('events.pack.show', $event));
 
@@ -116,6 +130,7 @@ test('the roster expands teams and deduplicates people while retaining deleted b
     // Assert
 
     $response->assertOk();
+
     $rosterData = data_get($response->viewData('card'), 'roster');
     assert(is_array($rosterData));
     $roster = collect($rosterData);
@@ -139,7 +154,10 @@ test('a stale tab cannot overwrite a saved pack and keeps its submitted notes', 
     // Act
     $response = from(route('events.pack.show', $event))->put(route('events.pack.update', $event), [...$payload, 'notes' => 'Stale notes']);
 
-    $response->assertSessionHasErrors('pack')->assertSessionHasInput('notes', 'Stale notes');
+    $response
+        ->assertSessionHasErrors('pack')
+        ->assertSessionHasInput('notes', 'Stale notes');
+
     expect($event->pack()->firstOrFail()->content['notes'])->toBe('First save')
         ->and($event->pack()->firstOrFail()->version)->toBe(1);
 });
@@ -155,6 +173,7 @@ test('card changes reject stale saves and require review on reopen', function ()
 
     // Assert
     $response->assertSessionHasNoErrors();
+
     $event->update(['name' => 'Changed show']);
 
     // Act
@@ -162,6 +181,7 @@ test('card changes reject stale saves and require review on reopen', function ()
 
     // Assert
     $response->assertSessionHasErrors('pack');
+
     $page = get(route('events.pack.show', $event));
     $payload = [...$payload, 'version' => 1, 'fingerprint' => data_get($page->viewData('card'), 'fingerprint')];
 
@@ -196,7 +216,10 @@ test('nested matches from another event are refused atomically', function () {
 
     // Assert
 
-    $response->assertSessionHasErrors(['matches.0.match_id', 'segments.0.after_match_id'])->assertSessionHasInput('notes', 'Do not save');
+    $response
+        ->assertSessionHasErrors(['matches.0.match_id', 'segments.0.after_match_id'])
+        ->assertSessionHasInput('notes', 'Do not save');
+
     expect($event->pack()->exists())->toBeFalse();
 });
 
@@ -232,12 +255,16 @@ test('members can read and print but only managers can save within their promoti
     $response = put(route('events.pack.update', $event), ['complete' => 1, 'version' => 0, 'fingerprint' => data_get($page->viewData('card'), 'fingerprint'), 'timezone' => 'UTC']);
 
     if ($canSave) {
-        $response->assertSessionHasNoErrors()->assertRedirect();
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
         expect($event->pack()->exists())->toBeTrue();
 
         return;
     }
     $response->assertForbidden();
+
     expect($event->pack()->exists())->toBeFalse();
 })->with([
     'member' => [MembershipRole::Member, false],
@@ -278,7 +305,11 @@ test('printing uses saved values and escapes notes without saving a record', fun
     $response = get(route('events.pack.show', ['event' => $event, 'print' => 1]));
 
     // Assert
-    $response->assertOk()->assertSee('Unscheduled')->assertSee('Venue not set');
+    $response
+        ->assertOk()
+        ->assertSee('Unscheduled')
+        ->assertSee('Venue not set');
+
     expect($event->pack()->exists())->toBeFalse();
     $page = get(route('events.pack.show', $event));
 
@@ -292,7 +323,13 @@ test('printing uses saved values and escapes notes without saving a record', fun
     // Act
     $response = get(route('events.pack.show', ['event' => $event, 'print' => 1, 'notes' => 'Unsaved injection']));
 
-    $response->assertOk()->assertViewIs('events.pack-print')->assertViewHas('event', $event)->assertSee('<script>alert(1)</script>')->assertDontSeeHtml('<script>alert(1)</script>')->assertDontSee('Unsaved injection');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.pack-print')
+        ->assertViewHas('event', $event)
+        ->assertSee('<script>alert(1)</script>')
+        ->assertDontSeeHtml('<script>alert(1)</script>')
+        ->assertDontSee('Unsaved injection');
 });
 
 test('removed anchors require placement and soft deleting the event preserves its pack', function () {
@@ -307,6 +344,7 @@ test('removed anchors require placement and soft deleting the event preserves it
 
     // Assert
     $response->assertSessionHasNoErrors();
+
     $match->delete();
     $page = get(route('events.pack.show', $event));
     expect($page->viewData('unplaced'))->toHaveCount(1);
@@ -316,6 +354,7 @@ test('removed anchors require placement and soft deleting the event preserves it
 
     // Assert
     $response->assertSessionHasErrors('segments.0.after_match_id');
+
     $event->delete();
 
     // Act
@@ -323,6 +362,7 @@ test('removed anchors require placement and soft deleting the event preserves it
 
     // Assert
     $response->assertNotFound();
+
     $event->restore();
 
     // Act
@@ -330,6 +370,7 @@ test('removed anchors require placement and soft deleting the event preserves it
 
     // Assert
     $response->assertOk();
+
     expect($event->pack()->firstOrFail()->content['segments'][0]['label'])->toBe('Intermission');
 });
 
@@ -348,6 +389,7 @@ test('reordering and adding matches keep timings and segment anchors on stable i
 
     // Assert
     $response->assertSessionHasNoErrors();
+
     $first->update(['match_number' => 3]);
     $second->update(['match_number' => 1]);
     EventMatch::factory()->for($event)->create(['match_number' => 2]);
@@ -375,7 +417,10 @@ test('an incomplete or invalid form cannot save partial data', function () {
 
     // Assert
 
-    $response->assertSessionHasErrors(['complete', 'timezone', 'doors_at'])->assertSessionHasInput('notes', 'Preserve me');
+    $response
+        ->assertSessionHasErrors(['complete', 'timezone', 'doors_at'])
+        ->assertSessionHasInput('notes', 'Preserve me');
+
     expect($event->pack()->exists())->toBeFalse();
 });
 

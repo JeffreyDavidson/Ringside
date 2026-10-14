@@ -26,7 +26,10 @@ test('only production managers can open the crew directory', function (Membershi
 
         return;
     }
-    $response->assertOk()->assertViewIs('crew.index')->assertSeeLivewire(Directory::class);
+    $response
+        ->assertOk()
+        ->assertViewIs('crew.index')
+        ->assertSeeLivewire(Directory::class);
 })->with([
     'owner' => [MembershipRole::Owner, 200],
     'manager' => [MembershipRole::Manager, 200],

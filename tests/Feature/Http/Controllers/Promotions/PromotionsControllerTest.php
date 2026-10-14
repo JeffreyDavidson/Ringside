@@ -26,7 +26,8 @@ it('shows a promotion detail page and its member manager to platform administrat
     // Assert
     $response
         ->assertOk()
-        ->assertViewIs('promotions.show')->assertViewHas('promotion', $promotion)
+        ->assertViewIs('promotions.show')
+        ->assertViewHas('promotion', $promotion)
         ->assertSee('Ringside Wrestling')
         ->assertSeeHtml('data-test="promotion-members-loading-placeholder"')
         ->assertSeeLivewire(Manage::class);
@@ -71,7 +72,9 @@ it('counts only members on the promotion page, not invitations', function () {
     $response = get(route('promotions.show', $promotion));
 
     // Assert
-    $response->assertOk()->assertViewHas('promotion', fn (Promotion $shown): bool => $shown->memberships_count === 1);
+    $response
+        ->assertOk()
+        ->assertViewHas('promotion', fn (Promotion $shown): bool => $shown->memberships_count === 1);
 });
 
 test('an administrator receives the promotion directory and table', function (): void {
@@ -82,9 +85,12 @@ test('an administrator receives the promotion directory and table', function ():
     $response = get(route('promotions.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('promotions.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('promotions.index')
         ->assertSeeLivewire(Main::class)
-        ->assertSeeHtml('data-test="table-loading-placeholder"')->assertSee(__('core.loading_table'));
+        ->assertSeeHtml('data-test="table-loading-placeholder"')
+        ->assertSee(__('core.loading_table'));
 });
 
 test('an active member receives their promotion but cannot open the platform directory', function (): void {
@@ -99,7 +105,10 @@ test('an active member receives their promotion but cannot open the platform dir
     $directoryResponse = get(route('promotions.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('promotions.show')->assertViewHas('promotion', $promotion);
+    $response
+        ->assertOk()
+        ->assertViewIs('promotions.show')
+        ->assertViewHas('promotion', $promotion);
     $directoryResponse->assertForbidden();
 });
 
@@ -119,5 +128,7 @@ test('users without membership cannot open the promotion directory', function ()
     $response = get(route('promotions.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });

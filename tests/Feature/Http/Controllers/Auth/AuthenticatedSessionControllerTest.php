@@ -25,7 +25,9 @@ test('login screen can be rendered', function () {
     $response = get($loginUrl);
 
     // Assert
-    $response->assertOk()->assertViewIs('auth.login');
+    $response
+        ->assertOk()
+        ->assertViewIs('auth.login');
 });
 
 test('users can authenticate using the login screen', function (string $email) {
@@ -45,6 +47,7 @@ test('users can authenticate using the login screen', function (string $email) {
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
+
     assertAuthenticatedAs($user);
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
@@ -65,6 +68,7 @@ test('users can not authenticate with invalid password', function () {
         ->assertSessionHasErrors('email')
         ->assertSessionHasInput('email', $user->email)
         ->assertSessionMissing('_old_input.password');
+
     assertGuest();
 });
 
@@ -79,7 +83,10 @@ test('only active users can authenticate', function (UserStatus $status) {
     ]);
 
     // Assert
-    $response->assertRedirect(route('login'))->assertSessionHasErrors('email');
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionHasErrors('email');
+
     assertGuest();
 })->with([
     'unverified' => UserStatus::Unverified,
@@ -96,8 +103,10 @@ test('deactivated users are logged out on their next request', function () {
     $response = get(route('dashboard'));
 
     // Assert
-    $response->assertRedirect(route('login'))
+    $response
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_inactive'));
+
     assertGuest();
 });
 
@@ -110,6 +119,7 @@ test('login requires credentials', function () {
 
     // Assert
     $response->assertSessionHasErrors(['email', 'password']);
+
     assertGuest();
 });
 
@@ -124,7 +134,10 @@ test('authenticated users can log out', function () {
     $response = post(route('logout'));
 
     // Assert
-    $response->assertRedirect(route('login'))->assertSessionMissing('private_session_marker');
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionMissing('private_session_marker');
+
     expect(session()->getId())->not->toBe($sessionId)
         ->and(session()->token())->not->toBe($csrfToken);
     assertGuest();
@@ -147,6 +160,7 @@ test('the sixth failed login within the throttle window is locked out', function
     $response
         ->assertRedirect(route('login'))
         ->assertSessionHasErrors(['email' => trans('auth.throttle', ['seconds' => 60, 'minutes' => 1])]);
+
     Event::assertDispatched(Lockout::class, fn (Lockout $event): bool => $event->request->input('email') === $user->email);
     Event::assertDispatchedOnce(Lockout::class);
     assertGuest();
@@ -165,6 +179,7 @@ test('failed logins under the throttle limit do not lock the account', function 
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
+
     Event::assertNotDispatched(Lockout::class);
     assertAuthenticatedAs($user);
 });
@@ -183,6 +198,7 @@ test('users can log in again once the throttle window has passed', function () {
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
+
     assertAuthenticatedAs($user);
 });
 
@@ -196,6 +212,7 @@ test('a legacy user stored with a mixed-case email can still sign in', function 
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
+
     assertAuthenticatedAs($user);
 })->with([
     'lowercase' => 'legacy.promoter@example.com',

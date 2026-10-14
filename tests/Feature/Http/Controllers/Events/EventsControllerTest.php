@@ -104,7 +104,9 @@ test('an administrator receives the events index view and table', function (): v
     $response = get(route('events.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('events.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -125,7 +127,9 @@ test('a user without membership cannot open the events index', function (): void
     $response = get(route('events.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct event profile', function (): void {
@@ -140,7 +144,10 @@ test('an active promotion member receives the correct event profile', function (
     $response = get(route('events.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.show')->assertViewHas('event', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('events.show')
+        ->assertViewHas('event', $record);
 });
 
 test('the event view receives only related storylines in title and identity order', function (): void {
@@ -162,6 +169,9 @@ test('the event view receives only related storylines in title and identity orde
     $response = get(route('events.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.show')->assertViewHas('event', $event);
+    $response
+        ->assertOk()
+        ->assertViewIs('events.show')
+        ->assertViewHas('event', $event);
     $response->assertViewHas('storylines', fn (Collection $stories): bool => $stories->modelKeys() === [$first->id, $tie->id, $later->id]);
 });

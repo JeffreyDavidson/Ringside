@@ -29,8 +29,17 @@ test('sponsor directory and records are private to active owners and managers', 
 
         return;
     }
-    $response->assertOk()->assertViewIs('sponsors.index')->assertViewHas('promotionId', $promotion->id)->assertSee('Harbor Hardware');
-    $show->assertOk()->assertViewIs('sponsors.show')->assertViewHas('sponsor', $sponsor)->assertSee('private@example.test');
+    $response
+        ->assertOk()
+        ->assertViewIs('sponsors.index')
+        ->assertViewHas('promotionId', $promotion->id)
+        ->assertSee('Harbor Hardware');
+    $show
+        ->assertOk()
+        ->assertViewIs('sponsors.show')
+        ->assertViewHas('sponsor', $sponsor)
+        ->assertSee('private@example.test');
+
     expect(Sponsor::query()->count())->toBe(1);
 })->with([[MembershipRole::Owner, true], [MembershipRole::Manager, true], [MembershipRole::Member, false]]);
 
@@ -49,6 +58,7 @@ test('guests and outsiders cannot reveal sponsor records', function (): void {
 
     // Assert
     $response->assertRedirect(route('login'));
+
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
@@ -58,7 +68,9 @@ test('guests and outsiders cannot reveal sponsor records', function (): void {
     $response = get(route('sponsors.show', $sponsor));
 
     // Assert
-    $response->assertNotFound()->assertDontSee('PRIVATE-7Q');
+    $response
+        ->assertNotFound()
+        ->assertDontSee('PRIVATE-7Q');
 });
 
 test('an administrator without an active promotion must choose one before opening the directory', function (): void {
@@ -93,7 +105,10 @@ test('a suspended or removed membership cannot recover private sponsor records',
     $response = get(route('sponsors.show', $sponsor));
 
     // Assert
-    $response->assertForbidden()->assertDontSee('PRIVATE-SUSPENDED-7Q');
+    $response
+        ->assertForbidden()
+        ->assertDontSee('PRIVATE-SUSPENDED-7Q');
+
     expect(Sponsor::query()->withoutGlobalScopes()->findOrFail($sponsor->id)->version)->toBe(1);
 })->with(['suspended', 'removed']);
 

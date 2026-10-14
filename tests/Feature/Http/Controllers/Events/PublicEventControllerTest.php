@@ -26,13 +26,17 @@ test('card releases omit outcomes and results need their own reviewed release', 
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('Robin North vs Casey Shore')->assertDontSee('Pinfall')->assertDontSee('View results');
+    $response
+        ->assertSee('Robin North vs Casey Shore')
+        ->assertDontSee('Pinfall')
+        ->assertDontSee('View results');
 
     // Act
     $response = get(publicShowUrl($publication, true));
 
     // Assert
     $response->assertNotFound();
+
     $before = DB::table('events_matches')->where('event_id', $event->id)->first();
     $publication = releasePublicPage($event, 'results');
 
@@ -40,13 +44,18 @@ test('card releases omit outcomes and results need their own reviewed release', 
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('View results')->assertDontSee('Pinfall');
+    $response
+        ->assertSee('View results')
+        ->assertDontSee('Pinfall');
 
     // Act
     $response = get(publicShowUrl($publication, true));
 
     // Assert
-    $response->assertSee('Robin North — Pinfall')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    $response
+        ->assertSee('Robin North — Pinfall')
+        ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+
     expect(DB::table('events_matches')->where('event_id', $event->id)->first())->toEqual($before);
 });
 
@@ -85,20 +94,27 @@ test('draft changes do not overwrite released pages and card changes require rev
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('Welcome to Harbor Night.')->assertDontSee('New draft words')->assertSee('Robin North')->assertDontSee('Private new ring name');
+    $response
+        ->assertSee('Welcome to Harbor Night.')
+        ->assertDontSee('New draft words')
+        ->assertSee('Robin North')
+        ->assertDontSee('Private new ring name');
 
     // Act
     $response = get(route('events.public-pages.edit', $event));
 
     // Assert
     $response->assertSee('Source changed');
+
     releasePublicPage($event);
 
     // Act
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('New draft words')->assertSee('Private new ring name');
+    $response
+        ->assertSee('New draft words')
+        ->assertSee('Private new ring name');
 });
 
 test('corrected and deleted result sources suppress outcomes until explicit review', function (string $change): void {
@@ -122,13 +138,17 @@ test('corrected and deleted result sources suppress outcomes until explicit revi
     $response = get(publicShowUrl($publication, true));
 
     // Assert
-    $response->assertSee('Results are being updated')->assertDontSee('Pinfall');
+    $response
+        ->assertSee('Results are being updated')
+        ->assertDontSee('Pinfall');
 
     // Act
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertDontSee('View results')->assertSee('Robin North');
+    $response
+        ->assertDontSee('View results')
+        ->assertSee('Robin North');
 
     // Act
     $response = get(route('events.public-pages.edit', $event));
@@ -142,7 +162,9 @@ test('corrected and deleted result sources suppress outcomes until explicit revi
         $response = get(publicShowUrl($publication, true));
 
         // Assert
-        $response->assertSee('Submission')->assertSee('Results corrected on');
+        $response
+            ->assertSee('Submission')
+            ->assertSee('Results corrected on');
     }
 })->with(['finish', 'match', 'competitor']);
 
@@ -158,7 +180,11 @@ test('changed dates suppress obsolete facts and poster links without exposing th
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('Event details are being updated')->assertDontSee('tickets.example.com')->assertDontSee('Casey Shore')->assertDontSee('Harbor Wrestling');
+    $response
+        ->assertSee('Event details are being updated')
+        ->assertDontSee('tickets.example.com')
+        ->assertDontSee('Casey Shore')
+        ->assertDontSee('Harbor Wrestling');
 });
 
 test('unpublishing results keeps the card and deleting restoring cannot restore publication', function (): void {
@@ -195,6 +221,7 @@ test('unpublishing results keeps the card and deleting restoring cannot restore 
 
     // Assert
     $response->assertNotFound();
+
     expect(freshModel($publication)->published_at)->toBeNull();
 });
 
@@ -232,6 +259,7 @@ test('foreign signed in visitors read only the public release while private endp
 
     // Assert
     $response->assertNotFound();
+
     expect(freshModel($publication)->version)->toBe($publication->version);
 });
 
@@ -268,7 +296,9 @@ test('a draw never names a winner even if a historical side reference remains', 
     $response = get(publicShowUrl($publication, true));
 
     // Assert
-    $response->assertSee('Time Limit Draw')->assertDontSee('Robin North — Time Limit Draw');
+    $response
+        ->assertSee('Time Limit Draw')
+        ->assertDontSee('Robin North — Time Limit Draw');
 });
 
 test('public card and result routes receive the intended released projection', function (bool $results): void {
@@ -283,7 +313,9 @@ test('public card and result routes receive the intended released projection', f
     $response = get(publicShowUrl($publication, $results));
 
     // Assert
-    $response->assertOk()->assertViewIs('public-events.show')
+    $response
+        ->assertOk()
+        ->assertViewIs('public-events.show')
         ->assertViewHas('page', fn (PublicEventData $page): bool => $page->title === 'Harbor Night' && $page->isResults === $results && ! $page->isPreview)
         ->assertHeader('Cache-Control', 'no-store, private')
         ->assertHeader('X-Robots-Tag', $results ? 'noindex, nofollow' : 'index, follow');

@@ -26,7 +26,13 @@ test('an owner opens the private sponsor checklist without creating data', funct
     $response = get(route('events.sponsors.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.sponsors')->assertViewHas('event', $event)->assertSee('Sponsor commitments')->assertSee('Harbor Showcase');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.sponsors')
+        ->assertViewHas('event', $event)
+        ->assertSee('Sponsor commitments')
+        ->assertSee('Harbor Showcase');
+
     expect(EventSponsorCommitment::query()->count())->toBe(0);
 });
 
@@ -52,11 +58,19 @@ test('the pack prints only deliberately reviewed sponsor instructions for member
     $liveResponse = get(route('events.live-show.show', $event));
 
     // Assert
-    $response->assertOk()->assertSee('Entrance banner')->assertSee('Hang before doors')->assertSee('Ring crew');
+    $response
+        ->assertOk()
+        ->assertSee('Entrance banner')
+        ->assertSee('Hang before doors')
+        ->assertSee('Ring crew');
     foreach (['PRIVATE-NOTE-7Q', 'PRIVATE-REF-7Q', 'PRIVATE-EVIDENCE-7Q', 'PRIVATE-CONTACT-7Q', 'PRIVATE-TERMS-7Q'] as $marker) {
         $response->assertDontSee($marker);
-        $packResponse->assertOk()->assertDontSee($marker);
-        $liveResponse->assertOk()->assertDontSee($marker);
+        $packResponse
+            ->assertOk()
+            ->assertDontSee($marker);
+        $liveResponse
+            ->assertOk()
+            ->assertDontSee($marker);
     }
 
     // Act
@@ -83,6 +97,7 @@ test('event sponsor histories refuse guests and foreign event identifiers', func
 
     // Assert
     $response->assertRedirect(route('login'));
+
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
     actingAs($user);
@@ -98,13 +113,17 @@ test('event sponsor histories refuse guests and foreign event identifiers', func
 
     // Assert
     $response->assertNotFound();
+
     $event->delete();
 
     // Act
     $response = get(route('events.sponsors.show', $event));
 
     // Assert
-    $response->assertOk()->assertSee('Event archived')->assertDontSeeHtml('wire:click="newCommitment"');
+    $response
+        ->assertOk()
+        ->assertSee('Event archived')
+        ->assertDontSeeHtml('wire:click="newCommitment"');
 });
 
 test('sponsor records and reviewed pack instructions never reach public event pages', function (string $mode): void {
@@ -124,7 +143,10 @@ test('sponsor records and reviewed pack instructions never reach public event pa
     $response = get(route('events.pack.show', $event));
 
     // Assert
-    $response->assertOk()->assertSee('PACK-INSTRUCTION-7Q');
+    $response
+        ->assertOk()
+        ->assertSee('PACK-INSTRUCTION-7Q');
+
     savePublicDraft($event);
     releasePublicPage($event);
     $publication = releasePublicPage($event, 'results');

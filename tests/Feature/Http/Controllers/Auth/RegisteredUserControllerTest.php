@@ -23,7 +23,9 @@ test('registration screen can be rendered', function () {
     $response = get($registrationUrl);
 
     // Assert
-    $response->assertOk()->assertViewIs('auth.register');
+    $response
+        ->assertOk()
+        ->assertViewIs('auth.register');
 });
 
 test('a user can register with their account details', function (string $email): void {
@@ -45,8 +47,10 @@ test('a user can register with their account details', function (string $email):
     $response = post(route('register'), $registrationData);
 
     // Assert
-    $response->assertRedirect(route('login'))
+    $response
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_pending'));
+
     $user = User::query()->where('email', 'jeffrey@example.com')->firstOrFail();
 
     expect($user)
@@ -85,6 +89,7 @@ test('registration requires valid account details', function () {
         ->assertSessionHasInput('email')
         ->assertSessionMissing('_old_input.password')
         ->assertSessionMissing('_old_input.password_confirmation');
+
     expect(User::query()->count())->toBe(0);
     Event::assertNotDispatched(Registered::class);
 });
@@ -108,12 +113,15 @@ test('registration answers the same for a taken and an unknown email', function 
         ->post(route('register'), $registration('unknown@example.com'));
 
     // Assert
-    $taken->assertRedirect(route('login'))
+    $taken
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_pending'))
         ->assertSessionHasNoErrors();
-    $unknown->assertRedirect(route('login'))
+    $unknown
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_pending'))
         ->assertSessionHasNoErrors();
+
     expect(User::query()->count())->toBe(2)
         ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
     Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->email === 'unknown@example.com');
@@ -139,8 +147,10 @@ test('registration creates nothing for the email of a deleted user', function ()
     ]);
 
     // Assert
-    $response->assertRedirect(route('login'))
+    $response
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_pending'));
+
     expect(User::query()->withTrashed()->count())->toBe(1);
     Event::assertNotDispatched(Registered::class);
 });
@@ -160,7 +170,8 @@ test('registration still validates the other fields for a taken email', function
         ]);
 
     // Assert
-    $response->assertRedirect(route('register'))
+    $response
+        ->assertRedirect(route('register'))
         ->assertSessionHasErrors(['first_name', 'password'])
         ->assertSessionDoesntHaveErrors('email');
 });
@@ -182,9 +193,11 @@ test('registration answers as pending when the database rejects a duplicate emai
     ]);
 
     // Assert
-    $response->assertRedirect(route('login'))
+    $response
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('auth-forms.account_pending'))
         ->assertSessionHasNoErrors();
+
     Event::assertNotDispatched(Registered::class);
     expect(User::query()->count())->toBe(0);
 });

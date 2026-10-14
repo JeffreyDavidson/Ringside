@@ -12,7 +12,13 @@ it('shows the bracket and readable rounds to an authorized promoter', function (
     $response = get(route('tournaments.show', $world['tournament']));
 
     // Assert
-    $response->assertOk()->assertViewIs('tournaments.show')->assertViewHas('tournament', $world['tournament'])->assertSee('Autumn Cup')->assertSee('Rounds')->assertSee('Bracket');
+    $response
+        ->assertOk()
+        ->assertViewIs('tournaments.show')
+        ->assertViewHas('tournament', $world['tournament'])
+        ->assertSee('Autumn Cup')
+        ->assertSee('Rounds')
+        ->assertSee('Bracket');
 });
 
 it('renders the tournament listing for an authorized operator', function (): void {
@@ -23,5 +29,8 @@ it('renders the tournament listing for an authorized operator', function (): voi
     $response = get(route('tournaments.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('tournaments.index')->assertSee('Autumn Cup');
+    $response
+        ->assertOk()
+        ->assertViewIs('tournaments.index')
+        ->assertSee('Autumn Cup');
 });

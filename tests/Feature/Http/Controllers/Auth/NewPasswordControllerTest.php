@@ -29,11 +29,13 @@ test('a failed reset gives the same error for a registered and an unknown email'
         ]);
 
     // Assert
-    $response->assertRedirect(route('password.reset', 'bogus-token'))
+    $response
+        ->assertRedirect(route('password.reset', 'bogus-token'))
         ->assertSessionHasErrors(['email' => __('passwords.token')])
         ->assertSessionHasInput('email', $email)
         ->assertSessionMissing('_old_input.password')
         ->assertSessionMissing('_old_input.password_confirmation');
+
     expect($user->refresh()->password)->toBe($password)
         ->and($user->remember_token)->toBe($rememberToken);
     Event::assertNotDispatched(PasswordReset::class);
@@ -58,8 +60,10 @@ test('a valid token resets the password', function (string $email): void {
     ]);
 
     // Assert
-    $response->assertRedirect(route('login'))
+    $response
+        ->assertRedirect(route('login'))
         ->assertSessionHas('status', __('passwords.reset'));
+
     expect(Hash::check('new-password-12345', $user->refresh()->password))->toBeTrue()
         ->and($user->remember_token)->not->toBe($rememberToken)
         ->and(Password::tokenExists($user, $token))->toBeFalse();
@@ -76,6 +80,9 @@ test('the reset form receives its token and email', function (): void {
     $response = get(route('password.reset', ['token' => $token, 'email' => $email]));
 
     // Assert
-    $response->assertOk()->assertViewIs('auth.passwords.reset')
-        ->assertViewHas('token', $token)->assertViewHas('email', $email);
+    $response
+        ->assertOk()
+        ->assertViewIs('auth.passwords.reset')
+        ->assertViewHas('token', $token)
+        ->assertViewHas('email', $email);
 });

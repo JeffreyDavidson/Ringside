@@ -152,7 +152,9 @@ test('an administrator receives the tag-teams index view and table', function ()
     $response = get(route('tag-teams.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('tag-teams.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('tag-teams.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -173,7 +175,9 @@ test('a user without membership cannot open the tag-teams index', function (): v
     $response = get(route('tag-teams.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct tagTeam profile', function (): void {
@@ -188,5 +192,8 @@ test('an active promotion member receives the correct tagTeam profile', function
     $response = get(route('tag-teams.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('tag-teams.show')->assertViewHas('tagTeam', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('tag-teams.show')
+        ->assertViewHas('tagTeam', $record);
 });

@@ -51,7 +51,10 @@ test('password reset rejects passwords shorter than twelve characters', function
     ]);
 
     // Assert
-    $response->assertSessionHasErrors('password')->assertSessionMissing('_old_input.password');
+    $response
+        ->assertSessionHasErrors('password')
+        ->assertSessionMissing('_old_input.password');
+
     expect($user->refresh()->password)->toBe($originalPassword)
         ->and(Password::tokenExists($user, $token))->toBeTrue();
     Event::assertNotDispatched(PasswordReset::class);

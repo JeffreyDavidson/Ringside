@@ -20,7 +20,13 @@ test('the live show page opens without preparing or changing a show', function (
     $response = get(route('events.live-show.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.live')->assertViewHas('event', $event)->assertSee('Live show')->assertSee('Save and review');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.live')
+        ->assertViewHas('event', $event)
+        ->assertSee('Live show')
+        ->assertSee('Save and review');
+
     expect(EventLiveRun::query()->count())->toBe(0);
 });
 
@@ -33,6 +39,7 @@ test('guests and other promotions cannot open a live show', function (): void {
 
     // Assert
     $response->assertRedirect(route('login'));
+
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
@@ -43,6 +50,7 @@ test('guests and other promotions cannot open a live show', function (): void {
 
     // Assert
     $response->assertNotFound();
+
     expect(EventLiveRun::query()->count())->toBe(0);
 });
 
@@ -58,6 +66,10 @@ test('an active member receives the live view for their own event', function ():
     $response = get(route('events.live-show.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.live')->assertViewHas('event', $event);
+    $response
+        ->assertOk()
+        ->assertViewIs('events.live')
+        ->assertViewHas('event', $event);
+
     expect(EventLiveRun::query()->count())->toBe(0);
 });

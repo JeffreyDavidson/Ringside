@@ -30,8 +30,10 @@ describe('accepting an invitation', function () {
         // Assert
         $membership = $promotion->memberships()->where('user_id', $invitee->id)->firstOrFail();
 
-        $response->assertRedirect(route('dashboard'))
+        $response
+            ->assertRedirect(route('dashboard'))
             ->assertSessionHas('status', __('promotions.invitation_accepted', ['promotion' => 'Invitation Championship Wrestling', 'role' => $role->label()]));
+
         expect($membership->status)->toBe(MembershipStatus::Active)
             ->and($membership->role)->toBe($role)
             ->and(promotionHasMemberWithRole($promotion, $invitee, $role))->toBeTrue()
@@ -72,8 +74,10 @@ describe('accepting an invitation', function () {
         $response = post(route('promotions.invitation.accept', $promotion));
 
         // Assert
-        $response->assertRedirect(route('dashboard'))
+        $response
+            ->assertRedirect(route('dashboard'))
             ->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect($invitation->fresh())->not->toBeNull()
             ->and($promotion->memberships()->count())->toBe(0);
     });
@@ -95,6 +99,7 @@ describe('accepting an invitation', function () {
         $membership = $promotion->memberships()->sole();
 
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect($membership->status)->toBe(MembershipStatus::Suspended)
             ->and($membership->role)->toBe(MembershipRole::Member)
             ->and($invitation->fresh())->toBeNull()
@@ -113,6 +118,7 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect($promotion->memberships()->count())->toBe(0);
     });
 
@@ -127,6 +133,7 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect($promotion->memberships()->count())->toBe(0);
     });
 
@@ -153,6 +160,7 @@ describe('accepting an invitation', function () {
 
         // Assert
         $response->assertRedirect(route('login'));
+
         expect(promotionHasActiveMember($promotion, $user))->toBeFalse()
             ->and($invitation->fresh())->not->toBeNull();
     });

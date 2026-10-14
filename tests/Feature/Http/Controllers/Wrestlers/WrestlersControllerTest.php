@@ -217,7 +217,9 @@ test('an administrator receives the wrestlers index view and table', function ()
     $response = get(route('wrestlers.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('wrestlers.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('wrestlers.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -238,7 +240,9 @@ test('a user without membership cannot open the wrestlers index', function (): v
     $response = get(route('wrestlers.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct wrestler profile', function (): void {
@@ -253,5 +257,8 @@ test('an active promotion member receives the correct wrestler profile', functio
     $response = get(route('wrestlers.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('wrestlers.show')->assertViewHas('wrestler', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('wrestlers.show')
+        ->assertViewHas('wrestler', $record);
 });

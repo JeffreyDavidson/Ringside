@@ -31,7 +31,10 @@ test('poster metadata is stripped and draft and replaced assets never become pub
     $response = get(route('events.public-pages.poster', $event));
 
     // Assert
-    $response->assertOk()->assertHeader('Content-Type', 'image/png');
+    $response
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/png');
+
     $url = route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]);
 
     // Act
@@ -39,13 +42,16 @@ test('poster metadata is stripped and draft and replaced assets never become pub
 
     // Assert
     $response->assertNotFound();
+
     releasePublicPage($event);
 
     // Act
     $response = get($url);
 
     // Assert
-    $response->assertOk()->assertHeader('Cache-Control', 'no-store, private');
+    $response
+        ->assertOk()
+        ->assertHeader('Cache-Control', 'no-store, private');
 
     $publication = savePublicDraft($event, ['poster' => UploadedFile::fake()->image('replacement.png', 50, 50), 'poster_alt' => 'Replacement event poster']);
 
@@ -54,6 +60,7 @@ test('poster metadata is stripped and draft and replaced assets never become pub
 
     // Assert
     $response->assertOk();
+
     releasePublicPage($event);
 
     // Act
@@ -66,7 +73,10 @@ test('poster metadata is stripped and draft and replaced assets never become pub
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('Replacement event poster')->assertDontSee($key);
+    $response
+        ->assertSee('Replacement event poster')
+        ->assertDontSee($key);
+
     $newUrl = route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => publicPosterKey($publication)]);
 
     // Act
@@ -74,6 +84,7 @@ test('poster metadata is stripped and draft and replaced assets never become pub
 
     // Assert
     $response->assertOk();
+
     $editor = get(route('events.public-pages.edit', $event));
 
     // Act
@@ -130,6 +141,7 @@ test('removing a draft poster leaves the released poster intact until reviewed',
 
     // Assert
     $response->assertNotFound();
+
     releasePublicPage($event);
 
     // Act

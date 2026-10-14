@@ -20,6 +20,7 @@ test('a session ends once the account password changes', function (): void {
 
     // Assert
     $response->assertSuccessful();
+
     DB::table('users')->where('id', $user->id)->update(['password' => Hash::make('a-brand-new-password')]);
     auth()->forgetGuards();
 
@@ -28,6 +29,7 @@ test('a session ends once the account password changes', function (): void {
 
     // Assert
     $response->assertRedirect(route('login'));
+
     assertGuest();
 });
 
@@ -45,5 +47,6 @@ test('a session continues while the account password is unchanged', function ():
 
     // Assert
     $response->assertSuccessful();
+
     assertAuthenticated();
 });

@@ -27,6 +27,7 @@ it('keeps foreign tournament bindings indistinguishable from missing records', f
 
     // Assert
     $response->assertNotFound();
+
     expect(Tournament::query()->withoutGlobalScopes()->count())->toBe(1);
 });
 
@@ -40,13 +41,17 @@ it('shows operation controls only to promotion owners and managers', function (M
     $response = get(route('tournaments.show', $world['tournament']));
 
     // Assert
-    $response->assertOk()->assertSee('Autumn Cup');
+    $response
+        ->assertOk()
+        ->assertSee('Autumn Cup');
     if ($editable) {
         $response->assertSee('Save draft');
 
         return;
     }
-    $response->assertDontSee('Save draft')->assertDontSee('Cancel tournament');
+    $response
+        ->assertDontSee('Save draft')
+        ->assertDontSee('Cancel tournament');
 })->with(['owner' => [MembershipRole::Owner, true], 'manager' => [MembershipRole::Manager, true], 'member' => [MembershipRole::Member, false]]);
 
 it('requires login for tournament pages', function (): void {

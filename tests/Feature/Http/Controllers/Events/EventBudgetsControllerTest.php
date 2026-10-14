@@ -19,7 +19,13 @@ test('the budget page opens without recording a budget', function (): void {
     $response = get(route('events.budget.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.budget')->assertViewHas('event', $event)->assertSeeHtml('Budget &amp; settlement')->assertSee('No budget recorded');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.budget')
+        ->assertViewHas('event', $event)
+        ->assertSeeHtml('Budget &amp; settlement')
+        ->assertSee('No budget recorded');
+
     expect(EventBudget::query()->count())->toBe(0);
 });
 
@@ -38,6 +44,7 @@ test('only owners managers and permitted administrators see finances', function 
     $response = get(route('events.budget.show', $event));
     // Assert
     $response->assertStatus($status);
+
     expect(EventBudget::query()->count())->toBe(0);
 })->with([['owner', 200], ['manager', 200], ['member', 403], ['administrator', 200]]);
 
@@ -49,6 +56,7 @@ test('guests and foreign promotion ids cannot open budgets', function (): void {
 
     // Assert
     $response->assertRedirect(route('login'));
+
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => 'owner', 'status' => 'active']);
@@ -73,14 +81,25 @@ test('financial markers are absent from event pack print and live show payloads 
     // Act
     foreach (['events.show', 'events.pack.show', 'events.live-show.show'] as $name) {
         $response = get(route($name, $event));
-        $response->assertOk()->assertViewIs(match ($name) {
-            'events.show' => 'events.show', 'events.pack.show' => 'events.pack', 'events.live-show.show' => 'events.live'
-        })->assertViewHas('event', $event)->assertDontSee('8149.37')->assertDontSee('814937')->assertDontSee('PRIVATE_FINANCIAL_NOTE_937')->assertDontSee('PRIVATE_PAYEE_937')->assertDontSeeHtml('Budget &amp; settlement');
+        $response
+            ->assertOk()
+            ->assertViewIs(match ($name) {
+                'events.show' => 'events.show', 'events.pack.show' => 'events.pack', 'events.live-show.show' => 'events.live'
+            })
+            ->assertViewHas('event', $event)
+            ->assertDontSee('8149.37')
+            ->assertDontSee('814937')
+            ->assertDontSee('PRIVATE_FINANCIAL_NOTE_937')
+            ->assertDontSee('PRIVATE_PAYEE_937')
+            ->assertDontSeeHtml('Budget &amp; settlement');
     }
     $response = get(route('events.pack.show', ['event' => $event, 'print' => 1]));
 
     // Assert
-    $response->assertOk()->assertDontSee('PRIVATE_FINANCIAL_NOTE_937')->assertDontSee('814937');
+    $response
+        ->assertOk()
+        ->assertDontSee('PRIVATE_FINANCIAL_NOTE_937')
+        ->assertDontSee('814937');
 
     // Act
     $response = get(route('events.budget.show', $event));
@@ -97,7 +116,11 @@ test('a dated promotion event shows the local show date on its financial page', 
     // Act
     $response = get(route('events.budget.show', $event));
     // Assert
-    $response->assertOk()->assertViewIs('events.budget')->assertViewHas('event', $event)->assertSee(now('America/New_York')->format('M j, Y'));
+    $response
+        ->assertOk()
+        ->assertViewIs('events.budget')
+        ->assertViewHas('event', $event)
+        ->assertSee(now('America/New_York')->format('M j, Y'));
 });
 
 test('outsiders and view-only members cannot change any business records by opening finance', function (string $role): void {
@@ -115,6 +138,7 @@ test('outsiders and view-only members cannot change any business records by open
     $response = get(route('events.budget.show', $event));
     // Assert
     $response->assertStatus($role === 'outsider' ? 404 : 403);
+
     expect(budgetBusinessFingerprint())->toBe($before);
 })->with(['outsider', 'member']);
 
@@ -132,7 +156,11 @@ test('owners can read the financial markers while every ordinary and shared outp
     $response = get(route('events.budget.show', $event));
 
     // Assert
-    $response->assertOk()->assertSee('LEAK-BUDGET-NOTE-7Q')->assertSee('8149.37 USD');
+    $response
+        ->assertOk()
+        ->assertSee('LEAK-BUDGET-NOTE-7Q')
+        ->assertSee('8149.37 USD');
+
     expect(budgetBusinessFingerprint())->toBe($before);
     $leaks = [];
     foreach (budgetSharedSurfaces($event) as $name => $text) {

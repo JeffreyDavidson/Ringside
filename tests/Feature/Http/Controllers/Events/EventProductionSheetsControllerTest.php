@@ -29,8 +29,19 @@ test('production print defaults to the live snapshot and excludes private notes'
     $planResponse = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1, 'source' => 'plan']));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.production-print')->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'live')->assertSee('PRIVATE-CUE-7Q')->assertDontSee('UNADOPTED-CUE-7Q')->assertDontSee('PRIVATE-NOTE-7Q');
-    $planResponse->assertOk()->assertViewIs('events.production-print')->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'plan')->assertSee('UNADOPTED-CUE-7Q')->assertDontSee('PRIVATE-NOTE-7Q');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production-print')
+        ->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'live')
+        ->assertSee('PRIVATE-CUE-7Q')
+        ->assertDontSee('UNADOPTED-CUE-7Q')
+        ->assertDontSee('PRIVATE-NOTE-7Q');
+    $planResponse
+        ->assertOk()
+        ->assertViewIs('events.production-print')
+        ->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'plan')
+        ->assertSee('UNADOPTED-CUE-7Q')
+        ->assertDontSee('PRIVATE-NOTE-7Q');
 });
 
 test('long cue sheets retain full manual instructions and never print contact details', function (): void {
@@ -49,7 +60,13 @@ test('long cue sheets retain full manual instructions and never print contact de
     $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.production-print')->assertSee($input['cues'][5]['instruction'])->assertSee('Long cue 6')->assertDontSee('CONTACT-PHONE-7Q')->assertDontSee('CONTACT-NOTE-7Q');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production-print')
+        ->assertSee($input['cues'][5]['instruction'])
+        ->assertSee('Long cue 6')
+        ->assertDontSee('CONTACT-PHONE-7Q')
+        ->assertDontSee('CONTACT-NOTE-7Q');
 });
 
 test('opening an empty production sheet creates no data and labels the plan unsaved', function (): void {
@@ -61,7 +78,12 @@ test('opening an empty production sheet creates no data and labels the plan unsa
     $response = get(route('events.production-sheet.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.production')->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'plan' && $sheet['version'] === 0)->assertSee('Not saved');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production')
+        ->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'plan' && $sheet['version'] === 0)
+        ->assertSee('Not saved');
+
     expect(EventPack::query()->count())->toBe(0)
         ->and(EventLiveRun::query()->count())->toBe(0)
         ->and(CrewContact::query()->count())->toBe(0);
@@ -83,7 +105,10 @@ test('production requests apply person and role filters to the sheet payload', f
     $response = get(route('events.production-sheet.show', ['event' => $event, ...$parameters]));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.production');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production');
+
     $sheet = $response->viewData('sheet');
     expect(data_get($sheet, 'event.id'))->toBe($event->id)
         ->and(data_get($sheet, 'assignments.*.contact_id'))->toBe($included ? [$fixture['contact']->id] : [])
@@ -101,7 +126,10 @@ test('invalid production filters return validation errors', function (string $fi
     $response = get(route('events.production-sheet.show', ['event' => $event, $field => $value]));
 
     // Assert
-    $response->assertRedirect()->assertSessionHasErrors($field);
+    $response
+        ->assertRedirect()
+        ->assertSessionHasErrors($field);
+
     expect(EventPack::query()->count())->toBe(0);
 })->with(['source' => ['source', 'invalid'], 'person' => ['person', 'bad'], 'role' => ['role', 'invalid'], 'print' => ['print', 'bad']]);
 

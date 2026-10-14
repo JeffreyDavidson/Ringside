@@ -20,8 +20,11 @@ test('an authorized publish request updates the release and returns to its edito
     $response = post(route('events.public-pages.publish', $event), ['version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
 
     // Assert
-    $response->assertRedirect(route('events.public-pages.edit', $event))->assertSessionHasNoErrors()
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasNoErrors()
         ->assertSessionHas('success', __('public-events.published'));
+
     $saved = freshModel($publication);
     expect($saved->version)->toBe($publication->version + 1)
         ->and($saved->published_at)->not->toBeNull()
@@ -41,8 +44,12 @@ test('a stale publish request preserves the newer release and submitted input', 
     $response = from(route('events.public-pages.edit', $event))->post(route('events.public-pages.publish', $event), ['version' => $draft->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
 
     // Assert
-    $response->assertRedirect(route('events.public-pages.edit', $event))->assertSessionHasErrors('publication')
-        ->assertSessionHasInput('version', $draft->version)->assertSessionHasInput('section', 'card');
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasErrors('publication')
+        ->assertSessionHasInput('version', $draft->version)
+        ->assertSessionHasInput('section', 'card');
+
     expect(freshModel($released)->getAttributes())->toBe($released->getAttributes());
 });
 

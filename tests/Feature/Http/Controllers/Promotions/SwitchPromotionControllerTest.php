@@ -57,7 +57,9 @@ test('a guest cannot switch promotions', function (): void {
     $response = post(route('promotions.switch'), ['promotion_id' => 1]);
 
     // Assert
-    $response->assertRedirect(route('login'))->assertSessionMissing('active_promotion_id');
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionMissing('active_promotion_id');
 });
 
 test('invalid selection keeps the previous promotion', function (mixed $id): void {
@@ -72,7 +74,9 @@ test('invalid selection keeps the previous promotion', function (mixed $id): voi
     $response = from(route('dashboard'))->post(route('promotions.switch'), ['promotion_id' => $id]);
 
     // Assert
-    $response->assertRedirect(route('dashboard'))->assertSessionHasErrors('promotion_id')
+    $response
+        ->assertRedirect(route('dashboard'))
+        ->assertSessionHasErrors('promotion_id')
         ->assertSessionHas('active_promotion_id', $promotion->id);
 })->with(['missing' => null, 'noninteger' => 'invalid']);
 
@@ -89,5 +93,7 @@ test('a refused selection keeps the previous promotion', function (): void {
     $response = post(route('promotions.switch'), ['promotion_id' => $other->id]);
 
     // Assert
-    $response->assertForbidden()->assertSessionHas('active_promotion_id', $promotion->id);
+    $response
+        ->assertForbidden()
+        ->assertSessionHas('active_promotion_id', $promotion->id);
 });

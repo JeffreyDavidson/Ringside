@@ -20,8 +20,12 @@ test('a saved public draft remains private until explicitly reviewed and publish
     $event = Event::factory()->for(Promotion::factory())->scheduled()->create(['name' => 'Harbor Night', 'preview' => 'LEAK-EVENT-NOTE-7Q']);
     actingAs(administrator());
     $editor = get(route('events.public-pages.edit', $event));
-    $editor->assertOk()->assertViewIs('events.publication')->assertViewHas('event', $event)
-        ->assertViewHas('publication', null)->assertViewHas('needsReview', false)
+    $editor
+        ->assertOk()
+        ->assertViewIs('events.publication')
+        ->assertViewHas('event', $event)
+        ->assertViewHas('publication', null)
+        ->assertViewHas('needsReview', false)
         ->assertViewHas('draft', fn (array $draft): bool => $draft['announcement'] === 'scheduled' && $draft['matches'] === [])
         ->assertViewHas('source', fn (array $source): bool => $source['title'] === 'Harbor Night');
 
@@ -33,7 +37,11 @@ test('a saved public draft remains private until explicitly reviewed and publish
 
     // Assert
 
-    $response->assertSessionHasNoErrors()->assertRedirect(route('events.public-pages.edit', $event))->assertSessionHas('success', __('public-events.saved'));
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHas('success', __('public-events.saved'));
+
     $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
     expect($publication->card)->toBeNull();
 
@@ -42,21 +50,31 @@ test('a saved public draft remains private until explicitly reviewed and publish
 
     // Assert
     $response->assertNotFound();
+
     $preview = get(route('events.public-pages.show', $event));
-    $preview->assertOk()->assertViewIs('public-events.show')->assertViewHas('page', fn (PublicEventData $page): bool => $page->title === 'Harbor Night' && $page->isPreview)->assertSee('Harbor Night')->assertDontSee('LEAK-EVENT-NOTE-7Q')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    $preview
+        ->assertOk()
+        ->assertViewIs('public-events.show')
+        ->assertViewHas('page', fn (PublicEventData $page): bool => $page->title === 'Harbor Night' && $page->isPreview)
+        ->assertSee('Harbor Night')
+        ->assertDontSee('LEAK-EVENT-NOTE-7Q')
+        ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
 
     // Act
     $response = post(route('events.public-pages.publish', $event), ['complete' => 1, 'version' => 1, 'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'), 'reviewed' => 1, 'section' => 'card']);
 
     // Assert
     $response->assertSessionHasNoErrors();
+
     auth()->logout();
 
     // Act
     $response = get(route('shows.show', ['publicId' => $publication->public_id, 'slug' => $publication->slug]));
 
     // Assert
-    $response->assertSee('A night at the harbor.')->assertDontSee('LEAK-EVENT-NOTE-7Q');
+    $response
+        ->assertSee('A night at the harbor.')
+        ->assertDontSee('LEAK-EVENT-NOTE-7Q');
 });
 
 test('members cannot prepare public pages while owners and managers can', function (MembershipRole $role, bool $allowed): void {
@@ -87,7 +105,9 @@ test('publication input rejects ticket schemes private hosts credentials and mal
     $response = put(route('events.public-pages.update', $event), ['complete' => 1, 'version' => 0, 'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'), 'announcement' => 'scheduled', 'tickets' => $url]);
 
     // Assert
-    $response->assertSessionHasErrors('tickets')->assertSessionHasInput('tickets', $url);
+    $response
+        ->assertSessionHasErrors('tickets')
+        ->assertSessionHasInput('tickets', $url);
 
     expect(EventPublication::query()->count())->toBe(0);
 })->with(['javascript:alert(1)', 'http://tickets.example.com', '//tickets.example.com', 'https://localhost/show', 'https://127.0.0.1/show', 'https://192.168.1.2/show', 'https://[::1]/show', 'https://user:secret@tickets.example.com', 'https://arena.local/show']);
@@ -109,6 +129,7 @@ test('doors time requires an explicit valid offset through daylight saving trans
         return;
     }
     $response->assertSessionHasErrors('doors_at');
+
     expect(EventPublication::query()->count())->toBe(0);
 })->with([
     ['not a date', '-04:00', false],
@@ -146,6 +167,7 @@ test('a stale source cannot save and a release requires deliberate review', func
 
     // Assert
     $response->assertSessionHasErrors('publication');
+
     expect(EventPublication::query()->count())->toBe(0);
     $publication = savePublicDraft($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
@@ -155,6 +177,7 @@ test('a stale source cannot save and a release requires deliberate review', func
 
     // Assert
     $response->assertSessionHasErrors('reviewed');
+
     expect(freshModel($publication)->card)->toBeNull();
 });
 
@@ -175,7 +198,11 @@ test('public projections expose only the explicitly permitted page and row prope
     }
     expect(array_keys(get_object_vars($page)))->toBe(['title', 'promotion', 'announcement', 'summary', 'notice', 'date', 'timezone', 'venue', 'address', 'doors', 'tickets', 'posterUrl', 'posterAlt', 'posterCaption', 'rows', 'cardUrl', 'resultsUrl', 'isResults', 'isPreview', 'scheduleChanged', 'resultsChanged', 'correctedAt'])
         ->and(array_keys($page->rows[0]))->toBe(['label', 'details', 'outcome']);
-    $response->assertDontSee('LEAK-EVENT-7Q')->assertDontSee('LEAK-MATCH-7Q')->assertDontSee('event_id')->assertDontSee('winning_side_id');
+    $response
+        ->assertDontSee('LEAK-EVENT-7Q')
+        ->assertDontSee('LEAK-MATCH-7Q')
+        ->assertDontSee('event_id')
+        ->assertDontSee('winning_side_id');
 });
 
 test('a malformed offset payload receives validation errors rather than a server error', function (): void {

@@ -90,7 +90,8 @@ describe('Event Matches Controller', function () {
         // Assert
         $response
             ->assertOk()
-            ->assertViewIs('matches.index')->assertViewHas('event', $event);
+            ->assertViewIs('matches.index')
+            ->assertViewHas('event', $event);
     });
 
     /**

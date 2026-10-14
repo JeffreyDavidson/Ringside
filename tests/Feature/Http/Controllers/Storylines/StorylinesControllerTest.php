@@ -28,7 +28,9 @@ test('only owners and managers can open creative planning', function (Membership
 
         return;
     }
-    $response->assertOk()->assertViewIs('storylines.index');
+    $response
+        ->assertOk()
+        ->assertViewIs('storylines.index');
 })->with([
     'owner' => [MembershipRole::Owner, 200],
     'booker' => [MembershipRole::Manager, 200],
@@ -43,7 +45,12 @@ test('a foreign story ID and a missing ID are both hidden while the owner can re
     $response = get(route('storylines.show', $f['story']));
 
     // Assert
-    $response->assertOk()->assertViewIs('storylines.show')->assertViewHas('storyline', $f['story'])->assertSee('Private betrayal');
+    $response
+        ->assertOk()
+        ->assertViewIs('storylines.show')
+        ->assertViewHas('storyline', $f['story'])
+        ->assertSee('Private betrayal');
+
     $foreign = Promotion::factory()->create();
     $attacker = basicUser();
     $foreign->users()->attach($attacker, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
@@ -56,6 +63,7 @@ test('a foreign story ID and a missing ID are both hidden while the owner can re
     $response = get(route('storylines.show', $f['story']));
     expect($response->headers->get('Location'))->toBeNull();
     $response->assertNotFound();
+
     $response = get(route('storylines.show', 999999));
 
     // Assert
@@ -66,7 +74,10 @@ test('read-only members see ordinary event surfaces without private creative mar
     $f = storylineSourceFixture();
     plannedStorylineStep($f['story'], new SourceData($f['event']->id, $f['match']->id));
     $ownerPage = get(route('events.show', $f['event']));
-    $ownerPage->assertSee('Related storylines')->assertSee('Private betrayal');
+    $ownerPage
+        ->assertSee('Related storylines')
+        ->assertSee('Private betrayal');
+
     $member = basicUser();
     requiredModel($f['story']->promotion)->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     session()->flush();
@@ -85,14 +96,20 @@ test('read-only members see ordinary event surfaces without private creative mar
         $response = get(route($route, $f['event']));
 
         // Assert
-        $response->assertOk()->assertDontSee('Private betrayal')->assertDontSee('Related storylines');
+        $response
+            ->assertOk()
+            ->assertDontSee('Private betrayal')
+            ->assertDontSee('Related storylines');
     }
 
     // Act
     $response = get(route('events.pack.show', ['event' => $f['event'], 'print' => 1]));
 
     // Assert
-    $response->assertOk()->assertDontSee('Private betrayal');
+    $response
+        ->assertOk()
+        ->assertDontSee('Private betrayal');
+
     expect($f['story']->revisions()->count())->toBe(1);
 });
 

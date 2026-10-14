@@ -146,7 +146,9 @@ test('an administrator receives the users index view and table', function (): vo
     $response = get(route('users.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('users.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('users.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -167,7 +169,9 @@ test('a user without membership cannot open the users index', function (): void 
     $response = get(route('users.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active member cannot open platform user management', function (): void {
@@ -182,6 +186,10 @@ test('an active member cannot open platform user management', function (): void 
     $profileResponse = get(route('users.show', $user));
 
     // Assert
-    $response->assertForbidden()->assertDontSee('General Info');
-    $profileResponse->assertForbidden()->assertDontSee($user->email);
+    $response
+        ->assertForbidden()
+        ->assertDontSee('General Info');
+    $profileResponse
+        ->assertForbidden()
+        ->assertDontSee($user->email);
 });

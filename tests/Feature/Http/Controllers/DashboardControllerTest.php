@@ -222,7 +222,9 @@ test('the dashboard pluralises the number of days a champion has held a title', 
     $response = get(route('dashboard'));
 
     // Assert
-    $response->assertOk()->assertSee($expected);
+    $response
+        ->assertOk()
+        ->assertSee($expected);
 
     if ($unexpected !== null) {
         $response->assertDontSee($unexpected);
@@ -247,6 +249,7 @@ test('the dashboard issues the same number of queries however large the roster i
 
         // Assert
         $response->assertOk();
+
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();
 

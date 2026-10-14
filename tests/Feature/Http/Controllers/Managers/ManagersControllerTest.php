@@ -129,7 +129,10 @@ describe('Managers Controller', function () {
         $response = get(route('managers.show', $manager));
 
         // Assert
-        $response->assertOk()->assertViewIs('managers.show')->assertViewHas('manager', $manager);
+        $response
+            ->assertOk()
+            ->assertViewIs('managers.show')
+            ->assertViewHas('manager', $manager);
     })->with(['employed', 'injured', 'retired', 'suspended']);
 
     /**
@@ -158,7 +161,9 @@ test('an administrator receives the managers index view and table', function ():
     $response = get(route('managers.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('managers.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('managers.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -179,7 +184,9 @@ test('a user without membership cannot open the managers index', function (): vo
     $response = get(route('managers.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct manager profile', function (): void {
@@ -194,5 +201,8 @@ test('an active promotion member receives the correct manager profile', function
     $response = get(route('managers.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('managers.show')->assertViewHas('manager', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('managers.show')
+        ->assertViewHas('manager', $record);
 });

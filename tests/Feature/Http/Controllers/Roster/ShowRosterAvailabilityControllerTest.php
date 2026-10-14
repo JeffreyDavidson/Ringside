@@ -38,8 +38,14 @@ test('the calendar shows only the current promotions unavailable people and reas
     $response = get(route('availability.index', ['date' => '2026-10-17']));
 
     // Assert
-    $response->assertOk()->assertViewIs('roster.availability')->assertSee('Harbor Talent')->assertSee('Local commitment')->assertSee('America/New_York')
-        ->assertDontSee('Foreign Talent')->assertDontSee('FOREIGN-PRIVATE-REASON');
+    $response
+        ->assertOk()
+        ->assertViewIs('roster.availability')
+        ->assertSee('Harbor Talent')
+        ->assertSee('Local commitment')
+        ->assertSee('America/New_York')
+        ->assertDontSee('Foreign Talent')
+        ->assertDontSee('FOREIGN-PRIVATE-REASON');
 })->with([MembershipRole::Owner, MembershipRole::Manager, MembershipRole::Member]);
 
 test('a global administrator must choose a promotion for the calendar', function (): void {
@@ -49,7 +55,9 @@ test('a global administrator must choose a promotion for the calendar', function
     $response = get(route('availability.index'));
 
     // Assert
-    $response->assertOk()->assertSee('Choose a promotion');
+    $response
+        ->assertOk()
+        ->assertSee('Choose a promotion');
 });
 
 test('malformed initial calendar filters show a useful error rather than throwing', function (): void {
@@ -63,5 +71,7 @@ test('malformed initial calendar filters show a useful error rather than throwin
     $response = get(route('availability.index', ['date' => 'not-a-date', 'kind' => 'unknown']));
 
     // Assert
-    $response->assertOk()->assertSee('Enter a valid calendar date');
+    $response
+        ->assertOk()
+        ->assertSee('Enter a valid calendar date');
 });

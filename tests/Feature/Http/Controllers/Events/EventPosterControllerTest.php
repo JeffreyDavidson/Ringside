@@ -22,7 +22,9 @@ test('the released poster streams the approved bytes with private security heade
     $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
-    $response->assertOk()->assertStreamedContent($bytes)
+    $response
+        ->assertOk()
+        ->assertStreamedContent($bytes)
         ->assertHeader('Content-Type', 'image/png')
         ->assertHeader('Cache-Control', 'no-store, private')
         ->assertHeader('X-Content-Type-Options', 'nosniff')

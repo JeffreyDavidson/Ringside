@@ -55,9 +55,12 @@ describe('an invitation grants nothing until it is accepted', function () {
         $foreignPage = get(route('promotions.show', $inviting));
 
         // Assert
-        $dashboard->assertSuccessful()->assertSessionHas('active_promotion_id', $own->id);
+        $dashboard
+            ->assertSuccessful()
+            ->assertSessionHas('active_promotion_id', $own->id);
         $foreignRecord->assertNotFound();
         $foreignPage->assertForbidden();
+
         expect(promotionHasActiveMember($inviting, $invitee))->toBeFalse();
     });
 
@@ -75,6 +78,7 @@ describe('an invitation grants nothing until it is accepted', function () {
 
         // Assert
         $response->assertForbidden();
+
         expect(session('active_promotion_id'))->toBeNull();
     });
 });
@@ -91,7 +95,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertForbidden()
+        $response
+            ->assertForbidden()
             ->assertDontSee('Expired Invitation Wrestling')
             ->assertDontSeeHtml(route('promotions.invitation.accept', $promotion));
     });
@@ -109,7 +114,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertForbidden()
+        $response
+            ->assertForbidden()
             ->assertViewIs('promotions.no-membership')
             ->assertSee('Invitation Championship Wrestling')
             ->assertSee(__('promotions.invitation_role', ['role' => 'Manager']))
@@ -132,7 +138,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertSuccessful()
+        $response
+            ->assertSuccessful()
             ->assertSee('Invitation Championship Wrestling')
             ->assertSeeHtml('data-test="invitation-indicator"')
             ->assertSeeHtml(route('promotions.invitation.accept', $inviting));
@@ -149,7 +156,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertSuccessful()
+        $response
+            ->assertSuccessful()
             ->assertDontSeeHtml('data-test="invitation-indicator"')
             ->assertDontSeeHtml('data-test="pending-invitations"');
     });
@@ -169,7 +177,8 @@ describe('seeing invitations', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertForbidden()
+        $response
+            ->assertForbidden()
             ->assertSee('Invitation Championship Wrestling')
             ->assertSee(__('promotions.invitation_role', ['role' => 'Owner']))
             ->assertSeeHtml(route('promotions.invitation.accept', $promotion));
@@ -222,7 +231,8 @@ describe('feedback for a user without a membership', function () {
         $response = followingRedirects()->post(route('promotions.invitation.decline', $promotion));
 
         // Assert
-        $response->assertForbidden()
+        $response
+            ->assertForbidden()
             ->assertSeeHtml('role="status"')
             ->assertSeeText(__('promotions.invitation_declined'));
     });
@@ -236,7 +246,8 @@ describe('feedback for a user without a membership', function () {
         $response = followingRedirects()->post(route('promotions.invitation.accept', $promotion));
 
         // Assert
-        $response->assertForbidden()
+        $response
+            ->assertForbidden()
             ->assertSeeHtml('role="alert"')
             ->assertSeeText(__('promotions.invitation_unavailable'));
     });

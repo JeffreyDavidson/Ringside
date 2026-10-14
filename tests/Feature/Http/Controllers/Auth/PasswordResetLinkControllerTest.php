@@ -21,7 +21,9 @@ test('password reset link screen can be rendered', function () {
     $response = get($passwordResetUrl);
 
     // Assert
-    $response->assertOk()->assertViewIs('auth.forgot-password');
+    $response
+        ->assertOk()
+        ->assertViewIs('auth.forgot-password');
 });
 
 test('password reset link requires a valid email address', function () {
@@ -49,7 +51,11 @@ test('password reset link can be requested', function (string $email) {
     $response = post(route('password.email'), $requestData);
 
     // Assert
-    $response->assertRedirect()->assertSessionHasNoErrors()->assertSessionHas('status', __('passwords.sent'));
+    $response
+        ->assertRedirect()
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', __('passwords.sent'));
+
     Notification::assertSentTo($user, ResetPassword::class);
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
@@ -65,7 +71,8 @@ test('registered and unregistered emails receive the same response', function (s
         ->post(route('password.email'), ['email' => $email]);
 
     // Assert
-    $response->assertRedirect(route('password.request'))
+    $response
+        ->assertRedirect(route('password.request'))
         ->assertSessionHasNoErrors()
         ->assertSessionMissing('_old_input')
         ->assertSessionHas('status', __('passwords.sent'))
@@ -83,8 +90,13 @@ test('only a registered email is sent a reset notification', function (): void {
     $response = post(route('password.email'), ['email' => $user->email]);
 
     // Assert
-    $unknownResponse->assertRedirect()->assertSessionHas('status', __('passwords.sent'));
-    $response->assertRedirect()->assertSessionHas('status', __('passwords.sent'));
+    $unknownResponse
+        ->assertRedirect()
+        ->assertSessionHas('status', __('passwords.sent'));
+    $response
+        ->assertRedirect()
+        ->assertSessionHas('status', __('passwords.sent'));
+
     Notification::assertSentTimes(ResetPassword::class, 1);
     Notification::assertSentTo($user, ResetPassword::class);
 });
@@ -103,12 +115,14 @@ test('a throttled request looks the same as a sent one and sends nothing', funct
         ->post(route('password.email'), $data);
 
     // Assert
-    $response->assertRedirect(route('password.request'))
+    $response
+        ->assertRedirect(route('password.request'))
         ->assertSessionHasNoErrors()
         ->assertSessionMissing('_old_input')
         ->assertSessionHas('status', __('passwords.sent'))
         ->assertSessionHas('recovery_email', $user->email)
         ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
+
     Notification::assertSentToTimes($user, ResetPassword::class, 1);
 });
 
@@ -128,8 +142,10 @@ test('a reset link can be resent after the broker cooldown', function (): void {
     $response = post(route('password.email'), $data);
 
     // Assert
-    $response->assertSessionHas('recovery_email', $user->email)
+    $response
+        ->assertSessionHas('recovery_email', $user->email)
         ->assertSessionHas('status', __('passwords.sent'));
+
     Notification::assertSentToTimes($user, ResetPassword::class, 2);
 });
 
@@ -143,6 +159,9 @@ test('password reset works for a legacy user stored with a mixed-case email', fu
     $response = post(route('password.email'), ['email' => 'legacy.promoter@example.com']);
 
     // Assert
-    $response->assertRedirect()->assertSessionHas('status', __('passwords.sent'));
+    $response
+        ->assertRedirect()
+        ->assertSessionHas('status', __('passwords.sent'));
+
     Notification::assertSentTo($user->refresh(), ResetPassword::class);
 });

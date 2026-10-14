@@ -24,9 +24,14 @@ test('the private preview streams the draft poster without publishing it', funct
     $response = get(route('events.public-pages.poster', $event));
 
     // Assert
-    $response->assertOk()->assertStreamedContent($bytes)
-        ->assertHeader('Content-Type', 'image/png')->assertHeader('Cache-Control', 'no-store, private')
-        ->assertHeader('X-Content-Type-Options', 'nosniff')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    $response
+        ->assertOk()
+        ->assertStreamedContent($bytes)
+        ->assertHeader('Content-Type', 'image/png')
+        ->assertHeader('Cache-Control', 'no-store, private')
+        ->assertHeader('X-Content-Type-Options', 'nosniff')
+        ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+
     expect(freshModel($publication)->published_at)->toBeNull();
 });
 

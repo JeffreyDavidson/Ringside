@@ -26,8 +26,10 @@ describe('declining an invitation', function () {
         $response = post(route('promotions.invitation.decline', $promotion));
 
         // Assert
-        $response->assertRedirect(route('dashboard'))
+        $response
+            ->assertRedirect(route('dashboard'))
             ->assertSessionHas('status', __('promotions.invitation_declined'));
+
         expect($promotion->invitations()->pluck('id')->all())->toBe([$bystanderInvitation->id])
             ->and($otherInvitation->fresh())->not->toBeNull()
             ->and($promotion->memberships()->count())->toBe(0);
@@ -45,6 +47,7 @@ describe('declining an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect(promotionHasMemberWithRole($promotion, $member, MembershipRole::Owner))->toBeTrue();
     });
 
@@ -61,6 +64,7 @@ describe('declining an invitation', function () {
 
         // Assert
         $response->assertSessionHas('error', __('promotions.invitation_unavailable'));
+
         expect($invitation->fresh())->not->toBeNull();
     });
 });

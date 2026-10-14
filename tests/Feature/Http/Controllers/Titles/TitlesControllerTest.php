@@ -136,7 +136,9 @@ test('an administrator receives the titles index view and table', function (): v
     $response = get(route('titles.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('titles.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('titles.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -157,7 +159,9 @@ test('a user without membership cannot open the titles index', function (): void
     $response = get(route('titles.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct title profile', function (): void {
@@ -172,5 +176,8 @@ test('an active promotion member receives the correct title profile', function (
     $response = get(route('titles.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('titles.show')->assertViewHas('title', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('titles.show')
+        ->assertViewHas('title', $record);
 });

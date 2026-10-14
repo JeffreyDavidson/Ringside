@@ -42,7 +42,10 @@ describe('pending invitations in the sidebar', function () {
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertStatus($status)->assertSeeHtml('data-test="pending-invitations"');
+        $response
+            ->assertStatus($status)
+            ->assertSeeHtml('data-test="pending-invitations"');
+
         expect(str_contains((string) $response->getContent(), 'data-test="invitation-admin-note"'))->toBe($seesNote);
     })->with([
         'administrator' => [administrator(...), 200, true],
@@ -65,6 +68,7 @@ describe('pending invitations in the sidebar', function () {
             ->assertSee('Accepted Wrestling')
             ->assertSeeHtml('id="promotion-menu"')
             ->assertDontSeeHtml('data-test="pending-invitations"');
+
         expect(promotionHasActiveMember($promotion, $admin))->toBeTrue();
     });
 
@@ -98,6 +102,7 @@ describe('pending invitations in the sidebar', function () {
             ->assertSuccessful()
             ->assertSeeHtml('data-test="invitation-indicator"')
             ->assertDontSeeHtml('data-test="invitation-collapsed-toggle"');
+
         expect(substr_count((string) $response->getContent(), 'data-test="pending-invitations"'))->toBe(1);
     });
 });

@@ -25,7 +25,13 @@ test('an event editor can open the checklist without creating agreements', funct
     $response = get(route('events.talent-bookings.show', $event));
 
     // Assert
-    $response->assertOk()->assertViewIs('events.talent-bookings')->assertViewHas('event', $event)->assertSee('Talent bookings')->assertSee('USD');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.talent-bookings')
+        ->assertViewHas('event', $event)
+        ->assertSee('Talent bookings')
+        ->assertSee('USD');
+
     expect(EventTalentBooking::query()->count())->toBe(0);
 });
 
@@ -43,7 +49,10 @@ test('only owners and managers see private booking pages and their links', funct
 
     // Assert
     if ($allowed) {
-        $response->assertOk()->assertViewIs('events.talent-bookings')->assertViewHas('event', $event);
+        $response
+            ->assertOk()
+            ->assertViewIs('events.talent-bookings')
+            ->assertViewHas('event', $event);
         $eventResponse->assertSee(route('events.talent-bookings.show', $event));
 
         return;
@@ -65,6 +74,7 @@ test('guests and foreign promotions cannot read the booking checklist', function
 
     // Assert
     $response->assertRedirect(route('login'));
+
     $other = Promotion::factory()->create();
     $user = basicUser();
     $other->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
@@ -75,6 +85,7 @@ test('guests and foreign promotions cannot read the booking checklist', function
 
     // Assert
     $response->assertNotFound();
+
     expect(EventTalentBooking::query()->count())->toBe(0);
 });
 
@@ -88,13 +99,21 @@ test('private terms never enter event pack print live or ordinary event response
         $response = get(route($name, $fixture['event']));
 
         // Assert
-        $response->assertOk()->assertDontSee('LEAK-TRAVEL-7Q')->assertDontSee('LEAK-REASON-7Q')->assertDontSee('1,234.56');
+        $response
+            ->assertOk()
+            ->assertDontSee('LEAK-TRAVEL-7Q')
+            ->assertDontSee('LEAK-REASON-7Q')
+            ->assertDontSee('1,234.56');
     }
 
     // Act
     $response = get(route('events.pack.show', ['event' => $fixture['event'], 'print' => 1]));
 
     // Assert
-    $response->assertOk()->assertDontSee('LEAK-TRAVEL-7Q')->assertDontSee('LEAK-REASON-7Q');
+    $response
+        ->assertOk()
+        ->assertDontSee('LEAK-TRAVEL-7Q')
+        ->assertDontSee('LEAK-REASON-7Q');
+
     expect(Activity::query()->get()->toJson())->not->toContain('LEAK-TRAVEL-7Q', 'LEAK-REASON-7Q');
 });

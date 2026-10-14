@@ -39,7 +39,8 @@ describe('Stables Controller', function () {
         // Assert
 
         $response->assertOk();
-        $response->assertViewIs('stables.show')
+        $response
+            ->assertViewIs('stables.show')
             ->assertSee($stable->name)
             ->assertSee('Status')
             ->assertViewHas('stable', $stable)
@@ -141,7 +142,10 @@ describe('Stables Controller', function () {
         $response = get(route('stables.show', $stable));
 
         // Assert
-        $response->assertOk()->assertViewIs('stables.show')->assertViewHas('stable', $stable);
+        $response
+            ->assertOk()
+            ->assertViewIs('stables.show')
+            ->assertViewHas('stable', $stable);
     })->with(['active', 'inactive', 'retired']);
 });
 
@@ -153,7 +157,9 @@ test('an administrator receives the stables index view and table', function (): 
     $response = get(route('stables.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('stables.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('stables.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -174,7 +180,9 @@ test('a user without membership cannot open the stables index', function (): voi
     $response = get(route('stables.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct stable profile', function (): void {
@@ -189,5 +197,8 @@ test('an active promotion member receives the correct stable profile', function 
     $response = get(route('stables.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('stables.show')->assertViewHas('stable', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('stables.show')
+        ->assertViewHas('stable', $record);
 });

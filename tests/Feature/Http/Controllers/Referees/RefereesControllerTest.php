@@ -116,7 +116,10 @@ describe('Referees Controller', function () {
         $response = get(route('referees.show', $referee));
 
         // Assert
-        $response->assertOk()->assertViewIs('referees.show')->assertViewHas('referee', $referee);
+        $response
+            ->assertOk()
+            ->assertViewIs('referees.show')
+            ->assertViewHas('referee', $referee);
     })->with(['bookable', 'injured', 'retired', 'suspended']);
 
     /**
@@ -145,7 +148,9 @@ test('an administrator receives the referees index view and table', function ():
     $response = get(route('referees.index'));
 
     // Assert
-    $response->assertOk()->assertViewIs('referees.index')
+    $response
+        ->assertOk()
+        ->assertViewIs('referees.index')
         ->assertSeeHtml('aria-label="Content workspace"')
         ->assertSeeLivewire(Main::class);
 });
@@ -166,7 +171,9 @@ test('a user without membership cannot open the referees index', function (): vo
     $response = get(route('referees.index'));
 
     // Assert
-    $response->assertForbidden()->assertViewIs('promotions.no-membership');
+    $response
+        ->assertForbidden()
+        ->assertViewIs('promotions.no-membership');
 });
 
 test('an active promotion member receives the correct referee profile', function (): void {
@@ -181,5 +188,8 @@ test('an active promotion member receives the correct referee profile', function
     $response = get(route('referees.show', $record));
 
     // Assert
-    $response->assertOk()->assertViewIs('referees.show')->assertViewHas('referee', $record);
+    $response
+        ->assertOk()
+        ->assertViewIs('referees.show')
+        ->assertViewHas('referee', $record);
 });
