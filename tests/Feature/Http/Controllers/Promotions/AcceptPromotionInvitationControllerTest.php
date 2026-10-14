@@ -19,7 +19,8 @@ require_once __DIR__.'/../../../../Fixtures/promotion-invitations.php';
 
 test('creates an active membership with the role the owner chose and deletes the invitation', function (MembershipRole $role) {
     // Arrange
-    $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
+    $promotion = Promotion::factory()
+        ->create(['name' => 'Invitation Championship Wrestling']);
 
     $invitee = basicUser();
     inviteTo($promotion, $invitee, $role);
@@ -37,12 +38,18 @@ test('creates an active membership with the role the owner chose and deletes the
             'role' => $role->label(),
         ]));
 
-    $membership = $promotion->memberships()->where('user_id', $invitee->id)->firstOrFail();
+    $membership = $promotion->memberships()
+        ->where('user_id', $invitee->id)
+        ->firstOrFail();
 
     expect($membership->status)->toBe(MembershipStatus::Active)
-        ->and($membership->role)->toBe($role)
-        ->and(promotionHasMemberWithRole($promotion, $invitee, $role))->toBeTrue()
-        ->and($promotion->invitations()->count())->toBe(0);
+        ->and($membership->role)
+        ->toBe($role)
+        ->and(promotionHasMemberWithRole($promotion, $invitee, $role))
+        ->toBeTrue()
+        ->and($promotion->invitations()
+            ->count())
+        ->toBe(0);
 })->with([
     'owner' => MembershipRole::Owner,
     'manager' => MembershipRole::Manager,
@@ -51,11 +58,14 @@ test('creates an active membership with the role the owner chose and deletes the
 
 test('gives the new member access to the promotion records', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $invitee = basicUser();
     inviteTo($promotion, $invitee, MembershipRole::Member);
-    $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
+    $wrestler = Wrestler::factory()
+        ->for($promotion, 'promotion')
+        ->create();
 
     actingAs($invitee);
     resolve(AcceptPromotionInvitationAction::class)->handle($promotion, $invitee);
@@ -74,7 +84,8 @@ test('gives the new member access to the promotion records', function () {
 
 test('cannot be done for another email by forging the promotion of someone elses invitation', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $invitee = basicUser();
     $attacker = basicUser();
@@ -91,12 +102,17 @@ test('cannot be done for another email by forging the promotion of someone elses
         ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
     expect($invitation->fresh())->not->toBeNull()
-        ->and($promotion->memberships()->count())->toBe(0);
+        ->and($promotion->memberships()
+            ->count())
+        ->toBe(0);
 });
 
 test('is not possible for a suspended member, keeps the suspension and deletes the invitation', function () {
     // Arrange
-    [$promotion, $other] = Promotion::factory()->count(2)->create()->all();
+    [$promotion, $other] = Promotion::factory()
+        ->count(2)
+        ->create()
+        ->all();
     $user = basicUser();
     joinAs($promotion, $user, MembershipRole::Member, MembershipStatus::Suspended);
     joinAs($other, $user);
@@ -111,20 +127,29 @@ test('is not possible for a suspended member, keeps the suspension and deletes t
     $response
         ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
-    $membership = $promotion->memberships()->sole();
+    $membership = $promotion->memberships()
+        ->sole();
 
     expect($membership->status)->toBe(MembershipStatus::Suspended)
-        ->and($membership->role)->toBe(MembershipRole::Member)
-        ->and($invitation->fresh())->toBeNull()
-        ->and(promotionHasActiveMember($promotion, $user))->toBeFalse();
+        ->and($membership->role)
+        ->toBe(MembershipRole::Member)
+        ->and($invitation->fresh())
+        ->toBeNull()
+        ->and(promotionHasActiveMember($promotion, $user))
+        ->toBeFalse();
 });
 
 test('is not possible once the invitation has expired', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $user = basicUser();
-    PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->expired()->create();
+    PromotionInvitation::factory()
+        ->for($promotion)
+        ->forEmail($user->email)
+        ->expired()
+        ->create();
 
     actingAs($user);
 
@@ -135,12 +160,14 @@ test('is not possible once the invitation has expired', function () {
     $response
         ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
-    expect($promotion->memberships()->count())->toBe(0);
+    expect($promotion->memberships()
+        ->count())->toBe(0);
 });
 
 test('is not possible after the invitation is gone', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $user = basicUser();
 
@@ -153,12 +180,14 @@ test('is not possible after the invitation is gone', function () {
     $response
         ->assertSessionHas('error', __('promotions.invitation_unavailable'));
 
-    expect($promotion->memberships()->count())->toBe(0);
+    expect($promotion->memberships()
+        ->count())->toBe(0);
 });
 
 test('requires a signed-in user', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     // Act
     $response = post(route('promotions.invitation.accept', $promotion));
@@ -170,9 +199,12 @@ test('requires a signed-in user', function () {
 
 test('is refused for an inactive account', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
-    $user = User::factory()->basicUser()->create(['status' => UserStatus::Inactive]);
+    $user = User::factory()
+        ->basicUser()
+        ->create(['status' => UserStatus::Inactive]);
     $invitation = inviteTo($promotion, $user);
 
     actingAs($user);
@@ -190,10 +222,13 @@ test('is refused for an inactive account', function () {
 
 test('a pending invitation alone cannot grant access to promotion records', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
     $invitee = basicUser();
     inviteTo($promotion, $invitee, MembershipRole::Member);
-    $wrestler = Wrestler::factory()->for($promotion)->create();
+    $wrestler = Wrestler::factory()
+        ->for($promotion)
+        ->create();
 
     actingAs($invitee);
 
@@ -209,7 +244,8 @@ test('a pending invitation alone cannot grant access to promotion records', func
 
 test('an administrator can accept an invitation through the HTTP endpoint', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create(['name' => 'Accepted Wrestling']);
+    $promotion = Promotion::factory()
+        ->create(['name' => 'Accepted Wrestling']);
     $admin = administrator();
     $invitation = inviteTo($promotion, $admin, MembershipRole::Manager);
 
@@ -227,5 +263,6 @@ test('an administrator can accept an invitation through the HTTP endpoint', func
         ]));
 
     expect(promotionHasMemberWithRole($promotion, $admin, MembershipRole::Manager))->toBeTrue()
-        ->and($invitation->fresh())->toBeNull();
+        ->and($invitation->fresh())
+        ->toBeNull();
 });

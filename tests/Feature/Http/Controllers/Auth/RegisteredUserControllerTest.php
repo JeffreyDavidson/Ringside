@@ -54,7 +54,9 @@ describe('store', function (): void {
             ->assertRedirect(route('login'))
             ->assertSessionHas('status', __('auth-forms.account_pending'));
 
-        $user = User::query()->where('email', 'jeffrey@example.com')->firstOrFail();
+        $user = User::query()
+            ->where('email', 'jeffrey@example.com')
+            ->firstOrFail();
 
         expect($user)
             ->first_name->toBe('Jeffrey')
@@ -62,7 +64,8 @@ describe('store', function (): void {
             ->role->toBe(Role::Basic)
             ->status->toBe(UserStatus::Unverified)
             ->email_verified_at->toBeNull()
-            ->and(Hash::check('password-12345', $user->password))->toBeTrue();
+            ->and(Hash::check('password-12345', $user->password))
+            ->toBeTrue();
 
         Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($user));
         Event::assertDispatchedOnce(Registered::class);
@@ -96,14 +99,17 @@ describe('store', function (): void {
             ->assertSessionMissing('_old_input.password')
             ->assertSessionMissing('_old_input.password_confirmation');
 
-        expect(User::query()->count())->toBe(0);
+        expect(User::query()
+            ->count())->toBe(0);
         Event::assertNotDispatched(Registered::class);
     });
 
     test('a taken email gets the pending response without changing the account', function (string $takenEmail): void {
         // Arrange
-        $existing = User::factory()->create(['email' => 'existing@example.com']);
-        $original = $existing->refresh()->getAttributes();
+        $existing = User::factory()
+            ->create(['email' => 'existing@example.com']);
+        $original = $existing->refresh()
+            ->getAttributes();
         $registrationData = [
             'first_name' => 'Taylor',
             'last_name' => 'Promoter',
@@ -123,8 +129,11 @@ describe('store', function (): void {
             ->assertSessionHas('status', __('auth-forms.account_pending'))
             ->assertSessionHasNoErrors();
 
-        expect(User::query()->count())->toBe(1)
-            ->and($existing->refresh()->getAttributes())->toBe($original);
+        expect(User::query()
+            ->count())->toBe(1)
+            ->and($existing->refresh()
+                ->getAttributes())
+            ->toBe($original);
         Event::assertNotDispatched(Registered::class);
         assertGuest();
     })->with([
@@ -134,8 +143,10 @@ describe('store', function (): void {
 
     test('an unknown email gets the same pending response and creates its own account', function (): void {
         // Arrange
-        $existing = User::factory()->create(['email' => 'existing@example.com']);
-        $original = $existing->refresh()->getAttributes();
+        $existing = User::factory()
+            ->create(['email' => 'existing@example.com']);
+        $original = $existing->refresh()
+            ->getAttributes();
         $registrationData = [
             'first_name' => 'Taylor',
             'last_name' => 'Promoter',
@@ -155,10 +166,18 @@ describe('store', function (): void {
             ->assertSessionHas('status', __('auth-forms.account_pending'))
             ->assertSessionHasNoErrors();
 
-        $created = User::query()->where('email', 'unknown@example.com')->firstOrFail();
-        expect(User::query()->count())->toBe(2)
-            ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1)
-            ->and($existing->refresh()->getAttributes())->toBe($original);
+        $created = User::query()
+            ->where('email', 'unknown@example.com')
+            ->firstOrFail();
+        expect(User::query()
+            ->count())->toBe(2)
+            ->and(User::query()
+                ->where('email', 'existing@example.com')
+                ->count())
+            ->toBe(1)
+            ->and($existing->refresh()
+                ->getAttributes())
+            ->toBe($original);
         Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($created));
         Event::assertDispatchedOnce(Registered::class);
         Event::assertNotDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($existing));
@@ -167,7 +186,9 @@ describe('store', function (): void {
 
     test('registration creates nothing for the email of a deleted user', function (): void {
         // Arrange
-        User::factory()->create(['email' => 'gone@example.com'])->delete();
+        User::factory()
+            ->create(['email' => 'gone@example.com'])
+            ->delete();
 
         Event::fake([Registered::class]);
 
@@ -187,13 +208,16 @@ describe('store', function (): void {
             ->assertRedirect(route('login'))
             ->assertSessionHas('status', __('auth-forms.account_pending'));
 
-        expect(User::query()->withTrashed()->count())->toBe(1);
+        expect(User::query()
+            ->withTrashed()
+            ->count())->toBe(1);
         Event::assertNotDispatched(Registered::class);
     });
 
     test('registration still validates the other fields for a taken email', function (): void {
         // Arrange
-        User::factory()->create(['email' => 'existing@example.com']);
+        User::factory()
+            ->create(['email' => 'existing@example.com']);
 
         Event::fake([Registered::class]);
 
@@ -215,7 +239,8 @@ describe('store', function (): void {
             ->assertSessionHasErrors(['first_name', 'password'])
             ->assertSessionDoesntHaveErrors('email');
 
-        expect(User::query()->count())->toBe(1);
+        expect(User::query()
+            ->count())->toBe(1);
         Event::assertNotDispatched(Registered::class);
     });
 
@@ -245,6 +270,7 @@ describe('store', function (): void {
             ->assertSessionHasNoErrors();
 
         Event::assertNotDispatched(Registered::class);
-        expect(User::query()->count())->toBe(0);
+        expect(User::query()
+            ->count())->toBe(0);
     });
 });

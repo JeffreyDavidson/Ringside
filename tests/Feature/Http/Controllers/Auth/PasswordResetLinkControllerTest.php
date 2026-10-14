@@ -46,7 +46,8 @@ describe('store', function (): void {
 
     test('registered emails receive the common recovery response and one reset notification', function (string $email): void {
         // Arrange
-        $user = User::factory()->create(['email' => 'promoter@example.com']);
+        $user = User::factory()
+            ->create(['email' => 'promoter@example.com']);
         config(['auth.passwords.users.throttle' => 90]);
         $requestData = ['email' => $email];
 
@@ -74,7 +75,8 @@ describe('store', function (): void {
 
     test('an unknown email receives the common recovery response without a notification', function (): void {
         // Arrange
-        User::factory()->create(['email' => 'promoter@example.com']);
+        User::factory()
+            ->create(['email' => 'promoter@example.com']);
         config(['auth.passwords.users.throttle' => 90]);
         $requestData = ['email' => 'nobody@example.com'];
 
@@ -100,7 +102,8 @@ describe('store', function (): void {
         Notification::fake();
         config(['auth.passwords.users.throttle' => 90]);
         freezeTime();
-        $user = User::factory()->create();
+        $user = User::factory()
+            ->create();
         $data = ['email' => $user->email];
         post(route('password.email'), $data);
 
@@ -125,7 +128,8 @@ describe('store', function (): void {
         Notification::fake();
         config(['auth.passwords.users.throttle' => 90]);
         freezeTime();
-        $user = User::factory()->create();
+        $user = User::factory()
+            ->create();
         $data = ['email' => $user->email];
         post(route('password.email'), $data);
         post(route('password.email'), $data);
@@ -146,8 +150,11 @@ describe('store', function (): void {
     test('password reset works for a legacy user stored with a mixed-case email', function () {
         // Arrange
         Notification::fake();
-        $user = User::factory()->create();
-        DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
+        $user = User::factory()
+            ->create();
+        DB::table('users')
+            ->where('id', $user->id)
+            ->update(['email' => 'Legacy.Promoter@Example.com']);
 
         $requestData = ['email' => 'legacy.promoter@example.com'];
 

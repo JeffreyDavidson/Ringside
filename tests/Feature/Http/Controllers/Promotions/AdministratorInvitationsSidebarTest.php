@@ -15,8 +15,13 @@ describe('pending invitations in the sidebar', function () {
     test('an administrator without a membership sees a pending invitation in the sidebar', function () {
         // Arrange
         $admin = administrator();
-        $promotion = Promotion::factory()->create(['name' => 'Sidebar Wrestling']);
-        PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create(['name' => 'Sidebar Wrestling']);
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($admin->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
 
         actingAs($admin);
 
@@ -35,8 +40,13 @@ describe('pending invitations in the sidebar', function () {
     test('administrators see promotion scoping notes', function (): void {
         // Arrange
         $user = administrator();
-        $promotion = Promotion::factory()->create();
-        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create();
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
 
         actingAs($user);
 
@@ -53,8 +63,13 @@ describe('pending invitations in the sidebar', function () {
     test('regular users see invitations without administrator scoping notes', function (): void {
         // Arrange
         $user = basicUser();
-        $promotion = Promotion::factory()->create();
-        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create();
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
 
         actingAs($user);
 
@@ -71,8 +86,13 @@ describe('pending invitations in the sidebar', function () {
     test('an administrator accepting the invitation then gets the promotion in the switcher', function () {
         // Arrange
         $admin = administrator();
-        $promotion = Promotion::factory()->create(['name' => 'Accepted Wrestling']);
-        PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create(['name' => 'Accepted Wrestling']);
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($admin->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
 
         actingAs($admin);
 
@@ -107,13 +127,20 @@ describe('pending invitations in the sidebar', function () {
     test('a member with an active promotion sees the invitation only once, inside the switcher', function () {
         // Arrange
         $user = basicUser();
-        $own = Promotion::factory()->create();
-        $inviting = Promotion::factory()->create(['name' => 'Inviting Wrestling']);
-        $own->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
-        PromotionInvitation::factory()->for($inviting)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        $own = Promotion::factory()
+            ->create();
+        $inviting = Promotion::factory()
+            ->create(['name' => 'Inviting Wrestling']);
+        $own->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
+        PromotionInvitation::factory()
+            ->for($inviting)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
 
         actingAs($user);
 

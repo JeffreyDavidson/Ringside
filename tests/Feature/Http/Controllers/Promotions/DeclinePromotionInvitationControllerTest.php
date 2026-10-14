@@ -14,7 +14,10 @@ require_once __DIR__.'/../../../../Fixtures/promotion-invitations.php';
 
 test('removes the invitation and nothing else', function () {
     // Arrange
-    [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
+    [$promotion, $otherPromotion] = Promotion::factory()
+        ->count(2)
+        ->create()
+        ->all();
     $invitee = basicUser();
     $bystander = basicUser();
     inviteTo($promotion, $invitee);
@@ -31,14 +34,19 @@ test('removes the invitation and nothing else', function () {
         ->assertRedirect(route('dashboard'))
         ->assertSessionHas('status', __('promotions.invitation_declined'));
 
-    expect($promotion->invitations()->pluck('id')->all())->toBe([$bystanderInvitation->id])
+    expect($promotion->invitations()
+        ->pluck('id')
+        ->all())->toBe([$bystanderInvitation->id])
         ->and($otherInvitation->fresh())->not->toBeNull()
-        ->and($promotion->memberships()->count())->toBe(0);
+        ->and($promotion->memberships()
+            ->count())
+        ->toBe(0);
 });
 
 test('cannot remove an active membership', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $member = basicUser();
     joinAs($promotion, $member, MembershipRole::Owner);
@@ -57,7 +65,8 @@ test('cannot remove an active membership', function () {
 
 test('cannot be done for another email by forging the promotion of someone elses invitation', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
     $invitee = basicUser();
     $attacker = basicUser();
@@ -77,7 +86,8 @@ test('cannot be done for another email by forging the promotion of someone elses
 
 test('a guest cannot decline an invitation', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
     $invitee = basicUser();
     $invitation = inviteTo($promotion, $invitee);
 
@@ -89,13 +99,18 @@ test('a guest cannot decline an invitation', function (): void {
         ->assertRedirect(route('login'));
 
     expect($invitation->fresh())->not->toBeNull()
-        ->and($promotion->memberships()->count())->toBe(0);
+        ->and($promotion->memberships()
+            ->count())
+        ->toBe(0);
 });
 
 test('an inactive account cannot decline an invitation', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
-    $user = User::factory()->basicUser()->create(['status' => UserStatus::Inactive]);
+    $promotion = Promotion::factory()
+        ->create();
+    $user = User::factory()
+        ->basicUser()
+        ->create(['status' => UserStatus::Inactive]);
     $invitation = inviteTo($promotion, $user);
 
     actingAs($user);
@@ -108,5 +123,7 @@ test('an inactive account cannot decline an invitation', function (): void {
         ->assertRedirect(route('login'));
 
     expect($invitation->fresh())->not->toBeNull()
-        ->and($promotion->memberships()->count())->toBe(0);
+        ->and($promotion->memberships()
+            ->count())
+        ->toBe(0);
 });

@@ -35,10 +35,12 @@ describe('create', function (): void {
 describe('store', function (): void {
     test('users can authenticate using the login screen', function (string $email) {
         // Arrange
-        $user = User::factory()->unverified()->create([
-            'email' => 'promoter@example.com',
-            'status' => UserStatus::Active,
-        ]);
+        $user = User::factory()
+            ->unverified()
+            ->create([
+                'email' => 'promoter@example.com',
+                'status' => UserStatus::Active,
+            ]);
         $credentials = [
             'email' => $email,
             'password' => 'secret',
@@ -59,7 +61,8 @@ describe('store', function (): void {
 
     test('users can not authenticate with invalid password', function () {
         // Arrange
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         $credentials = [
             'email' => $user->email,
             'password' => 'wrong-password',
@@ -80,7 +83,8 @@ describe('store', function (): void {
 
     test('only active users can authenticate', function (UserStatus $status) {
         // Arrange
-        $user = User::factory()->create(['status' => $status]);
+        $user = User::factory()
+            ->create(['status' => $status]);
 
         $requestData = [
             'email' => $user->email,
@@ -103,7 +107,8 @@ describe('store', function (): void {
 
     test('deactivated users are logged out on their next request', function () {
         // Arrange
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
 
         actingAs($user);
         $user->update(['status' => UserStatus::Inactive]);
@@ -137,7 +142,8 @@ describe('store', function (): void {
         // Arrange
         Event::fake([Lockout::class]);
         freezeTime();
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         $credentials = [
             'email' => $user->email,
             'password' => 'secret',
@@ -168,7 +174,8 @@ describe('store', function (): void {
     test('failed logins under the throttle limit do not lock the account', function () {
         // Arrange
         Event::fake([Lockout::class]);
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         foreach (range(1, 4) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
@@ -195,7 +202,8 @@ describe('store', function (): void {
     test('users can log in again once the throttle window has passed', function () {
         // Arrange
         freezeTime();
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         foreach (range(1, 5) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
@@ -221,8 +229,11 @@ describe('store', function (): void {
 
     test('a legacy user stored with a mixed-case email can still sign in', function (string $typedEmail) {
         // Arrange
-        $user = User::factory()->create(['status' => UserStatus::Active]);
-        DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
+        DB::table('users')
+            ->where('id', $user->id)
+            ->update(['email' => 'Legacy.Promoter@Example.com']);
 
         $requestData = [
             'email' => $typedEmail,

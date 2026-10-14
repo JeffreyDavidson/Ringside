@@ -36,7 +36,8 @@ describe('create', function (): void {
 describe('store', function (): void {
     test('a failed reset gives the same error for a registered and an unknown email', function (string $email): void {
         // Arrange
-        $user = User::factory()->create(['email' => 'registered@example.com']);
+        $user = User::factory()
+            ->create(['email' => 'registered@example.com']);
         $password = $user->password;
         $rememberToken = $user->remember_token;
 
@@ -62,7 +63,8 @@ describe('store', function (): void {
             ->assertSessionMissing('_old_input.password_confirmation');
 
         expect($user->refresh()->password)->toBe($password)
-            ->and($user->remember_token)->toBe($rememberToken);
+            ->and($user->remember_token)
+            ->toBe($rememberToken);
         Event::assertNotDispatched(PasswordReset::class);
     })->with([
         'a registered email' => 'registered@example.com',
@@ -71,7 +73,8 @@ describe('store', function (): void {
 
     test('a valid token resets the password', function (string $email): void {
         // Arrange
-        $user = User::factory()->create(['email' => 'promoter@example.com']);
+        $user = User::factory()
+            ->create(['email' => 'promoter@example.com']);
         $rememberToken = $user->remember_token;
         $token = Password::createToken($user);
 
@@ -94,7 +97,8 @@ describe('store', function (): void {
 
         expect(Hash::check('new-password-12345', $user->refresh()->password))->toBeTrue()
             ->and($user->remember_token)->not->toBe($rememberToken)
-            ->and(Password::tokenExists($user, $token))->toBeFalse();
+            ->and(Password::tokenExists($user, $token))
+            ->toBeFalse();
         Event::assertDispatched(PasswordReset::class, fn (PasswordReset $event): bool => $event->user instanceof User && $event->user->is($user));
         Event::assertDispatchedOnce(PasswordReset::class);
     })->with([
@@ -103,8 +107,10 @@ describe('store', function (): void {
     ]);
     test('missing reset fields cannot change the password or consume the token', function (string $field): void {
         // Arrange
-        $user = User::factory()->create(['email' => 'promoter@example.com']);
-        $original = $user->refresh()->getAttributes();
+        $user = User::factory()
+            ->create(['email' => 'promoter@example.com']);
+        $original = $user->refresh()
+            ->getAttributes();
         $token = Password::createToken($user);
         $payload = [
             'token' => $token,
@@ -126,8 +132,10 @@ describe('store', function (): void {
             ->assertSessionMissing('_old_input.password')
             ->assertSessionMissing('_old_input.password_confirmation');
 
-        expect($user->refresh()->getAttributes())->toBe($original)
-            ->and(Password::tokenExists($user, $token))->toBeTrue();
+        expect($user->refresh()
+            ->getAttributes())->toBe($original)
+            ->and(Password::tokenExists($user, $token))
+            ->toBeTrue();
         Event::assertNotDispatched(PasswordReset::class);
     })->with([
         'token' => 'token',
@@ -137,8 +145,10 @@ describe('store', function (): void {
 
     test('mismatched password confirmation cannot change the password or consume the token', function (): void {
         // Arrange
-        $user = User::factory()->create(['email' => 'promoter@example.com']);
-        $original = $user->refresh()->getAttributes();
+        $user = User::factory()
+            ->create(['email' => 'promoter@example.com']);
+        $original = $user->refresh()
+            ->getAttributes();
         $token = Password::createToken($user);
         $payload = [
             'token' => $token,
@@ -160,8 +170,10 @@ describe('store', function (): void {
             ->assertSessionMissing('_old_input.password')
             ->assertSessionMissing('_old_input.password_confirmation');
 
-        expect($user->refresh()->getAttributes())->toBe($original)
-            ->and(Password::tokenExists($user, $token))->toBeTrue();
+        expect($user->refresh()
+            ->getAttributes())->toBe($original)
+            ->and(Password::tokenExists($user, $token))
+            ->toBeTrue();
         Event::assertNotDispatched(PasswordReset::class);
     });
 });

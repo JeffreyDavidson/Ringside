@@ -14,10 +14,12 @@ use function Pest\Laravel\post;
 
 test('a session ends once the account password changes', function (): void {
     // Arrange
-    $user = User::factory()->administrator()->create([
-        'email' => 'promoter@example.com',
-        'status' => UserStatus::Active,
-    ]);
+    $user = User::factory()
+        ->administrator()
+        ->create([
+            'email' => 'promoter@example.com',
+            'status' => UserStatus::Active,
+        ]);
     post(route('login'), [
         'email' => 'promoter@example.com',
         'password' => 'secret',
@@ -31,7 +33,9 @@ test('a session ends once the account password changes', function (): void {
         ->assertSuccessful();
 
     // Arrange
-    DB::table('users')->where('id', $user->id)->update(['password' => Hash::make('a-brand-new-password')]);
+    DB::table('users')
+        ->where('id', $user->id)
+        ->update(['password' => Hash::make('a-brand-new-password')]);
     auth()->forgetGuards();
 
     // Act
@@ -46,10 +50,12 @@ test('a session ends once the account password changes', function (): void {
 
 test('a session continues while the account password is unchanged', function (): void {
     // Arrange
-    User::factory()->administrator()->create([
-        'email' => 'promoter@example.com',
-        'status' => UserStatus::Active,
-    ]);
+    User::factory()
+        ->administrator()
+        ->create([
+            'email' => 'promoter@example.com',
+            'status' => UserStatus::Active,
+        ]);
     post(route('login'), [
         'email' => 'promoter@example.com',
         'password' => 'secret',
