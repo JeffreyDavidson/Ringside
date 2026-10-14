@@ -15,9 +15,10 @@ describe('browser tab titles', function (): void {
         $user = administrator();
 
         actingAs($user);
+        $pageUrl = $url();
 
         // Act
-        $response = get($url());
+        $response = get($pageUrl);
 
         // Assert
         $response
@@ -35,9 +36,18 @@ describe('browser tab titles', function (): void {
         'venues' => [fn (): string => route('venues.index'), 'Venues'],
         'promotions' => [fn (): string => route('promotions.index'), 'Promotions'],
         'users' => [fn (): string => route('users.index'), 'Users'],
-        'wrestler' => [fn (): string => route('wrestlers.show', Wrestler::factory()->create(['name' => 'Marcus Vale'])), 'Marcus Vale'],
-        'event' => [fn (): string => route('events.show', Event::factory()->create(['name' => 'Fall Brawl'])), 'Fall Brawl'],
-        'title' => [fn (): string => route('titles.show', Title::factory()->create(['name' => 'Heavyweight Championship'])), 'Heavyweight Championship'],
+        'wrestler' => [
+            fn (): string => route('wrestlers.show', Wrestler::factory()->create(['name' => 'Marcus Vale'])),
+            'Marcus Vale',
+        ],
+        'event' => [
+            fn (): string => route('events.show', Event::factory()->create(['name' => 'Fall Brawl'])),
+            'Fall Brawl',
+        ],
+        'title' => [
+            fn (): string => route('titles.show', Title::factory()->create(['name' => 'Heavyweight Championship'])),
+            'Heavyweight Championship',
+        ],
     ]);
 
     it('escapes page names in the browser tab', function (): void {

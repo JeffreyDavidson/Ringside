@@ -22,9 +22,11 @@ describe('an invitation grants nothing until it is accepted', function () {
     test('an invited user with no other membership gets the no-membership page and no access to the inviting promotion', function (string $routeName) {
         // Arrange
         $promotion = Promotion::factory()->create();
+
         $invitee = basicUser();
         inviteTo($promotion, $invitee, MembershipRole::Owner);
         $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
+
         actingAs($invitee);
 
         // Act
@@ -36,7 +38,11 @@ describe('an invitation grants nothing until it is accepted', function () {
 
         // Assert
         $response->assertForbidden();
-    })->with(['dashboard', 'wrestlers.show', 'promotions.show']);
+    })->with([
+        'dashboard' => 'dashboard',
+        'wrestlers.show' => 'wrestlers.show',
+        'promotions.show' => 'promotions.show',
+    ]);
 
     test('an invited user keeps their own promotion and cannot reach the inviting promotions records', function () {
         // Arrange
@@ -46,6 +52,7 @@ describe('an invitation grants nothing until it is accepted', function () {
         inviteTo($inviting, $invitee, MembershipRole::Owner);
         $foreignWrestler = Wrestler::factory()->for($inviting, 'promotion')->create();
         withSession(['active_promotion_id' => $inviting->id]);
+
         actingAs($invitee);
 
         // Act
@@ -69,6 +76,7 @@ describe('an invitation grants nothing until it is accepted', function () {
         $invitee = basicUser();
         joinAs($own, $invitee);
         inviteTo($inviting, $invitee);
+
         actingAs($invitee);
 
         // Act
@@ -85,8 +93,10 @@ describe('seeing invitations', function () {
     test('the no-membership page leaves out an expired invitation', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Expired Invitation Wrestling']);
+
         $invitee = basicUser();
         PromotionInvitation::factory()->for($promotion)->forEmail($invitee->email)->expired()->create();
+
         actingAs($invitee);
 
         // Act
@@ -109,6 +119,7 @@ describe('seeing invitations', function () {
         $invitee = basicUser();
         inviteTo($promotion, $invitee, MembershipRole::Manager);
         inviteTo($otherPromotion, basicUser());
+
         actingAs($invitee);
 
         // Act
@@ -130,9 +141,11 @@ describe('seeing invitations', function () {
         // Arrange
         $own = Promotion::factory()->create();
         $inviting = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
+
         $invitee = basicUser();
         joinAs($own, $invitee);
         inviteTo($inviting, $invitee);
+
         actingAs($invitee);
 
         // Act
@@ -149,8 +162,10 @@ describe('seeing invitations', function () {
     test('a user without invitations sees none', function () {
         // Arrange
         $own = Promotion::factory()->create();
+
         $invitee = basicUser();
         joinAs($own, $invitee);
+
         actingAs($invitee);
 
         // Act
@@ -172,6 +187,7 @@ describe('seeing invitations', function () {
             'status' => UserStatus::Unverified,
         ]);
         $registered->update(['status' => UserStatus::Active]);
+
         actingAs($registered);
 
         // Act
@@ -188,8 +204,13 @@ describe('seeing invitations', function () {
     test('an invitation is shown whatever the case and whitespace it was typed in', function (string $typed) {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
-        $invitee = User::factory()->basicUser()->create(['email' => 'typed@example.test', 'status' => UserStatus::Active]);
+
+        $invitee = User::factory()->basicUser()->create([
+            'email' => 'typed@example.test',
+            'status' => UserStatus::Active,
+        ]);
         PromotionInvitation::factory()->for($promotion)->forEmail($typed)->create();
+
         actingAs($invitee);
 
         // Act
@@ -213,6 +234,7 @@ describe('seeing invitations', function () {
         inviteTo($older, $invitee);
         travel(1)->day();
         inviteTo($newer, $invitee);
+
         actingAs($invitee);
 
         // Act
@@ -227,8 +249,10 @@ describe('feedback for a user without a membership', function () {
     test('shows the decline message on the no-membership page', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
+
         $invitee = basicUser();
         inviteTo($promotion, $invitee);
+
         actingAs($invitee);
 
         // Act
@@ -244,6 +268,7 @@ describe('feedback for a user without a membership', function () {
     test('shows the unavailable message on the no-membership page when accepting fails', function () {
         // Arrange
         $promotion = Promotion::factory()->create();
+
         actingAs(basicUser());
 
         // Act
@@ -262,6 +287,7 @@ describe('promotion existence is not revealed', function () {
         // Arrange
         $user = basicUser();
         $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+
         actingAs($user);
 
         // Act
@@ -282,6 +308,7 @@ describe('promotion existence is not revealed', function () {
         // Arrange
         $user = basicUser();
         $promotionId = $promotionExists ? Promotion::factory()->create()->id : 999999;
+
         actingAs($user);
 
         // Act

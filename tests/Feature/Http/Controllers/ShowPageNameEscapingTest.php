@@ -38,7 +38,10 @@ describe('Show pages escape related names exactly once', function () {
             ->employed()
             ->onCurrentTagTeam(TagTeam::factory()->create(['name' => "O'Neil & Sons"]))
             ->create();
-        $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
+        $manager = Manager::factory()->create([
+            'first_name' => 'Travis',
+            'last_name' => "O'Keefe",
+        ]);
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         $wrestler->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
         TitleChampionship::factory()
@@ -88,7 +91,10 @@ describe('Show pages escape related names exactly once', function () {
         $tagTeam->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
         $tagTeam->currentWrestlers->skip(1)->firstOrFail()->update(['name' => "D'Angelo & Sons"]);
         $tagTeam->managers()->attach(
-            Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]),
+            Manager::factory()->create([
+                'first_name' => 'Travis',
+                'last_name' => "O'Keefe",
+            ]),
             ['hired_at' => now()->subDay()],
         );
         $tagTeam->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);

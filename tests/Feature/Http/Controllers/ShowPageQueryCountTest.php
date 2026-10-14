@@ -17,17 +17,18 @@ use function Pest\Laravel\get;
 describe('show page query counts', function (): void {
     test('it renders the show page without fallback lifecycle status queries', function (
         Closure $makeModel,
-        string $route,
+        string $routeName,
         int $maxQueries,
     ): void {
         // Arrange
         $model = $makeModel();
+
         actingAs(administrator());
         DB::flushQueryLog();
         DB::enableQueryLog();
 
         // Act
-        $response = get(route($route, $model));
+        $response = get(route($routeName, $model));
 
         // Assert
         $response->assertOk();
@@ -37,7 +38,7 @@ describe('show page query counts', function (): void {
         expect(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'select exists')))->toBeEmpty()
             ->and(count($queries))->toBeLessThanOrEqual($maxQueries)
             ->and(array_filter($queries, fn (string $sql): bool => str_contains($sql, 'roster_unavailabilities')))
-            ->toHaveCount(in_array($route, ['wrestlers.show', 'referees.show'], true) ? 2 : 0);
+            ->toHaveCount(in_array($routeName, ['wrestlers.show', 'referees.show'], true) ? 2 : 0);
     })->with([
         // Availability adds one person lookup and two bounded list counts on individual profiles.
         'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create(), 'wrestlers.show', 16],

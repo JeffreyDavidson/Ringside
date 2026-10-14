@@ -11,14 +11,19 @@ use function Pest\Laravel\from;
 
 test('an authorized unpublish request updates the release and returns to its editor', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     savePublicDraft($event);
     $publication = releasePublicPage($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
 
     // Act
-    $response = delete(route('events.public-pages.unpublish', $event), ['version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
+    $response = delete(route('events.public-pages.unpublish', $event), [
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card',
+        'reviewed' => 1,
+    ]);
 
     // Assert
     $response
@@ -26,21 +31,26 @@ test('an authorized unpublish request updates the release and returns to its edi
         ->assertSessionHasNoErrors()
         ->assertSessionHas('success', __('public-events.unpublished'));
 
-    $saved = freshModel($publication);
-    expect($saved->version)->toBe($publication->version + 1)
-        ->and($saved->published_at)->toBeNull();
+    $savedPublication = freshModel($publication);
+    expect($savedPublication->version)->toBe($publication->version + 1)
+        ->and($savedPublication->published_at)->toBeNull();
 });
 
 test('a stale unpublish request preserves the newer release and submitted input', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     $draft = savePublicDraft($event);
     $released = releasePublicPage($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
 
     // Act
-    $response = from(route('events.public-pages.edit', $event))->delete(route('events.public-pages.unpublish', $event), ['version' => $draft->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
+    $response = from(route('events.public-pages.edit', $event))->delete(route('events.public-pages.unpublish', $event), [
+        'version' => $draft->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card',
+        'reviewed' => 1,
+    ]);
 
     // Assert
     $response
@@ -54,20 +64,25 @@ test('a stale unpublish request preserves the newer release and submitted input'
 
 test('private unpublish refuses guests members and outsiders without changing publication', function (string $actor): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     savePublicDraft($event);
     $publication = releasePublicPage($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
     auth()->logout();
     session()->flush();
     if ($actor !== 'guest') {
-        $promotion = $actor === 'outsider' ? Promotion::factory()->create() : $event->promotion()->firstOrFail();
-        actingAsPromotionMember($promotion, $actor === 'outsider' ? MembershipRole::Owner : MembershipRole::Member);
+        $actorPromotion = $actor === 'outsider' ? Promotion::factory()->create() : $event->promotion()->firstOrFail();
+        actingAsPromotionMember($actorPromotion, $actor === 'outsider' ? MembershipRole::Owner : MembershipRole::Member);
     }
 
     // Act
-    $response = \Pest\Laravel\delete(route('events.public-pages.unpublish', $event), ['version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
+    $response = delete(route('events.public-pages.unpublish', $event), [
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card',
+        'reviewed' => 1,
+    ]);
 
     // Assert
     if ($actor === 'guest') {
@@ -77,5 +92,10 @@ test('private unpublish refuses guests members and outsiders without changing pu
     } else {
         $response->assertForbidden();
     }
+
     expect(freshModel($publication)->getAttributes())->toBe($publication->getAttributes());
-})->with(['guest', 'member', 'outsider']);
+})->with([
+    'guest' => 'guest',
+    'member' => 'member',
+    'outsider' => 'outsider',
+]);

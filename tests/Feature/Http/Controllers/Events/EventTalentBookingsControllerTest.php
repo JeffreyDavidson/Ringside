@@ -19,6 +19,7 @@ use function Pest\Laravel\get;
 test('an event editor can open the checklist without creating agreements', function (): void {
     // Arrange
     $event = Event::factory()->create();
+
     actingAs(administrator());
 
     // Act
@@ -39,8 +40,13 @@ test('only owners and managers see private booking pages and their links', funct
     // Arrange
     $promotion = Promotion::factory()->create();
     $event = Event::factory()->for($promotion)->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act
@@ -75,9 +81,15 @@ test('guests and foreign promotions cannot read the booking checklist', function
     // Assert
     $response->assertRedirect(route('login'));
 
+    // Arrange
     $other = Promotion::factory()->create();
+
     $user = basicUser();
-    $other->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    $other->users()->attach($user, [
+        'role' => MembershipRole::Manager,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act
@@ -106,8 +118,10 @@ test('private terms never enter event pack print live or ordinary event response
             ->assertDontSee('1,234.56');
     }
 
-    // Act
-    $response = get(route('events.pack.show', ['event' => $fixture['event'], 'print' => 1]));
+    $response = get(route('events.pack.show', [
+        'event' => $fixture['event'],
+        'print' => 1,
+    ]));
 
     // Assert
     $response

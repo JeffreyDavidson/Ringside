@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
-use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Livewire\Components\GeneralInfo;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Livewire\Wrestlers\Tables\Main;
@@ -26,16 +25,46 @@ use Illuminate\Support\Facades\DB;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-/**
- * Feature tests for Wrestlers Controller.
- *
- * @see WrestlersController
- */
-describe('Wrestlers Controller', function () {
-    /**
-     * @see WrestlersController::show()
-     */
-    test('show returns a view', function () {
+describe('index', function (): void {
+    test('an administrator receives the wrestlers index view and table', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('wrestlers.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('a guest cannot open the wrestlers index', function (): void {
+        // Act
+        $response = get(route('wrestlers.index'));
+
+        // Assert
+        $response->assertRedirect(route('login'));
+    });
+
+    test('a user without membership cannot open the wrestlers index', function (): void {
+        // Arrange
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('wrestlers.index'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+});
+
+describe('show', function (): void {
+    test('renders the wrestler profile and its related data', function () {
         // Arrange
         $wrestler = Wrestler::factory()->create();
 
@@ -62,9 +91,6 @@ describe('Wrestlers Controller', function () {
             ->assertSeeLivewire(PreviousStables::class);
     });
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('show labels injured and suspended wrestlers', function (bool $injured, bool $suspended) {
         // Arrange
         Wrestler::factory()->create();
@@ -101,15 +127,15 @@ describe('Wrestlers Controller', function () {
         'available' => [false, false],
     ]);
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('show renders the related data displayed by the wrestler summary', function () {
         // Arrange
         Wrestler::factory()->create();
 
         $wrestler = Wrestler::factory()->employed()->onCurrentTagTeam(TagTeam::factory()->create(['name' => 'Tag Team Alpha']))->create();
-        $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
+        $manager = Manager::factory()->create([
+            'first_name' => 'Travis',
+            'last_name' => "O'Keefe",
+        ]);
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
             ->for(Title::factory()->state(['name' => 'Heavyweight Belt']), 'title')
@@ -132,15 +158,13 @@ describe('Wrestlers Controller', function () {
             ->assertSee($wrestler->employments()->firstOrFail()->started_at->toDateString());
     });
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('show loads the summary relationships only once', function () {
         // Arrange
         Wrestler::factory()->create();
 
         $wrestler = Wrestler::factory()->employed()->create();
         $wrestler->managers()->attach(Manager::factory()->create(), ['hired_at' => now()->subDay()]);
+
         actingAs(administrator());
 
         DB::flushQueryLog();
@@ -159,9 +183,6 @@ describe('Wrestlers Controller', function () {
         expect($managerQueries)->toHaveCount(1);
     });
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('a user without a promotion membership cannot view wrestler profiles', function () {
         // Arrange
         $wrestler = Wrestler::factory()->create();
@@ -176,9 +197,6 @@ describe('Wrestlers Controller', function () {
             ->assertForbidden();
     });
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('a guest cannot view a wrestler profile', function () {
         // Arrange
         $wrestler = Wrestler::factory()->create();
@@ -191,9 +209,6 @@ describe('Wrestlers Controller', function () {
             ->assertRedirect(route('login'));
     });
 
-    /**
-     * @see WrestlersController::show()
-     */
     test('returns 404 when wrestler does not exist', function () {
         // Arrange
         Wrestler::factory()->create();
@@ -207,58 +222,27 @@ describe('Wrestlers Controller', function () {
         $response
             ->assertNotFound();
     });
-});
 
-test('an administrator receives the wrestlers index view and table', function (): void {
-    // Arrange
-    actingAs(administrator());
+    test('an active promotion member receives the correct wrestler profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
 
-    // Act
-    $response = get(route('wrestlers.index'));
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('wrestlers.index')
-        ->assertSeeHtml('aria-label="Content workspace"')
-        ->assertSeeLivewire(Main::class);
-});
+        actingAs($user);
 
-test('a guest cannot open the wrestlers index', function (): void {
-    // Act
-    $response = get(route('wrestlers.index'));
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
 
-    // Assert
-    $response->assertRedirect(route('login'));
-});
-
-test('a user without membership cannot open the wrestlers index', function (): void {
-    // Arrange
-    actingAs(basicUser());
-
-    // Act
-    $response = get(route('wrestlers.index'));
-
-    // Assert
-    $response
-        ->assertForbidden()
-        ->assertViewIs('promotions.no-membership');
-});
-
-test('an active promotion member receives the correct wrestler profile', function (): void {
-    // Arrange
-    $promotion = Promotion::factory()->create();
-    $record = Wrestler::factory()->for($promotion, 'promotion')->create();
-    $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    actingAs($user);
-
-    // Act
-    $response = get(route('wrestlers.show', $record));
-
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('wrestlers.show')
-        ->assertViewHas('wrestler', $record);
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $wrestler);
+    });
 });

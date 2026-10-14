@@ -25,6 +25,7 @@ test('guests can explore Ringside and reach sign in', function () {
 test('signed in users can explore Ringside and return to their dashboard', function () {
     // Arrange
     $user = basicUser();
+
     actingAs($user);
 
     // Act

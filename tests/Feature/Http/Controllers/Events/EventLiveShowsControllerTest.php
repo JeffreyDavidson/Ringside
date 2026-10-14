@@ -14,6 +14,7 @@ use function Pest\Laravel\get;
 test('the live show page opens without preparing or changing a show', function (): void {
     // Arrange
     $event = Event::factory()->create();
+
     actingAs(administrator());
 
     // Act
@@ -40,9 +41,15 @@ test('guests and other promotions cannot open a live show', function (): void {
     // Assert
     $response->assertRedirect(route('login'));
 
+    // Arrange
     $promotion = Promotion::factory()->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Manager,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act
@@ -58,8 +65,13 @@ test('an active member receives the live view for their own event', function ():
     // Arrange
     $promotion = Promotion::factory()->create();
     $event = Event::factory()->for($promotion)->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Member,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act

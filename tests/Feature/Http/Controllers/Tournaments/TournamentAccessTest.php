@@ -13,9 +13,15 @@ it('keeps foreign tournament bindings indistinguishable from missing records', f
     // Arrange
     $world = tournamentFixture();
     $other = Promotion::factory()->create();
+
     $user = basicUser();
-    $other->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $other->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
+
     // Act
     $response = get(route('tournaments.show', $world['tournament']));
 
@@ -34,9 +40,15 @@ it('keeps foreign tournament bindings indistinguishable from missing records', f
 it('shows operation controls only to promotion owners and managers', function (MembershipRole $role, bool $editable): void {
     // Arrange
     $world = tournamentFixture();
+
     $user = basicUser();
-    $world['promotion']->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $world['promotion']->users()->attach($user, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
+
     // Act
     $response = get(route('tournaments.show', $world['tournament']));
 
@@ -52,11 +64,16 @@ it('shows operation controls only to promotion owners and managers', function (M
     $response
         ->assertDontSee('Save draft')
         ->assertDontSee('Cancel tournament');
-})->with(['owner' => [MembershipRole::Owner, true], 'manager' => [MembershipRole::Manager, true], 'member' => [MembershipRole::Member, false]]);
+})->with([
+    'owner' => [MembershipRole::Owner, true],
+    'manager' => [MembershipRole::Manager, true],
+    'member' => [MembershipRole::Member, false],
+]);
 
 it('requires login for tournament pages', function (): void {
     // Arrange
     $world = tournamentFixture();
+
     // Act
     $response = get(route('tournaments.index'));
 
