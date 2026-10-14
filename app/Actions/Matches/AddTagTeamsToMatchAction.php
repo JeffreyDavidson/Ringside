@@ -11,6 +11,7 @@ use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,7 @@ class AddTagTeamsToMatchAction
         protected MatchAssignmentConflictService $conflictService,
         private readonly RosterBookingEligibility $bookingEligibility,
         private readonly MatchConfigurationRequirements $configurationRequirements,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     /**
@@ -82,6 +84,7 @@ class AddTagTeamsToMatchAction
      */
     public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber): void
     {
+        $this->tournamentRequirements->ensureCompetitors($lockedMatch, $tagTeams);
         $requestedTagTeams = $tagTeams->unique('id')->values();
         $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
         $lockedTagTeams = TagTeam::query()
@@ -100,6 +103,7 @@ class AddTagTeamsToMatchAction
         $this->conflictService->ensureTagTeamsCanBeAssigned(
             $conflictingEventIds,
             $lockedTagTeams,
+            $lockedMatch,
         );
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 

@@ -29,5 +29,6 @@ readonly class EventMatchData
         public Collection $sides,
         public ?string $preview,
         public ?MatchStipulation $matchStipulation = null,
+        public ?int $tournamentVersion = null,
     ) {}
 }

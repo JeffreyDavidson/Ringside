@@ -18,8 +18,9 @@ final class MatchCompetitorConflictService
     /**
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>  $wrestlers
+     * @param  list<int>  $permittedMatchIds
      */
-    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
+    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers, array $permittedMatchIds = []): void
     {
         $this->ensureCompetitorsCanBeAssigned(
             $conflictingEventIds,
@@ -27,6 +28,7 @@ final class MatchCompetitorConflictService
             fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
                 ->forWrestlerIds($competitorIds),
             'Wrestler',
+            $permittedMatchIds,
         );
 
         $this->ensureWrestlersAreNotBookedThroughTheirTagTeam($conflictingEventIds, $wrestlers);
@@ -35,8 +37,9 @@ final class MatchCompetitorConflictService
     /**
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, TagTeam>  $tagTeams
+     * @param  list<int>  $permittedMatchIds
      */
-    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
+    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams, array $permittedMatchIds = []): void
     {
         $this->ensureCompetitorsCanBeAssigned(
             $conflictingEventIds,
@@ -44,6 +47,7 @@ final class MatchCompetitorConflictService
             fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
                 ->forTagTeamIds($competitorIds),
             'Tag team',
+            $permittedMatchIds,
         );
 
         $this->ensureTagTeamMembersAreNotBookedIndividually($conflictingEventIds, $tagTeams);
@@ -116,17 +120,20 @@ final class MatchCompetitorConflictService
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>|Collection<int, TagTeam>  $competitors
      * @param  Closure(Collection<int, int>): MatchCompetitorBuilder<MatchCompetitor>  $queryForCompetitors
+     * @param  list<int>  $permittedMatchIds
      */
     private function ensureCompetitorsCanBeAssigned(
         Collection $conflictingEventIds,
         Collection $competitors,
         Closure $queryForCompetitors,
         string $entityType,
+        array $permittedMatchIds,
     ): void {
         $conflictingCompetitor = $queryForCompetitors(
             $competitors->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id),
         )
             ->forEventIds($conflictingEventIds)
+            ->whereNotIn('match_id', $permittedMatchIds)
             ->first(['competitor_id']);
 
         if ($conflictingCompetitor === null) {

@@ -8,7 +8,9 @@ use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Models\Matches\EventMatch;
+use App\Models\Tournaments\TournamentMatchLink;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateMatchAction
@@ -19,6 +21,7 @@ class UpdateMatchAction
         private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
         private readonly MatchConfigurationRequirements $requirements,
         private readonly MatchAssignmentConflictService $conflictService,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     public function handle(EventMatch $match, EventMatchData $data): EventMatch
@@ -33,6 +36,8 @@ class UpdateMatchAction
             }
 
             $this->requirements->ensureWithinEventPromotion($lockedMatch->event()->firstOrFail(), $data);
+
+            $this->tournamentRequirements->ensureEditable($lockedMatch, $data);
 
             $lockedMatch->update([
                 'match_type' => $data->matchType,
@@ -51,6 +56,12 @@ class UpdateMatchAction
 
             if ($data->titles->isNotEmpty()) {
                 $this->addTitlesToMatchAction->handleWithinTransaction($lockedMatch, $data->titles);
+            }
+
+            $link = TournamentMatchLink::query()->where('match_id', $lockedMatch->id)->first();
+            if ($link !== null) {
+                $tournament = $link->tournament()->firstOrFail();
+                $tournament->forceFill(['version' => $tournament->version + 1])->save();
             }
 
             return $lockedMatch->refresh();

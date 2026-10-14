@@ -60,8 +60,15 @@ class ResultModal extends ModalComponent
             unset($this->match);
         }
 
+        $this->form->fillFrom($this->match);
         $this->dispatch('refreshDatatable');
         $this->dispatch('closeModal');
+    }
+
+    #[\Override]
+    public static function destroyOnClose(): bool
+    {
+        return true;
     }
 
     public function updatedFormFinish(?string $finish): void

@@ -10,12 +10,17 @@ use App\Enums\MatchFinish;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Tournaments\TournamentMatchLink;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class MatchResultForm extends Form
 {
+    #[Locked]
+    public ?int $tournamentVersion = null;
+
     public ?string $finish = null;
 
     public ?int $winningSideId = null;
@@ -25,6 +30,7 @@ class MatchResultForm extends Form
 
     public function fillFrom(EventMatch $match): void
     {
+        $this->tournamentVersion = TournamentMatchLink::query()->with('tournament')->where('match_id', $match->id)->first()?->tournament->version;
         $this->finish = $match->match_finish?->value;
         $this->winningSideId = $match->winning_side_id;
         $this->eliminations = $match->competitors
@@ -69,6 +75,7 @@ class MatchResultForm extends Form
             finish: MatchFinish::from((string) $this->finish),
             winningSide: $this->winningSide($match),
             eliminations: $this->eliminationData($match),
+            tournamentVersion: $this->tournamentVersion,
         );
     }
 
