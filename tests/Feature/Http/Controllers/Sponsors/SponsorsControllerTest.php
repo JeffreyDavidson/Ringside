@@ -19,18 +19,18 @@ test('sponsor directory and records are private to active owners and managers', 
     actingAs($user);
 
     // Act
-    $index = get(route('sponsors.index'));
+    $response = get(route('sponsors.index'));
     $show = get(route('sponsors.show', $sponsor));
 
     // Assert
     if (! $allowed) {
-        $index->assertForbidden();
+        $response->assertForbidden();
         $show->assertForbidden();
 
         return;
     }
-    $index->assertOk()->assertSee('Harbor Hardware');
-    $show->assertOk()->assertSee('private@example.test');
+    $response->assertOk()->assertViewIs('sponsors.index')->assertViewHas('promotionId', $promotion->id)->assertSee('Harbor Hardware');
+    $show->assertOk()->assertViewIs('sponsors.show')->assertViewHas('sponsor', $sponsor)->assertSee('private@example.test');
     expect(Sponsor::query()->count())->toBe(1);
 })->with([[MembershipRole::Owner, true], [MembershipRole::Manager, true], [MembershipRole::Member, false]]);
 
@@ -38,14 +38,27 @@ test('guests and outsiders cannot reveal sponsor records', function (): void {
     // Arrange
     $sponsor = Sponsor::factory()->create(['notes' => 'PRIVATE-7Q']);
 
-    // Act and Assert
-    get(route('sponsors.index'))->assertRedirect(route('login'));
-    get(route('sponsors.show', $sponsor))->assertRedirect(route('login'));
+    // Act
+    $response = get(route('sponsors.index'));
+
+    // Assert
+    $response->assertRedirect(route('login'));
+
+    // Act
+    $response = get(route('sponsors.show', $sponsor));
+
+    // Assert
+    $response->assertRedirect(route('login'));
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
     actingAs($user);
-    get(route('sponsors.show', $sponsor))->assertNotFound()->assertDontSee('PRIVATE-7Q');
+
+    // Act
+    $response = get(route('sponsors.show', $sponsor));
+
+    // Assert
+    $response->assertNotFound()->assertDontSee('PRIVATE-7Q');
 });
 
 test('an administrator without an active promotion must choose one before opening the directory', function (): void {
@@ -66,7 +79,10 @@ test('a suspended or removed membership cannot recover private sponsor records',
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
     actingAs($user);
-    get(route('sponsors.show', $sponsor))->assertOk();
+    $response = get(route('sponsors.show', $sponsor));
+
+    // Assert
+    $response->assertOk();
     if ($membership === 'suspended') {
         $promotion->users()->updateExistingPivot($user->id, ['status' => MembershipStatus::Suspended]);
     } else {
@@ -80,3 +96,17 @@ test('a suspended or removed membership cannot recover private sponsor records',
     $response->assertForbidden()->assertDontSee('PRIVATE-SUSPENDED-7Q');
     expect(Sponsor::query()->withoutGlobalScopes()->findOrFail($sponsor->id)->version)->toBe(1);
 })->with(['suspended', 'removed']);
+
+test('missing sponsor records are not found', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('sponsors.show', 999999));
+
+    // Assert
+    $response->assertNotFound();
+});

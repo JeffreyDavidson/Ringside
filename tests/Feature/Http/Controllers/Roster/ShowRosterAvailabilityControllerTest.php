@@ -14,7 +14,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 test('the calendar requires authentication', function (): void {
-    get(route('availability.index'))->assertRedirect(route('login'));
+    // Act
+    $response = get(route('availability.index'));
+
+    // Assert
+    $response->assertRedirect(route('login'));
 });
 
 test('the calendar shows only the current promotions unavailable people and reasons', function (MembershipRole $role): void {
@@ -34,13 +38,18 @@ test('the calendar shows only the current promotions unavailable people and reas
     $response = get(route('availability.index', ['date' => '2026-10-17']));
 
     // Assert
-    $response->assertOk()->assertSee('Harbor Talent')->assertSee('Local commitment')->assertSee('America/New_York')
+    $response->assertOk()->assertViewIs('roster.availability')->assertSee('Harbor Talent')->assertSee('Local commitment')->assertSee('America/New_York')
         ->assertDontSee('Foreign Talent')->assertDontSee('FOREIGN-PRIVATE-REASON');
 })->with([MembershipRole::Owner, MembershipRole::Manager, MembershipRole::Member]);
 
 test('a global administrator must choose a promotion for the calendar', function (): void {
+    // Arrange
     actingAs(administrator());
-    get(route('availability.index'))->assertOk()->assertSee('Choose a promotion');
+    // Act
+    $response = get(route('availability.index'));
+
+    // Assert
+    $response->assertOk()->assertSee('Choose a promotion');
 });
 
 test('malformed initial calendar filters show a useful error rather than throwing', function (): void {
