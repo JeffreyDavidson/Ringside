@@ -20,6 +20,9 @@
         </header>
         <nav class="pack-nav" aria-label="{{ __('event-pack.title') }}">
             <a href="#running-order">{{ __('event-pack.running_order') }} <span>{{ count($card['rows']) }}</span></a>
+            @can('viewProduction', $event)
+                <a href="#production">{{ __('production.title') }}</a>
+            @endcan
             <a href="#show-details">{{ __('event-pack.show_details') }}</a>
             <a href="#segments">{{ __('event-pack.segments') }}</a>
             <a href="#pack-notes">{{ __('event-pack.notes') }}</a>
@@ -210,5 +213,8 @@
             </fieldset>
             <input type="hidden" name="complete" value="1" />
         </form>
+        @can('updateProduction', $event)
+            <livewire:events.components.production :eventId="$event->id" />
+        @endcan
     </x-layouts.workspace-canvas>
 </x-layouts.app>

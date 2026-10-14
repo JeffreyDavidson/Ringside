@@ -26,11 +26,14 @@ declare(strict_types=1);
  * other worker's transaction. It prints a single RESULT line as JSON.
  */
 
+use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\MarkLiveAttendanceAction;
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\RestoreAction;
+use App\Actions\Events\ReviewLiveShowAction;
+use App\Actions\Events\SaveEventProductionAction;
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
@@ -68,6 +71,7 @@ use App\Enums\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -84,6 +88,7 @@ use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 require dirname(__DIR__, 3).'/vendor/autoload.php';
 require_once __DIR__.'/worker-support.php';
@@ -99,7 +104,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int} $spec */
+/** @var array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -120,7 +125,19 @@ if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
 }
 
 try {
-    if (isset($spec['public_event_id'])) {
+    if (isset($spec['production_save_event_id'])) {
+        auth()->login(User::query()->findOrFail($spec['user_id']));
+        $production = json_decode($spec['production_json'], true, flags: JSON_THROW_ON_ERROR);
+        if (! is_array($production)) {
+            throw new InvalidArgumentException('Production worker input must be a JSON object.');
+        }
+        resolve(SaveEventProductionAction::class)->handle(Event::query()->findOrFail($spec['production_save_event_id']), $spec['version'], $spec['fingerprint'], [
+            'notes' => $production['notes'] ?? null, 'assignments' => $production['assignments'] ?? [], 'cues' => $production['cues'] ?? [],
+        ], false);
+    } elseif (isset($spec['crew_archive_id'])) {
+        auth()->login(User::query()->findOrFail($spec['user_id']));
+        resolve(ArchiveCrewContactAction::class)->handle(CrewContact::query()->findOrFail($spec['crew_archive_id']), $spec['version']);
+    } elseif (isset($spec['public_event_id'])) {
         $actor = User::query()->findOrFail($spec['public_actor_id']);
         auth()->login($actor);
         Carbon::setTestNow($spec['public_clock']);
@@ -153,6 +170,7 @@ try {
         $event = Event::query()->findOrFail($spec['live_event_id']);
         match ($spec['live_operation']) {
             'prepare' => resolve(PrepareLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint']),
+            'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], []),
             'attendance' => resolve(MarkLiveAttendanceAction::class)->handle($event, $spec['version'], $spec['key'], LiveAttendanceMark::Arrived, true),
             default => resolve(TransitionLiveItemAction::class)->handle($event, $spec['version'], $spec['key'], LiveItemOperation::from($spec['live_operation'])),
         };
@@ -249,7 +267,7 @@ try {
             ),
         );
     }
-} catch (BaseBusinessException $exception) {
+} catch (BaseBusinessException|ValidationException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => false, 'message' => mb_substr($exception->getMessage(), 0, 400)];
 } catch (DeadlockException|QueryException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception), 'message' => mb_substr($exception->getMessage(), 0, 400)];

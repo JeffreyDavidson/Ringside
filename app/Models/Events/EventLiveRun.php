@@ -14,10 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * @phpstan-import-type Assignment from \App\Models\Events\EventPack
+ * @phpstan-import-type Cue from \App\Models\Events\EventPack
+ *
  * @phpstan-type Timing array{planned_at?: ?string, revised_at?: ?string, minutes?: ?int, notes?: ?string}
- * @phpstan-type Item array{key: string, label: string, details: string, referees: string, warning: bool, timing: Timing, timezone: string, state: string, start: ?string, finish: ?string, reason: ?string, updated_by: ?int}
- * @phpstan-type Person array{key: string, name: string, role: string, matches: list<int>, warning: bool, assigned: bool, arrived: ?string, briefed: ?string, updated_by: ?int}
- * @phpstan-type Content array{event_date: string, event_name: string, venue: ?string, timezone: string, revision: ?string, items: list<Item>, roster: list<Person>}
+ * @phpstan-type Item array{key: string, label: string, details: string, referees: string, warning: bool, timing: Timing, timezone: string, state: string, start: ?string, finish: ?string, reason: ?string, updated_by: ?int, cues?: list<Cue>}
+ * @phpstan-type Person array{key: string, name: string, role: string, matches: list<int>, warning: bool, assigned: bool, arrived: ?string, briefed: ?string, updated_by: ?int, assignments?: list<Assignment>}
+ * @phpstan-type Content array{event_date: string, event_name: string, venue: ?string, timezone: string, revision: ?string, items: list<Item>, roster: list<Person>, production?: array{assignments: list<Assignment>}}
  *
  * @property int $id
  * @property int $event_id
