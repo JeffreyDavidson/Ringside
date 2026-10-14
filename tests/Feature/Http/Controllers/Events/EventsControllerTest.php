@@ -154,15 +154,21 @@ test('the event view receives only related storylines in title and identity orde
     // Arrange
     $promotion = Promotion::factory()->create();
     $event = Event::factory()->for($promotion)->create();
-    $later = Storyline::factory()->for($promotion)->create(['title' => 'Zulu']);
-    $first = Storyline::factory()->for($promotion)->create(['title' => 'Alpha']);
-    $tie = Storyline::factory()->for($promotion)->create(['title' => 'Alpha']);
+    [$later, $first] = Storyline::factory()
+        ->for($promotion)
+        ->count(2)
+        ->sequence(['title' => 'Zulu'], ['title' => 'Alpha'])
+        ->has(StorylineStep::factory()->for($event), 'steps')
+        ->create()
+        ->all();
+    $tie = Storyline::factory()
+        ->for($promotion)
+        ->has(StorylineDevelopment::factory()->for($event), 'developments')
+        ->create(['title' => 'Alpha']);
     Storyline::factory()->for($promotion)->create(['title' => 'Unrelated']);
-    $foreign = Storyline::factory()->create(['title' => 'Foreign']);
-    StorylineStep::factory()->for($later)->create(['event_id' => $event->id]);
-    StorylineStep::factory()->for($first)->create(['event_id' => $event->id]);
-    StorylineDevelopment::factory()->for($tie)->create(['event_id' => $event->id]);
-    StorylineDevelopment::factory()->for($foreign)->create(['event_id' => $event->id]);
+    Storyline::factory()
+        ->has(StorylineDevelopment::factory()->for($event), 'developments')
+        ->create(['title' => 'Foreign']);
     actingAs(administrator());
 
     // Act

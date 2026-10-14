@@ -32,9 +32,8 @@ test('login screen can be rendered', function () {
 
 test('users can authenticate using the login screen', function (string $email) {
     // Arrange
-    $user = User::factory()->create([
+    $user = User::factory()->unverified()->create([
         'email' => 'promoter@example.com',
-        'email_verified_at' => null,
         'status' => UserStatus::Active,
     ]);
     $credentials = [

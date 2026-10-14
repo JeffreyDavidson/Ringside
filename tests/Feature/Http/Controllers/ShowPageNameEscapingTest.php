@@ -42,7 +42,7 @@ describe('Show pages escape related names exactly once', function () {
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         $wrestler->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
         TitleChampionship::factory()
-            ->for(Title::factory()->create(['name' => "Champion's & Challenger's Belt"]), 'title')
+            ->for(Title::factory()->state(['name' => "Champion's & Challenger's Belt"]), 'title')
             ->forWrestler($wrestler)
             ->current()
             ->create();
@@ -93,7 +93,7 @@ describe('Show pages escape related names exactly once', function () {
         );
         $tagTeam->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
         TitleChampionship::factory()
-            ->for(Title::factory()->create(['name' => "Champion's & Challenger's Belt"]), 'title')
+            ->for(Title::factory()->state(['name' => "Champion's & Challenger's Belt"]), 'title')
             ->forTagTeam($tagTeam)
             ->current()
             ->create();

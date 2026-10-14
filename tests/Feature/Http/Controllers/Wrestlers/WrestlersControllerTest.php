@@ -112,7 +112,7 @@ describe('Wrestlers Controller', function () {
         $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
         $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
-            ->for(Title::factory()->create(['name' => 'Heavyweight Belt']), 'title')
+            ->for(Title::factory()->state(['name' => 'Heavyweight Belt']), 'title')
             ->forWrestler($wrestler)
             ->current()
             ->create();

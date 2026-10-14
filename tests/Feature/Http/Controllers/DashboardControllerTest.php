@@ -160,8 +160,7 @@ test('users without an active promotion membership see the no promotion page ins
  */
 test('members only see their own promotion on the dashboard', function () {
     // Arrange
-    $mine = Promotion::factory()->create();
-    $other = Promotion::factory()->create();
+    [$mine, $other] = Promotion::factory()->count(2)->create()->all();
     $user = basicUser();
     $mine->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     Event::factory()->for($mine, 'promotion')->create(['name' => 'Own Event', 'date' => now()->addDays(3)]);

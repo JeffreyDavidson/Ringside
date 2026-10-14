@@ -40,8 +40,7 @@ describe('an invitation grants nothing until it is accepted', function () {
 
     test('an invited user keeps their own promotion and cannot reach the inviting promotions records', function () {
         // Arrange
-        $own = Promotion::factory()->create();
-        $inviting = Promotion::factory()->create();
+        [$own, $inviting] = Promotion::factory()->count(2)->create()->all();
         $invitee = basicUser();
         joinAs($own, $invitee);
         inviteTo($inviting, $invitee, MembershipRole::Owner);
@@ -66,8 +65,7 @@ describe('an invitation grants nothing until it is accepted', function () {
 
     test('an invited user cannot switch to the inviting promotion', function () {
         // Arrange
-        $own = Promotion::factory()->create();
-        $inviting = Promotion::factory()->create();
+        [$own, $inviting] = Promotion::factory()->count(2)->create()->all();
         $invitee = basicUser();
         joinAs($own, $invitee);
         inviteTo($inviting, $invitee);
@@ -103,8 +101,11 @@ describe('seeing invitations', function () {
 
     test('the no-membership page lists the invitations addressed to the users email with accept and decline', function () {
         // Arrange
-        $promotion = Promotion::factory()->create(['name' => 'Invitation Championship Wrestling']);
-        $otherPromotion = Promotion::factory()->create(['name' => 'Somebody Elses Wrestling']);
+        [$promotion, $otherPromotion] = Promotion::factory()
+            ->count(2)
+            ->sequence(['name' => 'Invitation Championship Wrestling'], ['name' => 'Somebody Elses Wrestling'])
+            ->create()
+            ->all();
         $invitee = basicUser();
         inviteTo($promotion, $invitee, MembershipRole::Manager);
         inviteTo($otherPromotion, basicUser());
@@ -204,8 +205,11 @@ describe('seeing invitations', function () {
     test('invitations are listed oldest first', function () {
         // Arrange
         $invitee = basicUser();
-        $newer = Promotion::factory()->create(['name' => 'Newer Invitation Wrestling']);
-        $older = Promotion::factory()->create(['name' => 'Older Invitation Wrestling']);
+        [$newer, $older] = Promotion::factory()
+            ->count(2)
+            ->sequence(['name' => 'Newer Invitation Wrestling'], ['name' => 'Older Invitation Wrestling'])
+            ->create()
+            ->all();
         inviteTo($older, $invitee);
         travel(1)->day();
         inviteTo($newer, $invitee);

@@ -15,6 +15,8 @@ In Arrange, establish authentication and promotion context, create minimal deter
 
 Format response assertion chains with the response variable on its own line and each chained assertion on a separate following line. Combine consecutive assertions on the same response into one chain instead of repeating the response variable. Keep response assertions together, then leave a blank line before assertions about authentication, persisted state, events, jobs, mail, notifications, or other outcomes.
 
+Use existing named factory states, `count()` and `sequence()` for repeated records, and `for()`/`has()`/`hasAttached()` for relationships when they make the fixture's intent clearer. Keep meaningful variable names, deterministic attributes, deliberate insertion order, and explicit foreign-tenant or invalid fixtures. Do not force different lifecycle states or distinct roles into a sequence merely to shorten setup.
+
 Successful view responses assert the intended view and meaningful data passed to it: exact records, relevant collection identities/order, or payload values. Do not invent data assertions for views whose controllers pass none. Keep distinct rendering, escaping, privacy, and performance regressions. Component presence can share the successful response; detailed component behavior belongs in Integration.
 
 Successful writes assert the response/redirect, relevant flash messages, stored values, and applicable events/jobs/mail/notifications. Refusals assert the intended error, unchanged protected state, and no success side effects. Fake only relevant events after fixtures; assert meaningful event payloads and exact dispatch counts when duplicates are a regression. Fakes do not prove listener execution.

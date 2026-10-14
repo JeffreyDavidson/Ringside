@@ -267,9 +267,14 @@ test('all outward channels omit operational prose and unselected outcomes', func
     $world = publicEventFixture();
     $event = $world['event'];
     EventPack::factory()->for($event)->create(['content' => ['timezone' => 'UTC', 'doors_at' => null, 'revision' => null, 'master' => 'LEAK-MASTER-7Q', 'notes' => 'LEAK-FEE-1234.56', 'follow_up' => 'LEAK-TRAVEL-7Q', 'matches' => [], 'segments' => []]]);
-    $a = Wrestler::factory()->for($event->promotion()->firstOrFail())->bookable()->create(['name' => 'UNSELECTED-7Q']);
-    $b = Wrestler::factory()->for($event->promotion()->firstOrFail())->bookable()->create();
-    EventMatch::factory()->for($event)->withCompetitors([$a, $b])->create(['match_number' => 9, 'match_finish' => MatchFinish::Submission, 'preview' => 'LEAK-STORY-7Q']);
+    [$unselected, $opponent] = Wrestler::factory()
+        ->for($event->promotion()->firstOrFail())
+        ->bookable()
+        ->count(2)
+        ->sequence(['name' => 'UNSELECTED-7Q'], ['name' => 'Harbor Opponent'])
+        ->create()
+        ->all();
+    EventMatch::factory()->for($event)->withCompetitors([$unselected, $opponent])->create(['match_number' => 9, 'match_finish' => MatchFinish::Submission, 'preview' => 'LEAK-STORY-7Q']);
     savePublicDraft($event);
     releasePublicPage($event);
     $publication = releasePublicPage($event, 'results');

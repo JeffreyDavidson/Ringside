@@ -13,7 +13,7 @@ use function Pest\Laravel\get;
 test('sponsor directory and records are private to active owners and managers', function (MembershipRole $role, bool $allowed): void {
     // Arrange
     $promotion = Promotion::factory()->create();
-    $sponsor = Sponsor::factory()->create(['promotion_id' => $promotion->id, 'name' => 'Harbor Hardware', 'contact_email' => 'private@example.test']);
+    $sponsor = Sponsor::factory()->for($promotion)->create(['name' => 'Harbor Hardware', 'contact_email' => 'private@example.test']);
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
     actingAs($user);
@@ -87,7 +87,7 @@ test('an administrator without an active promotion must choose one before openin
 test('a suspended or removed membership cannot recover private sponsor records', function (string $membership): void {
     // Arrange
     $promotion = Promotion::factory()->create();
-    $sponsor = Sponsor::factory()->create(['promotion_id' => $promotion->id, 'notes' => 'PRIVATE-SUSPENDED-7Q']);
+    $sponsor = Sponsor::factory()->for($promotion)->create(['notes' => 'PRIVATE-SUSPENDED-7Q']);
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
     actingAs($user);

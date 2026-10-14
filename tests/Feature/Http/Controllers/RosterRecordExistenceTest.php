@@ -22,8 +22,7 @@ use function Pest\Laravel\withSession;
 test('a record from another promotion looks the same as a missing record', function (string $modelClass, string $routeName, MembershipRole $role): void {
     // Arrange
     $user = basicUser();
-    $ownPromotion = Promotion::factory()->create();
-    $otherPromotion = Promotion::factory()->create();
+    [$ownPromotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
     $ownPromotion->users()->attach($user, ['role' => $role->value, 'status' => MembershipStatus::Active->value]);
     $foreignRecord = $modelClass::factory()->for($otherPromotion, 'promotion')->create();
     actingAs($user);

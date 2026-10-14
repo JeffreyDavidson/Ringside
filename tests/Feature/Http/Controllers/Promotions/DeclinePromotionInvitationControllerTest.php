@@ -13,8 +13,7 @@ require_once __DIR__.'/../../../../Fixtures/promotion-invitations.php';
 describe('declining an invitation', function () {
     test('removes the invitation and nothing else', function () {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $otherPromotion = Promotion::factory()->create();
+        [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
         $invitee = basicUser();
         $bystander = basicUser();
         inviteTo($promotion, $invitee);

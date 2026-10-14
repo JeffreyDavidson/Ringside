@@ -86,8 +86,12 @@ test('saved pack timings and notes reopen for their event including midnight dat
 test('the pack uses the complete ordered card and preserves removed match notes', function () {
     // Arrange
     $event = Event::factory()->create();
-    $later = EventMatch::factory()->for($event)->create(['match_number' => 7]);
-    $first = EventMatch::factory()->for($event)->create(['match_number' => 2]);
+    [$later, $first] = EventMatch::factory()
+        ->for($event)
+        ->count(2)
+        ->sequence(['match_number' => 7], ['match_number' => 2])
+        ->create()
+        ->all();
     actingAs(administrator());
     $page = get(route('events.pack.show', $event));
     $payload = ['complete' => 1, 'version' => 0, 'fingerprint' => data_get($page->viewData('card'), 'fingerprint'), 'timezone' => 'UTC',
@@ -377,8 +381,12 @@ test('removed anchors require placement and soft deleting the event preserves it
 test('reordering and adding matches keep timings and segment anchors on stable identities', function () {
     // Arrange
     $event = Event::factory()->create();
-    $first = EventMatch::factory()->for($event)->create(['match_number' => 1]);
-    $second = EventMatch::factory()->for($event)->create(['match_number' => 2]);
+    [$first, $second] = EventMatch::factory()
+        ->for($event)
+        ->count(2)
+        ->sequence(['match_number' => 1], ['match_number' => 2])
+        ->create()
+        ->all();
     actingAs(administrator());
     $page = get(route('events.pack.show', $event));
     // Act

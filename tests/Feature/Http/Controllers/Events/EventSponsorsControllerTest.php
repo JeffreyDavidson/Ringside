@@ -40,7 +40,7 @@ test('the pack prints only deliberately reviewed sponsor instructions for member
     // Arrange
     $promotion = Promotion::factory()->create();
     $event = Event::factory()->for($promotion)->create();
-    $promise = EventSponsorCommitment::factory()->create(['event_id' => $event->id, 'promotion_id' => $promotion->id,
+    $promise = EventSponsorCommitment::factory()->for($event)->create([
         'instruction_label' => 'Entrance banner', 'instruction' => 'Hang before doors', 'instruction_owner' => 'Ring crew',
         'notes' => 'PRIVATE-NOTE-7Q', 'agreement_reference' => 'PRIVATE-REF-7Q', 'evidence_note' => 'PRIVATE-EVIDENCE-7Q']);
     $promise->sponsor->update(['contact_name' => 'PRIVATE-CONTACT-7Q', 'notes' => 'PRIVATE-TERMS-7Q']);
@@ -130,7 +130,7 @@ test('sponsor records and reviewed pack instructions never reach public event pa
     // Arrange
     $world = publicEventFixture();
     $event = $world['event'];
-    $promise = EventSponsorCommitment::factory()->create(['event_id' => $event->id, 'promotion_id' => $event->promotion_id,
+    $promise = EventSponsorCommitment::factory()->for($event)->create([
         'sponsor_name' => 'SPONSOR-NAME-7Q', 'description' => 'SPONSOR-DESCRIPTION-7Q', 'responsible' => 'SPONSOR-RESPONSIBLE-7Q',
         'notes' => 'SPONSOR-NOTE-7Q', 'agreement_reference' => 'SPONSOR-AGREEMENT-7Q', 'evidence_note' => 'SPONSOR-EVIDENCE-7Q',
         'evidence_url' => 'https://example.test/SPONSOR-EVIDENCE-URL-7Q',

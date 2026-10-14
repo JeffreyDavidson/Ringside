@@ -84,8 +84,7 @@ describe('accepting an invitation', function () {
 
     test('is not possible for a suspended member, keeps the suspension and deletes the invitation', function () {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $other = Promotion::factory()->create();
+        [$promotion, $other] = Promotion::factory()->count(2)->create()->all();
         $user = basicUser();
         joinAs($promotion, $user, MembershipRole::Member, MembershipStatus::Suspended);
         joinAs($other, $user);

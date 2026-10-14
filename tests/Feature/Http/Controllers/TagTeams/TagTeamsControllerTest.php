@@ -72,7 +72,7 @@ describe('TagTeams Controller', function () {
         $manager = Manager::factory()->create(['first_name' => 'Travis', 'last_name' => "O'Keefe"]);
         $tagTeam->managers()->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
-            ->for(Title::factory()->create(['name' => 'Tag Team Belt']), 'title')
+            ->for(Title::factory()->state(['name' => 'Tag Team Belt']), 'title')
             ->forTagTeam($tagTeam)
             ->current()
             ->create();
