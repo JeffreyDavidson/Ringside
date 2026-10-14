@@ -12,7 +12,8 @@ use function Pest\Laravel\get;
 
 test('index returns a view for administrator', function () {
     // Arrange
-    $event = Event::factory()->create();
+    $event = Event::factory()
+        ->create();
 
     actingAs(administrator());
 
@@ -29,7 +30,8 @@ test('index returns a view for administrator', function () {
 
 test('a user without membership cannot view event matches', function () {
     // Arrange
-    $event = Event::factory()->create();
+    $event = Event::factory()
+        ->create();
 
     actingAs(basicUser());
 
@@ -43,7 +45,8 @@ test('a user without membership cannot view event matches', function () {
 
 test('guest cannot view event matches', function () {
     // Arrange
-    $event = Event::factory()->create();
+    $event = Event::factory()
+        ->create();
 
     // Act
     $response = get(route('events.matches.index', $event));
@@ -55,14 +58,18 @@ test('guest cannot view event matches', function () {
 
 test('promotion member can view matches of their promotion event', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
-    $event = Event::factory()->for($promotion, 'promotion')->create();
+    $promotion = Promotion::factory()
+        ->create();
+    $event = Event::factory()
+        ->for($promotion, 'promotion')
+        ->create();
 
     $member = basicUser();
-    $promotion->users()->attach($member, [
-        'role' => MembershipRole::Member,
-        'status' => MembershipStatus::Active,
-    ]);
+    $promotion->users()
+        ->attach($member, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($member);
 
@@ -78,14 +85,18 @@ test('promotion member can view matches of their promotion event', function () {
 
 test('promotion member cannot view matches of another promotion event', function () {
     // Arrange
-    $promotion = Promotion::factory()->create();
-    $otherEvent = Event::factory()->for(Promotion::factory(), 'promotion')->create();
+    $promotion = Promotion::factory()
+        ->create();
+    $otherEvent = Event::factory()
+        ->for(Promotion::factory(), 'promotion')
+        ->create();
 
     $member = basicUser();
-    $promotion->users()->attach($member, [
-        'role' => MembershipRole::Member,
-        'status' => MembershipStatus::Active,
-    ]);
+    $promotion->users()
+        ->attach($member, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($member);
 
@@ -97,22 +108,30 @@ test('promotion member cannot view matches of another promotion event', function
         ->assertNotFound();
 });
 
-test('missing or deleted events have no match index', function (bool $deleted): void {
+test('a missing event has no match index', function (): void {
     // Arrange
-    $event = Event::factory()->create();
-    $id = $deleted ? $event->id : 999999;
-    if ($deleted) {
-        $event->delete();
-    }
+    actingAs(administrator());
+
+    // Act
+    $response = get(route('events.matches.index', 999999));
+
+    // Assert
+    $response
+        ->assertNotFound();
+});
+
+test('a deleted event has no match index', function (): void {
+    // Arrange
+    $event = Event::factory()
+        ->create();
+    $event->delete();
 
     actingAs(administrator());
 
     // Act
-    $response = get(route('events.matches.index', $id));
+    $response = get(route('events.matches.index', $event->id));
 
     // Assert
-    $response->assertNotFound();
-})->with([
-    'missing' => false,
-    'deleted' => true,
-]);
+    $response
+        ->assertNotFound();
+});

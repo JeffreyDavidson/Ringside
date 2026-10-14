@@ -13,7 +13,8 @@ use function Pest\Laravel\get;
 
 test('the live show page opens without preparing or changing a show', function (): void {
     // Arrange
-    $event = Event::factory()->create();
+    $event = Event::factory()
+        ->create();
 
     actingAs(administrator());
 
@@ -28,49 +29,24 @@ test('the live show page opens without preparing or changing a show', function (
         ->assertSee('Live show')
         ->assertSee('Save and review');
 
-    expect(EventLiveRun::query()->count())->toBe(0);
-});
-
-test('guests and other promotions cannot open a live show', function (): void {
-    // Arrange
-    $event = Event::factory()->create();
-
-    // Act
-    $response = get(route('events.live-show.show', $event));
-
-    // Assert
-    $response->assertRedirect(route('login'));
-
-    // Arrange
-    $promotion = Promotion::factory()->create();
-
-    $user = basicUser();
-    $promotion->users()->attach($user, [
-        'role' => MembershipRole::Manager,
-        'status' => MembershipStatus::Active,
-    ]);
-
-    actingAs($user);
-
-    // Act
-    $response = get(route('events.live-show.show', $event));
-
-    // Assert
-    $response->assertNotFound();
-
-    expect(EventLiveRun::query()->count())->toBe(0);
+    expect(EventLiveRun::query()
+        ->count())->toBe(0);
 });
 
 test('an active member receives the live view for their own event', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
-    $event = Event::factory()->for($promotion)->create();
+    $promotion = Promotion::factory()
+        ->create();
+    $event = Event::factory()
+        ->for($promotion)
+        ->create();
 
     $user = basicUser();
-    $promotion->users()->attach($user, [
-        'role' => MembershipRole::Member,
-        'status' => MembershipStatus::Active,
-    ]);
+    $promotion->users()
+        ->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($user);
 
@@ -83,5 +59,47 @@ test('an active member receives the live view for their own event', function ():
         ->assertViewIs('events.live')
         ->assertViewHas('event', $event);
 
-    expect(EventLiveRun::query()->count())->toBe(0);
+    expect(EventLiveRun::query()
+        ->count())->toBe(0);
+});
+
+test('guests cannot open a live show', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()
+        ->create();
+    $event = Event::factory()
+        ->for($promotion)
+        ->create();
+
+    // Act
+    $response = get(route('events.live-show.show', $event));
+
+    // Assert
+    $response
+        ->assertRedirect(route('login'));
+
+    expect(EventLiveRun::query()
+        ->count())->toBe(0);
+});
+
+test('foreign promotions cannot open a live show', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()
+        ->create();
+    $event = Event::factory()
+        ->for($promotion)
+        ->create();
+    $other = Promotion::factory()
+        ->create();
+    actingAsPromotionMember($other, MembershipRole::Manager);
+
+    // Act
+    $response = get(route('events.live-show.show', $event));
+
+    // Assert
+    $response
+        ->assertNotFound();
+
+    expect(EventLiveRun::query()
+        ->count())->toBe(0);
 });

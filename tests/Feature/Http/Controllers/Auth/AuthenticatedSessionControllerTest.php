@@ -35,10 +35,12 @@ describe('create', function (): void {
 describe('store', function (): void {
     test('users can authenticate using the login screen', function (string $email) {
         // Arrange
-        $user = User::factory()->unverified()->create([
-            'email' => 'promoter@example.com',
-            'status' => UserStatus::Active,
-        ]);
+        $user = User::factory()
+            ->unverified()
+            ->create([
+                'email' => 'promoter@example.com',
+                'status' => UserStatus::Active,
+            ]);
         $credentials = [
             'email' => $email,
             'password' => 'secret',
@@ -48,7 +50,8 @@ describe('store', function (): void {
         $response = post(route('login'), $credentials);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     })->with([
@@ -58,7 +61,8 @@ describe('store', function (): void {
 
     test('users can not authenticate with invalid password', function () {
         // Arrange
-        $user = User::factory()->create();
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         $credentials = [
             'email' => $user->email,
             'password' => 'wrong-password',
@@ -79,13 +83,16 @@ describe('store', function (): void {
 
     test('only active users can authenticate', function (UserStatus $status) {
         // Arrange
-        $user = User::factory()->create(['status' => $status]);
+        $user = User::factory()
+            ->create(['status' => $status]);
 
-        // Act
-        $response = from(route('login'))->post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = from(route('login'))->post(route('login'), $requestData);
 
         // Assert
         $response
@@ -100,7 +107,8 @@ describe('store', function (): void {
 
     test('deactivated users are logged out on their next request', function () {
         // Arrange
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
 
         actingAs($user);
         $user->update(['status' => UserStatus::Inactive]);
@@ -124,7 +132,8 @@ describe('store', function (): void {
         $response = post(route('login'), $credentials);
 
         // Assert
-        $response->assertSessionHasErrors(['email', 'password']);
+        $response
+            ->assertSessionHasErrors(['email', 'password']);
 
         assertGuest();
     });
@@ -133,7 +142,8 @@ describe('store', function (): void {
         // Arrange
         Event::fake([Lockout::class]);
         freezeTime();
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         $credentials = [
             'email' => $user->email,
             'password' => 'secret',
@@ -164,7 +174,8 @@ describe('store', function (): void {
     test('failed logins under the throttle limit do not lock the account', function () {
         // Arrange
         Event::fake([Lockout::class]);
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         foreach (range(1, 4) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
@@ -172,14 +183,17 @@ describe('store', function (): void {
             ]);
         }
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         Event::assertNotDispatched(Lockout::class);
         assertAuthenticatedAs($user);
@@ -188,7 +202,8 @@ describe('store', function (): void {
     test('users can log in again once the throttle window has passed', function () {
         // Arrange
         freezeTime();
-        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
         foreach (range(1, 5) as $attempt) {
             from(route('login'))->post(route('login'), [
                 'email' => $user->email,
@@ -197,31 +212,40 @@ describe('store', function (): void {
         }
         travel(61)->seconds();
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     });
 
     test('a legacy user stored with a mixed-case email can still sign in', function (string $typedEmail) {
         // Arrange
-        $user = User::factory()->create(['status' => UserStatus::Active]);
-        DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
+        $user = User::factory()
+            ->create(['status' => UserStatus::Active]);
+        DB::table('users')
+            ->where('id', $user->id)
+            ->update(['email' => 'Legacy.Promoter@Example.com']);
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $typedEmail,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     })->with([

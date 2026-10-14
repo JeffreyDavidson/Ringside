@@ -22,23 +22,33 @@ use function Pest\Laravel\withSession;
 test('a record from another promotion looks the same as a missing record', function (string $modelClass, string $routeName, MembershipRole $role): void {
     // Arrange
     $user = basicUser();
-    [$ownPromotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
-    $ownPromotion->users()->attach($user, [
-        'role' => $role->value,
-        'status' => MembershipStatus::Active->value,
-    ]);
-    $foreignRecord = $modelClass::factory()->for($otherPromotion, 'promotion')->create();
+    [$ownPromotion, $otherPromotion] = Promotion::factory()
+        ->count(2)
+        ->create()
+        ->all();
+    $ownPromotion->users()
+        ->attach($user, [
+            'role' => $role->value,
+            'status' => MembershipStatus::Active->value,
+        ]);
+    $foreignRecord = $modelClass::factory()
+        ->for($otherPromotion, 'promotion')
+        ->create();
 
     actingAs($user);
     withSession(['active_promotion_id' => $ownPromotion->id]);
 
+    $baselineResponse = get(route($routeName, 999_999));
+
     // Act
-    $foreignResponse = get(route($routeName, $foreignRecord->getKey()));
-    $missingResponse = get(route($routeName, 999_999));
+    $response = get(route($routeName, $foreignRecord->getKey()));
 
     // Assert
-    $foreignResponse->assertNotFound();
-    $missingResponse->assertNotFound();
+    $response
+        ->assertNotFound();
+
+    $baselineResponse
+        ->assertNotFound();
 })->with([
     'wrestler' => [Wrestler::class, 'wrestlers.show'],
     'manager' => [Manager::class, 'managers.show'],
@@ -47,14 +57,16 @@ test('a record from another promotion looks the same as a missing record', funct
     'stable' => [Stable::class, 'stables.show'],
     'title' => [Title::class, 'titles.show'],
     'event' => [Event::class, 'events.show'],
-])->with([
-    'owner' => MembershipRole::Owner,
-    'member' => MembershipRole::Member,
-]);
+])
+    ->with([
+        'owner' => MembershipRole::Owner,
+        'member' => MembershipRole::Member,
+    ]);
 
 test('a soft-deleted record has no show page', function (string $modelClass, string $routeName): void {
     // Arrange
-    $record = $modelClass::factory()->create();
+    $record = $modelClass::factory()
+        ->create();
     $record->delete();
 
     actingAs(administrator());
@@ -63,7 +75,8 @@ test('a soft-deleted record has no show page', function (string $modelClass, str
     $response = get(route($routeName, $record->getKey()));
 
     // Assert
-    $response->assertNotFound();
+    $response
+        ->assertNotFound();
 })->with([
     'wrestler' => [Wrestler::class, 'wrestlers.show'],
     'manager' => [Manager::class, 'managers.show'],

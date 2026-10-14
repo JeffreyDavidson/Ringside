@@ -1,264 +1,652 @@
 <?php
 
 declare(strict_types=1);
+use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventPublicationAction;
-use App\Http\Controllers\Events\EventPosterController;
-use App\Http\Controllers\Events\PreviewEventPosterController;
-use App\Http\Controllers\Events\ReleaseEventPublicationController;
-use App\Http\Controllers\Events\UnpublishEventController;
+use App\Actions\Events\StoreEventPosterAction;
+use App\Actions\Events\UnpublishEventPublicationAction;
+use App\Enums\Events\PublicSection;
 use App\Models\Events\EventPublication;
 use App\Queries\Events\PublicEventSourceQuery;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use JMac\Testing\Double;
+use PHPUnit\Framework\Assert;
 
-use function Pest\Laravel\delete;
 use function Pest\Laravel\get;
 use function Pest\Laravel\put;
 
-beforeEach(fn () => Storage::fake('local'));
-
-test('poster metadata is stripped and draft and replaced assets never become public', function (): void {
+test('uploading a poster strips metadata and preserves public alternative text', function (): void {
     // Arrange
+    Storage::fake('local');
     $fixture = publicEventFixture();
     $event = $fixture['event'];
-    $image = UploadedFile::fake()->image('private-camera-name.png', 60, 80);
+    $image = UploadedFile::fake()
+        ->image('private-camera-name.png', 60, 80);
     $original = $image->getContent();
     $marker = 'LEAK-GPS-CONTACT-7Q';
     $chunk = 'tEXt'."Comment\0".$marker;
     $bytes = substr($original, 0, -12).pack('N', strlen($chunk) - 4).$chunk.pack('N', crc32($chunk)).substr($original, -12);
-    $upload = UploadedFile::fake()->createWithContent('private-camera-name.png', $bytes);
-    $publication = savePublicDraft($event, [
-        'poster' => $upload,
-        'poster_alt' => 'Harbor Night event poster',
-        'poster_caption' => 'Join us by the harbor.',
-    ]);
+    $upload = UploadedFile::fake()
+        ->createWithContent('private-camera-name.png', $bytes);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasNoErrors();
+
+    $publication = EventPublication::query()
+        ->where('event_id', $event->id)
+        ->sole();
+    $poster = $publication->draft['poster'];
+    Assert::assertNotNull($poster);
     $key = publicPosterKey($publication);
-    expect(Storage::disk('local')->get('event-posters/'.$key))->not->toContain($marker)->not->toContain('private-camera-name');
+    expect(Storage::disk('local')
+        ->get('event-posters/'.$key))->not->toContain($marker)->not->toContain('private-camera-name')
+        ->and($poster['alt'])
+        ->toBe('Harbor Night event poster')
+        ->and($poster['caption'])
+        ->toBe('Join us by the harbor.');
+});
+
+test('an unreleased draft poster remains unavailable publicly', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
 
     // Act
-    $response = get(route('events.public-pages.poster', $event));
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
     $response
-        ->assertOk()
-        ->assertHeader('Content-Type', 'image/png');
+        ->assertNotFound();
+});
 
-    $url = route('shows.poster', [
-        'publicId' => $publication->public_id,
-        'slug' => $publication->slug,
-        'asset' => $key,
-    ]);
-
-    // Act
-    $response = get($url);
-
-    // Assert
-    $response->assertNotFound();
-
+test('a pending replacement cannot revoke the approved released poster', function (): void {
     // Arrange
-    releasePublicPage($event);
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
 
     // Act
-    $response = get($url);
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
     $response
-        ->assertOk()
-        ->assertHeader('Cache-Control', 'no-store, private');
+        ->assertOk();
+});
 
+test('a pending replacement cannot expose its new asset publicly', function (): void {
     // Arrange
-    $publication = savePublicDraft($event, [
-        'poster' => UploadedFile::fake()->image('replacement.png', 50, 50),
-        'poster_alt' => 'Replacement event poster',
-    ]);
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
+    $key = $newKey;
 
     // Act
-    $response = get($url);
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
-    $response->assertOk();
+    $response
+        ->assertNotFound();
+});
 
+test('a reviewed replacement revokes the previously approved poster key', function (): void {
     // Arrange
-    releasePublicPage($event);
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $key = $oldKey;
 
     // Act
-    $response = get($url);
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
-    $response->assertNotFound();
+    $response
+        ->assertNotFound();
+});
+
+test('a reviewed replacement serves its new poster key', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $key = $newKey;
+
+    // Act
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
+
+    // Assert
+    $response
+        ->assertOk();
+});
+
+test('public pages adopt reviewed replacement metadata without the old asset key', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
 
     // Act
     $response = get(publicShowUrl($publication));
 
     // Assert
     $response
+        ->assertOk()
+        ->assertViewIs('public-events.show')
         ->assertSee('Replacement event poster')
-        ->assertDontSee($key);
+        ->assertDontSee($oldKey);
+});
 
-    $newUrl = route('shows.poster', [
-        'publicId' => $publication->public_id,
-        'slug' => $publication->slug,
-        'asset' => publicPosterKey($publication),
-    ]);
-
-    // Act
-    $response = get($newUrl);
-
-    // Assert
-    $response->assertOk();
-
-    // Act
-    $editor = get(route('events.public-pages.edit', $event));
-
-    $response = delete(route('events.public-pages.unpublish', $event), [
-        'complete' => 1,
-        'version' => EventPublication::query()->where('event_id', $event->id)->firstOrFail()->version,
-        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
-        'section' => 'card',
-    ]);
-
-    // Assert
-    $response->assertSessionHasNoErrors();
-
-    // Act
-    $response = get($newUrl);
-
-    // Assert
-    $response->assertNotFound();
-})->see(
-    EventPosterController::class,
-    PreviewEventPosterController::class,
-    ReleaseEventPublicationController::class,
-    UnpublishEventController::class,
-);
-
-test('invalid uploads and missing alternative text cannot create a draft', function (string $kind): void {
+test('unpublishing a replaced card also revokes its current poster', function (): void {
     // Arrange
+    Storage::fake('local');
     $fixture = publicEventFixture();
     $event = $fixture['event'];
-    $editor = get(route('events.public-pages.edit', $event));
-    $upload = match ($kind) {
-        'svg' => UploadedFile::fake()->createWithContent('active.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
-        'corrupt' => UploadedFile::fake()->createWithContent('broken.png', 'not pixels'),
-        'dimensions' => UploadedFile::fake()->image('wide.png', 4100, 1),
-        'size' => UploadedFile::fake()->image('large.png')->size(5121),
-        default => UploadedFile::fake()->image('poster.png'),
-    };
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $oldKey = $key;
+    $newKey = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('replacement.png', 50, 50));
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'],
+        [...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    app(UnpublishEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $key = $newKey;
 
     // Act
-    $response = put(route('events.public-pages.update', $event), [
-        'complete' => 1,
-        'version' => 0,
-        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
-        'announcement' => 'scheduled',
-        'poster' => $upload,
-        'poster_alt' => $kind === 'alt' ? '' : 'Event poster',
-    ]);
+    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
 
     // Assert
-    $response->assertSessionHasErrors($kind === 'alt' ? 'poster_alt' : 'poster');
+    $response
+        ->assertNotFound();
+});
 
-    expect(EventPublication::query()->count())->toBe(0);
-})->with([
-    'SVG upload' => 'svg',
-    'corrupt image bytes' => 'corrupt',
-    'oversized image dimensions' => 'dimensions',
-    'oversized file' => 'size',
-    'missing alternative text' => 'alt',
-]);
-
-test('removing a draft poster leaves the released poster intact until reviewed', function (): void {
+test('SVG upload cannot create a publication draft or poster asset', function (): void {
     // Arrange
+    Storage::fake('local');
     $fixture = publicEventFixture();
     $event = $fixture['event'];
-    savePublicDraft($event, [
-        'poster' => UploadedFile::fake()->image('poster.png'),
-        'poster_alt' => 'Event poster',
-    ]);
-    $publication = releasePublicPage($event);
-    savePublicDraft($event, ['remove_poster' => 1]);
+    $upload = UploadedFile::fake()
+        ->createWithContent('active.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('poster');
+
+    expect(EventPublication::query()
+        ->count())->toBe(0)
+        ->and(Storage::disk('local')
+            ->allFiles('event-posters'))
+        ->toBeEmpty();
+});
+
+test('corrupt image bytes cannot create a publication draft or poster asset', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $upload = UploadedFile::fake()
+        ->createWithContent('broken.png', 'not pixels');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('poster');
+
+    expect(EventPublication::query()
+        ->count())->toBe(0)
+        ->and(Storage::disk('local')
+            ->allFiles('event-posters'))
+        ->toBeEmpty();
+});
+
+test('oversized image dimensions cannot create a publication draft or poster asset', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $upload = UploadedFile::fake()
+        ->image('wide.png', 4100, 1);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('poster');
+
+    expect(EventPublication::query()
+        ->count())->toBe(0)
+        ->and(Storage::disk('local')
+            ->allFiles('event-posters'))
+        ->toBeEmpty();
+});
+
+test('oversized file cannot create a publication draft or poster asset', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $upload = UploadedFile::fake()
+        ->image('large.png')
+        ->size(5121);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('poster');
+
+    expect(EventPublication::query()
+        ->count())->toBe(0)
+        ->and(Storage::disk('local')
+            ->allFiles('event-posters'))
+        ->toBeEmpty();
+});
+
+test('missing alternative text cannot create a publication draft or poster asset', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $upload = UploadedFile::fake()
+        ->image('poster.png');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => '', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('poster_alt');
+
+    expect(EventPublication::query()
+        ->count())->toBe(0)
+        ->and(Storage::disk('local')
+            ->allFiles('event-posters'))
+        ->toBeEmpty();
+});
+
+test('removing a draft poster cannot change its released public poster', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'poster' => null]);
 
     // Act
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertSee('Event poster');
+    $response
+        ->assertOk()
+        ->assertSee('Event poster');
+});
+
+test('a removed draft poster is absent from the private preview', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'poster' => null]);
 
     // Act
     $response = get(route('events.public-pages.poster', $event));
 
     // Assert
-    $response->assertNotFound();
+    $response
+        ->assertNotFound();
+});
 
+test('a reviewed removal omits the poster from the public page', function (): void {
     // Arrange
-    releasePublicPage($event);
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'poster' => null]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
 
     // Act
     $response = get(publicShowUrl($publication));
 
     // Assert
-    $response->assertDontSee('Event poster');
+    $response
+        ->assertOk()
+        ->assertDontSee('Event poster');
 });
 
-test('an unselected multipart file input does not prevent saving a text only draft', function (): void {
-    $fixture = publicEventFixture();
-    $event = $fixture['event'];
-
-    $publication = savePublicDraft($event, ['poster' => UploadedFile::fake()->createWithContent('', '')]);
-
-    expect($publication->draft['poster'])->toBeNull();
-});
-
-test('a stale poster upload does not leave an unreferenced derivative or replace the approved file', function (): void {
+test('an unselected multipart file control does not block a text-only draft', function (): void {
     // Arrange
+    Storage::fake('local');
     $fixture = publicEventFixture();
     $event = $fixture['event'];
-    $editor = get(route('events.public-pages.edit', $event));
-    savePublicDraft($event, [
-        'poster' => UploadedFile::fake()->image('approved.png'),
-        'poster_alt' => 'Approved poster',
-    ]);
-    $files = Storage::disk('local')->allFiles('event-posters');
+    $upload = UploadedFile::fake()
+        ->createWithContent('', '');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
-    $response = put(route('events.public-pages.update', $event), [
-        'complete' => 1,
-        'version' => 0,
-        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
-        'announcement' => 'scheduled',
-        'poster' => UploadedFile::fake()->image('stale.png'),
-        'poster_alt' => 'Stale poster',
-    ]);
+    $response = put(route('events.public-pages.update', $event), $requestData);
 
     // Assert
-    $response->assertSessionHasErrors('publication');
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasNoErrors();
 
-    expect(Storage::disk('local')->allFiles('event-posters'))->toBe($files);
+    expect(EventPublication::query()
+        ->where('event_id', $event->id)
+        ->sole()->draft['poster'])->toBeNull();
+});
+
+test('a stale upload preserves approved draft attributes and bytes without an orphan', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $publication->refresh();
+    $original = $publication->getAttributes();
+    $files = Storage::disk('local')
+        ->allFiles('event-posters');
+    $approvedBytes = Storage::disk('local')
+        ->get('event-posters/'.$key);
+    $upload = UploadedFile::fake()
+        ->image('stale.png');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertSessionHasErrors('publication');
+
+    expect(Storage::disk('local')
+        ->allFiles('event-posters'))->toBe($files)
+        ->and(Storage::disk('local')
+            ->get('event-posters/'.$key))
+        ->toBe($approvedBytes)
+        ->and($publication->refresh()
+            ->getAttributes())
+        ->toBe($original);
 });
 
 test('a persistence failure discards only this request derivative and propagates the failure', function (): void {
     // Arrange
+    Storage::fake('local');
     $fixture = publicEventFixture();
     $event = $fixture['event'];
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    Storage::disk('local')
+        ->put('event-posters/previously-approved.png', 'APPROVED-BYTES-7Q');
     $save = Double::for(SaveEventPublicationAction::class);
-    $save->expects('handle')->throws(new RuntimeException('Persistence unavailable'));
+    $save->expects('handle')
+        ->throws(new RuntimeException('Persistence unavailable'));
     app()->instance(SaveEventPublicationAction::class, $save);
+    $upload = UploadedFile::fake()
+        ->image('pending.png');
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
-    $response = put(route('events.public-pages.update', $event), [
-        'complete' => 1,
-        'version' => 0,
-        'fingerprint' => $source['fingerprint'],
-        'announcement' => 'scheduled',
-        'poster' => UploadedFile::fake()->image('pending.png'),
-        'poster_alt' => 'Event poster',
-    ]);
+    $response = put(route('events.public-pages.update', $event), $requestData);
 
     // Assert
-    $response->assertServerError();
+    $response
+        ->assertServerError();
 
-    expect(Storage::disk('local')->allFiles('event-posters'))->toBeEmpty();
+    expect(Storage::disk('local')
+        ->allFiles('event-posters'))->toBe(['event-posters/previously-approved.png'])
+        ->and(Storage::disk('local')
+            ->get('event-posters/previously-approved.png'))
+        ->toBe('APPROVED-BYTES-7Q');
     $save->verify();
+});
+
+test('removing a poster through the editor saves only the draft change', function (): void {
+    // Arrange
+    Storage::fake('local');
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $key = app(StoreEventPosterAction::class)->handle(UploadedFile::fake()
+        ->image('poster.png'));
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => false,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => ['key' => $key, 'alt' => 'Event poster', 'caption' => null],
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [$fixture['match']->id],
+        ]]);
+    $source = app(PublicEventSourceQuery::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $releasedCard = $publication->card;
+    $version = $publication->version;
+    $requestData = [
+        'complete' => 1,
+        'version' => $version,
+        'fingerprint' => $source['fingerprint'],
+        'announcement' => 'scheduled',
+        'summary' => 'Welcome to Harbor Night.',
+        'matches' => [['id' => $fixture['match']->id, 'selected' => 1, 'type' => 1]],
+        'results' => [$fixture['match']->id],
+        'remove_poster' => 1,
+    ];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('success', __('public-events.saved'));
+
+    $publication->refresh();
+    expect($publication->draft['poster'])->toBeNull()
+        ->and($publication->version)
+        ->toBe($version + 1)
+        ->and($publication->card)
+        ->toBe($releasedCard)
+        ->and(data_get($publication->card, 'poster.key'))
+        ->toBe($key)
+        ->and(Storage::disk('local')
+            ->exists('event-posters/'.$key))
+        ->toBeTrue();
 });

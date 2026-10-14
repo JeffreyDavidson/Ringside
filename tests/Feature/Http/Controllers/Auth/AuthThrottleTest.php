@@ -16,7 +16,8 @@ test('guest account endpoints stop responding after six requests a minute', func
     $response = post($url, []);
 
     // Assert
-    $response->assertTooManyRequests();
+    $response
+        ->assertTooManyRequests();
 })->with(['register', 'password.email', 'password.update']);
 
 test('the guest account endpoints keep separate rate limits', function (): void {
@@ -29,7 +30,8 @@ test('the guest account endpoints keep separate rate limits', function (): void 
     $response = post(route('password.email'), []);
 
     // Assert
-    $response->assertSessionHasErrors('email');
+    $response
+        ->assertSessionHasErrors('email');
 });
 
 test('the guest account endpoints accept requests again after the window passes', function (): void {
@@ -43,7 +45,8 @@ test('the guest account endpoints accept requests again after the window passes'
     $response = post(route('register'), []);
 
     // Assert
-    $response->assertSessionHasErrors('email');
+    $response
+        ->assertSessionHasErrors('email');
 });
 
 test('login stops responding after twenty failed attempts from one address across different emails', function (): void {
@@ -52,11 +55,14 @@ test('login stops responding after twenty failed attempts from one address acros
         post(route('login'), ['email' => "visitor{$attempt}@example.com", 'password' => 'wrong-password']);
     }
 
+    $requestData = ['email' => 'visitor21@example.com', 'password' => 'wrong-password'];
+
     // Act
-    $response = post(route('login'), ['email' => 'visitor21@example.com', 'password' => 'wrong-password']);
+    $response = post(route('login'), $requestData);
 
     // Assert
-    $response->assertTooManyRequests();
+    $response
+        ->assertTooManyRequests();
 });
 
 test('login still answers a failed attempt below the per address limit', function (): void {
@@ -65,9 +71,12 @@ test('login still answers a failed attempt below the per address limit', functio
         post(route('login'), ['email' => "visitor{$attempt}@example.com", 'password' => 'wrong-password']);
     }
 
+    $requestData = ['email' => 'visitor20@example.com', 'password' => 'wrong-password'];
+
     // Act
-    $response = post(route('login'), ['email' => 'visitor20@example.com', 'password' => 'wrong-password']);
+    $response = post(route('login'), $requestData);
 
     // Assert
-    $response->assertSessionHasErrors('email');
+    $response
+        ->assertSessionHasErrors('email');
 });

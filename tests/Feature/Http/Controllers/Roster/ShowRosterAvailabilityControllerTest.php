@@ -18,24 +18,33 @@ test('the calendar requires authentication', function (): void {
     $response = get(route('availability.index'));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
 });
 
 test('the calendar shows only the current promotions unavailable people and reasons', function (MembershipRole $role): void {
     // Arrange
-    $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
-    $foreignPromotion = Promotion::factory()->create();
-    $wrestler = Wrestler::factory()->for($promotion)->create(['name' => 'Harbor Talent']);
-    $foreignWrestler = Wrestler::factory()->for($foreignPromotion)->create(['name' => 'Foreign Talent']);
+    $promotion = Promotion::factory()
+        ->create(['timezone' => 'America/New_York']);
+    $foreignPromotion = Promotion::factory()
+        ->create();
+    $wrestler = Wrestler::factory()
+        ->for($promotion)
+        ->create(['name' => 'Harbor Talent']);
+    $foreignWrestler = Wrestler::factory()
+        ->for($foreignPromotion)
+        ->create(['name' => 'Foreign Talent']);
 
     $actor = administrator();
     resolve(CreateAction::class)->handle($wrestler, '2026-10-17', '2026-10-17', 'Local commitment', $actor);
     resolve(CreateAction::class)->handle($foreignWrestler, '2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON', $actor);
-    $member = User::factory()->create(['status' => UserStatus::Active]);
-    $promotion->users()->attach($member, [
-        'role' => $role,
-        'status' => MembershipStatus::Active,
-    ]);
+    $member = User::factory()
+        ->create(['status' => UserStatus::Active]);
+    $promotion->users()
+        ->attach($member, [
+            'role' => $role,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($member);
 
@@ -72,13 +81,16 @@ test('a global administrator must choose a promotion for the calendar', function
 
 test('malformed initial calendar filters show a useful error rather than throwing', function (): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
 
-    $member = User::factory()->create(['status' => UserStatus::Active]);
-    $promotion->users()->attach($member, [
-        'role' => MembershipRole::Member,
-        'status' => MembershipStatus::Active,
-    ]);
+    $member = User::factory()
+        ->create(['status' => UserStatus::Active]);
+    $promotion->users()
+        ->attach($member, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($member);
 
