@@ -33,6 +33,8 @@ An HTTP test shows that the endpoint performs authorization. It cannot identify 
 
 ## Browser Tests
 
+The examples below assume the Pest browser plugin. Use the target project's installed browser tooling and version-matched documentation; do not introduce a plugin or migrate Dusk/other suites just to match these examples.
+
 Write a browser test only for JavaScript behavior that an HTTP test cannot reach, such as modal interaction, drag-and-drop, live search, or client-side validation. Browser tests are slower than HTTP tests and can fail for reasons unrelated to the code under test.
 
 - Assert the state that the user can see, and assert the state in the database that the interaction saves.

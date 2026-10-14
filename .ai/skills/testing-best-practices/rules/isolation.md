@@ -49,4 +49,4 @@ Fake the exact endpoint used by each test. Do not call `Http::fake()` without an
 - Run real queries against the real records in the test database. Do not mock the query builder, because the test then asserts the mock.
 - Assert the exact keys of `toArray()` if the shape of the serialized model is a contract. The test then fails when the model exposes a new attribute.
 - Test application behavior caused by the schema, such as deleting dependent records through a cascade. Do not test the database engine's cascade implementation.
-- Use `LazilyRefreshDatabase` instead of `RefreshDatabase`. A test that does not use the database then does not run the migrations.
+- Follow the configured database isolation strategy. Consider `LazilyRefreshDatabase` for compatible HTTP suites after checking the installed Laravel version and setup; browser processes and engine-specific tests can require different isolation. Do not switch traits or replace a required database engine merely to speed up a run.

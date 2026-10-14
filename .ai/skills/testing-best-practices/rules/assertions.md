@@ -6,7 +6,7 @@ Write each test around one named behavior: Arrange the state, Act on one target 
 
 Group Arrange statements by meaning: target records and relationships, contrast/foreign fixtures, actor and authentication context, relevant fakes, and payload or baseline preparation. Use a blank line when the subject changes. Keep dependent records together and preserve creation order; do not insert a blank line after every statement or impose one universal setup order.
 
-Prepare payloads and prerequisite lookups before Act. For an HTTP test, assign the target response to `$response`, with assertions in Assert. Follow the project's response-chain format: group consecutive assertions on that response, then separate state/authentication/event assertions with a blank line. Do not make requests inside assertion callbacks.
+Prepare payloads and prerequisite lookups before Act. For an HTTP test, assign the target response to `$response`, with assertions in Assert. Prefer one response chain with each assertion on its own line, then separate state/authentication/event assertions with a blank line; explicit project formatting rules take precedence. Do not make requests inside assertion callbacks.
 
 Separate independent save, reopen, delete, restore or publication behaviors that repeat Arrange/Act/Assert cycles. Do not conceal those cycles in a helper. Read fixture helpers: a method named as setup may issue requests and assertions.
 
@@ -36,7 +36,7 @@ Use the assertion in this table for each subject.
 | The state in the database | a Laravel database assertion |
 | The existence of a model | `assertModelExists($model)` rather than `assertDatabaseHas('users', ['id' => $user->id])` |
 
-Use a PHPUnit assertion only if no Pest expectation and no Laravel assertion exists for the subject.
+In Pest suites, prefer the appropriate Laravel assertion or Pest expectation. In PHPUnit suites, use Laravel and PHPUnit assertions directly; do not migrate the suite to Pest just to match an example.
 
 Assert each meaningful fact once. Content and status are different facts: `assertSee()` checks response content and does not establish a successful status. Keep the appropriate named status assertion alongside content, view or payload assertions.
 

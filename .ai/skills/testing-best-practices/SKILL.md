@@ -8,10 +8,13 @@ metadata:
 
 # Testing Best Practices
 
-This is the project-maintained override of the Laravel testing guidance. Keep generic test design here and read the repository's scoped rules for controller formatting and matching-test requirements.
+This shared skill provides reusable Laravel testing guidance. The canonical source is the shared `agent-skills` repository at `skills/testing-best-practices/`. Project-local copies are snapshots; update the shared source before refreshing those copies. Preserve the original MIT licence and attribution.
 
-This skill provides rules for designing Laravel tests. Each rule file explains what to do and why. Use `search-docs` for Laravel and Pest API syntax.
-This project uses Pest. Follow the corresponding guidance in each rule.
+Read the target repository's instructions and scoped rules. Controller formatting, matching-test requirements, coverage targets and suite layout remain project decisions; do not impose another application's conventions.
+
+Confirm the installed Laravel, PHP, test framework and plugin versions from the repository's manifests/lockfiles and tooling before selecting APIs. Use Boost `search-docs` when available; otherwise consult official documentation for the installed versions or inspect installed source. Missing search results are not proof that an API is unavailable.
+
+Follow the project's Pest or PHPUnit convention. Pest examples illustrate test design, not a requirement to migrate PHPUnit suites or install plugins. Apply the same scenario, fixture and assertion principles using the existing framework. Check configured database engines, test isolation, scripts and CI gates instead of assuming SQLite, Composer script names or particular browser tooling.
 
 ## Consistency First
 
@@ -31,7 +34,7 @@ Read this section before you write a test.
 - Leave framework behavior to framework tests. Testing project configuration is not testing the framework. A constrained relationship, cast, scope, or validation rule belongs to this project.
 - Keep coverage of distinct defects and boundaries. Similar assertions in an Action test and an HTTP test can protect different wiring. Report genuine duplication and recommend a focused consolidation; do not automatically trim or delete existing coverage.
 - Write a feature test first. Write a unit test only for logic that does not use the framework.
-- Write a browser test only for behavior in JavaScript that a feature test cannot reach. Put a browser test in `tests/Browser`, and call `assertNoJavaScriptErrors()` in it.
+- Use browser tests for behavior that needs a real browser and cannot be adequately exercised through HTTP/component tests. Follow the configured browser suite and assert JavaScript errors with the installed tooling when supported.
 - Judge an architecture test by the convention it protects, not by the rules above. An `arch()` test declares a rule for an entire directory, such as the parent class of every model, the classes that may use an enum, or the methods every factory declares. It intentionally checks declarations and fails when a new file breaks the convention.
 - Use the test tools that the project installs. Add a new test dependency, plugin, or browser only after the user asks for it.
 

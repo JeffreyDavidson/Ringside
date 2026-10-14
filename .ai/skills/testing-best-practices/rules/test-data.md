@@ -38,38 +38,40 @@ Create only the records required to arrange the behavior or support an assertion
 
 Use a dataset when the setup, test body, and assertions remain the same across input values.
 
-A controller example from this project keeps the two allowed roles on one assertion path:
+A schematic Laravel/Pest example keeps valid inputs on one assertion path. It assumes an app with a `Project` factory, a `projects.store` route and a `projects.show` redirect; adapt these names, relationships and authorization setup to the target app. It is not a runnable fixture for every project.
 
 ```php
-use App\Enums\Promotions\MembershipRole;
-use App\Models\Events\Event;
-use App\Models\Promotions\Promotion;
+use App\Models\Project;
+use App\Models\User;
 
-use function Pest\Laravel\get;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\post;
 
-it('owners and managers can prepare public pages', function (MembershipRole $role): void {
+it('creates a project with a valid name', function (string $name): void {
     // Arrange
-    $promotion = Promotion::factory()->create();
-    $event = Event::factory()->for($promotion)->scheduled()->create();
+    $user = User::factory()->create();
+    actingAs($user);
 
-    actingAsPromotionMember($promotion, $role);
+    $payload = ['name' => $name];
 
     // Act
-    $response = get(route('events.public-pages.edit', $event));
+    $response = post(route('projects.store'), $payload);
 
     // Assert
+    $project = Project::query()->where('name', $name)->sole();
+
     $response
-        ->assertOk()
-        ->assertViewIs('events.publication')
-        ->assertViewHas('event', $event);
+        ->assertRedirect(route('projects.show', $project))
+        ->assertSessionHasNoErrors();
+
+    expect($project->name)->toBe($name);
 })->with([
-    'owner' => MembershipRole::Owner,
-    'manager' => MembershipRole::Manager,
+    'short name' => 'Launch',
+    'name with spaces' => 'Autumn Launch',
 ]);
 ```
 
-Member refusal and foreign-promotion 404 cases have different setup or assertions and belong in separate tests, rather than another column that switches the assertion path.
-
+Invalid-input and unauthorized requests have different assertions and belong in separate tests. The same design applies to PHPUnit data providers.
 
 Use parameterized tests for:
 

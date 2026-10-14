@@ -2,14 +2,14 @@
 
 ## File Layout
 
-- Name each test file `{ClassName}Test.php`.
-- Place each test file at the same relative path as the class under test. The class `app/Actions/DeleteTeam.php` gets the test `tests/Unit/Actions/DeleteTeamTest.php`.
+- Follow the repository's suite layout and naming. A useful default is `{ClassName}Test.php` at the same relative path as the class under test.
+- Choose Unit for pure logic and the configured framework-backed suite for code needing Laravel or a database; an Action is not automatically a unit test.
 - Follow the project's convention for fixture files. If none exists, put fixtures in `tests/Fixtures/` and load them by path.
 - Move large literal values out of the test body and into fixture files.
 
 ## Test Function
 
-Use the test function used by other files in the same directory. If no neighboring test files exist:
+Respect the existing Pest or PHPUnit style. The following declaration and grouping guidance applies to Pest; use equivalent test methods and data providers in PHPUnit. If no neighboring Pest files exist:
 
 - Use `it()` for the behavior of the code, and write the name as a verb phrase.
 - Use `test()` for a declarative fact, such as a grant in a policy, the labels of an enum, or the shape of a serialized model.
