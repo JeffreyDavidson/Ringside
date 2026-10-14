@@ -15,12 +15,14 @@ use function Pest\Laravel\get;
 describe('index', function (): void {
     test('an active promotion member cannot open the platform venue directory', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -43,6 +45,7 @@ describe('index', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('venues.index')
+            ->assertSeeHtml('<title>Venues · Ringside</title>')
             ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
@@ -73,7 +76,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the venue profile and its related data', function () {
         // Arrange
-        $venue = Venue::factory()->create();
+        $venue = Venue::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -93,7 +97,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view a venue', function () {
         // Arrange
-        $venue = Venue::factory()->create();
+        $venue = Venue::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -107,7 +112,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a venue', function () {
         // Arrange
-        $venue = Venue::factory()->create();
+        $venue = Venue::factory()
+            ->create();
 
         // Act
         $response = get(route('venues.show', $venue));
@@ -119,7 +125,8 @@ describe('show', function (): void {
 
     test('returns 404 when venue does not exist', function () {
         // Arrange
-        Venue::factory()->create();
+        Venue::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -133,14 +140,17 @@ describe('show', function (): void {
 
     test('an active promotion member cannot open the platform venue profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $venue = Venue::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $venue = Venue::factory()
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 

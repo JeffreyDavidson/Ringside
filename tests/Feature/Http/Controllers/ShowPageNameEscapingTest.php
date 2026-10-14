@@ -36,16 +36,24 @@ describe('Show pages escape related names exactly once', function () {
         // Arrange
         $wrestler = Wrestler::factory()
             ->employed()
-            ->onCurrentTagTeam(TagTeam::factory()->create(['name' => "O'Neil & Sons"]))
+            ->onCurrentTagTeam(TagTeam::factory()
+                ->create(['name' => "O'Neil & Sons"]))
             ->create();
-        $manager = Manager::factory()->create([
-            'first_name' => 'Travis',
-            'last_name' => "O'Keefe",
-        ]);
-        $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
-        $wrestler->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
+
+        $manager = Manager::factory()
+            ->create([
+                'first_name' => 'Travis',
+                'last_name' => "O'Keefe",
+            ]);
+        $wrestler->managers()
+            ->attach($manager, ['hired_at' => now()->subDay()]);
+        $wrestler->stables()
+            ->attach(Stable::factory()
+                ->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
+
         TitleChampionship::factory()
-            ->for(Title::factory()->state(['name' => "Champion's & Challenger's Belt"]), 'title')
+            ->for(Title::factory()
+                ->state(['name' => "Champion's & Challenger's Belt"]), 'title')
             ->forWrestler($wrestler)
             ->current()
             ->create();
@@ -69,9 +77,15 @@ describe('Show pages escape related names exactly once', function () {
 
     test('the manager page escapes its wrestler and tag team links', function () {
         // Arrange
-        $manager = Manager::factory()->employed()->create();
-        $manager->wrestlers()->attach(Wrestler::factory()->create(['name' => "Sean O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
-        $manager->tagTeams()->attach(TagTeam::factory()->create(['name' => "O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
+        $manager = Manager::factory()
+            ->employed()
+            ->create();
+        $manager->wrestlers()
+            ->attach(Wrestler::factory()
+                ->create(['name' => "Sean O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
+        $manager->tagTeams()
+            ->attach(TagTeam::factory()
+                ->create(['name' => "O'Neil & Sons"]), ['hired_at' => now()->subDay()]);
 
         actingAs(administrator());
 
@@ -87,19 +101,30 @@ describe('Show pages escape related names exactly once', function () {
 
     test('the tag team page escapes its wrestler, manager, stable and title links', function () {
         // Arrange
-        $tagTeam = TagTeam::factory()->employed()->create();
-        $tagTeam->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
-        $tagTeam->currentWrestlers->skip(1)->firstOrFail()->update(['name' => "D'Angelo & Sons"]);
-        $tagTeam->managers()->attach(
-            Manager::factory()->create([
-                'first_name' => 'Travis',
-                'last_name' => "O'Keefe",
-            ]),
-            ['hired_at' => now()->subDay()],
-        );
-        $tagTeam->stables()->attach(Stable::factory()->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
+        $tagTeam = TagTeam::factory()
+            ->employed()
+            ->create();
+        $tagTeam->currentWrestlers->firstOrFail()
+            ->update(['name' => "O'Neil & Sons"]);
+        $tagTeam->currentWrestlers->skip(1)
+            ->firstOrFail()
+            ->update(['name' => "D'Angelo & Sons"]);
+        $tagTeam->managers()
+            ->attach(
+                Manager::factory()
+                    ->create([
+                        'first_name' => 'Travis',
+                        'last_name' => "O'Keefe",
+                    ]),
+                ['hired_at' => now()->subDay()],
+            );
+        $tagTeam->stables()
+            ->attach(Stable::factory()
+                ->create(['name' => "Hart & O'Hara"]), ['joined_at' => now()->subDay()]);
+
         TitleChampionship::factory()
-            ->for(Title::factory()->state(['name' => "Champion's & Challenger's Belt"]), 'title')
+            ->for(Title::factory()
+                ->state(['name' => "Champion's & Challenger's Belt"]), 'title')
             ->forTagTeam($tagTeam)
             ->current()
             ->create();
@@ -124,9 +149,13 @@ describe('Show pages escape related names exactly once', function () {
 
     test('the stable page escapes its wrestler and tag team links', function () {
         // Arrange
-        $stable = Stable::factory()->active()->create();
-        $stable->currentWrestlers->firstOrFail()->update(['name' => "O'Neil & Sons"]);
-        $stable->currentTagTeams->firstOrFail()->update(['name' => "Hart & O'Hara"]);
+        $stable = Stable::factory()
+            ->active()
+            ->create();
+        $stable->currentWrestlers->firstOrFail()
+            ->update(['name' => "O'Neil & Sons"]);
+        $stable->currentTagTeams->firstOrFail()
+            ->update(['name' => "Hart & O'Hara"]);
 
         actingAs(administrator());
 
@@ -142,7 +171,10 @@ describe('Show pages escape related names exactly once', function () {
 
     test('the event page escapes its venue link', function () {
         // Arrange
-        $event = Event::factory()->atVenue(Venue::factory()->create(['name' => "O'Neil & Sons Arena"]))->create();
+        $event = Event::factory()
+            ->atVenue(Venue::factory()
+                ->create(['name' => "O'Neil & Sons Arena"]))
+            ->create();
 
         actingAs(administrator());
 
@@ -158,10 +190,12 @@ describe('Show pages escape related names exactly once', function () {
 
     test('the title page escapes its current champion link', function () {
         // Arrange
-        $title = Title::factory()->create();
+        $title = Title::factory()
+            ->create();
         TitleChampionship::factory()
             ->for($title, 'title')
-            ->forWrestler(Wrestler::factory()->create(['name' => "O'Neil & Sons"]))
+            ->forWrestler(Wrestler::factory()
+                ->create(['name' => "O'Neil & Sons"]))
             ->current()
             ->create();
 

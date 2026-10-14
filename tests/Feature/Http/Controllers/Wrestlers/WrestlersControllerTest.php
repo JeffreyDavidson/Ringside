@@ -28,12 +28,14 @@ use function Pest\Laravel\get;
 describe('index', function (): void {
     test('an active promotion member receives the wrestlers index', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -44,6 +46,7 @@ describe('index', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('wrestlers.index')
+            ->assertSeeHtml('<title>Wrestlers · Ringside</title>')
             ->assertSeeLivewire(Main::class);
     });
 
@@ -88,7 +91,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the wrestler profile and its related data', function () {
         // Arrange
-        $wrestler = Wrestler::factory()->create();
+        $wrestler = Wrestler::factory()
+            ->create(['name' => 'Marcus Vale']);
 
         actingAs(administrator());
 
@@ -99,6 +103,7 @@ describe('show', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('wrestlers.show')
+            ->assertSeeHtml('<title>Marcus Vale · Ringside</title>')
             ->assertSee($wrestler->name)
             ->assertSee('Status')
             ->assertViewHas('wrestler', $wrestler)
@@ -115,8 +120,12 @@ describe('show', function (): void {
 
     test('show labels an injured wrestler', function (): void {
         // Arrange
-        $wrestler = Wrestler::factory()->employed()->create();
-        Injury::factory()->for($wrestler, 'injurable')->create();
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->create();
+        Injury::factory()
+            ->for($wrestler, 'injurable')
+            ->create();
 
         actingAs(administrator());
 
@@ -135,8 +144,12 @@ describe('show', function (): void {
 
     test('show labels a suspended wrestler', function (): void {
         // Arrange
-        $wrestler = Wrestler::factory()->employed()->create();
-        Suspension::factory()->for($wrestler, 'suspendable')->create();
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->create();
+        Suspension::factory()
+            ->for($wrestler, 'suspendable')
+            ->create();
 
         actingAs(administrator());
 
@@ -155,9 +168,15 @@ describe('show', function (): void {
 
     test('show labels a wrestler who is both injured and suspended', function (): void {
         // Arrange
-        $wrestler = Wrestler::factory()->employed()->create();
-        Injury::factory()->for($wrestler, 'injurable')->create();
-        Suspension::factory()->for($wrestler, 'suspendable')->create();
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->create();
+        Injury::factory()
+            ->for($wrestler, 'injurable')
+            ->create();
+        Suspension::factory()
+            ->for($wrestler, 'suspendable')
+            ->create();
 
         actingAs(administrator());
 
@@ -176,7 +195,9 @@ describe('show', function (): void {
 
     test('show labels a healthy wrestler', function (): void {
         // Arrange
-        $wrestler = Wrestler::factory()->employed()->create();
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->create();
 
         actingAs(administrator());
 
@@ -195,16 +216,24 @@ describe('show', function (): void {
 
     test('show renders the related data displayed by the wrestler summary', function () {
         // Arrange
-        Wrestler::factory()->create();
+        Wrestler::factory()
+            ->create();
 
-        $wrestler = Wrestler::factory()->employed()->onCurrentTagTeam(TagTeam::factory()->create(['name' => 'Tag Team Alpha']))->create();
-        $manager = Manager::factory()->create([
-            'first_name' => 'Travis',
-            'last_name' => "O'Keefe",
-        ]);
-        $wrestler->managers()->attach($manager, ['hired_at' => now()->subDay()]);
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->onCurrentTagTeam(TagTeam::factory()
+                ->create(['name' => 'Tag Team Alpha']))
+            ->create();
+        $manager = Manager::factory()
+            ->create([
+                'first_name' => 'Travis',
+                'last_name' => "O'Keefe",
+            ]);
+        $wrestler->managers()
+            ->attach($manager, ['hired_at' => now()->subDay()]);
         TitleChampionship::factory()
-            ->for(Title::factory()->state(['name' => 'Heavyweight Belt']), 'title')
+            ->for(Title::factory()
+                ->state(['name' => 'Heavyweight Belt']), 'title')
             ->forWrestler($wrestler)
             ->current()
             ->create();
@@ -221,15 +250,21 @@ describe('show', function (): void {
             ->assertSee($manager->full_name)
             ->assertSee('Heavyweight Belt')
             ->assertDontSeeHtml('&amp;#039;')
-            ->assertSee($wrestler->employments()->firstOrFail()->started_at->toDateString());
+            ->assertSee($wrestler->employments()
+                ->firstOrFail()->started_at->toDateString());
     });
 
     test('show loads the summary relationships only once', function () {
         // Arrange
-        Wrestler::factory()->create();
+        Wrestler::factory()
+            ->create();
 
-        $wrestler = Wrestler::factory()->employed()->create();
-        $wrestler->managers()->attach(Manager::factory()->create(), ['hired_at' => now()->subDay()]);
+        $wrestler = Wrestler::factory()
+            ->employed()
+            ->create();
+        $wrestler->managers()
+            ->attach(Manager::factory()
+                ->create(), ['hired_at' => now()->subDay()]);
 
         actingAs(administrator());
 
@@ -252,7 +287,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view wrestler profiles', function () {
         // Arrange
-        $wrestler = Wrestler::factory()->create();
+        $wrestler = Wrestler::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -266,7 +302,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a wrestler profile', function () {
         // Arrange
-        $wrestler = Wrestler::factory()->create();
+        $wrestler = Wrestler::factory()
+            ->create();
 
         // Act
         $response = get(route('wrestlers.show', $wrestler));
@@ -278,7 +315,8 @@ describe('show', function (): void {
 
     test('returns 404 when wrestler does not exist', function () {
         // Arrange
-        Wrestler::factory()->create();
+        Wrestler::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -292,14 +330,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct wrestler profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $wrestler = Wrestler::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $wrestler = Wrestler::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 

@@ -23,6 +23,7 @@ describe('index', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('users.index')
+            ->assertSeeHtml('<title>Users · Ringside</title>')
             ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSeeLivewire(Main::class);
     });
@@ -51,13 +52,15 @@ describe('index', function (): void {
 
     test('an active member cannot open platform user management', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Owner,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Owner,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -74,13 +77,15 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('an active member cannot open a platform user profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Owner,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Owner,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -95,7 +100,8 @@ describe('show', function (): void {
 
     test('renders the user profile and its related data', function () {
         // Arrange
-        $user = User::factory()->create();
+        $user = User::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -111,15 +117,18 @@ describe('show', function (): void {
 
     test('show renders the users general information', function () {
         // Arrange
-        User::factory()->create();
+        User::factory()
+            ->create();
 
-        $user = User::factory()->administrator()->create([
-            'first_name' => 'Casey',
-            'last_name' => 'Ringside',
-            'email' => 'casey@example.test',
-            'phone_number' => '2125550198',
-            'email_verified_at' => now(),
-        ]);
+        $user = User::factory()
+            ->administrator()
+            ->create([
+                'first_name' => 'Casey',
+                'last_name' => 'Ringside',
+                'email' => 'casey@example.test',
+                'phone_number' => '2125550198',
+                'email_verified_at' => now(),
+            ]);
 
         actingAs(administrator());
 
@@ -140,7 +149,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view their user profile', function () {
         // Arrange
-        User::factory()->create();
+        User::factory()
+            ->create();
 
         actingAs($user = basicUser());
 
@@ -154,9 +164,11 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view another users profile', function () {
         // Arrange
-        User::factory()->create();
+        User::factory()
+            ->create();
 
-        $otherUser = User::factory()->create();
+        $otherUser = User::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -170,7 +182,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a user profile', function () {
         // Arrange
-        $user = User::factory()->create();
+        $user = User::factory()
+            ->create();
 
         // Act
         $response = get(route('users.show', $user));
@@ -182,7 +195,8 @@ describe('show', function (): void {
 
     test('returns 404 when user does not exist', function () {
         // Arrange
-        User::factory()->create();
+        User::factory()
+            ->create();
 
         actingAs(administrator());
 

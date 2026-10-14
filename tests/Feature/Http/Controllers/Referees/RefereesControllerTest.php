@@ -17,12 +17,14 @@ use function Pest\Laravel\get;
 describe('index', function (): void {
     test('an active promotion member receives the referees index', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -33,6 +35,7 @@ describe('index', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('referees.index')
+            ->assertSeeHtml('<title>Referees · Ringside</title>')
             ->assertSeeLivewire(Main::class);
     });
 
@@ -77,7 +80,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the referee profile and its related data', function () {
         // Arrange
-        $referee = Referee::factory()->create();
+        $referee = Referee::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -100,9 +104,12 @@ describe('show', function (): void {
 
     test('show renders the start date displayed by the referee summary', function () {
         // Arrange
-        Referee::factory()->create();
+        Referee::factory()
+            ->create();
 
-        $referee = Referee::factory()->employed()->create();
+        $referee = Referee::factory()
+            ->employed()
+            ->create();
 
         actingAs(administrator());
 
@@ -112,12 +119,14 @@ describe('show', function (): void {
         // Assert
         $response
             ->assertOk()
-            ->assertSee($referee->employments()->firstOrFail()->started_at->toDateString());
+            ->assertSee($referee->employments()
+                ->firstOrFail()->started_at->toDateString());
     });
 
     test('a user without a promotion membership cannot view a referee profile', function () {
         // Arrange
-        $referee = Referee::factory()->create();
+        $referee = Referee::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -131,7 +140,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a referee profile', function () {
         // Arrange
-        $referee = Referee::factory()->create();
+        $referee = Referee::factory()
+            ->create();
 
         // Act
         $response = get(route('referees.show', $referee));
@@ -144,10 +154,18 @@ describe('show', function (): void {
     test('an administrator can view referees in every lifecycle state', function (string $state): void {
         // Arrange
         $referee = match ($state) {
-            'bookable' => Referee::factory()->bookable()->create(),
-            'injured' => Referee::factory()->injured()->create(),
-            'retired' => Referee::factory()->retired()->create(),
-            'suspended' => Referee::factory()->suspended()->create(),
+            'bookable' => Referee::factory()
+                ->bookable()
+                ->create(),
+            'injured' => Referee::factory()
+                ->injured()
+                ->create(),
+            'retired' => Referee::factory()
+                ->retired()
+                ->create(),
+            'suspended' => Referee::factory()
+                ->suspended()
+                ->create(),
             default => throw new LogicException('Unknown lifecycle fixture'),
         };
 
@@ -170,7 +188,8 @@ describe('show', function (): void {
 
     test('returns 404 when referee does not exist', function () {
         // Arrange
-        Referee::factory()->create();
+        Referee::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -184,14 +203,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct referee profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $referee = Referee::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $referee = Referee::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 

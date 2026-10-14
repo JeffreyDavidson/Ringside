@@ -6,9 +6,9 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('browser tab and home screen icons', function (): void {
-    it('links the Ringside icons from every page layout', function (Closure $request): void {
+    it('links the Ringside icons from guest layouts', function (string $routeName): void {
         // Act
-        $response = $request();
+        $response = get(route($routeName));
 
         // Assert
         $response
@@ -17,10 +17,24 @@ describe('browser tab and home screen icons', function (): void {
             ->assertSeeHtml('<link rel="icon" href="'.asset('favicon.svg').'" type="image/svg+xml" />')
             ->assertSeeHtml('<link rel="apple-touch-icon" href="'.asset('apple-touch-icon.png').'" />');
     })->with([
-        'marketing layout' => [fn () => get(route('home'))],
-        'authentication layout' => [fn () => get(route('login'))],
-        'application layout' => [fn () => actingAs(administrator())->get(route('dashboard'))],
+        'marketing layout' => 'home',
+        'authentication layout' => 'login',
     ]);
+
+    it('links the Ringside icons from the application layout', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertSeeHtml('<link rel="icon" href="'.asset('favicon.ico').'" sizes="48x48" />')
+            ->assertSeeHtml('<link rel="icon" href="'.asset('favicon.svg').'" type="image/svg+xml" />')
+            ->assertSeeHtml('<link rel="apple-touch-icon" href="'.asset('apple-touch-icon.png').'" />');
+    });
 
     it('ships an icon file for each link', function (string $file): void {
         // Act

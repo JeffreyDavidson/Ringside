@@ -21,12 +21,14 @@ use function Pest\Laravel\get;
 describe('index', function (): void {
     test('an active promotion member receives the managers index', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -37,6 +39,7 @@ describe('index', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('managers.index')
+            ->assertSeeHtml('<title>Managers · Ringside</title>')
             ->assertSeeLivewire(Main::class);
     });
 
@@ -81,7 +84,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the manager profile and its related data', function () {
         // Arrange
-        $manager = Manager::factory()->create();
+        $manager = Manager::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -106,13 +110,20 @@ describe('show', function (): void {
 
     test('show renders the related data displayed by the manager summary', function () {
         // Arrange
-        Manager::factory()->create();
+        Manager::factory()
+            ->create();
 
-        $manager = Manager::factory()->employed()->create();
-        $wrestler = Wrestler::factory()->create(['name' => "Sean O'Neil"]);
-        $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team Alpha']);
-        $manager->wrestlers()->attach($wrestler, ['hired_at' => now()->subDay()]);
-        $manager->tagTeams()->attach($tagTeam, ['hired_at' => now()->subDay()]);
+        $manager = Manager::factory()
+            ->employed()
+            ->create();
+        $wrestler = Wrestler::factory()
+            ->create(['name' => "Sean O'Neil"]);
+        $tagTeam = TagTeam::factory()
+            ->create(['name' => 'Tag Team Alpha']);
+        $manager->wrestlers()
+            ->attach($wrestler, ['hired_at' => now()->subDay()]);
+        $manager->tagTeams()
+            ->attach($tagTeam, ['hired_at' => now()->subDay()]);
 
         actingAs(administrator());
 
@@ -124,12 +135,14 @@ describe('show', function (): void {
             ->assertOk()
             ->assertSee($wrestler->name)
             ->assertSee('Tag Team Alpha')
-            ->assertSee($manager->employments()->firstOrFail()->started_at->toDateString());
+            ->assertSee($manager->employments()
+                ->firstOrFail()->started_at->toDateString());
     });
 
     test('a user without a promotion membership cannot view manager profiles', function () {
         // Arrange
-        $manager = Manager::factory()->create();
+        $manager = Manager::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -143,7 +156,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a manager profile', function () {
         // Arrange
-        $manager = Manager::factory()->create();
+        $manager = Manager::factory()
+            ->create();
 
         // Act
         $response = get(route('managers.show', $manager));
@@ -156,10 +170,18 @@ describe('show', function (): void {
     test('an administrator can view managers in every lifecycle state', function (string $state): void {
         // Arrange
         $manager = match ($state) {
-            'employed' => Manager::factory()->employed()->create(),
-            'injured' => Manager::factory()->injured()->create(),
-            'retired' => Manager::factory()->retired()->create(),
-            'suspended' => Manager::factory()->suspended()->create(),
+            'employed' => Manager::factory()
+                ->employed()
+                ->create(),
+            'injured' => Manager::factory()
+                ->injured()
+                ->create(),
+            'retired' => Manager::factory()
+                ->retired()
+                ->create(),
+            'suspended' => Manager::factory()
+                ->suspended()
+                ->create(),
             default => throw new LogicException('Unknown lifecycle fixture'),
         };
 
@@ -182,7 +204,8 @@ describe('show', function (): void {
 
     test('returns 404 when manager does not exist', function () {
         // Arrange
-        Manager::factory()->create();
+        Manager::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -196,14 +219,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct manager profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $manager = Manager::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $manager = Manager::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
