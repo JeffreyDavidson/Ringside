@@ -43,6 +43,7 @@ enum MembershipRole: string
         'reunite',
         'debut',
         'pull',
+        'manageSponsors',
     ];
 
     public function label(): string

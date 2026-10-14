@@ -2,6 +2,9 @@
     <x-layouts.workspace-canvas class="event-pack-editor">
         <a class="pack-back" href="{{ route('events.show', $event) }}">&larr; {{ __('event-pack.back') }}</a>
         <a class="pack-back" href="{{ route('events.live-show.show', $event) }}">{{ __('live-show.title') }}</a>
+        @can('manageSponsors', $event)
+            <a class="pack-back" href="{{ route('events.sponsors.show', $event) }}">{{ __('sponsors.title') }}</a>
+        @endcan
         <header class="pack-heading">
             <div>
                 <h1>{{ $event->name }}</h1>
@@ -213,6 +216,21 @@
             </fieldset>
             <input type="hidden" name="complete" value="1" />
         </form>
+        @if (($content['sponsor_tasks'] ?? []) !== [])
+            <section class="pack-section" id="sponsor-setup">
+                <h2>{{ __('sponsors.setup_title') }}</h2>
+                <p>{{ __('sponsors.plan_notice') }}</p>
+                @foreach ($content['sponsor_tasks'] as $task)
+                    <div class="pack-row">
+                        <h3>{{ $task['label'] }}</h3>
+                        <p class="break-words whitespace-pre-wrap">{{ $task['instruction'] }}</p>
+                        @if ($task['owner'])
+                            <p>{{ __('sponsors.task_owner', ['name' => $task['owner']]) }}</p>
+                        @endif
+                    </div>
+                @endforeach
+            </section>
+        @endif
         @can('updateProduction', $event)
             <livewire:events.components.production :eventId="$event->id" />
         @endcan

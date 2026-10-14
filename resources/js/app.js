@@ -1,3 +1,4 @@
+import sponsorTracking from './sponsor-tracking';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import AlpineUI from '@alpinejs/ui';
 import rosterCombobox from './roster-combobox';
@@ -69,4 +70,6 @@ window.matchMedia('(min-width: 1024px)').addEventListener('change', event => {
 });
 
 // Livewire starts Alpine and dispatches livewire:init synchronously.
+Alpine.data('sponsorTracking', sponsorTracking);
+
 Livewire.start();

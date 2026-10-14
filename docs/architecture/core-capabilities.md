@@ -225,7 +225,7 @@ invitation stays saved and the outcome is still `Invited`, and the owner can
 still see it in the application. Text lives in `lang/en/mail.php`.
 
 Promotion roles apply only within the active promotion context. Members can
-view promotion-owned data. Managers can view and manage promotion-owned roster,
+view ordinary promotion-owned data and explicitly reviewed sponsor instructions in the event pack. Sponsor contacts, commitments, evidence and revision history require the private `manageSponsors` ability granted only to active Owners/Managers. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
 membership roles. Owners have the manager capabilities and can also update
 promotion settings and manage that promotion's memberships. Every promotion

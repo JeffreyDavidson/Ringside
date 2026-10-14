@@ -30,6 +30,13 @@
             href="{{ route('events.live-show.show', $event) }}"
             class="border-ringside-line-bright border px-4 py-3 font-semibold"
         >{{ __('live-show.title') }}</a>
+        @can('manageSponsors', $event)
+            <x-button
+                tag="a"
+                variant="secondary"
+                :href="route('events.sponsors.show', $event)"
+            >{{ __('sponsors.title') }}</x-button>
+        @endcan
     </div>
 
     @can('create', \App\Models\Matches\EventMatch::class)
