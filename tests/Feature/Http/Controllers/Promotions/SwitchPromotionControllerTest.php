@@ -113,10 +113,13 @@ test('invalid selection keeps the previous promotion', function (mixed $id): voi
     $response
         ->assertRedirect(route('dashboard'))
         ->assertSessionHasErrors('promotion_id')
-        ->assertSessionHas('active_promotion_id', $promotion->id);
+        ->assertSessionHas('active_promotion_id', $promotion->id)
+        ->assertSessionMissing('status')
+        ->assertSessionHasInput('promotion_id', fn (mixed $value): bool => $value === $id);
 })->with([
     'missing' => null,
     'noninteger' => 'invalid',
+    'array selection' => [[1]],
 ]);
 
 test('a refused selection keeps the previous promotion', function (): void {

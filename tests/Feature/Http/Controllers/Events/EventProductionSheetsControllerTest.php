@@ -101,6 +101,10 @@ test('invalid production filters return validation errors', function (string $fi
     'person' => ['person', 'bad'],
     'role' => ['role', 'invalid'],
     'print' => ['print', 'bad'],
+    'source array' => ['source', ['plan']],
+    'person array' => ['person', [1]],
+    'role array' => ['role', ['announcer']],
+    'print array' => ['print', [1]],
 ]);
 
 test('guests cannot open production sheets', function (): void {
@@ -396,4 +400,68 @@ test('deleted events have no production sheet', function (): void {
     // Assert
     $response
         ->assertNotFound();
+});
+
+test('empty optional filters preserve the unsaved plan without creating records', function (array $filters): void {
+    // Arrange
+    $event = Event::factory()
+        ->create();
+
+    actingAs(administrator());
+
+    $requestData = ['event' => $event,
+        ...$filters];
+
+    // Act
+    $response = get(route('events.production-sheet.show', $requestData));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production')
+        ->assertViewHas('sheet', fn (array $sheet): bool => $sheet['event']->is($event) && $sheet['source'] === 'plan' && $sheet['person'] === null && $sheet['role'] === null);
+
+    expect(EventPack::query()
+        ->count())->toBe(0)
+        ->and(EventLiveRun::query()
+            ->count())->toBe(0)
+        ->and(CrewContact::query()
+            ->count())->toBe(0);
+})->with([
+    'omitted filters' => [[]],
+    'empty filters' => [
+        [
+            'source' => '',
+            'person' => '',
+            'role' => '',
+            'print' => '',
+        ],
+    ],
+]);
+
+test('a valid unmatched person filter returns an empty assignment selection', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $unmatched = CrewContact::factory()
+        ->create();
+    $originalContent = $event->pack()
+        ->firstOrFail()->content;
+
+    $requestData = [
+        'event' => $event,
+        'person' => $unmatched->id,
+    ];
+
+    // Act
+    $response = get(route('events.production-sheet.show', $requestData));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertViewIs('events.production')
+        ->assertViewHas('sheet', fn (array $sheet): bool => $sheet['person'] === $unmatched->id && $sheet['assignments'] === []);
+
+    expect($event->pack()
+        ->firstOrFail()->content)->toBe($originalContent);
 });
