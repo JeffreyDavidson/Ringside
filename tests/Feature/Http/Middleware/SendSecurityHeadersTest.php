@@ -54,11 +54,13 @@ test('responses short-circuited by later web middleware still send the headers',
         ->assertHeaderContains('Permissions-Policy', 'usb=()');
 });
 
-test('headers a route already sets are kept and not duplicated', function (): void {
+test('downstream status body cookie and headers are preserved without duplicating security policies', function (): void {
     // Arrange
     Route::name('middleware.securityHeadersProbe')
         ->middleware('web')
-        ->get('/security-headers-probe', fn () => response('probe')
+        ->get('/security-headers-probe', fn () => response('Security header preservation probe', 201)
+            ->cookie('response_marker', 'route-cookie-value', 10)
+            ->header('X-Route-Marker', 'route-header-value')
             ->header('Referrer-Policy', 'no-referrer')
             ->header('X-Content-Type-Options', 'nosniff')
             ->header('Permissions-Policy', 'camera=(self)')
@@ -70,7 +72,10 @@ test('headers a route already sets are kept and not duplicated', function (): vo
 
     // Assert
     $response
-        ->assertOk();
+        ->assertCreated()
+        ->assertContent('Security header preservation probe')
+        ->assertCookie('response_marker', 'route-cookie-value')
+        ->assertHeader('X-Route-Marker', 'route-header-value');
 
     expect($response->headers->all('Referrer-Policy'))->toBe(['no-referrer'])
         ->and($response->headers->all('X-Content-Type-Options'))->toBe(['nosniff'])
