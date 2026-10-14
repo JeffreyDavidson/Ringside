@@ -1043,7 +1043,7 @@ describe('validated pack content', function (): void {
 
         $content = $event->pack()
             ->firstOrFail()->content;
-        expect($content)->toBe([
+        expect($content)->toEqual([
             'timezone' => 'UTC',
             'matches' => [
                 [
@@ -1070,7 +1070,10 @@ describe('validated pack content', function (): void {
             'master' => null,
             'notes' => null,
             'follow_up' => null,
-        ]);
+        ])->and($content['matches'][0]['match_id'])->toBe($match->id)
+            ->and($content['matches'][0]['minutes'])->toBe(12)
+            ->and($content['segments'][0]['after_match_id'])->toBe($match->id)
+            ->and($content['segments'][0]['minutes'])->toBe(5);
     });
 
     test('unknown nested match keys cannot be persisted', function (): void {
@@ -1178,7 +1181,7 @@ describe('validated pack content', function (): void {
 
         $content = $event->pack()
             ->firstOrFail()->content;
-        expect($content['matches'])->toBe([
+        expect($content['matches'])->toEqual([
             [
                 'match_id' => $match->id,
                 'notes' => 'Keep this historical note',

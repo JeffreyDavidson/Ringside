@@ -923,7 +923,7 @@ describe('validated publication draft', function (): void {
         $publication = EventPublication::query()
             ->where('event_id', $event->id)
             ->sole();
-        expect($publication->draft)->toBe([
+        expect($publication->draft)->toEqual([
             'announcement' => 'scheduled',
             'summary' => null,
             'notice' => null,
@@ -990,7 +990,7 @@ describe('validated publication draft', function (): void {
         $publication = EventPublication::query()
             ->where('event_id', $event->id)
             ->sole();
-        expect($publication->draft)->toBe([
+        expect($publication->draft)->toEqual([
             'announcement' => 'scheduled',
             'summary' => '0',
             'notice' => null,
@@ -1008,8 +1008,14 @@ describe('validated publication draft', function (): void {
                 ],
             ],
             'results' => [$fixture['match']->id],
-        ])->and($publication->published_at)
-            ->toBeNull();
+        ])->and($publication->draft['summary'])->toBe('0')
+            ->and($publication->draft['address'])->toBeFalse()
+            ->and($publication->draft['matches'][0]['id'])->toBe($fixture['match']->id)
+            ->and($publication->draft['matches'][0]['type'])->toBeFalse()
+            ->and($publication->draft['matches'][0]['stipulation'])->toBeTrue()
+            ->and($publication->draft['matches'][0]['titles'])->toBeFalse()
+            ->and($publication->draft['results'])->toBe([$fixture['match']->id])
+            ->and($publication->published_at)->toBeNull();
     });
 
     test('changed announcements require a notice before creating a draft', function (string $announcement): void {

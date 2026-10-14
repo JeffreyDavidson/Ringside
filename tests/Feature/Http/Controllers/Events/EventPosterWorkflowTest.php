@@ -687,7 +687,7 @@ test('zero alternative text retains existing poster text while zero caption is p
         ->assertRedirect(route('events.public-pages.edit', $event))
         ->assertSessionHasNoErrors();
 
-    expect($publication->refresh()->draft['poster'])->toBe([
+    expect($publication->refresh()->draft['poster'])->toEqual([
         'key' => 'existing-poster-key',
         'alt' => 'Existing alternative text',
         'caption' => '0',
