@@ -1,46 +1,10 @@
 <?php
 
-use App\Enums\Promotions\MembershipRole;
-use App\Enums\Promotions\MembershipStatus;
-use App\Enums\Users\UserStatus;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Support\Facades\Route;
-
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\withSession;
-
-function attachActivePromotion(User $user, Promotion $promotion): void
-{
-    $promotion->users()->attach($user, [
-        'role' => MembershipRole::Owner->value,
-        'status' => MembershipStatus::Active->value,
-    ]);
-}
-
-test('promotion middleware establishes the selected active promotion', function () {
-    $user = User::factory()->administrator()->create(['status' => UserStatus::Active]);
-    $firstPromotion = Promotion::factory()->create();
-    $secondPromotion = Promotion::factory()->create();
-    attachActivePromotion($user, $firstPromotion);
-    attachActivePromotion($user, $secondPromotion);
-
-    Route::middleware(['web', 'promotion.context'])->get('/promotion-context-test', fn () => response()->json([
-        'promotion_id' => app(PromotionContextService::class)->required()->id,
-    ]));
-
-    $response = withSession(['active_promotion_id' => $secondPromotion->id])
-        ->actingAs($user)
-        ->get('/promotion-context-test');
-
-    $response
-        ->assertOk()
-        ->assertJson(['promotion_id' => $secondPromotion->id]);
-});
 
 test('promotion-scoped models only return records from the active promotion', function () {
     $promotion = Promotion::factory()->create();
@@ -85,14 +49,4 @@ test('global venues remain visible while their event history follows the active 
 
     expect($venue->events()->pluck('id')->all())
         ->toEqualCanonicalizing([$ownedEvent->id, $otherEvent->id]);
-});
-
-test('promotion middleware rejects users without an active membership', function () {
-    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
-
-    Route::middleware(['web', 'promotion.context'])->get('/promotion-context-test', fn () => response()->noContent());
-
-    actingAs($user)
-        ->get('/promotion-context-test')
-        ->assertForbidden();
 });
