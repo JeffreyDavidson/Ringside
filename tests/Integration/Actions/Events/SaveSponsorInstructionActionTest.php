@@ -253,7 +253,8 @@ test('sponsor adoption and production edits preserve each others saved pack sect
     // Assert
     $content = $event->pack()->firstOrFail()->content;
     expect($content['production'] ?? null)->toBe($production);
-    $instructions = $mode === 'setup' ? $content['sponsor_tasks'] : $content['segments'];
+    $instructions = $mode === 'setup' ? ($content['sponsor_tasks'] ?? []) : $content['segments'];
+    expect($instructions)->toHaveCount(1);
 
     // Act
     app(SaveEventProductionAction::class)->handle($event, 2, $screen['card']['fingerprint'], [...$fixture['production'], 'notes' => 'Updated private crew note'], false);
@@ -261,6 +262,6 @@ test('sponsor adoption and production edits preserve each others saved pack sect
     // Assert
     $updated = $event->pack()->firstOrFail();
     expect($updated->version)->toBe(3)
-        ->and($mode === 'setup' ? $updated->content['sponsor_tasks'] : $updated->content['segments'])->toBe($instructions)
+        ->and($mode === 'setup' ? ($updated->content['sponsor_tasks'] ?? []) : $updated->content['segments'])->toBe($instructions)
         ->and(data_get($updated->content, 'production.notes'))->toBe('Updated private crew note');
 })->with(['setup', 'segment']);
