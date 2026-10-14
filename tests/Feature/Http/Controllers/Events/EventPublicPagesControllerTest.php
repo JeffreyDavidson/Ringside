@@ -629,7 +629,8 @@ describe('update', function (): void {
                 'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => null,
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
-            ]]);
+            ]])
+            ->refresh();
         $foreignMatch = EventMatch::factory()
             ->create();
         $source = app(PublicEventSourceQuery::class)->get($event);

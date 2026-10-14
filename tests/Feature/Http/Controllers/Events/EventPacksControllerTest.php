@@ -924,9 +924,11 @@ describe('update', function (): void {
         actingAs(administrator());
         $data = resolve(EventPackViewModel::class)->data($event);
         $content = [...$data['content'], 'segments' => [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Intermission', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => null, 'notes' => null]]];
-        EventPack::factory()
+        $pack = EventPack::factory()
             ->for($event)
-            ->create(['version' => 1, 'card_fingerprint' => $data['card']['fingerprint'], 'content' => $content]);
+            ->create(['version' => 1, 'card_fingerprint' => $data['card']['fingerprint'], 'content' => $content])
+            ->refresh();
+        $originalContent = $pack->content;
         $match->delete();
         $currentData = resolve(EventPackViewModel::class)->data($event);
         $requestData = ['complete' => 1, 'version' => 1, 'fingerprint' => $currentData['card']['fingerprint'], 'timezone' => 'UTC', 'reviewed' => 1, 'segments' => [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Intermission', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => null, 'notes' => null]]];
@@ -939,7 +941,7 @@ describe('update', function (): void {
             ->assertSessionHasErrors('segments.0.after_match_id');
 
         expect($event->pack()
-            ->firstOrFail()->content)->toBe($content)
+            ->firstOrFail()->content)->toBe($originalContent)
             ->and($event->pack()
                 ->firstOrFail()->version)
             ->toBe(1);
