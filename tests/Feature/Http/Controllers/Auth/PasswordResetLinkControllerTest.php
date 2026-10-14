@@ -71,6 +71,7 @@ describe('store', function (): void {
     })->with([
         'lowercase email' => 'promoter@example.com',
         'mixed-case email' => 'Promoter@Example.com',
+        'surrounding whitespace' => '  Promoter@Example.com  ',
     ]);
 
     test('an unknown email receives the common recovery response without a notification', function (): void {
@@ -168,4 +169,49 @@ describe('store', function (): void {
 
         Notification::assertSentTo($user->refresh(), ResetPassword::class);
     });
+});
+
+describe('email preparation', function (): void {
+    test('null and non-string email values remain validation failures', function (mixed $email): void {
+        // Arrange
+        $requestData = [
+            'email' => $email,
+        ];
+
+        // Act
+        $response = post(route('password.email'), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('email')
+            ->assertSessionMissing('_old_input.password')
+            ->assertSessionMissing('_old_input.password_confirmation');
+
+        expect(User::query()
+            ->count())->toBe(0);
+    })->with([
+        'null email' => null,
+        'array email' => [['unexpected']],
+        'numeric email' => 123,
+    ]);
+});
+
+test('invalid recovery input retains the entered email case without a notification', function (): void {
+    // Arrange
+    Notification::fake();
+
+    $requestData = ['email' => '  Invalid@@EMAIL  '];
+
+    // Act
+    $response = from(route('password.request'))
+        ->post(route('password.email'), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('password.request'))
+        ->assertSessionHasErrors('email')
+        ->assertSessionHasInput('email', 'Invalid@@EMAIL');
+
+    Notification::assertNothingSent();
 });

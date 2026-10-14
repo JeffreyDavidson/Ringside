@@ -104,6 +104,7 @@ describe('store', function (): void {
     })->with([
         'lowercase email' => 'promoter@example.com',
         'mixed-case email' => 'Promoter@Example.com',
+        'surrounding whitespace' => '  Promoter@Example.com  ',
     ]);
     test('missing reset fields cannot change the password or consume the token', function (string $field): void {
         // Arrange
@@ -176,4 +177,66 @@ describe('store', function (): void {
             ->toBeTrue();
         Event::assertNotDispatched(PasswordReset::class);
     });
+});
+
+describe('email preparation', function (): void {
+    test('null and non-string email values remain validation failures', function (mixed $email): void {
+        // Arrange
+        $requestData = [
+            'token' => 'invalid-token',
+            'password' => 'password-12345',
+            'password_confirmation' => 'password-12345',
+            'email' => $email,
+        ];
+
+        // Act
+        $response = post(route('password.update'), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('email')
+            ->assertSessionMissing('_old_input.password')
+            ->assertSessionMissing('_old_input.password_confirmation');
+
+        expect(User::query()
+            ->count())->toBe(0);
+    })->with([
+        'null email' => null,
+        'array email' => [['unexpected']],
+        'numeric email' => 123,
+    ]);
+});
+
+test('a refused reset retains normalized email without changing the password or token', function (): void {
+    // Arrange
+    $user = User::factory()
+        ->create(['email' => 'promoter@example.com']);
+    $originalPassword = $user->password;
+    $validToken = Password::createToken($user);
+
+    Event::fake([PasswordReset::class]);
+
+    $requestData = [
+        'email' => '  Promoter@Example.COM  ',
+        'token' => 'invalid-token',
+        'password' => 'new-password-12345',
+        'password_confirmation' => 'new-password-12345',
+    ];
+
+    // Act
+    $response = post(route('password.update'), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect()
+        ->assertSessionHasErrors('email')
+        ->assertSessionHasInput('email', 'promoter@example.com')
+        ->assertSessionMissing('_old_input.password')
+        ->assertSessionMissing('_old_input.password_confirmation');
+
+    expect($user->refresh()->password)->toBe($originalPassword)
+        ->and(Password::tokenExists($user, $validToken))
+        ->toBeTrue();
+    Event::assertNotDispatched(PasswordReset::class);
 });

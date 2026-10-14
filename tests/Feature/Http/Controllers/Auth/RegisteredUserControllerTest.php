@@ -73,6 +73,7 @@ describe('store', function (): void {
     })->with([
         'lowercase email' => 'jeffrey@example.com',
         'mixed-case email' => 'Jeffrey@Example.COM',
+        'surrounding whitespace' => '  Jeffrey@Example.COM  ',
     ]);
 
     test('registration requires valid account details', function () {
@@ -273,4 +274,63 @@ describe('store', function (): void {
         expect(User::query()
             ->count())->toBe(0);
     });
+});
+
+describe('email preparation', function (): void {
+    test('null and non-string email values remain validation failures', function (mixed $email): void {
+        // Arrange
+        $requestData = [
+            'first_name' => 'Jeffrey',
+            'last_name' => 'Davidson',
+            'password' => 'password-12345',
+            'password_confirmation' => 'password-12345',
+            'email' => $email,
+        ];
+
+        // Act
+        $response = post(route('register'), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('email')
+            ->assertSessionMissing('_old_input.password')
+            ->assertSessionMissing('_old_input.password_confirmation');
+
+        expect(User::query()
+            ->count())->toBe(0);
+    })->with([
+        'null email' => null,
+        'array email' => [['unexpected']],
+        'numeric email' => 123,
+    ]);
+});
+
+test('invalid registration keeps the entered email case without retaining passwords', function (): void {
+    // Arrange
+    Event::fake([Registered::class]);
+
+    $requestData = [
+        'first_name' => 'Jeffrey',
+        'last_name' => 'Davidson',
+        'email' => '  Jeffrey@Example.COM  ',
+        'password' => 'password-12345',
+        'password_confirmation' => 'different-password',
+    ];
+
+    // Act
+    $response = from(route('register'))
+        ->post(route('register'), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('register'))
+        ->assertSessionHasErrors('password')
+        ->assertSessionHasInput('email', 'Jeffrey@Example.COM')
+        ->assertSessionMissing('_old_input.password')
+        ->assertSessionMissing('_old_input.password_confirmation');
+
+    expect(User::query()
+        ->count())->toBe(0);
+    Event::assertNotDispatched(Registered::class);
 });
