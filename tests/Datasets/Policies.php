@@ -44,7 +44,7 @@ function policyAbilityCatalog(): array
     return [
         TournamentPolicy::class => ['model' => Tournament::class, 'create' => fn () => Tournament::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => ['view', 'update']],
         EventMatchPolicy::class => ['model' => EventMatch::class, 'create' => fn (): EventMatch => EventMatch::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => $crud],
-        EventPolicy::class => ['model' => Event::class, 'create' => fn (): Event => Event::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => [...$crud, 'manageSponsors', 'viewProduction', 'updateProduction', 'preparePublication', 'publishPublication', 'unpublishPublication', 'uploadPublicationPoster']],
+        EventPolicy::class => ['model' => Event::class, 'create' => fn (): Event => Event::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => [...$crud, 'viewBudget', 'updateBudget', 'manageSponsors', 'viewProduction', 'updateProduction', 'preparePublication', 'publishPublication', 'unpublishPublication', 'uploadPublicationPoster']],
         ManagerPolicy::class => ['model' => Manager::class, 'create' => fn (): Manager => Manager::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => $rosterMember],
         RefereePolicy::class => ['model' => Referee::class, 'create' => fn (): Referee => Referee::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => $rosterMember],
         StablePolicy::class => ['model' => Stable::class, 'create' => fn (): Stable => Stable::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => [...$crud, 'establish', 'disband', 'retire', 'unretire', 'merge', 'split', 'reunite']],

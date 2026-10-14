@@ -4,6 +4,7 @@ import AlpineUI from '@alpinejs/ui';
 import rosterCombobox from './roster-combobox';
 import liveShow from './live-show';
 import tournamentBracket from './tournament-bracket';
+import eventBudget from './event-budget';
 import bookingHistory from './booking-history';
 import '../css/app.css';
 import '../css/event-pack.css';
@@ -13,6 +14,7 @@ Alpine.plugin(AlpineUI);
 Alpine.data('rosterCombobox', rosterCombobox);
 Alpine.data('liveShow', liveShow);
 Alpine.data('tournamentBracket', tournamentBracket);
+Alpine.data('eventBudget', eventBudget);
 Alpine.data('bookingHistory', bookingHistory);
 
 const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';

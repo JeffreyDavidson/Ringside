@@ -70,6 +70,16 @@ class EventPolicy
         return false;
     }
 
+    public function viewBudget(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function updateBudget(User $user, Event $event): bool
+    {
+        return false;
+    }
+
     public function manageSponsors(User $user, Event $event): bool
     {
         return false;

@@ -14,6 +14,8 @@ enum MembershipRole: string
      * @var list<string>
      */
     private const array CONTENT_ABILITIES = [
+        'viewBudget',
+        'updateBudget',
         'viewProduction',
         'updateProduction',
         'preparePublication',
