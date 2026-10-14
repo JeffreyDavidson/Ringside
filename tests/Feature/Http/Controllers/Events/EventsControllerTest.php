@@ -172,6 +172,6 @@ test('the event view receives only related storylines in title and identity orde
     $response
         ->assertOk()
         ->assertViewIs('events.show')
-        ->assertViewHas('event', $event);
-    $response->assertViewHas('storylines', fn (Collection $stories): bool => $stories->modelKeys() === [$first->id, $tie->id, $later->id]);
+        ->assertViewHas('event', $event)
+        ->assertViewHas('storylines', fn (Collection $stories): bool => $stories->modelKeys() === [$first->id, $tie->id, $later->id]);
 });

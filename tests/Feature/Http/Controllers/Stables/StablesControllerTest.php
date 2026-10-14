@@ -38,8 +38,8 @@ describe('Stables Controller', function () {
 
         // Assert
 
-        $response->assertOk();
         $response
+            ->assertOk()
             ->assertViewIs('stables.show')
             ->assertSee($stable->name)
             ->assertSee('Status')
