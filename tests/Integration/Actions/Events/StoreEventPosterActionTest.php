@@ -74,3 +74,12 @@ test('a readable header with corrupt pixel data is refused without warnings or a
     expect(fn () => app(StoreEventPosterAction::class)->handle($file))->toThrow(EventPublicationException::class)
         ->and(Storage::disk('local')->allFiles('event-posters'))->toBeEmpty();
 });
+
+test('poster processing limits dimensions without cropping the complete image', function (): void {
+    $file = UploadedFile::fake()->image('tall.png', 1000, 3000);
+
+    $key = app(StoreEventPosterAction::class)->handle($file);
+
+    $dimensions = getimagesizefromstring(Storage::disk('local')->get('event-posters/'.$key) ?? throw new RuntimeException('Missing sanitized image')) ?: throw new RuntimeException('Invalid sanitized image');
+    expect($dimensions[0])->toBe(683)->and($dimensions[1])->toBe(2048);
+});

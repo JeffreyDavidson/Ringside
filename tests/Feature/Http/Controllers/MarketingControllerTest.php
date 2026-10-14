@@ -33,6 +33,7 @@ test('signed in users can explore Ringside and return to their dashboard', funct
     // Assert
     $response
         ->assertOk()
+        ->assertViewIs('marketing')
         ->assertSee(__('marketing.dashboard'))
         ->assertSeeHtml('href="'.route('dashboard').'"')
         ->assertDontSeeHtml('href="'.route('login').'"');

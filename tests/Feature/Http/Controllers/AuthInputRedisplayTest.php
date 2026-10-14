@@ -7,13 +7,17 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\withSession;
 
 it('renders auth forms when rejected old input contains arrays', function (string $routeName): void {
+    // Arrange
     withSession(['_old_input' => [
         'email' => ['invalid'],
         'first_name' => ['invalid'],
         'last_name' => ['invalid'],
     ]]);
 
+    // Act
     $response = get(route($routeName));
+
+    // Assert
 
     $response
         ->assertOk()

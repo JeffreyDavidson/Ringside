@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Livewire\Crew\Components\Directory;
 use App\Models\Promotions\Promotion;
 
 use function Pest\Laravel\actingAs;
@@ -20,9 +21,25 @@ test('only production managers can open the crew directory', function (Membershi
     $response = get(route('crew.contacts.index'));
 
     // Assert
-    $response->assertStatus($status);
+    if ($status === 403) {
+        $response->assertForbidden();
+
+        return;
+    }
+    $response
+        ->assertOk()
+        ->assertViewIs('crew.index')
+        ->assertSeeLivewire(Directory::class);
 })->with([
     'owner' => [MembershipRole::Owner, 200],
     'manager' => [MembershipRole::Manager, 200],
     'member' => [MembershipRole::Member, 403],
 ]);
+
+test('guests cannot open crew.contacts.index', function (): void {
+    // Act
+    $response = get(route('crew.contacts.index'));
+
+    // Assert
+    $response->assertRedirect(route('login'));
+});

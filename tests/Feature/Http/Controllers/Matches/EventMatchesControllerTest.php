@@ -21,10 +21,16 @@ describe('Event Matches Controller', function () {
      * @see EventMatchesController::index()
      */
     test('index returns a view for administrator', function () {
+        // Arrange
         $event = Event::factory()->create();
 
-        actingAs(administrator())
-            ->get(route('events.matches.index', $event))
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('events.matches.index', $event));
+
+        // Assert
+        $response
             ->assertOk()
             ->assertViewIs('matches.index')
             ->assertSeeHtml('aria-label="Content workspace"')
@@ -34,11 +40,17 @@ describe('Event Matches Controller', function () {
     /**
      * @see EventMatchesController::index()
      */
-    test('basic user cannot view event matches', function () {
+    test('a user without membership cannot view event matches', function () {
+        // Arrange
         $event = Event::factory()->create();
 
-        actingAs(basicUser())
-            ->get(route('events.matches.index', $event))
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('events.matches.index', $event));
+
+        // Assert
+        $response
             ->assertForbidden();
     });
 
@@ -46,9 +58,14 @@ describe('Event Matches Controller', function () {
      * @see EventMatchesController::index()
      */
     test('guest cannot view event matches', function () {
+        // Arrange
         $event = Event::factory()->create();
 
-        get(route('events.matches.index', $event))
+        // Act
+        $response = get(route('events.matches.index', $event));
+
+        // Assert
+        $response
             ->assertRedirect(route('login'));
     });
 
@@ -56,6 +73,7 @@ describe('Event Matches Controller', function () {
      * @see EventMatchesController::index()
      */
     test('promotion member can view matches of their promotion event', function () {
+        // Arrange
         $promotion = Promotion::factory()->create();
         $event = Event::factory()->for($promotion, 'promotion')->create();
         $member = basicUser();
@@ -64,16 +82,23 @@ describe('Event Matches Controller', function () {
             'status' => MembershipStatus::Active,
         ]);
 
-        actingAs($member)
-            ->get(route('events.matches.index', $event))
+        actingAs($member);
+
+        // Act
+        $response = get(route('events.matches.index', $event));
+
+        // Assert
+        $response
             ->assertOk()
-            ->assertViewIs('matches.index');
+            ->assertViewIs('matches.index')
+            ->assertViewHas('event', $event);
     });
 
     /**
      * @see EventMatchesController::index()
      */
     test('promotion member cannot view matches of another promotion event', function () {
+        // Arrange
         $promotion = Promotion::factory()->create();
         $otherEvent = Event::factory()->for(Promotion::factory(), 'promotion')->create();
         $member = basicUser();
@@ -82,8 +107,29 @@ describe('Event Matches Controller', function () {
             'status' => MembershipStatus::Active,
         ]);
 
-        actingAs($member)
-            ->get(route('events.matches.index', $otherEvent))
+        actingAs($member);
+
+        // Act
+        $response = get(route('events.matches.index', $otherEvent));
+
+        // Assert
+        $response
             ->assertNotFound();
     });
 });
+
+test('missing or deleted events have no match index', function (bool $deleted): void {
+    // Arrange
+    $event = Event::factory()->create();
+    $id = $deleted ? $event->id : 999999;
+    if ($deleted) {
+        $event->delete();
+    }
+    actingAs(administrator());
+
+    // Act
+    $response = get(route('events.matches.index', $id));
+
+    // Assert
+    $response->assertNotFound();
+})->with(['missing' => false, 'deleted' => true]);

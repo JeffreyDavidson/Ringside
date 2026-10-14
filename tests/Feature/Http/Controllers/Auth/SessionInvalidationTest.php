@@ -16,7 +16,11 @@ test('a session ends once the account password changes', function (): void {
     // Arrange
     $user = User::factory()->administrator()->create(['email' => 'promoter@example.com', 'status' => UserStatus::Active]);
     post(route('login'), ['email' => 'promoter@example.com', 'password' => 'secret']);
-    get(route('promotions.index'))->assertSuccessful();
+    $response = get(route('promotions.index'));
+
+    // Assert
+    $response->assertSuccessful();
+
     DB::table('users')->where('id', $user->id)->update(['password' => Hash::make('a-brand-new-password')]);
     auth()->forgetGuards();
 
@@ -25,6 +29,7 @@ test('a session ends once the account password changes', function (): void {
 
     // Assert
     $response->assertRedirect(route('login'));
+
     assertGuest();
 });
 
@@ -32,12 +37,16 @@ test('a session continues while the account password is unchanged', function ():
     // Arrange
     User::factory()->administrator()->create(['email' => 'promoter@example.com', 'status' => UserStatus::Active]);
     post(route('login'), ['email' => 'promoter@example.com', 'password' => 'secret']);
-    get(route('promotions.index'))->assertSuccessful();
+    $response = get(route('promotions.index'));
+
+    // Assert
+    $response->assertSuccessful();
 
     // Act
     $response = get(route('promotions.index'));
 
     // Assert
     $response->assertSuccessful();
+
     assertAuthenticated();
 });

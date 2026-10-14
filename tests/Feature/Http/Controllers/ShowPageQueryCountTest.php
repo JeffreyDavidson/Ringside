@@ -27,9 +27,11 @@ describe('show page query counts', function (): void {
         DB::enableQueryLog();
 
         // Act
-        get(route($route, $model))->assertOk();
+        $response = get(route($route, $model));
 
         // Assert
+        $response->assertOk();
+
         $queries = array_column(DB::getQueryLog(), 'query');
         DB::disableQueryLog();
         expect(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'select exists')))->toBeEmpty()

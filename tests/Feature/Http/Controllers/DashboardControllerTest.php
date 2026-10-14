@@ -28,23 +28,19 @@ use function Pest\Laravel\get;
 /**
  * @see DashboardController::__invoke()
  */
-test('administrators can view the dashboard', function () {
-    actingAs(administrator())
-        ->get(route('dashboard'))
-        ->assertOk()
-        ->assertViewIs('dashboard');
-});
-
-/**
- * @see DashboardController::__invoke()
- */
 test('promotion members can view the dashboard', function () {
+    // Arrange
     $promotion = Promotion::factory()->create();
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
 
-    actingAs($user)
-        ->get(route('dashboard'))
+    actingAs($user);
+
+    // Act
+    $response = get(route('dashboard'));
+
+    // Assert
+    $response
         ->assertOk()
         ->assertViewIs('dashboard');
 });
@@ -53,7 +49,11 @@ test('promotion members can view the dashboard', function () {
  * @see DashboardController::__invoke()
  */
 test('a guest cannot view the dashboard', function () {
-    get(route('dashboard'))
+    // Act
+    $response = get(route('dashboard'));
+
+    // Assert
+    $response
         ->assertRedirect(route('login'));
 });
 
@@ -71,13 +71,15 @@ test('the dashboard shows the roster, upcoming events and current champions', fu
     $title = Title::factory()->active()->create(['name' => 'Heavyweight Championship']);
     TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
 
+    actingAs(administrator());
+
     // Act
-    $response = actingAs(administrator())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
         ->assertOk()
+        ->assertViewIs('dashboard')
         ->assertViewHas('dashboard', fn (mixed $dashboard): bool => $dashboard instanceof DashboardViewModel)
         ->assertSeeInOrder(['Cleared to book', '3', 'Injured', '1', 'Suspended', '0', 'Under contract', '4'])
         ->assertSee('Winter Warfare')
@@ -101,9 +103,10 @@ test('the dashboard shows when a reign began as the day in the title promotion t
         ->current()
         ->create(['won_at' => Date::parse('2026-03-02 03:00:00', 'UTC')]);
 
+    actingAs(administrator());
+
     // Act
-    $response = actingAs(administrator())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
@@ -116,9 +119,11 @@ test('the dashboard shows when a reign began as the day in the title promotion t
  * @see DashboardController::__invoke()
  */
 test('the dashboard guides a new promotion when nothing is scheduled', function () {
+    // Arrange
+    actingAs(administrator());
+
     // Act
-    $response = actingAs(administrator())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
@@ -137,9 +142,10 @@ test('users without an active promotion membership see the no promotion page ins
     Event::factory()->for($promotion, 'promotion')->create(['name' => 'Hidden Event', 'date' => now()->addDays(3)]);
     Wrestler::factory()->for($promotion, 'promotion')->employed()->create();
 
+    actingAs(basicUser());
+
     // Act
-    $response = actingAs(basicUser())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
@@ -154,8 +160,7 @@ test('users without an active promotion membership see the no promotion page ins
  */
 test('members only see their own promotion on the dashboard', function () {
     // Arrange
-    $mine = Promotion::factory()->create();
-    $other = Promotion::factory()->create();
+    [$mine, $other] = Promotion::factory()->count(2)->create()->all();
     $user = basicUser();
     $mine->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     Event::factory()->for($mine, 'promotion')->create(['name' => 'Own Event', 'date' => now()->addDays(3)]);
@@ -165,9 +170,10 @@ test('members only see their own promotion on the dashboard', function () {
     $foreignTitle = Title::factory()->for($other, 'promotion')->active()->create(['name' => 'Foreign Belt']);
     TitleChampionship::factory()->for($foreignTitle)->forWrestler($foreignChampion)->current()->create();
 
+    actingAs($user);
+
     // Act
-    $response = actingAs($user)
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
@@ -186,9 +192,10 @@ test('administrators without a membership still see every promotion on the dashb
     // Arrange
     Event::factory()->for(Promotion::factory(), 'promotion')->create(['name' => 'Platform Event', 'date' => now()->addDays(3)]);
 
+    actingAs(administrator());
+
     // Act
-    $response = actingAs(administrator())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
     $response
@@ -208,12 +215,15 @@ test('the dashboard pluralises the number of days a champion has held a title', 
         ->current()
         ->create(['won_at' => now()->subDays($days)]);
 
+    actingAs(administrator());
+
     // Act
-    $response = actingAs(administrator())
-        ->get(route('dashboard'));
+    $response = get(route('dashboard'));
 
     // Assert
-    $response->assertOk()->assertSee($expected);
+    $response
+        ->assertOk()
+        ->assertSee($expected);
 
     if ($unexpected !== null) {
         $response->assertDontSee($unexpected);
@@ -232,7 +242,13 @@ test('the dashboard issues the same number of queries however large the roster i
     $countQueries = function (): int {
         DB::flushQueryLog();
         DB::enableQueryLog();
-        get(route('dashboard'))->assertOk();
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response->assertOk();
+
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();
 

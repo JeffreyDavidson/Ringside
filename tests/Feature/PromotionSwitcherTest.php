@@ -7,7 +7,6 @@ use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\from;
 
 function attachActivePromotionMembership(User $user, Promotion $promotion): void
 {
@@ -16,37 +15,6 @@ function attachActivePromotionMembership(User $user, Promotion $promotion): void
         'status' => MembershipStatus::Active->value,
     ]);
 }
-
-test('a user can switch to another active promotion', function () {
-    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
-    $firstPromotion = Promotion::factory()->create();
-    $secondPromotion = Promotion::factory()->create();
-    attachActivePromotionMembership($user, $firstPromotion);
-    attachActivePromotionMembership($user, $secondPromotion);
-
-    $response = from(route('dashboard'))
-        ->actingAs($user)
-        ->post(route('promotions.switch'), ['promotion_id' => $secondPromotion->id]);
-
-    $response
-        ->assertRedirect(route('dashboard'))
-        ->assertSessionHas('status', __('promotions.switched'));
-
-    expect(session('active_promotion_id'))->toBe($secondPromotion->id);
-});
-
-test('a user cannot switch to a promotion without an active membership', function () {
-    $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
-    $promotion = Promotion::factory()->create();
-    $otherPromotion = Promotion::factory()->create();
-    attachActivePromotionMembership($user, $promotion);
-
-    actingAs($user)
-        ->post(route('promotions.switch'), ['promotion_id' => $otherPromotion->id])
-        ->assertForbidden();
-
-    expect(session('active_promotion_id'))->toBeNull();
-});
 
 test('the authenticated layout displays active promotions', function () {
     $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);

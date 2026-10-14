@@ -25,7 +25,13 @@ test('an event editor can open the checklist without creating agreements', funct
     $response = get(route('events.talent-bookings.show', $event));
 
     // Assert
-    $response->assertOk()->assertSee('Talent bookings')->assertSee('USD');
+    $response
+        ->assertOk()
+        ->assertViewIs('events.talent-bookings')
+        ->assertViewHas('event', $event)
+        ->assertSee('Talent bookings')
+        ->assertSee('USD');
+
     expect(EventTalentBooking::query()->count())->toBe(0);
 });
 
@@ -43,7 +49,10 @@ test('only owners and managers see private booking pages and their links', funct
 
     // Assert
     if ($allowed) {
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertViewIs('events.talent-bookings')
+            ->assertViewHas('event', $event);
         $eventResponse->assertSee(route('events.talent-bookings.show', $event));
 
         return;
@@ -60,13 +69,23 @@ test('guests and foreign promotions cannot read the booking checklist', function
     // Arrange
     $event = Event::factory()->for(Promotion::factory())->create();
 
-    // Act / Assert
-    get(route('events.talent-bookings.show', $event))->assertRedirect(route('login'));
+    // Act
+    $response = get(route('events.talent-bookings.show', $event));
+
+    // Assert
+    $response->assertRedirect(route('login'));
+
     $other = Promotion::factory()->create();
     $user = basicUser();
     $other->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
     actingAs($user);
-    get(route('events.talent-bookings.show', $event))->assertNotFound();
+
+    // Act
+    $response = get(route('events.talent-bookings.show', $event));
+
+    // Assert
+    $response->assertNotFound();
+
     expect(EventTalentBooking::query()->count())->toBe(0);
 });
 
@@ -75,10 +94,26 @@ test('private terms never enter event pack print live or ordinary event response
     $fixture = talentBookingFixture();
     saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'LEAK-REASON-7Q'));
 
-    // Act / Assert
+    // Act
     foreach (['events.show', 'events.pack.show', 'events.live-show.show'] as $name) {
-        get(route($name, $fixture['event']))->assertOk()->assertDontSee('LEAK-TRAVEL-7Q')->assertDontSee('LEAK-REASON-7Q')->assertDontSee('1,234.56');
+        $response = get(route($name, $fixture['event']));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertDontSee('LEAK-TRAVEL-7Q')
+            ->assertDontSee('LEAK-REASON-7Q')
+            ->assertDontSee('1,234.56');
     }
-    get(route('events.pack.show', ['event' => $fixture['event'], 'print' => 1]))->assertOk()->assertDontSee('LEAK-TRAVEL-7Q')->assertDontSee('LEAK-REASON-7Q');
+
+    // Act
+    $response = get(route('events.pack.show', ['event' => $fixture['event'], 'print' => 1]));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertDontSee('LEAK-TRAVEL-7Q')
+        ->assertDontSee('LEAK-REASON-7Q');
+
     expect(Activity::query()->get()->toJson())->not->toContain('LEAK-TRAVEL-7Q', 'LEAK-REASON-7Q');
 });

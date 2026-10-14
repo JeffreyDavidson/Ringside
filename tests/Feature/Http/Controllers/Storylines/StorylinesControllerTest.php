@@ -23,7 +23,14 @@ test('only owners and managers can open creative planning', function (Membership
     $response = get(route('storylines.index'));
 
     // Assert
-    $response->assertStatus($status);
+    if ($status === 403) {
+        $response->assertForbidden();
+
+        return;
+    }
+    $response
+        ->assertOk()
+        ->assertViewIs('storylines.index');
 })->with([
     'owner' => [MembershipRole::Owner, 200],
     'booker' => [MembershipRole::Manager, 200],
@@ -32,8 +39,18 @@ test('only owners and managers can open creative planning', function (Membership
 
 require_once __DIR__.'/../../../../Fixtures/storylines.php';
 test('a foreign story ID and a missing ID are both hidden while the owner can read the real story', function () {
+    // Arrange
     $f = storylineSourceFixture();
-    get(route('storylines.show', $f['story']))->assertOk()->assertSee('Private betrayal');
+    // Act
+    $response = get(route('storylines.show', $f['story']));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertViewIs('storylines.show')
+        ->assertViewHas('storyline', $f['story'])
+        ->assertSee('Private betrayal');
+
     $foreign = Promotion::factory()->create();
     $attacker = basicUser();
     $foreign->users()->attach($attacker, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
@@ -41,28 +58,65 @@ test('a foreign story ID and a missing ID are both hidden while the owner can re
     actingAs($attacker);
     expect(Auth::id())->toBe($attacker->id)
         ->and($attacker->refresh()->status)->toBe(UserStatus::Active);
+
+    // Act
     $response = get(route('storylines.show', $f['story']));
     expect($response->headers->get('Location'))->toBeNull();
     $response->assertNotFound();
-    get(route('storylines.show', 999999))->assertNotFound();
+
+    $response = get(route('storylines.show', 999999));
+
+    // Assert
+    $response->assertNotFound();
 });
 test('read-only members see ordinary event surfaces without private creative markers or hints', function () {
+    // Arrange
     $f = storylineSourceFixture();
     plannedStorylineStep($f['story'], new SourceData($f['event']->id, $f['match']->id));
     $ownerPage = get(route('events.show', $f['event']));
-    $ownerPage->assertSee('Related storylines')->assertSee('Private betrayal');
+    $ownerPage
+        ->assertSee('Related storylines')
+        ->assertSee('Private betrayal');
+
     $member = basicUser();
     requiredModel($f['story']->promotion)->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     session()->flush();
     actingAs($member);
     expect(Auth::id())->toBe($member->id)
         ->and($member->refresh()->status)->toBe(UserStatus::Active);
+    // Act
     $response = get(route('storylines.show', $f['story']));
+
+    // Assert
     expect($response->headers->get('Location'))->toBeNull();
     $response->assertForbidden();
     foreach (['events.show', 'events.pack.show', 'events.live-show.show'] as $route) {
-        get(route($route, $f['event']))->assertOk()->assertDontSee('Private betrayal')->assertDontSee('Related storylines');
+
+        // Act
+        $response = get(route($route, $f['event']));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertDontSee('Private betrayal')
+            ->assertDontSee('Related storylines');
     }
-    get(route('events.pack.show', ['event' => $f['event'], 'print' => 1]))->assertOk()->assertDontSee('Private betrayal');
+
+    // Act
+    $response = get(route('events.pack.show', ['event' => $f['event'], 'print' => 1]));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertDontSee('Private betrayal');
+
     expect($f['story']->revisions()->count())->toBe(1);
+});
+
+test('guests cannot open storylines.index', function (): void {
+    // Act
+    $response = get(route('storylines.index'));
+
+    // Assert
+    $response->assertRedirect(route('login'));
 });
