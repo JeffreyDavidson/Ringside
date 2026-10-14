@@ -6,6 +6,7 @@
     @if (! $complete) wire:poll.5s.visible="refreshState" @endif
     class="mx-auto flex max-w-6xl flex-col gap-3 pb-8 lg:gap-4"
 >
+    @php $talent = collect($run?->content['roster'] ?? [])->reject(fn ($person) => str_starts_with($person['key'], 'crew:')); @endphp
     <nav class="flex flex-wrap gap-x-6 gap-y-3 text-sm">
         <a
             href="{{ route('events.show', $event) }}"
@@ -49,17 +50,27 @@
                 </span>
                 <span wire:loading role="status" class="text-ringside-muted">{{ __('live-show.saving') }}</span>
             </div>
-            <x-button
-                variant="secondary"
-                wire:click="refreshState"
-                wire:loading.attr="disabled"
-                aria-label="{{ __('live-show.refresh_short') }}"
-                title="{{ __('live-show.refresh') }}"
-                class="shrink-0 px-3"
-            >
-                <x-heroicon-o-arrow-path class="size-5" />
-                <span class="sr-only">{{ __('live-show.refresh_short') }}</span>
-            </x-button>
+            <div class="flex shrink-0 items-center gap-2">
+                @if ($run !== null)
+                    @can('viewProduction', $event)
+                        <a
+                            href="{{ route('events.production-sheet.show', $event) }}"
+                            class="flex min-h-11 items-center px-2 font-semibold underline underline-offset-4"
+                        >{{ __('production.cues') }}</a>
+                    @endcan
+                @endif
+                <x-button
+                    variant="secondary"
+                    wire:click="refreshState"
+                    wire:loading.attr="disabled"
+                    aria-label="{{ __('live-show.refresh_short') }}"
+                    title="{{ __('live-show.refresh') }}"
+                    class="shrink-0 px-3"
+                >
+                    <x-heroicon-o-arrow-path class="size-5" />
+                    <span class="sr-only">{{ __('live-show.refresh_short') }}</span>
+                </x-button>
+            </div>
         </div>
         @if ($run !== null)
             <nav aria-label="{{ __('live-show.sections') }}" class="border-ringside-line grid grid-cols-3 border-t">
@@ -72,7 +83,7 @@
                     class="hover:bg-ringside-surface-hover flex min-h-14 flex-col items-center justify-center px-2 py-2"
                 >
                     <span class="font-semibold underline underline-offset-4">{{ __('live-show.roster_short') }}</span>
-                    <span class="text-ringside-muted tabular-nums">{{ __('live-show.arrived_count', ['count' => collect($run->content['roster'])->whereNotNull('arrived')->count(), 'total' => count($run->content['roster'])]) }}</span>
+                    <span class="text-ringside-muted tabular-nums">{{ __('live-show.arrived_count', ['count' => $talent->whereNotNull('arrived')->count(), 'total' => $talent->count()]) }}</span>
                 </a>
                 <a
                     href="#live-order"
@@ -149,6 +160,12 @@
                     @foreach ($source['content']['items'] ?? [] as $item)
                         <li wire:key="preview-{{ $item['key'] }}">
                             {{ $item['label'] }} · {{ $screen->comparison($item) }}
+                            @if ($item['cues'] ?? [])
+                                <x-events.production.cues
+                                    :cues="$item['cues']"
+                                    :assignments="$source['content']['production']['assignments'] ?? []"
+                                />
+                            @endif
                         </li>
                     @endforeach
                 </ol>
@@ -199,6 +216,17 @@
                         @if ($current['warning'])
                             <p class="text-ringside-warning mt-3">{{ __('live-show.unavailable') }}</p>
                         @endif
+                        @if ($current['cues'] ?? [])
+                            <details>
+                                <summary class="min-h-11 cursor-pointer py-3">
+                                    {{ __('production.cues') }} ({{ count($current['cues']) }})
+                                </summary>
+                                <x-events.production.cues
+                                    :cues="$current['cues']"
+                                    :assignments="$run->content['production']['assignments'] ?? []"
+                                />
+                            </details>
+                        @endif
                         @if ($current['timing']['notes'] ?? null)
                             <p class="mt-4 whitespace-pre-wrap">{{ $current['timing']['notes'] }}</p>
                         @endif
@@ -229,6 +257,17 @@
                     @if ($next)
                         <p class="text-ringside-muted mt-1 lg:mt-2">{{ $next['details'] }}</p>
                         <p class="text-ringside-muted mt-1 lg:mt-2">{{ $screen->comparison($next) }}</p>
+                        @if ($next['cues'] ?? [])
+                            <details>
+                                <summary class="min-h-11 cursor-pointer py-3">
+                                    {{ __('production.cues') }} ({{ count($next['cues']) }})
+                                </summary>
+                                <x-events.production.cues
+                                    :cues="$next['cues']"
+                                    :assignments="$run->content['production']['assignments'] ?? []"
+                                />
+                            </details>
+                        @endif
                         @if ($next['timing']['notes'] ?? null)
                             <p class="mt-4 whitespace-pre-wrap">{{ $next['timing']['notes'] }}</p>
                         @endif
@@ -337,7 +376,7 @@
                     <h2 id="live-roster" class="scroll-mt-36 text-xl font-semibold">{{ __('live-show.roster') }}</h2>
                     <p class="text-ringside-muted mt-2 text-sm">{{ __('live-show.roster_help') }}</p>
                     <p class="mt-3 tabular-nums">
-                        {{ __('live-show.arrived_count', ['count' => collect($run->content['roster'])->whereNotNull('arrived')->count(), 'total' => count($run->content['roster'])]) }} · {{ __('live-show.briefed_count', ['count' => collect($run->content['roster'])->whereNotNull('briefed')->count(), 'total' => count($run->content['roster'])]) }}
+                        {{ __('live-show.arrived_count', ['count' => $talent->whereNotNull('arrived')->count(), 'total' => $talent->count()]) }} · {{ __('live-show.briefed_count', ['count' => $talent->whereNotNull('briefed')->count(), 'total' => $talent->count()]) }}
                     </p>
                 </div>
                 <label class="flex flex-col gap-2 text-sm"
@@ -352,75 +391,29 @@
                     </select>
                 </label>
             </div>
-            @php $people = collect($run->content['roster'])->filter(fn ($person) => ! in_array($rosterFilter, ['arrived', 'briefed'], true) || $person[$rosterFilter] === null); @endphp
+            @php $people = $talent->filter(fn ($person) => ! in_array($rosterFilter, ['arrived', 'briefed'], true) || $person[$rosterFilter] === null); @endphp
             <div class="divide-ringside-line mt-5 divide-y">
                 @forelse ($people as $person)
-                    <article
-                        wire:key="person-{{ $person['key'] }}"
-                        class="flex flex-wrap items-start justify-between gap-4 py-5"
-                    >
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-semibold break-words">{{ $person['name'] }}</h3>
-                            <p class="text-ringside-muted mt-1 text-sm">
-                                {{ $person['role'] }} · {{ __('live-show.matches') }} {{ implode(', ', $person['matches']) }}
-                            </p>
-                            @if (! $person['assigned'])
-                                <p class="text-ringside-warning mt-2">{{ __('live-show.no_longer_assigned') }}</p>
-                            @endif
-                            @if ($person['warning'])
-                                <p class="text-ringside-warning mt-2">{{ __('live-show.unavailable') }}</p>
-                            @endif
-                            <p class="mt-2 text-sm tabular-nums">
-                                {{ __('live-show.arrival_time') }}: {{ $screen->actual($person['arrived'], $run->content['timezone']) }}
-                            </p>
-                            <p class="mt-1 text-sm tabular-nums">
-                                {{ __('live-show.briefing_time') }}: {{ $screen->actual($person['briefed'], $run->content['timezone']) }}
-                            </p>
-                        </div>
-                        @if (! $complete)
-                            @can('update', $event)
-                                <fieldset
-                                    :disabled="requestFailed || ! online"
-                                    wire:offline.attr="disabled"
-                                    class="flex flex-wrap gap-3"
-                                >
-                                    @if ($person['arrived'] === null)
-                                        <x-button
-                                            variant="secondary"
-                                            wire:click="attendance('{{ $person['key'] }}', 'arrived', true)"
-                                            wire:loading.attr="disabled"
-                                        >{{ __('live-show.arrived') }}</x-button>
-                                    @else
-                                        <x-button
-                                            variant="secondary"
-                                            wire:click="attendance('{{ $person['key'] }}', 'arrived', false)"
-                                            wire:confirm="{{ __('live-show.clear_confirm') }}"
-                                            wire:loading.attr="disabled"
-                                        >{{ __('live-show.clear_arrival') }}</x-button>
-                                    @endif
-                                    @if ($person['briefed'] === null)
-                                        <x-button
-                                            variant="secondary"
-                                            wire:click="attendance('{{ $person['key'] }}', 'briefed', true)"
-                                            wire:loading.attr="disabled"
-                                            :disabled="$person['arrived'] === null"
-                                        >{{ __('live-show.briefed') }}</x-button>
-                                    @else
-                                        <x-button
-                                            variant="secondary"
-                                            wire:click="attendance('{{ $person['key'] }}', 'briefed', false)"
-                                            wire:loading.attr="disabled"
-                                        >{{ __('live-show.clear_briefing') }}</x-button>
-                                    @endif
-                                </fieldset>
-                            @endcan
-                        @endif
-                    </article>
+                    <x-events.production.attendance-person :$person :$event :$run :$complete :$screen />
                 @empty
                     <p class="text-ringside-muted py-5">{{ __('live-show.empty_filter') }}</p>
                 @endforelse
             </div>
         </section>
+        @can('viewProduction', $event)
+            <section aria-labelledby="live-crew" class="border-ringside-line border-t pt-6">
+                <h2 id="live-crew" class="scroll-mt-36 text-xl font-semibold">{{ __('production.directory') }}</h2>
+                @php $crew = collect($run->content['roster'])->filter(fn ($person) => str_starts_with($person['key'], 'crew:')); @endphp
+                <p class="mt-3">
+                    {{ __('live-show.arrived_count', ['count' => $crew->whereNotNull('arrived')->count(), 'total' => $crew->count()]) }}
+                </p>
+                <div class="divide-ringside-line divide-y">
+                    @foreach ($crew as $person)
+                        <x-events.production.attendance-person :$person :$event :$run :$complete :$screen />
+                    @endforeach
+                </div>
+            </section>
+        @endcan
         <section aria-labelledby="live-order" class="border-ringside-line border-t pt-6">
             <h2 id="live-order" class="scroll-mt-36 text-xl font-semibold">{{ __('live-show.order') }}</h2>
             <p class="text-ringside-muted mt-2 text-sm">{{ __('live-show.snapshot_help') }}</p>
@@ -450,6 +443,17 @@
                                 </p>
                             @endif
                         </div>
+                        @if ($item['cues'] ?? [])
+                            <details>
+                                <summary class="min-h-11 cursor-pointer py-3">
+                                    {{ __('production.cues') }} ({{ count($item['cues']) }})
+                                </summary>
+                                <x-events.production.cues
+                                    :cues="$item['cues']"
+                                    :assignments="$run->content['production']['assignments'] ?? []"
+                                />
+                            </details>
+                        @endif
                         @if ($item['reason'])
                             <p class="text-sm">{{ __('live-show.reason') }}: {{ $item['reason'] }}</p>
                         @endif

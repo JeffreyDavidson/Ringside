@@ -9,6 +9,7 @@ use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
+use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,7 @@ class RestoreAction
         private readonly DeletionStateManager $deletionState,
         private readonly MatchAssignmentConflictService $assignmentConflicts,
         private readonly SchedulingSlotLock $slotLock,
+        private readonly EventRosterAvailabilityQuery $rosterAvailability,
     ) {}
 
     /**
@@ -60,6 +62,9 @@ class RestoreAction
             }
 
             $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $lockedEvent->date);
+            if ($lockedEvent->date?->isFuture()) {
+                $this->rosterAvailability->ensureAt($lockedEvent, $lockedEvent->date, lock: true);
+            }
             $this->deletionState->restore($lockedEvent, now());
         }, attempts: 3);
     }

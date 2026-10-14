@@ -21,13 +21,17 @@ use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
+use App\Queries\Matches\BookingHistoryQuery;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 
 /**
+ * @phpstan-import-type Snapshot from BookingHistoryQuery
+ *
  * @extends BaseFormModal<CreateEditForm, EventMatch>
  *
  * @property-read array<string,string> $getMatchTypes
@@ -123,6 +127,35 @@ class FormModal extends BaseFormModal
             ->all();
     }
 
+    /** @return Snapshot|array{error: string} */
+    #[Renderless]
+    public function checkHistory(int $page = 1): array
+    {
+        $editedMatch = null;
+
+        if ($this->form->isEditing()) {
+            $editedMatch = EventMatch::query()->findOrFail($this->form->modelId);
+            Gate::authorize('update', $editedMatch);
+        } else {
+            Gate::authorize('create', EventMatch::class);
+        }
+
+        $event = $this->bookedEvent();
+        Gate::authorize('update', $event);
+
+        if (! $this->form->matchType instanceof MatchType) {
+            return ['error' => __('matches.history.selection_required')];
+        }
+
+        try {
+            return resolve(BookingHistoryQuery::class)->forEvent(
+                $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
+            );
+        } catch (ValidationException) {
+            return ['error' => __('matches.history.unavailable_selection')];
+        }
+    }
+
     /**
      * Search bookable roster records by name for the form's searchable selects.
      *
@@ -141,7 +174,10 @@ class FormModal extends BaseFormModal
             return [];
         }
 
-        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $this->bookedEvent()->promotion_id);
+        $event = $this->bookedEvent();
+        $event->loadMissing('promotion');
+
+        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString());
     }
 
     /**

@@ -9,6 +9,9 @@
 <body class="event-pack-print">
     <nav class="pack-print-controls" aria-label="{{ __('event-pack.print_options') }}">
         <a href="{{ route('events.pack.show', $event) }}">&larr; {{ __('event-pack.back_to_pack') }}</a>
+        @can('viewProduction', $event)
+            <a href="{{ route('events.production-sheet.show', ['event' => $event, 'print' => 1]) }}">{{ __('production.print') }}</a>
+        @endcan
         <fieldset>
             <legend>{{ __('event-pack.sections') }}</legend>
             @foreach (['running_order', 'roster', 'notes'] as $section)

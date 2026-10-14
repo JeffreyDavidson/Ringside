@@ -10,6 +10,14 @@ if (form) {
             status.textContent = form.dataset.dirtyMessage;
         }
     };
+    window.addEventListener('production-pack-saved', event => {
+        const version = form.querySelector('[name=version]');
+        if (Number(version.value) !== event.detail.previousVersion) {
+            return;
+        }
+        version.value = String(event.detail.version);
+        form.querySelector('[name=fingerprint]').value = event.detail.fingerprint;
+    });
     form.addEventListener('input', markDirty);
     form.addEventListener('change', markDirty);
     form.addEventListener('submit', () => {

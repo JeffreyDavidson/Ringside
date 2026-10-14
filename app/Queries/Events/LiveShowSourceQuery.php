@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Queries\Events;
 
+use App\Enums\Crew\CrewRole;
 use App\Exceptions\Events\LiveShowException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -35,13 +36,25 @@ class LiveShowSourceQuery
             throw LiveShowException::because('prepare_required');
         }
 
+        $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
+        $crew = [];
+        foreach ($assignments as $assignment) {
+            $key = 'crew:'.$assignment['contact_id'];
+            $crew[$key] ??= ['key' => $key, 'name' => $assignment['name'], 'role' => '', 'matches' => [], 'warning' => false,
+                'assigned' => true, 'arrived' => null, 'briefed' => null, 'updated_by' => null, 'assignments' => []];
+            $crew[$key]['assignments'][] = $assignment;
+            $crew[$key]['role'] = implode(', ', array_unique(array_map(fn (array $entry): string => CrewRole::from($entry['role'])->label(), $crew[$key]['assignments'])));
+        }
+        $cues = $data['content']['production']['cues'] ?? [];
+
         return ['pack' => $data['pack'], 'fingerprint' => $data['card']['fingerprint'], 'content' => [
             'event_date' => $event->date->toIso8601String(), 'event_name' => $event->name,
             'venue' => $event->venue?->name, 'timezone' => $data['content']['timezone'], 'revision' => $data['content']['revision'],
             'items' => array_map(fn (array $row): array => [...$row, 'timezone' => $data['content']['timezone'], 'state' => 'pending', 'start' => null,
-                'finish' => null, 'reason' => null, 'updated_by' => null], $data['running']),
-            'roster' => array_map(fn (array $person): array => [...$person, 'assigned' => true,
-                'arrived' => null, 'briefed' => null, 'updated_by' => null], $data['card']['roster']),
+                'finish' => null, 'reason' => null, 'updated_by' => null, 'cues' => array_values(array_filter($cues, fn (array $cue): bool => $cue['item_key'] === $row['key']))], $data['running']),
+            'roster' => [...array_map(fn (array $person): array => [...$person, 'assigned' => true,
+                'arrived' => null, 'briefed' => null, 'updated_by' => null], $data['card']['roster']), ...array_values($crew)],
+            'production' => ['assignments' => $assignments],
         ]];
     }
 }

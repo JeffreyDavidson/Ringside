@@ -2,12 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Crew\CrewContactsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventBudgetsController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
+use App\Http\Controllers\Events\EventPosterController;
+use App\Http\Controllers\Events\EventProductionSheetsController;
+use App\Http\Controllers\Events\EventPublicPagesController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\EventTalentBookingsController;
+use App\Http\Controllers\Events\PreviewEventPosterController;
+use App\Http\Controllers\Events\PublicEventController;
+use App\Http\Controllers\Events\ReleaseEventPublicationController;
+use App\Http\Controllers\Events\UnpublishEventController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\Matches\EventMatchesController;
@@ -16,12 +24,14 @@ use App\Http\Controllers\Promotions\DeclinePromotionInvitationController;
 use App\Http\Controllers\Promotions\PromotionsController;
 use App\Http\Controllers\Promotions\SwitchPromotionController;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Controllers\Roster\ShowRosterAvailabilityController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -38,6 +48,9 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/auth.php';
 
 Route::get('/', MarketingController::class)->name('home');
+Route::get('shows/{publicId}/{slug}', PublicEventController::class)->whereUuid('publicId')->name('shows.show');
+Route::get('shows/{publicId}/{slug}/results', PublicEventController::class)->whereUuid('publicId')->name('shows.results');
+Route::get('shows/{publicId}/{slug}/poster/{asset}', EventPosterController::class)->whereUuid('publicId')->where('asset', '[a-f0-9-]{36}\\.png')->name('shows.poster');
 
 Route::middleware('auth')->group(function () {
     Route::post('promotions/switch', SwitchPromotionController::class)->name('promotions.switch');
@@ -60,6 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
 
         Route::prefix('roster')->group(function () {
+            Route::get('availability', ShowRosterAvailabilityController::class)->can('viewAny', Wrestler::class)->name('availability.index');
             Route::get('stables', [StablesController::class, 'index'])->can('viewAny', Stable::class)->name('stables.index');
             Route::get('stables/{stable}', [StablesController::class, 'show'])->can('view', 'stable')->name('stables.show');
             Route::get('wrestlers', [WrestlersController::class, 'index'])->can('viewAny', Wrestler::class)->name('wrestlers.index');
@@ -76,9 +90,17 @@ Route::middleware('auth')->group(function () {
         Route::get('titles/{title}', [TitlesController::class, 'show'])->can('view', 'title')->name('titles.show');
 
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
+        Route::get('production-crew', [CrewContactsController::class, 'index'])->can('viewAny', CrewContact::class)->name('crew.contacts.index');
+        Route::get('events/{event}/public-pages', [EventPublicPagesController::class, 'edit'])->can('preparePublication', 'event')->name('events.public-pages.edit');
+        Route::put('events/{event}/public-pages', [EventPublicPagesController::class, 'update'])->can('preparePublication', 'event')->name('events.public-pages.update');
+        Route::get('events/{event}/public-pages/preview', [EventPublicPagesController::class, 'show'])->can('preparePublication', 'event')->name('events.public-pages.show');
+        Route::get('events/{event}/public-pages/poster', PreviewEventPosterController::class)->can('uploadPublicationPoster', 'event')->name('events.public-pages.poster');
+        Route::post('events/{event}/public-pages/publish', ReleaseEventPublicationController::class)->can('publishPublication', 'event')->name('events.public-pages.publish');
+        Route::delete('events/{event}/public-pages/publish', UnpublishEventController::class)->can('unpublishPublication', 'event')->name('events.public-pages.unpublish');
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
+        Route::get('events/{event}/production-sheet', [EventProductionSheetsController::class, 'show'])->can('viewProduction', 'event')->name('events.production-sheet.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
         Route::get('events/{event}/budget', [EventBudgetsController::class, 'show'])->can('viewBudget', 'event')->name('events.budget.show');
         Route::get('events/{event}/talent-bookings', [EventTalentBookingsController::class, 'show'])->can('update', 'event')->name('events.talent-bookings.show');
