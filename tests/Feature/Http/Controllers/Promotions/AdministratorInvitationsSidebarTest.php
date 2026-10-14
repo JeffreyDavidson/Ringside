@@ -17,6 +17,7 @@ describe('pending invitations in the sidebar', function () {
         $admin = administrator();
         $promotion = Promotion::factory()->create(['name' => 'Sidebar Wrestling']);
         PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+
         actingAs($admin);
 
         // Act
@@ -31,11 +32,12 @@ describe('pending invitations in the sidebar', function () {
             ->assertSeeHtml(route('promotions.invitation.decline', $promotion));
     });
 
-    test('an administrator is told that accepting scopes them to the promotion, a regular user is not', function (callable $makeUser, int $status, bool $seesNote): void {
+    test('acceptance notes explain promotion scoping only to administrators', function (callable $makeUser, int $status, bool $seesNote): void {
         // Arrange
         $user = $makeUser();
         $promotion = Promotion::factory()->create();
         PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+
         actingAs($user);
 
         // Act
@@ -57,6 +59,7 @@ describe('pending invitations in the sidebar', function () {
         $admin = administrator();
         $promotion = Promotion::factory()->create(['name' => 'Accepted Wrestling']);
         PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+
         actingAs($admin);
 
         // Act
@@ -90,8 +93,12 @@ describe('pending invitations in the sidebar', function () {
         $user = basicUser();
         $own = Promotion::factory()->create();
         $inviting = Promotion::factory()->create(['name' => 'Inviting Wrestling']);
-        $own->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        $own->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
         PromotionInvitation::factory()->for($inviting)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+
         actingAs($user);
 
         // Act

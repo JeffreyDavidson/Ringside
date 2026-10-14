@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
-use App\Http\Controllers\Venues\VenuesController;
 use App\Livewire\Venues\Tables\Main;
 use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Venue;
@@ -13,16 +12,46 @@ use App\Models\Promotions\Promotion;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-/**
- * Feature tests for Venues Controller.
- *
- * @see VenuesController
- */
-describe('Venues Controller', function () {
-    /**
-     * @see VenuesController::show()
-     */
-    test('show returns a view', function () {
+describe('index', function (): void {
+    test('an administrator receives the venues index view and table', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('venues.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('venues.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('a guest cannot open the venues index', function (): void {
+        // Act
+        $response = get(route('venues.index'));
+
+        // Assert
+        $response->assertRedirect(route('login'));
+    });
+
+    test('a user without membership cannot open the venues index', function (): void {
+        // Arrange
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('venues.index'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+});
+
+describe('show', function (): void {
+    test('renders the venue profile and its related data', function () {
         // Arrange
         $venue = Venue::factory()->create();
 
@@ -42,9 +71,6 @@ describe('Venues Controller', function () {
             ->assertSeeLivewire(PreviousEvents::class);
     });
 
-    /**
-     * @see VenuesController::show()
-     */
     test('a user without a promotion membership cannot view a venue', function () {
         // Arrange
         $venue = Venue::factory()->create();
@@ -59,9 +85,6 @@ describe('Venues Controller', function () {
             ->assertForbidden();
     });
 
-    /**
-     * @see VenuesController::show()
-     */
     test('a guest cannot view a venue', function () {
         // Arrange
         $venue = Venue::factory()->create();
@@ -74,9 +97,6 @@ describe('Venues Controller', function () {
             ->assertRedirect(route('login'));
     });
 
-    /**
-     * @see VenuesController::show()
-     */
     test('returns 404 when venue does not exist', function () {
         // Arrange
         Venue::factory()->create();
@@ -90,55 +110,24 @@ describe('Venues Controller', function () {
         $response
             ->assertNotFound();
     });
-});
 
-test('an administrator receives the venues index view and table', function (): void {
-    // Arrange
-    actingAs(administrator());
+    test('an active promotion member cannot open the platform venue profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $venue = Venue::factory()->create();
 
-    // Act
-    $response = get(route('venues.index'));
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('venues.index')
-        ->assertSeeHtml('aria-label="Content workspace"')
-        ->assertSeeLivewire(Main::class);
-});
+        actingAs($user);
 
-test('a guest cannot open the venues index', function (): void {
-    // Act
-    $response = get(route('venues.index'));
+        // Act
+        $response = get(route('venues.show', $venue));
 
-    // Assert
-    $response->assertRedirect(route('login'));
-});
-
-test('a user without membership cannot open the venues index', function (): void {
-    // Arrange
-    actingAs(basicUser());
-
-    // Act
-    $response = get(route('venues.index'));
-
-    // Assert
-    $response
-        ->assertForbidden()
-        ->assertViewIs('promotions.no-membership');
-});
-
-test('an active promotion member cannot open the platform venue profile', function (): void {
-    // Arrange
-    $promotion = Promotion::factory()->create();
-    $record = Venue::factory()->create();
-    $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    actingAs($user);
-
-    // Act
-    $response = get(route('venues.show', $record));
-
-    // Assert
-    $response->assertForbidden();
+        // Assert
+        $response->assertForbidden();
+    });
 });

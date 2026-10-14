@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 use App\Actions\Events\SaveEventPublicationAction;
+use App\Http\Controllers\Events\EventPosterController;
+use App\Http\Controllers\Events\PreviewEventPosterController;
+use App\Http\Controllers\Events\ReleaseEventPublicationController;
+use App\Http\Controllers\Events\UnpublishEventController;
 use App\Models\Events\EventPublication;
 use App\Queries\Events\PublicEventSourceQuery;
 use Illuminate\Http\UploadedFile;
@@ -16,17 +20,22 @@ beforeEach(fn () => Storage::fake('local'));
 
 test('poster metadata is stripped and draft and replaced assets never become public', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     $image = UploadedFile::fake()->image('private-camera-name.png', 60, 80);
     $original = $image->getContent();
     $marker = 'LEAK-GPS-CONTACT-7Q';
     $chunk = 'tEXt'."Comment\0".$marker;
     $bytes = substr($original, 0, -12).pack('N', strlen($chunk) - 4).$chunk.pack('N', crc32($chunk)).substr($original, -12);
     $upload = UploadedFile::fake()->createWithContent('private-camera-name.png', $bytes);
-    $publication = savePublicDraft($event, ['poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.']);
+    $publication = savePublicDraft($event, [
+        'poster' => $upload,
+        'poster_alt' => 'Harbor Night event poster',
+        'poster_caption' => 'Join us by the harbor.',
+    ]);
     $key = publicPosterKey($publication);
     expect(Storage::disk('local')->get('event-posters/'.$key))->not->toContain($marker)->not->toContain('private-camera-name');
+
     // Act
     $response = get(route('events.public-pages.poster', $event));
 
@@ -35,7 +44,11 @@ test('poster metadata is stripped and draft and replaced assets never become pub
         ->assertOk()
         ->assertHeader('Content-Type', 'image/png');
 
-    $url = route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]);
+    $url = route('shows.poster', [
+        'publicId' => $publication->public_id,
+        'slug' => $publication->slug,
+        'asset' => $key,
+    ]);
 
     // Act
     $response = get($url);
@@ -43,6 +56,7 @@ test('poster metadata is stripped and draft and replaced assets never become pub
     // Assert
     $response->assertNotFound();
 
+    // Arrange
     releasePublicPage($event);
 
     // Act
@@ -53,7 +67,11 @@ test('poster metadata is stripped and draft and replaced assets never become pub
         ->assertOk()
         ->assertHeader('Cache-Control', 'no-store, private');
 
-    $publication = savePublicDraft($event, ['poster' => UploadedFile::fake()->image('replacement.png', 50, 50), 'poster_alt' => 'Replacement event poster']);
+    // Arrange
+    $publication = savePublicDraft($event, [
+        'poster' => UploadedFile::fake()->image('replacement.png', 50, 50),
+        'poster_alt' => 'Replacement event poster',
+    ]);
 
     // Act
     $response = get($url);
@@ -61,6 +79,7 @@ test('poster metadata is stripped and draft and replaced assets never become pub
     // Assert
     $response->assertOk();
 
+    // Arrange
     releasePublicPage($event);
 
     // Act
@@ -77,7 +96,11 @@ test('poster metadata is stripped and draft and replaced assets never become pub
         ->assertSee('Replacement event poster')
         ->assertDontSee($key);
 
-    $newUrl = route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => publicPosterKey($publication)]);
+    $newUrl = route('shows.poster', [
+        'publicId' => $publication->public_id,
+        'slug' => $publication->slug,
+        'asset' => publicPosterKey($publication),
+    ]);
 
     // Act
     $response = get($newUrl);
@@ -85,10 +108,15 @@ test('poster metadata is stripped and draft and replaced assets never become pub
     // Assert
     $response->assertOk();
 
+    // Act
     $editor = get(route('events.public-pages.edit', $event));
 
-    // Act
-    $response = delete(route('events.public-pages.unpublish', $event), ['complete' => 1, 'version' => EventPublication::query()->where('event_id', $event->id)->firstOrFail()->version, 'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'), 'section' => 'card']);
+    $response = delete(route('events.public-pages.unpublish', $event), [
+        'complete' => 1,
+        'version' => EventPublication::query()->where('event_id', $event->id)->firstOrFail()->version,
+        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
+        'section' => 'card',
+    ]);
 
     // Assert
     $response->assertSessionHasNoErrors();
@@ -98,12 +126,17 @@ test('poster metadata is stripped and draft and replaced assets never become pub
 
     // Assert
     $response->assertNotFound();
-});
+})->see(
+    EventPosterController::class,
+    PreviewEventPosterController::class,
+    ReleaseEventPublicationController::class,
+    UnpublishEventController::class,
+);
 
 test('invalid uploads and missing alternative text cannot create a draft', function (string $kind): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     $editor = get(route('events.public-pages.edit', $event));
     $upload = match ($kind) {
         'svg' => UploadedFile::fake()->createWithContent('active.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
@@ -114,19 +147,35 @@ test('invalid uploads and missing alternative text cannot create a draft', funct
     };
 
     // Act
-    $response = put(route('events.public-pages.update', $event), ['complete' => 1, 'version' => 0, 'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'), 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => $kind === 'alt' ? '' : 'Event poster']);
+    $response = put(route('events.public-pages.update', $event), [
+        'complete' => 1,
+        'version' => 0,
+        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
+        'announcement' => 'scheduled',
+        'poster' => $upload,
+        'poster_alt' => $kind === 'alt' ? '' : 'Event poster',
+    ]);
 
     // Assert
     $response->assertSessionHasErrors($kind === 'alt' ? 'poster_alt' : 'poster');
 
     expect(EventPublication::query()->count())->toBe(0);
-})->with(['svg', 'corrupt', 'dimensions', 'size', 'alt']);
+})->with([
+    'SVG upload' => 'svg',
+    'corrupt image bytes' => 'corrupt',
+    'oversized image dimensions' => 'dimensions',
+    'oversized file' => 'size',
+    'missing alternative text' => 'alt',
+]);
 
 test('removing a draft poster leaves the released poster intact until reviewed', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
-    savePublicDraft($event, ['poster' => UploadedFile::fake()->image('poster.png'), 'poster_alt' => 'Event poster']);
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    savePublicDraft($event, [
+        'poster' => UploadedFile::fake()->image('poster.png'),
+        'poster_alt' => 'Event poster',
+    ]);
     $publication = releasePublicPage($event);
     savePublicDraft($event, ['remove_poster' => 1]);
 
@@ -142,6 +191,7 @@ test('removing a draft poster leaves the released poster intact until reviewed',
     // Assert
     $response->assertNotFound();
 
+    // Arrange
     releasePublicPage($event);
 
     // Act
@@ -152,8 +202,8 @@ test('removing a draft poster leaves the released poster intact until reviewed',
 });
 
 test('an unselected multipart file input does not prevent saving a text only draft', function (): void {
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
 
     $publication = savePublicDraft($event, ['poster' => UploadedFile::fake()->createWithContent('', '')]);
 
@@ -162,14 +212,24 @@ test('an unselected multipart file input does not prevent saving a text only dra
 
 test('a stale poster upload does not leave an unreferenced derivative or replace the approved file', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     $editor = get(route('events.public-pages.edit', $event));
-    savePublicDraft($event, ['poster' => UploadedFile::fake()->image('approved.png'), 'poster_alt' => 'Approved poster']);
+    savePublicDraft($event, [
+        'poster' => UploadedFile::fake()->image('approved.png'),
+        'poster_alt' => 'Approved poster',
+    ]);
     $files = Storage::disk('local')->allFiles('event-posters');
 
     // Act
-    $response = put(route('events.public-pages.update', $event), ['complete' => 1, 'version' => 0, 'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'), 'announcement' => 'scheduled', 'poster' => UploadedFile::fake()->image('stale.png'), 'poster_alt' => 'Stale poster']);
+    $response = put(route('events.public-pages.update', $event), [
+        'complete' => 1,
+        'version' => 0,
+        'fingerprint' => data_get($editor->viewData('source'), 'fingerprint'),
+        'announcement' => 'scheduled',
+        'poster' => UploadedFile::fake()->image('stale.png'),
+        'poster_alt' => 'Stale poster',
+    ]);
 
     // Assert
     $response->assertSessionHasErrors('publication');
@@ -179,15 +239,22 @@ test('a stale poster upload does not leave an unreferenced derivative or replace
 
 test('a persistence failure discards only this request derivative and propagates the failure', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     $source = app(PublicEventSourceQuery::class)->get($event);
     $save = Double::for(SaveEventPublicationAction::class);
     $save->expects('handle')->throws(new RuntimeException('Persistence unavailable'));
     app()->instance(SaveEventPublicationAction::class, $save);
 
     // Act
-    $response = put(route('events.public-pages.update', $event), ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => UploadedFile::fake()->image('pending.png'), 'poster_alt' => 'Event poster']);
+    $response = put(route('events.public-pages.update', $event), [
+        'complete' => 1,
+        'version' => 0,
+        'fingerprint' => $source['fingerprint'],
+        'announcement' => 'scheduled',
+        'poster' => UploadedFile::fake()->image('pending.png'),
+        'poster_alt' => 'Event poster',
+    ]);
 
     // Assert
     $response->assertServerError();

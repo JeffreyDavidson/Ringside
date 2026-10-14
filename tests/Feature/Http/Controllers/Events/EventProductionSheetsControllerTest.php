@@ -10,6 +10,7 @@ use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\ViewModels\EventPackViewModel;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 require_once __DIR__.'/../../../../Fixtures/production.php';
@@ -25,8 +26,15 @@ test('production print defaults to the live snapshot and excludes private notes'
     resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
 
     // Act
-    $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
-    $planResponse = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1, 'source' => 'plan']));
+    $response = get(route('events.production-sheet.show', [
+        'event' => $event,
+        'print' => 1,
+    ]));
+    $planResponse = get(route('events.production-sheet.show', [
+        'event' => $event,
+        'print' => 1,
+        'source' => 'plan',
+    ]));
 
     // Assert
     $response
@@ -52,12 +60,19 @@ test('long cue sheets retain full manual instructions and never print contact de
     $fixture['contact']->notes = 'CONTACT-NOTE-7Q';
     $fixture['contact']->save();
     $input = $fixture['production'];
-    $input['cues'] = array_map(fn (int $i): array => [...$input['cues'][0], 'id' => sprintf('eed36a82-90cb-4a79-b2cc-%012d', $i),
-        'subject' => 'Long cue '.$i, 'instruction' => str_repeat('Hold the entrance until the caller gives the signal. Fade under the announcement and keep the next entrance ready. ', 12)], range(1, 6));
+    $input['cues'] = array_map(fn (int $i): array => [
+        ...$input['cues'][0],
+        'id' => sprintf('eed36a82-90cb-4a79-b2cc-%012d', $i),
+        'subject' => 'Long cue '.$i,
+        'instruction' => str_repeat('Hold the entrance until the caller gives the signal. Fade under the announcement and keep the next entrance ready. ', 12),
+    ], range(1, 6));
     resolve(SaveEventProductionAction::class)->handle($event, 1, $event->pack()->firstOrFail()->card_fingerprint, $input, false);
 
     // Act
-    $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
+    $response = get(route('events.production-sheet.show', [
+        'event' => $event,
+        'print' => 1,
+    ]));
 
     // Assert
     $response
@@ -71,7 +86,7 @@ test('long cue sheets retain full manual instructions and never print contact de
 
 test('opening an empty production sheet creates no data and labels the plan unsaved', function (): void {
     // Arrange
-    \Pest\Laravel\actingAs(administrator());
+    actingAs(administrator());
     $event = Event::factory()->create();
 
     // Act
@@ -102,7 +117,10 @@ test('production requests apply person and role filters to the sheet payload', f
     };
 
     // Act
-    $response = get(route('events.production-sheet.show', ['event' => $event, ...$parameters]));
+    $response = get(route('events.production-sheet.show', [
+        'event' => $event,
+        ...$parameters,
+    ]));
 
     // Assert
     $response
@@ -115,15 +133,23 @@ test('production requests apply person and role filters to the sheet payload', f
         ->and(data_get($sheet, 'person'))->toBe($parameters['person'] ?? null)
         ->and(data_get($sheet, 'role'))->toBe($parameters['role'] ?? null)
         ->and(data_get($sheet, 'rows.0.cues'))->toHaveCount($included ? 1 : 0);
-})->with(['person' => ['person', true], 'other person' => ['other person', false], 'role' => ['role', true], 'other role' => ['other role', false]]);
+})->with([
+    'person' => ['person', true],
+    'other person' => ['other person', false],
+    'role' => ['role', true],
+    'other role' => ['other role', false],
+]);
 
 test('invalid production filters return validation errors', function (string $field, mixed $value): void {
     // Arrange
-    \Pest\Laravel\actingAs(administrator());
+    actingAs(administrator());
     $event = Event::factory()->create();
 
     // Act
-    $response = get(route('events.production-sheet.show', ['event' => $event, $field => $value]));
+    $response = get(route('events.production-sheet.show', [
+        'event' => $event,
+        $field => $value,
+    ]));
 
     // Assert
     $response
@@ -131,7 +157,12 @@ test('invalid production filters return validation errors', function (string $fi
         ->assertSessionHasErrors($field);
 
     expect(EventPack::query()->count())->toBe(0);
-})->with(['source' => ['source', 'invalid'], 'person' => ['person', 'bad'], 'role' => ['role', 'invalid'], 'print' => ['print', 'bad']]);
+})->with([
+    'source' => ['source', 'invalid'],
+    'person' => ['person', 'bad'],
+    'role' => ['role', 'invalid'],
+    'print' => ['print', 'bad'],
+]);
 
 test('guests cannot open production sheets', function (): void {
     // Arrange

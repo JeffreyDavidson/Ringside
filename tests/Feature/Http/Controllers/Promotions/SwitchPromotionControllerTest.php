@@ -15,8 +15,14 @@ test('a user can switch to another active promotion', function () {
     // Arrange
     $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
     [$firstPromotion, $secondPromotion] = Promotion::factory()->count(2)->create()->all();
-    $firstPromotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
-    $secondPromotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $firstPromotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+    $secondPromotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
 
     // Act
     $response = from(route('dashboard'))
@@ -24,7 +30,6 @@ test('a user can switch to another active promotion', function () {
         ->post(route('promotions.switch'), ['promotion_id' => $secondPromotion->id]);
 
     // Assert
-
     $response
         ->assertRedirect(route('dashboard'))
         ->assertSessionHas('status', __('promotions.switched'));
@@ -36,7 +41,10 @@ test('a user cannot switch to a promotion without an active membership', functio
     // Arrange
     $user = User::factory()->basicUser()->create(['status' => UserStatus::Active]);
     [$promotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
 
     actingAs($user);
 
@@ -63,8 +71,13 @@ test('a guest cannot switch promotions', function (): void {
 test('invalid selection keeps the previous promotion', function (mixed $id): void {
     // Arrange
     $promotion = Promotion::factory()->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
     withSession(['active_promotion_id' => $promotion->id]);
 
@@ -76,13 +89,20 @@ test('invalid selection keeps the previous promotion', function (mixed $id): voi
         ->assertRedirect(route('dashboard'))
         ->assertSessionHasErrors('promotion_id')
         ->assertSessionHas('active_promotion_id', $promotion->id);
-})->with(['missing' => null, 'noninteger' => 'invalid']);
+})->with([
+    'missing' => null,
+    'noninteger' => 'invalid',
+]);
 
 test('a refused selection keeps the previous promotion', function (): void {
     // Arrange
     [$promotion, $other] = Promotion::factory()->count(2)->create()->all();
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
     withSession(['active_promotion_id' => $promotion->id]);
 

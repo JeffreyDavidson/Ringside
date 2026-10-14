@@ -14,9 +14,12 @@ beforeEach(fn () => Storage::fake('local'));
 
 test('the private preview streams the draft poster without publishing it', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
-    $publication = savePublicDraft($event, ['poster' => UploadedFile::fake()->image('draft.png'), 'poster_alt' => 'Draft poster']);
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $publication = savePublicDraft($event, [
+        'poster' => UploadedFile::fake()->image('draft.png'),
+        'poster_alt' => 'Draft poster',
+    ]);
     $key = publicPosterKey($publication);
     $bytes = Storage::disk('local')->get('event-posters/'.$key) ?? throw new RuntimeException('Expected poster bytes');
 
@@ -37,10 +40,13 @@ test('the private preview streams the draft poster without publishing it', funct
 
 test('a private preview cannot expose a missing poster', function (string $case): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     if ($case !== 'no draft') {
-        $publication = savePublicDraft($event, $case === 'missing file' ? ['poster' => UploadedFile::fake()->image('draft.png'), 'poster_alt' => 'Draft poster'] : []);
+        $publication = savePublicDraft($event, $case === 'missing file' ? [
+            'poster' => UploadedFile::fake()->image('draft.png'),
+            'poster_alt' => 'Draft poster',
+        ] : []);
         if ($case === 'missing file') {
             Storage::disk('local')->delete('event-posters/'.publicPosterKey($publication));
         }
@@ -51,24 +57,33 @@ test('a private preview cannot expose a missing poster', function (string $case)
 
     // Assert
     $response->assertNotFound();
-})->with(['no draft', 'no poster', 'missing file']);
+})->with([
+    'no draft' => 'no draft',
+    'no poster' => 'no poster',
+    'missing file' => 'missing file',
+]);
 
 test('private poster refuses guests members and outsiders without changing publication', function (string $actor): void {
     // Arrange
-    $world = publicEventFixture();
-    $event = $world['event'];
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
     savePublicDraft($event);
     $publication = releasePublicPage($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
     auth()->logout();
     session()->flush();
     if ($actor !== 'guest') {
-        $promotion = $actor === 'outsider' ? Promotion::factory()->create() : $event->promotion()->firstOrFail();
-        actingAsPromotionMember($promotion, $actor === 'outsider' ? MembershipRole::Owner : MembershipRole::Member);
+        $actorPromotion = $actor === 'outsider' ? Promotion::factory()->create() : $event->promotion()->firstOrFail();
+        actingAsPromotionMember($actorPromotion, $actor === 'outsider' ? MembershipRole::Owner : MembershipRole::Member);
     }
 
     // Act
-    $response = \Pest\Laravel\get(route('events.public-pages.poster', $event), ['version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card', 'reviewed' => 1]);
+    $response = get(route('events.public-pages.poster', $event), [
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'section' => 'card',
+        'reviewed' => 1,
+    ]);
 
     // Assert
     if ($actor === 'guest') {
@@ -78,5 +93,10 @@ test('private poster refuses guests members and outsiders without changing publi
     } else {
         $response->assertForbidden();
     }
+
     expect(freshModel($publication)->getAttributes())->toBe($publication->getAttributes());
-})->with(['guest', 'member', 'outsider']);
+})->with([
+    'guest' => 'guest',
+    'member' => 'member',
+    'outsider' => 'outsider',
+]);

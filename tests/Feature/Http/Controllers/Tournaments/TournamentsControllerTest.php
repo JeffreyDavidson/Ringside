@@ -4,33 +4,40 @@ declare(strict_types=1);
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-it('shows the bracket and readable rounds to an authorized promoter', function (): void {
-    // Arrange
-    $world = tournamentFixture();
-    actingAs(administrator());
-    // Act
-    $response = get(route('tournaments.show', $world['tournament']));
+describe('index', function (): void {
+    test('renders the tournament listing for an authorized operator', function (): void {
+        // Arrange
+        $world = tournamentFixture();
+        actingAs(administrator());
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('tournaments.show')
-        ->assertViewHas('tournament', $world['tournament'])
-        ->assertSee('Autumn Cup')
-        ->assertSee('Rounds')
-        ->assertSee('Bracket');
+        // Act
+        $response = get(route('tournaments.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('tournaments.index')
+            ->assertSee('Autumn Cup');
+    });
 });
 
-it('renders the tournament listing for an authorized operator', function (): void {
-    // Arrange
-    $world = tournamentFixture();
-    \Pest\Laravel\actingAs(administrator());
-    // Act
-    $response = get(route('tournaments.index'));
+describe('show', function (): void {
+    test('shows the bracket and readable rounds to an authorized promoter', function (): void {
+        // Arrange
+        $world = tournamentFixture();
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('tournaments.index')
-        ->assertSee('Autumn Cup');
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tournaments.show', $world['tournament']));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('tournaments.show')
+            ->assertViewHas('tournament', $world['tournament'])
+            ->assertSee('Autumn Cup')
+            ->assertSee('Rounds')
+            ->assertSee('Bracket');
+    });
 });

@@ -11,15 +11,22 @@ beforeEach(fn () => Storage::fake('local'));
 
 test('the released poster streams the approved bytes with private security headers', function (): void {
     // Arrange
-    $world = publicEventFixture();
-    savePublicDraft($world['event'], ['poster' => UploadedFile::fake()->image('poster.png'), 'poster_alt' => 'Approved poster']);
-    $publication = releasePublicPage($world['event']);
+    $fixture = publicEventFixture();
+    savePublicDraft($fixture['event'], [
+        'poster' => UploadedFile::fake()->image('poster.png'),
+        'poster_alt' => 'Approved poster',
+    ]);
+    $publication = releasePublicPage($fixture['event']);
     $key = publicPosterKey($publication);
     $bytes = Storage::disk('local')->get('event-posters/'.$key) ?? throw new RuntimeException('Expected poster bytes');
     auth()->logout();
 
     // Act
-    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $publication->slug, 'asset' => $key]));
+    $response = get(route('shows.poster', [
+        'publicId' => $publication->public_id,
+        'slug' => $publication->slug,
+        'asset' => $key,
+    ]));
 
     // Assert
     $response
@@ -33,9 +40,12 @@ test('the released poster streams the approved bytes with private security heade
 
 test('missing or unapproved poster assets are not served', function (string $case): void {
     // Arrange
-    $world = publicEventFixture();
-    savePublicDraft($world['event'], ['poster' => UploadedFile::fake()->image('poster.png'), 'poster_alt' => 'Approved poster']);
-    $publication = releasePublicPage($world['event']);
+    $fixture = publicEventFixture();
+    savePublicDraft($fixture['event'], [
+        'poster' => UploadedFile::fake()->image('poster.png'),
+        'poster_alt' => 'Approved poster',
+    ]);
+    $publication = releasePublicPage($fixture['event']);
     $key = publicPosterKey($publication);
     if ($case === 'file missing') {
         Storage::disk('local')->delete('event-posters/'.$key);
@@ -45,8 +55,16 @@ test('missing or unapproved poster assets are not served', function (string $cas
     auth()->logout();
 
     // Act
-    $response = get(route('shows.poster', ['publicId' => $publication->public_id, 'slug' => $slug, 'asset' => $asset]));
+    $response = get(route('shows.poster', [
+        'publicId' => $publication->public_id,
+        'slug' => $slug,
+        'asset' => $asset,
+    ]));
 
     // Assert
     $response->assertNotFound();
-})->with(['file missing', 'wrong key', 'wrong slug']);
+})->with([
+    'file missing' => 'file missing',
+    'wrong key' => 'wrong key',
+    'wrong slug' => 'wrong slug',
+]);

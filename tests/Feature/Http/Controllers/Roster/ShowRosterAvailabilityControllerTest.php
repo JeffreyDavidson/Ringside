@@ -24,17 +24,22 @@ test('the calendar requires authentication', function (): void {
 test('the calendar shows only the current promotions unavailable people and reasons', function (MembershipRole $role): void {
     // Arrange
     $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
-    $foreign = Promotion::factory()->create();
-    $person = Wrestler::factory()->for($promotion)->create(['name' => 'Harbor Talent']);
-    $other = Wrestler::factory()->for($foreign)->create(['name' => 'Foreign Talent']);
+    $foreignPromotion = Promotion::factory()->create();
+    $wrestler = Wrestler::factory()->for($promotion)->create(['name' => 'Harbor Talent']);
+    $foreignWrestler = Wrestler::factory()->for($foreignPromotion)->create(['name' => 'Foreign Talent']);
+
     $actor = administrator();
-    resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', 'Local commitment', $actor);
-    resolve(CreateAction::class)->handle($other, '2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON', $actor);
+    resolve(CreateAction::class)->handle($wrestler, '2026-10-17', '2026-10-17', 'Local commitment', $actor);
+    resolve(CreateAction::class)->handle($foreignWrestler, '2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON', $actor);
     $member = User::factory()->create(['status' => UserStatus::Active]);
-    $promotion->users()->attach($member, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($member, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+
+    actingAs($member);
 
     // Act
-    actingAs($member);
     $response = get(route('availability.index', ['date' => '2026-10-17']));
 
     // Assert
@@ -46,11 +51,16 @@ test('the calendar shows only the current promotions unavailable people and reas
         ->assertSee('America/New_York')
         ->assertDontSee('Foreign Talent')
         ->assertDontSee('FOREIGN-PRIVATE-REASON');
-})->with([MembershipRole::Owner, MembershipRole::Manager, MembershipRole::Member]);
+})->with([
+    'owner' => MembershipRole::Owner,
+    'manager' => MembershipRole::Manager,
+    'member' => MembershipRole::Member,
+]);
 
 test('a global administrator must choose a promotion for the calendar', function (): void {
     // Arrange
     actingAs(administrator());
+
     // Act
     $response = get(route('availability.index'));
 
@@ -63,12 +73,20 @@ test('a global administrator must choose a promotion for the calendar', function
 test('malformed initial calendar filters show a useful error rather than throwing', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
+
     $member = User::factory()->create(['status' => UserStatus::Active]);
-    $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($member, [
+        'role' => MembershipRole::Member,
+        'status' => MembershipStatus::Active,
+    ]);
+
+    actingAs($member);
 
     // Act
-    actingAs($member);
-    $response = get(route('availability.index', ['date' => 'not-a-date', 'kind' => 'unknown']));
+    $response = get(route('availability.index', [
+        'date' => 'not-a-date',
+        'kind' => 'unknown',
+    ]));
 
     // Assert
     $response

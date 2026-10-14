@@ -13,8 +13,13 @@ use function Pest\Laravel\get;
 test('only production managers can open the crew directory', function (MembershipRole $role, int $status): void {
     // Arrange
     $promotion = Promotion::factory()->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act

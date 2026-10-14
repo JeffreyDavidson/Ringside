@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
-use App\Http\Controllers\Managers\ManagersController;
 use App\Livewire\Components\GeneralInfo;
 use App\Livewire\Managers\Components\Actions;
 use App\Livewire\Managers\Tables\Main;
@@ -19,16 +18,46 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-/**
- * Feature tests for Managers Controller.
- *
- * @see ManagersController
- */
-describe('Managers Controller', function () {
-    /**
-     * @see ManagersController::show()
-     */
-    test('show returns a view', function () {
+describe('index', function (): void {
+    test('an administrator receives the managers index view and table', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('managers.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('managers.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('a guest cannot open the managers index', function (): void {
+        // Act
+        $response = get(route('managers.index'));
+
+        // Assert
+        $response->assertRedirect(route('login'));
+    });
+
+    test('a user without membership cannot open the managers index', function (): void {
+        // Arrange
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('managers.index'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+});
+
+describe('show', function (): void {
+    test('renders the manager profile and its related data', function () {
         // Arrange
         $manager = Manager::factory()->create();
 
@@ -53,9 +82,6 @@ describe('Managers Controller', function () {
             ->assertSeeLivewire(PreviousStables::class);
     });
 
-    /**
-     * @see ManagersController::show()
-     */
     test('show renders the related data displayed by the manager summary', function () {
         // Arrange
         Manager::factory()->create();
@@ -79,9 +105,6 @@ describe('Managers Controller', function () {
             ->assertSee($manager->employments()->firstOrFail()->started_at->toDateString());
     });
 
-    /**
-     * @see ManagersController::show()
-     */
     test('a user without a promotion membership cannot view manager profiles', function () {
         // Arrange
         $manager = Manager::factory()->create();
@@ -96,9 +119,6 @@ describe('Managers Controller', function () {
             ->assertForbidden();
     });
 
-    /**
-     * @see ManagersController::show()
-     */
     test('a guest cannot view a manager profile', function () {
         // Arrange
         $manager = Manager::factory()->create();
@@ -111,9 +131,6 @@ describe('Managers Controller', function () {
             ->assertRedirect(route('login'));
     });
 
-    /**
-     * @see ManagersController::show()
-     */
     test('an administrator can view managers in every lifecycle state', function (string $state): void {
         // Arrange
         $manager = match ($state) {
@@ -123,6 +140,7 @@ describe('Managers Controller', function () {
             'suspended' => Manager::factory()->suspended()->create(),
             default => throw new LogicException('Unknown lifecycle fixture'),
         };
+
         actingAs(administrator());
 
         // Act
@@ -133,11 +151,13 @@ describe('Managers Controller', function () {
             ->assertOk()
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $manager);
-    })->with(['employed', 'injured', 'retired', 'suspended']);
+    })->with([
+        'employed' => 'employed',
+        'injured' => 'injured',
+        'retired' => 'retired',
+        'suspended' => 'suspended',
+    ]);
 
-    /**
-     * @see ManagersController::show()
-     */
     test('returns 404 when manager does not exist', function () {
         // Arrange
         Manager::factory()->create();
@@ -151,58 +171,27 @@ describe('Managers Controller', function () {
         $response
             ->assertNotFound();
     });
-});
 
-test('an administrator receives the managers index view and table', function (): void {
-    // Arrange
-    actingAs(administrator());
+    test('an active promotion member receives the correct manager profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $manager = Manager::factory()->for($promotion, 'promotion')->create();
 
-    // Act
-    $response = get(route('managers.index'));
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('managers.index')
-        ->assertSeeHtml('aria-label="Content workspace"')
-        ->assertSeeLivewire(Main::class);
-});
+        actingAs($user);
 
-test('a guest cannot open the managers index', function (): void {
-    // Act
-    $response = get(route('managers.index'));
+        // Act
+        $response = get(route('managers.show', $manager));
 
-    // Assert
-    $response->assertRedirect(route('login'));
-});
-
-test('a user without membership cannot open the managers index', function (): void {
-    // Arrange
-    actingAs(basicUser());
-
-    // Act
-    $response = get(route('managers.index'));
-
-    // Assert
-    $response
-        ->assertForbidden()
-        ->assertViewIs('promotions.no-membership');
-});
-
-test('an active promotion member receives the correct manager profile', function (): void {
-    // Arrange
-    $promotion = Promotion::factory()->create();
-    $record = Manager::factory()->for($promotion, 'promotion')->create();
-    $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    actingAs($user);
-
-    // Act
-    $response = get(route('managers.show', $record));
-
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('managers.show')
-        ->assertViewHas('manager', $record);
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('managers.show')
+            ->assertViewHas('manager', $manager);
+    });
 });

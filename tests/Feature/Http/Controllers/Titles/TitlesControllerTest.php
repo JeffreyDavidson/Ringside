@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
-use App\Http\Controllers\Titles\TitlesController;
 use App\Livewire\Components\GeneralInfo;
 use App\Livewire\Titles\Components\Actions;
 use App\Livewire\Titles\Tables\Main;
@@ -18,16 +17,46 @@ use App\Models\Titles\TitleChampionship;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-/**
- * Feature tests for Titles Controller.
- *
- * @see TitlesController
- */
-describe('Titles Controller', function () {
-    /**
-     * @see TitlesController::show()
-     */
-    test('show returns a view', function () {
+describe('index', function (): void {
+    test('an administrator receives the titles index view and table', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('titles.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('titles.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('a guest cannot open the titles index', function (): void {
+        // Act
+        $response = get(route('titles.index'));
+
+        // Assert
+        $response->assertRedirect(route('login'));
+    });
+
+    test('a user without membership cannot open the titles index', function (): void {
+        // Arrange
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('titles.index'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+});
+
+describe('show', function (): void {
+    test('renders the title profile and its related data', function () {
         // Arrange
         $title = Title::factory()->create();
 
@@ -51,9 +80,6 @@ describe('Titles Controller', function () {
             ->assertSeeLivewire(TitleHistory::class);
     });
 
-    /**
-     * @see TitlesController::show()
-     */
     test('show renders the related data displayed by the title summary', function () {
         // Arrange
         $title = Title::factory()->create();
@@ -78,9 +104,6 @@ describe('Titles Controller', function () {
             ->assertSee($wrestler->name);
     });
 
-    /**
-     * @see TitlesController::show()
-     */
     test('a user without a promotion membership cannot view a title', function () {
         // Arrange
         $title = Title::factory()->create();
@@ -95,9 +118,6 @@ describe('Titles Controller', function () {
             ->assertForbidden();
     });
 
-    /**
-     * @see TitlesController::show()
-     */
     test('a guest cannot view a title', function () {
         // Arrange
         $title = Title::factory()->create();
@@ -110,9 +130,6 @@ describe('Titles Controller', function () {
             ->assertRedirect(route('login'));
     });
 
-    /**
-     * @see TitlesController::show()
-     */
     test('returns 404 when title does not exist', function () {
         // Arrange
         Title::factory()->create();
@@ -126,58 +143,27 @@ describe('Titles Controller', function () {
         $response
             ->assertNotFound();
     });
-});
 
-test('an administrator receives the titles index view and table', function (): void {
-    // Arrange
-    actingAs(administrator());
+    test('an active promotion member receives the correct title profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $title = Title::factory()->for($promotion, 'promotion')->create();
 
-    // Act
-    $response = get(route('titles.index'));
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
 
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('titles.index')
-        ->assertSeeHtml('aria-label="Content workspace"')
-        ->assertSeeLivewire(Main::class);
-});
+        actingAs($user);
 
-test('a guest cannot open the titles index', function (): void {
-    // Act
-    $response = get(route('titles.index'));
+        // Act
+        $response = get(route('titles.show', $title));
 
-    // Assert
-    $response->assertRedirect(route('login'));
-});
-
-test('a user without membership cannot open the titles index', function (): void {
-    // Arrange
-    actingAs(basicUser());
-
-    // Act
-    $response = get(route('titles.index'));
-
-    // Assert
-    $response
-        ->assertForbidden()
-        ->assertViewIs('promotions.no-membership');
-});
-
-test('an active promotion member receives the correct title profile', function (): void {
-    // Arrange
-    $promotion = Promotion::factory()->create();
-    $record = Title::factory()->for($promotion, 'promotion')->create();
-    $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    actingAs($user);
-
-    // Act
-    $response = get(route('titles.show', $record));
-
-    // Assert
-    $response
-        ->assertOk()
-        ->assertViewIs('titles.show')
-        ->assertViewHas('title', $record);
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('titles.show')
+            ->assertViewHas('title', $title);
+    });
 });

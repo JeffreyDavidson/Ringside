@@ -13,9 +13,17 @@ use function Pest\Laravel\get;
 test('sponsor directory and records are private to active owners and managers', function (MembershipRole $role, bool $allowed): void {
     // Arrange
     $promotion = Promotion::factory()->create();
-    $sponsor = Sponsor::factory()->for($promotion)->create(['name' => 'Harbor Hardware', 'contact_email' => 'private@example.test']);
+    $sponsor = Sponsor::factory()->for($promotion)->create([
+        'name' => 'Harbor Hardware',
+        'contact_email' => 'private@example.test',
+    ]);
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => $role,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act
@@ -41,7 +49,11 @@ test('sponsor directory and records are private to active owners and managers', 
         ->assertSee('private@example.test');
 
     expect(Sponsor::query()->count())->toBe(1);
-})->with([[MembershipRole::Owner, true], [MembershipRole::Manager, true], [MembershipRole::Member, false]]);
+})->with([
+    'owner' => [MembershipRole::Owner, true],
+    'manager' => [MembershipRole::Manager, true],
+    'member' => [MembershipRole::Member, false],
+]);
 
 test('guests and outsiders cannot reveal sponsor records', function (): void {
     // Arrange
@@ -59,9 +71,15 @@ test('guests and outsiders cannot reveal sponsor records', function (): void {
     // Assert
     $response->assertRedirect(route('login'));
 
+    // Arrange
     $promotion = Promotion::factory()->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act
@@ -88,9 +106,16 @@ test('a suspended or removed membership cannot recover private sponsor records',
     // Arrange
     $promotion = Promotion::factory()->create();
     $sponsor = Sponsor::factory()->for($promotion)->create(['notes' => 'PRIVATE-SUSPENDED-7Q']);
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
+
+    // Act
     $response = get(route('sponsors.show', $sponsor));
 
     // Assert
@@ -110,13 +135,21 @@ test('a suspended or removed membership cannot recover private sponsor records',
         ->assertDontSee('PRIVATE-SUSPENDED-7Q');
 
     expect(Sponsor::query()->withoutGlobalScopes()->findOrFail($sponsor->id)->version)->toBe(1);
-})->with(['suspended', 'removed']);
+})->with([
+    'suspended' => 'suspended',
+    'removed' => 'removed',
+]);
 
 test('missing sponsor records are not found', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    $promotion->users()->attach($user, [
+        'role' => MembershipRole::Owner,
+        'status' => MembershipStatus::Active,
+    ]);
+
     actingAs($user);
 
     // Act

@@ -40,6 +40,7 @@ test('password reset rejects passwords shorter than twelve characters', function
     $user = User::factory()->create();
     $originalPassword = $user->password;
     $token = Password::createToken($user);
+
     Event::fake([PasswordReset::class]);
 
     // Act

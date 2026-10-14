@@ -18,11 +18,14 @@ it('renders auth forms when rejected old input contains arrays', function (strin
     $response = get(route($routeName));
 
     // Assert
-
     $response
         ->assertOk()
         ->assertDontSee('Array to string conversion');
-})->with(['login', 'register', 'password.request']);
+})->with([
+    'login' => 'login',
+    'register' => 'register',
+    'password.request' => 'password.request',
+]);
 
 it('renders a working submit control and masks passwords before JavaScript loads', function (string $routeName): void {
     // Arrange
@@ -48,4 +51,8 @@ it('renders a working submit control and masks passwords before JavaScript loads
     foreach ($form->querySelectorAll('input[name="password"], input[name="password_confirmation"]') as $input) {
         expect($input->getAttribute('type'))->toBe('password');
     }
-})->with(['login', 'register', 'password.request']);
+})->with([
+    'login' => 'login',
+    'register' => 'register',
+    'password.request' => 'password.request',
+]);

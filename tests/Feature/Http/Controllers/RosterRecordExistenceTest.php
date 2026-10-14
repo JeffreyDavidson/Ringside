@@ -23,8 +23,12 @@ test('a record from another promotion looks the same as a missing record', funct
     // Arrange
     $user = basicUser();
     [$ownPromotion, $otherPromotion] = Promotion::factory()->count(2)->create()->all();
-    $ownPromotion->users()->attach($user, ['role' => $role->value, 'status' => MembershipStatus::Active->value]);
+    $ownPromotion->users()->attach($user, [
+        'role' => $role->value,
+        'status' => MembershipStatus::Active->value,
+    ]);
     $foreignRecord = $modelClass::factory()->for($otherPromotion, 'promotion')->create();
+
     actingAs($user);
     withSession(['active_promotion_id' => $ownPromotion->id]);
 
@@ -43,12 +47,16 @@ test('a record from another promotion looks the same as a missing record', funct
     'stable' => [Stable::class, 'stables.show'],
     'title' => [Title::class, 'titles.show'],
     'event' => [Event::class, 'events.show'],
-])->with([MembershipRole::Owner, MembershipRole::Member]);
+])->with([
+    'owner' => MembershipRole::Owner,
+    'member' => MembershipRole::Member,
+]);
 
 test('a soft-deleted record has no show page', function (string $modelClass, string $routeName): void {
     // Arrange
     $record = $modelClass::factory()->create();
     $record->delete();
+
     actingAs(administrator());
 
     // Act
