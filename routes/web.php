@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Crew\CrewContactsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Events\EventLiveShowsController;
 use App\Http\Controllers\Events\EventPacksController;
 use App\Http\Controllers\Events\EventPosterController;
+use App\Http\Controllers\Events\EventProductionSheetsController;
 use App\Http\Controllers\Events\EventPublicPagesController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\EventSponsorsController;
@@ -30,6 +32,7 @@ use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -91,6 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->can('viewAny', EventMatch::class)->name('events.matches.index');
         Route::get('sponsors', [SponsorsController::class, 'index'])->can('manageSponsors', Sponsor::class)->name('sponsors.index');
         Route::get('sponsors/{sponsor}', [SponsorsController::class, 'show'])->can('manageSponsors', 'sponsor')->name('sponsors.show');
+        Route::get('production-crew', [CrewContactsController::class, 'index'])->can('viewAny', CrewContact::class)->name('crew.contacts.index');
         Route::get('events/{event}/public-pages', [EventPublicPagesController::class, 'edit'])->can('preparePublication', 'event')->name('events.public-pages.edit');
         Route::put('events/{event}/public-pages', [EventPublicPagesController::class, 'update'])->can('preparePublication', 'event')->name('events.public-pages.update');
         Route::get('events/{event}/public-pages/preview', [EventPublicPagesController::class, 'show'])->can('preparePublication', 'event')->name('events.public-pages.show');
@@ -100,6 +104,7 @@ Route::middleware('auth')->group(function () {
         Route::get('events', [EventsController::class, 'index'])->can('viewAny', Event::class)->name('events.index');
         Route::put('events/{event}/pack', [EventPacksController::class, 'update'])->can('update', 'event')->name('events.pack.update');
         Route::get('events/{event}/pack', [EventPacksController::class, 'show'])->can('view', 'event')->name('events.pack.show');
+        Route::get('events/{event}/production-sheet', [EventProductionSheetsController::class, 'show'])->can('viewProduction', 'event')->name('events.production-sheet.show');
         Route::get('events/{event}/live-show', [EventLiveShowsController::class, 'show'])->can('view', 'event')->name('events.live-show.show');
         Route::get('events/{event}/talent-bookings', [EventTalentBookingsController::class, 'show'])->can('update', 'event')->name('events.talent-bookings.show');
         Route::get('events/{event}/sponsors', [EventSponsorsController::class, 'show'])->can('manageSponsors', 'event')->withTrashed()->name('events.sponsors.show');

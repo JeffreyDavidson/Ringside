@@ -8,6 +8,7 @@ use App\Actions\Events\CompleteLiveShowAction;
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
+use App\Actions\Events\SaveEventProductionAction;
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Actions\Events\TransitionLiveItemAction;
@@ -234,3 +235,32 @@ test('instruction adoption keeps the event match promise pack and run lock order
         ->and($locks[4])->toBeLessThan(statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "event_packs"')))
         ->and($statements[$locks[1]]['sql'])->toContain('order by "id" asc');
 });
+
+test('sponsor adoption and production edits preserve each others saved pack sections', function (string $mode): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $production = $event->pack()->firstOrFail()->content['production'] ?? null;
+    $promise = EventSponsorCommitment::factory()->create(['event_id' => $event->id, 'promotion_id' => $event->promotion_id,
+        'instruction_label' => 'Entrance banner', 'instruction' => 'Hang before doors', 'instruction_owner' => 'Ring crew']);
+    $screen = app(EventPackViewModel::class)->data($event);
+    $preview = app(SponsorInstructionQuery::class)->preview($event, $promise, $mode, null, null);
+
+    // Act
+    app(SaveSponsorInstructionAction::class)->handle($event, $promise->id, 1, 1, $screen['card']['fingerprint'], $mode, null, null, $preview['hash']);
+
+    // Assert
+    $content = $event->pack()->firstOrFail()->content;
+    expect($content['production'] ?? null)->toBe($production);
+    $instructions = $mode === 'setup' ? $content['sponsor_tasks'] : $content['segments'];
+
+    // Act
+    app(SaveEventProductionAction::class)->handle($event, 2, $screen['card']['fingerprint'], [...$fixture['production'], 'notes' => 'Updated private crew note'], false);
+
+    // Assert
+    $updated = $event->pack()->firstOrFail();
+    expect($updated->version)->toBe(3)
+        ->and($mode === 'setup' ? $updated->content['sponsor_tasks'] : $updated->content['segments'])->toBe($instructions)
+        ->and(data_get($updated->content, 'production.notes'))->toBe('Updated private crew note');
+})->with(['setup', 'segment']);

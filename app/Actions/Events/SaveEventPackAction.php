@@ -31,6 +31,10 @@ class SaveEventPackAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
+            unset($content['production']);
+            if (isset($pack?->content['production'])) {
+                $content['production'] = $pack->content['production'];
+            }
             // Retain removed-match notes and omitted entries; identity is never inferred from card position.
             $content['matches'] = array_values(collect($pack?->content['matches'] ?? [])->keyBy('match_id')
                 ->replace(collect($content['matches'])->keyBy('match_id'))->all());

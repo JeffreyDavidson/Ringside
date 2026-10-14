@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Concerns\BelongsToPromotion;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Events\EventSponsorCommitmentRevision;
 use App\Models\Matches\EventMatch;
@@ -30,6 +31,10 @@ class PromotionGate
         $subject = $arguments[0] ?? null;
 
         if ($user->role->isAdministrator()) {
+            if ($subject === CrewContact::class && $ability === 'create' && ! $this->context->current() instanceof Promotion) {
+                return false;
+            }
+
             return $this->authorizeAdministrator($subject);
         }
 
@@ -93,6 +98,10 @@ class PromotionGate
         if ($subject instanceof Sponsor || $subject instanceof EventSponsorCommitment || $subject instanceof EventSponsorCommitmentRevision
             || in_array($subject, [Sponsor::class, EventSponsorCommitment::class, EventSponsorCommitmentRevision::class], true)) {
             return ($role?->allows('manageSponsors') ?? false) && $role->allows($ability);
+        }
+        if ($subject instanceof CrewContact || $subject === CrewContact::class) {
+            return in_array($role, [MembershipRole::Owner, MembershipRole::Manager], true)
+                && in_array($ability, ['view', 'viewAny', 'create', 'update', 'archive'], true);
         }
 
         return $role?->allows($ability) ?? false;

@@ -23,6 +23,7 @@ use App\Livewire\Wrestlers\Tables\PreviousTagTeams as WrestlerPreviousTagTeams;
 use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships as WrestlerPreviousTitleChampionships;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
@@ -83,14 +84,14 @@ dataset('livewire history tables', [
     'stable tag teams' => livewireHistoryTable(StablePreviousTagTeams::class, 'stableId', static fn (): Model => Stable::factory()->create(), 'tag teams'),
     'stable wrestlers' => livewireHistoryTable(StablePreviousWrestlers::class, 'stableId', static fn (): Model => Stable::factory()->create(), 'wrestlers'),
     'tag team managers' => livewireHistoryTable(TagTeamPreviousManagers::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->create(), 'managers'),
-    'tag team matches' => livewireHistoryTable(TagTeamPreviousMatches::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->create(), 'matches'),
+    'tag team matches' => livewireHistoryTable(TagTeamPreviousMatches::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->for(Promotion::factory(), 'promotion')->create(), 'matches'),
     'tag team stables' => livewireHistoryTable(TagTeamPreviousStables::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->create(), 'stables'),
     'tag team title championships' => livewireHistoryTable(TagTeamPreviousTitleChampionships::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->create(), 'title championships'),
     'tag team wrestlers' => livewireHistoryTable(TagTeamPreviousWrestlers::class, 'tagTeamId', static fn (): Model => TagTeam::factory()->create(), 'wrestlers'),
     'title reigns' => livewireHistoryTable(TitleHistory::class, 'titleId', static fn (): Model => Title::factory()->create(), 'title reigns', 'Title reigns', 'No title reigns yet.'),
     'venue events' => livewireHistoryTable(PreviousEvents::class, 'venueId', static fn (): Model => Venue::factory()->create(), 'events', basicUserStatus: 403),
     'wrestler managers' => livewireHistoryTable(WrestlerPreviousManagers::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->create(), 'managers'),
-    'wrestler matches' => livewireHistoryTable(WrestlerPreviousMatches::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->create(), 'matches'),
+    'wrestler matches' => livewireHistoryTable(WrestlerPreviousMatches::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->for(Promotion::factory(), 'promotion')->create(), 'matches'),
     'wrestler stables' => livewireHistoryTable(WrestlerPreviousStables::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->create(), 'stables'),
     'wrestler tag teams' => livewireHistoryTable(WrestlerPreviousTagTeams::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->create(), 'tag teams'),
     'wrestler title championships' => livewireHistoryTable(WrestlerPreviousTitleChampionships::class, 'wrestlerId', static fn (): Model => Wrestler::factory()->create(), 'title championships'),
@@ -107,9 +108,9 @@ dataset('livewire previous matches tables', [
         'component' => WrestlerPreviousMatches::class,
         'ownerParameter' => 'wrestlerId',
         'ownerRouteName' => 'wrestlers.show',
-        'createOwner' => static fn (): Model => Wrestler::factory()->create(),
+        'createOwner' => static fn (): Model => Wrestler::factory()->for(Promotion::factory(), 'promotion')->create(),
         'bookMatch' => static fn (MatchFactory $match, Model $owner): EventMatch => $match
-            ->withCompetitors([$owner, Wrestler::factory()->create()])
+            ->withCompetitors([$owner, Wrestler::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id')])])
             ->createOne(),
         'participantRelation' => 'competitors',
     ],
@@ -117,9 +118,9 @@ dataset('livewire previous matches tables', [
         'component' => TagTeamPreviousMatches::class,
         'ownerParameter' => 'tagTeamId',
         'ownerRouteName' => 'tag-teams.show',
-        'createOwner' => static fn (): Model => TagTeam::factory()->create(),
+        'createOwner' => static fn (): Model => TagTeam::factory()->for(Promotion::factory(), 'promotion')->create(),
         'bookMatch' => static fn (MatchFactory $match, Model $owner): EventMatch => $match
-            ->withCompetitors([$owner, TagTeam::factory()->create()])
+            ->withCompetitors([$owner, TagTeam::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id')])])
             ->createOne(),
         'participantRelation' => 'competitors',
     ],

@@ -56,7 +56,7 @@ class ReviewLiveShowAction
             foreach ($source['content']['roster'] as $person) {
                 $previous = $people->get($person['key']);
                 if ($previous !== null && ($previous['arrived'] !== null || $previous['briefed'] !== null)) {
-                    $person = [...$previous, 'assigned' => true, 'matches' => $person['matches'], 'warning' => $person['warning']];
+                    $person = [...$previous, 'assigned' => true, 'matches' => $person['matches'], 'warning' => $person['warning'], ...isset($person['assignments']) ? ['assignments' => $person['assignments'], 'role' => $person['role']] : []];
                 }
                 $roster[] = $person;
                 $people->forget($person['key']);
@@ -67,6 +67,7 @@ class ReviewLiveShowAction
                 }
             }
             $content['roster'] = $roster;
+            $content['production'] = $source['content']['production'] ?? ['assignments' => []];
             $content['event_date'] = $source['content']['event_date'];
             $content['event_name'] = $source['content']['event_name'];
             $content['venue'] = $source['content']['venue'];

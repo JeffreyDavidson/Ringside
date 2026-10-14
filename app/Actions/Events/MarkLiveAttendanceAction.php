@@ -36,7 +36,13 @@ class MarkLiveAttendanceAction
             $person['updated_by'] = (int) auth()->id();
             $content['roster'][$index] = $person;
             $run->content = $content;
-            $this->persist->handle($run, 'attendance', $key, $before, $content['roster'][$index]);
+            $auditBefore = $before;
+            $auditAfter = $person;
+            if (str_starts_with($key, 'crew:')) {
+                $auditBefore = array_intersect_key($before, array_flip(['arrived', 'briefed', 'updated_by']));
+                $auditAfter = array_intersect_key($person, array_flip(['arrived', 'briefed', 'updated_by']));
+            }
+            $this->persist->handle($run, 'attendance', $key, $auditBefore, $auditAfter);
         }, attempts: 3);
     }
 }
