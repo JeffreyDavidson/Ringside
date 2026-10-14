@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertAuthenticated;
+use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\from;
@@ -25,12 +25,12 @@ test('login screen can be rendered', function () {
     $response = get($loginUrl);
 
     // Assert
-    $response->assertSuccessful();
+    $response->assertOk()->assertViewIs('auth.login');
 });
 
 test('users can authenticate using the login screen', function (string $email) {
     // Arrange
-    User::factory()->create([
+    $user = User::factory()->create([
         'email' => 'promoter@example.com',
         'email_verified_at' => null,
         'status' => UserStatus::Active,
@@ -45,7 +45,7 @@ test('users can authenticate using the login screen', function (string $email) {
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
-    assertAuthenticated();
+    assertAuthenticatedAs($user);
 })->with(['promoter@example.com', 'Promoter@Example.com']);
 
 test('users can not authenticate with invalid password', function () {
@@ -62,7 +62,9 @@ test('users can not authenticate with invalid password', function () {
     // Assert
     $response
         ->assertRedirect(route('login'))
-        ->assertSessionHasErrors('email');
+        ->assertSessionHasErrors('email')
+        ->assertSessionHasInput('email', $user->email)
+        ->assertSessionMissing('_old_input.password');
     assertGuest();
 });
 
@@ -114,12 +116,17 @@ test('login requires credentials', function () {
 test('authenticated users can log out', function () {
     // Arrange
     actingAs(administrator());
+    session()->put('private_session_marker', 'must-disappear');
+    $sessionId = session()->getId();
+    $csrfToken = session()->token();
 
     // Act
     $response = post(route('logout'));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response->assertRedirect(route('login'))->assertSessionMissing('private_session_marker');
+    expect(session()->getId())->not->toBe($sessionId)
+        ->and(session()->token())->not->toBe($csrfToken);
     assertGuest();
 });
 
@@ -140,7 +147,8 @@ test('the sixth failed login within the throttle window is locked out', function
     $response
         ->assertRedirect(route('login'))
         ->assertSessionHasErrors(['email' => trans('auth.throttle', ['seconds' => 60, 'minutes' => 1])]);
-    Event::assertDispatched(Lockout::class);
+    Event::assertDispatched(Lockout::class, fn (Lockout $event): bool => $event->request->input('email') === $user->email);
+    Event::assertDispatchedOnce(Lockout::class);
     assertGuest();
 });
 
@@ -158,7 +166,7 @@ test('failed logins under the throttle limit do not lock the account', function 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
     Event::assertNotDispatched(Lockout::class);
-    assertAuthenticated();
+    assertAuthenticatedAs($user);
 });
 
 test('users can log in again once the throttle window has passed', function () {
@@ -175,7 +183,7 @@ test('users can log in again once the throttle window has passed', function () {
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
-    assertAuthenticated();
+    assertAuthenticatedAs($user);
 });
 
 test('a legacy user stored with a mixed-case email can still sign in', function (string $typedEmail) {
@@ -188,7 +196,7 @@ test('a legacy user stored with a mixed-case email can still sign in', function 
 
     // Assert
     $response->assertRedirect(route('dashboard', absolute: false));
-    assertAuthenticated();
+    assertAuthenticatedAs($user);
 })->with([
     'lowercase' => 'legacy.promoter@example.com',
     'exact stored case' => 'Legacy.Promoter@Example.com',
