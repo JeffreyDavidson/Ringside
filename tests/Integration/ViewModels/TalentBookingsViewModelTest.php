@@ -1,0 +1,130 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__.'/../../Fixtures/talent-booking.php';
+
+use App\Actions\Events\SaveTalentBookingAction;
+use App\Data\Events\TalentBookingData;
+use App\Enums\Events\TalentBookingStatus;
+use App\Enums\MatchType;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Queries\Events\TalentBookingContextQuery;
+use App\ViewModels\TalentBookingsViewModel;
+
+use function Pest\Laravel\actingAs;
+
+test('the checklist keeps unavailable agreements and flags event context changes', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $people = Wrestler::factory()->count(2)->bookable()->create();
+    EventMatch::factory()->for($event)->withCompetitors($people->all())->withReferees()->create();
+    $person = $people->firstOrFail();
+    $context = resolve(TalentBookingContextQuery::class);
+    $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
+        $context->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true));
+    $person->delete();
+    $event->update(['date' => now()->addDays(2)]);
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($event);
+
+    // Assert
+    $row = collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$person->id}");
+    expect($row['warnings'])->toContain('unavailable', 'reconfirmation')
+        ->and($row['booking']?->status)->toBe(TalentBookingStatus::Confirmed)
+        ->and($data['counts']['attention'])->toBeGreaterThan(0)
+        ->and($booking->refresh()->version)->toBe(1);
+});
+
+test('only material event context changes need reconfirmation', function (string $change, bool $review): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    $event = $fixture['event'];
+    $venue = $event->venue()->firstOrFail();
+
+    // Act
+    match ($change) {
+        'event name' => $event->update(['name' => 'Renamed show']),
+        'venue name' => $venue->update(['name' => 'Renamed venue']),
+        'date' => $event->update(['date' => now()->addDays(2)]),
+        'venue' => $event->update(['venue_id' => Venue::factory()->create()->id]),
+        'address' => $venue->update(['street_address' => 'New address']),
+        'unset venue' => $event->update(['venue_id' => null]),
+        'deleted venue' => $venue->delete(),
+        default => throw new InvalidArgumentException('Unknown context change'),
+    };
+    $data = resolve(TalentBookingsViewModel::class)->data($event->refresh());
+
+    // Assert
+    expect(in_array('reconfirmation', $data['rows'][0]['warnings'], true))->toBe($review)
+        ->and($fixture['booking']->refresh()->revisions()->count())->toBe(1);
+})->with(['rename event' => ['event name', false], 'rename venue' => ['venue name', false], 'date' => ['date', true],
+    'venue' => ['venue', true], 'address' => ['address', true], 'missing venue' => ['unset venue', true], 'deleted venue' => ['deleted venue', true]]);
+
+test('returning to agreed context clears the live warning without a new agreement', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    $date = $fixture['event']->date?->copy();
+    $fixture['event']->update(['date' => now()->addDays(3)]);
+
+    // Act
+    $fixture['event']->update(['date' => $date]);
+    $data = resolve(TalentBookingsViewModel::class)->data($fixture['event']);
+
+    // Assert
+    expect($data['rows'][0]['warnings'])->toBeEmpty()->and($data['counts']['confirmed_clear'])->toBe(1);
+});
+
+test('tag team members have individual rows and agreements never transfer to replacements', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $members = Wrestler::factory()->count(2)->bookable()->create();
+    $team = TagTeam::factory()->bookable()->withCurrentWrestlers($members)->create();
+    $opponent = TagTeam::factory()->bookable()->withCurrentWrestlers(Wrestler::factory()->count(2)->bookable()->create())->create();
+    EventMatch::factory()->for($event)->withCompetitors([$team, $opponent])->withReferees()->create(['match_type' => MatchType::TagTeam]);
+    $person = $members->firstOrFail();
+    resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
+        resolve(TalentBookingContextQuery::class)->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 5000, null, 'UTC', null, true));
+    $team->wrestlers()->updateExistingPivot($person->id, ['left_at' => now()]);
+    $replacement = Wrestler::factory()->bookable()->create();
+    $team->wrestlers()->attach($replacement, ['joined_at' => now()]);
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($event);
+
+    // Assert
+    expect(collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$person->id}")['warnings'])->toContain('removed')
+        ->and(collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$replacement->id}")['booking'])->toBeNull()
+        ->and(collect($data['rows'])->filter(fn (array $row): bool => $row['type'] === 'referee'))->toHaveCount(1);
+});
+
+test('a cancelled person still on the card requires attention without losing terms', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    $opponent = Wrestler::factory()->bookable()->create();
+    EventMatch::factory()->for($fixture['event'])->withCompetitors([$fixture['person'], $opponent])->withReferees()->create();
+    saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled'));
+
+    // Act
+    $row = collect(resolve(TalentBookingsViewModel::class)->data($fixture['event'])['rows'])
+        ->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$fixture['person']->id}");
+
+    // Assert
+    expect($row['warnings'])->toContain('cancelled_card')->and($row['booking']?->fee_minor)->toBe(123456);
+});
+
+test('fee display distinguishes an unknown fee from an agreed zero without fractional rounding', function (): void {
+    // Arrange
+    $screen = resolve(TalentBookingsViewModel::class);
+
+    // Act / Assert
+    expect($screen->fee(null))->toBe('Not recorded')->and($screen->fee(0))->toBe('0.00')
+        ->and($screen->fee(123456))->toBe('1,234.56')->and($screen->fee(9999999999))->toBe('99,999,999.99');
+});

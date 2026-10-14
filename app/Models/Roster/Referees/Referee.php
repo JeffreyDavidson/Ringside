@@ -25,6 +25,7 @@ use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Availability\Unavailability;
 use Database\Factories\Roster\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -131,5 +133,11 @@ class Referee extends Model implements Employable, Injurable, Retirable, SoftDel
         EventMatchBuilder::constrainToPastEvents($relation->getQuery());
 
         return $relation;
+    }
+
+    /** @return MorphMany<Unavailability, $this> */
+    public function unavailabilities(): MorphMany
+    {
+        return $this->morphMany(Unavailability::class, 'person');
     }
 }

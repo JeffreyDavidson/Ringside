@@ -43,4 +43,16 @@ abstract class IndividualBuilder extends Builder
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentInjury');
     }
+
+    /** Compose calendar restrictions with lifecycle eligibility for one promotion-local day. */
+    public function bookableOn(?string $date): static
+    {
+        $this->bookable();
+        if ($date === null) {
+            return $this;
+        }
+
+        return $this->whereDoesntHave('unavailabilities', fn (Builder $entries): Builder => $entries
+            ->whereNull('cancelled_at')->where('starts_on', '<=', $date)->where('ends_on', '>=', $date)->whereColumn('roster_unavailabilities.promotion_id', $this->qualifyColumn('promotion_id')));
+    }
 }

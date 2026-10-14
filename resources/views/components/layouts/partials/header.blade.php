@@ -6,6 +6,7 @@
         request()->routeIs('dashboard') => 'Overview',
         request()->routeIs('promotions.*') => 'Promotions',
         request()->routeIs('events.*') => 'Events',
+        request()->routeIs('availability.*') => __('availability.title'),
         request()->routeIs('wrestlers.*') => 'Wrestlers',
         request()->routeIs('tag-teams.*') => 'Tag teams',
         request()->routeIs('managers.*') => 'Managers',

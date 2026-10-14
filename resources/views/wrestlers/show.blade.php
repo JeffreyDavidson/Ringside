@@ -4,6 +4,8 @@
         <livewire:wrestlers.components.actions :wrestler="$wrestler" />
     </x-slot:sidebar>
 
+    <livewire:roster.availability.components.profile kind="wrestlers" :personId="$wrestler->id" />
+
     <livewire:wrestlers.tables.previous-title-championships :wrestlerId="$wrestler->id" defer.bundle />
     <livewire:wrestlers.tables.previous-matches :wrestlerId="$wrestler->id" defer.bundle />
     <livewire:wrestlers.tables.previous-tag-teams :wrestlerId="$wrestler->id" defer.bundle />

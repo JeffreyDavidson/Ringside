@@ -13,10 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * @phpstan-type Assignment array{id: string, contact_id: int, name: string, role: string, station: ?string, call_at: ?string, timezone: string, offset: ?string, setup: ?string, during: ?string, strike: ?string, active: bool}
+ * @phpstan-type Cue array{id: string, item_key: string, subject: string, trigger: string, instruction: string, role: ?string, owner_id: ?string, owner_name: ?string, owner_station: ?string, owner_role: ?string, owner_contact_id: ?int, pronunciation: ?string, track: ?string, url: ?string}
+ * @phpstan-type Production array{notes: ?string, assignments: list<Assignment>, cues: list<Cue>}
  * @phpstan-type Timing array{planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
  * @phpstan-type MatchEntry array{match_id: int, planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
  * @phpstan-type Segment array{id: string, label: string, after_match_id: ?int, planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
- * @phpstan-type Content array{timezone: string, doors_at: ?string, revision: ?string, master: ?string, notes: ?string, follow_up: ?string, matches: list<MatchEntry>, segments: list<Segment>}
+ * @phpstan-type SponsorTask array{id: string, label: string, instruction: string, owner: ?string}
+ * @phpstan-type Content array{timezone: string, doors_at: ?string, revision: ?string, master: ?string, notes: ?string, follow_up: ?string, matches: list<MatchEntry>, segments: list<Segment>, sponsor_tasks?: list<SponsorTask>, production?: Production}
  *
  * @property int $id
  * @property int $event_id

@@ -14,6 +14,12 @@ enum MembershipRole: string
      * @var list<string>
      */
     private const array CONTENT_ABILITIES = [
+        'viewProduction',
+        'updateProduction',
+        'preparePublication',
+        'publishPublication',
+        'unpublishPublication',
+        'uploadPublicationPoster',
         'view',
         'viewAny',
         'create',
@@ -35,6 +41,7 @@ enum MembershipRole: string
         'reunite',
         'debut',
         'pull',
+        'manageSponsors',
     ];
 
     public function label(): string

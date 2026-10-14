@@ -225,7 +225,7 @@ invitation stays saved and the outcome is still `Invited`, and the owner can
 still see it in the application. Text lives in `lang/en/mail.php`.
 
 Promotion roles apply only within the active promotion context. Members can
-view promotion-owned data. Managers can view and manage promotion-owned roster,
+view ordinary promotion-owned data and explicitly reviewed sponsor instructions in the event pack. Sponsor contacts, commitments, evidence and revision history require the private `manageSponsors` ability granted only to active Owners/Managers. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
 membership roles. Owners have the manager capabilities and can also update
 promotion settings and manage that promotion's memberships. Every promotion
@@ -408,3 +408,7 @@ development, instead of becoming a hidden N+1. Load relationships explicitly wit
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
 - [Championship System](championship-system.md)
+
+## Private storyline planning
+
+Owners and Managers can plan creative steps across events, link existing matches and saved pack segments, and record what actually happened with retained cast and revision history. Members cannot read these plans. Storylines never change bookings, outcomes, championships or live operations. See [Storyline planning](storyline-planning.md) for state, history, privacy and source authority.

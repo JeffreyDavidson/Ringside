@@ -12,6 +12,7 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -36,6 +37,7 @@ class AddMatchForEventAction
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentBracketService $bracket,
+        private readonly MatchRosterLock $rosterLock,
     ) {}
 
     /** @throws EntityNotAvailableException|InvalidMatchConfigurationException */
@@ -121,6 +123,7 @@ class AddMatchForEventAction
                 activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'match_id' => $createdMatch->id])->log('tournament.booked');
             }
 
+            $this->rosterLock->forData($eventMatchData);
             $this->addRefereesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->referees);
 
             $this->addCompetitorsToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->sides);

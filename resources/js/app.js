@@ -1,8 +1,10 @@
+import sponsorTracking from './sponsor-tracking';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import AlpineUI from '@alpinejs/ui';
 import rosterCombobox from './roster-combobox';
 import liveShow from './live-show';
 import tournamentBracket from './tournament-bracket';
+import bookingHistory from './booking-history';
 import '../css/app.css';
 import '../css/event-pack.css';
 import './event-pack';
@@ -11,6 +13,7 @@ Alpine.plugin(AlpineUI);
 Alpine.data('rosterCombobox', rosterCombobox);
 Alpine.data('liveShow', liveShow);
 Alpine.data('tournamentBracket', tournamentBracket);
+Alpine.data('bookingHistory', bookingHistory);
 
 const sidebarExpandedStorageKey = 'ringside.sidebar.expanded';
 
@@ -67,4 +70,6 @@ window.matchMedia('(min-width: 1024px)').addEventListener('change', event => {
 });
 
 // Livewire starts Alpine and dispatches livewire:init synchronously.
+Alpine.data('sponsorTracking', sponsorTracking);
+
 Livewire.start();

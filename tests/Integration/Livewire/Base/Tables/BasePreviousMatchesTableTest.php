@@ -24,7 +24,7 @@ describe('previous matches tables', function (): void {
     ): void {
         // Arrange
         $owner = $createOwner();
-        $event = Event::factory()->create([
+        $event = Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'),
             'name' => 'Historic Match Event',
             'date' => Date::parse('2025-01-15 20:00:00'),
         ]);
@@ -54,14 +54,14 @@ describe('previous matches tables', function (): void {
         // Arrange
         $owner = $createOwner();
         $olderMatch = $bookMatch(
-            EventMatch::factory()->for(Event::factory()->create(['date' => Date::now()->subYears(2)])),
+            EventMatch::factory()->for(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'), 'date' => Date::now()->subYears(2)])),
             $owner,
         );
         $recentMatch = $bookMatch(
-            EventMatch::factory()->for(Event::factory()->create(['date' => Date::now()->subYear()])),
+            EventMatch::factory()->for(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'), 'date' => Date::now()->subYear()])),
             $owner,
         );
-        $bookMatch(EventMatch::factory()->for(Event::factory()->future()), $owner);
+        $bookMatch(EventMatch::factory()->for(Event::factory()->state(['promotion_id' => $owner->getAttribute('promotion_id')])->future()), $owner);
         $bookMatch(EventMatch::factory()->for(Event::factory()->past()), $createOwner());
         $table = app($component);
         $table->{$ownerParameter} = $owner->getKey();
@@ -89,7 +89,7 @@ describe('previous matches tables', function (): void {
         $owner = $createOwner();
         foreach (['Historic Owner Event', 'Former Owner Event'] as $name) {
             $bookMatch(
-                EventMatch::factory()->for(Event::factory()->create([
+                EventMatch::factory()->for(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'),
                     'name' => $name,
                     'date' => Date::now()->subMonth(),
                 ])),
@@ -98,14 +98,14 @@ describe('previous matches tables', function (): void {
         }
 
         EventMatch::factory()
-            ->forEvent(Event::factory()->create([
+            ->forEvent(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'),
                 'name' => 'Historic Unrelated Event',
                 'date' => Date::now()->subMonth(),
             ]))
             ->create();
         $bookMatch(
             EventMatch::factory()
-                ->forEvent(Event::factory()->create([
+                ->forEvent(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'),
                     'name' => 'Historic Deleted Event',
                     'date' => Date::now()->subMonth(),
                 ]))

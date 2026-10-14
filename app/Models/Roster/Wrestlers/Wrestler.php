@@ -29,6 +29,7 @@ use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
@@ -47,6 +48,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -254,5 +256,11 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'height' => Height::class,
             'weight' => Weight::class,
         ];
+    }
+
+    /** @return MorphMany<Unavailability, $this> */
+    public function unavailabilities(): MorphMany
+    {
+        return $this->morphMany(Unavailability::class, 'person');
     }
 }

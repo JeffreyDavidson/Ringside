@@ -7,7 +7,10 @@ namespace App\Actions\Matches;
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentMatchRequirementsService;
@@ -22,6 +25,7 @@ class UpdateMatchAction
         private readonly MatchConfigurationRequirements $requirements,
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
+        private readonly MatchRosterLock $rosterLock,
     ) {}
 
     public function handle(EventMatch $match, EventMatchData $data): EventMatch
@@ -38,6 +42,9 @@ class UpdateMatchAction
             $this->requirements->ensureWithinEventPromotion($lockedMatch->event()->firstOrFail(), $data);
 
             $this->tournamentRequirements->ensureEditable($lockedMatch, $data);
+            $this->rosterLock->forData($data);
+            $retainedKeys = array_values($lockedMatch->competitors()->get()->map(fn (MatchCompetitor $entry): string => $entry->competitor_type.':'.$entry->competitor_id)
+                ->merge($lockedMatch->referees()->get()->map(RosterDateAvailability::key(...)))->all());
 
             $lockedMatch->update([
                 'match_type' => $data->matchType,
@@ -50,9 +57,9 @@ class UpdateMatchAction
             $lockedMatch->competitors()->delete();
             $lockedMatch->sides()->delete();
 
-            $this->addRefereesToMatchAction->handleWithinTransaction($lockedMatch, $data->referees);
+            $this->addRefereesToMatchAction->handleWithinTransaction($lockedMatch, $data->referees, $retainedKeys);
 
-            $this->addCompetitorsToMatchAction->handleWithinTransaction($lockedMatch, $data->sides);
+            $this->addCompetitorsToMatchAction->handleWithinTransaction($lockedMatch, $data->sides, $retainedKeys);
 
             if ($data->titles->isNotEmpty()) {
                 $this->addTitlesToMatchAction->handleWithinTransaction($lockedMatch, $data->titles);

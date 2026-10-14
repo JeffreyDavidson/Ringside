@@ -98,10 +98,13 @@ class CreateEditForm extends BaseForm
         );
     }
 
+    private ?Event $bookingEvent = null;
+
     /** Validate the selection against the booked event: only its promotion's roster and titles are accepted. */
     public function validateForEvent(Event $event): void
     {
         $this->eventPromotionId = $event->promotion_id;
+        $this->bookingEvent = $event;
 
         $this->validate();
     }
@@ -152,7 +155,7 @@ class CreateEditForm extends BaseForm
             ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['required', 'array', 'min:1'],
-            'referees.*' => ['bail', 'integer', $this->existsInPromotion('referees'), new RefereeIsBookable],
+            'referees.*' => ['bail', 'integer', $this->existsInPromotion('referees'), new RefereeIsBookable($this->bookingEvent, $this->modelId ? EventMatch::query()->find($this->modelId) : null)],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
                 'bail',
@@ -164,7 +167,7 @@ class CreateEditForm extends BaseForm
             ],
         ];
 
-        return array_merge($baseRules, new MatchCompetitorRuleSet($this->matchType, $this->formPromotionId())->rules());
+        return array_merge($baseRules, new MatchCompetitorRuleSet($this->matchType, $this->formPromotionId(), $this->bookingEvent, $this->modelId ? EventMatch::query()->find($this->modelId) : null)->rules());
     }
 
     /** A match has no promotion of its own: it books the roster and titles of its event's promotion. */

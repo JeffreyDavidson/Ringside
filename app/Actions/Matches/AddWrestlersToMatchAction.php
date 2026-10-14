@@ -9,6 +9,7 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Matches\MatchAssignmentConflictService;
@@ -21,6 +22,7 @@ class AddWrestlersToMatchAction
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly RosterDateAvailability $dateAvailability,
         private readonly MatchConfigurationRequirements $configurationRequirements,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
@@ -80,8 +82,9 @@ class AddWrestlersToMatchAction
      * Assign wrestlers while the caller owns the match transaction and lock.
      *
      * @param  Collection<int, Wrestler>  $wrestlers
+     * @param  list<string>  $retainedKeys  Server-derived assignments retained by the locked match update.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber): void
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber, array $retainedKeys = []): void
     {
         $this->tournamentRequirements->ensureCompetitors($lockedMatch, $wrestlers);
         $requestedWrestlers = $wrestlers->unique('id')->values();
@@ -103,6 +106,12 @@ class AddWrestlersToMatchAction
             $lockedWrestlers,
             $lockedMatch,
         );
+        $event = $lockedMatch->event()->firstOrFail();
+        foreach ($lockedWrestlers as $person) {
+            if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
+                $this->dateAvailability->ensureForEvent($person, $event);
+            }
+        }
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
         $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {

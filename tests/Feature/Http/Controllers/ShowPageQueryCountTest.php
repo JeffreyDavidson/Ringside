@@ -33,11 +33,14 @@ describe('show page query counts', function (): void {
         $queries = array_column(DB::getQueryLog(), 'query');
         DB::disableQueryLog();
         expect(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'select exists')))->toBeEmpty()
-            ->and(count($queries))->toBeLessThanOrEqual($maxQueries);
+            ->and(count($queries))->toBeLessThanOrEqual($maxQueries)
+            ->and(array_filter($queries, fn (string $sql): bool => str_contains($sql, 'roster_unavailabilities')))
+            ->toHaveCount(in_array($route, ['wrestlers.show', 'referees.show'], true) ? 2 : 0);
     })->with([
-        'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create(), 'wrestlers.show', 13],
+        // Availability adds one person lookup and two bounded list counts on individual profiles.
+        'wrestler' => [fn (): Model => Wrestler::factory()->employed()->create(), 'wrestlers.show', 16],
         'manager' => [fn (): Model => Manager::factory()->employed()->create(), 'managers.show', 10],
-        'referee' => [fn (): Model => Referee::factory()->employed()->create(), 'referees.show', 8],
+        'referee' => [fn (): Model => Referee::factory()->employed()->create(), 'referees.show', 11],
         'tag team' => [fn (): Model => TagTeam::factory()->employed()->create(), 'tag-teams.show', 13],
         'stable' => [fn (): Model => Stable::factory()->active()->create(), 'stables.show', 12],
         'title' => [fn (): Model => Title::factory()->active()->create(), 'titles.show', 9],

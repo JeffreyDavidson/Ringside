@@ -4,27 +4,37 @@ declare(strict_types=1);
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
+use App\Actions\Events\SaveTalentBookingAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\TalentBookingData;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\Events\TalentBookingException;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
+use App\Models\Events\EventTalentBooking;
+use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
+use App\Queries\Events\TalentBookingContextQuery;
 use App\ViewModels\EventPackViewModel;
+use App\ViewModels\TalentBookingsViewModel;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
@@ -728,5 +738,93 @@ test('concurrent live show commands commit once without replacing times or dupli
             ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe($auditCount + 1);
     });
 })->with(['prepare', 'start', 'finish', 'attendance'])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
+test('calendar writes serialize with direct team and rescheduled bookings without erasing prior bookings', function (string $mode): void {
+    withCommittedData(function () use ($mode): void {
+        foreach (range(1, 3) as $run) {
+            // Arrange
+            $promotion = Promotion::factory()->create();
+            $person = Wrestler::factory()->bookable()->for($promotion)->create();
+            $actor = administrator();
+            $target = now()->addWeeks($run)->startOfDay()->addHours(18);
+            $event = Event::factory()->for($promotion)->create(['name' => 'Availability race '.$mode.' '.$run, 'date' => $mode === 'reschedule' ? $target->copy()->subDay() : $target, 'venue_id' => null]);
+            $spec = ['event_id' => $event->id, 'first_wrestler_id' => $person->id,
+                'second_wrestler_id' => Wrestler::factory()->bookable()->for($promotion)->create()->id,
+                'referee_id' => Referee::factory()->bookable()->for($promotion)->create()->id];
+            if ($mode === 'team') {
+                $team = TagTeam::factory()->bookable()->for($promotion)->create();
+                $person = $team->currentWrestlers()->firstOrFail();
+                $person->forceFill(['promotion_id' => $promotion->id])->save();
+                $spec['team_id'] = $team->id;
+                $spec['opponent_team_id'] = TagTeam::factory()->bookable()->for($promotion)->create()->id;
+            }
+            if ($mode === 'reschedule') {
+                EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
+                $spec = ['event_id' => $event->id, 'reschedule_date' => $target->toDateTimeString()];
+            }
+            $availability = ['unavailability_person_id' => $person->id, 'unavailability_day' => $target->toDateString(), 'user_id' => $actor->id];
+
+            // Act
+            $results = bookConcurrently([$spec, $availability]);
+
+            // Assert
+            expect($results[1]['ok'])->toBeTrue(workerOutcomes($results))
+                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+                ->and($results[0]['exception'])->toBeIn([null, EntityNotAvailableException::class])
+                ->and(Unavailability::query()->where('person_id', $person->id)->count())->toBe(1);
+            if ($mode === 'reschedule') {
+                expect($event->refresh()->date?->toDateTimeString())->toBe(($results[0]['ok'] ? $target : $target->copy()->subDay())->toDateTimeString());
+            } else {
+                expect($event->matches()->count())->toBe($results[0]['ok'] ? 1 : 0);
+            }
+        }
+    });
+})->with(['direct', 'team', 'reschedule'])
+    ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency', 'availability-concurrency');
+
+test('concurrent talent changes never duplicate or overwrite agreements', function (string $operation): void {
+    withCommittedData(function () use ($operation): void {
+        // Arrange
+        $user = administrator();
+        \Pest\Laravel\actingAs($user);
+        $event = Event::factory()->create(['name' => 'Talent race '.$operation, 'date' => now()->addDay()]);
+        $person = Wrestler::factory()->bookable()->create();
+        $context = resolve(TalentBookingContextQuery::class);
+        $version = 0;
+        if ($operation !== 'first create') {
+            resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $context->fingerprint($event, "wrestler:{$person->id}"),
+                new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null));
+            $version = 1;
+        }
+        $spec = ['talent_event_id' => $event->id, 'user_id' => $user->id, 'person_id' => $person->id, 'version' => $version,
+            'fingerprint' => $context->fingerprint($event, "wrestler:{$person->id}"), 'talent_status' => 'confirmed', 'clock' => now()->toIso8601String()];
+        $other = $operation === 'reschedule' ? ['event_id' => $event->id, 'reschedule_date' => now()->addDays(2)->toIso8601String()]
+            : [...$spec, 'talent_status' => $operation === 'opposite' ? 'cancelled' : 'confirmed'];
+
+        // Act
+        $results = bookConcurrently([$spec, $other]);
+
+        // Assert
+        expect(collect($results)->contains('deadlock', true))->toBeFalse(workerOutcomes($results));
+        if ($operation === 'reschedule') {
+            expect($results[1]['ok'])->toBeTrue(workerOutcomes($results));
+            $booking = EventTalentBooking::query()->where('event_id', $event->id)->sole();
+            expect($booking->version)->toBeIn([1, 2]);
+            if ($booking->status === TalentBookingStatus::Confirmed) {
+                $row = resolve(TalentBookingsViewModel::class)->data($event->refresh())['rows'][0];
+                expect($row['warnings'])->toContain('reconfirmation');
+            }
+
+            return;
+        }
+        expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results))
+            ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([TalentBookingException::class], workerOutcomes($results))
+            ->and(EventTalentBooking::query()->where('event_id', $event->id)->sole()->version)->toBe($version + 1)
+            ->and(EventTalentBookingRevision::query()->count())->toBe($version + 1);
+    });
+})->with(['first create', 'same version', 'opposite', 'reschedule'])
     ->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
     ->group('concurrency', 'postgres-concurrency');

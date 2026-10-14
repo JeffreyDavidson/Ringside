@@ -1,4 +1,12 @@
 <nav class="mt-7 flex grow flex-col gap-1" aria-label="{{ __('navigation.sidebar.promotion_navigation') }}">
+    @can('viewAny', \App\Models\Storylines\Storyline::class)
+        <x-sidebar.menu-item href="{{ route('storylines.index') }}" :active="request()->routeIs('storylines.*')">
+            <x-slot:icon>
+                <x-heroicon-o-book-open class="size-5" />
+            </x-slot:icon>
+            {{ __('storylines.title') }}
+        </x-sidebar.menu-item>
+    @endcan
     <x-sidebar.menu-heading>{{ __('navigation.groups.promotion') }}</x-sidebar.menu-heading>
 
     <x-sidebar.menu-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -12,6 +20,12 @@
             <x-heroicon-o-calendar-days class="size-5" />
         </x-slot:icon>
         {{ __('navigation.sections.events') }}
+    </x-sidebar.menu-item>
+    <x-sidebar.menu-item href="{{ route('availability.index') }}" :active="request()->routeIs('availability.*')">
+        <x-slot:icon>
+            <x-heroicon-o-calendar-days class="size-5" />
+        </x-slot:icon>
+        {{ __('availability.title') }}
     </x-sidebar.menu-item>
     <x-sidebar.menu-item href="{{ route('wrestlers.index') }}" :active="request()->routeIs('wrestlers.*')">
         <x-slot:icon>

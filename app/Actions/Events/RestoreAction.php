@@ -11,6 +11,7 @@ use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Tournaments\Tournament;
+use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class RestoreAction
         private readonly SchedulingSlotLock $slotLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
+        private readonly EventRosterAvailabilityQuery $rosterAvailability,
     ) {}
 
     /**
@@ -71,6 +73,9 @@ class RestoreAction
             $this->tournamentRequirements->ensureEventChronology($lockedEvent, $lockedEvent->date);
             $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $lockedEvent->date);
             Tournament::query()->whereKey($tournamentIds)->increment('version');
+            if ($lockedEvent->date?->isFuture()) {
+                $this->rosterAvailability->ensureAt($lockedEvent, $lockedEvent->date, lock: true);
+            }
             $this->deletionState->restore($lockedEvent, now());
         }, attempts: 3);
     }

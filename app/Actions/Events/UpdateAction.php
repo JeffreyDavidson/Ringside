@@ -16,6 +16,7 @@ use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Tournaments\Tournament;
+use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Carbon;
@@ -25,6 +26,7 @@ class UpdateAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $assignmentConflicts,
+        private readonly EventRosterAvailabilityQuery $rosterAvailability,
         private readonly SchedulingSlotLock $slotLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
@@ -92,6 +94,7 @@ class UpdateAction
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
+                $this->rosterAvailability->ensureAt($lockedEvent, $eventData->date, lock: true);
             }
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {

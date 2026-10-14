@@ -11,8 +11,10 @@ use App\Models\Events\EventLiveRun;
 use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Gate;
 
 /**
+ * @phpstan-import-type Content from EventLiveRun
  * @phpstan-import-type Item from EventLiveRun
  * @phpstan-import-type Source from LiveShowSourceQuery
  *
@@ -37,6 +39,15 @@ class LiveShowViewModel
                 $sourceError = $exception->getMessage();
             }
         }
+        if (Gate::denies('viewProduction', $event)) {
+            if ($run !== null) {
+                $run = clone $run;
+                $run->content = $this->withoutProduction($run->content);
+            }
+            if ($source !== null) {
+                $source['content'] = $this->withoutProduction($source['content']);
+            }
+        }
         $needsReview = $run !== null && ! $complete && ($source === null || $source['pack']->version !== $run->pack_version
             || ! hash_equals($run->card_fingerprint, $source['fingerprint']));
         $items = collect($run?->content['items'] ?? []);
@@ -46,6 +57,22 @@ class LiveShowViewModel
             'needsReview' => $needsReview, 'complete' => $complete,
             'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true))->all()),
             'current' => $items->firstWhere('state', 'running'), 'next' => $items->firstWhere('state', 'pending')];
+    }
+
+    /** @param Content $content
+     * @return Content
+     */
+    private function withoutProduction(array $content): array
+    {
+        unset($content['production']);
+        $content['items'] = array_map(function (array $item): array {
+            unset($item['cues']);
+
+            return $item;
+        }, $content['items']);
+        $content['roster'] = array_values(array_filter($content['roster'], fn (array $person): bool => ! str_starts_with($person['key'], 'crew:')));
+
+        return $content;
     }
 
     public function actual(?string $instant, string $timezone): string

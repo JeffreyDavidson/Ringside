@@ -6,12 +6,15 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
+use App\Livewire\Concerns\FiltersMatchHistory;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use Livewire\Attributes\Locked;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
+    use FiltersMatchHistory;
+
     /**
      * Tag Team to use for component.
      */
@@ -21,17 +24,19 @@ class PreviousMatches extends BasePreviousMatchesTable
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
     {
-        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+        return $this->historyForSubject();
+    }
 
-        return EventMatch::query()
-            ->forHistory()
-            ->forTagTeamId($tagTeamId);
+    protected function historySubject(): TagTeam
+    {
+        return TagTeam::query()->findOrFail($this->requireContextId($this->tagTeamId, 'tag team'));
     }
 
     #[\Override]
     protected function configure(): void
     {
         parent::configure();
+        $this->configureHistory();
 
         $this->authorizeContextRecord(TagTeam::class, $this->tagTeamId, 'tag team');
     }
