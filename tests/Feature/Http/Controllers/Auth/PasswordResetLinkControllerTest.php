@@ -44,37 +44,16 @@ describe('store', function (): void {
             ->assertSessionHasInput('email');
     });
 
-    test('password reset link can be requested', function (string $email) {
+    test('registered emails receive the common recovery response and one reset notification', function (string $email): void {
         // Arrange
-        Notification::fake();
         $user = User::factory()->create(['email' => 'promoter@example.com']);
+        config(['auth.passwords.users.throttle' => 90]);
         $requestData = ['email' => $email];
 
-        // Act
-        $response = post(route('password.email'), $requestData);
-
-        // Assert
-        $response
-            ->assertRedirect()
-            ->assertSessionHasNoErrors()
-            ->assertSessionHas('status', __('passwords.sent'));
-
-        Notification::assertSentTo($user, ResetPassword::class);
-    })->with([
-        'lowercase email' => 'promoter@example.com',
-        'mixed-case email' => 'Promoter@Example.com',
-    ]);
-
-    test('registered and unregistered emails receive the same response', function (string $email): void {
-        // Arrange
         Notification::fake();
-        config(['auth.passwords.users.throttle' => 90]);
-        freezeTime();
-        User::factory()->create(['email' => 'promoter@example.com']);
 
         // Act
-        $response = from(route('password.request'))
-            ->post(route('password.email'), ['email' => $email]);
+        $response = from(route('password.request'))->post(route('password.email'), $requestData);
 
         // Assert
         $response
@@ -82,32 +61,38 @@ describe('store', function (): void {
             ->assertSessionHasNoErrors()
             ->assertSessionMissing('_old_input')
             ->assertSessionHas('status', __('passwords.sent'))
-            ->assertSessionHas('recovery_email', $email)
+            ->assertSessionHas('recovery_email', 'promoter@example.com')
             ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
+
+        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentToTimes($user, ResetPassword::class, 1);
+        Notification::assertSentTimes(ResetPassword::class, 1);
     })->with([
-        'registered' => 'promoter@example.com',
-        'unregistered' => 'nobody@example.com',
+        'lowercase email' => 'promoter@example.com',
+        'mixed-case email' => 'Promoter@Example.com',
     ]);
 
-    test('only a registered email is sent a reset notification', function (): void {
+    test('an unknown email receives the common recovery response without a notification', function (): void {
         // Arrange
+        User::factory()->create(['email' => 'promoter@example.com']);
+        config(['auth.passwords.users.throttle' => 90]);
+        $requestData = ['email' => 'nobody@example.com'];
+
         Notification::fake();
-        $user = User::factory()->create(['email' => 'promoter@example.com']);
 
         // Act
-        $unknownResponse = post(route('password.email'), ['email' => 'nobody@example.com']);
-        $response = post(route('password.email'), ['email' => $user->email]);
+        $response = from(route('password.request'))->post(route('password.email'), $requestData);
 
         // Assert
-        $unknownResponse
-            ->assertRedirect()
-            ->assertSessionHas('status', __('passwords.sent'));
         $response
-            ->assertRedirect()
-            ->assertSessionHas('status', __('passwords.sent'));
+            ->assertRedirect(route('password.request'))
+            ->assertSessionHasNoErrors()
+            ->assertSessionMissing('_old_input')
+            ->assertSessionHas('status', __('passwords.sent'))
+            ->assertSessionHas('recovery_email', 'nobody@example.com')
+            ->assertSessionHas('recovery_resend_at', now()->addSeconds(90)->timestamp);
 
-        Notification::assertSentTimes(ResetPassword::class, 1);
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertNothingSent();
     });
 
     test('a throttled request looks the same as a sent one and sends nothing', function (): void {
@@ -164,8 +149,10 @@ describe('store', function (): void {
         $user = User::factory()->create();
         DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
 
+        $requestData = ['email' => 'legacy.promoter@example.com'];
+
         // Act
-        $response = post(route('password.email'), ['email' => 'legacy.promoter@example.com']);
+        $response = post(route('password.email'), $requestData);
 
         // Assert
         $response

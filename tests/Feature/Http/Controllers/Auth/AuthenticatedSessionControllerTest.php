@@ -48,7 +48,8 @@ describe('store', function (): void {
         $response = post(route('login'), $credentials);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     })->with([
@@ -58,7 +59,7 @@ describe('store', function (): void {
 
     test('users can not authenticate with invalid password', function () {
         // Arrange
-        $user = User::factory()->create();
+        $user = User::factory()->create(['status' => UserStatus::Active]);
         $credentials = [
             'email' => $user->email,
             'password' => 'wrong-password',
@@ -81,11 +82,13 @@ describe('store', function (): void {
         // Arrange
         $user = User::factory()->create(['status' => $status]);
 
-        // Act
-        $response = from(route('login'))->post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = from(route('login'))->post(route('login'), $requestData);
 
         // Assert
         $response
@@ -124,7 +127,8 @@ describe('store', function (): void {
         $response = post(route('login'), $credentials);
 
         // Assert
-        $response->assertSessionHasErrors(['email', 'password']);
+        $response
+            ->assertSessionHasErrors(['email', 'password']);
 
         assertGuest();
     });
@@ -172,14 +176,17 @@ describe('store', function (): void {
             ]);
         }
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         Event::assertNotDispatched(Lockout::class);
         assertAuthenticatedAs($user);
@@ -197,14 +204,17 @@ describe('store', function (): void {
         }
         travel(61)->seconds();
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $user->email,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     });
@@ -214,14 +224,17 @@ describe('store', function (): void {
         $user = User::factory()->create(['status' => UserStatus::Active]);
         DB::table('users')->where('id', $user->id)->update(['email' => 'Legacy.Promoter@Example.com']);
 
-        // Act
-        $response = post(route('login'), [
+        $requestData = [
             'email' => $typedEmail,
             'password' => 'secret',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('login'), $requestData);
 
         // Assert
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response
+            ->assertRedirect(route('dashboard', absolute: false));
 
         assertAuthenticatedAs($user);
     })->with([

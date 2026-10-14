@@ -4,36 +4,67 @@ declare(strict_types=1);
 
 use App\Models\Users\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
+use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\post;
 
-test('registration enforces a twelve character password minimum', function (string $password, bool $isAccepted): void {
+test('registration rejects an eleven character password', function (): void {
     // Arrange
     $registrationData = [
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
         'email' => 'jeffrey@example.com',
-        'password' => $password,
-        'password_confirmation' => $password,
+        'password' => 'elevenchars',
+        'password_confirmation' => 'elevenchars',
     ];
+
+    Event::fake([Registered::class]);
 
     // Act
     $response = post(route('register'), $registrationData);
 
     // Assert
-    if ($isAccepted) {
-        $response->assertSessionHasNoErrors();
+    $response
+        ->assertSessionHasErrors('password')
+        ->assertSessionMissing('_old_input.password')
+        ->assertSessionMissing('_old_input.password_confirmation');
 
-        return;
-    }
+    expect(User::query()->count())->toBe(0);
+    Event::assertNotDispatched(Registered::class);
+    assertGuest();
+});
 
-    $response->assertSessionHasErrors('password');
-})->with([
-    'eleven characters' => ['elevenchars', false],
-    'twelve characters' => ['twelve-chars', true],
-]);
+test('registration accepts a twelve character password', function (): void {
+    // Arrange
+    $registrationData = [
+        'first_name' => 'Jeffrey',
+        'last_name' => 'Davidson',
+        'email' => 'jeffrey@example.com',
+        'password' => 'twelve-chars',
+        'password_confirmation' => 'twelve-chars',
+    ];
+
+    Event::fake([Registered::class]);
+
+    // Act
+    $response = post(route('register'), $registrationData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', __('auth-forms.account_pending'));
+
+    $user = User::query()->sole();
+    expect(Hash::check('twelve-chars', $user->password))->toBeTrue();
+    Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($user));
+    Event::assertDispatchedOnce(Registered::class);
+    assertGuest();
+});
 
 test('password reset rejects passwords shorter than twelve characters', function (): void {
     // Arrange
@@ -43,13 +74,15 @@ test('password reset rejects passwords shorter than twelve characters', function
 
     Event::fake([PasswordReset::class]);
 
-    // Act
-    $response = post(route('password.update'), [
+    $requestData = [
         'token' => $token,
         'email' => $user->email,
         'password' => 'elevenchars',
         'password_confirmation' => 'elevenchars',
-    ]);
+    ];
+
+    // Act
+    $response = post(route('password.update'), $requestData);
 
     // Assert
     $response
