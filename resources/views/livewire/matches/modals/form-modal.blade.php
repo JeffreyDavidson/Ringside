@@ -229,6 +229,8 @@
         </x-form-modal.modal-input>
     @endif
 
+    <x-matches.booking-history />
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-officials-grid">
         <x-form-modal.modal-input>
             <x-form.inputs.roster-combobox

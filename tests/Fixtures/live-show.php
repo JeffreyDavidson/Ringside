@@ -16,8 +16,11 @@ use function Pest\Laravel\actingAs;
 function liveShowFixture(bool $segment = false, ?string $date = null): array
 {
     actingAs(administrator());
-    $event = Event::factory()->create(['date' => $date ?? now()]);
-    $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+    $event = Event::factory()->create(['name' => 'Harbor Showcase', 'date' => $date ?? now()]);
+    $wrestlers = Wrestler::factory()->count(2)->sequence(
+        ['name' => 'Prof. Russ Kihn'],
+        ['name' => 'Yasmine Nolan'],
+    )->bookable()->create();
     $match = EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     $content = $data['content'];

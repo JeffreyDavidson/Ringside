@@ -1,3 +1,4 @@
+@php $stackRowsOnMobile ??= false; @endphp
 <div @class(['flex flex-col', 'gap-3' => $tableHeading, 'gap-6' => ! $tableHeading])>
     @if ($beforeWrapperView)
         <x-dynamic-component :component="$beforeWrapperView" />
@@ -9,7 +10,9 @@
         </h2>
     @endif
 
-    @if ($tableHeading && $rows->isEmpty() && ! $hasActiveFilters)
+    @if ($historyUnavailable ?? false)
+        <p class="text-ringside-muted text-sm">{{ __('matches.history.unavailable') }}</p>
+    @elseif ($tableHeading && $rows->isEmpty() && ! $hasActiveFilters)
         <p
             class="border-ringside-line bg-ringside-surface-header text-ringside-muted m-0 border px-4 py-4 text-sm"
             data-test="{{ $this->resourceName }}-empty-state"
@@ -52,7 +55,7 @@
             @if ($rows->isNotEmpty())
                 <p
                     id="{{ $this->resourceName }}-table-scroll-hint"
-                    class="border-ringside-line text-ringside-muted flex items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden"
+                    @class(['border-ringside-line text-ringside-muted items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden', 'hidden' => $stackRowsOnMobile, 'flex' => ! $stackRowsOnMobile])
                 >
                     {{ __('core.table_scroll_hint') }}
                     <x-heroicon-o-arrow-right class="size-4 shrink-0" aria-hidden="true" />
@@ -64,10 +67,10 @@
                     tabindex="0"
                     aria-label="{{ __('core.table_results_region') }}"
                     aria-describedby="{{ $this->resourceName }}-table-scroll-hint"
-                    class="focus-visible:outline-ringside-ink overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                    @class(['focus-visible:outline-ringside-ink focus-visible:outline-2 focus-visible:outline-offset-[-2px]', 'overflow-x-auto' => ! $stackRowsOnMobile, 'md:overflow-x-auto' => $stackRowsOnMobile])
                 >
-                    <table class="w-full min-w-[40rem] table-auto border-collapse text-left text-sm">
-                        <thead>
+                    <table @class(['w-full table-auto border-collapse text-left text-sm', 'min-w-[40rem]' => ! $stackRowsOnMobile, 'block md:table' => $stackRowsOnMobile])>
+                        <thead @class(['hidden md:table-header-group' => $stackRowsOnMobile])>
                             <tr>
                                 @foreach ($columns as $column)
                                     @php
@@ -105,17 +108,17 @@
                                 @endforeach
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody @class(['block md:table-row-group' => $stackRowsOnMobile])>
                             @foreach ($rows as $row)
                                 <tr
                                     wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}"
-                                    class="border-ringside-line hover:bg-ringside-surface-hover border-b transition-colors"
+                                    @class(['border-ringside-line hover:bg-ringside-surface-hover border-b transition-colors', 'block md:table-row' => $stackRowsOnMobile])
                                 >
                                     @foreach ($columns as $column)
-                                        <td
-                                            class="text-ringside-ink px-4 py-4
-                                    {{ !$loop->last ? 'border-ringside-line border-e' : '' }}"
-                                        >
+                                        <td @class(['text-ringside-ink px-4 py-4', 'border-ringside-line border-e' => ! $loop->last && ! $stackRowsOnMobile, 'block md:table-cell' => $stackRowsOnMobile])>
+                                            @if ($stackRowsOnMobile)
+                                                <span class="text-ringside-muted mb-1 block text-xs font-semibold md:hidden">{{ $column->getTitle() }}</span>
+                                            @endif
                                             @if ($column->isHtml())
                                                 {{ $column->resolveHtmlValue($row) }}
                                             @else

@@ -7,6 +7,7 @@ namespace App\ViewModels;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Queries\Events\EventPackCardQuery;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @phpstan-import-type Content from EventPack
@@ -29,6 +30,14 @@ class EventPackViewModel
         $card = $this->query->get($event);
         $pack = $event->pack()->first();
         $content = $pack->content ?? ['timezone' => $card['timezone'], 'doors_at' => null, 'revision' => null, 'master' => null, 'notes' => null, 'follow_up' => null, 'matches' => [], 'segments' => []];
+
+        if (Gate::denies('viewProduction', $event)) {
+            unset($content['production']);
+            if ($pack !== null) {
+                $pack = clone $pack;
+                $pack->content = $content;
+            }
+        }
 
         $ids = array_column($card['rows'], 'id');
         $timings = collect($content['matches'])->keyBy('match_id');

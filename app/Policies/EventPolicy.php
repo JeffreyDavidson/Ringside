@@ -15,12 +15,42 @@ use App\Models\Users\User;
  */
 class EventPolicy
 {
+    public function preparePublication(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function publishPublication(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function unpublishPublication(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function uploadPublicationPoster(User $user, Event $event): bool
+    {
+        return false;
+    }
+
     public function viewAny(User $user): bool
     {
         return false;
     }
 
     public function view(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function viewProduction(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function updateProduction(User $user, Event $event): bool
     {
         return false;
     }
@@ -36,6 +66,11 @@ class EventPolicy
     }
 
     public function delete(User $user, Event $event): bool
+    {
+        return false;
+    }
+
+    public function manageSponsors(User $user, Event $event): bool
     {
         return false;
     }

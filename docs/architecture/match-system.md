@@ -188,3 +188,19 @@ Pinfall, submission, knockout, stipulation, and forfeit finishes allow titles to
 - [Business Rules](business-rules.md)
 - [Core Capabilities](core-capabilities.md)
 - [Championship System](championship-system.md)
+
+## Booking history and continuity
+
+The booking modal's explicit **Check history** action is read-only and reauthorizes the current create/update ability and actual event before reading. It submits the current deferred roster selection; it does not query history while searching the roster. The client discards its snapshot as soon as the competitors or format change and ignores responses for older selections. A check never relaxes booking, scheduling, title-defender or availability rules and writes no domain records.
+
+BookingHistoryQuery reads the existing EventMatch, MatchSide and MatchCompetitor records. Its reference is the earlier of the target event timestamp and one captured server timestamp, or now for an undated target. Earlier history excludes the reference instant, the edited match, deleted matches and deleted parent events. Every source query explicitly filters the event's promotion, including for global administrators. An unowned event/profile yields unavailable history rather than an empty record. Dates are displayed in the promotion time zone.
+
+The snapshot includes five recent bookings **per selected identity**, latest recorded dates, and direct head-to-head records over all available qualifying history. A past booking without a usable result remains visible and cannot establish an appearance, draw or loss. Current corrected outcomes are authoritative; this is event-date reporting rather than an audit reconstruction. No counters or result copies are persisted. Retained deleted competitors keep their names and a Deleted marker without linking to inaccessible profiles; missing or foreign references are redacted.
+
+Direct head-to-head records require exactly two populated sides and one same-type competitor entry on each side: Singles for wrestlers, or ordinary equal-size tag formats for named teams. Multi-way, partner combinations, handicaps, gauntlets, battle royals and rumbles do not become one-on-one records. Team outcomes remain with the named team across membership changes; members do not inherit those outcomes. A team id and a wrestler id are separate identities even when their numeric values match.
+
+Repeat notices compare typed identities on opposing sides in the preceding 90 **local calendar days**, lower bound inclusive and reference exclusive. They distinguish recorded meetings from unresulted/incomplete bookings, show the latest source match, and paginate matching pairs five at a time. Previous opposition between today's selected partners is not a repeat opposing pairing. Individual-entrant form lists are normalized to individual sides. Notices are advisory and do not infer storyline intent.
+
+EventMatchBuilder owns reusable promotion/time, opposing-side and direct-bout constraints plus the completed-result projection. Counts are portable SQL aggregates; previews eager-load with per-parent limits, and notice sources load in a single bounded batch. Query counts do not grow with history rows or individual opposing pairs. No membership expansion, schema change, cross-request statistics cache or new dependency is involved.
+
+Wrestler and tag-team PreviousMatches tables use FiltersMatchHistory for a typed opponent URL filter and links from actual opponents. Forged, foreign and malformed filters fail closed; clearing the filter returns to the subject's full promotion-scoped history. These history tables stack labelled fields on phones while retaining their desktop table. Streaks and title-defence totals are intentionally not calculated.

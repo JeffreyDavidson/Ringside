@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'sponsor_setup' => 'Sponsor setup',
     'incomplete' => 'The form was incomplete. Your changes were not saved. Reload and try again; this show may exceed the server’s form size limit.',
     'title' => 'Event pack',
     'back' => 'Back to event',
@@ -36,7 +37,7 @@ return [
     'revised' => 'Revised start',
     'revised_short' => 'Revised',
     'minutes' => 'Slot minutes',
-    'row_notes' => 'Cues and notes',
+    'row_notes' => 'Shared match / segment notes',
     'referee' => 'Referee',
     'wrestler' => 'Wrestler',
     'unassigned' => 'Not assigned',
@@ -70,7 +71,7 @@ return [
     'print' => 'Print / Save as PDF',
     'print_help' => 'Prints saved timings and notes with the current card. Choose Letter or A4 in your browser. Turn off browser headers and footers for a clean copy.',
     'schedule' => 'Schedule',
-    'match_segment' => 'Match / segment & cues',
+    'match_segment' => 'Match / segment & shared notes',
     'on_the_night' => 'On the night',
     'actual_start' => 'Actual start',
     'actual_finish' => 'Actual finish',

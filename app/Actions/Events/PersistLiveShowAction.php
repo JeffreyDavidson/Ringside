@@ -16,6 +16,8 @@ class PersistLiveShowAction
     {
         $run->version++;
         $run->save();
+        // Private production instructions stay in the protected run, outside the generic event audit.
+        unset($before['cues'], $after['cues']);
         activity('live-show')->performedOn($run->event)->withProperties([
             'operation' => $operation, 'target' => $target, 'version' => $run->version,
             'before' => $before, 'after' => $after, 'reason' => $reason,

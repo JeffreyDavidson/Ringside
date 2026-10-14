@@ -24,28 +24,28 @@ beforeEach(function (): void {
 });
 
 /**
- * A past event in a promotion of its own, so a lazy load of the event's promotion cannot be served from a shared model.
+ * A distinct past event in the roster member's promotion, so per-row relationship reads cannot reuse one event model.
  */
-function pastEventInOwnPromotion(): Event
+function pastEventInOwnPromotion(?int $promotionId): Event
 {
-    return Event::factory()->past()->for(Promotion::factory(), 'promotion')->create();
+    return Event::factory()->past()->create(['promotion_id' => $promotionId]);
 }
 
 dataset('previous matches tables', [
     'wrestlers' => [
         WrestlerPreviousMatches::class,
         'wrestlerId',
-        fn (): Model => Wrestler::factory()->create(),
+        fn (): Model => Wrestler::factory()->for(Promotion::factory(), 'promotion')->create(),
         fn (MatchFactory $match, Model $subject): EventMatch => $match
-            ->withCompetitors([$subject, Wrestler::factory()->create()])
+            ->withCompetitors([$subject, Wrestler::factory()->create(['promotion_id' => $subject->getAttribute('promotion_id')])])
             ->createOne(),
     ],
     'tag teams' => [
         TagTeamPreviousMatches::class,
         'tagTeamId',
-        fn (): Model => TagTeam::factory()->create(),
+        fn (): Model => TagTeam::factory()->for(Promotion::factory(), 'promotion')->create(),
         fn (MatchFactory $match, Model $subject): EventMatch => $match
-            ->withCompetitors([$subject, TagTeam::factory()->create()])
+            ->withCompetitors([$subject, TagTeam::factory()->create(['promotion_id' => $subject->getAttribute('promotion_id')])])
             ->createOne(),
     ],
     'referees' => [
@@ -70,9 +70,9 @@ describe('history table query counts', function (): void {
     ): void {
         // Arrange
         $subject = $createSubject();
-        $bookMatch(EventMatch::factory()->for(pastEventInOwnPromotion()), $subject);
+        $bookMatch(EventMatch::factory()->for(pastEventInOwnPromotion($subject->getAttribute('promotion_id'))), $subject);
         $queriesWithOneRow = recordStatements(fn () => livewire($table, [$parameter => $subject->getKey()]));
-        collect(range(1, 9))->each(fn (): EventMatch => $bookMatch(EventMatch::factory()->for(pastEventInOwnPromotion()), $subject));
+        collect(range(1, 9))->each(fn (): EventMatch => $bookMatch(EventMatch::factory()->for(pastEventInOwnPromotion($subject->getAttribute('promotion_id'))), $subject));
 
         // Act
         $queriesWithTenRows = recordStatements(fn () => livewire($table, [$parameter => $subject->getKey()]));

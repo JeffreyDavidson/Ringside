@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
+use App\Models\Events\EventPublication;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +43,10 @@ class DeleteAction
         DB::transaction(function () use ($event, $deletionDate): void {
             $lockedEvent = $event->refreshForUpdate();
 
+            EventPublication::query()->where('event_id', $lockedEvent->id)->update([
+                'published_at' => null, 'results_published_at' => null, 'unpublished_at' => now(),
+                'version' => DB::raw('version + 1'),
+            ]);
             $this->deletionState->delete($lockedEvent, $deletionDate ?? now());
         });
     }
