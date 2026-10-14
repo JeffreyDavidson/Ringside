@@ -294,6 +294,7 @@ test('invalid release controls preserve the existing draft', function (string $f
     $response
         ->assertRedirect(route('events.public-pages.edit', $event))
         ->assertSessionHasErrors($field)
+        ->assertSessionHasInput($field, $value)
         ->assertSessionMissing('success');
 
     expect($publication->refresh()->getRawOriginal())->toBe($original);

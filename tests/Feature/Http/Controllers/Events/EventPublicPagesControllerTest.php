@@ -1071,7 +1071,8 @@ describe('validated publication draft', function (): void {
         // Assert
         $response
             ->assertRedirect()
-            ->assertSessionHasErrors('matches.0');
+            ->assertSessionHasErrors('matches.0')
+            ->assertSessionHasInput('matches', $requestData['matches']);
 
         expect(EventPublication::query()
             ->count())->toBe(0);

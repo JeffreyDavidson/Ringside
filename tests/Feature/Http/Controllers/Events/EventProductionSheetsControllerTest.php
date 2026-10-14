@@ -92,7 +92,8 @@ test('invalid production filters return validation errors', function (string $fi
     // Assert
     $response
         ->assertRedirect()
-        ->assertSessionHasErrors($field);
+        ->assertSessionHasErrors($field)
+        ->assertSessionHasInput($field, $value);
 
     expect(EventPack::query()
         ->count())->toBe(0);

@@ -185,6 +185,7 @@ describe('email preparation', function (): void {
         $response
             ->assertRedirect()
             ->assertSessionHasErrors('email')
+            ->assertSessionHasInput('email', fn (mixed $input): bool => $input === $email)
             ->assertSessionMissing('_old_input.password')
             ->assertSessionMissing('_old_input.password_confirmation');
 

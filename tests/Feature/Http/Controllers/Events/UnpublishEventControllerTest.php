@@ -276,6 +276,7 @@ test('invalid unpublish controls preserve the released card', function (string $
     $response
         ->assertRedirect(route('events.public-pages.edit', $event))
         ->assertSessionHasErrors($field)
+        ->assertSessionHasInput($field, $value)
         ->assertSessionMissing('success');
 
     expect($publication->refresh()->getRawOriginal())->toBe($original);

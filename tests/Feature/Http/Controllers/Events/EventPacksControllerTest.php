@@ -1140,7 +1140,8 @@ describe('validated pack content', function (): void {
         // Assert
         $response
             ->assertRedirect()
-            ->assertSessionHasErrors(['matches.0.match_id', 'matches.1.match_id']);
+            ->assertSessionHasErrors(['matches.0.match_id', 'matches.1.match_id'])
+            ->assertSessionHasInput('matches', $requestData['matches']);
 
         expect($event->pack()
             ->exists())->toBeFalse();
