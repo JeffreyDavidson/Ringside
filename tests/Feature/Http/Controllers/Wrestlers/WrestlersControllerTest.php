@@ -26,6 +26,27 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the wrestlers index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('wrestlers.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.index')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the wrestlers index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -46,7 +67,8 @@ describe('index', function (): void {
         $response = get(route('wrestlers.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the wrestlers index', function (): void {
@@ -91,19 +113,10 @@ describe('show', function (): void {
             ->assertSeeLivewire(PreviousStables::class);
     });
 
-    test('show labels injured and suspended wrestlers', function (bool $injured, bool $suspended) {
+    test('show labels an injured wrestler', function (): void {
         // Arrange
-        Wrestler::factory()->create();
-
         $wrestler = Wrestler::factory()->employed()->create();
-
-        if ($injured) {
-            Injury::factory()->for($wrestler, 'injurable')->create();
-        }
-
-        if ($suspended) {
-            Suspension::factory()->for($wrestler, 'suspendable')->create();
-        }
+        Injury::factory()->for($wrestler, 'injurable')->create();
 
         actingAs(administrator());
 
@@ -113,19 +126,72 @@ describe('show', function (): void {
         // Assert
         $response
             ->assertOk()
-            ->assertSee('Employed');
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $wrestler)
+            ->assertSee('Employed')
+            ->assertSeeHtml('data-test="availability-injured"')
+            ->assertDontSeeHtml('data-test="availability-suspended"');
+    });
 
-        expect($response->getContent())
-            ->when($injured, fn ($html) => $html->toContain('data-test="availability-injured"'))
-            ->unless($injured, fn ($html) => $html->not->toContain('data-test="availability-injured"'))
-            ->when($suspended, fn ($html) => $html->toContain('data-test="availability-suspended"'))
-            ->unless($suspended, fn ($html) => $html->not->toContain('data-test="availability-suspended"'));
-    })->with([
-        'injured' => [true, false],
-        'suspended' => [false, true],
-        'injured and suspended' => [true, true],
-        'available' => [false, false],
-    ]);
+    test('show labels a suspended wrestler', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->employed()->create();
+        Suspension::factory()->for($wrestler, 'suspendable')->create();
+
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $wrestler)
+            ->assertSee('Employed')
+            ->assertDontSeeHtml('data-test="availability-injured"')
+            ->assertSeeHtml('data-test="availability-suspended"');
+    });
+
+    test('show labels a wrestler who is both injured and suspended', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->employed()->create();
+        Injury::factory()->for($wrestler, 'injurable')->create();
+        Suspension::factory()->for($wrestler, 'suspendable')->create();
+
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $wrestler)
+            ->assertSee('Employed')
+            ->assertSeeHtml('data-test="availability-injured"')
+            ->assertSeeHtml('data-test="availability-suspended"');
+    });
+
+    test('show labels a healthy wrestler', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->employed()->create();
+
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('wrestlers.show', $wrestler));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('wrestlers.show')
+            ->assertViewHas('wrestler', $wrestler)
+            ->assertSee('Employed')
+            ->assertDontSeeHtml('data-test="availability-injured"')
+            ->assertDontSeeHtml('data-test="availability-suspended"');
+    });
 
     test('show renders the related data displayed by the wrestler summary', function () {
         // Arrange
@@ -174,7 +240,8 @@ describe('show', function (): void {
         $response = get(route('wrestlers.show', $wrestler));
 
         // Assert
-        $response->assertOk();
+        $response
+            ->assertOk();
 
         $managerQueries = collect(DB::getQueryLog())
             ->filter(fn (array $query): bool => str_contains($query['query'], 'wrestlers_managers'));

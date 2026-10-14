@@ -22,6 +22,67 @@ use App\Models\Titles\TitleChampionship;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
+describe('index', function (): void {
+    test('an active promotion member receives the tag-teams index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('tag-teams.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('tag-teams.index')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('an administrator receives the tag-teams index view and table', function (): void {
+        // Arrange
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('tag-teams.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('tag-teams.index')
+            ->assertSeeHtml('aria-label="Content workspace"')
+            ->assertSeeLivewire(Main::class);
+    });
+
+    test('a guest cannot open the tag-teams index', function (): void {
+        // Act
+        $response = get(route('tag-teams.index'));
+
+        // Assert
+        $response
+            ->assertRedirect(route('login'));
+    });
+
+    test('a user without membership cannot open the tag-teams index', function (): void {
+        // Arrange
+        actingAs(basicUser());
+
+        // Act
+        $response = get(route('tag-teams.index'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertViewIs('promotions.no-membership');
+    });
+
+});
+
 describe('show', function (): void {
     test('renders the tag team profile and its related data', function () {
         // Arrange
@@ -77,10 +138,10 @@ describe('show', function (): void {
         $response
             ->assertOk()
             ->assertSee($manager->full_name)
-            ->assertSee('Tag Team Belt');
+            ->assertSee('Tag Team Belt')
+            ->assertDontSeeHtml('&amp;#039;');
 
         $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => $response->assertSee($wrestler->name));
-        $response->assertDontSeeHtml('&amp;#039;');
     });
 
     test('a user without a promotion membership cannot view tag team profiles', function () {
@@ -99,8 +160,6 @@ describe('show', function (): void {
 
     test('a guest cannot view a tag team profile', function () {
         // Arrange
-        TagTeam::factory()->create();
-
         $tagTeam = TagTeam::factory()->create();
 
         // Act
@@ -123,42 +182,6 @@ describe('show', function (): void {
         // Assert
         $response
             ->assertNotFound();
-    });
-
-    test('an administrator receives the tag-teams index view and table', function (): void {
-        // Arrange
-        actingAs(administrator());
-
-        // Act
-        $response = get(route('tag-teams.index'));
-
-        // Assert
-        $response
-            ->assertOk()
-            ->assertViewIs('tag-teams.index')
-            ->assertSeeHtml('aria-label="Content workspace"')
-            ->assertSeeLivewire(Main::class);
-    });
-
-    test('a guest cannot open the tag-teams index', function (): void {
-        // Act
-        $response = get(route('tag-teams.index'));
-
-        // Assert
-        $response->assertRedirect(route('login'));
-    });
-
-    test('a user without membership cannot open the tag-teams index', function (): void {
-        // Arrange
-        actingAs(basicUser());
-
-        // Act
-        $response = get(route('tag-teams.index'));
-
-        // Assert
-        $response
-            ->assertForbidden()
-            ->assertViewIs('promotions.no-membership');
     });
 
     test('an active promotion member receives the correct tagTeam profile', function (): void {
