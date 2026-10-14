@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\ValidateSignature;
@@ -21,6 +20,7 @@ use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\ParentConnectingVisitor;
 use PhpParser\ParserFactory;
+use Tests\Fixtures\Http\Middleware\AbstractMiddleware;
 
 test('the application uses Laravel security middleware', function () {
     $router = resolve(Router::class);
@@ -173,7 +173,7 @@ test('middleware matching rejects missing and misplaced files', function (string
 
 test('middleware matching exempts a genuine abstract base', function (): void {
     // Act
-    $problems = middlewareTestProblems([Controller::class], sys_get_temp_dir());
+    $problems = middlewareTestProblems([AbstractMiddleware::class], sys_get_temp_dir());
 
     // Assert
     expect($problems)->toBeEmpty();
