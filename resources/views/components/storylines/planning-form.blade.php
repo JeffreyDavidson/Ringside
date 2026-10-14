@@ -6,14 +6,10 @@
         $statusOptions = [$story->previous_status->value => __('storylines.restore').' · '.__('storylines.'.$story->previous_status->value)];
     }
 @endphp
-<form
-    wire:submit="save"
-    id="storyline-form"
-    class="border-ringside-line bg-ringside-surface-panel scroll-mt-6 border p-5 sm:p-7"
->
+<form wire:submit="save" id="storyline-form" class="border-border bg-surface-panel scroll-mt-6 border p-5 sm:p-7">
     <h2 class="font-display mb-5 text-2xl">{{ __('storylines.form_titles.'.$mode) }}</h2>
     @if ($errors->any())
-        <div role="alert" class="border-ringside-error bg-ringside-error-surface text-ringside-error mb-5 border p-4">
+        <div role="alert" class="border-error bg-error-surface text-error mb-5 border p-4">
             <x-heroicon-o-exclamation-triangle class="mr-2 inline size-5" />
             @foreach ($errors->all() as $error)
                 <p>{{ $error }}</p>
@@ -81,9 +77,9 @@
                     />
                 @endif
             </div>
-            <section class="border-ringside-line border-t pt-5">
+            <section class="border-border border-t pt-5">
                 <h3 class="mb-3 font-semibold">{{ __('storylines.source') }}</h3>
-                <p class="text-ringside-muted mb-4 text-sm">{{ __('storylines.source_hint') }}</p>
+                <p class="text-muted-foreground mb-4 text-sm">{{ __('storylines.source_hint') }}</p>
                 <div class="grid gap-4">
                     <x-form.inputs.text
                         wire:model.live.debounce.300ms="eventSearch"
@@ -99,7 +95,7 @@
                         :placeholder="__('storylines.no_event')"
                         class="min-h-11"
                     />
-                    <p class="text-ringside-muted text-sm">{{ __('storylines.selection_hint') }}</p>
+                    <p class="text-muted-foreground text-sm">{{ __('storylines.selection_hint') }}</p>
                     @if ($selectedEvent)
                         <div class="grid gap-4 sm:grid-cols-2">
                             <x-form.inputs.select
@@ -129,13 +125,13 @@
                         />
                     @endif
                     @if ($form->eventId)
-                        <p class="text-ringside-muted">
+                        <p class="text-muted-foreground">
                             {{ __('storylines.source_evidence') }}: {{ $source['context']['segment_label'] ?? $source['context']['match_label'] ?? $source['context']['event_name'] ?? '' }} · {{ $source['context']['live_state'] ? __('live-show.'.$source['context']['live_state']) : __('storylines.no_live') }}
                             @if ($form->matchId) ·{{ $source['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                     @endif
                     @foreach ($source['warnings'] as $warning)
-                        <p class="text-ringside-warning">{{ $warning }}</p>
+                        <p class="text-warning">{{ $warning }}</p>
                     @endforeach
                     <x-button
                         variant="secondary"
@@ -145,9 +141,9 @@
                 </div>
             </section>
             @if ($mode === 'development')
-                <fieldset class="border-ringside-line grid gap-3 border-t pt-5">
+                <fieldset class="border-border grid gap-3 border-t pt-5">
                     <legend class="font-semibold">{{ __('storylines.cast') }}</legend>
-                    <p class="text-ringside-muted text-sm">{{ __('storylines.cast_hint') }}</p>
+                    <p class="text-muted-foreground text-sm">{{ __('storylines.cast_hint') }}</p>
                     @foreach ($participants as $person)
                         <label class="flex min-h-11 items-center gap-3"
                             ><input
@@ -241,7 +237,7 @@
         <div class="flex flex-wrap gap-3">
             <x-button type="submit">{{ __('storylines.save') }}</x-button
             ><x-button variant="secondary" wire:click="cancel">{{ __('storylines.cancel') }}</x-button
-            ><span wire:loading role="status" class="text-ringside-muted">{{ __('storylines.loading') }}</span>
+            ><span wire:loading role="status" class="text-muted-foreground">{{ __('storylines.loading') }}</span>
         </div>
     </fieldset>
 </form>

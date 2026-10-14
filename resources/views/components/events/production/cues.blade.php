@@ -1,6 +1,6 @@
 @props(['cues', 'assignments' => []])
 @foreach ($cues as $cue)
-    <div class="production-cue border-ringside-line mt-4 border-t py-4 break-words">
+    <div class="production-cue border-border mt-4 border-t py-4 break-words">
         <strong>{{ $cue['subject'] }}</strong>
         <p class="mt-2">
             <strong>{{ $cue['trigger'] }}</strong> ·

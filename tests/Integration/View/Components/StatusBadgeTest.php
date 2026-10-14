@@ -16,19 +16,19 @@ describe('table status badge', function (): void {
             ->toContain($status->label())
             ->toContain($dotClass.' size-1.5 shrink-0 rounded-full');
     })->with([
-        'employed' => [EmploymentStatus::Employed, 'bg-success'],
-        'awaiting employment' => [EmploymentStatus::FutureEmployment, 'bg-warning'],
-        'released' => [EmploymentStatus::Released, 'bg-ringside-muted'],
-        'scheduled event' => [EventStatus::Scheduled, 'bg-success'],
-        'past event' => [EventStatus::Past, 'bg-ringside-muted'],
-        'unscheduled event' => [EventStatus::Unscheduled, 'bg-ringside-signal'],
-        'active stable' => [StableStatus::Active, 'bg-success'],
-        'inactive stable' => [StableStatus::Inactive, 'bg-warning'],
-        'pending stable' => [StableStatus::PendingEstablishment, 'bg-ringside-signal'],
-        'retired stable' => [StableStatus::Retired, 'bg-ringside-muted'],
-        'active title' => [TitleStatus::Active, 'bg-success'],
-        'inactive title' => [TitleStatus::Inactive, 'bg-warning'],
-        'pending title' => [TitleStatus::PendingDebut, 'bg-ringside-signal'],
-        'undebuted title' => [TitleStatus::Undebuted, 'bg-ringside-muted'],
+        'employed' => [EmploymentStatus::Employed, 'bg-legacy-success'],
+        'awaiting employment' => [EmploymentStatus::FutureEmployment, 'bg-legacy-warning'],
+        'released' => [EmploymentStatus::Released, 'bg-muted-foreground'],
+        'scheduled event' => [EventStatus::Scheduled, 'bg-legacy-success'],
+        'past event' => [EventStatus::Past, 'bg-muted-foreground'],
+        'unscheduled event' => [EventStatus::Unscheduled, 'bg-signal'],
+        'active stable' => [StableStatus::Active, 'bg-legacy-success'],
+        'inactive stable' => [StableStatus::Inactive, 'bg-legacy-warning'],
+        'pending stable' => [StableStatus::PendingEstablishment, 'bg-signal'],
+        'retired stable' => [StableStatus::Retired, 'bg-muted-foreground'],
+        'active title' => [TitleStatus::Active, 'bg-legacy-success'],
+        'inactive title' => [TitleStatus::Inactive, 'bg-legacy-warning'],
+        'pending title' => [TitleStatus::PendingDebut, 'bg-signal'],
+        'undebuted title' => [TitleStatus::Undebuted, 'bg-muted-foreground'],
     ]);
 });

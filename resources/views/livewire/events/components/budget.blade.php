@@ -16,20 +16,20 @@
         <h1 class="font-display text-2xl lg:text-3xl">{{ __('event-budget.title') }}</h1>
         <p class="text-lg font-semibold">
             {{ $event->name }}
-            <span class="text-ringside-muted font-normal">· {{ $event->local_date?->format('M j, Y') ?? __('event-budget.date_not_set') }} · USD</span>
+            <span class="text-muted-foreground font-normal">· {{ $event->local_date?->format('M j, Y') ?? __('event-budget.date_not_set') }} · USD</span>
         </p>
-        <p class="text-ringside-muted max-w-3xl leading-relaxed">{{ __('event-budget.intro') }}</p>
+        <p class="text-muted-foreground max-w-3xl leading-relaxed">{{ __('event-budget.intro') }}</p>
         <p class="font-semibold">
             {{ __('event-budget.'.($budget === null ? 'empty' : ($totals['balanced'] ? 'all_balanced' : 'incomplete'))) }}
         </p>
         @if ($budget)
-            <p class="text-ringside-muted text-sm">
+            <p class="text-muted-foreground text-sm">
                 {{ __('event-budget.last_saved') }} {{ $budget->updated_at->utc()->format('Y-m-d H:i') }} UTC · {{ __('event-budget.timezone') }} {{ $budget->timezone }}
             </p>
         @endif
     </header>
     @if ($errors->any())
-        <div role="alert" class="border-ringside-error bg-ringside-error-surface text-ringside-error border p-4">
+        <div role="alert" class="border-error bg-error-surface text-error border p-4">
             <x-heroicon-o-exclamation-circle class="mb-2 size-5" aria-hidden="true" />
             @foreach ($errors->all() as $error)
                 <p>{{ $error }}</p>
@@ -38,20 +38,18 @@
     @endif
     <section
         aria-label="{{ __('event-budget.planned_net') }}"
-        class="border-ringside-line grid grid-cols-2 gap-4 border-b pb-4 lg:pb-6"
+        class="border-border grid grid-cols-2 gap-4 border-b pb-4 lg:pb-6"
     >
         @foreach (['planned_net', 'confirmed_net'] as $key)
             <div>
-                <h2 class="text-ringside-muted">{{ __('event-budget.'.$key) }}</h2>
+                <h2 class="text-muted-foreground">{{ __('event-budget.'.$key) }}</h2>
                 <p class="mt-2 text-xl font-semibold tabular-nums">
                     {{ \App\ValueObjects\UsdAmount::display($totals[$key]) }}
                 </p>
             </div>
         @endforeach
         @if ($totals['missing'])
-            <p class="text-ringside-warning sm:col-span-2">
-                {{ __('event-budget.missing', ['count' => $totals['missing']]) }}
-            </p>
+            <p class="text-warning sm:col-span-2">{{ __('event-budget.missing', ['count' => $totals['missing']]) }}</p>
         @endif
     </section>
     <section aria-labelledby="settlement-heading">
@@ -59,16 +57,16 @@
         <dl class="grid grid-cols-2 gap-x-5 gap-y-4 lg:grid-cols-4">
             @foreach (['to_pay', 'to_collect', 'refund_to_send', 'refund_to_collect'] as $key)
                 <div>
-                    <dt class="text-ringside-muted">{{ __('event-budget.'.$key) }}</dt>
+                    <dt class="text-muted-foreground">{{ __('event-budget.'.$key) }}</dt>
                     <dd class="mt-1 font-semibold tabular-nums">
                         {{ \App\ValueObjects\UsdAmount::display($totals[$key]) }}
                     </dd>
                 </div>
             @endforeach
         </dl>
-        <p class="text-ringside-muted mt-4 max-w-3xl text-sm">{{ __('event-budget.balanced_note') }}</p>
+        <p class="text-muted-foreground mt-4 max-w-3xl text-sm">{{ __('event-budget.balanced_note') }}</p>
     </section>
-    <div class="border-ringside-line flex flex-wrap items-center gap-3 border-y py-3">
+    <div class="border-border flex flex-wrap items-center gap-3 border-y py-3">
         <x-button
             variant="secondary"
             wire:click="refreshState"
@@ -83,12 +81,10 @@
         >{{ __('event-budget.history_all') }}</x-button>
         <span wire:loading role="status">{{ __('event-budget.saving') }}</span>
         <span x-show="saved" x-cloak role="status">{{ __('event-budget.notice') }}</span>
-        <p x-show="! online" x-cloak role="status" class="text-ringside-warning">{{ __('event-budget.offline') }}</p>
-        <p x-show="requestFailed" x-cloak role="alert" class="text-ringside-error">
-            {{ __('event-budget.request_failed') }}
-        </p>
+        <p x-show="! online" x-cloak role="status" class="text-warning">{{ __('event-budget.offline') }}</p>
+        <p x-show="requestFailed" x-cloak role="alert" class="text-error">{{ __('event-budget.request_failed') }}</p>
     </div>
-    <details class="border-ringside-line border-y py-4">
+    <details class="border-border border-y py-4">
         <summary class="min-h-11 cursor-pointer font-semibold">{{ __('event-budget.cash_summary') }}</summary>
         <div class="grid gap-4 py-3 sm:grid-cols-3">
             @foreach (['income', 'expense'] as $direction)
@@ -128,17 +124,17 @@
         <section
             data-budget-draft
             aria-labelledby="budget-draft-heading"
-            class="border-ringside-outline bg-ringside-surface-panel border p-4 lg:p-6"
+            class="border-outline bg-surface-panel border p-4 lg:p-6"
         >
             <h2 id="budget-draft-heading" class="text-lg font-semibold">
                 {{ __('event-budget.'.$operation->value) }}
                 @if ($draftLabel) ·{{ $draftLabel }} @endif
             </h2>
-            <p class="text-ringside-muted mt-2 text-sm">{{ __('event-budget.manual') }}</p>
+            <p class="text-muted-foreground mt-2 text-sm">{{ __('event-budget.manual') }}</p>
             <form method="post" wire:submit="save" @input="dirty = true" class="mt-5 space-y-5">
                 @csrf
                 @if ($operation === \App\Enums\Events\BudgetOperation::SaveLine)
-                    <p class="text-ringside-muted">{{ __('event-budget.amount_help') }}</p>
+                    <p class="text-muted-foreground">{{ __('event-budget.amount_help') }}</p>
                     <div class="grid gap-4 md:grid-cols-2">
                         <x-form.inputs.select
                             class="min-h-11"
@@ -240,7 +236,7 @@
                                 :options="['cash' => __('event-budget.cash_method'), 'bank_transfer' => __('event-budget.bank_transfer'), 'other' => __('event-budget.other')]"
                             />
                             @if ($movementForm->kind === 'refund')
-                                <p class="text-ringside-muted md:col-span-2">{{ __('event-budget.refund_help') }}</p>
+                                <p class="text-muted-foreground md:col-span-2">{{ __('event-budget.refund_help') }}</p>
                                 <x-form.inputs.select
                                     class="min-h-11"
                                     :label="__('event-budget.source')"
@@ -280,8 +276,8 @@
                         />
                     @endif
                 @endif
-                <p x-show="dirty" x-cloak class="text-ringside-warning">{{ __('event-budget.dirty') }}</p>
-                <p class="text-ringside-muted text-sm">{{ __('event-budget.refresh_help') }}</p>
+                <p x-show="dirty" x-cloak class="text-warning">{{ __('event-budget.dirty') }}</p>
+                <p class="text-muted-foreground text-sm">{{ __('event-budget.refresh_help') }}</p>
                 <div class="flex flex-wrap gap-3">
                     <x-button
                         type="submit"
@@ -304,14 +300,14 @@
             <h2 id="budget-{{ $direction }}" class="mb-4 text-xl font-semibold">
                 {{ __('event-budget.'.$direction) }}
             </h2>
-            <dl class="border-ringside-line mb-4 grid grid-cols-2 gap-4 border-y py-4">
+            <dl class="border-border mb-4 grid grid-cols-2 gap-4 border-y py-4">
                 @foreach (['planned', 'confirmed'] as $key)
                     <div>
-                        <dt class="text-ringside-muted">{{ __('event-budget.'.$key) }}</dt>
+                        <dt class="text-muted-foreground">{{ __('event-budget.'.$key) }}</dt>
                         <dd class="font-semibold tabular-nums">
                             {{ \App\ValueObjects\UsdAmount::display($totals[$direction][$key]) }}
                             @if ($totals[$direction]['missing_'.$key])
-                                <p class="text-ringside-warning text-sm">
+                                <p class="text-warning text-sm">
                                     {{ __('event-budget.missing', ['count' => $totals[$direction]['missing_'.$key]]) }}
                                 </p>
                             @endif
@@ -319,14 +315,14 @@
                     </div>
                 @endforeach
             </dl>
-            <div class="divide-ringside-line divide-y">
+            <div class="divide-border divide-y">
                 @forelse (array_filter($rows, fn ($row) => $row['line']->direction->value === $direction && ($safeFilter === 'all' || $safeFilter === $row['attention'] || ($safeFilter === 'refunds' && str_starts_with($row['attention'], 'refund_')))) as $row)
                     @php($line = $row['line'])
                     <article wire:key="budget-line-{{ $line->id }}" class="py-5">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <h3 class="text-lg font-semibold break-words">{{ $line->description }}</h3>
-                                <p class="text-ringside-muted break-words">
+                                <p class="text-muted-foreground break-words">
                                     {{ $line->counterparty }} · {{ __('event-budget.'.$line->category->value) }}
                                 </p>
                                 @if ($line->due_date)
@@ -345,13 +341,13 @@
                         <dl class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
                             @foreach (['planned' => $line->planned_cents, 'confirmed' => $line->confirmed_cents, 'cash' => $row['net'], 'variance' => $row['variance']] as $key => $value)
                                 <div>
-                                    <dt class="text-ringside-muted text-sm">{{ __('event-budget.'.$key) }}</dt>
+                                    <dt class="text-muted-foreground text-sm">{{ __('event-budget.'.$key) }}</dt>
                                     <dd class="tabular-nums">{{ \App\ValueObjects\UsdAmount::display($value) }}</dd>
                                 </div>
                             @endforeach
                         </dl>
                         @if ($line->notes)
-                            <p class="text-ringside-muted mt-3 break-words whitespace-pre-wrap">{{ $line->notes }}</p>
+                            <p class="text-muted-foreground mt-3 break-words whitespace-pre-wrap">{{ $line->notes }}</p>
                         @endif
                         <div class="mt-4 flex flex-wrap gap-2">
                             <x-button
@@ -388,11 +384,11 @@
                             </summary>
                             <div class="space-y-3 py-3">
                                 @forelse ($line->movements as $movement)
-                                    <div class="border-ringside-line border-b border-l-0 pb-3">
+                                    <div class="border-border border-b border-l-0 pb-3">
                                         <p class="tabular-nums">
                                             {{ $movement->effective_date->toDateString() }} · {{ __('event-budget.'.$movement->kind->value) }} · {{ \App\ValueObjects\UsdAmount::display($movement->amount_cents) }}
                                         </p>
-                                        <p class="text-ringside-muted break-words">
+                                        <p class="text-muted-foreground break-words">
                                             {{ $movement->reference }} {{ $movement->notes }}
                                         </p>
                                         @if ($movement->voided_at)
@@ -412,7 +408,7 @@
                         </details>
                     </article>
                 @empty
-                    <p class="text-ringside-muted py-4">{{ __('event-budget.no_lines') }}</p>
+                    <p class="text-muted-foreground py-4">{{ __('event-budget.no_lines') }}</p>
                 @endforelse
             </div>
         </section>
@@ -423,7 +419,7 @@
                 {{ __('event-budget.archived_heading') }} ({{ $archived->count() }})
             </summary>
             @foreach ($archived as $line)
-                <p class="border-ringside-line flex flex-wrap items-center gap-3 border-b py-3">
+                <p class="border-border flex flex-wrap items-center gap-3 border-b py-3">
                     {{ $line->description }} · {{ $line->counterparty }}<x-button
                         variant="secondary"
                         wire:click="showHistory({{ $line->id }})"
@@ -433,17 +429,17 @@
         </details>
     @endif
     @if ($historyOpen)
-        <section aria-label="{{ __('event-budget.history') }}" class="border-ringside-line border-t pt-5">
+        <section aria-label="{{ __('event-budget.history') }}" class="border-border border-t pt-5">
             <div class="flex items-center justify-between gap-4">
                 <h2 class="text-xl font-semibold">{{ __('event-budget.history') }}</h2>
                 <x-button variant="secondary" wire:click="hideHistory">{{ __('event-budget.history_close') }}</x-button>
             </div>
             @forelse ($history ?? [] as $revision)
-                <article class="border-ringside-line border-b py-4">
+                <article class="border-border border-b py-4">
                     <h3 class="font-semibold">
                         {{ __('event-budget.'.$revision->operation->value) }} · {{ $revision->actor_label }}
                     </h3>
-                    <p class="text-ringside-muted text-sm">
+                    <p class="text-muted-foreground text-sm">
                         {{ $revision->created_at->utc()->format('Y-m-d H:i') }} UTC · #{{ $revision->version }}
                     </p>
                     @if ($revision->reason)

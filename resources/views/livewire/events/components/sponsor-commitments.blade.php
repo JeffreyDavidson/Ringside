@@ -15,12 +15,12 @@
             >{{ __('event-pack.title') }}</a>
         @endif
     </nav>
-    <header class="border-ringside-line flex flex-col gap-3 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
+    <header class="border-border flex flex-col gap-3 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
             <h1 class="font-display text-2xl leading-tight break-words lg:text-3xl">
                 {{ __('sponsors.title') }} · {{ $event->name }}
             </h1>
-            <p class="text-ringside-muted mt-2 max-w-prose text-sm">{{ __('sponsors.private_help') }}</p>
+            <p class="text-muted-foreground mt-2 max-w-prose text-sm">{{ __('sponsors.private_help') }}</p>
         </div>
         @if (! $event->trashed() && $event->promotion_id !== null)
             <x-button
@@ -30,7 +30,7 @@
             >{{ __('sponsors.new_promise') }}</x-button>
         @endif
     </header>
-    <div x-cloak x-show="! online || requestFailed" role="alert" class="border-ringside-warning border p-4">
+    <div x-cloak x-show="! online || requestFailed" role="alert" class="border-warning border p-4">
         <p>{{ __('sponsors.online_help') }}</p>
         <a
             href="{{ route('events.sponsors.show', $event) }}"
@@ -38,13 +38,13 @@
         >{{ __('sponsors.reload') }}</a>
     </div>
     @if ($event->trashed())
-        <p class="text-ringside-warning">{{ __('sponsors.event_archived') }}</p>
+        <p class="text-warning">{{ __('sponsors.event_archived') }}</p>
     @endif
     @if ($notice)
-        <p role="status" class="border-ringside-success border p-4">{{ $notice }}</p>
+        <p role="status" class="border-success border p-4">{{ $notice }}</p>
     @endif
     @if ($errors->any())
-        <div role="alert" class="border-ringside-error bg-ringside-error-surface text-ringside-error border p-4">
+        <div role="alert" class="border-error bg-error-surface text-error border p-4">
             <p class="flex items-center gap-2 font-semibold">
                 <x-heroicon-o-exclamation-circle
                     class="size-5 shrink-0"
@@ -69,14 +69,14 @@
                     $event.returnValue = '';
                 }
             "
-            class="border-ringside-line bg-ringside-surface-panel border-y p-4 sm:p-6"
+            class="border-border bg-surface-panel border-y p-4 sm:p-6"
             data-sponsor-draft
         >
             <fieldset x-bind:disabled="! online || requestFailed" class="flex min-w-0 flex-col gap-5">
                 <legend class="mb-4 text-xl font-semibold">
                     {{ __($draftId === null ? 'sponsors.new_promise' : 'sponsors.edit_promise') }}
                 </legend>
-                <p x-cloak x-show="dirty" class="text-ringside-warning">{{ __('event-pack.unsaved') }}</p>
+                <p x-cloak x-show="dirty" class="text-warning">{{ __('event-pack.unsaved') }}</p>
                 <div class="grid min-w-0 gap-5 md:grid-cols-2">
                     <div class="min-w-0">
                         <x-form.inputs.text
@@ -88,21 +88,21 @@
                             {{ __('sponsors.selected') }}:
                             <strong>{{ $selected?->name ?? __('sponsors.not_set') }}</strong>
                         </p>
-                        <div class="border-ringside-line max-h-44 overflow-auto border">
+                        <div class="border-border max-h-44 overflow-auto border">
                             @forelse ($sponsors as $sponsor)
                                 <button
                                     type="button"
                                     wire:key="choice-{{ $sponsor->id }}"
                                     data-sponsor-choice="{{ $sponsor->id }}"
                                     wire:click="chooseSponsor({{ $sponsor->id }})"
-                                    class="hover:bg-ringside-surface-hover min-h-11 w-full px-3 py-2 text-left break-words focus-visible:outline-2"
+                                    class="hover:bg-surface-hover min-h-11 w-full px-3 py-2 text-left break-words focus-visible:outline-2"
                                 >
                                     {{ $sponsor->name }}<span
-                                        class="text-ringside-muted block text-sm"
+                                        class="text-muted-foreground block text-sm"
                                         >{{ $sponsor->contact_name ?? __('sponsors.record_number', ['number' => $sponsor->id]) }}</span>
                                 </button>
                             @empty
-                                <p class="text-ringside-muted p-3 text-sm">{{ __('sponsors.empty_sponsors') }}</p>
+                                <p class="text-muted-foreground p-3 text-sm">{{ __('sponsors.empty_sponsors') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -130,7 +130,7 @@
                         :label="__('sponsors.offset')"
                     />
                 </div>
-                <p class="text-ringside-muted max-w-prose text-sm">{{ __('sponsors.offset_help') }}</p>
+                <p class="text-muted-foreground max-w-prose text-sm">{{ __('sponsors.offset_help') }}</p>
                 <x-form.inputs.select
                     class="min-h-11"
                     wire:model.live="form.status"
@@ -160,7 +160,7 @@
                         />
                     </div>
                 @endif
-                <p class="text-ringside-muted max-w-prose text-sm">
+                <p class="text-muted-foreground max-w-prose text-sm">
                     {{ __('sponsors.complete_help') }} {{ __('sponsors.terminal_help') }}
                 </p>
                 <x-form.inputs.textarea wire:model="form.reason" :label="__('sponsors.reason')" rows="2" />
@@ -170,7 +170,7 @@
                         wire:model="form.reviewed"
                         class="size-5"
                     />{{ __('sponsors.review_event') }}</label>
-                <details wire:ignore.self class="border-ringside-line border-t pt-3">
+                <details wire:ignore.self class="border-border border-t pt-3">
                     <summary class="min-h-11 cursor-pointer py-3 font-semibold">
                         {{ __('sponsors.private_notes') }} · {{ __('sponsors.agreement') }}
                     </summary>
@@ -180,7 +180,7 @@
                             wire:model="form.agreement"
                             :label="__('sponsors.agreement')"
                         />
-                        <p class="text-ringside-muted max-w-prose text-sm">{{ __('sponsors.agreement_help') }}</p>
+                        <p class="text-muted-foreground max-w-prose text-sm">{{ __('sponsors.agreement_help') }}</p>
                         <x-form.inputs.textarea
                             wire:model="form.notes"
                             :label="__('sponsors.private_notes')"
@@ -188,12 +188,12 @@
                         />
                     </div>
                 </details>
-                <details wire:ignore.self class="border-ringside-line border-t pt-3">
+                <details wire:ignore.self class="border-border border-t pt-3">
                     <summary data-sponsor-wording class="min-h-11 cursor-pointer py-3 font-semibold">
                         {{ __('sponsors.pack_wording') }}
                     </summary>
                     <div class="mt-3 flex flex-col gap-5">
-                        <p class="text-ringside-muted max-w-prose text-sm">{{ __('sponsors.pack_wording_help') }}</p>
+                        <p class="text-muted-foreground max-w-prose text-sm">{{ __('sponsors.pack_wording_help') }}</p>
                         <x-form.inputs.text
                             class="min-h-11"
                             wire:model="form.instructionLabel"
@@ -211,7 +211,7 @@
                         />
                     </div>
                 </details>
-                <div class="border-ringside-line bg-ringside-surface-panel sticky bottom-0 flex flex-wrap gap-3 border-t py-3">
+                <div class="border-border bg-surface-panel sticky bottom-0 flex flex-wrap gap-3 border-t py-3">
                     <x-button type="submit" wire:loading.attr="disabled">{{ __('sponsors.save_promise') }}</x-button>
                     <x-button variant="secondary" wire:click="cancelDraft">{{ __('sponsors.cancel_draft') }}</x-button>
                 </div>
@@ -219,7 +219,7 @@
         </form>
     @endif
     @if ($instruction)
-        <section class="border-ringside-line bg-ringside-surface-panel border-y p-4 sm:p-6" data-sponsor-draft>
+        <section class="border-border bg-surface-panel border-y p-4 sm:p-6" data-sponsor-draft>
             <h2 class="mb-5 text-xl font-semibold">
                 {{ __('sponsors.review_instruction') }} · {{ $instruction->description }}
             </h2>
@@ -246,7 +246,7 @@
                         />
                     @endif
                 @else
-                    <p class="text-ringside-muted text-sm">{{ __('sponsors.retract_help') }}</p>
+                    <p class="text-muted-foreground text-sm">{{ __('sponsors.retract_help') }}</p>
                     <x-form.inputs.textarea wire:model="instructionReason" :label="__('sponsors.reason')" rows="2" />
                 @endif
                 <div class="flex flex-wrap gap-3">
@@ -258,7 +258,7 @@
                     <x-button variant="secondary" wire:click="cancelDraft">{{ __('sponsors.cancel_draft') }}</x-button>
                 </div>
                 @if ($previewHash !== '')
-                    <div class="border-ringside-outline border p-4" data-instruction-preview>
+                    <div class="border-outline border p-4" data-instruction-preview>
                         @if (($preview['target'] ?? $preview['linked'] ?? null) !== null)
                             @php($currentInstruction = $preview['target'] ?? $preview['linked'])
                             <h3 class="mb-2 font-semibold">{{ __('sponsors.current_instruction') }}</h3>
@@ -269,14 +269,14 @@
                         @endif
                         <h3 class="mb-2 font-semibold">{{ __('sponsors.proposed_instruction') }}</h3>
 
-                        <p class="text-ringside-muted mb-3 max-w-prose text-sm">{{ __('sponsors.preview_help') }}</p>
+                        <p class="text-muted-foreground mb-3 max-w-prose text-sm">{{ __('sponsors.preview_help') }}</p>
                         <p class="font-semibold">{{ $instruction->instruction_label }}</p>
                         <p class="break-words whitespace-pre-wrap">{{ $instruction->instruction }}</p>
                         @if ($instruction->instruction_owner)
                             <p>{{ __('sponsors.task_owner', ['name' => $instruction->instruction_owner]) }}</p>
                         @endif
                         @if ($previewMode === 'remove')
-                            <p class="text-ringside-warning mt-3">{{ __('sponsors.retract_help') }}</p>
+                            <p class="text-warning mt-3">{{ __('sponsors.retract_help') }}</p>
                         @endif
                         @if ($preview !== null && hash_equals($previewHash, $preview['hash']))
                             <x-button
@@ -286,7 +286,7 @@
                                 x-bind:disabled="! online || requestFailed"
                             >{{ __('sponsors.apply') }}</x-button>
                         @else
-                            <p class="text-ringside-warning mt-4">{{ __('sponsors.preview_changed') }}</p>
+                            <p class="text-warning mt-4">{{ __('sponsors.preview_changed') }}</p>
                         @endif
                     </div>
                 @endif
@@ -302,7 +302,7 @@
             :selected="$filter"
         />
     </div>
-    <section class="divide-ringside-line divide-y" aria-label="{{ __('sponsors.title') }}">
+    <section class="divide-border divide-y" aria-label="{{ __('sponsors.title') }}">
         @forelse ($rows as $row)
             <article
                 wire:key="promise-{{ $row->id }}"
@@ -317,20 +317,22 @@
                         · {{ $row->type->label() }}
                     </p>
                     <h2 class="mt-2 text-lg leading-snug break-words">{{ $row->description }}</h2>
-                    <p class="text-ringside-muted mt-2 text-sm">{{ $row->responsible ?? __('sponsors.unassigned') }}</p>
+                    <p class="text-muted-foreground mt-2 text-sm">
+                        {{ $row->responsible ?? __('sponsors.unassigned') }}
+                    </p>
                     <p class="mt-1 text-sm tabular-nums">
                         {{ $row->deadline_at ? __('sponsors.due_at', ['time' => $row->deadline_at->copy()->setTimezone($row->timezone)->format('M j, Y H:i P'), 'zone' => $row->timezone]) : __('sponsors.deadline').': '.__('sponsors.not_set') }}
                     </p>
-                    <p class="mt-2 font-semibold {{ $screen->status($row) === __('sponsors.overdue') ? 'text-ringside-warning' : '' }}">
+                    <p class="mt-2 font-semibold {{ $screen->status($row) === __('sponsors.overdue') ? 'text-warning' : '' }}">
                         {{ $screen->status($row) }}
                     </p>
                     @if ($screen->eventNeedsReview($row))
-                        <p class="text-ringside-warning mt-2 text-sm">{{ __('sponsors.event_review') }}</p>
+                        <p class="text-warning mt-2 text-sm">{{ __('sponsors.event_review') }}</p>
                     @endif
                     @if ($screen->instructionNeedsReview($row))
-                        <p class="text-ringside-warning mt-2 text-sm">{{ __('sponsors.pack_review') }}</p>
+                        <p class="text-warning mt-2 text-sm">{{ __('sponsors.pack_review') }}</p>
                     @endif
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ $row->pack_key === null ? __('sponsors.no_instruction') : (str_starts_with($row->pack_key, 'setup:') ? __('sponsors.setup_linked') : ($screen->liveState($row) ?? __('sponsors.no_live_item'))) }}
                     </p>
                     <details class="mt-3 text-sm">
@@ -371,16 +373,16 @@
                 </div>
             </article>
         @empty
-            <p class="text-ringside-muted py-6">{{ __('sponsors.empty') }}</p>
+            <p class="text-muted-foreground py-6">{{ __('sponsors.empty') }}</p>
         @endforelse
     </section>
     {{ $rows->links() }}
     @if ($history)
-        <section class="border-ringside-line border-t pt-6">
+        <section class="border-border border-t pt-6">
             <h2 class="text-xl font-semibold">{{ __('sponsors.history') }}</h2>
-            <p class="text-ringside-muted mt-2 text-sm">{{ __('sponsors.history_help') }}</p>
+            <p class="text-muted-foreground mt-2 text-sm">{{ __('sponsors.history_help') }}</p>
             @foreach ($history as $revision)
-                <details wire:key="revision-{{ $revision->id }}" class="border-ringside-line border-b py-3">
+                <details wire:key="revision-{{ $revision->id }}" class="border-border border-b py-3">
                     <summary class="min-h-11 cursor-pointer py-3">
                         {{ __('sponsors.version') }} {{ $revision->version }} · {{ $revision->created_at->format('M j, Y H:i') }} UTC
                         · {{ $revision->actor_name }}

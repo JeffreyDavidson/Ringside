@@ -28,6 +28,6 @@ final readonly class MatchCompetitorRouteResolver
      */
     public static function unbookableMarker(): string
     {
-        return ' <span class="text-2xs font-medium text-ringside-warning">('.e(__('matches.no_longer_bookable')).')</span>';
+        return ' <span class="text-2xs font-medium text-warning">('.e(__('matches.no_longer_bookable')).')</span>';
     }
 }

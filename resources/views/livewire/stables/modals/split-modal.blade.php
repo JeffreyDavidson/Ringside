@@ -2,7 +2,7 @@
     <div class="space-y-5">
         <x-stables.modal-error />
 
-        <p class="text-ringside-muted text-sm">
+        <p class="text-muted-foreground text-sm">
             {{ __('stables.modals.split.description', ['name' => $this->stable->name, 'minimum' => $this->minimumMemberCount()]) }}
         </p>
 

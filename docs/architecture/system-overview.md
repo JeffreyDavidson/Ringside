@@ -261,6 +261,9 @@ Restoring a soft-deleted title locks the title row and verifies that no active t
 
 ### Saved event operations pack
 
+The shared Tailwind v4 color/font/shape tokens live in `resources/css/tokens.css` with semantic names documented in `DESIGN.md`. Both `app.css` and `marketing.css` import them. The app/auth JS entry points load app.css; app.js also loads event-pack.css, which consumes the app's shared variables. Public event pages load app.css directly. The separate event-pack-print.js entry point loads event-pack-print.css, importing the Tailwind theme and shared tokens without the app's legacy palette. Metronic primary/success/warning families in app.css keep explicit legacy names and values; print ink and true-black overlays remain distinct.
+
+
 The event detail page links to an authenticated pack editor. `EventPacksController` uses the event's existing promotion-scoped `view` and `update` abilities: viewers can read and print, managers can save. GET requests never create a pack. The print preview uses saved operational fields with the current complete card and roster; attendance, briefing and actual times remain paper blanks.
 
 `event_packs` holds one record per event (unique foreign key), a version, a card fingerprint and a JSON content document. The document contains full local date/time strings with an explicit saved timezone, show notes, revision/master-copy labels, match entries keyed by match ID, and UUID segment entries anchored before the card or after a match. A promotion-timezone change does not convert saved times. The editor flags card/date/timezone changes for review. Removed-match entries survive edits and return when the match is restored; removed segment anchors must be repositioned. Soft deletion of the event retains the pack; permanent deletion cascades it.

@@ -43,27 +43,27 @@
     <div class="pt-5" x-show="notification !== null" x-cloak>
         <x-container-fixed>
             <div
-                class="bg-ringside-surface-panel text-ringside-ink flex items-center justify-between gap-4 border border-s-4 px-4 py-3 text-sm"
+                class="bg-surface-panel text-foreground flex items-center justify-between gap-4 border border-s-4 px-4 py-3 text-sm"
                 x-bind:class="{
-                    'border-ringside-error': notification?.type === 'error',
-                    'border-ringside-warning': notification?.type === 'warning',
-                    'border-ringside-success': notification?.type !== 'error' && notification?.type !== 'warning',
+                    'border-error': notification?.type === 'error',
+                    'border-warning': notification?.type === 'warning',
+                    'border-success': notification?.type !== 'error' && notification?.type !== 'warning',
                 }"
             >
                 <span class="flex items-start gap-3">
                     <x-heroicon-s-exclamation-circle
                         x-show="notification?.type === 'error'"
-                        class="text-ringside-error mt-0.5 size-4 shrink-0"
+                        class="text-error mt-0.5 size-4 shrink-0"
                         aria-hidden="true"
                     />
                     <x-heroicon-s-exclamation-triangle
                         x-show="notification?.type === 'warning'"
-                        class="text-ringside-warning mt-0.5 size-4 shrink-0"
+                        class="text-warning mt-0.5 size-4 shrink-0"
                         aria-hidden="true"
                     />
                     <x-heroicon-s-check-circle
                         x-show="notification?.type !== 'error' && notification?.type !== 'warning'"
-                        class="text-ringside-success mt-0.5 size-4 shrink-0"
+                        class="text-success mt-0.5 size-4 shrink-0"
                         aria-hidden="true"
                     />
                     <span x-text="notification?.message">{{ $notificationMessage }}</span>
@@ -71,7 +71,7 @@
 
                 <button
                     type="button"
-                    class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex size-9 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
+                    class="text-muted-foreground hover:bg-surface-hover hover:text-foreground focus-visible:outline-foreground inline-flex size-9 shrink-0 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
                     aria-label="{{ __('core.dismiss_notification') }}"
                     x-on:click="notification = null"
                 >

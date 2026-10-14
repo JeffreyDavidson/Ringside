@@ -9,7 +9,7 @@
 
 <div class="flex flex-col gap-2">
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        <label for="{{ $name }}" class="text-ringside-muted-bright text-sm font-semibold">{{ $label }}</label>
+        <label for="{{ $name }}" class="text-muted-foreground-bright text-sm font-semibold">{{ $label }}</label>
         @isset($action)
             {{ $action }}
         @endisset
@@ -25,14 +25,10 @@
         {{ $attributes }}
     />
     @if ($hint)
-        <p id="{{ $name }}-hint" class="text-ringside-muted text-sm leading-relaxed">{{ $hint }}</p>
+        <p id="{{ $name }}-hint" class="text-muted-foreground text-sm leading-relaxed">{{ $hint }}</p>
     @endif
     @error($name)
-        <p
-            id="{{ $name }}-error"
-            role="alert"
-            class="text-ringside-error flex items-start gap-1.5 text-sm leading-relaxed"
-        >
+        <p id="{{ $name }}-error" role="alert" class="text-error flex items-start gap-1.5 text-sm leading-relaxed">
             <x-heroicon-s-exclamation-circle class="mt-0.5 size-4 shrink-0" aria-hidden="true" data-error-icon />
             <span>{{ $message }}</span>
         </p>

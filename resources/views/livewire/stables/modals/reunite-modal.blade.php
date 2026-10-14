@@ -3,11 +3,11 @@
         <x-stables.modal-error />
 
         @if ($this->wrestlers->isEmpty() && $this->tagTeams->isEmpty())
-            <p class="text-ringside-muted text-sm" data-test="reunite-empty">
+            <p class="text-muted-foreground text-sm" data-test="reunite-empty">
                 {{ __('stables.modals.reunite.no_members') }}
             </p>
         @else
-            <p class="text-ringside-muted text-sm">
+            <p class="text-muted-foreground text-sm">
                 {{ __('stables.modals.reunite.description', ['name' => $this->stable->name, 'minimum' => $this->minimumMemberCount()]) }}
             </p>
 

@@ -10,30 +10,30 @@
     <header class="flex flex-wrap items-start justify-between gap-4">
         <div class="min-w-0">
             <h1 class="font-display text-3xl break-words">{{ $tournament->name }}</h1>
-            <p class="text-ringside-muted mt-2 text-sm">
+            <p class="text-muted-foreground mt-2 text-sm">
                 {{ __('tournaments.kind.'.$tournament->entrant_kind->value) }} · {{ __('tournaments.slots',['count'=>$tournament->capacity]) }}
             </p>
             <p class="mt-2 font-semibold">{{ __('tournaments.status.'.$tournament->status->value) }}</p>
             @if ($tournament->description)
-                <p class="text-ringside-muted mt-3 max-w-2xl whitespace-pre-line">{{ $tournament->description }}</p>
+                <p class="text-muted-foreground mt-3 max-w-2xl whitespace-pre-line">{{ $tournament->description }}</p>
             @endif
         </div>
         <x-button variant="secondary" wire:click="refreshState">{{ __('tournaments.refresh') }}</x-button>
     </header>
     @if ($nextBout && in_array($tournament->status, [\App\Enums\Tournaments\TournamentStatus::Draft, \App\Enums\Tournaments\TournamentStatus::Active], true))
-        <p class="border-ringside-red border-l-2 pl-3">
+        <p class="border-primary border-l-2 pl-3">
             {{ __('tournaments.next') }} {{ __('tournaments.bout_label', ['round' => $nextBout->node->round, 'number' => $nextBout->node->position]) }} · {{ $nextBout->link ? ($nextBout->link->match->match_finish ? __('tournaments.rematch') : __('tournaments.awaiting_result')) : __('tournaments.ready') }}
         </p>
     @endif
     @if ($notice)
-        <p role="status" class="text-ringside-success">{{ $notice }}</p>
+        <p role="status" class="text-success">{{ $notice }}</p>
     @endif
     @error('operation')
         <x-tournaments.error>{{ $message }}</x-tournaments.error>
     @enderror
     @if ($tournament->status === \App\Enums\Tournaments\TournamentStatus::Completed && $bouts->last()?->winner)
-        <div class="border-ringside-line border-y py-5">
-            <p class="text-ringside-muted text-sm">{{ __('tournaments.winner') }}</p>
+        <div class="border-border border-y py-5">
+            <p class="text-muted-foreground text-sm">{{ __('tournaments.winner') }}</p>
             <p class="mt-1 text-2xl font-semibold">{{ $bouts->last()->winner->competitor->name }}</p>
             @if ($bouts->last()->node->walkover_entry_id)
                 <p>{{ __('tournaments.walkover') }}</p>
@@ -42,7 +42,7 @@
     @endif
     @can('update', $tournament)
         @if ($tournament->status === \App\Enums\Tournaments\TournamentStatus::Draft)
-            <details open class="border-ringside-line border-y py-4">
+            <details open class="border-border border-y py-4">
                 <summary class="min-h-11 cursor-pointer font-semibold">{{ __('tournaments.setup') }}</summary>
                 <form wire:submit="save" class="mt-4 flex flex-col gap-4">
                     <x-tournaments.setup :form="$form" :labels="$labels" :kind="$kind" /><x-button
@@ -52,7 +52,7 @@
                 </form>
             </details>
         @else
-            <details class="border-ringside-line border-y py-3">
+            <details class="border-border border-y py-3">
                 <summary class="min-h-11 cursor-pointer font-semibold">{{ __('tournaments.edit_name') }}</summary>
                 <form wire:submit="rename" class="flex flex-col gap-4">
                     <x-form.inputs.text wire:model="form.name" :label="__('tournaments.name')" /><x-form.inputs.textarea
@@ -67,7 +67,7 @@
         <section
             x-ref="panel"
             tabindex="-1"
-            class="border-ringside-outline focus-visible:outline-ringside-ink border p-4 focus-visible:outline-2 sm:p-6"
+            class="border-outline focus-visible:outline-foreground border p-4 focus-visible:outline-2 sm:p-6"
             aria-labelledby="tournament-operation-title"
         >
             <form wire:submit="confirm" class="flex flex-col gap-4">
@@ -84,7 +84,7 @@
                     />
                 @endif
                 @if ($draftOperation === 'book')
-                    <p class="text-ringside-muted">
+                    <p class="text-muted-foreground">
                         {{ $selected?->first?->competitor->name }} {{ __('tournaments.versus') }} {{ $selected?->second?->competitor->name }}
                     </p>
                     <x-form.inputs.roster-combobox
@@ -110,7 +110,7 @@
                             class="min-h-11"
                         />
                     @endif
-                    <p class="text-ringside-muted text-sm">{{ __('tournaments.booking_hint') }}</p>
+                    <p class="text-muted-foreground text-sm">{{ __('tournaments.booking_hint') }}</p>
                 @endif
                 @if ($entryId !== null)
                     <p class="font-semibold">{{ $entries->sole('id', $entryId)->competitor->name }}</p>
@@ -130,7 +130,7 @@
                 @endif
                 @if (in_array($draftOperation, ['reset', 'unbook', 'withdraw', 'replace', 'walkover', 'cancel'], true))
                     <p>{{ __('tournaments.review_hint') }}</p>
-                    <ul class="text-ringside-muted list-inside list-disc text-sm">
+                    <ul class="text-muted-foreground list-inside list-disc text-sm">
                         @forelse ($affected as $affectedBout)
                             @if ($affectedBout->link)
                                 <li>
@@ -175,7 +175,7 @@
             >{{ __('tournaments.bracket') }}</x-button>
     </nav>
     @if ($view === 'bracket')
-        <p class="text-ringside-muted text-sm">{{ __('tournaments.bracket_hint') }}</p>
+        <p class="text-muted-foreground text-sm">{{ __('tournaments.bracket_hint') }}</p>
         <div
             class="max-w-full overflow-x-auto overscroll-x-contain pb-4"
             tabindex="0"
@@ -187,7 +187,7 @@
                 class="relative grid min-w-max gap-x-6 gap-y-4"
                 style="grid-template-columns:repeat({{ (int)log($tournament->capacity,2) }},minmax(15rem,1fr))"
             >
-                <svg wire:ignore data-bracket-lines aria-hidden="true" class="text-ringside-muted pointer-events-none absolute inset-0 size-full fill-none"></svg>
+                <svg wire:ignore data-bracket-lines aria-hidden="true" class="text-muted-foreground pointer-events-none absolute inset-0 size-full fill-none"></svg>
                 @for ($round = 1; $round <= (int) log($tournament->capacity, 2); $round++)
                     <h2 class="font-semibold" style="grid-column:{{ $round }};grid-row:1">
                         {{ __('tournaments.round',['round'=>$round]) }}
@@ -224,15 +224,15 @@
             </section>
         @endforeach
     @endif
-    <details class="border-ringside-line border-y py-4">
+    <details class="border-border border-y py-4">
         <summary class="min-h-11 cursor-pointer text-lg font-semibold">{{ __('tournaments.entrants') }}</summary>
-        <ol class="divide-ringside-line divide-y">
+        <ol class="divide-border divide-y">
             @foreach ($entries as $entry)
                 <li wire:key="entry-{{ $entry->id }}" class="flex flex-wrap items-center justify-between gap-3 py-3">
                     <div>
                         {{ $entry->seed }}. {{ $entry->competitor->name }}
                         @if ($entry->withdrawn)
-                            <span class="text-ringside-warning">{{ __('tournaments.withdrawn') }}</span>
+                            <span class="text-warning">{{ __('tournaments.withdrawn') }}</span>
                         @endif
                     </div>
                     @can('update', $tournament)

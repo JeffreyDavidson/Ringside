@@ -13,7 +13,7 @@
             :aria-controls="$id('row-actions-menu')"
             aria-haspopup="true"
             aria-label="{{ $label }}"
-            class="text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex size-9 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
+            class="text-muted-foreground hover:bg-surface-hover hover:text-foreground focus-visible:outline-foreground inline-flex size-9 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
         >
             <x-heroicon-m-ellipsis-vertical class="size-5" aria-hidden="true" />
         </button>
@@ -28,7 +28,7 @@
             x-anchor.fixed.bottom-start="$refs.button"
             x-transition.origin.top.left
             :id="$id('row-actions-menu')"
-            class="border-ringside-line bg-ringside-surface-header text-ringside-ink z-[105] m-0 w-48 border p-1 shadow-xl"
+            class="border-border bg-surface-header text-foreground z-[105] m-0 w-48 border p-1 shadow-xl"
             role="group"
             aria-label="{{ $menuLabel }}"
             data-row-actions-panel

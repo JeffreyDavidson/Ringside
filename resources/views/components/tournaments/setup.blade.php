@@ -20,7 +20,7 @@
         <x-form.inputs.textarea wire:model="form.description" :label="__('tournaments.description')" />
     </div>
 </div>
-<p class="text-ringside-muted text-sm">{{ __('tournaments.repeat_hint') }}</p>
+<p class="text-muted-foreground text-sm">{{ __('tournaments.repeat_hint') }}</p>
 <x-form.inputs.roster-combobox
     wire:model="form.entrants"
     :label="__('tournaments.entrants')"
@@ -28,12 +28,12 @@
     :labels="$labels"
     :multiple="true"
 />
-<p class="text-ringside-muted text-sm">{{ __('tournaments.seed_hint') }}</p>
-<ol class="divide-ringside-line divide-y">
+<p class="text-muted-foreground text-sm">{{ __('tournaments.seed_hint') }}</p>
+<ol class="divide-border divide-y">
     @foreach ($form->entrants as $index => $id)
         @php($name = collect($labels)->firstWhere('id',$id)['name'] ?? __('tournaments.selected_entry'))
         <li wire:key="seed-{{ $id }}" class="flex min-h-14 items-center gap-3 py-2">
-            <span class="text-ringside-muted w-8 shrink-0 tabular-nums">{{ $index+1 }}</span
+            <span class="text-muted-foreground w-8 shrink-0 tabular-nums">{{ $index+1 }}</span
             ><span class="min-w-0 grow break-words">{{ $name }}</span>
             <x-button
                 variant="secondary"

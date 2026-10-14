@@ -12,7 +12,7 @@
             @empty($this->modelForm->formModel)
                 <x-button
                     variant="secondary"
-                    class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !h-9 !rounded-none !border !bg-transparent"
+                    class="!border-border !text-muted-foreground hover:!bg-surface hover:!text-foreground !h-9 !rounded-none !border !bg-transparent"
                     wire:click="fillDummyFields"
                     wire:loading.attr="disabled"
                     wire:target="save, clear, fillDummyFields"
@@ -25,7 +25,7 @@
     <div class="flex justify-end gap-2">
         <x-button
             variant="secondary"
-            class="!border-ringside-line !text-ringside-muted hover:!bg-ringside-surface hover:!text-ringside-ink !h-9 !rounded-none !border !bg-transparent"
+            class="!border-border !text-muted-foreground hover:!bg-surface hover:!text-foreground !h-9 !rounded-none !border !bg-transparent"
             :data-confirm-message="__('core.form.confirm_clear')"
             x-on:click="
                 if (JSON.stringify($wire.form) !== initialForm && confirm($el.dataset.confirmMessage)) $wire.clear();

@@ -15,7 +15,7 @@
     >{{ __('storylines.back') }}</a>
     <header class="space-y-3">
         <h1 class="font-display text-3xl leading-tight break-words">{{ $story->title }}</h1>
-        <p class="text-ringside-muted">
+        <p class="text-muted-foreground">
             {{ __('storylines.'.$story->status->value) }} · {{ __('storylines.private') }}
         </p>
         <p class="max-w-prose whitespace-pre-line">{{ $story->premise }}</p>
@@ -26,24 +26,24 @@
             </details>
         @endif
     </header>
-    <section class="border-ringside-line grid gap-6 border-y py-6 md:grid-cols-2">
+    <section class="border-border grid gap-6 border-y py-6 md:grid-cols-2">
         <div>
-            <h2 class="text-ringside-muted">{{ __('storylines.last') }}</h2>
+            <h2 class="text-muted-foreground">{{ __('storylines.last') }}</h2>
             <p class="mt-2 text-xl font-semibold">{{ $last?->heading ?? __('storylines.no_last') }}</p>
             @if ($last)
                 <p class="mt-2 max-w-prose whitespace-pre-line">{{ $last->description }}</p>
-                <p class="text-ringside-muted mt-2 text-sm">{{ $last->occurred_on->toDateString() }}</p>
+                <p class="text-muted-foreground mt-2 text-sm">{{ $last->occurred_on->toDateString() }}</p>
             @endif
         </div>
         <div>
-            <h2 class="text-ringside-muted">
+            <h2 class="text-muted-foreground">
                 {{ __('storylines.next') }}
                 @if ($story->status === \App\Enums\Storylines\StorylineStatus::Paused) ·{{ __('storylines.paused') }}@endif
             </h2>
             <p class="mt-2 text-xl font-semibold">{{ $next?->heading ?? __('storylines.no_next') }}</p>
             @if ($next)
                 <p class="mt-2 max-w-prose whitespace-pre-line">{{ $next->description }}</p>
-                <p class="text-ringside-muted mt-2 text-sm">
+                <p class="text-muted-foreground mt-2 text-sm">
                     {{ $next->event?->name }} {{ $next->event?->local_date?->toDateString() ?? $next->target_on?->toDateString() ?? __('storylines.undated') }}
                 </p>
             @endif
@@ -79,8 +79,8 @@
     @endif
     <section>
         <h2 class="font-display mb-4 text-2xl">{{ __('storylines.participants') }}</h2>
-        <p class="text-ringside-muted mb-4 text-sm">{{ __('storylines.participants_hint') }}</p>
-        <div class="divide-ringside-line divide-y">
+        <p class="text-muted-foreground mb-4 text-sm">{{ __('storylines.participants_hint') }}</p>
+        <div class="divide-border divide-y">
             @forelse ($participants as $person)
                 <div
                     class="flex flex-wrap items-center justify-between gap-3 py-3"
@@ -89,7 +89,7 @@
                     <p>
                         {{ $person->label }}
                         @if ($person->role) ·{{ $person->role }}@endif
-                        <span class="text-ringside-muted block text-sm"
+                        <span class="text-muted-foreground block text-sm"
                             >{{ $person->joined_on->toDateString() }}
                             @if ($person->left_on) —{{ $person->left_on->toDateString() }}·{{ __('storylines.ended') }}@endif
                         </span>
@@ -102,33 +102,33 @@
                     @endif
                 </div>
             @empty
-                <p class="text-ringside-muted">{{ __('storylines.no_participants') }}</p>
+                <p class="text-muted-foreground">{{ __('storylines.no_participants') }}</p>
             @endforelse
         </div>
     </section>
     <section>
         <h2 class="font-display mb-4 text-2xl">{{ __('storylines.steps') }}</h2>
-        <div class="divide-ringside-line divide-y">
+        <div class="divide-border divide-y">
             @forelse ($steps as $step)
                 <article class="py-5" wire:key="step-{{ $step->id }}">
-                    <p class="text-ringside-muted mb-2 text-sm">
+                    <p class="text-muted-foreground mb-2 text-sm">
                         {{ __('storylines.'.$step->status->value) }} · {{ $step->target_on?->toDateString() }}
                     </p>
                     <h3 class="text-lg font-semibold">{{ $step->heading }}</h3>
                     <p class="mt-2 max-w-prose whitespace-pre-line">{{ $step->description }}</p>
                     <x-storylines.source-links :entry="$step" />
                     @if ($step->event_id)
-                        <p class="text-ringside-muted mt-2 text-sm">
+                        <p class="text-muted-foreground mt-2 text-sm">
                             {{ $sourceStates[$step->id]['context']['segment_label'] ?? $sourceStates[$step->id]['context']['match_label'] ?? '' }} · {{ $sourceStates[$step->id]['context']['live_state'] ? __('live-show.'.$sourceStates[$step->id]['context']['live_state']) : __('storylines.no_live') }}
                             @if ($step->match_id) ·{{ $sourceStates[$step->id]['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                         @foreach ($sourceStates[$step->id]['warnings'] as $warning)
-                            <p class="text-ringside-warning mt-2 text-sm">{{ $warning }}</p>
+                            <p class="text-warning mt-2 text-sm">{{ $warning }}</p>
                         @endforeach
                     @endif
                     @if ($step->source_context['event_date'] ?? false)
                         @if ($step->event?->date?->toIso8601String() !== $step->source_context['event_date'])
-                            <p class="text-ringside-warning mt-2">{{ __('storylines.source_moved') }}</p>
+                            <p class="text-warning mt-2">{{ __('storylines.source_moved') }}</p>
                         @endif
                     @endif
                     @if (in_array($story->status, [\App\Enums\Storylines\StorylineStatus::Active, \App\Enums\Storylines\StorylineStatus::Paused], true) && $step->status !== \App\Enums\Storylines\StepStatus::Happened)
@@ -151,26 +151,26 @@
                     @endif
                 </article>
             @empty
-                <p class="text-ringside-muted">{{ __('storylines.no_steps') }}</p>
+                <p class="text-muted-foreground">{{ __('storylines.no_steps') }}</p>
             @endforelse
         </div>
         {{ $steps->links() }}
     </section>
     <section>
         <h2 class="font-display mb-4 text-2xl">{{ __('storylines.history') }}</h2>
-        <div class="divide-ringside-line divide-y">
+        <div class="divide-border divide-y">
             @forelse ($developments as $development)
                 <article class="py-5" wire:key="development-{{ $development->id }}">
-                    <p class="text-ringside-muted mb-2 text-sm">
+                    <p class="text-muted-foreground mb-2 text-sm">
                         {{ $development->occurred_on->toDateString() }} · {{ $development->timezone }}
                         @if ($development->retracted_at) ·{{ __('storylines.retracted') }}@endif
                     </p>
                     <h3 class="text-lg font-semibold">{{ $development->heading }}</h3>
                     <p class="mt-2 max-w-prose whitespace-pre-line">{{ $development->description }}</p>
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ __('storylines.historical_cast') }}: {{ collect($development->cast)->pluck('label')->join(', ') }}
                     </p>
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ __('storylines.recorded') }} {{ $development->created_at?->toIso8601String() }}
                     </p>
                     <x-storylines.source-links :entry="$development" />
@@ -190,18 +190,18 @@
                     @endif
                 </article>
             @empty
-                <p class="text-ringside-muted">{{ __('storylines.no_developments') }}</p>
+                <p class="text-muted-foreground">{{ __('storylines.no_developments') }}</p>
             @endforelse
         </div>
         {{ $developments->links() }}
     </section>
     <details>
         <summary class="font-display min-h-11 cursor-pointer py-3 text-2xl">{{ __('storylines.changes') }}</summary>
-        <div class="divide-ringside-line divide-y">
+        <div class="divide-border divide-y">
             @foreach ($revisions as $revision)
                 <article class="py-4" wire:key="revision-{{ $revision->id }}">
                     <p class="font-semibold">{{ __('storylines.operations.'.$revision->operation) }}</p>
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ $revision->actor?->full_name }} · {{ $revision->created_at?->toIso8601String() }}
                     </p>
                     @if ($revision->reason)
@@ -214,7 +214,7 @@
                         <div class="grid gap-5 sm:grid-cols-2">
                             @foreach (['before', 'after'] as $side)
                                 <div>
-                                    <h4 class="text-ringside-muted font-semibold">{{ __('storylines.'.$side) }}</h4>
+                                    <h4 class="text-muted-foreground font-semibold">{{ __('storylines.'.$side) }}</h4>
                                     <x-storylines.revision-fields :data="$revision->$side" />
                                 </div>
                             @endforeach

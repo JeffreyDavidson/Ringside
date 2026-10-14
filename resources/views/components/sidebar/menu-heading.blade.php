@@ -1,4 +1,4 @@
-<p class="text-ringside-muted relative min-h-8 px-3 pt-3 pb-1 text-xs font-normal">
+<p class="text-muted-foreground relative min-h-8 px-3 pt-3 pb-1 text-xs font-normal">
     <span
         :aria-hidden="! expanded"
         data-test="sidebar-menu-heading-label"

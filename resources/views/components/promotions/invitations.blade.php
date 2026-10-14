@@ -3,22 +3,20 @@
 {{-- The signed-in user's own pending invitations. Accepting or declining posts to routes outside the promotion context. --}}
 @if ($invitations->isNotEmpty())
     <section aria-labelledby="promotion-invitations-heading" data-test="pending-invitations" {{ $attributes }}>
-        <h2 id="promotion-invitations-heading" class="text-ringside-ink text-sm font-semibold">
+        <h2 id="promotion-invitations-heading" class="text-foreground text-sm font-semibold">
             {{ __('promotions.invitations_pending') }}
         </h2>
         @if (auth()->user()?->role->isAdministrator())
-            <p class="text-ringside-muted mt-1 text-xs" data-test="invitation-admin-note">
+            <p class="text-muted-foreground mt-1 text-xs" data-test="invitation-admin-note">
                 {{ __('promotions.invitation_administrator_note') }}
             </p>
         @endif
-        <ul class="divide-ringside-line mt-3 divide-y">
+        <ul class="divide-border mt-3 divide-y">
             @foreach ($invitations as $invitation)
                 <li class="flex flex-col gap-3 py-3">
                     <div class="min-w-0">
-                        <p class="text-ringside-ink truncate text-sm font-semibold">
-                            {{ $invitation->promotion->name }}
-                        </p>
-                        <p class="text-ringside-muted mt-1 text-xs">
+                        <p class="text-foreground truncate text-sm font-semibold">{{ $invitation->promotion->name }}</p>
+                        <p class="text-muted-foreground mt-1 text-xs">
                             {{ __('promotions.invitation_role', ['role' => $invitation->role->label()]) }}
                         </p>
                     </div>

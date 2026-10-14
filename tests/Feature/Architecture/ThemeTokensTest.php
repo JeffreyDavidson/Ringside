@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 use Symfony\Component\Finder\Finder;
 
-test('every Ringside colour used by the views is defined as a theme token', function (): void {
+test('every semantic colour used by application source is defined as a theme token', function (): void {
     // Arrange
-    preg_match_all('/--color-(ringside-[a-z-]+)\s*:/', (string) file_get_contents(resource_path('css/tokens.css')), $definitions);
+    $theme = file_get_contents(resource_path('css/tokens.css')).file_get_contents(resource_path('css/app.css'));
+    preg_match_all('/--color-([a-z0-9-]+)\s*:/', $theme, $definitions);
     $definedColors = array_flip($definitions[1]);
-    $utilityPattern = '/(?<![\w-])(?:bg|text|border(?:-[xytrblse])?|outline|ring|fill|stroke|divide|placeholder|caret|decoration|from|via|to|shadow|accent)-(ringside-[a-z]+(?:-[a-z]+)*)/';
-    $variablePattern = '/var\(--color-(ringside-[a-z-]+)\)/';
+    $semanticNames = '(?:ringside|legacy|surface|foreground|muted-foreground|border|signal|success|warning|error|primary|outline|white|ink|overlay)(?:-[a-z0-9]+)*';
+    $utilityPattern = '/(?<![\w-])(?:bg|text|border(?:-[xytrblse])?|outline|ring|fill|stroke|divide|placeholder|caret|decoration|from|via|to|shadow|accent)-('.$semanticNames.')(?![\w-])/';
+    $variablePattern = '/var\(--color-('.$semanticNames.')(?![\w-])/';
     $undefinedColors = [];
 
     // Act
     $files = Finder::create()
         ->files()
-        ->in(resource_path('views'))
-        ->name('*.blade.php');
+        ->in([resource_path(), app_path()])
+        ->name(['*.php', '*.css', '*.js']);
 
     foreach ($files as $file) {
         $contents = $file->getContents();
@@ -28,7 +30,8 @@ test('every Ringside colour used by the views is defined as a theme token', func
                 continue;
             }
 
-            $undefinedColors[$color][$file->getRelativePathname()] = $file->getRelativePathname();
+            $path = $file->getPathname();
+            $undefinedColors[$color][$path] = $path;
         }
     }
 
@@ -42,5 +45,5 @@ test('every Ringside colour used by the views is defined as a theme token', func
     // Assert
     $undefinedList = implode("\n", $report);
 
-    expect($report)->toBeEmpty("Undefined Ringside colour tokens:\n{$undefinedList}");
+    expect($report)->toBeEmpty("Undefined semantic colour tokens:\n{$undefinedList}");
 });

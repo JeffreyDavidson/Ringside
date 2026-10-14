@@ -15,10 +15,10 @@
 
     $textareaClasses = collect([
         'block w-full appearance-none outline-none resize-y',
-        'border border-solid border-ringside-outline bg-ringside-surface-panel text-ringside-ink aria-invalid:border-ringside-error',
+        'border border-solid border-outline bg-surface-panel text-foreground aria-invalid:border-error',
         'rounded-none transition-colors',
-        'placeholder:text-ringside-muted',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ringside-ink',
+        'placeholder:text-muted-foreground',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground',
         $size === 'sm' ? 'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-xs' : null,
         $size === 'md' ? 'px-[calc(var(--spacing)*3)] py-[calc(var(--spacing)*2)] text-2sm' : null,
         $size === 'lg' ? 'px-[calc(var(--spacing)*4)] py-[calc(var(--spacing)*2.5)] text-sm' : null,

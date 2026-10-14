@@ -61,17 +61,17 @@
     --leading-4.25: 1.125rem;
 
     /* Metronic Color Palette */
-    --color-primary: #1B84FF;
-    --color-primary-active: #056EE9;
-    --color-primary-light: #EFF6FF;
-    --color-primary-clarity: rgba(27, 132, 255, 0.20);
-    --color-primary-inverse: #ffffff;
+    --color-legacy-primary: #1B84FF;
+    --color-legacy-primary-active: #056EE9;
+    --color-legacy-primary-light: #EFF6FF;
+    --color-legacy-primary-clarity: rgba(27, 132, 255, 0.20);
+    --color-legacy-primary-inverse: #ffffff;
 
-    --color-success: #17C653;
-    --color-success-active: #04B440;
-    --color-success-light: #EAFFF1;
-    --color-success-clarity: rgba(23, 198, 83, 0.20);
-    --color-success-inverse: #ffffff;
+    --color-legacy-success: #17C653;
+    --color-legacy-success-active: #04B440;
+    --color-legacy-success-light: #EAFFF1;
+    --color-legacy-success-clarity: rgba(23, 198, 83, 0.20);
+    --color-legacy-success-inverse: #ffffff;
 
     --color-danger: #F8285A;
     --color-danger-active: #D81A48;
@@ -79,11 +79,11 @@
     --color-danger-clarity: rgba(248, 40, 90, 0.20);
     --color-danger-inverse: #ffffff;
 
-    --color-warning: #F6B100;
-    --color-warning-active: #DFA000;
-    --color-warning-light: #FFF8DD;
-    --color-warning-clarity: rgba(246, 177, 0, 0.20);
-    --color-warning-inverse: #ffffff;
+    --color-legacy-warning: #F6B100;
+    --color-legacy-warning-active: #DFA000;
+    --color-legacy-warning-light: #FFF8DD;
+    --color-legacy-warning-clarity: rgba(246, 177, 0, 0.20);
+    --color-legacy-warning-inverse: #ffffff;
 
     --color-info: #7239EA;
     --color-info-active: #5014D0;
@@ -247,7 +247,7 @@ html[data-sidebar-initializing] * {
     }
 
     .form-input-states {
-        @apply hover:border-gray-400 focus:border-primary focus:text-gray-700;
+        @apply hover:border-gray-400 focus:border-legacy-primary focus:text-gray-700;
     }
 
     .form-input-default {
@@ -262,7 +262,7 @@ html[data-sidebar-initializing] * {
         @apply flex gap-1.5 items-center appearance-none shadow-none outline-none
                text-gray-600 w-full font-medium text-sm leading-none
                bg-light-active rounded-md h-10 ps-3 pe-3 border border-solid
-               border-gray-300 hover:border-gray-400 has-[:focus]:border-primary
+               border-gray-300 hover:border-gray-400 has-[:focus]:border-legacy-primary
                has-[:focus]:text-gray-700 has-[:invalid]:border-red-600;
     }
 
