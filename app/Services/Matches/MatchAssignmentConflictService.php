@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Matches;
 
 use App\Collections\MatchCompetitorsCollection;
+use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
@@ -12,6 +13,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
+use App\Models\Tournaments\TournamentMatchLink;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
@@ -23,6 +26,8 @@ final readonly class MatchAssignmentConflictService
         private MatchCompetitorConflictService $competitorConflicts,
         private MatchRefereeConflictService $refereeConflicts,
         private MatchTitleConflictService $titleConflicts,
+        private TournamentLocks $tournamentLocks,
+        private TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     public function ensureEventCanBeRescheduled(Event $event, ?Carbon $date): void
@@ -81,18 +86,18 @@ final readonly class MatchAssignmentConflictService
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
+    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers, ?EventMatch $match = null): void
     {
-        $this->competitorConflicts->ensureWrestlersCanBeAssigned($conflictingEventIds, $wrestlers);
+        $this->competitorConflicts->ensureWrestlersCanBeAssigned($conflictingEventIds, $wrestlers, $this->tournamentRequirements->permittedPriorMatchIds($match));
     }
 
     /**
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, TagTeam>  $tagTeams
      */
-    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
+    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams, ?EventMatch $match = null): void
     {
-        $this->competitorConflicts->ensureTagTeamsCanBeAssigned($conflictingEventIds, $tagTeams);
+        $this->competitorConflicts->ensureTagTeamsCanBeAssigned($conflictingEventIds, $tagTeams, $this->tournamentRequirements->permittedPriorMatchIds($match));
     }
 
     /**
@@ -158,6 +163,10 @@ final readonly class MatchAssignmentConflictService
      */
     public function lockMatchWithEventSet(EventMatch $eventMatch): EventMatch
     {
+        $link = TournamentMatchLink::query()->where('match_id', $eventMatch->id)->first();
+        if ($link !== null) {
+            $this->tournamentLocks->lock($link->tournament_id);
+        }
         do {
             $eventId = EventMatch::query()->withTrashed()->whereKey($eventMatch->getKey())->firstOrFail(['id', 'event_id'])->event_id;
             $this->lockEventSet($eventId);

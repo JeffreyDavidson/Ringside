@@ -26,6 +26,10 @@ Production runs **MySQL 8**. The application supports MySQL, PostgreSQL, and SQL
 | `coverage` | Coverage (100%) | `composer test:coverage`: non-parallel Pest run with PCOV, Browser suite excluded, fails below 100% |
 | `browser-tests` | Browser Tests | Installs Chromium, builds assets, then `composer test:browser` |
 
+The disposable MySQL service stores `/var/lib/mysql` on a 1 GiB `tmpfs` mount. Native concurrency checks commit data for child processes and rebuild the schema after each test; memory-backed storage avoids repeated writes through Docker’s container layer. MySQL isolation, row locks, constraints and all test commands remain unchanged. This CI database does not test persistence across a container restart.
+
+Both native database jobs have a bounded 30-minute budget for the full application suite followed by independent-process concurrency tests. The MySQL suite exceeded the previous 20-minute total while still completing passing concurrency cases; this budget allows the whole gate to finish without skipping tests.
+
 **Key Features:**
 - **Runtime**: PHP 8.5 (shared `.github/actions/setup-php-composer` action) and Node.js 24 for jobs that need it. `package.json` declares `engines.node: ">=22.13"`, the lowest version the toolchain supports (Vite 8 and laravel-vite-plugin 3 need 22.12, ESLint 10 needs 22.13), so a server still on Node 22 deploys without `EBADENGINE` warnings; Node 24 remains the recommended version everywhere
 - **Impacted Tests First**: `application-tests` runs `pest --tia --baselined --filtered` and falls back to the full non-browser suite with a warning if TIA is unavailable or fails

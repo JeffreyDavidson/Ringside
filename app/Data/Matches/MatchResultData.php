@@ -17,5 +17,6 @@ readonly class MatchResultData
         public MatchFinish $finish,
         public ?MatchSide $winningSide,
         public Collection $eliminations,
+        public ?int $tournamentVersion = null,
     ) {}
 }

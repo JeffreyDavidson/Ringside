@@ -261,7 +261,7 @@ jobs:
     postgres-tests:
         name: Postgres tests
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 30
         env:
             DB_CONNECTION: pgsql
             DB_HOST: 127.0.0.1
@@ -334,6 +334,7 @@ jobs:
                 ports:
                     - 3306:3306
                 options: >-
+                    --tmpfs /var/lib/mysql:rw,size=1g
                     --health-cmd "mysqladmin ping -h 127.0.0.1 -u ringside -pringside"
                     --health-interval 10s
                     --health-timeout 5s

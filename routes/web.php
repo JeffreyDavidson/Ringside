@@ -31,6 +31,7 @@ use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Storylines\StorylinesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
+use App\Http\Controllers\Tournaments\TournamentsController;
 use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
@@ -47,6 +48,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Sponsors\Sponsor;
 use App\Models\Storylines\Storyline;
 use App\Models\Titles\Title;
+use App\Models\Tournaments\Tournament;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Route;
 
@@ -75,6 +77,8 @@ Route::middleware('auth')->group(function () {
             ->can('view', 'promotion')
             ->name('promotions.show');
 
+        Route::get('tournaments', [TournamentsController::class, 'index'])->can('viewAny', Tournament::class)->name('tournaments.index');
+        Route::get('tournaments/{tournament}', [TournamentsController::class, 'show'])->can('view', 'tournament')->name('tournaments.show');
         Route::get('storylines', [StorylinesController::class, 'index'])->can('viewAny', Storyline::class)->name('storylines.index');
         Route::get('storylines/{storyline}', [StorylinesController::class, 'show'])->can('view', 'storyline')->name('storylines.show');
 

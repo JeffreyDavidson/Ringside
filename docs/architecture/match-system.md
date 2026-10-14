@@ -130,7 +130,7 @@ Recorded outcomes are checked by `MatchOutcomeRequirements`, which explicitly co
 
 Match assignments observe these collision rules:
 
-- A wrestler, tag team, or title may be assigned only once on an event card.
+- A wrestler, tag team, or title may be assigned only once on an event card. A tournament may explicitly permit only its qualified sequential wrestler/tag-team appearances and recorded-draw rematches on that same card; title stakes remain once per card. See [Tournament Management](tournament-generation.md) for the exact linked-match exception and additional event-union lock order.
 - A wrestler, tag team, or title may not be assigned to different events scheduled for the same exact date and time.
 - A referee may officiate multiple matches on one event card, but may not officiate matches on different events scheduled for the same exact date and time.
 - A wrestler who is a current member of a tag team cannot be booked individually while that tag team is entered on the same card or at the same exact date and time, and a tag team cannot be entered while one of its current members is booked individually. `MatchCompetitorConflictService` checks these through the tag team's current membership; these are read-only checks and the canonical lock order is unchanged. Former members are ignored.

@@ -13,6 +13,7 @@ use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -23,6 +24,7 @@ class AddWrestlersToMatchAction
         private readonly RosterBookingEligibility $bookingEligibility,
         private readonly RosterDateAvailability $dateAvailability,
         private readonly MatchConfigurationRequirements $configurationRequirements,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     /**
@@ -84,6 +86,7 @@ class AddWrestlersToMatchAction
      */
     public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber, array $retainedKeys = []): void
     {
+        $this->tournamentRequirements->ensureCompetitors($lockedMatch, $wrestlers);
         $requestedWrestlers = $wrestlers->unique('id')->values();
         $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
         $lockedWrestlers = Wrestler::query()
@@ -101,6 +104,7 @@ class AddWrestlersToMatchAction
         $this->conflictService->ensureWrestlersCanBeAssigned(
             $conflictingEventIds,
             $lockedWrestlers,
+            $lockedMatch,
         );
         $event = $lockedMatch->event()->firstOrFail();
         foreach ($lockedWrestlers as $person) {

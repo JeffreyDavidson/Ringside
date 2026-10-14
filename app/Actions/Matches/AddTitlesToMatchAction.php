@@ -10,6 +10,7 @@ use App\Lifecycle\Matches\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,7 @@ class AddTitlesToMatchAction
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly MatchTitleRequirements $requirements,
         private readonly MatchConfigurationRequirements $configurationRequirements,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     /**
@@ -75,6 +77,7 @@ class AddTitlesToMatchAction
      */
     public function handleWithinTransaction(EventMatch $lockedMatch, Collection $titles): void
     {
+        $this->tournamentRequirements->ensureFinalStakes($lockedMatch);
         $requestedTitles = $titles->unique('id')->values();
 
         if ($requestedTitles->isEmpty()) {

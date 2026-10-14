@@ -13,6 +13,7 @@ use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -24,6 +25,7 @@ class AddTagTeamsToMatchAction
         private readonly RosterDateAvailability $dateAvailability,
         private readonly MatchRosterLock $rosterLock,
         private readonly MatchConfigurationRequirements $configurationRequirements,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
     ) {}
 
     /**
@@ -87,6 +89,7 @@ class AddTagTeamsToMatchAction
      */
     public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber, array $retainedKeys = []): void
     {
+        $this->tournamentRequirements->ensureCompetitors($lockedMatch, $tagTeams);
         $requestedTagTeams = $tagTeams->unique('id')->values();
         $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
         $this->rosterLock->lock(collect(), collect(), $requestedTagTeams);
@@ -106,6 +109,7 @@ class AddTagTeamsToMatchAction
         $this->conflictService->ensureTagTeamsCanBeAssigned(
             $conflictingEventIds,
             $lockedTagTeams,
+            $lockedMatch,
         );
         $event = $lockedMatch->event()->firstOrFail();
         foreach ($lockedTagTeams as $person) {

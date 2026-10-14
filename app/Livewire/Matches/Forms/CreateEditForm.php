@@ -17,6 +17,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Tournaments\TournamentMatchLink;
 use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
@@ -25,11 +26,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BaseForm<EventMatch> */
 class CreateEditForm extends BaseForm
 {
+    #[Locked]
+    public ?int $tournamentVersion = null;
+
     private MatchCompetitorStateMapper $competitorStateMapper;
 
     /** The booked event's promotion, set by validateForEvent() for the current request only. */
@@ -69,6 +74,8 @@ class CreateEditForm extends BaseForm
 
     protected function loadModelData(Model $model): void
     {
+        $this->tournamentVersion = TournamentMatchLink::query()->with('tournament')->where('match_id', $model->getKey())->first()?->tournament->version;
+
         $this->matchType = $model->match_type;
         $this->matchStipulationId = $model->match_stipulation_id;
 
@@ -132,6 +139,7 @@ class CreateEditForm extends BaseForm
             matchStipulation: $this->matchStipulationId === null
                 ? null
                 : MatchStipulation::query()->findOrFail($this->matchStipulationId),
+            tournamentVersion: $this->tournamentVersion,
         );
     }
 

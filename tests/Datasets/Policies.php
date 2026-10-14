@@ -14,6 +14,7 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Tournaments\Tournament;
 use App\Models\Users\User;
 use App\Policies\EventMatchPolicy;
 use App\Policies\EventPolicy;
@@ -22,6 +23,7 @@ use App\Policies\RefereePolicy;
 use App\Policies\StablePolicy;
 use App\Policies\TagTeamPolicy;
 use App\Policies\TitlePolicy;
+use App\Policies\TournamentPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VenuePolicy;
 use App\Policies\WrestlerPolicy;
@@ -40,6 +42,7 @@ function policyAbilityCatalog(): array
     $rosterMember = [...$crud, 'employ', 'release', 'retire', 'unretire', 'suspend', 'reinstate', 'injure', 'clearFromInjury'];
 
     return [
+        TournamentPolicy::class => ['model' => Tournament::class, 'create' => fn () => Tournament::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => ['view', 'update']],
         EventMatchPolicy::class => ['model' => EventMatch::class, 'create' => fn (): EventMatch => EventMatch::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => $crud],
         EventPolicy::class => ['model' => Event::class, 'create' => fn (): Event => Event::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => [...$crud, 'viewBudget', 'updateBudget', 'manageSponsors', 'viewProduction', 'updateProduction', 'preparePublication', 'publishPublication', 'unpublishPublication', 'uploadPublicationPoster']],
         ManagerPolicy::class => ['model' => Manager::class, 'create' => fn (): Manager => Manager::factory()->create(), 'class' => ['viewAny', 'create'], 'instance' => $rosterMember],

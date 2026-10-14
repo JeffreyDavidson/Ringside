@@ -7,10 +7,13 @@ namespace App\Actions\Events;
 use App\Exceptions\Events\CannotBeRestoredException;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
+use App\Models\Tournaments\Tournament;
 use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
+use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
@@ -19,6 +22,8 @@ class RestoreAction
         private readonly DeletionStateManager $deletionState,
         private readonly MatchAssignmentConflictService $assignmentConflicts,
         private readonly SchedulingSlotLock $slotLock,
+        private readonly TournamentLocks $tournamentLocks,
+        private readonly TournamentMatchRequirementsService $tournamentRequirements,
         private readonly EventRosterAvailabilityQuery $rosterAvailability,
     ) {}
 
@@ -46,6 +51,10 @@ class RestoreAction
             // queues with concurrent reschedules and restores into the same slot. Bookings never wait for it.
             $this->slotLock->lock($event->date);
 
+            $tournamentIds = $this->tournamentLocks->forEvent($event->id);
+            if ($tournamentIds !== []) {
+                $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $event->date);
+            }
             $lockedEvent = $event->refreshForUpdate();
             $venue = $lockedEvent->venue()->withTrashed()->first();
 
@@ -61,7 +70,9 @@ class RestoreAction
                 VenueSchedulingEligibility::ensureAvailable($venue, $lockedEvent->date, $lockedEvent);
             }
 
+            $this->tournamentRequirements->ensureEventChronology($lockedEvent, $lockedEvent->date);
             $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $lockedEvent->date);
+            Tournament::query()->whereKey($tournamentIds)->increment('version');
             if ($lockedEvent->date?->isFuture()) {
                 $this->rosterAvailability->ensureAt($lockedEvent, $lockedEvent->date, lock: true);
             }

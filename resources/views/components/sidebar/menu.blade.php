@@ -64,6 +64,12 @@
         {{ __('navigation.sections.titles') }}
     </x-sidebar.menu-item>
 
+    <x-sidebar.menu-item :href="route('tournaments.index')" :active="request()->routeIs('tournaments.*')">
+        <x-slot:icon>
+            <x-heroicon-o-trophy class="size-5" />
+        </x-slot:icon>
+        {{ __('tournaments.title') }}</x-sidebar.menu-item>
+
     <x-sidebar.menu-heading>{{ __('navigation.groups.shared_directory') }}</x-sidebar.menu-heading>
     <x-sidebar.menu-item href="{{ route('venues.index') }}" :active="request()->routeIs('venues.*')">
         <x-slot:icon>
