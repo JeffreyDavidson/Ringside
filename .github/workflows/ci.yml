@@ -334,6 +334,7 @@ jobs:
                 ports:
                     - 3306:3306
                 options: >-
+                    --tmpfs /var/lib/mysql:rw,size=1g
                     --health-cmd "mysqladmin ping -h 127.0.0.1 -u ringside -pringside"
                     --health-interval 10s
                     --health-timeout 5s
