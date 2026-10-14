@@ -19,7 +19,8 @@ use Illuminate\Support\Carbon;
  * @phpstan-type Timing array{planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
  * @phpstan-type MatchEntry array{match_id: int, planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
  * @phpstan-type Segment array{id: string, label: string, after_match_id: ?int, planned_at: ?string, revised_at: ?string, minutes: ?int, notes: ?string}
- * @phpstan-type Content array{timezone: string, doors_at: ?string, revision: ?string, master: ?string, notes: ?string, follow_up: ?string, matches: list<MatchEntry>, segments: list<Segment>, production?: Production}
+ * @phpstan-type SponsorTask array{id: string, label: string, instruction: string, owner: ?string}
+ * @phpstan-type Content array{timezone: string, doors_at: ?string, revision: ?string, master: ?string, notes: ?string, follow_up: ?string, matches: list<MatchEntry>, segments: list<Segment>, sponsor_tasks?: list<SponsorTask>, production?: Production}
  *
  * @property int $id
  * @property int $event_id

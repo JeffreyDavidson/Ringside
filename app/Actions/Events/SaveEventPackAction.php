@@ -38,6 +38,10 @@ class SaveEventPackAction
             // Retain removed-match notes and omitted entries; identity is never inferred from card position.
             $content['matches'] = array_values(collect($pack?->content['matches'] ?? [])->keyBy('match_id')
                 ->replace(collect($content['matches'])->keyBy('match_id'))->all());
+            $savedTasks = $pack->content['sponsor_tasks'] ?? null;
+            if (! array_key_exists('sponsor_tasks', $content) && $savedTasks !== null) {
+                $content['sponsor_tasks'] = $savedTasks;
+            }
             $pack ??= new EventPack;
             $pack->event_id = $event->id;
             $pack->version = $version + 1;

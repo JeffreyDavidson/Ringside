@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 /*
  * Child process for BookingConcurrencyTest: books one match through AddMatchForEventAction, or, when the spec
+ * carries sponsor_event_id it creates/completes/cancels a sponsor promise, archives its sponsor, publishes a reviewed instruction, or prepares/reviews its live source. A spec that
  * carries a reschedule_date, moves an event to that date through Events\UpdateAction. A spec with a
  * create_event_at_venue_id creates an event at that venue through Events\CreateAction, and one with a
  * demote_user_id makes that owner a plain member of the promotion through UpdatePromotionMemberRoleAction. A spec
@@ -33,7 +34,10 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\ReviewLiveShowAction;
+use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Actions\Events\SaveSponsorCommitmentAction;
+use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
@@ -42,6 +46,7 @@ use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\RecordResultAction;
 use App\Actions\Promotions\UpdatePromotionMemberRoleAction;
 use App\Actions\Roster\Availability\CreateAction as CreateUnavailabilityAction;
+use App\Actions\Sponsors\SaveSponsorAction;
 use App\Actions\Stables\CreateAction as CreateStableAction;
 use App\Actions\Stables\RestoreAction as RestoreStableAction;
 use App\Actions\Stables\SplitStableAction;
@@ -53,10 +58,12 @@ use App\Actions\Venues\CreateAction as CreateVenueAction;
 use App\Actions\Wrestlers\CreateAction as CreateWrestlerAction;
 use App\Actions\Wrestlers\UpdateAction as UpdateWrestlerAction;
 use App\Data\Events\EventData;
+use App\Data\Events\SponsorCommitmentData;
 use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Sponsors\SponsorData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Data\TagTeams\TagTeamData;
@@ -65,6 +72,8 @@ use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\PublicSection;
+use App\Enums\Events\SponsorCommitmentStatus;
+use App\Enums\Events\SponsorCommitmentType;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
@@ -80,9 +89,11 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\ViewModels\EventPackViewModel;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;
@@ -104,7 +115,7 @@ if (! is_string($payload)) {
     exit(1);
 }
 
-/** @var array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string} $spec */
+/** @var array{sponsor_event_id: int, sponsor_id: int, promise_id: int, user_id: int, version: int, submission_key: string, sponsor_operation: string, fingerprint: string, pack_version: int, preview_hash: string, target_key: string, mode: string, clock: string}|array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
 DB::select('select 1');
@@ -164,6 +175,32 @@ try {
         Carbon::setTestNow($spec['clock']);
         resolve(SaveTalentBookingAction::class)->handle(Event::query()->findOrFail($spec['talent_event_id']), 'wrestler', $spec['person_id'],
             $spec['version'], $spec['fingerprint'], new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'));
+    } elseif (isset($spec['sponsor_event_id'])) {
+        auth()->login(User::query()->findOrFail($spec['user_id']));
+        Carbon::setTestNow($spec['clock']);
+        $event = Event::query()->withTrashed()->findOrFail($spec['sponsor_event_id']);
+        if ($spec['sponsor_operation'] === 'archive') {
+            $sponsor = Sponsor::query()->findOrFail($spec['sponsor_id']);
+            resolve(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($sponsor->promotion_id), $sponsor->id, $spec['version'], $sponsor->submission_key, new SponsorData($sponsor->name, archived: true));
+        } elseif ($spec['sponsor_operation'] === 'publish') {
+            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], $spec['mode'], $spec['target_key'] ?: null, null, $spec['preview_hash']);
+        } elseif ($spec['sponsor_operation'] === 'pack') {
+            $source = resolve(EventPackViewModel::class)->data($event);
+            resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], [...$source['content'], 'notes' => 'Reviewed ordinary pack note'], false);
+        } elseif ($spec['sponsor_operation'] === 'prepare') {
+            resolve(PrepareLiveShowAction::class)->handle($event, 0, $spec['pack_version'], $spec['fingerprint']);
+        } elseif ($spec['sponsor_operation'] === 'review') {
+            resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], []);
+        } else {
+            $status = match ($spec['sponsor_operation']) {
+                'complete' => SponsorCommitmentStatus::Completed,
+                'cancel' => SponsorCommitmentStatus::Cancelled,
+                default => SponsorCommitmentStatus::Pending,
+            };
+            resolve(SaveSponsorCommitmentAction::class)->handle($event, $spec['sponsor_operation'] === 'create' ? null : $spec['promise_id'], $spec['version'], $spec['submission_key'],
+                new SponsorCommitmentData($spec['sponsor_id'], SponsorCommitmentType::Banner, 'Concurrent banner', status: $status, evidence: $status === SponsorCommitmentStatus::Completed ? 'Checked at doors' : null),
+                'Concurrent correction');
+        }
     } elseif (isset($spec['live_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         Carbon::setTestNow($spec['clock']);
