@@ -17,6 +17,27 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the events index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('events.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('events.index')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the events index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -37,7 +58,8 @@ describe('index', function (): void {
         $response = get(route('events.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the events index', function (): void {
@@ -66,6 +88,7 @@ describe('show', function (): void {
 
         // Assert
         $response
+            ->assertOk()
             ->assertViewIs('events.show')
             ->assertViewHas('event', $event)
             ->assertSeeHtml('aria-label="Content workspace"')

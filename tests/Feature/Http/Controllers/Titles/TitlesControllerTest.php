@@ -18,6 +18,27 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the titles index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Member,
+            'status' => MembershipStatus::Active,
+        ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('titles.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('titles.index')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the titles index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -38,7 +59,8 @@ describe('index', function (): void {
         $response = get(route('titles.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the titles index', function (): void {

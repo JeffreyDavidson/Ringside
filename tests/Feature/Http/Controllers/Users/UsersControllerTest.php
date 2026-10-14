@@ -32,7 +32,8 @@ describe('index', function (): void {
         $response = get(route('users.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the users index', function (): void {
@@ -62,19 +63,36 @@ describe('index', function (): void {
 
         // Act
         $response = get(route('users.index'));
-        $profileResponse = get(route('users.show', $user));
 
         // Assert
         $response
             ->assertForbidden()
             ->assertDontSee('General Info');
-        $profileResponse
-            ->assertForbidden()
-            ->assertDontSee($user->email);
     });
 });
 
 describe('show', function (): void {
+    test('an active member cannot open a platform user profile', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+
+        $user = basicUser();
+        $promotion->users()->attach($user, [
+            'role' => MembershipRole::Owner,
+            'status' => MembershipStatus::Active,
+        ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('users.show', $user));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertDontSee($user->email);
+    });
+
     test('renders the user profile and its related data', function () {
         // Arrange
         $user = User::factory()->create();
