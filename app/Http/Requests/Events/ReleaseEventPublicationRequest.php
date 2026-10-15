@@ -13,7 +13,13 @@ class ReleaseEventPublicationRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return ['version' => ['required', 'integer', 'min:1'], 'fingerprint' => ['required', 'string', 'size:64'],
-            'section' => ['required', Rule::enum(PublicSection::class)], 'reviewed' => $this->isMethod('delete') ? ['nullable', 'boolean'] : ['required', 'accepted']];
+        return [
+            'version' => ['required', 'integer', 'min:1'],
+            'fingerprint' => ['required', 'string', 'size:64'],
+            'section' => ['required', Rule::enum(PublicSection::class)],
+            'reviewed' => $this->isMethod('delete')
+                ? ['nullable', 'boolean']
+                : ['required', 'accepted'],
+        ];
     }
 }

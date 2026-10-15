@@ -896,3 +896,185 @@ describe('update', function (): void {
     });
 
 });
+
+describe('validated publication draft', function (): void {
+    test('omitted and null selections preserve empty draft defaults', function (array $selections): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $event = $fixture['event'];
+        $source = app(PublicEventSourceQuery::class)->get($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $source['fingerprint'],
+            'announcement' => 'scheduled',
+            ...$selections,
+        ];
+
+        // Act
+        $response = put(route('events.public-pages.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.public-pages.edit', $event))
+            ->assertSessionHasNoErrors();
+
+        $publication = EventPublication::query()
+            ->where('event_id', $event->id)
+            ->sole();
+        expect($publication->draft)->toEqual([
+            'announcement' => 'scheduled',
+            'summary' => null,
+            'notice' => null,
+            'address' => false,
+            'doors_at' => null,
+            'doors_offset' => null,
+            'tickets' => null,
+            'poster' => null,
+            'matches' => [],
+            'results' => [],
+        ])->and($publication->published_at)
+            ->toBeNull();
+    })->with([
+        'omitted lists' => [[]],
+        'null lists' => [
+            [
+                'matches' => null,
+                'results' => null,
+            ],
+        ],
+    ]);
+
+    test('selected match flags and result identities are normalized without editor controls', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $event = $fixture['event'];
+        $excluded = EventMatch::factory()
+            ->for($event)
+            ->create();
+        $source = app(PublicEventSourceQuery::class)->get($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $source['fingerprint'],
+            'announcement' => 'scheduled',
+            'summary' => '0',
+            'address' => '0',
+            'unexpected' => 'Do not store',
+            'matches' => [
+                [
+                    'id' => (string) $fixture['match']->id,
+                    'selected' => '1',
+                    'type' => '0',
+                    'stipulation' => '1',
+                ],
+                [
+                    'id' => (string) $excluded->id,
+                    'selected' => '0',
+                    'titles' => '1',
+                ],
+            ],
+            'results' => [(string) $fixture['match']->id],
+        ];
+
+        // Act
+        $response = put(route('events.public-pages.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.public-pages.edit', $event))
+            ->assertSessionHasNoErrors();
+
+        $publication = EventPublication::query()
+            ->where('event_id', $event->id)
+            ->sole();
+        expect($publication->draft)->toEqual([
+            'announcement' => 'scheduled',
+            'summary' => '0',
+            'notice' => null,
+            'address' => false,
+            'doors_at' => null,
+            'doors_offset' => null,
+            'tickets' => null,
+            'poster' => null,
+            'matches' => [
+                [
+                    'id' => $fixture['match']->id,
+                    'type' => false,
+                    'stipulation' => true,
+                    'titles' => false,
+                ],
+            ],
+            'results' => [$fixture['match']->id],
+        ])->and($publication->draft['summary'])->toBe('0')
+            ->and($publication->draft['address'])->toBeFalse()
+            ->and($publication->draft['matches'][0]['id'])->toBe($fixture['match']->id)
+            ->and($publication->draft['matches'][0]['type'])->toBeFalse()
+            ->and($publication->draft['matches'][0]['stipulation'])->toBeTrue()
+            ->and($publication->draft['matches'][0]['titles'])->toBeFalse()
+            ->and($publication->draft['results'])->toBe([$fixture['match']->id])
+            ->and($publication->published_at)->toBeNull();
+    });
+
+    test('changed announcements require a notice before creating a draft', function (string $announcement): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $event = $fixture['event'];
+        $source = app(PublicEventSourceQuery::class)->get($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $source['fingerprint'],
+            'announcement' => $announcement,
+        ];
+
+        // Act
+        $response = from(route('events.public-pages.edit', $event))
+            ->put(route('events.public-pages.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.public-pages.edit', $event))
+            ->assertSessionHasErrors('notice')
+            ->assertSessionHasInput('announcement', $announcement);
+
+        expect(EventPublication::query()
+            ->count())->toBe(0);
+    })->with(['cancelled', 'postponed', 'rescheduled']);
+
+    test('unknown match selection keys cannot create a draft', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $event = $fixture['event'];
+        $source = app(PublicEventSourceQuery::class)->get($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $source['fingerprint'],
+            'announcement' => 'scheduled',
+            'matches' => [
+                [
+                    'id' => $fixture['match']->id,
+                    'selected' => 1,
+                    'unexpected' => 'Do not store',
+                ],
+            ],
+        ];
+
+        // Act
+        $response = put(route('events.public-pages.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('matches.0')
+            ->assertSessionHasInput('matches', $requestData['matches']);
+
+        expect(EventPublication::query()
+            ->count())->toBe(0);
+    });
+});

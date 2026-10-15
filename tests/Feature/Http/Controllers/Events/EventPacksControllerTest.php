@@ -948,3 +948,248 @@ describe('update', function (): void {
     });
 
 });
+
+describe('validated pack content', function (): void {
+    test('omitted and null collections persist the same empty content defaults', function (array $collections): void {
+        // Arrange
+        $event = Event::factory()
+            ->create();
+
+        actingAs(administrator());
+        $data = resolve(EventPackViewModel::class)->data($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $data['card']['fingerprint'],
+            'timezone' => 'UTC',
+            ...$collections,
+        ];
+
+        // Act
+        $response = put(route('events.pack.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.pack.show', $event))
+            ->assertSessionHasNoErrors();
+
+        $pack = $event->pack()
+            ->firstOrFail();
+        expect($pack->content)->toEqual([
+            'timezone' => 'UTC',
+            'doors_at' => null,
+            'revision' => null,
+            'master' => null,
+            'notes' => null,
+            'follow_up' => null,
+            'matches' => [],
+            'segments' => [],
+        ])->and($pack->version)
+            ->toBe(1);
+    })->with([
+        'omitted lists' => [[]],
+        'null lists' => [
+            [
+                'matches' => null,
+                'segments' => null,
+            ],
+        ],
+    ]);
+
+    test('numeric strings become integer identities and minutes without storing editor controls', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create();
+        $match = EventMatch::factory()
+            ->for($event)
+            ->create();
+
+        actingAs(administrator());
+        $data = resolve(EventPackViewModel::class)->data($event);
+        $segmentId = 'e8027dd9-03ce-4237-b3be-b306679da858';
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $data['card']['fingerprint'],
+            'timezone' => 'UTC',
+            'reviewed' => 1,
+            'print_after' => '0',
+            'unexpected' => 'Do not store',
+            'matches' => [
+                [
+                    'match_id' => (string) $match->id,
+                    'minutes' => '12',
+                ],
+            ],
+            'segments' => [
+                [
+                    'id' => $segmentId,
+                    'label' => 'Break',
+                    'after_match_id' => (string) $match->id,
+                    'minutes' => '5',
+                ],
+            ],
+        ];
+
+        // Act
+        $response = put(route('events.pack.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.pack.show', $event))
+            ->assertSessionHasNoErrors();
+
+        $content = $event->pack()
+            ->firstOrFail()->content;
+        expect($content)->toEqual([
+            'timezone' => 'UTC',
+            'matches' => [
+                [
+                    'match_id' => $match->id,
+                    'minutes' => 12,
+                    'planned_at' => null,
+                    'revised_at' => null,
+                    'notes' => null,
+                ],
+            ],
+            'segments' => [
+                [
+                    'id' => $segmentId,
+                    'label' => 'Break',
+                    'after_match_id' => $match->id,
+                    'minutes' => 5,
+                    'planned_at' => null,
+                    'revised_at' => null,
+                    'notes' => null,
+                ],
+            ],
+            'doors_at' => null,
+            'revision' => null,
+            'master' => null,
+            'notes' => null,
+            'follow_up' => null,
+        ])->and($content['matches'][0]['match_id'])->toBe($match->id)
+            ->and($content['matches'][0]['minutes'])->toBe(12)
+            ->and($content['segments'][0]['after_match_id'])->toBe($match->id)
+            ->and($content['segments'][0]['minutes'])->toBe(5);
+    });
+
+    test('unknown nested match keys cannot be persisted', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create();
+        $match = EventMatch::factory()
+            ->for($event)
+            ->create();
+
+        actingAs(administrator());
+        $data = resolve(EventPackViewModel::class)->data($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $data['card']['fingerprint'],
+            'timezone' => 'UTC',
+            'notes' => 'Retain my input',
+            'matches' => [
+                [
+                    'match_id' => $match->id,
+                    'unexpected' => 'Do not store',
+                ],
+            ],
+        ];
+
+        // Act
+        $response = from(route('events.pack.show', $event))
+            ->put(route('events.pack.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.pack.show', $event))
+            ->assertSessionHasErrors('matches.0')
+            ->assertSessionHasInput('notes', 'Retain my input');
+
+        expect($event->pack()
+            ->exists())->toBeFalse();
+    });
+
+    test('duplicate match identities cannot create a pack', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create();
+        $match = EventMatch::factory()
+            ->for($event)
+            ->create();
+
+        actingAs(administrator());
+        $data = resolve(EventPackViewModel::class)->data($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $data['card']['fingerprint'],
+            'timezone' => 'UTC',
+            'matches' => [['match_id' => $match->id], ['match_id' => $match->id]],
+        ];
+
+        // Act
+        $response = put(route('events.pack.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors(['matches.0.match_id', 'matches.1.match_id'])
+            ->assertSessionHasInput('matches', $requestData['matches']);
+
+        expect($event->pack()
+            ->exists())->toBeFalse();
+    });
+
+    test('notes for a removed match can still be saved as historical content', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create();
+        $match = EventMatch::factory()
+            ->for($event)
+            ->create();
+        $match->delete();
+
+        actingAs(administrator());
+        $data = resolve(EventPackViewModel::class)->data($event);
+
+        $requestData = [
+            'complete' => 1,
+            'version' => 0,
+            'fingerprint' => $data['card']['fingerprint'],
+            'timezone' => 'UTC',
+            'matches' => [
+                [
+                    'match_id' => $match->id,
+                    'notes' => 'Keep this historical note',
+                ],
+            ],
+        ];
+
+        // Act
+        $response = put(route('events.pack.update', $event), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('events.pack.show', $event))
+            ->assertSessionHasNoErrors();
+
+        $content = $event->pack()
+            ->firstOrFail()->content;
+        expect($content['matches'])->toEqual([
+            [
+                'match_id' => $match->id,
+                'notes' => 'Keep this historical note',
+                'planned_at' => null,
+                'revised_at' => null,
+                'minutes' => null,
+            ],
+        ]);
+    });
+});

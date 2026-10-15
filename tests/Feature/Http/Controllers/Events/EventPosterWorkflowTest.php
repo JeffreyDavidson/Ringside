@@ -650,3 +650,50 @@ test('removing a poster through the editor saves only the draft change', functio
             ->exists('event-posters/'.$key))
         ->toBeTrue();
 });
+
+test('zero alternative text retains existing poster text while zero caption is preserved', function (): void {
+    // Arrange
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create();
+    $publication->draft = [
+        ...$publication->draft,
+        'poster' => [
+            'key' => 'existing-poster-key',
+            'alt' => 'Existing alternative text',
+            'caption' => 'Existing caption',
+        ],
+    ];
+    $publication->save();
+    $source = app(PublicEventSourceQuery::class)->get($event);
+
+    $requestData = [
+        'complete' => 1,
+        'version' => $publication->version,
+        'fingerprint' => $source['fingerprint'],
+        'announcement' => 'scheduled',
+        'poster_alt' => '0',
+        'poster_caption' => '0',
+        'remove_poster' => '0',
+    ];
+
+    // Act
+    $response = put(route('events.public-pages.update', $event), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('events.public-pages.edit', $event))
+        ->assertSessionHasNoErrors();
+
+    expect($publication->refresh()->draft['poster'])->toEqual([
+        'key' => 'existing-poster-key',
+        'alt' => 'Existing alternative text',
+        'caption' => '0',
+    ])
+        ->and($publication->version)
+        ->toBe(2)
+        ->and($publication->published_at)
+        ->toBeNull();
+});
