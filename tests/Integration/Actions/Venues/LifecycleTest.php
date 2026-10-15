@@ -7,7 +7,7 @@ use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Actions\Venues\UpdateAction;
 use App\Data\Events\VenueData;
-use App\Exceptions\Events\CannotBeRestoredException;
+use App\Exceptions\Venues\CannotBeRestoredException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 

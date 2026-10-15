@@ -52,6 +52,31 @@ test('exceptions do not use technical catch-all directories', function () {
         ->and(glob(app_path('Exceptions/BusinessRules/*.php')) ?: [])->toBeEmpty();
 });
 
+test('exception folders are a domain folder of the app or a named shared folder', function () {
+    // Arrange
+    $sharedFolders = ['Roster/Individuals', 'Scheduling', 'Lifecycle'];
+    $directories = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(app_path('Exceptions'), FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST,
+    );
+
+    // Act
+    $disallowedFolders = collect($directories)
+        ->filter(fn (SplFileInfo $entry): bool => $entry->isDir())
+        ->map(fn (SplFileInfo $directory): string => str($directory->getPathname())
+            ->after(app_path('Exceptions').DIRECTORY_SEPARATOR)
+            ->replace(DIRECTORY_SEPARATOR, '/')
+            ->toString())
+        ->reject(fn (string $folder): bool => in_array($folder, $sharedFolders, true)
+            || is_dir(app_path("Models/{$folder}"))
+            || is_dir(app_path("Actions/{$folder}")))
+        ->values()
+        ->all();
+
+    // Assert
+    expect($disallowedFolders)->toBeEmpty();
+});
+
 test('application code does not directly construct generic exceptions', function () {
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator(app_path(), FilesystemIterator::SKIP_DOTS)

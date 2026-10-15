@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Venues;
 
-use App\Exceptions\Events\CannotBeRestoredException;
 use App\Exceptions\Venues\CannotBeDeletedException;
+use App\Exceptions\Venues\CannotBeRestoredException;
 use App\Models\Events\Venue;
 use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Carbon;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
-use App\Exceptions\Events\CannotBeRestoredException;
+use App\Exceptions\Venues\CannotBeRestoredException;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Tournaments\TournamentLocks;

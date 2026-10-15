@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Exceptions\Events;
+namespace App\Exceptions\Venues;
 
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;

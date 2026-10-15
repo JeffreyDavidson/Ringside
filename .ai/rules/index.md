@@ -20,7 +20,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/css/** | .ai/rules/css.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |
-| app/{Actions/Venues,Exceptions/Events,Lifecycle}/** | .ai/rules/events-lifecycle.md |
+| app/{Actions/Venues,Exceptions/Venues,Lifecycle}/** | .ai/rules/events-lifecycle.md |
 | app/{Actions,Exceptions,Lifecycle,Rules,Livewire}/Events/** | .ai/rules/events.md |
 | app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |
