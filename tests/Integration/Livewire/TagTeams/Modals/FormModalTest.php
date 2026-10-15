@@ -234,7 +234,7 @@ describe('authorized tag team form interactions', function () {
         $modal->call('save');
 
         $modal
-            ->assertHasErrors(['form.wrestlerA'])
+            ->assertHasErrors(['form.wrestlerA' => "{$wrestlers->firstOrFail()->name} is already a member of The Claimers and cannot join another tag team."])
             ->assertNotDispatched('closeModal')
             ->assertNotDispatched('refreshDatatable');
     });

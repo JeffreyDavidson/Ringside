@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'app/{Actions,Lifecycle}/TagTeams/**'
+  - 'app/{Actions/TagTeams,Lifecycle/Roster/TagTeams}/**'
 ---
 
 # Tag Teams

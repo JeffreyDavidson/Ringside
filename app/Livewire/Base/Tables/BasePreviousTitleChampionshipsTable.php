@@ -66,9 +66,9 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
                         ? null
                         : $this->routeResolver->urlFor($champion);
                 }),
-            DateColumn::make(__('championships.dates_held'), 'local_won_at')
+            DateColumn::make(__('championships.date_won'), 'local_won_at')
                 ->outputFormat('Y-m-d'),
-            DateColumn::make(__('championships.dates_held'), 'local_lost_at')
+            DateColumn::make(__('championships.date_lost'), 'local_lost_at')
                 ->outputFormat('Y-m-d'),
             Column::make(__('championships.days_held'))
                 ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),

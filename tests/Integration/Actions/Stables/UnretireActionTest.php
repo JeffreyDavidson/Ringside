@@ -34,14 +34,44 @@ test('it rejects unretiring a stable that is not retired', function (): void {
         ->toThrow(CannotBeUnretiredException::class);
 });
 
-test('it rejects unretiring a stable with too few available former members', function (): void {
+test('it unretires a stable of one wrestler and one tag team using the weighted headcount', function (): void {
+    // Arrange
     $stable = Stable::factory()->retired()->create();
-    $stable->previousWrestlers()->firstOrFail()->suspensions()->create(['started_at' => now()->subHour()]);
+    $stable->wrestlers()->detach($stable->previousWrestlers()->firstOrFail());
 
-    expect(fn () => resolve(UnretireAction::class)->handle($stable))
-        ->toThrow(CannotBeUnretiredException::class, 'only 2 former members available, but 3 required')
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active);
+});
+
+test('it rejects unretiring a stable with too few available former members', function (): void {
+    // Arrange
+    $stable = Stable::factory()->retired()->create();
+    $stable->tagTeams()->detach();
+
+    // Act
+    $unretire = fn () => resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($unretire)->toThrow(CannotBeUnretiredException::class, 'only 2 former members available, but 3 required')
         ->and($stable->currentRetirement()->exists())->toBeTrue()
         ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
+});
+
+test('it reports the weighted headcount when a tag team alone is too few', function (): void {
+    // Arrange
+    $stable = Stable::factory()->retired()->create();
+    $stable->previousWrestlers()->get()->each(
+        fn (Wrestler $wrestler) => $wrestler->suspensions()->create(['started_at' => now()->subHour()])
+    );
+
+    // Act
+    $unretire = fn () => resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($unretire)->toThrow(CannotBeUnretiredException::class, 'only 2 former members available, but 3 required');
 });
 
 test('it rejects unretiring a stable when a key former member is unavailable', function (Closure $makeMemberUnavailable): void {
