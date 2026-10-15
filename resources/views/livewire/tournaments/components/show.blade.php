@@ -11,9 +11,9 @@
         <div class="min-w-0">
             <h1 class="font-display text-3xl break-words">{{ $tournament->name }}</h1>
             <p class="text-muted-foreground mt-2 text-sm">
-                {{ __('tournaments.kind.'.$tournament->entrant_kind->value) }} · {{ __('tournaments.slots',['count'=>$tournament->capacity]) }}
+                {{ $tournament->entrant_kind->label() }} · {{ __('tournaments.slots',['count'=>$tournament->capacity]) }}
             </p>
-            <p class="mt-2 font-semibold">{{ __('tournaments.status.'.$tournament->status->value) }}</p>
+            <p class="mt-2 font-semibold">{{ $tournament->status->label() }}</p>
             @if ($tournament->description)
                 <p class="text-muted-foreground mt-3 max-w-2xl whitespace-pre-line">{{ $tournament->description }}</p>
             @endif
@@ -72,7 +72,7 @@
         >
             <form wire:submit="confirm" class="flex flex-col gap-4">
                 <h2 id="tournament-operation-title" class="text-xl font-semibold">
-                    {{ __('tournaments.operations.'.$draftOperation) }}
+                    {{ \App\Enums\Tournaments\TournamentOperation::tryFrom($draftOperation)?->label() ?? $draftOperation }}
                 </h2>
                 @if (in_array($draftOperation, ['book', 'plan'], true))
                     <x-form.inputs.select

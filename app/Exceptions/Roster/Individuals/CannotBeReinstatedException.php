@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\Individuals;
 
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;

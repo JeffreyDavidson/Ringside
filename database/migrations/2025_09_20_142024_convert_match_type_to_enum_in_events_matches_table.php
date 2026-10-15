@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +19,11 @@ return new class extends Migration
             $table->string('match_type')->nullable()->after('match_type_id');
         });
 
-        // Set default value for any existing records (uses Singles as default)
+        // Set default value for any existing records: the stored value of a singles match. A literal keeps this
+        // migration independent of application classes that may move or change.
         DB::table('events_matches')
             ->whereNull('match_type')
-            ->update(['match_type' => MatchType::Singles->value]);
+            ->update(['match_type' => 'singles']);
 
         // Remove the old column
         Schema::table('events_matches', function (Blueprint $table) {

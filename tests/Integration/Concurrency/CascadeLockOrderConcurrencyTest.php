@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;

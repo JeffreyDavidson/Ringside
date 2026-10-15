@@ -6,7 +6,7 @@ namespace App\Services\Tournaments;
 
 use App\Data\Matches\EventMatchData;
 use App\Data\Tournaments\TournamentBoutData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Tournaments\EntrantKind;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;

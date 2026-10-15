@@ -7,7 +7,7 @@ use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Data\Events\EventData;
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;

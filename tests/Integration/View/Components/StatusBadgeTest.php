@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Enums\Shared\EmploymentStatus;
 use App\Enums\Stables\StableStatus;
 use App\Enums\Titles\TitleStatus;

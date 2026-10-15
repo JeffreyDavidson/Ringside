@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 
 it('defines roster-member compositions for formats that encode side sizes', function (
     MatchType $matchType,

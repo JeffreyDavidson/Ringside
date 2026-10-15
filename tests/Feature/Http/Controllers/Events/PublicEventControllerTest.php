@@ -9,7 +9,7 @@ use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
 use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicSection;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\EventPack;

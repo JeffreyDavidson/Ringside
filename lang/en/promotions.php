@@ -3,6 +3,15 @@
 declare(strict_types=1);
 
 return [
+    'roles' => [
+        'owner' => 'Owner',
+        'manager' => 'Manager',
+        'member' => 'Member',
+    ],
+    'status' => [
+        'active' => 'Active',
+        'suspended' => 'Suspended',
+    ],
     'active_promotion' => 'Active promotion',
     'actions' => 'Actions',
     'add' => 'Add',

@@ -16,9 +16,6 @@ enum Role: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Administrator => 'Administrator',
-            self::Basic => 'Basic',
-        };
+        return __("users.roles.{$this->value}");
     }
 }

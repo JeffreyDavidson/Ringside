@@ -9,7 +9,7 @@ use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\MatchResultData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

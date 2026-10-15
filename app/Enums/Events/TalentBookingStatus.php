@@ -10,4 +10,9 @@ enum TalentBookingStatus: string
     case Contacted = 'contacted';
     case Confirmed = 'confirmed';
     case Cancelled = 'cancelled';
+
+    public function label(): string
+    {
+        return __("talent-bookings.states.{$this->value}");
+    }
 }

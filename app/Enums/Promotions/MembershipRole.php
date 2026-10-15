@@ -48,11 +48,7 @@ enum MembershipRole: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Owner => 'Owner',
-            self::Manager => 'Manager',
-            self::Member => 'Member',
-        };
+        return __("promotions.roles.{$this->value}");
     }
 
     public function allows(string $ability): bool

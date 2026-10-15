@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'app/{Enums/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/Matches/MatchCompetitorRequirements.php}'
+  - 'app/{Enums/Matches/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/Matches/MatchCompetitorRequirements.php}'
 ---
 
 # Matches Matches

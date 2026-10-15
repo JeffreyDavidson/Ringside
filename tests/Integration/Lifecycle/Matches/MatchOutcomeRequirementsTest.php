@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Models\Matches\EventMatch;

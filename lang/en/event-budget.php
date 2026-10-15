@@ -115,8 +115,7 @@ return [
     'sponsorship' => 'Sponsorship',
     'merchandise' => 'Merchandise',
     'other' => 'Other',
-    'bank_transfer' => 'Bank transfer',
-    'cash_method' => 'Cash',
+    'payment_methods' => ['cash' => 'Cash', 'bank_transfer' => 'Bank transfer', 'other' => 'Other'],
     'notice' => 'Record saved.',
     'leave' => 'You have unsaved budget changes. Leave this page?',
 ];

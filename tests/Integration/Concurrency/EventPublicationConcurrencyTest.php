@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Events\EventPublicationException;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\PublicEventSourceQuery;

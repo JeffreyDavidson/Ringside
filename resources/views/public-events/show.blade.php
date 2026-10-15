@@ -20,7 +20,7 @@
                 <section aria-label="{{ __('public-events.public_facts') }}" class="min-w-0">
                     @if ($page->announcement !== 'scheduled')
                         <p class="text-signal text-lg font-bold">
-                            {{ \App\Enums\Events\PublicAnnouncement::from($page->announcement)->label() }}
+                            {{ \App\Enums\Events\PublicAnnouncement::tryFrom($page->announcement)?->label() ?? $page->announcement }}
                         </p>
                     @endif
                     @if ($page->notice)
@@ -80,7 +80,7 @@
                         </figure>
                     @endif
                 </section>
-                @if (! \App\Enums\Events\PublicAnnouncement::from($page->announcement)->isNotice())
+                @if (! (\App\Enums\Events\PublicAnnouncement::tryFrom($page->announcement)?->isNotice() ?? false))
                     <section class="min-w-0">
                         <h2 class="font-display text-3xl uppercase">
                             {{ $page->isResults ? __('public-events.results') : __('public-events.card') }}

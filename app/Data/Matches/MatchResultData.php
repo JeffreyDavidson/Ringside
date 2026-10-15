@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Matches;
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Models\Matches\MatchSide;
 use Illuminate\Support\Collection;
 

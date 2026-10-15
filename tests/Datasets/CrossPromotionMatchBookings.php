@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;

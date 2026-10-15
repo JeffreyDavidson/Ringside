@@ -5,7 +5,7 @@
             <div>
                 <dt class="text-muted-foreground text-sm">{{ __('storylines.'.$label) }}</dt>
                 <dd class="mt-1 break-words whitespace-pre-line">
-                    {{ $field === 'status' ? __('storylines.'.$data[$field]) : $data[$field] }}
+                    {{ $field === 'status' ? (\App\Enums\Storylines\StorylineStatus::tryFrom($data[$field]) ?? \App\Enums\Storylines\StepStatus::tryFrom($data[$field]))?->label() ?? $data[$field] : $data[$field] }}
                 </dd>
             </div>
         @endif

@@ -19,7 +19,7 @@ use App\Actions\TagTeams\UpdateAction as UpdateTagTeamAction;
 use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
 use App\Data\Matches\MatchResultData;
 use App\Data\TagTeams\TagTeamData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;

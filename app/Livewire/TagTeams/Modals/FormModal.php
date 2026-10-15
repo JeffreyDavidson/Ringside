@@ -6,8 +6,8 @@ namespace App\Livewire\TagTeams\Modals;
 
 use App\Actions\TagTeams\CreateAction;
 use App\Actions\TagTeams\UpdateAction;
-use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterMemberKind;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;

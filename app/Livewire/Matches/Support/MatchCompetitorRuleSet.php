@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Rules\TagTeams\IsBookable as TagTeamIsBookable;

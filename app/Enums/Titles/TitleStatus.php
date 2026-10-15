@@ -18,12 +18,6 @@ enum TitleStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Undebuted => 'Not Yet Debuted',
-            self::PendingDebut => 'Scheduled to Debut',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
-            self::Retired => 'Retired',
-        };
+        return __("titles.status.{$this->value}");
     }
 }

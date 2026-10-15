@@ -6,7 +6,7 @@ use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicSection;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;

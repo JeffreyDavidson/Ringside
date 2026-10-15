@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
@@ -71,6 +72,6 @@ class SponsorCommitmentsViewModel
     {
         $item = collect($commitment->event->liveRun->content['items'] ?? [])->firstWhere('key', $commitment->pack_key);
 
-        return $item === null ? null : Lang::string('sponsors.live_state', ['state' => Lang::string('live-show.'.$item['state'])]);
+        return $item === null ? null : Lang::string('sponsors.live_state', ['state' => LiveItemStatus::tryFrom($item['state'])?->label() ?? $item['state']]);
     }
 }

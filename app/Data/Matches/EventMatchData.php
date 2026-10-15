@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Matches;
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;

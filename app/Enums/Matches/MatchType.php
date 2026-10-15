@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enums\Matches;
 
+use App\Enums\Concerns\ProvidesFilterOptions;
 use App\Enums\Lifecycle\LifecycleOwnerType;
 
 enum MatchType: string
 {
+    use ProvidesFilterOptions;
+
     case Singles = 'singles';
     case TagTeam = 'tag-team';
     case TripleThreat = 'triple-threat';
@@ -23,32 +26,11 @@ enum MatchType: string
     case TornadoTagTeam = 'tornado-tag-team';
     case Gauntlet = 'gauntlet';
 
-    /**
-     * Get the human-readable label for the match type.
-     */
     public function label(): string
     {
-        return match ($this) {
-            self::Singles => 'Singles',
-            self::TagTeam => 'Tag Team',
-            self::TripleThreat => 'Triple Threat',
-            self::Triangle => 'Triangle',
-            self::Fatal4Way => 'Fatal 4 Way',
-            self::SixManTagTeam => '6 Man Tag Team',
-            self::EightManTagTeam => '8 Man Tag Team',
-            self::TenManTagTeam => '10 Man Tag Team',
-            self::TwoOnOneHandicap => 'Two On One Handicap',
-            self::ThreeOnTwoHandicap => 'Three On Two Handicap',
-            self::BattleRoyal => 'Battle Royal',
-            self::RoyalRumble => 'Royal Rumble',
-            self::TornadoTagTeam => 'Tornado Tag Team',
-            self::Gauntlet => 'Gauntlet',
-        };
+        return __("matches.type.{$this->value}");
     }
 
-    /**
-     * Get the number of sides for this match type.
-     */
     public function numberOfSides(): ?int
     {
         return match ($this) {
@@ -107,11 +89,6 @@ enum MatchType: string
         return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
     }
 
-    public function recordsIndividualEliminations(): bool
-    {
-        return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
-    }
-
     /**
      * Check if this match type allows wrestler competitors.
      */
@@ -150,20 +127,5 @@ enum MatchType: string
             self::RoyalRumble => 30,
             default => $this->getMinimumCompetitors(),
         };
-    }
-
-    /**
-     * Get all match types as an array for forms/selects.
-     *
-     * @return array<string, string>
-     */
-    public static function options(): array
-    {
-        $options = [];
-        foreach (self::cases() as $case) {
-            $options[$case->value] = $case->label();
-        }
-
-        return $options;
     }
 }

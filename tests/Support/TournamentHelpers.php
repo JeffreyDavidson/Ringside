@@ -6,7 +6,7 @@ use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Data\Matches\MatchResultData;
 use App\Data\Tournaments\TournamentData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Tournaments\EntrantKind;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

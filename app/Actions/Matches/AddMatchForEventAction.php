@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;

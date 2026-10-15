@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 return [
+    'status' => [
+        'past' => 'Past',
+        'scheduled' => 'Scheduled',
+        'unscheduled' => 'Unscheduled',
+    ],
     'name' => 'Event Name',
     'date' => 'Date',
     'date_time' => 'Date and time',

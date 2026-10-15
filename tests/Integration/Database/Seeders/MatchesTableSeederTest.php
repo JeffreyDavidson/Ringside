@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Matches\EventMatch;
 use Database\Seeders\MatchesTableSeeder;
 use Illuminate\Support\Facades\Artisan;

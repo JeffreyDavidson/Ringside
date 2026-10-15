@@ -8,4 +8,9 @@ enum BudgetDirection: string
 {
     case Income = 'income';
     case Expense = 'expense';
+
+    public function label(): string
+    {
+        return __("event-budget.{$this->value}");
+    }
 }

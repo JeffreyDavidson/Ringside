@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Forms;
 
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Support\MatchCompetitorRuleSet;

@@ -14,4 +14,9 @@ enum TournamentOperation: string
     case Replace = 'replace';
     case Walkover = 'walkover';
     case Cancel = 'cancel';
+
+    public function label(): string
+    {
+        return __("tournaments.operations.{$this->value}");
+    }
 }

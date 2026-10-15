@@ -10,4 +10,9 @@ enum BudgetOperation: string
     case ArchiveLine = 'archive_line';
     case RecordMovement = 'record_movement';
     case CorrectMovement = 'correct_movement';
+
+    public function label(): string
+    {
+        return __("event-budget.{$this->value}");
+    }
 }

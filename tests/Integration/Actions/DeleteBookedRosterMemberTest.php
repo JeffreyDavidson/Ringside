@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Referees\DeleteAction as DeleteRefereeAction;
 use App\Actions\TagTeams\DeleteAction as DeleteTagTeamAction;
 use App\Actions\Wrestlers\DeleteAction as DeleteWrestlerAction;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException as IndividualCannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException as TagTeamCannotBeDeletedException;
 use App\Livewire\Matches\Modals\ResultModal;

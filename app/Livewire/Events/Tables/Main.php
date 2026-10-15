@@ -8,7 +8,7 @@ use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Builders\Events\VenueBuilder;
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Table\Column;

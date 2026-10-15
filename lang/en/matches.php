@@ -1,6 +1,33 @@
 <?php
 
 return [
+    'finish' => [
+        'pinfall' => 'Pinfall',
+        'submission' => 'Submission',
+        'disqualification' => 'Disqualification',
+        'countout' => 'Countout',
+        'knockout' => 'Knockout',
+        'stipulation' => 'Stipulation',
+        'forfeit' => 'Forfeit',
+        'time-limit-draw' => 'Time Limit Draw',
+        'no-decision' => 'No Decision',
+    ],
+    'type' => [
+        'singles' => 'Singles',
+        'tag-team' => 'Tag Team',
+        'triple-threat' => 'Triple Threat',
+        'triangle' => 'Triangle',
+        'fatal-4-way' => 'Fatal 4 Way',
+        '6-man-tag-team' => '6 Man Tag Team',
+        '8-man-tag-team' => '8 Man Tag Team',
+        '10-man-tag-team' => '10 Man Tag Team',
+        'two-on-one-handicap' => 'Two On One Handicap',
+        'three-on-two-handicap' => 'Three On Two Handicap',
+        'battle-royal' => 'Battle Royal',
+        'royal-rumble' => 'Royal Rumble',
+        'tornado-tag-team' => 'Tornado Tag Team',
+        'gauntlet' => 'Gauntlet',
+    ],
     'history' => [
         'by' => 'by',
         'title' => 'Booking history',

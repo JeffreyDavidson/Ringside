@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enums\Events;
 
 use App\Enums\Concerns\ProvidesFilterOptions;
 use Carbon\CarbonInterface;
@@ -26,10 +26,6 @@ enum EventStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Past => 'Past',
-            self::Scheduled => 'Scheduled',
-            self::Unscheduled => 'Unscheduled',
-        };
+        return __("events.status.{$this->value}");
     }
 }

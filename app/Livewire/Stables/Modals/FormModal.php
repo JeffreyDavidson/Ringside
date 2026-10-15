@@ -6,8 +6,8 @@ namespace App\Livewire\Stables\Modals;
 
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\UpdateAction;
-use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterMemberKind;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;

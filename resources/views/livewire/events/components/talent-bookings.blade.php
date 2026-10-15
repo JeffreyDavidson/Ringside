@@ -51,7 +51,7 @@
         @foreach (['attention', 'confirmed', 'contacted', 'proposed', 'not_tracked', 'cancelled'] as $count)
             <div>
                 <dt class="text-muted-foreground text-sm">
-                    {{ $count === 'attention' ? __('talent-bookings.attention') : __('talent-bookings.states.'.$count) }}
+                    {{ $count === 'attention' ? __('talent-bookings.attention') : (\App\Enums\Events\TalentBookingStatus::tryFrom($count)?->label() ?? __('talent-bookings.states.not_tracked')) }}
                 </dt>
                 <dd class="text-xl font-semibold tabular-nums">{{ $counts[$count] }}</dd>
             </div>
@@ -70,8 +70,9 @@
         >
             <option value="all">{{ __('talent-bookings.all') }}</option>
             <option value="attention">{{ __('talent-bookings.attention') }}</option>
-            @foreach (['not_tracked', 'proposed', 'contacted', 'confirmed', 'cancelled'] as $state)
-                <option value="{{ $state }}">{{ __('talent-bookings.states.'.$state) }}</option>
+            <option value="not_tracked">{{ __('talent-bookings.states.not_tracked') }}</option>
+            @foreach (\App\Enums\Events\TalentBookingStatus::cases() as $state)
+                <option value="{{ $state->value }}">{{ $state->label() }}</option>
             @endforeach
         </select>
     </div>
@@ -93,7 +94,7 @@
                         </p>
                     @endif
                     <p class="mt-2 font-semibold">
-                        {{ __('talent-bookings.states.'.($row['booking']?->status->value ?? 'not_tracked')) }}
+                        {{ ($row['booking']?->status->label() ?? __('talent-bookings.states.not_tracked')) }}
                     </p>
                     @foreach ($row['warnings'] as $warning)
                         <p class="text-warning mt-2 flex items-start gap-2">
@@ -147,7 +148,9 @@
                             <p class="font-semibold">
                                 #{{ $revision->version }} · {{ $revision->actor_name }} · {{ $revision->created_at->copy()->setTimezone($context['timezone'])->format('M j, Y H:i') }}
                             </p>
-                            <p>{{ __('talent-bookings.states.'.$revision->snapshot['status']) }}</p>
+                            <p>
+                                {{ \App\Enums\Events\TalentBookingStatus::tryFrom($revision->snapshot['status'])?->label() ?? $revision->snapshot['status'] }}
+                            </p>
                             @if ($revision->snapshot['terms_need_review'] ?? false)
                                 <p class="text-warning">{{ __('talent-bookings.warnings.reconfirmation') }}</p>
                             @endif
@@ -189,9 +192,7 @@
                             class="border-outline bg-surface-panel min-h-11 border px-3"
                         >
                             @foreach (\App\Enums\Events\TalentBookingStatus::cases() as $state)
-                                <option value="{{ $state->value }}">
-                                    {{ __('talent-bookings.states.'.$state->value) }}
-                                </option>
+                                <option value="{{ $state->value }}">{{ $state->label() }}</option>
                             @endforeach</select
                         ><x-form.error name="form.status" />
                     </div>

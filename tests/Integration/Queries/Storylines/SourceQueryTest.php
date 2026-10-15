@@ -6,7 +6,7 @@ use App\Actions\Storylines\RecordDevelopmentAction;
 use App\Data\Matches\MatchResultData;
 use App\Data\Storylines\DevelopmentData;
 use App\Data\Storylines\SourceData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Storylines\StepStatus;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;

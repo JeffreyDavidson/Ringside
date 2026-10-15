@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;

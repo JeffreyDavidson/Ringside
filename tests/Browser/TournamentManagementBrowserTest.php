@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Tournaments\EntrantKind;
 
 use function Pest\Laravel\actingAs;

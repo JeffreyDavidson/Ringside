@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'roles' => [
+        'administrator' => 'Administrator',
+        'basic' => 'Basic',
+    ],
+    'status' => [
+        'unverified' => 'Unverified',
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+    ],
     'add' => 'Add User',
     'index_description' => 'Manage global accounts and platform access.',
     'index_title' => 'Users',

@@ -7,7 +7,7 @@ require_once __DIR__.'/../../Fixtures/talent-booking.php';
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;

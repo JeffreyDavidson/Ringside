@@ -7,7 +7,7 @@ use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Data\Matches\MatchResultData;
 use App\Data\Tournaments\TournamentData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\Tournaments\TournamentException;

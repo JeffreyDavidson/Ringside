@@ -10,7 +10,7 @@
             wire:model.live="status"
             :label="__('storylines.status')"
             size="lg"
-            :options="collect(\App\Enums\Storylines\StorylineStatus::cases())->mapWithKeys(fn ($state) => [$state->value => __('storylines.'.$state->value)])->all()"
+            :options="collect(\App\Enums\Storylines\StorylineStatus::cases())->mapWithKeys(fn ($state) => [$state->value => $state->label()])->all()"
             :placeholder="__('storylines.all_status')"
             class="min-h-11"
         />
@@ -29,7 +29,7 @@
                         href="{{ route('storylines.show', $story) }}"
                         class="text-xl font-semibold break-words underline underline-offset-4"
                     >{{ $story->title }}</a>
-                    <p class="text-muted-foreground mt-2">{{ __('storylines.'.$story->status->value) }}</p>
+                    <p class="text-muted-foreground mt-2">{{ $story->status->label() }}</p>
                     <p class="mt-2 text-sm">
                         {{ $story->participants->whereNull('left_on')->pluck('label')->join(', ') }}
                     </p>

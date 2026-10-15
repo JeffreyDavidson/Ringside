@@ -30,13 +30,13 @@
                 <div class="min-w-0">
                     <h2 class="text-lg font-semibold break-words">{{ $tournament->name }}</h2>
                     <p class="text-muted-foreground text-sm">
-                        {{ __('tournaments.kind.'.$tournament->entrant_kind->value) }} · {{ __('tournaments.slots',['count'=>$tournament->capacity]) }}
+                        {{ $tournament->entrant_kind->label() }} · {{ __('tournaments.slots',['count'=>$tournament->capacity]) }}
                     </p>
                     <p class="text-muted-foreground mt-1 text-sm">
                         {{ trans_choice('tournaments.entrants_count', $tournament->entries_count) }} · {{ trans_choice('tournaments.results_count', $tournament->recorded_results_count) }}
                     </p>
                 </div>
-                <span class="shrink-0 text-sm">{{ __('tournaments.status.'.$tournament->status->value) }}</span>
+                <span class="shrink-0 text-sm">{{ $tournament->status->label() }}</span>
             </a>
         @empty
             <p class="text-muted-foreground py-8">{{ __('tournaments.empty') }}</p>

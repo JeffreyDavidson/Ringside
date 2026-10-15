@@ -24,7 +24,7 @@ final readonly class MatchEliminationRequirement
         MatchResultData $result,
         MatchCompetitorsCollection $competitors,
     ): void {
-        if (! $match->match_type->recordsIndividualEliminations()) {
+        if (! $match->match_type->usesIndividualCompetitorSides()) {
             if ($result->eliminations->isNotEmpty()) {
                 throw InvalidMatchOutcomeException::eliminationsNotSupported();
             }

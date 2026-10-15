@@ -16,10 +16,6 @@ enum UserStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Unverified => 'Unverified',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
-        };
+        return __("users.status.{$this->value}");
     }
 }

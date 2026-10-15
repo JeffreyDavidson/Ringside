@@ -12,6 +12,11 @@ enum EntrantKind: string
     case Wrestler = 'wrestler';
     case TagTeam = 'tag_team';
 
+    public function label(): string
+    {
+        return __("tournaments.kind.{$this->value}");
+    }
+
     /** @return class-string<Wrestler>|class-string<TagTeam> */
     public function modelClass(): string
     {

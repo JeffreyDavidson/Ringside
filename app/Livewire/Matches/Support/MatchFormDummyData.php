@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Models\Roster\Referees\Referee;
