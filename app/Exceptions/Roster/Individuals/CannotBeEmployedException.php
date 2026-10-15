@@ -16,20 +16,20 @@ final class CannotBeEmployedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::AlreadyEmployed, "{$context} is already employed and cannot be re-employed.");
+        return self::forReason(BusinessRuleReason::AlreadyEmployed, __('individuals.errors.employ.already_employed', ['context' => $context]));
     }
 
     public static function retired(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::Retired, "{$context} is retired and cannot be employed.");
+        return self::forReason(BusinessRuleReason::Retired, __('individuals.errors.employ.retired', ['context' => $context]));
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} already has future employment scheduled and cannot be employed again.");
+        return new self(__('individuals.errors.employ.future_employment', ['context' => $context]));
     }
 }

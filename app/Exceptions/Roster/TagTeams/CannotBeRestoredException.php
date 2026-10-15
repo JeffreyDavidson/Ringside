@@ -14,13 +14,13 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return self::forReason(BusinessRuleReason::NotDeleted, "{$context} cannot be restored because it is not deleted. Only soft-deleted tag teams can be restored to active status.");
+        return self::forReason(BusinessRuleReason::NotDeleted, __('tag-team-lifecycle.errors.restore.not_deleted', ['context' => $context]));
     }
 
     public static function nameConflict(TagTeam $tagTeam, string $conflictingName): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be restored because the name conflicts with existing active tag team '{$conflictingName}'. Resolve name conflicts before restoration.");
+        return new self(__('tag-team-lifecycle.errors.restore.name_conflict', ['context' => $context, 'name' => $conflictingName]));
     }
 }

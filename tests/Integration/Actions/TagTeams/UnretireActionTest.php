@@ -352,7 +352,7 @@ test('it rejects unretiring a tag team whose name is used by an employed tag tea
     $conflictingTagTeam = TagTeam::factory()->employed()->create(['name' => $tagTeam->name]);
 
     expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeUnretiredException::class, "name conflicts with existing tag team '{$conflictingTagTeam->name}'")
+        ->toThrow(CannotBeUnretiredException::class, "an existing tag team is already named '{$conflictingTagTeam->name}'")
         ->and($tagTeam->currentRetirement()->exists())->toBeTrue()
         ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
 });

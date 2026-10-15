@@ -16,6 +16,6 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::NotDeleted, "{$context} is not deleted and cannot be restored.");
+        return self::forReason(BusinessRuleReason::NotDeleted, __('individuals.errors.restore.not_deleted', ['context' => $context]));
     }
 }
