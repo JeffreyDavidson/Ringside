@@ -2,7 +2,7 @@
 <article wire:key="person-{{ $person['key'] }}" class="flex flex-wrap items-start justify-between gap-4 py-5">
     <div class="min-w-0">
         <h3 class="text-lg font-semibold break-words">{{ $person['name'] }}</h3>
-        <p class="text-ringside-muted mt-1 text-sm">
+        <p class="text-muted-foreground mt-1 text-sm">
             {{ $person['role'] }}
             @if (! str_starts_with($person['key'], 'crew:')) ·{{ __('live-show.matches') }} {{ implode(', ', $person['matches']) }} @endif
         </p>
@@ -12,10 +12,10 @@
             </p>
         @endforeach
         @if (! $person['assigned'])
-            <p class="text-ringside-warning mt-2">{{ __('live-show.no_longer_assigned') }}</p>
+            <p class="text-warning mt-2">{{ __('live-show.no_longer_assigned') }}</p>
         @endif
         @if ($person['warning'])
-            <p class="text-ringside-warning mt-2">{{ __('live-show.unavailable') }}</p>
+            <p class="text-warning mt-2">{{ __('live-show.unavailable') }}</p>
         @endif
         <p class="mt-2 text-sm tabular-nums">
             {{ __('live-show.arrival_time') }}: {{ $screen->actual($person['arrived'], $run->content['timezone']) }}

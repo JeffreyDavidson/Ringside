@@ -3,7 +3,7 @@
         <div class="mx-auto max-w-6xl space-y-8">
             <header>
                 <h1 class="font-display text-3xl">{{ __('storylines.title') }}</h1>
-                <p class="text-ringside-muted mt-2">{{ __('storylines.private') }}</p>
+                <p class="text-muted-foreground mt-2">{{ __('storylines.private') }}</p>
             </header>
             <livewire:storylines.components.create />
             <livewire:storylines.tables.main />

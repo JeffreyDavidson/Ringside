@@ -2,13 +2,10 @@
     <div class="space-y-6">
         @error('outcome')
             <div
-                class="border-ringside-error bg-ringside-error-surface text-ringside-ink flex items-start gap-3 border px-4 py-3 text-sm"
+                class="border-error bg-error-surface text-foreground flex items-start gap-3 border px-4 py-3 text-sm"
                 role="alert"
             >
-                <x-heroicon-s-exclamation-circle
-                    class="text-ringside-error mt-0.5 size-4 shrink-0"
-                    aria-hidden="true"
-                />
+                <x-heroicon-s-exclamation-circle class="text-error mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 <span>{{ $message }}</span>
             </div>
         @enderror
@@ -34,29 +31,29 @@
         @if ($this->match->match_type->recordsIndividualEliminations())
             <section class="space-y-3" aria-labelledby="result-eliminations-heading">
                 <div>
-                    <h3 id="result-eliminations-heading" class="text-ringside-ink text-sm font-semibold">
+                    <h3 id="result-eliminations-heading" class="text-foreground text-sm font-semibold">
                         {{ __('matches.result_modal.eliminations') }}
                     </h3>
-                    <p class="text-ringside-muted text-xs">{{ __('matches.result_modal.eliminations_hint') }}</p>
+                    <p class="text-muted-foreground text-xs">{{ __('matches.result_modal.eliminations_hint') }}</p>
                 </div>
 
-                <div class="border-ringside-line overflow-x-auto border">
+                <div class="border-border overflow-x-auto border">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-ringside-surface text-ringside-muted text-xs font-medium">
+                        <thead class="bg-surface text-muted-foreground text-xs font-medium">
                             <tr>
                                 <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.competitor') }}</th>
                                 <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.order') }}</th>
                                 <th scope="col" class="px-4 py-2.5">{{ __('matches.result_modal.eliminated_by') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-ringside-line divide-y">
+                        <tbody class="divide-border divide-y">
                             @foreach ($this->match->competitors as $competitor)
                                 @php
                                     $orderInputId = "elimination-order-{$competitor->id}";
                                     $orderField = "form.eliminations.{$competitor->id}.order";
                                 @endphp
                                 <tr wire:key="result-competitor-{{ $competitor->id }}">
-                                    <th scope="row" class="text-ringside-ink px-4 py-3 font-medium">
+                                    <th scope="row" class="text-foreground px-4 py-3 font-medium">
                                         {{ $competitor->competitor->name }}
                                     </th>
                                     <td class="w-28 px-4 py-3 align-top">

@@ -1,10 +1,7 @@
 <div class="flex min-w-0 flex-col gap-6">
     <x-tag-teams.index.table-pre />
 
-    <section
-        class="border-ringside-line bg-ringside-surface-header min-w-0 border"
-        aria-label="{{ __('tag-teams.index_title') }}"
-    >
+    <section class="border-border bg-surface-header min-w-0 border" aria-label="{{ __('tag-teams.index_title') }}">
         <x-tables.status-filters
             :metadata="$this->metadata"
             :label="__('tag-teams.filter_status')"
@@ -24,7 +21,7 @@
             <span
                 wire:loading.delay
                 role="status"
-                class="text-ringside-muted text-xs"
+                class="text-muted-foreground text-xs"
             >{{ __('tag-teams.updating') }}</span>
         </div>
 
@@ -33,7 +30,7 @@
                 <caption class="sr-only">
                     {{ __('tag-teams.index_title') }}
                 </caption>
-                <thead class="border-ringside-line bg-ringside-surface text-ringside-muted border-y text-xs">
+                <thead class="border-border bg-surface text-muted-foreground border-y text-xs">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium sm:px-5">{{ __('tag-teams.name') }}</th>
                         <th scope="col" class="hidden w-48 px-4 py-3 font-medium sm:table-cell">
@@ -47,13 +44,13 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-ringside-line divide-y">
+                <tbody class="divide-border divide-y">
                     @foreach ($rows as $row)
-                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-ringside-surface-hover/40 transition-colors">
+                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-surface-hover/40 transition-colors">
                             <td class="px-4 py-4 align-top sm:px-5">
                                 <x-tables.record-name :record="$row" :href="route('tag-teams.show', $row)">
                                     {{ $row->name }}</x-tables.record-name>
-                                <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 wrap-break-word">
+                                <p class="text-muted-foreground m-0 mt-1 text-xs leading-5 wrap-break-word">
                                     {{ __('tag-teams.partners') }}: {{ $row->currentWrestlers->pluck('name')->join(' & ') ?: '—' }}
                                 </p>
                                 <div class="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
@@ -72,7 +69,7 @@
                                     :suspended="$row->isSuspended() || $row->hasSuspendedMember()"
                                 />
                             </td>
-                            <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums xl:table-cell">
+                            <td class="text-muted-foreground hidden px-4 py-4 align-top text-xs leading-5 tabular-nums xl:table-cell">
                                 {{ $row->firstEmployment?->started_at?->format('M j, Y') ?? '—' }}
                             </td>
                             <td class="px-2 py-3 align-top"><x-tables.columns.tag-team-actions :tag-team="$row" /></td>
@@ -93,7 +90,7 @@
                             $wire.set('search', '', false);
                             $wire.set('filterValues.status', '');
                         "
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                         {{ __('tag-teams.clear_filters') }}
                     </button>

@@ -11,10 +11,10 @@ describe('general info links', function (): void {
         expect($html)
             ->toContain('href="/venues/1"')
             ->toContain('Riverside Armory')
-            ->toContain('text-ringside-ink')
+            ->toContain('text-foreground')
             ->toContain('underline')
-            ->toContain('focus-visible:outline-ringside-ink')
-            ->not->toContain('outline-ringside-white')
+            ->toContain('focus-visible:outline-foreground')
+            ->not->toContain('outline-white')
             ->not->toContain('text-gray-800');
     });
 
@@ -23,8 +23,8 @@ describe('general info links', function (): void {
 
         expect($html)
             ->toContain('Venue:')
-            ->toContain('text-ringside-muted')
-            ->toContain('text-ringside-ink')
+            ->toContain('text-muted-foreground')
+            ->toContain('text-foreground')
             ->not->toContain('text-gray-');
     })->with(['links', 'link-list']);
 });
@@ -36,8 +36,8 @@ describe('general info card', function (): void {
         expect($html)
             ->toContain('General Info')
             ->toContain('rounded-none')
-            ->toContain('border-ringside-line')
-            ->toContain('bg-ringside-surface-header')
+            ->toContain('border-border')
+            ->toContain('bg-surface-header')
             ->not->toContain('var(--radius)')
             ->not->toContain('text-gray-');
     });

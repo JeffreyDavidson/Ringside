@@ -1,6 +1,6 @@
 @props(['entry'])
 @if ($entry->event)
-    <div class="text-ringside-muted mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+    <div class="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
         <span
             >{{ $entry->event->name }} · {{ $entry->event->local_date?->toDateString() ?? __('storylines.undated_source') }}
             @if ($entry->event->trashed()) ·{{ __('storylines.removed') }}@endif

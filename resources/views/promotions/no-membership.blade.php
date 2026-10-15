@@ -8,7 +8,7 @@
         <p
             role="status"
             data-test="no-membership-status"
-            class="bg-ringside-surface-panel text-ringside-ink border-ringside-success border border-s-4 px-4 py-3 text-sm"
+            class="bg-surface-panel text-foreground border-success border border-s-4 px-4 py-3 text-sm"
         >
             {{ session('status') }}
         </p>
@@ -18,7 +18,7 @@
         <p
             role="alert"
             data-test="no-membership-error"
-            class="bg-ringside-surface-panel text-ringside-ink border-ringside-error border border-s-4 px-4 py-3 text-sm"
+            class="bg-surface-panel text-foreground border-error border border-s-4 px-4 py-3 text-sm"
         >
             {{ session('error') }}
         </p>

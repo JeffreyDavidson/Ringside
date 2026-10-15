@@ -1,10 +1,7 @@
 <div class="flex min-w-0 flex-col gap-6">
     <x-events.index.table-pre />
 
-    <section
-        class="border-ringside-line bg-ringside-surface-header min-w-0 border"
-        aria-label="{{ __('events.index_title') }}"
-    >
+    <section class="border-border bg-surface-header min-w-0 border" aria-label="{{ __('events.index_title') }}">
         <x-tables.status-filters
             :metadata="$this->metadata"
             :label="__('events.filter_status')"
@@ -28,7 +25,7 @@
                     id="events-venue"
                     data-test="events-venue-filter"
                     wire:model.live="filterValues.venue"
-                    class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2 sm:w-auto"
+                    class="border-outline bg-surface text-foreground focus-visible:outline-foreground min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2 sm:w-auto"
                 >
                     <option value="">{{ __('events.all_venues') }}</option>
                     @foreach ($this->getVenues as $venueId => $venueName)
@@ -36,19 +33,19 @@
                     @endforeach
                 </select>
                 <x-heroicon-o-chevron-down
-                    class="text-ringside-muted pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2"
+                    class="text-muted-foreground pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2"
                     aria-hidden="true"
                 />
             </div>
             <details class="group relative w-full sm:w-auto">
-                <summary class="border-ringside-line text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <summary class="border-border text-muted-foreground hover:bg-surface-hover hover:text-foreground focus-visible:outline-foreground inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                     {{ __('events.filters') }}
                     <x-heroicon-o-chevron-down
                         class="size-4 transition-transform group-open:rotate-180"
                         aria-hidden="true"
                     />
                 </summary>
-                <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
+                <div class="border-border bg-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
                     <x-tables.date-range-filter
                         id-prefix="events"
                         filter-key="event_dates"
@@ -60,7 +57,7 @@
                         type="button"
                         wire:click="clearFilters"
                         @disabled($search === '' && ($filterValues['status'] ?? '') === '' && ($filterValues['venue'] ?? '') === '' && empty($filterValues['event_dates']['minDate'] ?? null) && empty($filterValues['event_dates']['maxDate'] ?? null))
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
                     >
                         {{ __('events.clear_filters') }}
                     </button>
@@ -69,7 +66,7 @@
             <span
                 wire:loading.delay
                 role="status"
-                class="text-ringside-muted text-xs"
+                class="text-muted-foreground text-xs"
             >{{ __('events.updating') }}</span>
         </x-tables.toolbar>
 
@@ -78,7 +75,7 @@
                 <caption class="sr-only">
                     {{ __('events.index_title') }}
                 </caption>
-                <thead class="border-ringside-line bg-ringside-surface text-ringside-muted border-y text-xs">
+                <thead class="border-border bg-surface text-muted-foreground border-y text-xs">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium sm:px-5">{{ __('events.name') }}</th>
                         <th scope="col" class="hidden w-44 px-4 py-3 font-medium sm:table-cell">
@@ -95,20 +92,20 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-ringside-line divide-y">
+                <tbody class="divide-border divide-y">
                     @foreach ($rows as $row)
-                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-ringside-surface-hover/40 transition-colors">
+                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-surface-hover/40 transition-colors">
                             <td class="px-4 py-4 align-top sm:px-5">
                                 <x-tables.record-name :record="$row" :href="route('events.show', $row)">
                                     {{ $row->name }}</x-tables.record-name>
-                                <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 tabular-nums sm:hidden">
+                                <p class="text-muted-foreground m-0 mt-1 text-xs leading-5 tabular-nums sm:hidden">
                                     {{ $row->local_date?->format('M j, Y') ?? __('events.no_date') }}
                                 </p>
-                                <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 lg:hidden">
+                                <p class="text-muted-foreground m-0 mt-1 text-xs leading-5 lg:hidden">
                                     @if ($row->venue)
                                         <a
                                             href="{{ route('venues.show', $row->venue) }}"
-                                            class="text-ringside-ink underline-offset-4 hover:underline"
+                                            class="text-foreground underline-offset-4 hover:underline"
                                         >
                                             {{ $row->venue->name }}
                                         </a>
@@ -118,19 +115,19 @@
                                 </p>
                                 <div class="mt-2 md:hidden"><x-tables.status :status="$row->status" /></div>
                             </td>
-                            <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums sm:table-cell">
+                            <td class="text-muted-foreground hidden px-4 py-4 align-top text-xs leading-5 tabular-nums sm:table-cell">
                                 {{ $row->local_date?->format('M j, Y') ?? __('events.no_date') }}
                             </td>
                             <td class="hidden px-4 py-4 align-top text-xs leading-5 lg:table-cell">
                                 @if ($row->venue)
                                     <a
                                         href="{{ route('venues.show', $row->venue) }}"
-                                        class="text-ringside-ink underline-offset-4 hover:underline"
+                                        class="text-foreground underline-offset-4 hover:underline"
                                     >
                                         {{ $row->venue->name }}
                                     </a>
                                 @else
-                                    <span class="text-ringside-muted">{{ __('events.no_venue') }}</span>
+                                    <span class="text-muted-foreground">{{ __('events.no_venue') }}</span>
                                 @endif
                             </td>
                             <td class="hidden px-4 py-4 align-top md:table-cell">
@@ -152,7 +149,7 @@
                     <button
                         type="button"
                         wire:click="clearFilters"
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                         {{ __('events.clear_filters') }}
                     </button>

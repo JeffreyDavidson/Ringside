@@ -6,12 +6,12 @@
     data-incomplete-result="{{ __('matches.history.result_incomplete') }}"
     data-by-label="{{ __('matches.history.by') }}"
     data-deleted-label="{{ __('matches.history.deleted') }}"
-    class="border-ringside-outline space-y-3 border-t pt-4"
+    class="border-outline space-y-3 border-t pt-4"
     aria-labelledby="booking-history-heading"
     :aria-busy="busy"
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <h3 id="booking-history-heading" class="text-ringside-ink text-sm font-semibold">
+        <h3 id="booking-history-heading" class="text-foreground text-sm font-semibold">
             {{ __('matches.history.title') }}
         </h3>
         <x-buttons.light
@@ -25,28 +25,28 @@
             <span x-show="busy" x-cloak>{{ __('matches.history.checking') }}</span>
         </x-buttons.light>
     </div>
-    <p class="text-ringside-muted text-sm">{{ __('matches.history.hint') }}</p>
+    <p class="text-muted-foreground text-sm">{{ __('matches.history.hint') }}</p>
     <div
         x-show="error"
         x-cloak
         role="status"
-        class="border-ringside-error bg-ringside-error-surface text-ringside-error flex items-start gap-2 border px-3 py-3 text-sm"
+        class="border-error bg-error-surface text-error flex items-start gap-2 border px-3 py-3 text-sm"
     >
         <x-heroicon-o-exclamation-circle class="size-5 shrink-0" aria-hidden="true" />
         <span x-text="error"></span>
     </div>
     <template x-if="snapshot">
         <div class="space-y-4" aria-live="polite">
-            <p x-show="! snapshot.available" class="text-ringside-muted text-sm">
+            <p x-show="! snapshot.available" class="text-muted-foreground text-sm">
                 {{ __('matches.history.unavailable') }}
             </p>
             <template x-if="snapshot.available">
                 <div class="space-y-4">
-                    <p class="text-ringside-muted text-sm">{{ __('matches.history.checked') }}</p>
+                    <p class="text-muted-foreground text-sm">{{ __('matches.history.checked') }}</p>
                     <template x-if="snapshot.direct">
-                        <div class="border-ringside-outline space-y-2 border-b pb-4">
+                        <div class="border-outline space-y-2 border-b pb-4">
                             <h4 class="text-sm font-semibold">{{ __('matches.history.direct') }}</h4>
-                            <p class="text-ringside-muted text-sm">{{ __('matches.history.direct_scope') }}</p>
+                            <p class="text-muted-foreground text-sm">{{ __('matches.history.direct_scope') }}</p>
                             <p
                                 x-show="snapshot.direct.recorded === 0 && snapshot.direct.incomplete === 0"
                                 class="text-sm"
@@ -83,7 +83,7 @@
                                 x-bind:href="snapshot.direct.url"
                                 target="_blank"
                                 rel="noopener"
-                                class="text-ringside-signal-soft inline-flex min-h-11 items-center text-sm underline"
+                                class="text-signal-soft inline-flex min-h-11 items-center text-sm underline"
                                 >{{ __('matches.history.sources') }}<span class="sr-only">
                                     ({{ __('matches.history.new_tab') }})</span
                                 ></a>
@@ -92,16 +92,16 @@
                     <div class="space-y-2">
                         <h4 class="flex items-center gap-2 text-sm font-semibold">
                             <x-heroicon-o-information-circle
-                                class="text-ringside-warning size-5 shrink-0"
+                                class="text-warning size-5 shrink-0"
                                 aria-hidden="true"
                             />{{ __('matches.history.recent') }}
                         </h4>
-                        <p class="text-ringside-muted text-sm">{{ __('matches.history.window') }}</p>
+                        <p class="text-muted-foreground text-sm">{{ __('matches.history.window') }}</p>
                         <p x-show="snapshot.totalNotices === 0" class="text-sm">
                             {{ __('matches.history.no_repeats') }}
                         </p>
                         <template x-for="(notice, index) in snapshot.notices" :key="index">
-                            <div class="border-ringside-outline space-y-1 border-b py-2 text-sm">
+                            <div class="border-outline space-y-1 border-b py-2 text-sm">
                                 <p class="font-medium" x-text="`${notice.first} vs ${notice.second}`"></p>
                                 <p>
                                     <span>{{ __('matches.history.recorded') }}: </span
@@ -113,12 +113,12 @@
                                     <span>{{ __('matches.history.latest_pairing') }}: </span
                                     ><span x-text="notice.latestDate"></span>
                                 </p>
-                                <p class="text-ringside-muted" x-text="`${notice.type} · ${notice.finish}`"></p>
+                                <p class="text-muted-foreground" x-text="`${notice.type} · ${notice.finish}`"></p>
                                 <a
                                     x-bind:href="notice.sourceUrl"
                                     target="_blank"
                                     rel="noopener"
-                                    class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                                    class="text-signal-soft inline-flex min-h-11 items-center underline"
                                 >
                                     <span x-text="`${notice.event} · #${notice.number}`"></span>
                                     <span class="sr-only"> ({{ __('matches.history.new_tab') }})</span>
@@ -128,7 +128,7 @@
                                     x-bind:href="notice.url"
                                     target="_blank"
                                     rel="noopener"
-                                    class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                                    class="text-signal-soft inline-flex min-h-11 items-center underline"
                                     >{{ __('matches.history.sources') }}<span class="sr-only">
                                         ({{ __('matches.history.new_tab') }})</span
                                     ></a>
@@ -136,7 +136,7 @@
                         </template>
                         <div x-show="snapshot.pages > 1" class="flex flex-wrap items-center gap-3">
                             <span
-                                class="text-ringside-muted text-sm tabular-nums"
+                                class="text-muted-foreground text-sm tabular-nums"
                                 x-text="`${snapshot.page} / ${snapshot.pages} · ${snapshot.totalNotices}`"
                             ></span>
                             <x-buttons.light
@@ -156,10 +156,10 @@
                         </div>
                     </div>
                     <template x-for="subject in snapshot.subjects" :key="subject.key">
-                        <details class="border-ringside-outline border-t pt-3">
+                        <details class="border-outline border-t pt-3">
                             <summary class="min-h-11 cursor-pointer text-sm font-semibold">
                                 <span x-text="subject.name + (subject.deleted ? ` (${messages.deletedLabel})` : '')"></span>
-                                <span class="text-ringside-muted block font-normal">
+                                <span class="text-muted-foreground block font-normal">
                                     {{ __('matches.history.latest') }}:
                                     <span x-text="subject.latestRecordedDate ?? @js(__('matches.history.no_recorded'))"></span>
                                 </span>
@@ -167,16 +167,16 @@
                             <div class="space-y-3 py-2 text-sm">
                                 <p x-show="subject.recent.length === 0">{{ __('matches.history.empty') }}</p>
                                 <template x-for="(row, index) in subject.recent" :key="index">
-                                    <div class="border-ringside-outline space-y-1 border-b py-2">
+                                    <div class="border-outline space-y-1 border-b py-2">
                                         <a
                                             x-bind:href="row.url"
                                             target="_blank"
                                             rel="noopener"
-                                            class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                                            class="text-signal-soft inline-flex min-h-11 items-center underline"
                                             x-text="`${row.event} · ${row.date} · #${row.number}`"
                                         ></a>
                                         <p x-text="sides(row)"></p>
-                                        <p class="text-ringside-muted" x-text="row.type"></p>
+                                        <p class="text-muted-foreground" x-text="row.type"></p>
                                         <p x-text="result(row)"></p>
                                     </div>
                                 </template>
@@ -185,7 +185,7 @@
                                         x-bind:href="subject.url"
                                         target="_blank"
                                         rel="noopener"
-                                        class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                                        class="text-signal-soft inline-flex min-h-11 items-center underline"
                                         >{{ __('matches.history.all') }}<span class="sr-only">
                                             ({{ __('matches.history.new_tab') }})</span
                                         ></a

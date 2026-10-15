@@ -2,43 +2,40 @@
     <div class="mx-auto max-w-5xl min-w-0 px-4 py-7 sm:px-7">
         <a
             href="{{ route('events.show', $event) }}"
-            class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+            class="text-signal-soft inline-flex min-h-11 items-center underline"
         >{{ $event->name }}</a>
         <h1 class="font-display mt-3 text-3xl uppercase">{{ __('public-events.editor_title') }}</h1>
-        <p class="text-ringside-muted mt-3 max-w-prose">{{ __('public-events.private_help') }}</p>
-        <div class="border-ringside-line mt-6 border-y py-4">
+        <p class="text-muted-foreground mt-3 max-w-prose">{{ __('public-events.private_help') }}</p>
+        <div class="border-border mt-6 border-y py-4">
             <p class="font-bold">
                 {{ $publication?->published_at ? __('public-events.published') : __('public-events.private') }} · {{ __('public-events.draft') }} {{ $publication?->version ?? 0 }}
             </p>
             @if ($publication?->published_at)
-                <p class="text-ringside-muted mt-2">
+                <p class="text-muted-foreground mt-2">
                     {{ __('public-events.publisher', ['name'=>$publication->publisher?->full_name ?? __('public-events.former_publisher')]) }}
                 </p>
                 @if ($publication->results_published_at)
-                    <p class="text-ringside-muted mt-2">
+                    <p class="text-muted-foreground mt-2">
                         {{ __('public-events.results_publisher', ['name'=>$publication->resultsPublisher?->full_name ?? __('public-events.former_publisher')]) }}
                     </p>
                 @endif
-                <p class="text-ringside-muted mt-2">
+                <p class="text-muted-foreground mt-2">
                     {{ __('public-events.last_published', ['date'=>$publication->published_at->format('M j, Y g:i A T')]) }}
                 </p>
                 <a
                     href="{{ route('shows.show', ['publicId'=>$publication->public_id,'slug'=>$publication->slug]) }}"
-                    class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                    class="text-signal-soft inline-flex min-h-11 items-center underline"
                 >{{ __('public-events.open_public') }}</a>
             @endif
             @if ($needsReview)
-                <p class="text-ringside-warning mt-2">{{ __('public-events.source_changed') }}</p>
+                <p class="text-warning mt-2">{{ __('public-events.source_changed') }}</p>
             @endif
         </div>
         @session('success')
-            <p role="status" class="text-ringside-success mt-5">{{ $value }}</p>
+            <p role="status" class="text-success mt-5">{{ $value }}</p>
         @endsession
         @if ($errors->any())
-            <div
-                role="alert"
-                class="border-ringside-error bg-ringside-error-surface text-ringside-error mt-5 border p-4"
-            >
+            <div role="alert" class="border-error bg-error-surface text-error mt-5 border p-4">
                 <p class="flex items-center gap-2 font-bold">
                     <x-heroicon-o-exclamation-circle class="h-5 w-5" />{{ __('public-events.errors') }}
                 </p>
@@ -67,7 +64,7 @@
                 <label class="block"
                     >{{ __('public-events.announcement') }}<select
                         name="announcement"
-                        class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                        class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                     >
                         @foreach (\App\Enums\Events\PublicAnnouncement::cases() as $state)
                             <option
@@ -83,7 +80,7 @@
                         name="summary"
                         maxlength="2000"
                         rows="3"
-                        class="border-ringside-line bg-ringside-surface mt-2 w-full border p-3"
+                        class="border-border bg-surface mt-2 w-full border p-3"
                         >{{ old('summary', $draft['summary']) }}</textarea>
                 </label>
                 <label class="block"
@@ -91,10 +88,10 @@
                         name="notice"
                         maxlength="1000"
                         rows="2"
-                        class="border-ringside-line bg-ringside-surface mt-2 w-full border p-3"
+                        class="border-border bg-surface mt-2 w-full border p-3"
                         >{{ old('notice', $draft['notice']) }}</textarea>
                 </label>
-                <p class="text-ringside-muted text-sm">{{ __('public-events.notice_help') }}</p>
+                <p class="text-muted-foreground text-sm">{{ __('public-events.notice_help') }}</p>
                 <label class="flex min-h-11 items-center gap-3"
                     ><input
                         type="checkbox"
@@ -108,7 +105,7 @@
                             type="datetime-local"
                             name="doors_at"
                             value="{{ old('doors_at', $draft['doors_at']) }}"
-                            class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                            class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                     /></label>
                     <label
                         >{{ __('public-events.doors_offset') }}<input
@@ -116,21 +113,21 @@
                             name="doors_offset"
                             placeholder="-04:00"
                             value="{{ old('doors_offset', $draft['doors_offset']) }}"
-                            class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                            class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                     /></label>
                 </div>
-                <p class="text-ringside-muted text-sm">{{ __('public-events.doors_help') }}</p>
+                <p class="text-muted-foreground text-sm">{{ __('public-events.doors_help') }}</p>
                 <label class="block"
                     >{{ __('public-events.ticket_url') }}<input
                         type="url"
                         name="tickets"
                         value="{{ old('tickets', $draft['tickets']) }}"
-                        class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                        class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                 /></label>
             </section>
-            <section class="border-ringside-line space-y-4 border-t pt-6">
+            <section class="border-border space-y-4 border-t pt-6">
                 <h2 class="font-display text-2xl uppercase">{{ __('public-events.poster') }}</h2>
-                <p class="text-ringside-muted">{{ __('public-events.poster_help') }}</p>
+                <p class="text-muted-foreground">{{ __('public-events.poster_help') }}</p>
                 <label class="block"
                     >{{ __('public-events.poster') }}<input
                         type="file"
@@ -144,7 +141,7 @@
                         name="poster_alt"
                         maxlength="400"
                         value="{{ old('poster_alt', $draft['poster']['alt'] ?? '') }}"
-                        class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                        class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                 /></label>
                 <label class="block"
                     >{{ __('public-events.poster_caption') }}<input
@@ -152,7 +149,7 @@
                         name="poster_caption"
                         maxlength="1000"
                         value="{{ old('poster_caption', $draft['poster']['caption'] ?? '') }}"
-                        class="border-ringside-line bg-ringside-surface mt-2 block min-h-11 w-full border p-3"
+                        class="border-border bg-surface mt-2 block min-h-11 w-full border p-3"
                 /></label>
                 @if ($draft['poster'])
                     <label class="flex min-h-11 items-center gap-3"
@@ -163,12 +160,12 @@
                         />{{ __('public-events.remove_poster') }}</label>
                 @endif
             </section>
-            <section class="border-ringside-line border-t pt-6">
+            <section class="border-border border-t pt-6">
                 <h2 class="font-display text-2xl uppercase">{{ __('public-events.card') }}</h2>
-                <p class="text-ringside-muted mt-3">{{ __('public-events.results_help') }}</p>
+                <p class="text-muted-foreground mt-3">{{ __('public-events.results_help') }}</p>
                 @forelse ($source['matches'] as $index => $match)
                     @php($choice = collect($draft['matches'])->firstWhere('id', $match['id']))
-                    <fieldset class="border-ringside-line mt-5 min-w-0 border-b pb-5">
+                    <fieldset class="border-border mt-5 min-w-0 border-b pb-5">
                         <legend class="text-lg font-bold break-words">{{ $match['label'] }}</legend>
                         <input type="hidden" name="matches[{{ $index }}][id]" value="{{ $match['id'] }}" />
                         <label class="flex min-h-11 items-center gap-3"
@@ -198,23 +195,23 @@
                                     @checked(in_array($match['id'], old('results', $draft['results'])))
                                 />{{ __('public-events.select_result') }}: {{ $match['winner'] }} {{ $match['finish'] }}</label>
                         @else
-                            <p class="text-ringside-muted mt-2">{{ __('public-events.unrecorded') }}</p>
+                            <p class="text-muted-foreground mt-2">{{ __('public-events.unrecorded') }}</p>
                         @endif
                     </fieldset>
                 @empty
-                    <p class="text-ringside-muted mt-4">{{ __('public-events.none') }}</p>
+                    <p class="text-muted-foreground mt-4">{{ __('public-events.none') }}</p>
                 @endforelse
             </section>
             <x-buttons.primary type="submit">{{ __('public-events.save') }}</x-buttons.primary>
             <input type="hidden" name="complete" value="1" />
         </form>
         @if ($publication)
-            <section class="border-ringside-line mt-9 border-t pt-7">
+            <section class="border-border mt-9 border-t pt-7">
                 <h2 class="font-display text-2xl uppercase">{{ __('public-events.release_title') }}</h2>
-                <p class="text-ringside-muted mt-3">{{ __('public-events.published_help') }}</p>
+                <p class="text-muted-foreground mt-3">{{ __('public-events.published_help') }}</p>
                 <a
                     href="{{ route('events.public-pages.show', $event) }}"
-                    class="text-ringside-signal-soft inline-flex min-h-11 items-center underline"
+                    class="text-signal-soft inline-flex min-h-11 items-center underline"
                 >{{ __('public-events.preview') }}</a>
                 <form method="POST" action="{{ route('events.public-pages.publish', $event) }}" class="mt-4">
                     @csrf
@@ -233,14 +230,14 @@
                             type="submit"
                             name="section"
                             value="card"
-                            class="bg-ringside-red hover:bg-ringside-red-hover min-h-11 px-5 py-3 font-bold"
+                            class="bg-primary hover:bg-primary-hover min-h-11 px-5 py-3 font-bold"
                         >
                             {{ __('public-events.publish_card') }}</button
                         ><button
                             type="submit"
                             name="section"
                             value="results"
-                            class="border-ringside-line min-h-11 border px-5 py-3 font-bold"
+                            class="border-border min-h-11 border px-5 py-3 font-bold"
                         >
                             {{ __('public-events.publish_results') }}
                         </button>
@@ -262,7 +259,7 @@
                         type="submit"
                         name="section"
                         value="results"
-                        class="text-ringside-signal-soft border-ringside-line min-h-11 border px-5 py-3 font-bold"
+                        class="text-signal-soft border-border min-h-11 border px-5 py-3 font-bold"
                     >
                         {{ __('public-events.unpublish_results') }}
                     </button>
@@ -270,7 +267,7 @@
                         type="submit"
                         name="section"
                         value="card"
-                        class="text-ringside-signal-soft border-ringside-line min-h-11 border px-5 py-3 font-bold"
+                        class="text-signal-soft border-border min-h-11 border px-5 py-3 font-bold"
                     >
                         {{ __('public-events.unpublish_card') }}
                     </button>

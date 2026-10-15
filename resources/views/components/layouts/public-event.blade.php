@@ -23,10 +23,10 @@
     <x-favicons />
     @vite('resources/css/app.css')
 </head>
-<body class="bg-ringside-surface text-ringside-ink font-body text-base leading-relaxed">
+<body class="bg-surface text-foreground font-body text-base leading-relaxed">
     <a
         href="#event-details"
-        class="bg-ringside-red fixed top-4 left-4 z-50 -translate-y-24 px-5 py-3 font-bold focus:translate-y-0"
+        class="bg-primary fixed top-4 left-4 z-50 -translate-y-24 px-5 py-3 font-bold focus:translate-y-0"
     >{{ __('public-events.skip') }}</a>
     {{ $slot }}
 </body>

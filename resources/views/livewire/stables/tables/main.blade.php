@@ -1,10 +1,7 @@
 <div class="flex min-w-0 flex-col gap-6">
     <x-stables.index.table-pre />
 
-    <section
-        class="border-ringside-line bg-ringside-surface-header min-w-0 border"
-        aria-label="{{ __('stables.index_title') }}"
-    >
+    <section class="border-border bg-surface-header min-w-0 border" aria-label="{{ __('stables.index_title') }}">
         <x-tables.status-filters
             :metadata="$this->metadata"
             :label="__('stables.filter_status')"
@@ -24,14 +21,14 @@
                 :clear-label="__('stables.clear_search')"
             />
             <details class="group relative w-full sm:w-auto">
-                <summary class="border-ringside-line text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <summary class="border-border text-muted-foreground hover:bg-surface-hover hover:text-foreground focus-visible:outline-foreground inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                     {{ __('stables.filters') }}
                     <x-heroicon-o-chevron-down
                         class="size-4 transition-transform group-open:rotate-180"
                         aria-hidden="true"
                     />
                 </summary>
-                <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
+                <div class="border-border bg-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
                     <x-tables.date-range-filter
                         id-prefix="stables"
                         filter-key="activation_date"
@@ -43,13 +40,13 @@
                         type="button"
                         wire:click="clearFilters"
                         @disabled($search === '' && ($filterValues['status'] ?? '') === '' && empty($filterValues['activation_date']['minDate'] ?? null) && empty($filterValues['activation_date']['maxDate'] ?? null))
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
                     >
                         {{ __('stables.clear_filters') }}
                     </button>
                 </div>
             </details>
-            <span wire:loading.delay role="status" class="text-ringside-muted text-xs">
+            <span wire:loading.delay role="status" class="text-muted-foreground text-xs">
                 {{ __('stables.updating') }}
             </span>
         </div>
@@ -59,7 +56,7 @@
                 <caption class="sr-only">
                     {{ __('stables.index_title') }}
                 </caption>
-                <thead class="border-ringside-line bg-ringside-surface text-ringside-muted border-y text-xs">
+                <thead class="border-border bg-surface text-muted-foreground border-y text-xs">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium sm:px-5">{{ __('stables.name') }}</th>
                         <th scope="col" class="hidden w-48 px-4 py-3 font-medium sm:table-cell">
@@ -73,24 +70,24 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-ringside-line divide-y">
+                <tbody class="divide-border divide-y">
                     @foreach ($rows as $row)
-                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-ringside-surface-hover/40 transition-colors">
+                        <tr wire:key="row-{{ $row->id }}" class="hover:bg-surface-hover/40 transition-colors">
                             <td class="px-4 py-4 align-top sm:px-5">
                                 <x-tables.record-name :record="$row" :href="route('stables.show', $row)">
                                     {{ $row->name }}</x-tables.record-name>
-                                <p class="text-ringside-muted m-0 mt-1 text-xs leading-5 wrap-break-word">
+                                <p class="text-muted-foreground m-0 mt-1 text-xs leading-5 wrap-break-word">
                                     {{ trans_choice('stables.members_count', $row->currentWrestlers->count() + $row->currentTagTeams->count(), ['count' => $row->currentWrestlers->count() + $row->currentTagTeams->count()]) }}
                                 </p>
                                 <div class="mt-2 sm:hidden"><x-tables.status :status="$row->status" /></div>
-                                <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
+                                <p class="text-muted-foreground m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
                                     {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
                                 </p>
                             </td>
                             <td class="hidden px-4 py-4 align-top sm:table-cell">
                                 <x-tables.status :status="$row->status" />
                             </td>
-                            <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
+                            <td class="text-muted-foreground hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                 {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
                             </td>
                             <td class="px-2 py-3 align-top"><x-tables.columns.stable-actions :stable="$row" /></td>
@@ -109,7 +106,7 @@
                     <button
                         type="button"
                         wire:click="clearFilters"
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                         {{ __('stables.clear_filters') }}
                     </button>

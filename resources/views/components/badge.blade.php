@@ -11,9 +11,9 @@
 
     // Each colour keeps at least 5:1 text contrast on every Ringside surface, including hovered table rows.
     $colors = [
-        'gray' => 'border-ringside-line bg-ringside-surface-hover text-ringside-muted',
-        'danger' => 'border-ringside-signal-soft/40 bg-ringside-signal-soft/12 text-ringside-signal-soft',
-        'warning' => 'border-ringside-warning/40 bg-ringside-warning/12 text-ringside-warning',
+        'gray' => 'border-border bg-surface-hover text-muted-foreground',
+        'danger' => 'border-signal-soft/40 bg-signal-soft/12 text-signal-soft',
+        'warning' => 'border-warning/40 bg-warning/12 text-warning',
     ];
 
     $sizeClasses = $sizes[$size] ?? $sizes['sm'];
