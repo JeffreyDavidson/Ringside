@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Actions\Events\RecordBudgetMovementAction;
 use App\Exceptions\Events\BudgetException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
@@ -86,7 +87,7 @@ test('concurrent first saves keep one budget and exact retries keep one line', f
             ->and(EventBudgetLine::query()->count())->toBe(1)
             ->and(EventBudget::query()->firstOrFail()->revisions()->count())->toBe(1);
         if (! $sameKey) {
-            expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([BudgetException::class]);
+            expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
     });
 })->with([true, false])->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)->group('concurrency', 'postgres-concurrency');
@@ -110,7 +111,7 @@ test('native payment and refund races keep one financial write per version or re
             ->and($f['line']->movements()->count())->toBe($case === 'refund' ? 2 : 1)
             ->and($f['budget']->revisions()->count())->toBe(1);
         if ($case !== 'retry') {
-            expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([BudgetException::class]);
+            expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
         if ($case === 'refund') {
             expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, $input))->toThrow(BudgetException::class);
