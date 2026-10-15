@@ -8,11 +8,6 @@ use App\Exceptions\BaseBusinessException;
 
 final class StorylineConflictException extends BaseBusinessException
 {
-    public static function changed(): self
-    {
-        return new self(__('storylines.changed'));
-    }
-
     public static function state(): self
     {
         return new self(__('storylines.state_error'));

@@ -8,7 +8,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Enums\Events\SponsorCommitmentStatus;
-use App\Exceptions\Sponsors\SponsorCommitmentException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
@@ -59,7 +59,7 @@ test('sponsor concurrency admits one repeated create and one atomic revision', f
 
             // Assert
             expect($results->where('ok', true))->toHaveCount(1)
-                ->and($results->where('ok', false)->pluck('exception')->all())->toBe([SponsorCommitmentException::class])
+                ->and($results->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class])
                 ->and(EventSponsorCommitment::query()->where('submission_key', $key)->firstOrFail()->revisions()->count())->toBe(1)
                 ->and(deadlocksResolvedSince($deadlocks))->toBe(0);
         }

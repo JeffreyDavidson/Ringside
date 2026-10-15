@@ -76,7 +76,7 @@ test('two browser screens do not overwrite the first saved start', function (): 
 
     // Act / Assert
     $first->click('Start item')->assertSee('Finish item');
-    $stale->click('Start item')->assertSee('This show changed on another screen.')->assertNoJavaScriptErrors();
+    $stale->click('Start item')->assertSee('This was changed by someone else.')->assertNoJavaScriptErrors();
     expect($fixture['run']->refresh()->version)->toBe(2);
 });
 

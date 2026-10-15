@@ -14,6 +14,7 @@ use App\Enums\Titles\TitleType;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
@@ -95,7 +96,7 @@ it('rejects a conflicting stale result and treats an identical retry as a no-op'
     $action->handle($match, $data);
     $after = $world['tournament']->refresh()->version;
     $action->handle($match, $data);
-    expect(fn () => $action->handle($match, new MatchResultData(MatchFinish::Pinfall, $loser, collect(), $version)))->toThrow(TournamentException::class)
+    expect(fn () => $action->handle($match, new MatchResultData(MatchFinish::Pinfall, $loser, collect(), $version)))->toThrow(RecordChangedException::class)
         ->and($world['tournament']->refresh()->version)->toBe($after)
         ->and($match->refresh()->winning_side_id)->toBe($winner->id);
 });

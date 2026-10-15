@@ -5,6 +5,7 @@ use App\Actions\Storylines\SaveStepAction;
 use App\Data\Storylines\SourceData;
 use App\Data\Storylines\StepData;
 use App\Enums\Storylines\StepStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
 use App\Models\Storylines\Storyline;
@@ -26,7 +27,7 @@ test('a planned event step preserves its original target and rejects a stale sav
     expect($step->status)->toBe(StepStatus::Planned)
         ->and($step->source_context['event_date'])->toBe(requiredDate($event->date)->toIso8601String())
         ->and($step->target_on)->toBeNull();
-    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->version, $data))->toThrow(StorylineConflictException::class)
+    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->version, $data))->toThrow(RecordChangedException::class)
         ->and($story->steps()->count())->toBe(1);
 });
 
@@ -46,5 +47,5 @@ test('a reused step submission identity is refused even with a fresh story versi
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
     $data = new StepData('Repeated plan', 'Same submission.', 1, new SourceData, $step->submission_id);
-    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(StorylineConflictException::class);
+    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(RecordChangedException::class);
 });

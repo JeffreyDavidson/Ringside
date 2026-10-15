@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Exceptions\Events\EventPackConflictException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
@@ -30,7 +31,7 @@ class SaveEventProductionAction
             $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
-                throw EventPackConflictException::stale();
+                throw RecordChangedException::changed();
             }
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();

@@ -3,6 +3,16 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Lang;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\StaticCall;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\Name;
+use PhpParser\NodeFinder;
+use PhpParser\ParserFactory;
 use Symfony\Component\Finder\Finder;
 
 test('literal translation keys used by the application resolve to translations', function (): void {
@@ -41,6 +51,47 @@ test('literal translation keys used by the application resolve to translations',
     $missingList = implode("\n", $report);
 
     expect($report)->toBeEmpty("Missing translation keys:\n{$missingList}");
+});
+
+test('every business exception message is built from a translation key', function (): void {
+    // Arrange
+    $isTranslated = fn (?Expr $message): bool => $message instanceof Variable
+        || ($message instanceof FuncCall && $message->name instanceof Name && in_array($message->name->toString(), ['__', 'trans_choice'], true));
+    $hardCoded = [];
+    $files = Finder::create()
+        ->files()
+        ->in(app_path('Exceptions'))
+        ->name('*.php');
+
+    // Act
+    foreach ($files as $file) {
+        $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($file->getContents()) ?? [];
+        $relativePath = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+        $finder = new NodeFinder;
+
+        $constructed = array_map(
+            fn (New_ $construction): ?Expr => ($construction->args[0] ?? null) instanceof Arg ? $construction->args[0]->value : null,
+            $finder->findInstanceOf($statements, New_::class),
+        );
+        $withReason = array_map(
+            fn (StaticCall $call): ?Expr => ($call->args[1] ?? null) instanceof Arg ? $call->args[1]->value : null,
+            array_filter(
+                $finder->findInstanceOf($statements, StaticCall::class),
+                fn (StaticCall $call): bool => $call->name instanceof Identifier && $call->name->toString() === 'forReason',
+            ),
+        );
+
+        foreach ([...$constructed, ...$withReason] as $message) {
+            if ($message instanceof Expr && ! $isTranslated($message)) {
+                $hardCoded[] = "{$relativePath}:{$message->getStartLine()}";
+            }
+        }
+    }
+
+    // Assert
+    $hardCodedList = implode("\n", $hardCoded);
+
+    expect($hardCoded)->toBeEmpty("Exception messages that are not translated:\n{$hardCodedList}");
 });
 
 test('every enum label resolves to a translation', function (): void {

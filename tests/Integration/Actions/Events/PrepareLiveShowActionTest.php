@@ -14,6 +14,7 @@ use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -62,7 +63,7 @@ test('arrival and briefing persist and a stale operator cannot replace them', fu
     expect($run->refresh()->content['roster'][0]['arrived'])->not->toBeNull()
         ->and($run->refresh()->content['roster'][0]['briefed'])->not->toBeNull();
     expect(fn () => $action->handle($event, 1, $key, LiveAttendanceMark::Arrived, true))
-        ->toThrow(LiveShowException::class)
+        ->toThrow(RecordChangedException::class)
         ->and($run->refresh()->version)->toBe(3);
 });
 
@@ -128,7 +129,7 @@ test('repeated preparation and outdated pack previews never replace a live recor
     $pack = $fixture['event']->pack()->firstOrFail();
 
     // Act / Assert
-    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($fixture['event'], 0, 1, $pack->card_fingerprint))->toThrow(LiveShowException::class);
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($fixture['event'], 0, 1, $pack->card_fingerprint))->toThrow(RecordChangedException::class);
     expect($fixture['event']->liveRun()->count())->toBe(1)
         ->and($fixture['event']->liveRun()->firstOrFail()->version)->toBe(1);
 });
@@ -170,7 +171,7 @@ test('a stale preparation preview cannot create a run from a different pack', fu
     $fingerprint = $staleVersion ? $data['card']['fingerprint'] : str_repeat('0', 64);
 
     // Act / Assert
-    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $fingerprint))->toThrow(LiveShowException::class, __('live-show.conflict'));
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $fingerprint))->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
     expect($event->liveRun()->exists())->toBeFalse()
         ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe(0);
 })->with(['outdated pack version' => true, 'different card fingerprint' => false]);

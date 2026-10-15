@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Tournaments\Tournament;
@@ -22,7 +23,7 @@ class CancelTournamentAction
         DB::transaction(function () use ($tournament, $version, $reason): void {
             $tournament = $this->locks->lock($tournament->id);
             if ($tournament->version !== $version) {
-                throw TournamentException::because('stale');
+                throw RecordChangedException::changed();
             }
             if ($tournament->status === TournamentStatus::Completed) {
                 throw TournamentException::because('closed');

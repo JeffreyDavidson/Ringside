@@ -16,29 +16,29 @@ final class CannotBeInjuredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is unemployed and cannot be injured.");
+        return self::forReason(BusinessRuleReason::Unemployed, __('individuals.errors.injure.unemployed', ['context' => $context]));
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} has not been officially employed and cannot be injured.");
+        return new self(__('individuals.errors.injure.future_employment', ['context' => $context]));
     }
 
     public static function injured(Wrestler|Manager|Referee $entity, ?string $currentInjury = null): static
     {
         $context = self::formatModelContext($entity);
-        $injury = $currentInjury ? " ({$currentInjury})" : '';
+        $details = $currentInjury ? " ({$currentInjury})" : '';
 
-        return self::forReason(BusinessRuleReason::AlreadyInjured, "{$context} is already currently injured{$injury}.");
+        return self::forReason(BusinessRuleReason::AlreadyInjured, __('individuals.errors.injure.already_injured', ['context' => $context, 'details' => $details]));
     }
 
     public static function suspended(Wrestler|Manager|Referee $entity, ?string $suspensionReason = null): static
     {
         $context = self::formatModelContext($entity);
-        $reason = $suspensionReason ? " ({$suspensionReason})" : '';
+        $details = $suspensionReason ? " ({$suspensionReason})" : '';
 
-        return self::forReason(BusinessRuleReason::Suspended, "{$context} is suspended{$reason} and cannot be injured.");
+        return self::forReason(BusinessRuleReason::Suspended, __('individuals.errors.injure.suspended', ['context' => $context, 'details' => $details]));
     }
 }

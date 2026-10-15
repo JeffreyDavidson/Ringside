@@ -62,7 +62,7 @@ test('stale forms keep their draft and require a deliberate refresh before retry
     $second->call('beginLine', $f['line']->id);
     // Act
     $first->set('lineForm.description', 'Saved by first')->call('save')->assertHasNoErrors();
-    $second->set('lineForm.description', 'Retained draft')->call('save')->assertHasErrors('budget')->assertSet('lineForm.description', 'Retained draft');
+    $second->set('lineForm.description', 'Retained draft')->call('save')->assertHasErrors(['budget' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.'])->assertSet('lineForm.description', 'Retained draft');
     // Assert
     expect($f['line']->refresh()->description)->toBe('Saved by first');
     // Act

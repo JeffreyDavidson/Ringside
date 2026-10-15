@@ -13,6 +13,7 @@ use App\Enums\Events\BudgetDirection;
 use App\Enums\Events\BudgetMovementKind;
 use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
+use App\Exceptions\RecordChangedException;
 use App\Livewire\Events\Forms\BudgetLineForm;
 use App\Livewire\Events\Forms\BudgetMovementForm;
 use App\Models\Events\Event;
@@ -187,7 +188,7 @@ class Budget extends Component
                 BudgetOperation::CorrectMovement => app(CorrectBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? $movementInput : null),
                 BudgetOperation::ArchiveLine => app(ArchiveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
             };
-        } catch (BudgetException $exception) {
+        } catch (BudgetException|RecordChangedException $exception) {
             $this->addError('budget', $exception->getMessage());
 
             return;

@@ -11,7 +11,6 @@ return [
     'private' => 'Private',
     'saved' => 'Public draft saved. Nothing was published.',
     'unpublished' => 'Publication removed.',
-    'stale' => 'The draft or event changed. Reopen the page, review it, and try again.',
     'invalid' => 'This release is not ready. Review its date, selected matches, recorded results and poster before publishing.',
     'scheduled' => 'Scheduled',
     'rescheduled' => 'Rescheduled',

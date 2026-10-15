@@ -6,6 +6,7 @@ namespace App\Lifecycle\Tournaments;
 
 use App\Data\Matches\MatchResultData;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Matches\EventMatch;
 use App\Models\Tournaments\Tournament;
@@ -27,7 +28,7 @@ class TournamentOutcomeManager
             return;
         }
         if ($result->tournamentVersion === null || ($match->match_finish !== null && $result->tournamentVersion !== $link->tournament->version)) {
-            throw TournamentException::because('stale');
+            throw RecordChangedException::changed();
         }
         if ($link->tournament->status === TournamentStatus::Cancelled) {
             throw TournamentException::because('closed');

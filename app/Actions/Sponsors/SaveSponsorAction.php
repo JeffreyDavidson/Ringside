@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Sponsors;
 
 use App\Data\Sponsors\SponsorData;
-use App\Exceptions\Sponsors\SponsorCommitmentException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use Illuminate\Support\Facades\DB;
@@ -26,10 +26,10 @@ class SaveSponsorAction
             Gate::authorize('manageSponsors', $promotion);
             $sponsor = $id === null ? null : Sponsor::query()->where('promotion_id', $promotion->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
-                throw SponsorCommitmentException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if (($sponsor->version ?? 0) !== $version || ($sponsor === null && Sponsor::query()->where('promotion_id', $promotion->id)->where('submission_key', $submissionKey)->exists())) {
-                throw SponsorCommitmentException::because('conflict');
+                throw RecordChangedException::changed();
             }
             $sponsor ??= new Sponsor;
             $sponsor->promotion_id = $promotion->id;

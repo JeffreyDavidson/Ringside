@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Events\EventPublicationException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\PublicEventSourceQuery;
 
@@ -21,7 +22,7 @@ test('racing publishers and unpublishing never release two copies of the same re
 
         $results = collect(bookConcurrently([$spec, [...$spec, 'public_operation' => $other]]));
 
-        expect($results->where('ok', true))->toHaveCount(1)->and($results->where('ok', false)->pluck('exception')->all())->toBe([EventPublicationException::class])
+        expect($results->where('ok', true))->toHaveCount(1)->and($results->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class])
             ->and(deadlocksResolvedSince($deadlocks))->toBe(0)
             ->and(freshModel($publication)->version)->toBe($publication->version + 1);
     });
@@ -41,7 +42,7 @@ test('result and card source edits race safely with publication without releasin
         $results = collect(bookConcurrently([$spec, [...$spec, 'public_operation' => $other]]));
 
         expect($results->where('deadlock', true))->toBeEmpty()->and(deadlocksResolvedSince($deadlocks))->toBe(0)
-            ->and($results->where('ok', false)->pluck('exception')->all())->each->toBe(EventPublicationException::class);
+            ->and($results->where('ok', false)->pluck('exception')->all())->each->toBeIn([EventPublicationException::class, RecordChangedException::class]);
         if ($other === 'result') {
             expect(EventMatch::query()->findOrFail($world['match']->id)->match_finish)->toBe(MatchFinish::Submission)
                 ->and(freshModel($publication)->results['rows'][0]['outcome'] ?? 'not released')->not->toContain('Submission');

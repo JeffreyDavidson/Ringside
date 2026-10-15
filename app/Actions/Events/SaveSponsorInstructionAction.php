@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -37,7 +38,7 @@ class SaveSponsorInstructionAction
             $preview = $this->instructions->preview($event, $commitment, $mode, $targetKey, $afterMatchId);
             if ($commitment->version !== $version || ($pack->version ?? 0) !== $packVersion || ! hash_equals($card['fingerprint'], $fingerprint)
                 || ! hash_equals($preview['hash'], $previewHash)) {
-                throw SponsorCommitmentException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint) {
                 throw SponsorCommitmentException::because('pack_review_required');

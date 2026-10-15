@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-use App\Exceptions\Storylines\StorylineConflictException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
@@ -54,7 +54,7 @@ test('two real booker requests commit exactly one planned or actual development'
         // Assert
         expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
             ->and(collect($results)->where('ok', true))->toHaveCount(1)
-            ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([StorylineConflictException::class])
+            ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class])
             ->and($operation === 'step' ? $story->steps()->count() : $story->developments()->count())->toBe(1)
             ->and($story->revisions()->count())->toBe(1);
     });

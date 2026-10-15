@@ -20,7 +20,6 @@ return [
     'unsaved' => 'Unsaved changes',
     'save_failed' => 'The pack could not be saved.',
     'reload' => 'Reload saved version (discards these edits)',
-    'conflict' => 'The pack or show has changed since you opened it. Your edits are still below. Copy anything you need, then reload the saved version and review before saving again.',
     'review_required' => 'Review the changed card and confirm its timings before saving.',
     'review_notice' => 'Review needed: the show or card has changed. Check timings, assignments and segment positions before using this pack.',
     'reviewed' => 'I have reviewed the current card, timings and segment positions.',

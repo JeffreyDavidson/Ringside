@@ -14,6 +14,7 @@ use App\Actions\Tournaments\WithdrawTournamentEntryAction;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
@@ -40,7 +41,7 @@ it('rejects stale tournament reviews with no partial mutations', function (strin
         'rename' => resolve(RenameTournamentAction::class)->handle($t, 0, 'Changed', null),
         'save' => resolve(SaveTournamentAction::class)->handle($world['promotion'], new TournamentData('Changed', null, EntrantKind::Wrestler, 4, true, array_values($t->entries()->get()->map(fn ($entry): int => $entry->competitor_id)->all())), $t, 0),
     };
-    expect($call)->toThrow(TournamentException::class, __('tournaments.errors.stale'));
+    expect($call)->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
     $t->refresh();
     expect([$t->version, $t->name, $t->entries()->pluck('competitor_id')->all(), $t->nodes()->pluck('planned_event_id')->all()])->toBe($snapshot)
         ->and($world['event']->matches()->count())->toBe(0);
@@ -131,7 +132,7 @@ it('keeps cancellation retries and subsequent synchronization unchanged', functi
 });
 
 it('rejects locking a tournament id that does not exist', function (): void {
-    expect(fn () => resolve(TournamentLocks::class)->lockMany([PHP_INT_MAX]))->toThrow(TournamentException::class);
+    expect(fn () => resolve(TournamentLocks::class)->lockMany([PHP_INT_MAX]))->toThrow(RecordChangedException::class);
 });
 it('refuses a review if event membership or dates changed while obtaining its union locks', function (bool $dateChanged): void {
     $world = tournamentFixture();
@@ -154,7 +155,7 @@ it('refuses a review if event membership or dates changed while obtaining its un
         }
         $node->forceFill(['planned_event_id' => $other->id])->save();
     });
-    expect(fn () => DB::transaction(fn () => resolve(TournamentLocks::class)->lock($t->id)))->toThrow(TournamentException::class)
+    expect(fn () => DB::transaction(fn () => resolve(TournamentLocks::class)->lock($t->id)))->toThrow(RecordChangedException::class)
         ->and($t->refresh()->version)->toBe(2)
         ->and($node->refresh()->planned_event_id)->toBe($event->id);
 })->with([true, false]);

@@ -7,6 +7,7 @@ namespace App\Actions\Events;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Exceptions\Events\TalentBookingException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
@@ -43,7 +44,7 @@ class SaveTalentBookingAction
             }
             $key = $personType.':'.$personId;
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->context->fingerprint($event, $key), $fingerprint)) {
-                throw TalentBookingException::because('stale');
+                throw RecordChangedException::changed();
             }
             if ($booking?->status === TalentBookingStatus::Cancelled && $data->status !== TalentBookingStatus::Proposed) {
                 throw TalentBookingException::because('reopen');

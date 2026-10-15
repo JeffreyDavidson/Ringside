@@ -51,6 +51,5 @@ return [
     'empty_filter' => 'No people match this filter.',
     'title' => 'Live show', 'prepare' => 'Prepare live show',
     'prepare_required' => 'Save and review an event pack with a scheduled event and a valid running order before preparing the live show.',
-    'conflict' => 'This show changed on another screen. Refresh to see what was saved before trying again.',
     'old_event' => 'Live shows can be prepared for today or a future event. Past shows cannot start a new live record.',
 ];

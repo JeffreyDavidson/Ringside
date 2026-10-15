@@ -6,6 +6,7 @@ namespace App\Actions\Storylines;
 
 use App\Data\Storylines\StepData;
 use App\Enums\Storylines\StepStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
@@ -36,7 +37,7 @@ class SaveStepAction
                 throw StorylineConflictException::state();
             }
             if ($stepId === null && $story->steps()->where('submission_id', $data->submissionId)->exists()) {
-                throw StorylineConflictException::changed();
+                throw RecordChangedException::changed();
             }
             $before = $step->attributesToArray();
             $step->promotion_id = $story->promotion_id;

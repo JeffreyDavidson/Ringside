@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
@@ -29,11 +30,11 @@ class PrepareLiveShowAction
             EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->first();
             if ($run !== null || $version !== 0) {
-                throw LiveShowException::because('conflict');
+                throw RecordChangedException::changed();
             }
             $source = $this->source->get($event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
-                throw LiveShowException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if (Promotion::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(Promotion::toLocalTime($event->promotion, now())->startOfDay())) {
                 throw LiveShowException::because('old_event');

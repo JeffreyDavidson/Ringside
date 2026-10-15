@@ -12,9 +12,8 @@ use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
-use App\Exceptions\Events\LiveShowException;
-use App\Exceptions\Events\TalentBookingException;
 use App\Exceptions\Promotions\CannotRemoveLastOwnerException;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
@@ -730,7 +729,7 @@ test('concurrent live show commands commit once without replacing times or dupli
 
         // Assert
         expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results));
-        expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([LiveShowException::class], workerOutcomes($results))
+        expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class], workerOutcomes($results))
             ->and(collect($results)->contains('deadlock', true))->toBeFalse(workerOutcomes($results));
         $run = EventLiveRun::query()->where('event_id', $event->id)->firstOrFail();
         expect($run->version)->toBe($version + 1)
@@ -821,7 +820,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
             return;
         }
         expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results))
-            ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([TalentBookingException::class], workerOutcomes($results))
+            ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class], workerOutcomes($results))
             ->and(EventTalentBooking::query()->where('event_id', $event->id)->sole()->version)->toBe($version + 1)
             ->and(EventTalentBookingRevision::query()->count())->toBe($version + 1);
     });

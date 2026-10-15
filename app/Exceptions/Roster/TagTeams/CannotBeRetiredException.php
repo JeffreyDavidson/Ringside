@@ -14,13 +14,13 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is not currently employed and cannot be retired.");
+        return self::forReason(BusinessRuleReason::Unemployed, __('tag-team-lifecycle.errors.retire.unemployed', ['context' => $context]));
     }
 
     public static function alreadyRetired(TagTeam $tagTeam): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return self::forReason(BusinessRuleReason::AlreadyRetired, "{$context} is already retired.");
+        return self::forReason(BusinessRuleReason::AlreadyRetired, __('tag-team-lifecycle.errors.retire.already_retired', ['context' => $context]));
     }
 }

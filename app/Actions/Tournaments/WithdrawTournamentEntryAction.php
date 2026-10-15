@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
@@ -23,7 +24,7 @@ class WithdrawTournamentEntryAction
         DB::transaction(function () use ($entry, $version, $reason): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
-                throw TournamentException::because('stale');
+                throw RecordChangedException::changed();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::because('closed');

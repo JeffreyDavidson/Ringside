@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\StoreEventPosterAction;
 use App\Exceptions\Events\EventPublicationException;
+use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\SaveEventPublicationRequest;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
@@ -60,7 +61,7 @@ class EventPublicPagesController
                     Storage::disk('local')->delete('event-posters/'.$newPosterKey);
                 }
             }
-        } catch (EventPublicationException $exception) {
+        } catch (EventPublicationException|RecordChangedException $exception) {
 
             return back()->withErrors(['publication' => $exception->getMessage()])->withInput();
         }

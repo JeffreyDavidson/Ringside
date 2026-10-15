@@ -8,6 +8,7 @@ use App\Data\Matches\EventMatchData;
 use App\Data\Tournaments\TournamentBoutData;
 use App\Enums\Matches\MatchType;
 use App\Enums\Tournaments\EntrantKind;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -102,7 +103,7 @@ class TournamentMatchRequirementsService
             return;
         }
         if ($data->tournamentVersion !== $link->tournament->version) {
-            throw TournamentException::because('stale');
+            throw RecordChangedException::changed();
         }
         $this->ensureCompetitors($match, $data->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? [])));
         $bout = $this->bracket->bout($link->node);

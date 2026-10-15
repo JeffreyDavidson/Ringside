@@ -16,6 +16,6 @@ final class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::NotInjured, "{$context} is not currently injured and cannot be cleared from injury.");
+        return self::forReason(BusinessRuleReason::NotInjured, __('individuals.errors.clear_from_injury.not_injured', ['context' => $context]));
     }
 }

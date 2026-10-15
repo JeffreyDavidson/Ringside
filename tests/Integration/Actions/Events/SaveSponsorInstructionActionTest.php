@@ -15,6 +15,7 @@ use App\Actions\Events\TransitionLiveItemAction;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\EventSponsorCommitment;
 use App\Queries\Events\LiveShowSourceQuery;
@@ -117,7 +118,7 @@ test('pack edits invalidate previews without losing setup instructions on an ord
     app(SaveEventPackAction::class)->handle($event, 0, $fingerprint, $screen->data($event)['content'], false);
 
     // Act and Assert
-    expect(fn () => $publisher->handle($event, $promise->id, 2, 0, $fingerprint, 'setup', null, null, $preview['hash']))->toThrow(SponsorCommitmentException::class);
+    expect(fn () => $publisher->handle($event, $promise->id, 2, 0, $fingerprint, 'setup', null, null, $preview['hash']))->toThrow(RecordChangedException::class);
     $publisher->handle($event, $promise->id, 2, 1, $fingerprint, 'setup', null, null, $query->preview($event, $promise, 'setup', null, null)['hash']);
     $data = $screen->data($event);
     $tasks = $data['content']['sponsor_tasks'] ?? [];

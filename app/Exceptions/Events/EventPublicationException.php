@@ -13,11 +13,6 @@ final class EventPublicationException extends BaseBusinessException
         return new self(__('public-events.poster_invalid'));
     }
 
-    public static function stale(): static
-    {
-        return new self(__('public-events.stale'));
-    }
-
     public static function invalid(): static
     {
         return new self(__('public-events.invalid'));

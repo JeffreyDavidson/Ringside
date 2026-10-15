@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Enums\Users\UserStatus;
 use App\Exceptions\Events\EventPublicationException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
@@ -43,7 +44,7 @@ class LockEventPublicationAction
         $publication = EventPublication::query()->withoutGlobalScope(PromotionContextScope::class)->where('event_id', $event->id)->lockForUpdate()->first();
         $source = $this->source->get($event);
         if (($publication->version ?? 0) !== $version || ! hash_equals($source['fingerprint'], $fingerprint)) {
-            throw EventPublicationException::stale();
+            throw RecordChangedException::changed();
         }
         if ($publication !== null && $publication->promotion_id !== $event->promotion_id) {
             throw EventPublicationException::invalid();

@@ -110,7 +110,6 @@ return [
     'removed_segment' => 'Segment removed',
     'unplaced_segment' => 'Segment needs repositioning',
     'skipped_source' => 'Live item skipped',
-    'changed' => 'This storyline changed on another screen. Reload and review before saving.',
     'state_error' => 'Resolve remaining plans, or reopen/restore this storyline before changing it.',
     'source_changed' => 'The linked source changed. Review it and explain the difference before recording what happened.',
     'removed' => 'Deleted',

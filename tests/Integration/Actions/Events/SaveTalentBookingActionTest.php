@@ -10,6 +10,7 @@ use App\Actions\Events\SaveTalentBookingAction;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Exceptions\Events\TalentBookingException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
@@ -53,9 +54,9 @@ test('stale first creation and opposite transitions never overwrite or duplicate
     $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data);
 
     // Act / Assert
-    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data))->toThrow(TalentBookingException::class);
+    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data))->toThrow(RecordChangedException::class);
     expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled')))->toThrow(TalentBookingException::class)
+        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled')))->toThrow(RecordChangedException::class)
         ->and(EventTalentBooking::query()->sole()->status)->toBe(TalentBookingStatus::Confirmed)
         ->and(EventTalentBookingRevision::query()->count())->toBe(1);
 });
@@ -135,7 +136,7 @@ test('a changed event refuses a stale reconfirmation without overwriting it', fu
 
     // Act / Assert
     expect(fn () => resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'wrestler', $fixture['person']->id, 1, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true)))->toThrow(TalentBookingException::class);
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true)))->toThrow(RecordChangedException::class);
     expect($fixture['booking']->refresh()->version)->toBe(1);
 });
 

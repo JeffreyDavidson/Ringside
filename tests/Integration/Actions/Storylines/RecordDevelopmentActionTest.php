@@ -10,6 +10,7 @@ use App\Data\Storylines\ParticipantData;
 use App\Data\Storylines\SourceData;
 use App\Data\Storylines\StepData;
 use App\Enums\Storylines\StepStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
@@ -37,7 +38,7 @@ test('confirming a different outcome retains the original plan and cannot be rep
     expect($development->description)->toBe('They argued but stayed together.')
         ->and($step->refresh()->description)->toBe('Attack the partner.')
         ->and($step->status)->toBe(StepStatus::Happened);
-    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $version, $data))->toThrow(StorylineConflictException::class)
+    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $version, $data))->toThrow(RecordChangedException::class)
         ->and($story->developments()->count())->toBe(1);
 });
 
@@ -98,7 +99,7 @@ test('unplanned submissions cannot be duplicated with a fresh version and future
     $story = Storyline::factory()->create();
     $data = new DevelopmentData('Confrontation', 'An argument.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid());
     resolve(RecordDevelopmentAction::class)->handle($story, 1, $data);
-    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(StorylineConflictException::class);
+    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(RecordChangedException::class);
     $future = new DevelopmentData('Future', 'Not yet happened.', today()->addDays(2)->toDateString(), 1, [], new SourceData, (string) Str::uuid());
     expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $future))->toThrow(ValidationException::class);
 });

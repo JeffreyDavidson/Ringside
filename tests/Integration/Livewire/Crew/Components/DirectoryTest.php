@@ -88,6 +88,27 @@ test('directory errors preserve an edit and cancel clears private draft fields',
     expect($contact->refresh()->name)->toBe('Other editor');
 });
 
+test('a stale contact save and archive show the shared changed-by-someone-else message', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $contact = CrewContact::factory()->create();
+    $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'My draft');
+    resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
+        ['name' => 'Other editor', 'phone' => null, 'email' => null, 'notes' => null]);
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors(['contact' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.']);
+
+    // Act
+    $page->call('archive', $contact->id, 1);
+
+    // Assert
+    $page->assertHasErrors(['contact' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.']);
+});
+
 test('an administrator must select a promotion before creating owned crew contacts', function (): void {
     // Arrange
     actingAs(administrator());
