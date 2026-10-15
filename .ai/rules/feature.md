@@ -11,6 +11,12 @@ Use RefreshDatabase for Feature tests; keep database reset configuration central
 ## Controller HTTP contracts
 Every concrete controller has an executable Pest test in `tests/Feature/Http/Controllers` at the full mirrored controller path, named `{ControllerName}Test.php`. Abstract controllers are exempt. The controller architecture gate rejects missing, empty, comment-only, or pending-only matching files. The matching file covers every routed action; supplemental shared concerns do not replace it.
 
+Each controller test has one scenario and target action. Split scenario-dependent setup or assertions (guest/member/foreign actors, success/refusal, valid/invalid input) into separate tests; use named datasets only when setup, action and assertion structure stay the same. Do not conceal branches with an expected-status parameter or an assertion callback.
+
+Split independent behaviors that repeat Arrange/Act/Assert cycles. Retain a sequence only when its named defect requires a baseline or earlier action, such as stale input, replay protection or a query comparison; make that necessity explicit. Account for HTTP calls inside setup helpers. Type/null guards should use appropriate assertions, and uniform fixture/collection loops are not separate scenarios by themselves.
+
+Group Arrange by meaning, with blank lines between target relationships, contrast fixtures, actor/context, fakes and payload/baseline preparation where the subject changes. Keep dependent records together and preserve creation order. Do not use blank lines after every statement or a rigid universal setup order.
+
 In Arrange, establish authentication and promotion context, create minimal deterministic fixtures, and configure specific fakes. In Act, assign the HTTP response to `$response`; do not chain assertions onto the request. In Assert, check the response and meaningful persisted state or side effects. Keep target requests outside assertion callbacks.
 
 Format response assertion chains with the response variable on its own line and each chained assertion on a separate following line. Combine consecutive assertions on the same response into one chain instead of repeating the response variable. Keep response assertions together, then leave a blank line before assertions about authentication, persisted state, events, jobs, mail, notifications, or other outcomes.
