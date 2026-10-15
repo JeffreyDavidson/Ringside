@@ -44,7 +44,8 @@ arch('environment values are read through configuration')
 
 arch('enums are native enums')
     ->expect('App\\Enums')
-    ->toBeEnums();
+    ->toBeEnums()
+    ->ignoring('App\\Enums\\Concerns');
 
 arch('controllers use the controller suffix')
     ->expect('App\\Http\\Controllers')

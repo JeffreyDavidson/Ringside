@@ -11,6 +11,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Actions/Matches/** | .ai/rules/actions-matches.md |
 | app/Actions/** | .ai/rules/actions.md |
 | app/** | .ai/rules/app.md |
+| app/Auth/** | .ai/rules/auth.md |
 | app/Lifecycle/Roster/Booking/** | .ai/rules/booking.md |
 | tests/Browser/** | .ai/rules/browser.md |
 | app/Builders/** | .ai/rules/builders.md |
@@ -46,6 +47,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Rules/** | .ai/rules/rules.md |
 | app/Exceptions/Scheduling/** | .ai/rules/scheduling.md |
 | app/Services/** | .ai/rules/services.md |
+| app/Support/** | .ai/rules/support.md |
 | app/{Actions/Stables/**,Lifecycle/Roster/Stables/Stable*Eligibility.php} | .ai/rules/stables.md |
 | app/{Actions/TagTeams,Lifecycle/Roster/TagTeams}/** | .ai/rules/tag-teams.md |
 | tests/** | .ai/rules/tests.md |
