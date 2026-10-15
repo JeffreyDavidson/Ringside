@@ -467,24 +467,71 @@ test('a valid unmatched person filter returns an empty assignment selection', fu
         ->firstOrFail()->content)->toBe($originalContent);
 });
 
-test('production sheets stay private for members and scoped to the active promotion', function (MembershipRole $role, int $status): void {
+test('production sheet access follows the viewer\'s promotion role', function (MembershipRole $role, int $status): void {
     // Arrange
-    require_once __DIR__.'/../../../../Fixtures/production.php';
-    $fixture = productionFixture();
-    $event = $fixture['event'];
-    $promotion = Promotion::query()->findOrFail($event->promotion_id);
+    $event = productionFixture()['event'];
+
     $user = basicUser();
-    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
     actingAs($user);
-    $other = Event::factory()->for(Promotion::factory())->create();
 
     // Act
-    $sheet = get(route('events.production-sheet.show', $event));
-    $print = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
-    $foreign = get(route('events.production-sheet.show', $other));
+    $response = get(route('events.production-sheet.show', $event));
 
     // Assert
-    $sheet->assertStatus($status);
-    $print->assertStatus($status);
-    $foreign->assertNotFound();
-})->with(['owner' => [MembershipRole::Owner, 200], 'manager' => [MembershipRole::Manager, 200], 'member' => [MembershipRole::Member, 403]]);
+    $response->assertStatus($status);
+})->with([
+    'owner' => [MembershipRole::Owner, 200],
+    'manager' => [MembershipRole::Manager, 200],
+    'member' => [MembershipRole::Member, 403],
+]);
+
+test('printable production sheet access follows the viewer\'s promotion role', function (MembershipRole $role, int $status): void {
+    // Arrange
+    $event = productionFixture()['event'];
+
+    $user = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
+
+    // Assert
+    $response->assertStatus($status);
+})->with([
+    'owner' => [MembershipRole::Owner, 200],
+    'manager' => [MembershipRole::Manager, 200],
+    'member' => [MembershipRole::Member, 403],
+]);
+
+test('a production sheet from another promotion is not found', function (MembershipRole $role): void {
+    // Arrange
+    $event = productionFixture()['event'];
+    $foreignEvent = Event::factory()
+        ->for(Promotion::factory())
+        ->create();
+
+    $user = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('events.production-sheet.show', $foreignEvent));
+
+    // Assert
+    $response->assertNotFound();
+})->with([
+    'owner' => [MembershipRole::Owner],
+    'manager' => [MembershipRole::Manager],
+    'member' => [MembershipRole::Member],
+]);
