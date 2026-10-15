@@ -299,7 +299,9 @@
         </details>
         @if ($draftKey !== '')
             <form wire:submit="saveCorrection" data-live-draft class="border-border scroll-mt-36 border p-5">
-                <h2 class="text-xl font-semibold">{{ __('live-show.'.$draftOperation) }} · {{ $draftLabel }}</h2>
+                <h2 class="text-xl font-semibold">
+                    {{ \App\Enums\Events\LiveItemOperation::tryFrom($draftOperation)?->label() ?? $draftOperation }} · {{ $draftLabel }}
+                </h2>
                 <fieldset
                     :disabled="requestFailed || ! online"
                     wire:offline.attr="disabled"
@@ -410,7 +412,7 @@
                     <li wire:key="item-{{ $item['key'] }}" class="flex flex-col gap-3 py-5">
                         <div class="flex flex-wrap justify-between gap-2">
                             <h3 class="text-lg font-semibold break-words">{{ $item['label'] }}</h3>
-                            <span class="font-semibold">{{ \App\Enums\Events\LiveItemStatus::from($item['state'])->label() }}</span>
+                            <span class="font-semibold">{{ \App\Enums\Events\LiveItemStatus::tryFrom($item['state'])?->label() ?? $item['state'] }}</span>
                         </div>
                         <p class="text-muted-foreground text-sm">
                             {{ $screen->comparison($item) }} · {{ $item['details'] }} · {{ $item['referees'] }}

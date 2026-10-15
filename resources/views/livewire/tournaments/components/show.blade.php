@@ -72,7 +72,7 @@
         >
             <form wire:submit="confirm" class="flex flex-col gap-4">
                 <h2 id="tournament-operation-title" class="text-xl font-semibold">
-                    {{ \App\Enums\Tournaments\TournamentOperation::from($draftOperation)->label() }}
+                    {{ \App\Enums\Tournaments\TournamentOperation::tryFrom($draftOperation)?->label() ?? $draftOperation }}
                 </h2>
                 @if (in_array($draftOperation, ['book', 'plan'], true))
                     <x-form.inputs.select

@@ -126,7 +126,7 @@
                     @endif
                     @if ($form->eventId)
                         <p class="text-muted-foreground">
-                            {{ __('storylines.source_evidence') }}: {{ $source['context']['segment_label'] ?? $source['context']['match_label'] ?? $source['context']['event_name'] ?? '' }} · {{ $source['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::from($source['context']['live_state'])->label() : __('storylines.no_live') }}
+                            {{ __('storylines.source_evidence') }}: {{ $source['context']['segment_label'] ?? $source['context']['match_label'] ?? $source['context']['event_name'] ?? '' }} · {{ $source['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::tryFrom($source['context']['live_state'])?->label() ?? $source['context']['live_state'] : __('storylines.no_live') }}
                             @if ($form->matchId) ·{{ $source['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                     @endif

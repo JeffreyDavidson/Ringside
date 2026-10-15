@@ -117,7 +117,7 @@
                     <x-storylines.source-links :entry="$step" />
                     @if ($step->event_id)
                         <p class="text-muted-foreground mt-2 text-sm">
-                            {{ $sourceStates[$step->id]['context']['segment_label'] ?? $sourceStates[$step->id]['context']['match_label'] ?? '' }} · {{ $sourceStates[$step->id]['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::from($sourceStates[$step->id]['context']['live_state'])->label() : __('storylines.no_live') }}
+                            {{ $sourceStates[$step->id]['context']['segment_label'] ?? $sourceStates[$step->id]['context']['match_label'] ?? '' }} · {{ $sourceStates[$step->id]['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::tryFrom($sourceStates[$step->id]['context']['live_state'])?->label() ?? $sourceStates[$step->id]['context']['live_state'] : __('storylines.no_live') }}
                             @if ($step->match_id) ·{{ $sourceStates[$step->id]['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                         @foreach ($sourceStates[$step->id]['warnings'] as $warning)

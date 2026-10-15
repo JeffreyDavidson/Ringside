@@ -8,6 +8,7 @@ use App\Enums\Events\BudgetMovementKind;
 use App\Enums\Events\BudgetOperation;
 use App\Enums\Events\BudgetPaymentMethod;
 use App\Enums\Events\EventStatus;
+use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Enums\Events\TalentBookingStatus;
@@ -143,6 +144,11 @@ test('enum labels render the text users see', function (Closure $resolveLabel, s
     'operation withdraw' => [TournamentOperation::Withdraw->label(...), 'Withdraw entrant'],
     'operation replace' => [TournamentOperation::Replace->label(...), 'Replace an unplayed entrant'],
     'operation walkover' => [TournamentOperation::Walkover->label(...), 'Advance the opponent by walkover'],
+    'live item start' => [LiveItemOperation::Start->label(...), 'Start item'],
+    'live item finish' => [LiveItemOperation::Finish->label(...), 'Finish item'],
+    'live item skip' => [LiveItemOperation::Skip->label(...), 'Skip item'],
+    'live item correct' => [LiveItemOperation::Correct->label(...), 'Correct actual times'],
+    'live item reopen' => [LiveItemOperation::Reopen->label(...), 'Reopen / restore item'],
     'operation cancel' => [TournamentOperation::Cancel->label(...), 'Cancel this tournament'],
 ]);
 

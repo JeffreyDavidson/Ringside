@@ -25,7 +25,7 @@ Ringside uses native PHP enums for statuses, types, roles and operation names. E
 
 ## Stored values
 
-Enums are string-backed with PascalCase cases and lowercase snake_case values. Four enums store kebab-case values that are already in existing rows: `MatchType`, `MatchFinish`, `RosterEntityType` and `TitleType` (for example `tag-team`, `time-limit-draw`). They keep those values; there is no data migration. Two lifecycle transition enums (`StableActivityTransition`, `TitleLifecycleTransition`) are unbacked because they are never stored.
+Enums are string-backed with PascalCase cases and lowercase snake_case values. Four enums store kebab-case values that are already in existing rows: `MatchType`, `MatchFinish`, `RosterEntityType` and `TitleType` (for example `tag-team`, `time-limit-draw`). They keep those values; there is no data migration. Two lifecycle transition enums (`StableActivityTransition`, `TitleLifecycleTransition`) are unbacked because they are never stored. `UnitedStatesState` stores the display name (`New York`) as its value and has no `label()`.
 
 Enum class names are not stored in the database. Models cast columns to enums, so moving an enum to another namespace needs no data change.
 
@@ -48,6 +48,8 @@ enum TitleStatus: string
     }
 }
 ```
+
+Enums whose value is never shown (such as `PublicSection`, `LiveAttendanceMark`, `PromotionInvitationOutcome`, `BusinessRuleReason` and the lifecycle vocabulary) have no label. When the value comes from stored JSON, views use `Enum::tryFrom($value)?->label() ?? $value` so an old or hand-edited value renders as stored instead of failing.
 
 `TranslationKeysTest` loads every enum with a `label()` method and fails when a case returns an untranslated key.
 

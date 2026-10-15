@@ -175,7 +175,7 @@
                                             <option value="">{{ __('production.unassigned') }}</option>
                                             @foreach ($assignments as $owner)
                                                 <option value="{{ $owner['id'] }}">
-                                                    {{ $contacts->firstWhere('id', $owner['contact_id'])?->name ?? __('production.choose_contact') }} · {{ \App\Enums\Crew\CrewRole::tryFrom($owner['role'])?->label() }} · {{ $owner['station'] }}
+                                                    {{ $contacts->firstWhere('id', $owner['contact_id'])?->name ?? __('production.choose_contact') }} · {{ \App\Enums\Crew\CrewRole::tryFrom($owner['role'])?->label() ?? $owner['role'] }} · {{ $owner['station'] }}
                                                 </option>
                                             @endforeach
                                             @if ($cue['owner_id'] && ! in_array($cue['owner_id'], array_column($assignments, 'id'), true))

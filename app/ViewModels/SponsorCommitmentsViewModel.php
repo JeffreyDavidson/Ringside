@@ -72,6 +72,6 @@ class SponsorCommitmentsViewModel
     {
         $item = collect($commitment->event->liveRun->content['items'] ?? [])->firstWhere('key', $commitment->pack_key);
 
-        return $item === null ? null : Lang::string('sponsors.live_state', ['state' => LiveItemStatus::from($item['state'])->label()]);
+        return $item === null ? null : Lang::string('sponsors.live_state', ['state' => LiveItemStatus::tryFrom($item['state'])?->label() ?? $item['state']]);
     }
 }

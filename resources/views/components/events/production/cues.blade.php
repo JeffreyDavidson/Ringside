@@ -9,7 +9,7 @@
         @if ($cue['owner_id'])
             <p class="mt-2">
                 {{ __('production.owner') }}: {{ $cue['owner_name'] }}
-                @if ($cue['owner_role']) ·{{ \App\Enums\Crew\CrewRole::from($cue['owner_role'])->label() }} @endif
+                @if ($cue['owner_role']) ·{{ \App\Enums\Crew\CrewRole::tryFrom($cue['owner_role'])?->label() ?? $cue['owner_role'] }} @endif
                 · {{ $cue['owner_station'] }}
                 @if (! in_array($cue['owner_id'], array_column($assignments, 'id'), true))
                     <strong>{{ __('production.removed_owner') }}</strong>
@@ -20,7 +20,7 @@
         @endif
         @if ($cue['role'])
             <p class="mt-2">
-                {{ __('production.target_role') }}: {{ \App\Enums\Crew\CrewRole::from($cue['role'])->label() }}
+                {{ __('production.target_role') }}: {{ \App\Enums\Crew\CrewRole::tryFrom($cue['role'])?->label() ?? $cue['role'] }}
             </p>
         @endif
         @if ($cue['pronunciation'])
