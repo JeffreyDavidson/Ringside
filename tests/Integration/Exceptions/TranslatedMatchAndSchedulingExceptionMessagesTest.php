@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;

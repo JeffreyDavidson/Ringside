@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\EventBuilder;
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\TracksActivity;

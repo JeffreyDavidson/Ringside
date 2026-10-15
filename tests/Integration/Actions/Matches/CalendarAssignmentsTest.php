@@ -11,7 +11,7 @@ use App\Actions\Roster\Availability\CancelAction;
 use App\Actions\Roster\Availability\CreateAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Livewire\Managers\Components\Actions as ManagerActions;
 use App\Livewire\Referees\Components\Actions as RefereeActions;
 use App\Livewire\Stables\Components\Actions as StableActions;

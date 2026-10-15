@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\DeleteAction;
 use App\Actions\Titles\RestoreAction;
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\Titles\CannotBeRestoredException;
 use App\Models\Titles\Title;
 

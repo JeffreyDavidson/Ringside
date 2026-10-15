@@ -15,9 +15,7 @@
     >{{ __('storylines.back') }}</a>
     <header class="space-y-3">
         <h1 class="font-display text-3xl leading-tight break-words">{{ $story->title }}</h1>
-        <p class="text-muted-foreground">
-            {{ __('storylines.'.$story->status->value) }} · {{ __('storylines.private') }}
-        </p>
+        <p class="text-muted-foreground">{{ $story->status->label() }} · {{ __('storylines.private') }}</p>
         <p class="max-w-prose whitespace-pre-line">{{ $story->premise }}</p>
         @if ($story->payoff)
             <details>
@@ -112,14 +110,14 @@
             @forelse ($steps as $step)
                 <article class="py-5" wire:key="step-{{ $step->id }}">
                     <p class="text-muted-foreground mb-2 text-sm">
-                        {{ __('storylines.'.$step->status->value) }} · {{ $step->target_on?->toDateString() }}
+                        {{ $step->status->label() }} · {{ $step->target_on?->toDateString() }}
                     </p>
                     <h3 class="text-lg font-semibold">{{ $step->heading }}</h3>
                     <p class="mt-2 max-w-prose whitespace-pre-line">{{ $step->description }}</p>
                     <x-storylines.source-links :entry="$step" />
                     @if ($step->event_id)
                         <p class="text-muted-foreground mt-2 text-sm">
-                            {{ $sourceStates[$step->id]['context']['segment_label'] ?? $sourceStates[$step->id]['context']['match_label'] ?? '' }} · {{ $sourceStates[$step->id]['context']['live_state'] ? __('live-show.'.$sourceStates[$step->id]['context']['live_state']) : __('storylines.no_live') }}
+                            {{ $sourceStates[$step->id]['context']['segment_label'] ?? $sourceStates[$step->id]['context']['match_label'] ?? '' }} · {{ $sourceStates[$step->id]['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::from($sourceStates[$step->id]['context']['live_state'])->label() : __('storylines.no_live') }}
                             @if ($step->match_id) ·{{ $sourceStates[$step->id]['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                         @foreach ($sourceStates[$step->id]['warnings'] as $warning)

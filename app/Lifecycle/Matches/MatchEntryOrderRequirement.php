@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Matches;
 
 use App\Collections\MatchCompetitorsCollection;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;

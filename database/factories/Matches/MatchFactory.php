@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories\Matches;
 
 use App\Enums\Lifecycle\LifecycleOwnerType;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;

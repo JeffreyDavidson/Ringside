@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;

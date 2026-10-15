@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;

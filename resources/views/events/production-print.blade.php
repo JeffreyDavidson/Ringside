@@ -48,7 +48,9 @@
                         <tr>
                             <td>
                                 <strong>{{ $assignment['name'] }}</strong>
-                                <p>{{ __('production.roles.'.$assignment['role']) }} · {{ $assignment['station'] }}</p>
+                                <p>
+                                    {{ \App\Enums\Crew\CrewRole::from($assignment['role'])->label() }} · {{ $assignment['station'] }}
+                                </p>
                                 <p>
                                     {{ __('production.call_time') }}: {{ str_replace('T', ' ', $assignment['call_at'] ?? __('production.not_set')) }}<br />{{ $assignment['timezone'] }} {{ $assignment['offset'] }}
                                 </p>

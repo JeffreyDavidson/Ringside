@@ -25,7 +25,7 @@
     <div data-live-toolbar class="border-border bg-surface sticky -top-4 z-20 border-y lg:-top-7">
         <div class="flex min-h-11 items-center justify-between gap-2 py-1">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 tabular-nums">
-                <span class="font-semibold">{{ __('live-show.'.($complete ? 'completed_heading' : ($run?->status->value ?? 'not_prepared'))) }}</span>
+                <span class="font-semibold">{{ ($run?->status->label() ?? __('live-show.not_prepared')) }}</span>
                 @if ($current)
                     <span
                         aria-label="{{ __('live-show.elapsed') }}"
@@ -410,7 +410,7 @@
                     <li wire:key="item-{{ $item['key'] }}" class="flex flex-col gap-3 py-5">
                         <div class="flex flex-wrap justify-between gap-2">
                             <h3 class="text-lg font-semibold break-words">{{ $item['label'] }}</h3>
-                            <span class="font-semibold">{{ __('live-show.'.$item['state']) }}</span>
+                            <span class="font-semibold">{{ \App\Enums\Events\LiveItemStatus::from($item['state'])->label() }}</span>
                         </div>
                         <p class="text-muted-foreground text-sm">
                             {{ $screen->comparison($item) }} · {{ $item['details'] }} · {{ $item['referees'] }}

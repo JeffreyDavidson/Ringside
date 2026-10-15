@@ -10,4 +10,9 @@ enum StorylineStatus: string
     case Paused = 'paused';
     case Completed = 'completed';
     case Archived = 'archived';
+
+    public function label(): string
+    {
+        return __("storylines.{$this->value}");
+    }
 }

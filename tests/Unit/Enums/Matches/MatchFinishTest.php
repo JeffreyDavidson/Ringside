@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 
 it('identifies whether a finish allows a title change', function (MatchFinish $finish, bool $allowsTitleChange) {
     expect($finish->allowsTitleChange())->toBe($allowsTitleChange);

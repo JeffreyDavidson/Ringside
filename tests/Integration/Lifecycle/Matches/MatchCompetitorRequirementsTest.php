@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Lifecycle\Matches\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;

@@ -2,250 +2,84 @@
 
 ## Overview
 
-Ringside uses a domain-organized enum structure to maintain type safety and consistency across the wrestling management system. All enums are organized by domain with shared enums for cross-domain usage.
+Ringside uses native PHP enums for statuses, types, roles and operation names. Every enum lives in the folder of the domain that owns it under `app/Enums/`, with `Shared/` for values more than one domain stores. No enum sits directly in `App\Enums`; `ApplicationArchitectureTest` enforces this. The written rules are in `.ai/rules/enums.md`.
 
-## Enum Organization
+## Folders
 
-### Domain Structure
-```
-app/Enums/
-├── Lifecycle/              # Lifecycle audit enums
-│   ├── LifecycleDimension.php
-│   ├── LifecycleOwnerType.php
-│   └── LifecycleTransitionType.php
-├── Shared/                 # Cross-domain enums
-│   └── EmploymentStatus.php
-├── Events/                 # Event-specific enums
-├── Stables/               # Stable-specific enums
-│   └── StableStatus.php
-├── Titles/                # Title-specific enums
-│   ├── TitleStatus.php
-│   └── TitleType.php
-└── Users/                 # User-specific enums
-    ├── Role.php
-    └── UserStatus.php
-```
+| Folder | Holds |
+| --- | --- |
+| `Crew/` | Crew roles |
+| `Events/` | Event status, public announcements and sections, live show, talent booking, budget and sponsor commitment vocabularies |
+| `Lifecycle/` | Lifecycle audit vocabulary (dimension, owner type, transition type) |
+| `Matches/` | `MatchType`, `MatchFinish` |
+| `Naming/` | Names guarded by `RecordNameLock` |
+| `Promotions/` | Membership roles and statuses, invitation outcomes |
+| `Roster/` | Roster entity kinds and lifecycle actions |
+| `Shared/` | `EmploymentStatus`, `UnitedStatesState`, `DeletedFilter`, `BusinessRuleReason` |
+| `Stables/` | Stable status, lifecycle actions and member unavailability |
+| `Storylines/` | Storyline and step statuses |
+| `Titles/` | `TitleStatus`, `TitleType`, title lifecycle transitions |
+| `Tournaments/` | Tournament status, entrant kind and operations |
+| `Users/` | `Role`, `UserStatus` |
+| `Concerns/` | Traits shared by enums (`ProvidesFilterOptions`) |
 
-### Architecture Principles
+## Stored values
 
-1. **Domain Organization**: Enums are grouped by business domain
-2. **Shared Resources**: Common enums live in `Shared/` directory
-3. **No Root Enums**: All enums must be domain-organized (root-level enums removed)
-4. **Type Safety**: Enums provide compile-time type checking
-5. **Business Logic**: Enums contain presentation and validation logic
+Enums are string-backed with PascalCase cases and lowercase snake_case values. Four enums store kebab-case values that are already in existing rows: `MatchType`, `MatchFinish`, `RosterEntityType` and `TitleType` (for example `tag-team`, `time-limit-draw`). They keep those values; there is no data migration. Two lifecycle transition enums (`StableActivityTransition`, `TitleLifecycleTransition`) are unbacked because they are never stored.
 
-## Enum Categories
+Enum class names are not stored in the database. Models cast columns to enums, so moving an enum to another namespace needs no data change.
 
-### Shared Enums
+## Labels
 
-#### EmploymentStatus
-Used for entities with employment relationships (wrestlers, managers, referees, tag teams).
-
-```php
-enum EmploymentStatus: string
-{
-    case Employed = 'employed';             // Currently employed
-    case FutureEmployment = 'future_employment'; // Scheduled employment
-    case Released = 'released';             // Contract released
-    case Retired = 'retired';               // Permanently retired
-    case Unemployed = 'unemployed';         // Not currently employed
-}
-```
-
-**Usage:**
-- Pure employment contract states
-- Separate from availability/booking status
-- Used across roster member types
-
-### Domain-Specific Enums
-
-#### Title Status (Titles/TitleStatus.php)
-Wrestling-specific status for championship titles.
+An enum whose value a user sees has a `label(): string` that returns a translation. The text lives in `lang/en`, under a key built from the owning file, the enum and the case value, such as `titles.status.pending_debut` or `matches.type.tag-team`. Blade views and PHP call `->label()` and never build the key themselves.
 
 ```php
 enum TitleStatus: string
 {
-    case Undebuted = 'undebuted';           // Title exists but never debuted
-    case PendingDebut = 'pending_debut';    // Scheduled to debut
-    case Active = 'active';                 // Currently active/defendable
-    case Inactive = 'inactive';             // Temporarily out of circulation
-}
-```
+    use ProvidesFilterOptions;
 
-**Key Characteristics:**
-- Wrestling-specific terminology ("debuted" vs "activated")
-- Title-specific business logic
-- Championship-focused workflow states
+    case Undebuted = 'undebuted';
+    case PendingDebut = 'pending_debut';
+    case Active = 'active';
 
-#### Title Type (Titles/TitleType.php)
-Defines championship title categories.
-
-```php
-enum TitleType: string
-{
-    case Singles = 'singles';               // Individual championship
-    case TagTeam = 'tag-team';             // Tag team championship
-}
-```
-
-#### User Role (Users/Role.php)
-System access levels for users.
-
-```php
-enum Role: string
-{
-    case Administrator = 'administrator';    // Full system access
-    case Basic = 'basic';                   // Limited access
-
-    public function isAdministrator(): bool
+    public function label(): string
     {
-        return $this === self::Administrator;
+        return __("titles.status.{$this->value}");
     }
 }
 ```
 
-Authorization policies inspect role behavior through the cast `Role` value. The `User` model stores and casts the role but does not define role-specific predicates.
+`TranslationKeysTest` loads every enum with a `label()` method and fails when a case returns an untranslated key.
 
-#### User Status (Users/UserStatus.php)
-User account states.
+## Select and filter options
+
+`App\Enums\Concerns\ProvidesFilterOptions` provides:
+
+- `options()`: `value => label` for every case, for form selects.
+- `filterOptions()`: the same with an `'' => All` row first, for table filters.
 
 ```php
-enum UserStatus: string
+TitleStatus::filterOptions(); // ['' => 'All', 'undebuted' => 'Not Yet Debuted', ...]
+MatchType::options();          // ['singles' => 'Singles', 'tag-team' => 'Tag Team', ...]
+```
+
+## Behaviour on enums
+
+Enums carry small, stateless behaviour that more than one caller needs: `MatchFinish::requiresWinningSide()`, `MatchType::numberOfSides()`, `Role::isAdministrator()`, `BudgetCategory::accepts()`, and the `ability()` mapping on lifecycle action enums (checked by `PolicyAbilityArchitectureTest`). Business rules that depend on other records live in Actions and `app/Lifecycle`, not in enums.
+
+## Model integration
+
+```php
+protected function casts(): array
 {
-    case Unverified = 'unverified';        // Email not verified
-    case Active = 'active';                // Active account
-    case Inactive = 'inactive';            // Suspended account
+    return ['status' => EmploymentStatus::class];
 }
 ```
 
-## Enum Usage Guidelines
+Factories and tests pass enum cases, not strings: `'status' => EmploymentStatus::Employed`.
 
-### Import Patterns
+## Testing
 
-**Correct Usage:**
-```php
-use App\Enums\Shared\EmploymentStatus;
-use App\Enums\Titles\TitleStatus;
-use App\Enums\Users\Role;
-```
-
-**Incorrect Usage:**
-```php
-use App\Enums\Role;              // ❌ Root-level enum removed
-```
-
-### Model Integration
-
-#### Enum Casting
-```php
-class Wrestler extends Model
-{
-    protected $casts = [
-        'status' => EmploymentStatus::class,
-    ];
-}
-```
-
-#### Factory Usage
-```php
-class WrestlerFactory extends Factory
-{
-    public function definition(): array
-    {
-        return [
-            'status' => EmploymentStatus::Unemployed,
-        ];
-    }
-    
-    public function employed(): static
-    {
-        return $this->state(['status' => EmploymentStatus::Employed]);
-    }
-}
-```
-
-#### Blade Templates
-```php
-<!-- Correct enum reference -->
-<x-tables.meta-data enum="\App\Enums\Titles\TitleStatus" />
-```
-
-### Business Logic Methods
-
-All enums provide standardized methods for presentation and logic:
-
-```php
-// Label for display
-$status->label();  // "Currently Employed"
-
-// Custom business logic
-$status->isActive();
-$status->canTransitionTo($newStatus);
-```
-
-## Enum Best Practices
-
-### 1. Domain Placement
-- Place enums in appropriate domain directories
-- Use `Shared/` for cross-domain enums
-- Never create root-level enums
-
-### 2. Naming Conventions
-- Use descriptive enum names that reflect business concepts
-- Case names should be PascalCase
-- String values should be snake_case
-
-### 3. Documentation
-- Include docblocks explaining business context
-- Document enum case meanings
-- Provide usage examples
-
-### 4. Backward Compatibility
-- Never remove enum cases (mark as deprecated instead)
-- Add new cases at the end
-- Consider migration impact when changing values
-
-## Testing Enums
-
-### Unit Testing
-```php
-test('employment status provides correct labels', function () {
-    expect(EmploymentStatus::Employed->label())->toBe('Employed');
-    expect(EmploymentStatus::Released->label())->toBe('Released');
-});
-```
-
-### Integration Testing
-```php
-test('wrestler factory creates correct employment status', function () {
-    $wrestler = Wrestler::factory()->employed()->create();
-    
-    expect($wrestler->status)->toBe(EmploymentStatus::Employed);
-    expect($wrestler->status->label())->toBe('Employed');
-});
-```
-
-## Migration from Root Enums
-
-During the enum cleanup process, all root-level enums were removed and replaced with domain-organized versions:
-
-### Removed Enums
-- ✅ `App\Enums\TitleType` → `App\Enums\Titles\TitleType`
-- ✅ `App\Enums\EmploymentStatus` → `App\Enums\Shared\EmploymentStatus`
-- ✅ `App\Enums\Role` → `App\Enums\Users\Role`
-- ✅ `App\Enums\UserStatus` → `App\Enums\Users\UserStatus`
-
-### Updated Components
-- ✅ Factory imports updated to use domain-organized enums
-- ✅ Test files updated with correct enum references
-- ✅ Blade templates updated with proper enum paths
-- ✅ Title status architecture unified (TitleFactory → TitleStatus)
-
-## Architecture Benefits
-
-1. **Type Safety**: Compile-time enum validation prevents invalid states
-2. **Business Logic Encapsulation**: Enum methods contain domain logic
-3. **Consistency**: Standardized status patterns across domains
-4. **Maintainability**: Domain organization makes enums easy to find
-5. **Extensibility**: New enum cases can be added without breaking changes
-6. **Testing**: Enum behavior can be thoroughly unit tested
+- `tests/Integration/Enums/EnumLabelsTest.php` pins the text users see for every labelled enum.
+- `TranslationKeysTest` catches a label whose translation key is missing.
+- Enum behaviour that needs no framework is tested in `tests/Unit/Enums`.

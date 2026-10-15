@@ -89,7 +89,7 @@
         <div class="grid gap-4 py-3 sm:grid-cols-3">
             @foreach (['income', 'expense'] as $direction)
                 <p>
-                    {{ __('event-budget.'.$direction) }}:
+                    {{ \App\Enums\Events\BudgetDirection::from($direction)->label() }}:
                     <span class="tabular-nums">{{ \App\ValueObjects\UsdAmount::display($totals[$direction]['cash']) }}</span>
                 </p>
             @endforeach
@@ -127,7 +127,7 @@
             class="border-outline bg-surface-panel border p-4 lg:p-6"
         >
             <h2 id="budget-draft-heading" class="text-lg font-semibold">
-                {{ __('event-budget.'.$operation->value) }}
+                {{ $operation->label() }}
                 @if ($draftLabel) ·{{ $draftLabel }} @endif
             </h2>
             <p class="text-muted-foreground mt-2 text-sm">{{ __('event-budget.manual') }}</p>
@@ -146,7 +146,7 @@
                             class="min-h-11"
                             :label="__('event-budget.category')"
                             wire:model="lineForm.category"
-                            :options="collect($categories)->mapWithKeys(fn ($category) => [$category->value => __('event-budget.'.$category->value)])->all()"
+                            :options="collect($categories)->mapWithKeys(fn ($category) => [$category->value => $category->label()])->all()"
                         />
                         <x-form.inputs.text
                             class="min-h-11"
@@ -213,7 +213,7 @@
                                 class="min-h-11"
                                 :label="__('event-budget.movements')"
                                 wire:model.live="movementForm.kind"
-                                :options="['payment' => __('event-budget.payment'), 'refund' => __('event-budget.refund')]"
+                                :options="\App\Enums\Events\BudgetMovementKind::options()"
                             />
                             <x-form.inputs.text
                                 class="min-h-11"
@@ -233,7 +233,7 @@
                                 class="min-h-11"
                                 :label="__('event-budget.method')"
                                 wire:model="movementForm.method"
-                                :options="['cash' => __('event-budget.cash_method'), 'bank_transfer' => __('event-budget.bank_transfer'), 'other' => __('event-budget.other')]"
+                                :options="\App\Enums\Events\BudgetPaymentMethod::options()"
                             />
                             @if ($movementForm->kind === 'refund')
                                 <p class="text-muted-foreground md:col-span-2">{{ __('event-budget.refund_help') }}</p>
@@ -298,7 +298,7 @@
     @foreach (['income', 'expense'] as $direction)
         <section aria-labelledby="budget-{{ $direction }}">
             <h2 id="budget-{{ $direction }}" class="mb-4 text-xl font-semibold">
-                {{ __('event-budget.'.$direction) }}
+                {{ \App\Enums\Events\BudgetDirection::from($direction)->label() }}
             </h2>
             <dl class="border-border mb-4 grid grid-cols-2 gap-4 border-y py-4">
                 @foreach (['planned', 'confirmed'] as $key)
@@ -323,7 +323,7 @@
                             <div class="min-w-0">
                                 <h3 class="text-lg font-semibold break-words">{{ $line->description }}</h3>
                                 <p class="text-muted-foreground break-words">
-                                    {{ $line->counterparty }} · {{ __('event-budget.'.$line->category->value) }}
+                                    {{ $line->counterparty }} · {{ $line->category->label() }}
                                 </p>
                                 @if ($line->due_date)
                                     <p class="text-sm">
@@ -386,7 +386,7 @@
                                 @forelse ($line->movements as $movement)
                                     <div class="border-border border-b border-l-0 pb-3">
                                         <p class="tabular-nums">
-                                            {{ $movement->effective_date->toDateString() }} · {{ __('event-budget.'.$movement->kind->value) }} · {{ \App\ValueObjects\UsdAmount::display($movement->amount_cents) }}
+                                            {{ $movement->effective_date->toDateString() }} · {{ $movement->kind->label() }} · {{ \App\ValueObjects\UsdAmount::display($movement->amount_cents) }}
                                         </p>
                                         <p class="text-muted-foreground break-words">
                                             {{ $movement->reference }} {{ $movement->notes }}
@@ -436,9 +436,7 @@
             </div>
             @forelse ($history ?? [] as $revision)
                 <article class="border-border border-b py-4">
-                    <h3 class="font-semibold">
-                        {{ __('event-budget.'.$revision->operation->value) }} · {{ $revision->actor_label }}
-                    </h3>
+                    <h3 class="font-semibold">{{ $revision->operation->label() }} · {{ $revision->actor_label }}</h3>
                     <p class="text-muted-foreground text-sm">
                         {{ $revision->created_at->utc()->format('Y-m-d H:i') }} UTC · #{{ $revision->version }}
                     </p>

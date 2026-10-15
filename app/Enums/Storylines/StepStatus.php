@@ -10,4 +10,9 @@ enum StepStatus: string
     case Postponed = 'postponed';
     case Cancelled = 'cancelled';
     case Happened = 'happened';
+
+    public function label(): string
+    {
+        return __("storylines.{$this->value}");
+    }
 }

@@ -31,7 +31,7 @@
             <summary class="min-h-11 cursor-pointer py-3">
                 {{ __('production.filter_options') }}
                 @if ($sheet['person']) ·{{ collect($sheet['allAssignments'])->firstWhere('contact_id', $sheet['person'])['name'] ?? __('production.not_assigned') }} @endif
-                @if ($sheet['role']) ·{{ __('production.roles.'.$sheet['role']) }} @endif
+                @if ($sheet['role']) ·{{ \App\Enums\Crew\CrewRole::from($sheet['role'])->label() }} @endif
             </summary>
             <form method="GET" class="flex flex-wrap items-end gap-4">
                 <label class="flex flex-col gap-2"
@@ -97,7 +97,7 @@
             @forelse ($sheet['assignments'] as $assignment)
                 <article class="border-border border-t py-5">
                     <h3 class="text-lg font-semibold break-words">
-                        {{ $assignment['name'] }} · {{ __('production.roles.'.$assignment['role']) }}
+                        {{ $assignment['name'] }} · {{ \App\Enums\Crew\CrewRole::from($assignment['role'])->label() }}
                     </h3>
                     <p class="mt-2 break-words">{{ $assignment['station'] }}</p>
                     <p class="mt-2">

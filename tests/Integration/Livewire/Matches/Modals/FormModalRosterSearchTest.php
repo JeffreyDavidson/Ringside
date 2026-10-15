@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

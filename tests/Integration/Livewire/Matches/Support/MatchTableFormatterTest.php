@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;
 use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Models\Matches\EventMatch;

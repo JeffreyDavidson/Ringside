@@ -6,7 +6,7 @@ namespace App\Builders\Events;
 
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByNameInPromotion;
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Models\Events\Event;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;

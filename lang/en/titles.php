@@ -3,6 +3,21 @@
 declare(strict_types=1);
 
 return [
+    'status' => [
+        'undebuted' => 'Not Yet Debuted',
+        'pending_debut' => 'Scheduled to Debut',
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'retired' => 'Retired',
+    ],
+    'types' => [
+        'singles' => 'Singles',
+        'tag-team' => 'Tag Team',
+    ],
+    'competitors' => [
+        'singles' => 'wrestlers',
+        'tag-team' => 'tag teams',
+    ],
     'name' => 'Title Name',
     'type' => 'Title Type',
     'type_locked' => 'The type cannot be changed once the title has championship reigns or is booked in a match.',

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Events;
 
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Exceptions\Events\CannotBeRescheduledException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

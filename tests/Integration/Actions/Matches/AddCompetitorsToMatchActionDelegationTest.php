@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;

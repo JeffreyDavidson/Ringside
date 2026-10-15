@@ -1,9 +1,9 @@
 @props(['mode', 'form', 'editingId', 'story', 'participants', 'events', 'selectedEvent', 'source', 'needsReload'])
 @php
     $states = $mode === 'step-status' ? [\App\Enums\Storylines\StepStatus::Planned, \App\Enums\Storylines\StepStatus::Postponed, \App\Enums\Storylines\StepStatus::Cancelled] : \App\Enums\Storylines\StorylineStatus::cases();
-    $statusOptions = collect($states)->mapWithKeys(fn ($state) => [$state->value => __('storylines.'.$state->value)])->all();
+    $statusOptions = collect($states)->mapWithKeys(fn ($state) => [$state->value => $state->label()])->all();
     if ($mode === 'story-status' && $story->status === \App\Enums\Storylines\StorylineStatus::Archived) {
-        $statusOptions = [$story->previous_status->value => __('storylines.restore').' · '.__('storylines.'.$story->previous_status->value)];
+        $statusOptions = [$story->previous_status->value => __('storylines.restore').' · '.$story->previous_status->label()];
     }
 @endphp
 <form wire:submit="save" id="storyline-form" class="border-border bg-surface-panel scroll-mt-6 border p-5 sm:p-7">
@@ -126,7 +126,7 @@
                     @endif
                     @if ($form->eventId)
                         <p class="text-muted-foreground">
-                            {{ __('storylines.source_evidence') }}: {{ $source['context']['segment_label'] ?? $source['context']['match_label'] ?? $source['context']['event_name'] ?? '' }} · {{ $source['context']['live_state'] ? __('live-show.'.$source['context']['live_state']) : __('storylines.no_live') }}
+                            {{ __('storylines.source_evidence') }}: {{ $source['context']['segment_label'] ?? $source['context']['match_label'] ?? $source['context']['event_name'] ?? '' }} · {{ $source['context']['live_state'] ? \App\Enums\Events\LiveItemStatus::from($source['context']['live_state'])->label() : __('storylines.no_live') }}
                             @if ($form->matchId) ·{{ $source['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                     @endif

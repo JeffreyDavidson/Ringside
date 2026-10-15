@@ -28,7 +28,7 @@
             />
         </div>
 
-        @if ($this->match->match_type->recordsIndividualEliminations())
+        @if ($this->match->match_type->usesIndividualCompetitorSides())
             <section class="space-y-3" aria-labelledby="result-eliminations-heading">
                 <div>
                     <h3 id="result-eliminations-heading" class="text-foreground text-sm font-semibold">

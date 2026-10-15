@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Matches\RecordResultAction;
 use App\Data\Matches\MatchResultData;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;

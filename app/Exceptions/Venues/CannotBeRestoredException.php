@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Venues;
 
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;

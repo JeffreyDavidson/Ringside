@@ -6,9 +6,9 @@ namespace App\Livewire\Matches\Modals;
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\UpdateMatchAction;
-use App\Enums\BusinessRuleReason;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Roster\BookableRosterKind;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;

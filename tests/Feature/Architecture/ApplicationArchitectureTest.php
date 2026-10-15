@@ -47,6 +47,14 @@ arch('enums are native enums')
     ->toBeEnums()
     ->ignoring('App\\Enums\\Concerns');
 
+test('enums live in a domain folder, never directly in App\\Enums', function (): void {
+    // Act
+    $rootEnums = glob(app_path('Enums/*.php'));
+
+    // Assert
+    expect($rootEnums)->toBeEmpty();
+});
+
 arch('controllers use the controller suffix')
     ->expect('App\\Http\\Controllers')
     ->toHaveSuffix('Controller');

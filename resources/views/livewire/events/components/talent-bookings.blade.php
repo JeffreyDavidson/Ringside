@@ -93,7 +93,7 @@
                         </p>
                     @endif
                     <p class="mt-2 font-semibold">
-                        {{ __('talent-bookings.states.'.($row['booking']?->status->value ?? 'not_tracked')) }}
+                        {{ ($row['booking']?->status->label() ?? __('talent-bookings.states.not_tracked')) }}
                     </p>
                     @foreach ($row['warnings'] as $warning)
                         <p class="text-warning mt-2 flex items-start gap-2">
@@ -189,9 +189,7 @@
                             class="border-outline bg-surface-panel min-h-11 border px-3"
                         >
                             @foreach (\App\Enums\Events\TalentBookingStatus::cases() as $state)
-                                <option value="{{ $state->value }}">
-                                    {{ __('talent-bookings.states.'.$state->value) }}
-                                </option>
+                                <option value="{{ $state->value }}">{{ $state->label() }}</option>
                             @endforeach</select
                         ><x-form.error name="form.status" />
                     </div>

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Matches;
 
-use App\Enums\BusinessRuleReason;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Titles\Title;
 

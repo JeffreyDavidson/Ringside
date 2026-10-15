@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;

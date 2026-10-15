@@ -389,7 +389,7 @@
                     </summary>
                     <p class="break-words whitespace-pre-wrap">{{ $revision->snapshot['description'] ?? '' }}</p>
                     <p>
-                        {{ __('sponsors.state') }}: {{ __('sponsors.'.($revision->snapshot['status'] ?? 'pending')) }}
+                        {{ __('sponsors.state') }}: {{ \App\Enums\Events\SponsorCommitmentStatus::from($revision->snapshot['status'] ?? 'pending')->label() }}
                     </p>
                     <p>
                         {{ __('sponsors.deadline') }}: {{ $revision->snapshot['deadline_at'] ?? __('sponsors.not_set') }}

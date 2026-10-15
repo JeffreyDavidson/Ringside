@@ -16,6 +16,11 @@ enum BudgetCategory: string
     case Merchandise = 'merchandise';
     case Other = 'other';
 
+    public function label(): string
+    {
+        return __("event-budget.{$this->value}");
+    }
+
     public function accepts(BudgetDirection $direction): bool
     {
         if ($this === self::Other) {

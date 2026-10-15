@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enums\Matches;
+
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 enum MatchFinish: string
 {
+    use ProvidesFilterOptions;
+
     case Pinfall = 'pinfall';
     case Submission = 'submission';
     case Disqualification = 'disqualification';
@@ -18,17 +22,7 @@ enum MatchFinish: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Pinfall => 'Pinfall',
-            self::Submission => 'Submission',
-            self::Disqualification => 'Disqualification',
-            self::Countout => 'Countout',
-            self::Knockout => 'Knockout',
-            self::Stipulation => 'Stipulation',
-            self::Forfeit => 'Forfeit',
-            self::TimeLimitDraw => 'Time Limit Draw',
-            self::NoDecision => 'No Decision',
-        };
+        return __("matches.finish.{$this->value}");
     }
 
     public function requiresWinningSide(): bool
@@ -52,13 +46,5 @@ enum MatchFinish: string
             self::TimeLimitDraw,
             self::NoDecision => false,
         };
-    }
-
-    /** @return array<string, string> */
-    public static function options(): array
-    {
-        return collect(self::cases())
-            ->mapWithKeys(fn (self $finish): array => [$finish->value => $finish->label()])
-            ->all();
     }
 }

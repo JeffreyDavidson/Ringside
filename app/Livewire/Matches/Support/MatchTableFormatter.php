@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;

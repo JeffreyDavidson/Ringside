@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Matches\Modals\FormModal;

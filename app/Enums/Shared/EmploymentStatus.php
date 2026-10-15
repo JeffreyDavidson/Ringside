@@ -25,12 +25,6 @@ enum EmploymentStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Employed => 'Employed',
-            self::FutureEmployment => 'Awaiting Employment',
-            self::Released => 'Released',
-            self::Retired => 'Retired',
-            self::Unemployed => 'Unemployed',
-        };
+        return __("employments.status.{$this->value}");
     }
 }
