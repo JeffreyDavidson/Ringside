@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Titles;
 
-use App\Support\Enums\ProvidesFilterOptions;
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 enum TitleStatus: string
 {

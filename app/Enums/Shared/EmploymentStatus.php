@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Shared;
 
-use App\Support\Enums\ProvidesFilterOptions;
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 /**
  * Employment status enum for entities that can be employed.

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Auth\CaseInsensitiveEmailUserProvider;
 use App\Models\Users\User;
-use App\Support\Auth\CaseInsensitiveEmailUserProvider;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\DB;
 

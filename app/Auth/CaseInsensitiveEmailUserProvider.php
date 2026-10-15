@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Auth;
+namespace App\Auth;
 
 use App\Models\Users\User;
 use Illuminate\Auth\EloquentUserProvider;
