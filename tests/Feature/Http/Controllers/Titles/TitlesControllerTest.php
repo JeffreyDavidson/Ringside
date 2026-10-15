@@ -18,6 +18,30 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the titles index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $user = basicUser();
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('titles.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('titles.index')
+            ->assertSeeHtml('<title>Titles · Ringside</title>')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the titles index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -38,7 +62,8 @@ describe('index', function (): void {
         $response = get(route('titles.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the titles index', function (): void {
@@ -58,7 +83,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the title profile and its related data', function () {
         // Arrange
-        $title = Title::factory()->create();
+        $title = Title::factory()
+            ->create(['name' => 'Heavyweight Championship']);
 
         actingAs(administrator());
 
@@ -69,6 +95,7 @@ describe('show', function (): void {
         $response
             ->assertOk()
             ->assertViewIs('titles.show')
+            ->assertSeeHtml('<title>Heavyweight Championship · Ringside</title>')
             ->assertSee($title->name)
             ->assertSee('Current Champion')
             ->assertSee('Vacant')
@@ -82,15 +109,21 @@ describe('show', function (): void {
 
     test('show renders the related data displayed by the title summary', function () {
         // Arrange
-        $title = Title::factory()->create();
+        $title = Title::factory()
+            ->create();
 
         $startedAt = today()->subDay();
         ActivityPeriod::factory()
             ->for($title, 'activeable')
             ->started($startedAt)
             ->create();
-        $wrestler = Wrestler::factory()->create();
-        TitleChampionship::factory()->for($title, 'title')->forWrestler($wrestler)->current()->create();
+        $wrestler = Wrestler::factory()
+            ->create();
+        TitleChampionship::factory()
+            ->for($title, 'title')
+            ->forWrestler($wrestler)
+            ->current()
+            ->create();
 
         actingAs(administrator());
 
@@ -106,7 +139,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view a title', function () {
         // Arrange
-        $title = Title::factory()->create();
+        $title = Title::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -120,7 +154,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a title', function () {
         // Arrange
-        $title = Title::factory()->create();
+        $title = Title::factory()
+            ->create();
 
         // Act
         $response = get(route('titles.show', $title));
@@ -132,7 +167,8 @@ describe('show', function (): void {
 
     test('returns 404 when title does not exist', function () {
         // Arrange
-        Title::factory()->create();
+        Title::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -146,14 +182,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct title profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $title = Title::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $title = Title::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 

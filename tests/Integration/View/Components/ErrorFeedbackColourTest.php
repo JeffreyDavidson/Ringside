@@ -17,8 +17,8 @@ describe('error feedback colour', function (): void {
         // Assert
         expect($html)
             ->toContain('Something needs fixing.')
-            ->toContain('ringside-error')
-            ->not->toContain('ringside-signal-soft');
+            ->toContain('text-error')
+            ->not->toContain('signal-soft');
     })->with([
         'stable error panel' => ['stable', '<x-stables.modal-error />'],
         'sign-in field' => ['email', '<x-auth.field name="email" label="Email" />'],
@@ -48,8 +48,8 @@ describe('error feedback colour', function (): void {
 
         // Assert
         expect($html)
-            ->toContain('bg-ringside-error-surface')
-            ->toContain('border-ringside-error');
+            ->toContain('bg-error-surface')
+            ->toContain('border-error');
     });
 
     it('marks an error flash message with the error colour', function (): void {
@@ -58,8 +58,8 @@ describe('error feedback colour', function (): void {
 
         // Assert
         expect($html)
-            ->toContain("'border-ringside-error': notification?.type === 'error'")
-            ->not->toContain('ringside-signal-soft');
+            ->toContain("'border-error': notification?.type === 'error'")
+            ->not->toContain('signal-soft');
     });
 
     it('keeps destructive actions in coral so they are not mistaken for errors', function (): void {
@@ -68,7 +68,7 @@ describe('error feedback colour', function (): void {
 
         // Assert
         expect($html)
-            ->toContain('text-ringside-signal-soft')
-            ->not->toContain('ringside-error');
+            ->toContain('text-signal-soft')
+            ->not->toContain('error');
     });
 });

@@ -18,6 +18,30 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the stables index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $user = basicUser();
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('stables.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('stables.index')
+            ->assertSeeHtml('<title>Stables · Ringside</title>')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the stables index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -38,7 +62,8 @@ describe('index', function (): void {
         $response = get(route('stables.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the stables index', function (): void {
@@ -58,7 +83,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the stable profile and its related data', function () {
         // Arrange
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -81,7 +107,8 @@ describe('show', function (): void {
 
     test('show leaves the summary relationships to the general info component', function () {
         // Arrange
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()
+            ->create();
 
         $startedAt = today()->subDay();
         ActivityPeriod::factory()
@@ -103,7 +130,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view stable profiles', function () {
         // Arrange
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -117,7 +145,8 @@ describe('show', function (): void {
 
     test('a guest cannot view a stable profile', function () {
         // Arrange
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()
+            ->create();
 
         // Act
         $response = get(route('stables.show', $stable));
@@ -129,7 +158,8 @@ describe('show', function (): void {
 
     test('returns 404 when stable does not exist', function () {
         // Arrange
-        Stable::factory()->create();
+        Stable::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -144,9 +174,15 @@ describe('show', function (): void {
     test('administrators can view stable profiles in every lifecycle state', function (string $state): void {
         // Arrange
         $stable = match ($state) {
-            'active' => Stable::factory()->active()->create(),
-            'inactive' => Stable::factory()->inactive()->create(),
-            'retired' => Stable::factory()->retired()->create(),
+            'active' => Stable::factory()
+                ->active()
+                ->create(),
+            'inactive' => Stable::factory()
+                ->inactive()
+                ->create(),
+            'retired' => Stable::factory()
+                ->retired()
+                ->create(),
             default => throw new LogicException('Unknown lifecycle fixture'),
         };
 
@@ -168,14 +204,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct stable profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $stable = Stable::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $stable = Stable::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 

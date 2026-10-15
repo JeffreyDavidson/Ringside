@@ -32,7 +32,7 @@
     @stack('styles')
 </head>
 
-<body class="layout1 bg-ringside-surface text-ringside-ink min-h-dvh antialiased">
+<body class="layout1 bg-surface text-foreground min-h-dvh antialiased">
     <script>
         document.body.style.setProperty(
             '--sidebar-initial-width',
@@ -45,7 +45,7 @@
     <a
         href="#main-content"
         data-test="skip-link"
-        class="bg-ringside-surface-panel text-ringside-ink border-ringside-ink focus-visible:outline-ringside-ink sr-only z-[80] border px-4 py-3 text-sm font-semibold focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="bg-surface-panel text-foreground border-foreground focus-visible:outline-foreground sr-only z-[80] border px-4 py-3 text-sm font-semibold focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-visible:outline-2 focus-visible:outline-offset-2"
     >{{ __('navigation.skip_to_content') }}</a>
 
     <!-- Page -->
@@ -61,7 +61,7 @@
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div
-            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-[var(--header-height)] transition-[padding] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:ps-[var(--shell-sidebar-width)] lg:pt-[var(--header-height)]"
+            class="flex h-dvh min-h-dvh min-w-0 grow flex-col overflow-hidden pt-(--header-height) transition-[padding] duration-(--sidebar-transition-duration) ease-(--sidebar-transition-timing) lg:ps-(--shell-sidebar-width) lg:pt-(--header-height)"
             x-data
             x-init="$nextTick(() => document.documentElement.removeAttribute('data-sidebar-initializing'))"
             :inert="$store.sidebar && $store.sidebar.mobileOpen"

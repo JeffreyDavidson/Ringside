@@ -11,9 +11,9 @@
 
 @if ($members->isNotEmpty())
     <fieldset class="space-y-2" @if ($errorMessages !== []) aria-describedby="{{ $errorId }}" @endif>
-        <legend class="text-ringside-ink text-sm font-semibold">{{ $heading }}</legend>
+        <legend class="text-foreground text-sm font-semibold">{{ $heading }}</legend>
 
-        <ul class="divide-ringside-line border-ringside-line divide-y border">
+        <ul class="divide-border border-border divide-y border">
             @foreach ($members as $member)
                 @php
                     $inputId = "{$model}-{$member['id']}";
@@ -27,18 +27,18 @@
                         value="{{ $member['id'] }}"
                         {{ $attributes->whereStartsWith('wire:model') }}
                         @disabled($unavailability !== null)
-                        class="accent-ringside-red focus-visible:outline-ringside-ink size-4 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="accent-primary focus-visible:outline-foreground size-4 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2"
                     />
-                    <label for="{{ $inputId }}" class="text-ringside-ink flex-1 text-sm">{{ $member['name'] }}</label>
+                    <label for="{{ $inputId }}" class="text-foreground flex-1 text-sm">{{ $member['name'] }}</label>
                     @if ($unavailability !== null)
-                        <span class="text-ringside-muted text-xs">{{ $unavailability->label() }}</span>
+                        <span class="text-muted-foreground text-xs">{{ $unavailability->label() }}</span>
                     @endif
                 </li>
             @endforeach
         </ul>
 
         @if ($errorMessages !== [])
-            <div id="{{ $errorId }}" class="text-ringside-error space-y-1 text-sm" role="alert">
+            <div id="{{ $errorId }}" class="text-error space-y-1 text-sm" role="alert">
                 @foreach ($errorMessages as $message)
                     <p>{{ $message }}</p>
                 @endforeach

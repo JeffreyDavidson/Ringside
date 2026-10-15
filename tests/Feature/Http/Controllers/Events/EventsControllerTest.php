@@ -17,6 +17,30 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 describe('index', function (): void {
+    test('an active promotion member receives the events index', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $user = basicUser();
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('events.index'));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertViewIs('events.index')
+            ->assertSeeHtml('<title>Events · Ringside</title>')
+            ->assertSeeLivewire(Main::class);
+    });
+
     test('an administrator receives the events index view and table', function (): void {
         // Arrange
         actingAs(administrator());
@@ -37,7 +61,8 @@ describe('index', function (): void {
         $response = get(route('events.index'));
 
         // Assert
-        $response->assertRedirect(route('login'));
+        $response
+            ->assertRedirect(route('login'));
     });
 
     test('a user without membership cannot open the events index', function (): void {
@@ -57,7 +82,8 @@ describe('index', function (): void {
 describe('show', function (): void {
     test('renders the event profile and its related data', function () {
         // Arrange
-        $event = Event::factory()->create();
+        $event = Event::factory()
+            ->create(['name' => 'Fall Brawl']);
 
         actingAs(administrator());
 
@@ -66,7 +92,9 @@ describe('show', function (): void {
 
         // Assert
         $response
+            ->assertOk()
             ->assertViewIs('events.show')
+            ->assertSeeHtml('<title>Fall Brawl · Ringside</title>')
             ->assertViewHas('event', $event)
             ->assertSeeHtml('aria-label="Content workspace"')
             ->assertSee($event->name)
@@ -77,7 +105,8 @@ describe('show', function (): void {
 
     test('a user without a promotion membership cannot view an event profile', function () {
         // Arrange
-        $event = Event::factory()->create();
+        $event = Event::factory()
+            ->create();
 
         actingAs(basicUser());
 
@@ -91,7 +120,8 @@ describe('show', function (): void {
 
     test('a guest cannot view an event profile', function () {
         // Arrange
-        $event = Event::factory()->create();
+        $event = Event::factory()
+            ->create();
 
         // Act
         $response = get(route('events.show', $event));
@@ -103,7 +133,8 @@ describe('show', function (): void {
 
     test('returns 404 when event does not exist', function () {
         // Arrange
-        Event::factory()->create();
+        Event::factory()
+            ->create();
 
         actingAs(administrator());
 
@@ -117,14 +148,18 @@ describe('show', function (): void {
 
     test('an active promotion member receives the correct event profile', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $event = Event::factory()->for($promotion, 'promotion')->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $event = Event::factory()
+            ->for($promotion, 'promotion')
+            ->create();
 
         $user = basicUser();
-        $promotion->users()->attach($user, [
-            'role' => MembershipRole::Member,
-            'status' => MembershipStatus::Active,
-        ]);
+        $promotion->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
 
         actingAs($user);
 
@@ -140,22 +175,30 @@ describe('show', function (): void {
 
     test('the event view receives only related storylines in title and identity order', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
-        $event = Event::factory()->for($promotion)->create();
+        $promotion = Promotion::factory()
+            ->create();
+        $event = Event::factory()
+            ->for($promotion)
+            ->create();
         [$later, $first] = Storyline::factory()
             ->for($promotion)
             ->count(2)
             ->sequence(['title' => 'Zulu'], ['title' => 'Alpha'])
-            ->has(StorylineStep::factory()->for($event), 'steps')
+            ->has(StorylineStep::factory()
+                ->for($event), 'steps')
             ->create()
             ->all();
         $tie = Storyline::factory()
             ->for($promotion)
-            ->has(StorylineDevelopment::factory()->for($event), 'developments')
+            ->has(StorylineDevelopment::factory()
+                ->for($event), 'developments')
             ->create(['title' => 'Alpha']);
-        Storyline::factory()->for($promotion)->create(['title' => 'Unrelated']);
         Storyline::factory()
-            ->has(StorylineDevelopment::factory()->for($event), 'developments')
+            ->for($promotion)
+            ->create(['title' => 'Unrelated']);
+        Storyline::factory()
+            ->has(StorylineDevelopment::factory()
+                ->for($event), 'developments')
             ->create(['title' => 'Foreign']);
 
         actingAs(administrator());

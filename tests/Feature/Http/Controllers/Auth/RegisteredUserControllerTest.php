@@ -54,7 +54,9 @@ describe('store', function (): void {
             ->assertRedirect(route('login'))
             ->assertSessionHas('status', __('auth-forms.account_pending'));
 
-        $user = User::query()->where('email', 'jeffrey@example.com')->firstOrFail();
+        $user = User::query()
+            ->where('email', 'jeffrey@example.com')
+            ->firstOrFail();
 
         expect($user)
             ->first_name->toBe('Jeffrey')
@@ -62,7 +64,8 @@ describe('store', function (): void {
             ->role->toBe(Role::Basic)
             ->status->toBe(UserStatus::Unverified)
             ->email_verified_at->toBeNull()
-            ->and(Hash::check('password-12345', $user->password))->toBeTrue();
+            ->and(Hash::check('password-12345', $user->password))
+            ->toBeTrue();
 
         Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($user));
         Event::assertDispatchedOnce(Registered::class);
@@ -70,6 +73,7 @@ describe('store', function (): void {
     })->with([
         'lowercase email' => 'jeffrey@example.com',
         'mixed-case email' => 'Jeffrey@Example.COM',
+        'surrounding whitespace' => '  Jeffrey@Example.COM  ',
     ]);
 
     test('registration requires valid account details', function () {
@@ -96,92 +100,149 @@ describe('store', function (): void {
             ->assertSessionMissing('_old_input.password')
             ->assertSessionMissing('_old_input.password_confirmation');
 
-        expect(User::query()->count())->toBe(0);
+        expect(User::query()
+            ->count())->toBe(0);
         Event::assertNotDispatched(Registered::class);
     });
 
-    test('registration answers the same for a taken and an unknown email', function (string $takenEmail): void {
+    test('a taken email gets the pending response without changing the account', function (string $takenEmail): void {
         // Arrange
-        $existing = User::factory()->create(['email' => 'existing@example.com']);
-
-        Event::fake([Registered::class]);
-        $registration = fn (string $email): array => [
+        $existing = User::factory()
+            ->create(['email' => 'existing@example.com']);
+        $original = $existing->refresh()
+            ->getAttributes();
+        $registrationData = [
             'first_name' => 'Taylor',
             'last_name' => 'Promoter',
-            'email' => $email,
+            'email' => $takenEmail,
             'password' => 'test-password-123',
             'password_confirmation' => 'test-password-123',
         ];
 
+        Event::fake([Registered::class]);
+
         // Act
-        $taken = from(route('register'))
-            ->post(route('register'), $registration($takenEmail));
-        $unknown = from(route('register'))
-            ->post(route('register'), $registration('unknown@example.com'));
+        $response = from(route('register'))->post(route('register'), $registrationData);
 
         // Assert
-        $taken
-            ->assertRedirect(route('login'))
-            ->assertSessionHas('status', __('auth-forms.account_pending'))
-            ->assertSessionHasNoErrors();
-        $unknown
+        $response
             ->assertRedirect(route('login'))
             ->assertSessionHas('status', __('auth-forms.account_pending'))
             ->assertSessionHasNoErrors();
 
-        expect(User::query()->count())->toBe(2)
-            ->and(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
-        Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->email === 'unknown@example.com');
-        Event::assertDispatchedOnce(Registered::class);
-        Event::assertNotDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($existing));
+        expect(User::query()
+            ->count())->toBe(1)
+            ->and($existing->refresh()
+                ->getAttributes())
+            ->toBe($original);
+        Event::assertNotDispatched(Registered::class);
+        assertGuest();
     })->with([
         'the same email' => 'existing@example.com',
         'an email that differs by case' => 'Existing@Example.COM',
     ]);
 
-    test('registration creates nothing for the email of a deleted user', function (): void {
+    test('an unknown email gets the same pending response and creates its own account', function (): void {
         // Arrange
-        User::factory()->create(['email' => 'gone@example.com'])->delete();
+        $existing = User::factory()
+            ->create(['email' => 'existing@example.com']);
+        $original = $existing->refresh()
+            ->getAttributes();
+        $registrationData = [
+            'first_name' => 'Taylor',
+            'last_name' => 'Promoter',
+            'email' => 'unknown@example.com',
+            'password' => 'test-password-123',
+            'password_confirmation' => 'test-password-123',
+        ];
 
         Event::fake([Registered::class]);
 
         // Act
-        $response = post(route('register'), [
+        $response = from(route('register'))->post(route('register'), $registrationData);
+
+        // Assert
+        $response
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('status', __('auth-forms.account_pending'))
+            ->assertSessionHasNoErrors();
+
+        $created = User::query()
+            ->where('email', 'unknown@example.com')
+            ->firstOrFail();
+        expect(User::query()
+            ->count())->toBe(2)
+            ->and(User::query()
+                ->where('email', 'existing@example.com')
+                ->count())
+            ->toBe(1)
+            ->and($existing->refresh()
+                ->getAttributes())
+            ->toBe($original);
+        Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($created));
+        Event::assertDispatchedOnce(Registered::class);
+        Event::assertNotDispatched(Registered::class, fn (Registered $event): bool => $event->user instanceof User && $event->user->is($existing));
+        assertGuest();
+    });
+
+    test('registration creates nothing for the email of a deleted user', function (): void {
+        // Arrange
+        User::factory()
+            ->create(['email' => 'gone@example.com'])
+            ->delete();
+
+        Event::fake([Registered::class]);
+
+        $requestData = [
             'first_name' => 'Taylor',
             'last_name' => 'Promoter',
             'email' => 'gone@example.com',
             'password' => 'test-password-123',
             'password_confirmation' => 'test-password-123',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('register'), $requestData);
 
         // Assert
         $response
             ->assertRedirect(route('login'))
             ->assertSessionHas('status', __('auth-forms.account_pending'));
 
-        expect(User::query()->withTrashed()->count())->toBe(1);
+        expect(User::query()
+            ->withTrashed()
+            ->count())->toBe(1);
         Event::assertNotDispatched(Registered::class);
     });
 
     test('registration still validates the other fields for a taken email', function (): void {
         // Arrange
-        User::factory()->create(['email' => 'existing@example.com']);
+        User::factory()
+            ->create(['email' => 'existing@example.com']);
+
+        Event::fake([Registered::class]);
+
+        $requestData = [
+            'first_name' => '',
+            'last_name' => 'Promoter',
+            'email' => 'existing@example.com',
+            'password' => 'short',
+            'password_confirmation' => 'short',
+        ];
 
         // Act
         $response = from(route('register'))
-            ->post(route('register'), [
-                'first_name' => '',
-                'last_name' => 'Promoter',
-                'email' => 'existing@example.com',
-                'password' => 'short',
-                'password_confirmation' => 'short',
-            ]);
+            ->post(route('register'), $requestData);
 
         // Assert
         $response
             ->assertRedirect(route('register'))
             ->assertSessionHasErrors(['first_name', 'password'])
             ->assertSessionDoesntHaveErrors('email');
+
+        expect(User::query()
+            ->count())->toBe(1);
+        Event::assertNotDispatched(Registered::class);
     });
 
     test('registration answers as pending when the database rejects a duplicate email', function (): void {
@@ -192,14 +253,16 @@ describe('store', function (): void {
 
         Event::fake([Registered::class]);
 
-        // Act
-        $response = post(route('register'), [
+        $requestData = [
             'first_name' => 'Taylor',
             'last_name' => 'Promoter',
             'email' => 'new@example.com',
             'password' => 'test-password-123',
             'password_confirmation' => 'test-password-123',
-        ]);
+        ];
+
+        // Act
+        $response = post(route('register'), $requestData);
 
         // Assert
         $response
@@ -208,6 +271,67 @@ describe('store', function (): void {
             ->assertSessionHasNoErrors();
 
         Event::assertNotDispatched(Registered::class);
-        expect(User::query()->count())->toBe(0);
+        expect(User::query()
+            ->count())->toBe(0);
     });
+});
+
+describe('email preparation', function (): void {
+    test('null and non-string email values remain validation failures', function (mixed $email): void {
+        // Arrange
+        $requestData = [
+            'first_name' => 'Jeffrey',
+            'last_name' => 'Davidson',
+            'password' => 'password-12345',
+            'password_confirmation' => 'password-12345',
+            'email' => $email,
+        ];
+
+        // Act
+        $response = post(route('register'), $requestData);
+
+        // Assert
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('email')
+            ->assertSessionHasInput('email', fn (mixed $input): bool => $input === $email)
+            ->assertSessionMissing('_old_input.password')
+            ->assertSessionMissing('_old_input.password_confirmation');
+
+        expect(User::query()
+            ->count())->toBe(0);
+    })->with([
+        'null email' => null,
+        'array email' => [['unexpected']],
+        'numeric email' => 123,
+    ]);
+});
+
+test('invalid registration keeps the entered email case without retaining passwords', function (): void {
+    // Arrange
+    Event::fake([Registered::class]);
+
+    $requestData = [
+        'first_name' => 'Jeffrey',
+        'last_name' => 'Davidson',
+        'email' => '  Jeffrey@Example.COM  ',
+        'password' => 'password-12345',
+        'password_confirmation' => 'different-password',
+    ];
+
+    // Act
+    $response = from(route('register'))
+        ->post(route('register'), $requestData);
+
+    // Assert
+    $response
+        ->assertRedirect(route('register'))
+        ->assertSessionHasErrors('password')
+        ->assertSessionHasInput('email', 'Jeffrey@Example.COM')
+        ->assertSessionMissing('_old_input.password')
+        ->assertSessionMissing('_old_input.password_confirmation');
+
+    expect(User::query()
+        ->count())->toBe(0);
+    Event::assertNotDispatched(Registered::class);
 });

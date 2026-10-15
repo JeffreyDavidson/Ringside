@@ -78,10 +78,10 @@ it('marks invalid fields with the Ringside error styling', function (string $com
     $html = Blade::render('<x-'.$component.' wire:model="form.name" label="Name" />');
 
     expect($html)
-        ->toContain('aria-invalid:border-ringside-error')
-        ->toContain('text-ringside-error')
+        ->toContain('aria-invalid:border-error')
+        ->toContain('text-error')
         ->toContain('<svg')
-        ->not->toContain('ringside-signal-soft')
+        ->not->toContain('signal-soft')
         ->not->toContain('var(--input)')
         ->not->toContain('text-destructive');
 })->with(['form.input', 'form.inputs.textarea', 'form.inputs.select']);
@@ -94,8 +94,8 @@ it('renders standalone errors as a visible alert with an icon', function (): voi
 
     expect($html)
         ->toContain('role="alert"')
-        ->toContain('text-ringside-error')
-        ->not->toContain('ringside-signal-soft')
+        ->toContain('text-error')
+        ->not->toContain('signal-soft')
         ->toContain('<svg')
         ->toContain('This wrestler is not available for booking.');
 });

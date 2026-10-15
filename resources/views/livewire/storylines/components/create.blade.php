@@ -1,4 +1,4 @@
-<details class="border-ringside-line border-y py-4">
+<details class="border-border border-y py-4">
     <summary class="min-h-11 cursor-pointer py-3 font-semibold">{{ __('storylines.new_story') }}</summary>
     <form wire:submit="save" class="mt-4 grid max-w-2xl gap-5">
         <x-form.inputs.select

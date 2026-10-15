@@ -1,9 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use App\Actions\Tournaments\SaveTournamentAction;
+use App\Data\Tournaments\TournamentData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Tournaments\EntrantKind;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\Tournament;
 
 use function Pest\Laravel\actingAs;
@@ -11,78 +15,113 @@ use function Pest\Laravel\get;
 
 it('keeps foreign tournament bindings indistinguishable from missing records', function (): void {
     // Arrange
-    $world = tournamentFixture();
-    $other = Promotion::factory()->create();
+    $promotion = Promotion::factory()
+        ->create();
+    $entrants = Wrestler::factory()
+        ->employed()
+        ->for($promotion)
+        ->count(4)
+        ->create();
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
+        ->all())));
+    $other = Promotion::factory()
+        ->create();
 
     $user = basicUser();
-    $other->users()->attach($user, [
-        'role' => MembershipRole::Owner,
-        'status' => MembershipStatus::Active,
-    ]);
+    $other->users()
+        ->attach($user, [
+            'role' => MembershipRole::Owner,
+            'status' => MembershipStatus::Active,
+        ]);
 
     actingAs($user);
 
-    // Act
-    $response = get(route('tournaments.show', $world['tournament']));
-
-    // Assert
-    $response->assertNotFound();
+    $baselineResponse = get(route('tournaments.show', PHP_INT_MAX));
 
     // Act
-    $response = get(route('tournaments.show', PHP_INT_MAX));
+    $response = get(route('tournaments.show', $tournament));
 
     // Assert
-    $response->assertNotFound();
+    $response
+        ->assertNotFound();
 
-    expect(Tournament::query()->withoutGlobalScopes()->count())->toBe(1);
+    $baselineResponse
+        ->assertNotFound();
+
+    expect(Tournament::query()
+        ->withoutGlobalScopes()
+        ->count())->toBe(1);
 });
 
-it('shows operation controls only to promotion owners and managers', function (MembershipRole $role, bool $editable): void {
+it('owners and managers see tournament operation controls', function (MembershipRole $role): void {
     // Arrange
-    $world = tournamentFixture();
+    $promotion = Promotion::factory()
+        ->create();
+    $entrants = Wrestler::factory()
+        ->employed()
+        ->for($promotion)
+        ->count(4)
+        ->create();
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
+        ->all())));
 
-    $user = basicUser();
-    $world['promotion']->users()->attach($user, [
-        'role' => $role,
-        'status' => MembershipStatus::Active,
-    ]);
-
-    actingAs($user);
+    actingAsPromotionMember($promotion, $role);
 
     // Act
-    $response = get(route('tournaments.show', $world['tournament']));
+    $response = get(route('tournaments.show', $tournament));
 
     // Assert
     $response
         ->assertOk()
-        ->assertSee('Autumn Cup');
-    if ($editable) {
-        $response->assertSee('Save draft');
+        ->assertSee('Autumn Cup')
+        ->assertSee('Save draft');
+})->with(['owner' => MembershipRole::Owner, 'manager' => MembershipRole::Manager]);
 
-        return;
-    }
+it('members cannot see tournament operation controls', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()
+        ->create();
+    $entrants = Wrestler::factory()
+        ->employed()
+        ->for($promotion)
+        ->count(4)
+        ->create();
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
+        ->all())));
+
+    actingAsPromotionMember($promotion, MembershipRole::Member);
+
+    // Act
+    $response = get(route('tournaments.show', $tournament));
+
+    // Assert
     $response
+        ->assertOk()
+        ->assertSee('Autumn Cup')
         ->assertDontSee('Save draft')
         ->assertDontSee('Cancel tournament');
-})->with([
-    'owner' => [MembershipRole::Owner, true],
-    'manager' => [MembershipRole::Manager, true],
-    'member' => [MembershipRole::Member, false],
-]);
+});
 
-it('requires login for tournament pages', function (): void {
+it('requires login for the tournament index', function (): void {
     // Arrange
-    $world = tournamentFixture();
 
     // Act
     $response = get(route('tournaments.index'));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
+});
+
+it('requires login for a tournament profile', function (): void {
+    // Arrange
+    $tournament = Tournament::factory()
+        ->create();
 
     // Act
-    $response = get(route('tournaments.show', $world['tournament']));
+    $response = get(route('tournaments.show', $tournament));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
 });

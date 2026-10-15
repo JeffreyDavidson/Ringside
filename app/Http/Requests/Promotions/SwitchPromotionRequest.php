@@ -20,10 +20,7 @@ class SwitchPromotionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'promotion_id' => [
-                'required',
-                'integer',
-            ],
+            'promotion_id' => ['required', 'integer'],
         ];
     }
 }

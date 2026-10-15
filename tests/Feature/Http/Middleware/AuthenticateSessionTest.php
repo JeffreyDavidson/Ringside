@@ -12,101 +12,33 @@ use Illuminate\Testing\TestResponse;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
+use function Pest\Laravel\assertAuthenticatedAs;
+use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withHeaders;
 use function Pest\Laravel\withUnencryptedCookies;
 use function Pest\Livewire\livewire;
 
 /**
- * Saves the users form modal for the user with the request a browser sends, so the web middleware (including
- * AuthenticateSession) runs around the Livewire update.
+ * Prepare a mounted form snapshot and the browser's update payload without sending the save request.
  *
- * @param  array<string, string>  $formState  The form fields to change before saving, keyed by property path
- * @param  ?Cookie  $recaller  The encrypted remember-me cookie the browser sends along, when it has one
- * @return TestResponse<Response>
+ * @param  array<string, string>  $updates
+ * @return array{components: list<array{snapshot: string, updates: array<string, string>, calls: list<array{method: string, params: array{}}>}>}
  */
-function saveUsersFormThroughHttp(User $user, array $formState, ?Cookie $recaller = null): TestResponse
+function usersFormSavePayload(User $user, array $updates): array
 {
     $snapshot = livewire(FormModal::class, ['modelId' => $user->id])
-        ->set($formState)
         ->__get('snapshot');
 
-    auth()->forgetGuards();
-
-    return withUnencryptedCookies(
-        $recaller instanceof Cookie ? [$recaller->getName() => (string) $recaller->getValue()] : [],
-    )->withCredentials()->withHeaders(['X-Livewire' => 'true'])
-        ->postJson(route('default-livewire.update'), [
-            'components' => [
-                [
-                    'snapshot' => json_encode($snapshot),
-                    'updates' => [],
-                    'calls' => [['method' => 'save', 'params' => []]],
-                ],
-            ],
-        ]);
+    return ['components' => [[
+        'snapshot' => json_encode($snapshot, JSON_THROW_ON_ERROR),
+        'updates' => $updates,
+        'calls' => [['method' => 'save', 'params' => []]],
+    ]]];
 }
 
-/**
- * Saves a new password for the user through the users form modal.
- *
- * @param  ?Cookie  $recaller  The encrypted remember-me cookie the browser sends along, when it has one
- * @return TestResponse<Response>
- */
-function saveNewPasswordThroughUsersForm(User $user, string $password, ?Cookie $recaller = null): TestResponse
-{
-    return saveUsersFormThroughHttp($user, [
-        'form.password' => $password,
-        'form.password_confirmation' => $password,
-    ], $recaller);
-}
-
-function signInAsAdministrator(): User
-{
-    return signIn()[0];
-}
-
-/**
- * Signs in an administrator with "remember me" and returns it with the encrypted remember-me cookie the browser received.
- *
- * @return array{0: User, 1: Cookie}
- */
-function signInAsRememberedAdministrator(): array
-{
-    [$administrator, $response] = signIn(remember: true);
-
-    $cookie = rememberCookie($response);
-
-    // The shared cookie jar would otherwise attach the login's cookie to every later response in this test.
-    cookie()->unqueue($cookie->getName());
-
-    return [$administrator, $cookie];
-}
-
-/**
- * @return array{0: User, 1: TestResponse<Response>}
- */
-function signIn(bool $remember = false): array
-{
-    $administrator = User::factory()->administrator()->create([
-        'email' => 'admin@example.com',
-        'password' => 'original-password',
-        'status' => UserStatus::Active,
-    ]);
-
-    $response = post(route('login'), [
-        'email' => 'admin@example.com',
-        'password' => 'original-password',
-        'remember' => $remember,
-    ]);
-    get(route('dashboard'))->assertSuccessful();
-
-    return [$administrator, $response];
-}
-
-/**
- * @param  TestResponse<Response>  $response
- */
+/** @param TestResponse<Response> $response */
 function rememberCookie(TestResponse $response): Cookie
 {
     /** @var Cookie */
@@ -114,124 +46,463 @@ function rememberCookie(TestResponse $response): Cookie
         ->firstOrFail(fn (Cookie $cookie): bool => str_starts_with($cookie->getName(), 'remember_web_'));
 }
 
-test('an administrator who changes their own password stays signed in on this session', function (): void {
-    // Arrange
-    $administrator = signInAsAdministrator();
+describe('password and session authentication', function (): void {
+    test('an administrator who changes their own password stays signed in on this session', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
 
-    // Act
-    $response = saveNewPasswordThroughUsersForm($administrator, 'replacement-password');
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => false,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
 
-    // Assert
-    $response->assertOk();
-    auth()->forgetGuards();
+        $payload = usersFormSavePayload($administrator, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
+        auth()->forgetGuards();
 
-    get(route('dashboard'))->assertSuccessful();
-    expect(Hash::check('replacement-password', $administrator->refresh()->password))->toBeTrue();
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $administrator->refresh();
+
+        $response
+            ->assertOk();
+
+        assertAuthenticatedAs($administrator);
+        expect(Hash::check('replacement-password', $administrator->password))->toBeTrue();
+    });
+
+    test('other sessions of an administrator who changes their own password are ended', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
+
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => false,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
+        $otherSessionHash = session('password_hash_web');
+
+        $payload = usersFormSavePayload($administrator, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
+
+        // Replay the hash retained by another session before the password change.
+        session()->put('password_hash_web', $otherSessionHash);
+        auth()->forgetGuards();
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertRedirect(route('login'));
+
+        assertGuest();
+    });
+
+    test('an administrator who saves their own account with a blank password keeps their password and session', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
+
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => false,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
+        $originalHash = $administrator->password;
+
+        $payload = usersFormSavePayload($administrator, ['form.first_name' => 'Renamed']);
+        auth()->forgetGuards();
+        $accountSave = withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $accountSave
+            ->assertOk();
+        auth()->forgetGuards();
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $administrator->refresh();
+
+        $response
+            ->assertOk();
+
+        assertAuthenticatedAs($administrator);
+        expect($administrator->first_name)->toBe('Renamed')
+            ->and($administrator->password)->toBe($originalHash)
+            ->and(Hash::check('original-password', $administrator->password))->toBeTrue();
+    });
+
+    test('an administrator who changes another users password keeps their current session', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
+
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
+
+        $oldCookie = rememberCookie($login);
+        cookie()->unqueue($oldCookie->getName());
+
+        $otherUser = User::factory()
+            ->create(['status' => UserStatus::Active]);
+        $originalHash = $administrator->password;
+
+        $payload = usersFormSavePayload($otherUser, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
+        auth()->forgetGuards();
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $administrator->refresh();
+        $otherUser->refresh();
+
+        $response
+            ->assertOk();
+
+        assertAuthenticatedAs($administrator);
+        expect($administrator->password)->toBe($originalHash)
+            ->and(Hash::check('replacement-password', $otherUser->password))->toBeTrue();
+    });
 });
 
-test('other sessions of an administrator who changes their own password are ended', function (): void {
-    // Arrange
-    $administrator = signInAsAdministrator();
-    $otherSessionHash = session('password_hash_web');
+describe('remember-me authentication', function (): void {
+    test('an administrator who changes their own password gets a remember-me cookie carrying the new hash', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
 
-    // Act
-    saveNewPasswordThroughUsersForm($administrator, 'replacement-password')->assertOk();
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
 
-    // Assert
-    session()->put('password_hash_web', $otherSessionHash);
-    auth()->forgetGuards();
+        $oldCookie = rememberCookie($login);
+        // Queued login cookies would otherwise be attached to later responses too.
+        cookie()->unqueue($oldCookie->getName());
 
-    get(route('dashboard'))->assertRedirect(route('login'));
-});
+        $payload = usersFormSavePayload($administrator, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
 
-/**
- * Sends a request without a session, the way a browser does after its session ended but the remember-me cookie remains.
- *
- * @return TestResponse<Response>
- */
-function visitDashboardWithOnlyCookie(Cookie $cookie): TestResponse
-{
-    session()->flush();
-    auth()->forgetGuards();
+        // Act
+        $response = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
 
-    return withUnencryptedCookies([$cookie->getName() => (string) $cookie->getValue()])->get(route('dashboard'));
-}
+        // Assert
+        $newCookie = rememberCookie($response);
+        $administrator->refresh();
+        $decrypted = Crypt::decryptString((string) $newCookie->getValue());
+        [$id, $token, $hash] = explode('|', CookieValuePrefix::remove($decrypted));
 
-test('an administrator who changes their own password gets a remember-me cookie carrying the new hash', function (): void {
-    // Arrange
-    [$administrator, $oldCookie] = signInAsRememberedAdministrator();
+        $response
+            ->assertOk();
 
-    // Act
-    $response = saveNewPasswordThroughUsersForm(
-        $administrator,
-        'replacement-password',
-        $oldCookie,
-    );
+        expect($id)->toBe((string) $administrator->id)
+            ->and($token)->toBe($administrator->getRememberToken())
+            ->and($hash)->toBe(auth()->guard()->hashPasswordForCookie($administrator->password))
+            ->and(Hash::check('replacement-password', $administrator->password))->toBeTrue();
+    });
 
-    // Assert
-    $newCookie = rememberCookie($response);
-    $administrator->refresh();
-    [$id, $token, $hash] = explode('|', CookieValuePrefix::remove(Crypt::decryptString((string) $newCookie->getValue())));
+    test('the new remember-me cookie signs in a session-less request', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
 
-    expect($id)->toBe((string) $administrator->id)
-        ->and($token)->toBe($administrator->getRememberToken())
-        ->and($hash)->toBe(auth()->guard()->hashPasswordForCookie($administrator->password));
-});
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
 
-test('the new remember-me cookie signs in a session-less request and the old one does not', function (): void {
-    // Arrange
-    [$administrator, $oldCookie] = signInAsRememberedAdministrator();
-    $newCookie = rememberCookie(saveNewPasswordThroughUsersForm(
-        $administrator,
-        'replacement-password',
-        $oldCookie,
-    ));
+        $oldCookie = rememberCookie($login);
+        // Queued login cookies would otherwise be attached to later responses too.
+        cookie()->unqueue($oldCookie->getName());
 
-    // Act
-    $withNewCookie = visitDashboardWithOnlyCookie($newCookie);
-    $withOldCookie = visitDashboardWithOnlyCookie($oldCookie);
+        $payload = usersFormSavePayload($administrator, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
+        $newCookie = rememberCookie($passwordChange);
 
-    // Assert
-    $withNewCookie->assertSuccessful();
-    $withOldCookie->assertRedirect(route('login'));
-});
+        // Challenge the cookie without the session that originally authenticated the user.
+        session()->flush();
+        auth()->forgetGuards();
 
-test('an administrator who changes another user\'s password keeps their session and remember-me cookie', function (): void {
-    // Arrange
-    [, $oldCookie] = signInAsRememberedAdministrator();
-    $otherUser = User::factory()->create(['status' => UserStatus::Active]);
+        // Act
+        $response = withUnencryptedCookies([$newCookie->getName() => (string) $newCookie->getValue()])
+            ->get(route('dashboard'));
 
-    // Act
-    $response = saveNewPasswordThroughUsersForm(
-        $otherUser,
-        'replacement-password',
-        $oldCookie,
-    );
+        // Assert
+        $response
+            ->assertOk();
 
-    // Assert
-    $response->assertOk();
-    expect(collect($response->headers->getCookies())->map->getName()->filter(fn (string $name): bool => str_starts_with($name, 'remember_web_')))->toBeEmpty();
-    auth()->forgetGuards();
+        assertAuthenticatedAs($administrator);
+    });
 
-    get(route('dashboard'))->assertSuccessful();
-    visitDashboardWithOnlyCookie($oldCookie)->assertSuccessful();
-});
+    test('the old remember-me cookie cannot sign in after a password change', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
 
-test('an administrator who saves their own account with a blank password keeps their password and session', function (): void {
-    // Arrange
-    $administrator = signInAsAdministrator();
-    $originalHash = $administrator->password;
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
 
-    // Act
-    $response = saveUsersFormThroughHttp($administrator, ['form.first_name' => 'Renamed']);
+        $oldCookie = rememberCookie($login);
+        // Queued login cookies would otherwise be attached to later responses too.
+        cookie()->unqueue($oldCookie->getName());
 
-    // Assert
-    $response->assertOk();
-    auth()->forgetGuards();
+        $payload = usersFormSavePayload($administrator, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
 
-    get(route('dashboard'))->assertSuccessful();
-    $administrator->refresh();
-    expect($administrator->first_name)->toBe('Renamed')
-        ->and($administrator->password)->toBe($originalHash)
-        ->and(Hash::check('original-password', $administrator->password))->toBeTrue();
+        // Challenge the cookie without the session that originally authenticated the user.
+        session()->flush();
+        auth()->forgetGuards();
+
+        // Act
+        $response = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertRedirect(route('login'));
+
+        assertGuest();
+    });
+
+    test('an administrator who changes another users password does not replace their remember-me cookie', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
+
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
+
+        $oldCookie = rememberCookie($login);
+        // Queued login cookies would otherwise be attached to later responses too.
+        cookie()->unqueue($oldCookie->getName());
+
+        $otherUser = User::factory()
+            ->create(['status' => UserStatus::Active]);
+
+        $payload = usersFormSavePayload($otherUser, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+
+        // Act
+        $response = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+
+        // Assert
+        $rememberCookies = collect($response->headers->getCookies())
+            ->map->getName()
+            ->filter(fn (string $name): bool => str_starts_with($name, 'remember_web_'));
+        $otherUser->refresh();
+
+        $response
+            ->assertOk();
+
+        assertAuthenticatedAs($administrator);
+        expect($rememberCookies)->toBeEmpty()
+            ->and(Hash::check('replacement-password', $otherUser->password))->toBeTrue();
+    });
+
+    test('an administrators remember-me cookie remains usable after they change another users password', function (): void {
+        // Arrange
+        $administrator = User::factory()
+            ->administrator()
+            ->create([
+                'email' => 'admin@example.com',
+                'password' => 'original-password',
+                'status' => UserStatus::Active,
+            ]);
+
+        $login = post(route('login'), [
+            'email' => $administrator->email,
+            'password' => 'original-password',
+            'remember' => true,
+        ]);
+        $login
+            ->assertRedirect(route('dashboard'));
+        $baseline = get(route('dashboard'));
+        $baseline
+            ->assertOk();
+
+        $oldCookie = rememberCookie($login);
+        // Queued login cookies would otherwise be attached to later responses too.
+        cookie()->unqueue($oldCookie->getName());
+
+        $otherUser = User::factory()
+            ->create(['status' => UserStatus::Active]);
+
+        $payload = usersFormSavePayload($otherUser, [
+            'form.password' => 'replacement-password',
+            'form.password_confirmation' => 'replacement-password',
+        ]);
+        auth()->forgetGuards();
+        $passwordChange = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->withCredentials()
+            ->withHeaders(['X-Livewire' => 'true'])
+            ->postJson(route('default-livewire.update'), $payload);
+        $passwordChange
+            ->assertOk();
+
+        session()->flush();
+        auth()->forgetGuards();
+
+        // Act
+        $response = withUnencryptedCookies([$oldCookie->getName() => (string) $oldCookie->getValue()])
+            ->get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertOk();
+
+        assertAuthenticatedAs($administrator);
+    });
 });

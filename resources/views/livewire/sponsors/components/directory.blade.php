@@ -1,10 +1,10 @@
 <div x-data="sponsorTracking" class="mx-auto flex max-w-5xl flex-col gap-6 pb-8">
-    <header class="border-ringside-line flex flex-col gap-3 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
+    <header class="border-border flex flex-col gap-3 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
             <h1 class="font-display text-2xl break-words lg:text-3xl">
                 {{ $selected?->name ?? __('sponsors.directory') }}
             </h1>
-            <p class="text-ringside-muted mt-2 max-w-prose text-sm">{{ __('sponsors.private_help') }}</p>
+            <p class="text-muted-foreground mt-2 max-w-prose text-sm">{{ __('sponsors.private_help') }}</p>
         </div>
         <x-button
             wire:click="newSponsor"
@@ -12,7 +12,7 @@
             x-bind:disabled="! online || requestFailed"
         >{{ __('sponsors.new_sponsor') }}</x-button>
     </header>
-    <div x-cloak x-show="! online || requestFailed" role="alert" class="border-ringside-warning border p-4">
+    <div x-cloak x-show="! online || requestFailed" role="alert" class="border-warning border p-4">
         <p>{{ __('sponsors.online_help') }}</p>
         <a
             href="{{ route('sponsors.index') }}"
@@ -20,10 +20,10 @@
         >{{ __('sponsors.reload') }}</a>
     </div>
     @if ($notice)
-        <p role="status" class="border-ringside-success border p-4">{{ $notice }}</p>
+        <p role="status" class="border-success border p-4">{{ $notice }}</p>
     @endif
     @if ($errors->any())
-        <div role="alert" class="border-ringside-error bg-ringside-error-surface text-ringside-error border p-4">
+        <div role="alert" class="border-error bg-error-surface text-error border p-4">
             <p class="flex gap-2 font-semibold">
                 <x-heroicon-o-exclamation-circle
                     class="size-5 shrink-0"
@@ -48,14 +48,14 @@
                     $event.returnValue = '';
                 }
             "
-            class="border-ringside-line bg-ringside-surface-panel border-y p-4 sm:p-6"
+            class="border-border bg-surface-panel border-y p-4 sm:p-6"
             data-sponsor-draft
         >
             <fieldset x-bind:disabled="! online || requestFailed" class="flex min-w-0 flex-col gap-5">
                 <legend class="mb-4 text-xl font-semibold">
                     {{ __($draftId === null ? 'sponsors.new_sponsor' : 'sponsors.edit_sponsor') }}
                 </legend>
-                <p x-cloak x-show="dirty" class="text-ringside-warning">{{ __('event-pack.unsaved') }}</p>
+                <p x-cloak x-show="dirty" class="text-warning">{{ __('event-pack.unsaved') }}</p>
                 <x-form.inputs.text class="min-h-11" wire:model="form.name" :label="__('sponsors.name')" />
                 <div class="grid min-w-0 gap-5 md:grid-cols-2">
                     <x-form.inputs.text
@@ -73,7 +73,7 @@
                         class="size-5"
                         wire:model="form.archived"
                     />{{ __('sponsors.archive') }}</label>
-                <p class="text-ringside-muted max-w-prose text-sm">{{ __('sponsors.sponsor_archive_help') }}</p>
+                <p class="text-muted-foreground max-w-prose text-sm">{{ __('sponsors.sponsor_archive_help') }}</p>
                 <div class="flex flex-wrap gap-3">
                     <x-button type="submit" wire:loading.attr="disabled">{{ __('sponsors.save_sponsor') }}</x-button
                     ><x-button variant="secondary" wire:click="cancelDraft">{{ __('sponsors.cancel_draft') }}</x-button>
@@ -82,7 +82,7 @@
         </form>
     @endif
     @if ($selected)
-        <section class="border-ringside-line border-b pb-6">
+        <section class="border-border border-b pb-6">
             <p class="break-words">{{ $selected->contact_name }}</p>
             <p class="mt-2 break-all">{{ $selected->contact_email }}</p>
             <p class="mt-2 break-all">{{ $selected->contact_phone }}</p>
@@ -96,13 +96,13 @@
         <section>
             <h2 class="text-xl font-semibold">{{ __('sponsors.sponsor_history') }}</h2>
             @forelse ($history as $promise)
-                <article wire:key="sponsor-promise-{{ $promise->id }}" class="border-ringside-line border-b py-5">
+                <article wire:key="sponsor-promise-{{ $promise->id }}" class="border-border border-b py-5">
                     <p class="font-semibold">
                         {{ $promise->event->name }}
                         @if ($promise->event->trashed()) ·{{ __('sponsors.archived_label') }}@endif
                     </p>
                     <p class="mt-2 break-words">{{ $promise->description }} · {{ $screen->status($promise) }}</p>
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ __('sponsors.reference') }}: {{ $promise->agreement_reference ?? __('sponsors.not_set') }}
                     </p>
                     <a
@@ -111,7 +111,7 @@
                     >{{ __('sponsors.open_event') }}</a>
                 </article>
             @empty
-                <p class="text-ringside-muted py-6">{{ __('sponsors.empty') }}</p>
+                <p class="text-muted-foreground py-6">{{ __('sponsors.empty') }}</p>
             @endforelse
             {{ $history->links() }}
         </section>
@@ -119,7 +119,7 @@
     <div class="max-w-md">
         <x-form.inputs.text class="min-h-11" wire:model.live.debounce.300ms="search" :label="__('sponsors.search')" />
     </div>
-    <section class="divide-ringside-line divide-y">
+    <section class="divide-border divide-y">
         @forelse ($sponsors as $sponsor)
             <article
                 wire:key="sponsor-{{ $sponsor->id }}"
@@ -132,11 +132,11 @@
                             href="{{ route('sponsors.show', $sponsor) }}"
                         >{{ $sponsor->name }}</a>
                     </h2>
-                    <p class="text-ringside-muted mt-2 text-sm">
+                    <p class="text-muted-foreground mt-2 text-sm">
                         {{ $sponsor->contact_name ?? __('sponsors.record_number', ['number' => $sponsor->id]) }}
                     </p>
                     @if ($sponsor->archived_at)
-                        <p class="text-ringside-muted mt-2 text-sm">{{ __('sponsors.archived_label') }}</p>
+                        <p class="text-muted-foreground mt-2 text-sm">{{ __('sponsors.archived_label') }}</p>
                     @endif
                 </div>
                 <x-button
@@ -145,7 +145,7 @@
                 >{{ __('sponsors.edit_sponsor') }}</x-button>
             </article>
         @empty
-            <p class="text-ringside-muted py-6">{{ __('sponsors.empty_sponsors') }}</p>
+            <p class="text-muted-foreground py-6">{{ __('sponsors.empty_sponsors') }}</p>
         @endforelse
     </section>
     {{ $sponsors->links() }}

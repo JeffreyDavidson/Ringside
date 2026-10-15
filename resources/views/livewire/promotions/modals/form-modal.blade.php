@@ -1,5 +1,5 @@
 <div>
-    <x-modal class="!border-ringside-line !bg-ringside-surface-panel [&_h3]:!text-ringside-ink [&_label]:!text-ringside-muted [&_input]:!border-ringside-outline [&_input]:!bg-ringside-surface [&_input]:!text-ringside-ink !rounded-none !border">
+    <x-modal class="!border-border !bg-surface-panel [&_h3]:!text-foreground [&_label]:!text-muted-foreground [&_input]:!border-outline [&_input]:!bg-surface [&_input]:!text-foreground !rounded-none !border">
         <x-modal.body>
             <div class="flex flex-col gap-4">
                 <x-form.inputs.text
@@ -32,7 +32,7 @@
                     {{ __('core.form.cancel') }}
                 </x-buttons.light>
                 <x-buttons.primary
-                    class="!bg-ringside-red !text-ringside-white hover:!bg-ringside-red-hover active:!bg-ringside-red-dark !rounded-none"
+                    class="!bg-primary hover:!bg-primary-hover active:!bg-primary-pressed !rounded-none !text-white"
                     wire:click="save"
                     wire:loading.attr="disabled"
                     wire:target="save"

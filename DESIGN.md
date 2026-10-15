@@ -125,6 +125,52 @@ The palette is deliberately narrow. Red carries action and emphasis; neutral gra
 
 **The Error Rule.** Errors are rose, never brand red or the destructive coral, so feedback about a mistake cannot be mistaken for a delete action. Every error also carries an icon and plain wording; color is never the only signal.
 
+## Theme token names
+
+The app uses purpose-based Tailwind v4 names from `resources/css/tokens.css`. Use `bg-surface`, `text-foreground`, `text-muted-foreground`, `border-border`, and `bg-primary`. The first word in `border-border` selects the utility; the second identifies the divider color. Typography and values remain shared across the app, marketing, event packs and print.
+
+| Token | Value and use |
+| --- | --- |
+| `--color-surface` | #101112; page canvas |
+| `--color-surface-deep` | #060607; hero fallback |
+| `--color-surface-header` | #09090a; navigation/header |
+| `--color-surface-index` | #0b0c0d; index section |
+| `--color-surface-panel` | #171819; panels |
+| `--color-surface-faq` | #161719; FAQ/marketing hover |
+| `--color-surface-hover` | #272729; app hover |
+| `--color-foreground` | #f7f7f5; main text and app focus |
+| `--color-muted-foreground` | #bfc0c3; supporting text |
+| `--color-muted-foreground-bright` | #d5d5d7; brighter supporting text |
+| `--color-muted-foreground-soft` | #c6c6c8; softer supporting text |
+| `--color-border` | #363638; quiet dividers |
+| `--color-border-strong` | #49494c; stronger field/divider border |
+| `--color-signal` | #ff4b50; emphasis/wordmark |
+| `--color-signal-soft` | #ff8588; coral accents and destructive text |
+| `--color-success` | #5fd38d; brand success feedback |
+| `--color-warning` | #f5b83d; brand warning feedback |
+| `--color-error` | #ffa3bf; validation/error rose |
+| `--color-error-surface` | #3b1826; error panel tint |
+| `--color-primary` | #cb2028; main action |
+| `--color-primary-hover` | #b91c24; main action hover |
+| `--color-primary-pressed` | #a61920; main pressed / existing destructive hover |
+| `--color-outline` | #b7b7b9; outline button and print rule color |
+| `--color-status-positive` | #17c653; positive table status dot |
+| `--color-status-caution` | #f6b100; caution table status dot |
+| `--color-footer-muted` | #99a1b7; footer copyright text |
+| `--color-footer-foreground` | #78829d; footer credit text |
+| `--color-ink` | #111111; print and white-background ink |
+| `--radius-pill` | 999px; preserve geometry (do not substitute rounded-full) |
+| `--font-display` | Anton, 'Arial Narrow', sans-serif |
+| `--font-body` | Arial, Helvetica, sans-serif |
+
+Primary actions use `hover:bg-primary-hover` and `active:bg-primary-pressed`. Validation uses rose `error`/`error-surface`; destructive actions retain coral `signal-soft` and the existing deep-red hover. Signal-soft also serves links and required markers. Opacity modifiers such as `border-warning/40` and `bg-warning/12` preserve the underlying color. Use `border-signal/50` for translucent signal borders. Direct brand CSS uses `--alpha(var(--color-signal) / 50%)`. Marketing’s neutral borders and scrim retain explicit `rgb(255 255 255 / 50%)`, `rgb(255 255 255 / 35%)`, and `rgb(0 0 0 / 36%)`: converting these to `--alpha()` changes the compiled color space and rendered blending. Pure white and black come from Tailwind’s default theme. Small label badges use native `rounded-lg` to retain their 8px corners.
+
+`ink` is #111111 for print and text on white; Tailwind's default `black` remains true black, including `bg-black/70` overlays. The pill radius remains exactly 999px.
+
+Table status colors use `status-positive` and `status-caution`, preserving their established green/yellow separately from `success`/`warning` feedback. The footer keeps its exact existing text colors through `footer-muted` and `footer-foreground`. Unused palettes, form helpers and shadow declarations have been removed.
+
+App typography uses Inter through `--font-sans` in app.css, with `--text-2xs` (0.6875rem) and `--text-2sm` (0.8125rem) for the existing small type. Spacing uses Tailwind’s native `--spacing` scale, including fractional utilities such as `h-8.5` and `gap-7.5`. CSS custom properties use v4 shorthand such as `duration-(--sidebar-transition-duration)`. The modal width source declaration remains because the installed modal package selects those classes dynamically.
+
 ## Typography
 
 **Display Font:** Anton (with Arial Narrow and Arial fallbacks)

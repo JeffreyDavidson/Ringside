@@ -26,7 +26,7 @@
             </x-slot:action>
         </x-auth.field>
         <label
-            class="text-ringside-muted-bright flex min-h-11 w-fit cursor-pointer items-center gap-3 text-base"
+            class="text-muted-foreground-bright flex min-h-11 w-fit cursor-pointer items-center gap-3 text-base"
             for="remember"
         >
             <input
@@ -36,7 +36,7 @@
                 value="1"
                 data-test="remember"
                 @checked(old('remember'))
-                class="accent-ringside-red focus-visible:outline-ringside-ink size-5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4"
+                class="accent-primary focus-visible:outline-foreground size-5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4"
             />
             {{ __('auth-forms.remember') }}
         </label>
