@@ -16,9 +16,13 @@ Follow explicit project conventions for shared setup. Prefer configuration in `b
 - Use `count()` and `sequence()` for meaningful repeated records and deterministic attributes. Do not combine distinct lifecycle states or roles just to shorten setup; preserve deliberately foreign fixtures, insertion order and identities used by assertions.
 
 ```php
-$organization = Organization::factory()->onPlan(BillingPlan::PRO)->create();
+$organization = Organization::factory()
+    ->onPlan(BillingPlan::PRO)
+    ->create();
 
-$environment = Environment::factory()->for($organization)->create();
+$environment = Environment::factory()
+    ->for($organization)
+    ->create();
 
 // If nested factories generate organizations, recycle this one there.
 // Verify that graph before adding recycle($organization).
@@ -26,13 +30,13 @@ $environment = Environment::factory()->for($organization)->create();
 $organizations = Organization::factory()
     ->count(2)
     ->sequence(
-        ['created_at' => now()->setSeconds(30)],
-        ['created_at' => now()->setSeconds(1)],
+        ['created_at' => '2026-01-01 12:00:30'],
+        ['created_at' => '2026-01-01 12:00:01'],
     )
     ->create();
 ```
 
-Create only the records required to arrange the behavior or support an assertion.
+Create only the records required to arrange the behavior or support an assertion. For model tests, inspect schema defaults, casts and valid states; factories may override defaults and unguard construction, so they do not prove guarded mass-assignment behavior. Exercise that boundary explicitly as described in [model contracts](models.md).
 
 ## Datasets
 
@@ -49,7 +53,8 @@ use function Pest\Laravel\post;
 
 it('creates a project with a valid name', function (string $name): void {
     // Arrange
-    $user = User::factory()->create();
+    $user = User::factory()
+        ->create();
     actingAs($user);
 
     $payload = ['name' => $name];
@@ -58,7 +63,9 @@ it('creates a project with a valid name', function (string $name): void {
     $response = post(route('projects.store'), $payload);
 
     // Assert
-    $project = Project::query()->where('name', $name)->sole();
+    $project = Project::query()
+        ->where('name', $name)
+        ->sole();
 
     $response
         ->assertRedirect(route('projects.show', $project))

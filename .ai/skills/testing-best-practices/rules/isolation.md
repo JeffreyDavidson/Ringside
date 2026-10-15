@@ -8,10 +8,14 @@ Fetch `https://laravel.com/framework/docs/mocking` for Laravel's fakes, facade d
 
 Identify the dependency, then choose the first applicable option. A framework fake preserves the real code path, while a mock replaces the dependency.
 
-1. Always use framework fakes for facades such as events, queues, mail, notifications, storage, the HTTP client, time, and sleep.
+1. Prefer framework fakes for facades such as events, queues, mail, notifications, storage, the HTTP client, time, and sleep; preserve explicitly required project double tools.
 2. Use a developer-defined fake implementation of a service if the application provides one.
 3. Use a mock for a container-resolved contract only when the real implementation leaves the process or is nondeterministic.
 4. Use the real implementation for everything else, including the database.
+
+## Controller Feature-Test Boundaries
+
+Keep registered routing, relevant middleware, binding, FormRequests, policies/gates, internal Actions and database behavior real; read [endpoint tests](endpoint-tests.md#exercise-the-application-http-path). Do not replace the application's own permission or business workflow with a mock and then describe the resulting request as complete controller coverage. A container-resolved adapter may be doubled where it owns external IO or nondeterminism; that is not permission to replace the whole internal workflow. Lower-layer collaborator tests supplement HTTP tests instead of substituting for them.
 
 ## Framework Fakes
 
@@ -26,7 +30,7 @@ Create prerequisite factory records before calling `Event::fake()`. Factories us
 
 ## Mocking
 
-Use `shouldReceive()` before the action to declare an expectation. Use `shouldHaveReceived()` after the action for a spy. Use `Mockery::on()` or `withArgs()` if an equality check cannot state the expected argument, such as a check of one field of a value object.
+Use the project's installed and approved double tool. For a Mockery-based suite, use `shouldReceive()` before the action to declare an expectation and `shouldHaveReceived()` after the action for a spy. Use `Mockery::on()` or `withArgs()` when equality cannot state the expected argument. Do not introduce Mockery calls or facade spies into a suite that explicitly requires another tool, such as jasonmccreary/double. Keep each fluent configuration method on its own line and assert the intended interaction or non-interaction.
 
 Import the mock function before you use it: `use function Pest\Laravel\mock;`.
 

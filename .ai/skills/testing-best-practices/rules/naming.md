@@ -3,7 +3,7 @@
 ## File Layout
 
 - Follow the repository's suite layout and naming. A useful default is `{ClassName}Test.php` at the same relative path as the class under test.
-- Choose Unit for pure logic and the configured framework-backed suite for code needing Laravel or a database; an Action is not automatically a unit test.
+- Choose Unit for pure logic and the configured framework-backed suite for code needing Laravel or a database; an Action is not automatically a unit test. Model persistence/relationship tests default to Integration with the complete mirrored model path, subject to explicit project conventions; HTTP contracts remain in Feature. Read [model contracts](models.md).
 - Follow the project's convention for fixture files. If none exists, put fixtures in `tests/Fixtures/` and load them by path.
 - Move large literal values out of the test body and into fixture files.
 

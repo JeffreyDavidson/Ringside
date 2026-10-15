@@ -33,5 +33,7 @@ A hand-built check fails with `false is not true`, which identifies nothing. A f
 expect(User::where('email', 'taylor@laravel.com')->exists())->toBeTrue();
 
 // Use this... the failure names the table and the attributes that it did not find...
-$this->assertDatabaseHas('users', ['email' => 'taylor@laravel.com']);
+use function Pest\Laravel\assertDatabaseHas;
+
+assertDatabaseHas('users', ['email' => 'taylor@laravel.com']);
 ```

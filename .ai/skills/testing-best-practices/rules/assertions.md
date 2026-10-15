@@ -2,11 +2,15 @@
 
 ## Arrange, Act, Assert
 
-Write each test around one named behavior: Arrange the state, Act on one target operation, then Assert its response and meaningful outcomes. Preserve explicit phase comments when the project uses them. Separate the phases with a blank line.
+Write each behavior test around one named behavior. Use explicit `// Arrange`, `// Act`, and `// Assert` comments, with a blank line between phases. Put fixture/context preparation in Arrange, the target operation in Act, and response/state/effect checks in Assert. Apply this to new and materially rewritten tests; nearby unlabelled legacy tests do not waive the requirement. Do not invent empty phases for a declaration-only architecture rule or a single literal-value expectation.
 
 Group Arrange statements by meaning: target records and relationships, contrast/foreign fixtures, actor and authentication context, relevant fakes, and payload or baseline preparation. Use a blank line when the subject changes. Keep dependent records together and preserve creation order; do not insert a blank line after every statement or impose one universal setup order.
 
 Prepare payloads and prerequisite lookups before Act. For an HTTP test, assign the target response to `$response`, with assertions in Assert. Prefer one response chain with each assertion on its own line, then separate state/authentication/event assertions with a blank line; explicit project formatting rules take precedence. Do not make requests inside assertion callbacks.
+
+Use Pest Laravel's function helpers for requests, authentication, time travel and framework assertions when the installed plugin provides them. Do not replace `$this->travelTo()` with `test()->travelTo()` when `travelTo()` is available. Use the underlying test instance only for an API without a suitable helper, or for project-owned test state.
+
+Put each chained method call on its own line, including factory and test-double configuration. Prepare a complex return payload separately when that makes the double easier to read. A stub/interaction expectation configured in Arrange is legitimate setup, not a reason to mix the target request with assertions. Keep prerequisites and post-action reads visible; do not bury mutations or deep query/refresh chains inside `expect()` arguments.
 
 Separate independent save, reopen, delete, restore or publication behaviors that repeat Arrange/Act/Assert cycles. Do not conceal those cycles in a helper. Read fixture helpers: a method named as setup may issue requests and assertions.
 
@@ -44,7 +48,20 @@ Assert each meaningful fact once. Content and status are different facts: `asser
 
 Use a named response assertion, such as `assertNotFound()`, rather than `assertStatus(404)`. A failure then identifies the broken contract. Laravel provides named assertions for commonly tested status codes.
 
-Keep one `expect()` chain on one subject. Start a new chain when the subject changes, or when the chain is difficult to read.
+Chain related assertions about one outcome with `->and()`. Different values can belong in the same chain, such as a saved record's title, status and publication date. Start a separate chain when the assertions concern a different outcome or the chain becomes difficult to follow. Multiple subjects alone are not a style violation; judge their relationship to the named behavior. Keep multiple HTTP assertions on the same response in one fluent chain.
+
+Preserve the project's configured Rector expectation-chaining behavior. Do not switch to PHPUnit assertions, add filler comments or change tooling solely to evade that behavior. Split independently testable scenarios when a chain joins unrelated outcomes; complementary response, state and effect facts can still protect one coherent contract.
+
+```php
+// Assert
+$response
+    ->assertOk()
+    ->assertSeeText('Profile');
+
+expect($card->textContent)->toContain('Reader')
+    ->and($cardHeadings->length)
+    ->toBe(0);
+```
 
 ## Format Expectations
 
@@ -74,3 +91,36 @@ A status code is not the complete result of a write operation. Assert each of th
 - The notifications and the mail that the operation sends.
 
 On the failure path, assert that the operation makes none of these changes. A test that asserts only `assertOk()` passes even when the application saves no record.
+
+## Database-Portable JSON Assertions
+
+Inspect the cast, storage type and configured database engines. JSON object member order is generally not an application contract; MySQL can reorder object keys when storing JSON ([MySQL JSON documentation](https://dev.mysql.com/doc/refman/8.0/en/json.html)). Persist and reload before asserting a storage round trip. Do not use strict whole-array identity merely to require PHP insertion order after JSON object storage, or weaken meaningful values/types to avoid a database failure.
+
+For Pest, `toEqual()` compares object-shaped associative arrays without requiring key insertion order but also allows loose scalar equality. Pair it with strict checks for contractual identities, booleans, numeric/zero-string distinctions and other relevant types. PHPUnit suites use the equivalent equality and strict assertions. Example assertion phase after a payload has been saved and reloaded:
+
+```php
+// Assert
+expect($storedPayload)
+    ->toEqual([
+        'enabled' => false,
+        'label' => '0',
+        'items' => [
+            ['item_id' => 42, 'minutes' => 5],
+            ['item_id' => 7, 'minutes' => null],
+        ],
+    ])
+    ->and($storedPayload['enabled'])
+    ->toBeFalse()
+    ->and($storedPayload['label'])
+    ->toBe('0')
+    ->and(array_column($storedPayload['items'], 'item_id'))
+    ->toBe([42, 7])
+    ->and($storedPayload['items'][0]['minutes'])
+    ->toBe(5)
+    ->and($storedPayload['items'][1]['minutes'])
+    ->toBeNull();
+```
+
+Keep list positions and duplicates when they carry meaning. Do not apply `toEqualCanonicalizing()`, recursive sorting or JSON string comparison indiscriminately to a payload containing ordered lists. Canonicalization remains appropriate for an actually unordered collection; sorting only object keys while preserving lists and scalar types is another option when an existing project helper provides it. Check the installed comparator's semantics and run required native-database gates; a SQLite-only pass is not cross-engine proof.
+
+For redirected validation failures, read [FormRequest old-input contracts](form-requests.md#refusals-and-old-input), including nullable values and sensitive-field exclusions.
