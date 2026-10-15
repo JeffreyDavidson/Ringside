@@ -34,7 +34,7 @@ class SaveCrewContactAction
                     return $existing;
                 }
                 if ($version !== 0) {
-                    throw RecordChangedException::changed();
+                    throw RecordChangedException::changedKeepingInput();
                 }
                 $saved = new CrewContact;
                 $saved->promotion_id = $promotion->id;
@@ -44,7 +44,7 @@ class SaveCrewContactAction
                 $saved = CrewContact::query()->whereKey($contact->id)->lockForUpdate()->firstOrFail();
                 Gate::authorize('update', $saved);
                 if ($saved->version !== $version || $saved->archived_at !== null) {
-                    throw RecordChangedException::changed();
+                    throw RecordChangedException::changedKeepingInput();
                 }
                 $saved->version++;
             }

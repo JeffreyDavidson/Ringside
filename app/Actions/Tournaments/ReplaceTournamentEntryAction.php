@@ -27,7 +27,7 @@ class ReplaceTournamentEntryAction
         DB::transaction(function () use ($entry, $competitorId, $version, $reason): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::because('closed');

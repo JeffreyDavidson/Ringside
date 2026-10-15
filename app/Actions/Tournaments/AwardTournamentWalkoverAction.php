@@ -29,7 +29,7 @@ class AwardTournamentWalkoverAction
         DB::transaction(function () use ($node, $version, $reason): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::because('closed');

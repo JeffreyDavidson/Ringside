@@ -23,7 +23,7 @@ class CancelTournamentAction
         DB::transaction(function () use ($tournament, $version, $reason): void {
             $tournament = $this->locks->lock($tournament->id);
             if ($tournament->version !== $version) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if ($tournament->status === TournamentStatus::Completed) {
                 throw TournamentException::because('closed');
