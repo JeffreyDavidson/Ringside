@@ -20,7 +20,7 @@ enum TitleStatus: string
     {
         return match ($this) {
             self::Undebuted => 'Not Yet Debuted',
-            self::PendingDebut => 'Schedule to Debut',
+            self::PendingDebut => 'Scheduled to Debut',
             self::Active => 'Active',
             self::Inactive => 'Inactive',
             self::Retired => 'Retired',
