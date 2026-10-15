@@ -61,7 +61,7 @@ test('exception folders are a domain folder of the app or a named shared folder'
     );
 
     // Act
-    $disallowedFolders = collect($directories)
+    $disallowedFolders = collect(iterator_to_array($directories))
         ->filter(fn (SplFileInfo $entry): bool => $entry->isDir())
         ->map(fn (SplFileInfo $directory): string => str($directory->getPathname())
             ->after(app_path('Exceptions').DIRECTORY_SEPARATOR)
