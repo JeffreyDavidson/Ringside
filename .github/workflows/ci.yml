@@ -324,10 +324,14 @@ jobs:
 
             - name: Start the runner's MySQL
               run: |
-                  # Throwaway test data: skip forcing each commit to disk (the service container kept its data
-                  # in memory). This changes durability only, not how queries, locks or deadlocks behave.
+                  # Throwaway test data: skip forcing each commit to disk. This changes durability only, not how
+                  # queries, locks or deadlocks behave.
                   printf '[mysqld]\ninnodb_flush_log_at_trx_commit = 2\ninnodb_doublewrite = OFF\nsync_binlog = 0\ndisable_log_bin\n' \
                       | sudo tee /etc/mysql/mysql.conf.d/zz-ci.cnf
+                  # Keep the data directory in memory, as the old service container did (--tmpfs /var/lib/mysql).
+                  sudo cp -a /var/lib/mysql /tmp/mysql-seed
+                  sudo mount -t tmpfs -o size=2g tmpfs /var/lib/mysql
+                  sudo cp -a /tmp/mysql-seed/. /var/lib/mysql/
                   sudo systemctl start mysql.service
                   for attempt in $(seq 1 30); do mysqladmin ping -h127.0.0.1 -uroot -proot --silent && break; sleep 1; done
                   mysql --version
