@@ -84,7 +84,6 @@ return [
     'line_limit' => 'A budget may contain up to 500 lines.',
     'movement_limit' => 'A line may contain up to 1,000 movements.',
     'category_direction' => 'Choose a category that matches income or expenses.',
-    'conflict' => 'Someone saved a newer budget. Your draft is retained. Refresh saved totals, review the changes, then retry.',
     'key_conflict' => 'This attempt was already saved with different details. Review history before starting a new entry.',
     'archived' => 'This plan-only line was archived and cannot receive financial changes.',
     'direction_locked' => 'A line with movements cannot change between income and expenses.',

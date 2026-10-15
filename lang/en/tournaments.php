@@ -36,7 +36,6 @@ return [
     'remove_booking' => 'Remove booking', 'reset_future' => 'Reset future rounds', 'history' => 'Booking history', 'attempt' => 'Attempt :number', 'historical' => 'Historical',
     'operations' => ['book' => 'Book this bout', 'plan' => 'Plan an event', 'reset' => 'Reset unplayed future rounds', 'unbook' => 'Remove this unplayed booking', 'withdraw' => 'Withdraw entrant', 'replace' => 'Replace an unplayed entrant', 'walkover' => 'Advance the opponent by walkover', 'cancel' => 'Cancel this tournament'],
     'errors' => [
-        'stale' => 'This tournament changed. Refresh the page or reopen this form, then review before saving.',
         'structure_frozen' => 'The bracket is locked after booking. You can still correct its name or use the reviewed replacement and reset actions.',
         'entrant_unavailable' => 'An entrant is unavailable, belongs to another promotion, or is already in the bracket.',
         'unresolved' => 'Both eligible entrants must be known before booking this bout.',

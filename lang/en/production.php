@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'contact_conflict' => 'This contact changed or was archived. Reload before trying again.',
     'add_contact' => 'Add crew contact', 'name' => 'Name', 'phone' => 'Telephone', 'email' => 'Email',
     'contact_notes' => 'Private contact notes', 'save_contact' => 'Save contact', 'cancel' => 'Cancel',
     'search_contacts' => 'Search crew contacts', 'include_archived' => 'Include archived contacts',

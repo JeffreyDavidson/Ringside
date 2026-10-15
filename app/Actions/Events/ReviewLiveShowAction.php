@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
@@ -29,7 +30,7 @@ class ReviewLiveShowAction
             $source = $this->source->get($run->event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)
                 || ! $this->source->changed($run->event, $run)) {
-                throw LiveShowException::because('conflict');
+                throw RecordChangedException::changed();
             }
             $content = $run->content;
             $old = collect($content['items'])->keyBy('key');

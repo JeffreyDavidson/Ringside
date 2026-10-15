@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetRevision;
@@ -49,7 +50,7 @@ class MutateBudgetAction
                 return $budget;
             }
             if (($budget->version ?? 0) !== $version) {
-                throw BudgetException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if ($budget === null) {
                 $budget = new EventBudget;

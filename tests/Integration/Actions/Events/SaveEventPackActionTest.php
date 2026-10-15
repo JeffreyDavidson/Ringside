@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
-use App\Exceptions\Events\EventPackConflictException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\ViewModels\EventPackViewModel;
@@ -44,7 +44,7 @@ test('a repeated first save fails without replacing the existing document', func
     $repeat = fn () => $action->handle($event, 0, $data['card']['fingerprint'], [...$data['content'], 'notes' => 'Repeated'], false);
 
     // Assert
-    expect($repeat)->toThrow(EventPackConflictException::class)
+    expect($repeat)->toThrow(RecordChangedException::class)
         ->and($event->pack()->firstOrFail()->content['notes'])->toBe('Saved first')
         ->and($event->pack()->count())->toBe(1);
 });

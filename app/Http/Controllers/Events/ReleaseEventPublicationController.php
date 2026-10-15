@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
+use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\ReleaseEventPublicationRequest;
 use App\Models\Events\Event;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,7 @@ class ReleaseEventPublicationController
     {
         try {
             $release->handle($event, $request->user() ?? abort(403), $request->integer('version'), $request->string('fingerprint')->toString(), PublicSection::from($request->string('section')->toString()));
-        } catch (EventPublicationException $exception) {
+        } catch (EventPublicationException|RecordChangedException $exception) {
             return back()->withErrors(['publication' => $exception->getMessage()])->withInput();
         }
 

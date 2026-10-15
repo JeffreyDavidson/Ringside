@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEventPackAction;
 use App\Exceptions\Events\EventPackConflictException;
+use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\UpdateEventPackRequest;
 use App\Models\Events\Event;
 use App\ViewModels\EventPackViewModel;
@@ -24,7 +25,7 @@ class EventPacksController
     {
         try {
             $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), $request->content(), $request->boolean('reviewed'));
-        } catch (EventPackConflictException $exception) {
+        } catch (EventPackConflictException|RecordChangedException $exception) {
             return back()->withErrors(['pack' => $exception->getMessage()])->withInput();
         }
 

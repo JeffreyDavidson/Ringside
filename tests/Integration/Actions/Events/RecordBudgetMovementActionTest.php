@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Actions\Events\RecordBudgetMovementAction;
 use App\Enums\Events\BudgetMovementKind;
 use App\Exceptions\Events\BudgetException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\EventBudgetLine;
 use App\Models\Events\EventBudgetMovement;
 use App\Services\Events\BudgetSettlementService;
@@ -33,7 +34,7 @@ test('new payment identities require the latest version and never overwrite cash
     // Act
     $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetPayment());
     // Assert
-    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetPayment()))->toThrow(BudgetException::class);
+    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetPayment()))->toThrow(RecordChangedException::class);
     // Act
     $action->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetPayment(['amount' => '300.00']));
     // Assert

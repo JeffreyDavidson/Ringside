@@ -28,6 +28,7 @@ use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
@@ -139,7 +140,7 @@ it('requires a refresh when a planned event has been deleted since it was select
     $node = $world['tournament']->nodes()->firstOrFail();
     $selected = Event::query()->findOrFail($world['event']->id);
     resolve(App\Actions\Events\DeleteAction::class)->handle($world['event']);
-    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, $selected, $world['tournament']->version))->toThrow(TournamentException::class)
+    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, $selected, $world['tournament']->version))->toThrow(RecordChangedException::class)
         ->and($node->refresh()->planned_event_id)->toBeNull();
 });
 it('refuses changing a qualifier after an administrative descendant has advanced', function (): void {
@@ -273,7 +274,7 @@ it('rejects forged low-level tournament booking contexts atomically', function (
     }
     $version = $t->refresh()->version;
     $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]]), null);
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $node, $version))->toThrow(TournamentException::class)
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
         ->and($event->matches()->count())->toBe(0)
         ->and($t->refresh()->version)->toBe($version);
 })->with(['unresolved', 'withdrawn', 'other entrants', 'nonfinal title', 'foreign tournament', 'conflicting retry']);

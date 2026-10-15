@@ -7,6 +7,7 @@ use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
 use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\EventPublication;
 use App\Queries\Events\PublicEventSourceQuery;
 use Illuminate\Http\UploadedFile;
@@ -30,7 +31,7 @@ test('stale copies and opposing publication operations cannot overwrite a newer 
         default => throw new LogicException('Unknown test operation'),
     };
 
-    expect($call)->toThrow(EventPublicationException::class)
+    expect($call)->toThrow(RecordChangedException::class)
         ->and(freshModel($publication)->version)->toBe($stale + 1)
         ->and(freshModel($publication)->published_at)->not->toBeNull();
 })->with(['save', 'release', 'unpublish']);

@@ -11,6 +11,7 @@ use App\Actions\Events\TransitionLiveItemAction;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Matches\EventMatch;
 use App\ViewModels\EventPackViewModel;
 
@@ -40,7 +41,7 @@ test('review cannot adopt a source version that changed after the preview', func
     resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Updated'], false);
 
     // Act / Assert
-    expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 1, $pack->card_fingerprint, []))->toThrow(LiveShowException::class);
+    expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 1, $pack->card_fingerprint, []))->toThrow(RecordChangedException::class);
     expect($fixture['run']->refresh()->version)->toBe(1);
 });
 

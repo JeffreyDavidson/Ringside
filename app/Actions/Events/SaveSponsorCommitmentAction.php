@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Data\Events\SponsorCommitmentData;
 use App\Enums\Events\SponsorCommitmentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
@@ -31,10 +32,10 @@ class SaveSponsorCommitmentAction
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
             $commitment = $id === null ? null : EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
-                throw SponsorCommitmentException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if (($commitment->version ?? 0) !== $version || ($commitment === null && EventSponsorCommitment::query()->where('event_id', $event->id)->where('submission_key', $submissionKey)->exists())) {
-                throw SponsorCommitmentException::because('conflict');
+                throw RecordChangedException::changed();
             }
             if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
                 throw SponsorCommitmentException::because('archived');

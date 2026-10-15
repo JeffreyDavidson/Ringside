@@ -9,6 +9,7 @@ use App\Enums\Matches\MatchType;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
@@ -53,14 +54,14 @@ class AddMatchForEventAction
                 $event = Event::query()->withTrashed()->findOrFail($event->id);
                 $node = $tournament->nodes()->findOrFail($node->id);
                 if ($tournament->promotion_id !== $event->promotion_id) {
-                    throw TournamentException::because('stale');
+                    throw RecordChangedException::changed();
                 }
                 $bout = $this->bracket->bout($node);
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null && $this->sameBooking($bout->link->match, $event, $eventMatchData)) {
                     return $bout->link->match;
                 }
                 if ($tournament->version !== $version) {
-                    throw TournamentException::because('stale');
+                    throw RecordChangedException::changed();
                 }
                 if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
                     throw TournamentException::because('closed');

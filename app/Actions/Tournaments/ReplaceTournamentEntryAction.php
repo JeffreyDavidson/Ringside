@@ -6,6 +6,7 @@ namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Tournaments\TournamentLocks;
@@ -26,7 +27,7 @@ class ReplaceTournamentEntryAction
         DB::transaction(function () use ($entry, $competitorId, $version, $reason): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
-                throw TournamentException::because('stale');
+                throw RecordChangedException::changed();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::because('closed');

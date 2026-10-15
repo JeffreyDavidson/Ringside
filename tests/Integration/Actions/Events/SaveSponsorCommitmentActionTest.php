@@ -10,6 +10,7 @@ use App\Data\Events\SponsorCommitmentData;
 use App\Data\Sponsors\SponsorData;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
@@ -74,10 +75,10 @@ test('stale tabs repeated creates and invalid submission keys cannot add promise
 
     // Act and Assert
     expect(fn () => $action->handle($world['event'], $stale->id, 1, $stale->submission_key, sponsorPromiseData($stale)))
-        ->toThrow(SponsorCommitmentException::class);
+        ->toThrow(RecordChangedException::class);
     expect(fn () => $action->handle($world['event'], null, 0, $promise->submission_key, sponsorPromiseData($promise)))
-        ->toThrow(SponsorCommitmentException::class)
-        ->and(fn () => $action->handle($world['event'], null, 0, 'invalid', sponsorPromiseData($promise)))->toThrow(SponsorCommitmentException::class)
+        ->toThrow(RecordChangedException::class)
+        ->and(fn () => $action->handle($world['event'], null, 0, 'invalid', sponsorPromiseData($promise)))->toThrow(RecordChangedException::class)
         ->and($promise->refresh()->description)->toBe('Entrance and exit banner')
         ->and($promise->revisions()->count())->toBe(2)
         ->and(EventSponsorCommitment::query()->count())->toBe(1);

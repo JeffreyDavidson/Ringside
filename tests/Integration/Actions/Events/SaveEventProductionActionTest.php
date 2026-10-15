@@ -8,6 +8,7 @@ use App\Actions\Events\SaveEventProductionAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Events\EventPackConflictException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -176,7 +177,7 @@ test('stale production previews cannot overwrite a changed source', function (st
     $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, $version, $fingerprint, $fixture['production'], false);
 
     // Assert
-    expect($attempt)->toThrow(EventPackConflictException::class)
+    expect($attempt)->toThrow($case === 'review' ? EventPackConflictException::class : RecordChangedException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before);
 })->with(['version', 'fingerprint', 'review']);
 

@@ -6,6 +6,7 @@ namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Tournaments\TournamentLocks;
@@ -28,7 +29,7 @@ class AwardTournamentWalkoverAction
         DB::transaction(function () use ($node, $version, $reason): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {
-                throw TournamentException::because('stale');
+                throw RecordChangedException::changed();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::because('closed');

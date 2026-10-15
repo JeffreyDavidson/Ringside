@@ -96,7 +96,6 @@ return [
     'live_state' => 'Live snapshot: :state',
     'no_live_item' => 'Not in the adopted live order',
     'no_instruction' => 'No pack instruction linked',
-    'conflict' => 'This record changed or was already saved. Reload and review before saving again.',
     'archived' => 'Archived records cannot be selected for new promises.',
     'reason_required' => 'Give a reason for cancelling, reopening or correcting a finished promise.',
     'evidence_required' => 'Record completion evidence and a completion time that is not in the future.',

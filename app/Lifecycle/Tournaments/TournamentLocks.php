@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Tournaments;
 
-use App\Exceptions\Tournaments\TournamentException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentMatchLink;
@@ -30,7 +30,7 @@ class TournamentLocks
     {
         $tournaments = Tournament::query()->whereKey($tournamentIds)->orderBy('id')->get();
         if ($tournaments->count() !== count(array_unique($tournamentIds))) {
-            throw TournamentException::because('stale');
+            throw RecordChangedException::changed();
         }
         $snapshot = $this->eventIds($tournamentIds);
         $ids = array_values(array_unique([...$snapshot, ...$extraEvents]));
@@ -43,7 +43,7 @@ class TournamentLocks
         Tournament::query()->whereKey($tournamentIds)->orderBy('id')->lockForUpdate()->get();
         $after = Event::query()->withTrashed()->whereKey($ids)->orderBy('id')->get()->mapWithKeys(fn (Event $event): array => [$event->id => $event->date?->toIso8601String()])->all();
         if ($snapshot !== $this->eventIds($tournamentIds) || $before !== $after) {
-            throw TournamentException::because('stale');
+            throw RecordChangedException::changed();
         }
     }
 

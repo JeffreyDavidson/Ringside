@@ -6,6 +6,7 @@ use App\Actions\Tournaments\SaveTournamentAction;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -61,6 +62,6 @@ it('refuses a conflicting retry payload for an already accepted create identifie
     $ids = array_values($entrants->map(fn (Wrestler $wrestler): int => $wrestler->id)->all());
     $identifier = Str::uuid()->toString();
     resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Original Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier));
-    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Different Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier)))->toThrow(TournamentException::class)
+    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Different Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier)))->toThrow(RecordChangedException::class)
         ->and(Tournament::query()->sole()->name)->toBe('Original Cup');
 });

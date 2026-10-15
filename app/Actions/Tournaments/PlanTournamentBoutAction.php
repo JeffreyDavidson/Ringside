@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Events\Event;
@@ -23,7 +24,7 @@ class PlanTournamentBoutAction
             $tournament = $this->locks->lock($node->tournament_id, $event instanceof Event ? [$event->id] : []);
             $event = $event instanceof Event ? Event::query()->withTrashed()->findOrFail($event->id) : null;
             if ($tournament->version !== $version || ($event !== null && ($event->trashed() || $event->promotion_id !== $tournament->promotion_id))) {
-                throw TournamentException::because('stale');
+                throw RecordChangedException::changed();
             }
             if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
                 throw TournamentException::because('closed');
