@@ -61,17 +61,24 @@ test('exception folders are a domain folder of the app or a named shared folder'
     );
 
     // Act
-    $disallowedFolders = collect(iterator_to_array($directories))
-        ->filter(fn (SplFileInfo $entry): bool => $entry->isDir())
-        ->map(fn (SplFileInfo $directory): string => str($directory->getPathname())
+    $disallowedFolders = [];
+
+    foreach ($directories as $entry) {
+        if (! $entry instanceof SplFileInfo || ! $entry->isDir()) {
+            continue;
+        }
+
+        $folder = str($entry->getPathname())
             ->after(app_path('Exceptions').DIRECTORY_SEPARATOR)
             ->replace(DIRECTORY_SEPARATOR, '/')
-            ->toString())
-        ->reject(fn (string $folder): bool => in_array($folder, $sharedFolders, true)
-            || is_dir(app_path("Models/{$folder}"))
-            || is_dir(app_path("Actions/{$folder}")))
-        ->values()
-        ->all();
+            ->toString();
+
+        if (in_array($folder, $sharedFolders, true) || is_dir(app_path("Models/{$folder}")) || is_dir(app_path("Actions/{$folder}"))) {
+            continue;
+        }
+
+        $disallowedFolders[] = $folder;
+    }
 
     // Assert
     expect($disallowedFolders)->toBeEmpty();
