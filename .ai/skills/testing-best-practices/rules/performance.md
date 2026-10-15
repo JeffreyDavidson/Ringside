@@ -1,6 +1,6 @@
 # Test Suite Performance
 
-These settings apply to the project and CI, not to individual tests. Read `rules/isolation.md` for choices within a test.
+These are candidates to investigate, not a configuration to apply wholesale. Read `isolation.md` for choices within a test. Confirm installed framework/plugin support and use the project's canonical commands. Pest flags below do not apply to PHPUnit runners. Preserve full-suite fallback when impact data is absent or stale, mandatory coverage and engine-specific checks.
 
 Fetch `https://pestphp.com/docs/optimizing-tests` for Pest options that make test runs faster.
 Verify each flag in the documentation before adding it to CI.
@@ -17,7 +17,7 @@ Measure before changing a setting. Find the slow test first, and apply a project
 
 ## Global Fakes
 
-Put these three calls in the base `Pest.php` of the project:
+Consider these supported facilities in the configured test setup (`tests/Pest.php` or a PHPUnit base test class), after checking they do not suppress behavior under test:
 
 - `Http::preventStrayRequests()`, because one request that reaches the network can slow the suite. This catches requests made through Laravel's HTTP client. Check direct Guzzle and cURL usage separately.
 - `Sleep::fake(syncWithCarbon: true)`, so a retry and a backoff do not sleep.

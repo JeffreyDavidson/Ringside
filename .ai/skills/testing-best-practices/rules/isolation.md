@@ -8,17 +8,21 @@ Fetch `https://laravel.com/framework/docs/mocking` for Laravel's fakes, facade d
 
 Identify the dependency, then choose the first applicable option. A framework fake preserves the real code path, while a mock replaces the dependency.
 
-1. Always use framework fakes for facades such as events, queues, mail, notifications, storage, the HTTP client, time, and sleep.
+1. Prefer framework fakes for facades such as events, queues, mail, notifications, storage, the HTTP client, time, and sleep; preserve explicitly required project double tools.
 2. Use a developer-defined fake implementation of a service if the application provides one.
 3. Use a mock for a container-resolved contract only when the real implementation leaves the process or is nondeterministic.
 4. Use the real implementation for everything else, including the database.
+
+## Controller Feature-Test Boundaries
+
+Keep registered routing, relevant middleware, binding, FormRequests, policies/gates, internal Actions and database behavior real; read [endpoint tests](endpoint-tests.md#exercise-the-application-http-path). Do not replace the application's own permission or business workflow with a mock and then describe the resulting request as complete controller coverage. A container-resolved adapter may be doubled where it owns external IO or nondeterminism; that is not permission to replace the whole internal workflow. Lower-layer collaborator tests supplement HTTP tests instead of substituting for them.
 
 ## Framework Fakes
 
 - Create each fake inside the test that needs it. Do not create fakes in a file-level `beforeEach()`.
 - Pass class names to `Event::fake()` and `Queue::fake()` when you know which classes the code dispatches. A fake without class names can hide an unexpected dispatch.
 - Use a fake without class names only when the test asserts the complete result, including a call to `assertNothingPushed()`.
-- Write one assertion for each fake. The assertion states that the code dispatches the item, or that the code does not dispatch the item.
+- Assert meaningful dispatch or non-dispatch for each fake. Add payload and exact-count checks when those facts protect the contract; one assertion per fake is not a maximum.
 - Assert the data of a job or of an event if that data is part of the behavior.
 - Use `Exceptions::fake()` to assert that the application reports the correct exception. Do not use `withoutExceptionHandling()`, because it changes the response under test.
 
@@ -26,7 +30,7 @@ Create prerequisite factory records before calling `Event::fake()`. Factories us
 
 ## Mocking
 
-Use `shouldReceive()` before the action to declare an expectation. Use `shouldHaveReceived()` after the action for a spy. Use `Mockery::on()` or `withArgs()` if an equality check cannot state the expected argument, such as a check of one field of a value object.
+Use the project's installed and approved double tool. For a Mockery-based suite, use `shouldReceive()` before the action to declare an expectation and `shouldHaveReceived()` after the action for a spy. Use `Mockery::on()` or `withArgs()` when equality cannot state the expected argument. Do not introduce Mockery calls or facade spies into a suite that explicitly requires another tool, such as jasonmccreary/double. Keep each fluent configuration method on its own line and assert the intended interaction or non-interaction.
 
 Import the mock function before you use it: `use function Pest\Laravel\mock;`.
 
@@ -49,4 +53,4 @@ Fake the exact endpoint used by each test. Do not call `Http::fake()` without an
 - Run real queries against the real records in the test database. Do not mock the query builder, because the test then asserts the mock.
 - Assert the exact keys of `toArray()` if the shape of the serialized model is a contract. The test then fails when the model exposes a new attribute.
 - Test application behavior caused by the schema, such as deleting dependent records through a cascade. Do not test the database engine's cascade implementation.
-- Use `LazilyRefreshDatabase` instead of `RefreshDatabase`. A test that does not use the database then does not run the migrations.
+- Follow the configured database isolation strategy. Consider `LazilyRefreshDatabase` for compatible HTTP suites after checking the installed Laravel version and setup; browser processes and engine-specific tests can require different isolation. Do not switch traits or replace a required database engine merely to speed up a run.

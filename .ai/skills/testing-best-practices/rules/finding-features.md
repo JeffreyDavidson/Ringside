@@ -2,9 +2,9 @@
 
 Pest adds features faster than this skill can list them. Find an existing feature before implementing the behavior by hand.
 
-- Give `search-docs` the capability you need rather than the name of a function you remember. It returns features available in the installed version.
+- When Boost `search-docs` is available, give it the capability you need and scope to the relevant packages. Otherwise use official version-matched documentation or installed source.
 - Fetch `https://pestphp.com/llms.txt` for the complete feature list and additions in each release.
-- If a search returns no results, tell the user that the installed version does not provide the feature. Do not write an API that you have not confirmed.
+- If a search returns no results, verify the installed version and source before concluding the feature is unavailable. Do not invent an API.
 
 Search for a feature in this table before you write the code by hand.
 
@@ -33,5 +33,7 @@ A hand-built check fails with `false is not true`, which identifies nothing. A f
 expect(User::where('email', 'taylor@laravel.com')->exists())->toBeTrue();
 
 // Use this... the failure names the table and the attributes that it did not find...
-$this->assertDatabaseHas('users', ['email' => 'taylor@laravel.com']);
+use function Pest\Laravel\assertDatabaseHas;
+
+assertDatabaseHas('users', ['email' => 'taylor@laravel.com']);
 ```
