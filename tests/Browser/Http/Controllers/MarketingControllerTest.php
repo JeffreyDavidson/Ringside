@@ -12,7 +12,7 @@ test('visitors can explore the page, read answers and sign in', function (int $w
     // Assert
     $page->assertSee(__('marketing.hero.first'))
         ->assertScript('document.documentElement.scrollWidth <= window.innerWidth')
-        ->assertScript('getComputedStyle(document.querySelector(".hero h1 span")).color === getComputedStyle(document.querySelector(".hero h1")).color')
+        ->assertScript('getComputedStyle(document.querySelector("#hero-title > span:nth-child(2)")).color === getComputedStyle(document.querySelector(".hero h1")).color')
         ->assertNoJavaScriptErrors()
         ->assertNoAccessibilityIssues(3);
 

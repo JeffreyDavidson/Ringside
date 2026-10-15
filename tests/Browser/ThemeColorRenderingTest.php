@@ -8,7 +8,10 @@ use function Pest\Laravel\actingAs;
 
 test('table status dots keep their distinct green from success feedback', function (): void {
     // Arrange
-    Event::factory()->scheduled()->create(['name' => 'Theme color showcase']);
+    Event::factory()
+        ->scheduled()
+        ->create(['name' => 'Theme color showcase']);
+
     actingAs(administrator());
 
     // Act

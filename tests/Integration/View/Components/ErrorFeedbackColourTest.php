@@ -17,7 +17,7 @@ describe('error feedback colour', function (): void {
         // Assert
         expect($html)
             ->toContain('Something needs fixing.')
-            ->toContain('error')
+            ->toContain('text-error')
             ->not->toContain('signal-soft');
     })->with([
         'stable error panel' => ['stable', '<x-stables.modal-error />'],
