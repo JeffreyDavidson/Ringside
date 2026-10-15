@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Crew\Components\Directory;
 use App\Models\Promotions\Promotion;
 
@@ -64,3 +65,20 @@ test('users without memberships cannot open the crew directory', function (): vo
         ->assertForbidden()
         ->assertViewIs('promotions.no-membership');
 });
+
+test('the crew directory stays private for members and open to owners and managers on a production event', function (MembershipRole $role, int $status): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $promotion = Promotion::query()->findOrFail($event->promotion_id);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('crew.contacts.index'));
+
+    // Assert
+    $response->assertStatus($status);
+})->with(['owner' => [MembershipRole::Owner, 200], 'manager' => [MembershipRole::Manager, 200], 'member' => [MembershipRole::Member, 403]]);

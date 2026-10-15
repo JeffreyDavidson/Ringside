@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
@@ -1191,5 +1192,36 @@ describe('validated pack content', function (): void {
                 'minutes' => null,
             ],
         ]);
+    });
+});
+
+describe('production privacy', function (): void {
+    test('a member pack response omits private production content before rendering', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()
+            ->for($promotion)
+            ->create();
+
+        $pack = EventPack::factory()
+            ->for($event)
+            ->create();
+        $pack->content = [...$pack->content, 'production' => ['notes' => 'CREW-PRIVATE-7Q', 'assignments' => [], 'cues' => []]];
+        $pack->save();
+
+        $member = basicUser();
+        $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        actingAs($member);
+
+        // Act
+        $response = get(route('events.pack.show', $event));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertDontSee('CREW-PRIVATE-7Q');
+
+        expect($response->viewData('content'))->not->toHaveKey('production')
+            ->and(data_get($response->viewData('pack'), 'content'))->not->toHaveKey('production');
     });
 });

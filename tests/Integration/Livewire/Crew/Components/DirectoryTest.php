@@ -11,6 +11,7 @@ use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('a manager creates edits and archives a contact in the directory', function (): void {
@@ -98,4 +99,21 @@ test('an administrator must select a promotion before creating owned crew contac
     // Assert
     $page->assertForbidden();
     expect(CrewContact::query()->count())->toBe(0);
+});
+
+test('a member forging the directory component is forbidden', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $user = basicUser();
+    Promotion::query()->findOrFail($event->promotion_id)->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    get(route('events.pack.show', $event))->assertOk();
+
+    // Act
+    $component = livewire(Directory::class);
+
+    // Assert
+    $component->assertForbidden();
 });

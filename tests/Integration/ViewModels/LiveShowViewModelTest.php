@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
+use App\Models\Promotions\Promotion;
+use App\ViewModels\EventPackViewModel;
 use App\ViewModels\LiveShowViewModel;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 
 require_once __DIR__.'/../../Fixtures/live-show.php';
@@ -31,4 +37,28 @@ test('the screen reports revised planned starts and actual delay without inventi
     $item['timing'] = [];
     expect($screen->comparison($item))->toBe('No planned start')
         ->and($screen->actual(null, 'UTC'))->toBe('Not recorded');
+});
+
+test('the live screen data a member receives leaves out crew production content', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../Fixtures/production.php';
+    $event = productionFixture()['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
+    $member = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    actingAs($member);
+
+    // Act
+    $screen = resolve(LiveShowViewModel::class)->data($event);
+
+    // Assert
+    expect(json_encode(data_get($screen, 'run.content')))->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-CUE-7Q')
+        ->and(data_get($screen, 'run.content'))->not->toHaveKey('production')
+        ->and($screen['current'])->toBeNull()
+        ->and($screen['next'])->not->toHaveKey('cues');
 });

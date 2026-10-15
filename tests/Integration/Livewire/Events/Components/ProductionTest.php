@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Components\Production;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -12,6 +14,7 @@ use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('an authorized pack editor adds a crew assignment and saves a cue', function (): void {
@@ -111,4 +114,21 @@ test('a stale production editor keeps its draft and requires reload', function (
     $page->assertHasErrors('production')->assertSet('notes', 'Unsaved private draft');
     expect($event->pack()->firstOrFail()->version)->toBe(2);
     $page->call('reloadSaved')->assertSet('notes', 'PRIVATE-NOTE-7Q')->assertSet('version', 2);
+});
+
+test('a member forging the production component is forbidden', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $user = basicUser();
+    Promotion::query()->findOrFail($event->promotion_id)->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    get(route('events.pack.show', $event))->assertOk();
+
+    // Act
+    $component = livewire(Production::class, ['eventId' => $event->id]);
+
+    // Assert
+    $component->assertForbidden();
 });

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
+use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 require_once __DIR__.'/../../../../Fixtures/production.php';
-
-use App\Enums\Promotions\MembershipRole;
-use App\Models\Promotions\Promotion;
 
 test('long cue sheets retain full manual instructions and never print contact details', function (): void {
     // Arrange
@@ -466,3 +466,72 @@ test('a valid unmatched person filter returns an empty assignment selection', fu
     expect($event->pack()
         ->firstOrFail()->content)->toBe($originalContent);
 });
+
+test('production sheet access follows the viewer\'s promotion role', function (MembershipRole $role, int $status): void {
+    // Arrange
+    $event = productionFixture()['event'];
+
+    $user = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('events.production-sheet.show', $event));
+
+    // Assert
+    $response->assertStatus($status);
+})->with([
+    'owner' => [MembershipRole::Owner, 200],
+    'manager' => [MembershipRole::Manager, 200],
+    'member' => [MembershipRole::Member, 403],
+]);
+
+test('printable production sheet access follows the viewer\'s promotion role', function (MembershipRole $role, int $status): void {
+    // Arrange
+    $event = productionFixture()['event'];
+
+    $user = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
+
+    // Assert
+    $response->assertStatus($status);
+})->with([
+    'owner' => [MembershipRole::Owner, 200],
+    'manager' => [MembershipRole::Manager, 200],
+    'member' => [MembershipRole::Member, 403],
+]);
+
+test('a production sheet from another promotion is not found', function (MembershipRole $role): void {
+    // Arrange
+    $event = productionFixture()['event'];
+    $foreignEvent = Event::factory()
+        ->for(Promotion::factory())
+        ->create();
+
+    $user = basicUser();
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+
+    // Act
+    $response = get(route('events.production-sheet.show', $foreignEvent));
+
+    // Assert
+    $response->assertNotFound();
+})->with([
+    'owner' => [MembershipRole::Owner],
+    'manager' => [MembershipRole::Manager],
+    'member' => [MembershipRole::Member],
+]);
