@@ -27,7 +27,7 @@
     @endif
     <span
         data-test="sidebar-menu-label"
-        class="max-w-40 truncate whitespace-nowrap transition-[max-width,opacity] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] group-data-[collapsed=true]:max-w-0 group-data-[collapsed=true]:opacity-0 motion-reduce:transition-none"
+        class="max-w-40 truncate whitespace-nowrap transition-[max-width,opacity] duration-(--sidebar-transition-duration) ease-(--sidebar-transition-timing) group-data-[collapsed=true]:max-w-0 group-data-[collapsed=true]:opacity-0 motion-reduce:transition-none"
     >{{ $slot }}</span>
     @if ($active)
         <span class="bg-signal absolute inset-y-3 start-0 w-px" aria-hidden="true"></span>

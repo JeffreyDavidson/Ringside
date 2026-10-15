@@ -23,10 +23,10 @@
         'rounded-none transition-colors',
         'placeholder:text-muted-foreground',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground',
-        // Size variants using CSS variables (Metronic specifications) - add extra right padding for password fields
-        $size === 'sm' ? ($type === 'password' ? 'h-[calc(var(--spacing)*7)] pl-[calc(var(--spacing)*2.5)] pr-[calc(var(--spacing)*8)] text-xs' : 'h-[calc(var(--spacing)*7)] px-[calc(var(--spacing)*2.5)] text-xs') : null,
-        $size === 'md' ? ($type === 'password' ? 'h-[calc(var(--spacing)*8.5)] pl-[calc(var(--spacing)*3)] pr-[calc(var(--spacing)*10)] text-2sm' : 'h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm') : null,
-        $size === 'lg' ? ($type === 'password' ? 'h-[calc(var(--spacing)*10)] pl-[calc(var(--spacing)*4)] pr-[calc(var(--spacing)*12)] text-sm' : 'h-[calc(var(--spacing)*10)] px-[calc(var(--spacing)*4)] text-sm') : null,
+        // Reserve space for the password visibility button at each control size.
+        $size === 'sm' ? ($type === 'password' ? 'h-7 pl-2.5 pr-8 text-xs' : 'h-7 px-2.5 text-xs') : null,
+        $size === 'md' ? ($type === 'password' ? 'h-8.5 pl-3 pr-10 text-2sm' : 'h-8.5 px-3 text-2sm') : null,
+        $size === 'lg' ? ($type === 'password' ? 'h-10 pl-4 pr-12 text-sm' : 'h-10 px-4 text-sm') : null,
     ])->filter()->implode(' ');
 
     if ($appearance === 'ringside') {

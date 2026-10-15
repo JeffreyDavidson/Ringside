@@ -17,7 +17,6 @@
     --color-border-strong: #49494c;
     --color-signal: #ff4b50;
     --color-signal-soft: #ff8588;
-    --color-signal-border: rgb(255 75 80 / 50%);
     --color-success: #5fd38d;
     --color-warning: #f5b83d;
     --color-error: #ffa3bf;
@@ -26,10 +25,10 @@
     --color-primary-hover: #b91c24;
     --color-primary-pressed: #a61920;
     --color-outline: #b7b7b9;
-    --color-white: #ffffff;
-    --color-white-50: rgb(255 255 255 / 50%);
-    --color-white-35: rgb(255 255 255 / 35%);
-    --color-overlay: rgb(0 0 0 / 36%);
+    --color-status-positive: #17c653;
+    --color-status-caution: #f6b100;
+    --color-footer-muted: #99a1b7;
+    --color-footer-foreground: #78829d;
     --color-ink: #111111;
 
     --radius-pill: 999px;

@@ -13,7 +13,7 @@
     {{ $slot }}
 
     @if ($badge)
-        <span class="bg-surface-panel text-muted-foreground ml-1.5 inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium">
+        <span class="bg-surface-panel text-muted-foreground ml-1.5 inline-flex items-center rounded-lg px-1.5 py-0.5 text-xs font-medium">
             {{ $badge }}
         </span>
     @endif

@@ -16,18 +16,18 @@ describe('table status badge', function (): void {
             ->toContain($status->label())
             ->toContain($dotClass.' size-1.5 shrink-0 rounded-full');
     })->with([
-        'employed' => [EmploymentStatus::Employed, 'bg-legacy-success'],
-        'awaiting employment' => [EmploymentStatus::FutureEmployment, 'bg-legacy-warning'],
+        'employed' => [EmploymentStatus::Employed, 'bg-status-positive'],
+        'awaiting employment' => [EmploymentStatus::FutureEmployment, 'bg-status-caution'],
         'released' => [EmploymentStatus::Released, 'bg-muted-foreground'],
-        'scheduled event' => [EventStatus::Scheduled, 'bg-legacy-success'],
+        'scheduled event' => [EventStatus::Scheduled, 'bg-status-positive'],
         'past event' => [EventStatus::Past, 'bg-muted-foreground'],
         'unscheduled event' => [EventStatus::Unscheduled, 'bg-signal'],
-        'active stable' => [StableStatus::Active, 'bg-legacy-success'],
-        'inactive stable' => [StableStatus::Inactive, 'bg-legacy-warning'],
+        'active stable' => [StableStatus::Active, 'bg-status-positive'],
+        'inactive stable' => [StableStatus::Inactive, 'bg-status-caution'],
         'pending stable' => [StableStatus::PendingEstablishment, 'bg-signal'],
         'retired stable' => [StableStatus::Retired, 'bg-muted-foreground'],
-        'active title' => [TitleStatus::Active, 'bg-legacy-success'],
-        'inactive title' => [TitleStatus::Inactive, 'bg-legacy-warning'],
+        'active title' => [TitleStatus::Active, 'bg-status-positive'],
+        'inactive title' => [TitleStatus::Inactive, 'bg-status-caution'],
         'pending title' => [TitleStatus::PendingDebut, 'bg-signal'],
         'undebuted title' => [TitleStatus::Undebuted, 'bg-muted-foreground'],
     ]);

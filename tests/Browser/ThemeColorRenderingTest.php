@@ -6,7 +6,7 @@ use App\Models\Events\Event;
 
 use function Pest\Laravel\actingAs;
 
-test('legacy status dots keep their existing green while brand feedback uses the shared palette', function (): void {
+test('table status dots keep their distinct green from success feedback', function (): void {
     // Arrange
     Event::factory()->scheduled()->create(['name' => 'Theme color showcase']);
     actingAs(administrator());
@@ -16,7 +16,7 @@ test('legacy status dots keep their existing green while brand feedback uses the
 
     // Assert
     $page->assertSee('Theme color showcase')
-        ->assertScript('document.querySelector(".bg-legacy-success") !== null && getComputedStyle(document.querySelector(".bg-legacy-success")).backgroundColor === "rgb(23, 198, 83)"');
+        ->assertScript('document.querySelector(".bg-status-positive") !== null && getComputedStyle(document.querySelector(".bg-status-positive")).backgroundColor === "rgb(23, 198, 83)"');
 
     // Act
     $page->script('window.dispatchEvent(new CustomEvent("flash-message", {detail: {type: "status", message: "Theme feedback saved."}}))');

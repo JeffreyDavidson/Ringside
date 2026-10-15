@@ -159,6 +159,7 @@ summary svg {
 }
 
 .hero-image,
+/* Keep neutral alpha literals in sRGB; --alpha() changes their existing blending. */
 .hero-scrim {
     position: absolute;
     inset: 0;
@@ -173,7 +174,7 @@ summary svg {
 }
 
 .hero-scrim {
-    background: linear-gradient(90deg, var(--color-overlay), transparent 75%);
+    background: linear-gradient(90deg, rgb(0 0 0 / 36%), transparent 75%);
 }
 
 .hero-content {
@@ -203,7 +204,7 @@ summary svg {
     align-items: center;
     margin-bottom: 1.5rem;
     padding: 0.45rem 0.9rem;
-    border: 1px solid var(--color-signal-border);
+    border: 1px solid --alpha(var(--color-signal) / 50%);
     border-radius: var(--radius-pill);
     color: var(--color-signal-soft);
     font-size: 0.75rem;
@@ -316,7 +317,7 @@ summary svg {
 }
 
 .show-steps > div {
-    border-top: 1px solid var(--color-white-50);
+    border-top: 1px solid rgb(255 255 255 / 50%);
     padding-top: 2rem;
 }
 
@@ -343,12 +344,12 @@ summary svg {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-top: 5rem;
-    border-top: 1px solid var(--color-white-50);
+    border-top: 1px solid rgb(255 255 255 / 50%);
 }
 
 .workflow-step {
     padding: 1.5rem 1rem 0 0;
-    border-right: 1px solid var(--color-white-35);
+    border-right: 1px solid rgb(255 255 255 / 35%);
 }
 
 .workflow-step:last-child {
@@ -659,7 +660,7 @@ summary::-webkit-details-marker {
 
     .workflow-step {
         border-right: 0;
-        border-bottom: 1px solid var(--color-white-35);
+        border-bottom: 1px solid rgb(255 255 255 / 35%);
         padding-block: 1.5rem;
     }
 

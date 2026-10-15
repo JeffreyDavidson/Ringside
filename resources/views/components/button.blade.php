@@ -25,7 +25,7 @@
     $roles = [
         'primary' => 'border-primary bg-primary text-white hover:border-primary-hover hover:bg-primary-hover active:border-primary-pressed active:bg-primary-pressed',
         'secondary' => 'border-outline bg-transparent text-foreground hover:border-white hover:bg-surface-hover',
-        'destructive' => 'border-signal-border bg-transparent text-signal-soft hover:border-primary-pressed hover:bg-primary-pressed hover:text-white',
+        'destructive' => 'border-signal/50 bg-transparent text-signal-soft hover:border-primary-pressed hover:bg-primary-pressed hover:text-white',
     ];
 @endphp
 

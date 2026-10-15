@@ -22,7 +22,7 @@
     $describedBy = $hasError ? "{$hintId} {$errorId}" : $hintId;
     $accessibleLabel = trim("{$group} {$label}");
 
-    $inputClasses = 'block w-full appearance-none outline-none border border-solid border-outline bg-surface-panel text-foreground aria-invalid:border-error rounded-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm';
+    $inputClasses = 'block w-full appearance-none outline-none border border-solid border-outline bg-surface-panel text-foreground aria-invalid:border-error rounded-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground h-8.5 px-3 text-2sm';
 @endphp
 
 <div

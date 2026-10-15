@@ -8,8 +8,9 @@ test('every semantic colour used by application source is defined as a theme tok
     // Arrange
     $theme = file_get_contents(resource_path('css/tokens.css')).file_get_contents(resource_path('css/app.css'));
     preg_match_all('/--color-([a-z0-9-]+)\s*:/', $theme, $definitions);
-    $definedColors = array_flip($definitions[1]);
-    $semanticNames = '(?:ringside|legacy|surface|foreground|muted-foreground|border|signal|success|warning|error|primary|outline|white|ink|overlay)(?:-[a-z0-9]+)*';
+    // Pure white and black come from Tailwind's default theme.
+    $definedColors = array_flip([...$definitions[1], 'white', 'black']);
+    $semanticNames = '(?:ringside|legacy|surface|foreground|muted-foreground|border|signal|success|warning|error|primary|outline|white|black|ink|status|footer|overlay)(?:-[a-z0-9]+)*';
     $utilityPattern = '/(?<![\w-])(?:bg|text|border(?:-[xytrblse])?|outline|ring|fill|stroke|divide|placeholder|caret|decoration|from|via|to|shadow|accent)-('.$semanticNames.')(?![\w-])/';
     $variablePattern = '/var\(--color-('.$semanticNames.')(?![\w-])/';
     $undefinedColors = [];

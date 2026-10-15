@@ -79,7 +79,7 @@
         }
     "
     @keydown.escape.window="closeSearch(true)"
-    class="border-border bg-surface-header fixed inset-x-0 top-0 z-40 flex h-[var(--header-height)] min-h-[var(--header-height)] min-w-0 items-center border-b transition-[inset-inline-start] duration-[var(--sidebar-transition-duration)] ease-[var(--sidebar-transition-timing)] lg:start-[var(--shell-sidebar-width)] lg:end-0"
+    class="border-border bg-surface-header fixed inset-x-0 top-0 z-40 flex h-(--header-height) min-h-(--header-height) min-w-0 items-center border-b transition-[inset-inline-start] duration-(--sidebar-transition-duration) ease-(--sidebar-transition-timing) lg:start-(--shell-sidebar-width) lg:end-0"
     data-test="app-shell-header"
 >
     <div class="flex w-full min-w-0 items-center gap-4 px-4 lg:px-7">

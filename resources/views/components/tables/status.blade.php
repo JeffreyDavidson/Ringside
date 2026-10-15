@@ -7,8 +7,8 @@
     use App\Enums\Titles\TitleStatus;
 
     $dotClass = match ($status) {
-        EmploymentStatus::Employed, EventStatus::Scheduled, StableStatus::Active, TitleStatus::Active => 'bg-legacy-success',
-        EmploymentStatus::FutureEmployment, StableStatus::Inactive, TitleStatus::Inactive => 'bg-legacy-warning',
+        EmploymentStatus::Employed, EventStatus::Scheduled, StableStatus::Active, TitleStatus::Active => 'bg-status-positive',
+        EmploymentStatus::FutureEmployment, StableStatus::Inactive, TitleStatus::Inactive => 'bg-status-caution',
         EventStatus::Unscheduled, StableStatus::PendingEstablishment, TitleStatus::PendingDebut => 'bg-signal',
         default => 'bg-muted-foreground',
     };
