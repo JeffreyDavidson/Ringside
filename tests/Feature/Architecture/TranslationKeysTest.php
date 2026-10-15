@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Lang;
+use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\New_;
@@ -69,11 +70,11 @@ test('every business exception message is built from a translation key', functio
         $finder = new NodeFinder;
 
         $constructed = array_map(
-            fn (New_ $construction): ?Expr => ($construction->args[0] ?? null)?->value,
+            fn (New_ $construction): ?Expr => ($construction->args[0] ?? null) instanceof Arg ? $construction->args[0]->value : null,
             $finder->findInstanceOf($statements, New_::class),
         );
         $withReason = array_map(
-            fn (StaticCall $call): ?Expr => ($call->args[1] ?? null)?->value,
+            fn (StaticCall $call): ?Expr => ($call->args[1] ?? null) instanceof Arg ? $call->args[1]->value : null,
             array_filter(
                 $finder->findInstanceOf($statements, StaticCall::class),
                 fn (StaticCall $call): bool => $call->name instanceof Identifier && $call->name->toString() === 'forReason',
