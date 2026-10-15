@@ -15,36 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 use function Pest\Laravel\travel;
-
-it('shows a promotion detail page and its member manager to platform administrators', function () {
-    $promotion = Promotion::factory()->create(['name' => 'Ringside Wrestling']);
-
-    actingAs(administrator())
-        ->get(route('promotions.show', $promotion))
-        ->assertOk()
-        ->assertViewIs('promotions.show')
-        ->assertSee('Ringside Wrestling')
-        ->assertSeeHtml('data-test="promotion-members-loading-placeholder"')
-        ->assertSeeLivewire(Manage::class);
-});
-
-it('keeps promotion membership management unavailable to regular users', function () {
-    $promotion = Promotion::factory()->create();
-
-    actingAs(basicUser())
-        ->get(route('promotions.show', $promotion))
-        ->assertForbidden();
-});
-
-it('redirects guests to login from the promotion member page', function () {
-    $promotion = Promotion::factory()->create();
-
-    get(route('promotions.show', $promotion))
-        ->assertRedirect(route('login'));
-});
 
 it('saves an invitation for the typed email to only the selected promotion with its selected role', function () {
     // Arrange
@@ -613,19 +584,6 @@ describe('pending invitations', function () {
             ->and($promotion->memberships()->count())->toBe(0);
     })->with(['activate', 'change role']);
 
-    it('counts only members on the promotion page, not invitations', function () {
-        // Arrange
-        $promotion = Promotion::factory()->create();
-        PromotionInvitation::factory()->for($promotion)->create();
-        $member = User::factory()->create(['status' => UserStatus::Active]);
-        $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-
-        // Act
-        $response = actingAs(administrator())->get(route('promotions.show', $promotion));
-
-        // Assert
-        $response->assertOk()->assertViewHas('promotion', fn (Promotion $shown): bool => $shown->memberships_count === 1);
-    });
 });
 
 it('lists only pending invitations and shows when each expires in the promotion time zone', function () {

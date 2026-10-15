@@ -21,7 +21,7 @@ class SwitchPromotionController
 
         $switchActivePromotion->handle(
             $user,
-            $request->integer('promotion_id'),
+            $request->safe()->integer('promotion_id'),
             $request->session(),
         );
 
