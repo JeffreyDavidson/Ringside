@@ -47,6 +47,6 @@ test('it rejects a wrestler who is on another current tag team', function () {
     // Assert
     expect($lock)->toThrow(
         CannotBeEstablishedException::class,
-        "Wrestler '{$takenWrestler->name}' is already a member of TagTeam '{$otherTagTeam->name}' and cannot join another tag team.",
+        "{$takenWrestler->name} is already a member of {$otherTagTeam->name} and cannot join another tag team.",
     );
 });

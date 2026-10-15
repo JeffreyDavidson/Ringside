@@ -80,6 +80,7 @@ return [
     ],
 
     'validation' => [
+        'wrestler_on_another_tag_team' => ':wrestler is already a member of :tag_team and cannot join another tag team.',
         'name_taken' => "A tag team named ':name' already exists in this promotion.",
         'signature_move_taken' => "A tag team with the signature move ':signature_move' already exists in this promotion.",
         'attributes' => [
