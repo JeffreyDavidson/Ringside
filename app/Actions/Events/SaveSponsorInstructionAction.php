@@ -38,7 +38,7 @@ class SaveSponsorInstructionAction
             $preview = $this->instructions->preview($event, $commitment, $mode, $targetKey, $afterMatchId);
             if ($commitment->version !== $version || ($pack->version ?? 0) !== $packVersion || ! hash_equals($card['fingerprint'], $fingerprint)
                 || ! hash_equals($preview['hash'], $previewHash)) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint) {
                 throw SponsorCommitmentException::because('pack_review_required');

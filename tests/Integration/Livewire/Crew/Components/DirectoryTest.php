@@ -100,7 +100,7 @@ test('a stale contact save and archive show the shared changed-by-someone-else m
     $page->call('save');
 
     // Assert
-    $page->assertHasErrors(['contact' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.']);
+    $page->assertHasErrors(['contact' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.']);
 
     // Act
     $page->call('archive', $contact->id, 1);

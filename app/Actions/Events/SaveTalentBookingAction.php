@@ -44,7 +44,7 @@ class SaveTalentBookingAction
             }
             $key = $personType.':'.$personId;
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->context->fingerprint($event, $key), $fingerprint)) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if ($booking?->status === TalentBookingStatus::Cancelled && $data->status !== TalentBookingStatus::Proposed) {
                 throw TalentBookingException::because('reopen');

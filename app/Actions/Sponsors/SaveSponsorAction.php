@@ -26,10 +26,10 @@ class SaveSponsorAction
             Gate::authorize('manageSponsors', $promotion);
             $sponsor = $id === null ? null : Sponsor::query()->where('promotion_id', $promotion->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             if (($sponsor->version ?? 0) !== $version || ($sponsor === null && Sponsor::query()->where('promotion_id', $promotion->id)->where('submission_key', $submissionKey)->exists())) {
-                throw RecordChangedException::changed();
+                throw RecordChangedException::changedKeepingInput();
             }
             $sponsor ??= new Sponsor;
             $sponsor->promotion_id = $promotion->id;
