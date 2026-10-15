@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -12,9 +14,11 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\EventProductionViewModel;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('saving production keeps existing pack notes and snapshots one contact with multiple roles', function (): void {
     // Arrange
@@ -175,3 +179,23 @@ test('stale production previews cannot overwrite a changed source', function (st
     expect($attempt)->toThrow(EventPackConflictException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before);
 })->with(['version', 'fingerprint', 'review']);
+
+test('a member forging a production save writes nothing', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $user = basicUser();
+    Promotion::query()->findOrFail($event->promotion_id)->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    get(route('events.pack.show', $event))->assertOk();
+    $before = $event->pack()->firstOrFail()->content;
+
+    // Act
+    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 1,
+        $event->pack()->firstOrFail()->card_fingerprint, $fixture['production'], false);
+
+    // Assert
+    expect($attempt)->toThrow(AuthorizationException::class)
+        ->and($event->pack()->firstOrFail()->content)->toBe($before);
+});

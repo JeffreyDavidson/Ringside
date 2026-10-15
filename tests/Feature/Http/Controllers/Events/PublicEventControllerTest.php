@@ -1,14 +1,17 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Actions\Events\DeleteAction;
 use App\Actions\Events\ReleaseEventPublicationAction;
+use App\Actions\Events\SaveEventProductionAction;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
 use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicSection;
 use App\Enums\MatchFinish;
 use App\Enums\Promotions\MembershipRole;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\EventPack;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
@@ -16,6 +19,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Events\PublicEventSourceQuery;
 use App\Services\Promotions\PromotionContextService;
+use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Assert;
 
@@ -891,3 +895,32 @@ test('outward public channels omit operational prose and unselected outcomes', f
         ->assertDontSee('LEAK-STORY-7Q')
         ->assertDontSee('Submission');
 })->with(['card' => [false, 'Harbor Night'], 'results' => [true, 'Selected results']]);
+
+test('published event cards and results omit crew contacts and production cues', function (): void {
+    // Arrange
+    $world = publicEventFixture();
+    $event = $world['event'];
+    $contact = CrewContact::factory()->create(['promotion_id' => $event->promotion_id,
+        'name' => 'PRIVATE-CREW-7Q', 'phone' => 'PRIVATE-PHONE-7Q',
+        'email' => 'private-crew-7q@example.test', 'notes' => 'PRIVATE-CONTACT-NOTE-7Q']);
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventProductionAction::class)->handle($event, 0, $data['card']['fingerprint'], [
+        'notes' => 'PRIVATE-NOTE-7Q',
+        'assignments' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC']],
+        'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$world['match']->id,
+            'subject' => 'PRIVATE-SUBJECT-7Q', 'trigger' => 'PRIVATE-TRIGGER-7Q', 'instruction' => 'PRIVATE-CUE-7Q',
+            'owner_id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001']],
+    ], false);
+
+    // Act
+    savePublicDraft($event);
+    releasePublicPage($event);
+    $publication = releasePublicPage($event, 'results');
+    $surfaces = publicEventSurfaces($event, $publication);
+
+    // Assert
+    $surfaces['snapshots'] = json_encode([$publication->card, $publication->results], JSON_THROW_ON_ERROR);
+    expect($surfaces)->each->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-PHONE-7Q', 'private-crew-7q@example.test', 'PRIVATE-CONTACT-NOTE-7Q', 'PRIVATE-NOTE-7Q', 'PRIVATE-SUBJECT-7Q', 'PRIVATE-TRIGGER-7Q', 'PRIVATE-CUE-7Q')
+        ->and($surfaces['card'])->toContain('Robin North', 'Casey Shore')
+        ->and($surfaces['results'])->toContain('Robin North');
+});

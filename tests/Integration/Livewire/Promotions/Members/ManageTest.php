@@ -10,6 +10,7 @@ use App\Livewire\Promotions\Members\Manage;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionContextService;
 use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\RateLimiter;
@@ -822,5 +823,77 @@ describe('member pagination', function () {
 
         // Assert
         expect($options)->toBe(collect(MembershipRole::cases())->mapWithKeys(fn (MembershipRole $role): array => [$role->value => $role->label()])->all());
+    });
+});
+
+describe('role-based member management', function (): void {
+    it('shows plain members the roster without the invitation form and refuses addMember', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+        $invitee = User::factory()->create(['status' => UserStatus::Active]);
+
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        // Act
+        $component = Livewire::actingAs($user)
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Assert
+        $component
+            ->assertDontSee('Add a member by email')
+            ->assertDontSee('Save role')
+            ->assertSee('Member')
+            ->set('email', $invitee->email)
+            ->call('addMember')
+            ->assertForbidden();
+    });
+
+    it('shows managers the roster without the invitation form and refuses updateMemberStatus', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+
+        $context = app(PromotionContextService::class);
+        $context->set($promotion);
+        $context->enforce();
+
+        // Act
+        $component = Livewire::actingAs($user)
+            ->test(Manage::class, ['promotionId' => $promotion->id]);
+
+        // Assert
+        $component
+            ->assertDontSee('Add a member by email')
+            ->assertDontSee('Save role')
+            ->assertSee('Manager')
+            ->call('updateMemberStatus', User::factory()->create()->id, MembershipStatus::Suspended->value)
+            ->assertForbidden();
+    });
+
+    it('lets owners see the invitation form and invite a member', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $user = basicUser();
+        $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+        $newMember = User::factory()->create(['status' => UserStatus::Active]);
+
+        // Act
+        $component = Livewire::actingAs($user)
+            ->test(Manage::class, ['promotionId' => $promotion->id])
+            ->assertSee('Add a member by email')
+            ->assertSee('Save role')
+            ->set('email', $newMember->email)
+            ->call('addMember');
+
+        // Assert
+        $component->assertHasNoErrors();
+        expect(promotionHasActiveMember($promotion, $newMember))->toBeFalse()
+            ->and($promotion->memberships()->count())->toBe(1)
+            ->and($promotion->invitations()->sole()->email)->toBe($newMember->email);
     });
 });

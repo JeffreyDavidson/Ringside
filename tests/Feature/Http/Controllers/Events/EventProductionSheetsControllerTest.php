@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
+use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 require_once __DIR__.'/../../../../Fixtures/production.php';
-
-use App\Enums\Promotions\MembershipRole;
-use App\Models\Promotions\Promotion;
 
 test('long cue sheets retain full manual instructions and never print contact details', function (): void {
     // Arrange
@@ -466,3 +466,25 @@ test('a valid unmatched person filter returns an empty assignment selection', fu
     expect($event->pack()
         ->firstOrFail()->content)->toBe($originalContent);
 });
+
+test('production sheets stay private for members and scoped to the active promotion', function (MembershipRole $role, int $status): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $promotion = Promotion::query()->findOrFail($event->promotion_id);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $other = Event::factory()->for(Promotion::factory())->create();
+
+    // Act
+    $sheet = get(route('events.production-sheet.show', $event));
+    $print = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
+    $foreign = get(route('events.production-sheet.show', $other));
+
+    // Assert
+    $sheet->assertStatus($status);
+    $print->assertStatus($status);
+    $foreign->assertNotFound();
+})->with(['owner' => [MembershipRole::Owner, 200], 'manager' => [MembershipRole::Manager, 200], 'member' => [MembershipRole::Member, 403]]);
