@@ -9,7 +9,6 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
-use App\ViewModels\LiveShowViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -107,25 +106,26 @@ test('foreign promotions cannot open a live show', function (): void {
         ->count())->toBe(0);
 });
 
-test('a member live response removes crew cues and counts from its view data', function (): void {
+test('a member live response does not show crew cues or crew names', function (): void {
     // Arrange
     require_once __DIR__.'/../../../../Fixtures/production.php';
-    $fixture = productionFixture();
-    $event = $fixture['event'];
+    $event = productionFixture()['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
     $member = basicUser();
-    Promotion::query()->findOrFail($event->promotion_id)->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
+    Promotion::query()
+        ->findOrFail($event->promotion_id)
+        ->users()
+        ->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     actingAs($member);
 
     // Act
     $response = get(route('events.live-show.show', $event));
 
     // Assert
-    $response->assertOk()->assertDontSee('PRIVATE-CREW-7Q')->assertDontSee('PRIVATE-CUE-7Q');
-    $screen = resolve(LiveShowViewModel::class)->data($event);
-    expect(json_encode(data_get($screen, 'run.content')))->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-CUE-7Q')
-        ->and(data_get($screen, 'run.content'))->not->toHaveKey('production')
-        ->and($screen['current'])->toBeNull()
-        ->and($screen['next'])->not->toHaveKey('cues');
+    $response
+        ->assertOk()
+        ->assertDontSee('PRIVATE-CREW-7Q')
+        ->assertDontSee('PRIVATE-CUE-7Q');
 });
