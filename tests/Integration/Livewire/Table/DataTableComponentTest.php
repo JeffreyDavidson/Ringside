@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Livewire\Table;
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\Role;
+use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertModelExists;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 describe('data table component', function (): void {
@@ -371,5 +376,42 @@ describe('data table refreshing', function (): void {
 
         // Assert
         $component->assertSee('Latecomer');
+    });
+});
+
+describe('data table loading placeholder', function (): void {
+    test('resource index pages render a table loading placeholder in the initial response', function (): void {
+        // Arrange
+        $administrator = administrator();
+        $promotion = Promotion::factory()->create();
+        $promotion->users()->attach($administrator, [
+            'role' => MembershipRole::Owner->value,
+            'status' => MembershipStatus::Active->value,
+        ]);
+
+        actingAs($administrator);
+
+        foreach ([
+            'events.index',
+            'managers.index',
+            'promotions.index',
+            'referees.index',
+            'stables.index',
+            'tag-teams.index',
+            'titles.index',
+            'users.index',
+            'venues.index',
+            'wrestlers.index',
+        ] as $routeName) {
+            // Act
+            $response = get(route($routeName));
+
+            // Assert
+            $response
+                ->assertOk()
+                ->assertSeeHtml('data-test="table-loading-placeholder"')
+                ->assertSeeHtml('aria-busy="true"')
+                ->assertSee(__('core.loading_table'));
+        }
     });
 });
