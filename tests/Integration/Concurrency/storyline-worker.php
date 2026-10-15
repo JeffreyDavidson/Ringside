@@ -6,7 +6,7 @@ use App\Actions\Storylines\SaveStepAction;
 use App\Data\Storylines\DevelopmentData;
 use App\Data\Storylines\SourceData;
 use App\Data\Storylines\StepData;
-use App\Exceptions\Storylines\StorylineConflictException;
+use App\Exceptions\BaseBusinessException;
 use App\Models\Storylines\Storyline;
 use App\Models\Users\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -38,6 +38,6 @@ try {
         resolve(SaveStepAction::class)->handle($story, $spec['version'], new StepData('Concurrent plan', 'The planned argument.', 1, $source, $spec['submission']));
     }
     fwrite(STDOUT, 'RESULT:'.json_encode(['ok' => true], JSON_THROW_ON_ERROR)."\n");
-} catch (StorylineConflictException $exception) {
+} catch (BaseBusinessException $exception) {
     fwrite(STDOUT, 'RESULT:'.json_encode(['ok' => false, 'exception' => $exception::class, 'message' => $exception->getMessage()], JSON_THROW_ON_ERROR)."\n");
 }
