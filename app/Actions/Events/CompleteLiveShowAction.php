@@ -6,15 +6,15 @@ namespace App\Actions\Events;
 
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
-use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Facades\DB;
 
 class CompleteLiveShowAction
 {
     public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
-        private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing) {}
+        private readonly LiveShowSourceRequirements $source, private readonly LiveShowTimingService $timing) {}
 
     public function handle(Event $event, int $version): void
     {
@@ -24,7 +24,7 @@ class CompleteLiveShowAction
             if (collect($run->content['items'])->contains(fn (array $item): bool => in_array($item['state'], ['pending', 'running'], true))) {
                 throw LiveShowException::unfinished();
             }
-            if ($this->source->changed($run->event, $run)) {
+            if ($this->source->hasChanged($run->event, $run)) {
                 throw LiveShowException::reviewRequired();
             }
             $before = ['status' => $run->status->value];

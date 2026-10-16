@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\ViewModels;
 
 use App\Enums\Events\LiveShowStatus;
-use App\Exceptions\Events\LiveShowException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Lang;
 
 /**
  * @phpstan-import-type Content from EventLiveRun
@@ -33,11 +33,8 @@ class LiveShowViewModel
         $sourceError = null;
         $complete = $run?->status === LiveShowStatus::Completed;
         if (! $complete) {
-            try {
-                $source = $this->source->get($event);
-            } catch (LiveShowException $exception) {
-                $sourceError = $exception->getMessage();
-            }
+            $source = $this->source->get($event);
+            $sourceError = $source === null ? Lang::string('live-show.prepare_required') : null;
         }
         if (Gate::denies('viewProduction', $event)) {
             if ($run !== null) {

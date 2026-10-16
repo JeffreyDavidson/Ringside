@@ -7,19 +7,19 @@ namespace App\Actions\Events;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\LiveShowSourceQuery;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class PrepareLiveShowAction
 {
-    public function __construct(private readonly LiveShowSourceQuery $source) {}
+    public function __construct(private readonly LiveShowSourceRequirements $source) {}
 
     public function handle(Event $event, int $version, int $packVersion, string $fingerprint): EventLiveRun
     {
@@ -32,7 +32,7 @@ class PrepareLiveShowAction
             if ($run !== null || $version !== 0) {
                 throw RecordChangedException::changed();
             }
-            $source = $this->source->get($event);
+            $source = $this->source->ensureSource($event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
             }

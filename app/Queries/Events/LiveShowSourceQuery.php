@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Queries\Events;
 
 use App\Enums\Crew\CrewRole;
-use App\Exceptions\Events\LiveShowException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
-use App\ViewModels\EventPackViewModel;
 
 /**
  * @phpstan-import-type Content from EventLiveRun
@@ -18,22 +16,19 @@ use App\ViewModels\EventPackViewModel;
  */
 class LiveShowSourceQuery
 {
-    public function __construct(private readonly EventPackViewModel $pack) {}
+    public function __construct(private readonly EventPackSourceQuery $pack) {}
 
-    public function changed(Event $event, EventLiveRun $run): bool
+    /**
+     * The live show's source, or null while the event has no date, no saved pack, a pack that no longer matches
+     * the card, segments without a match to follow, or nothing to run.
+     *
+     * @return Source|null
+     */
+    public function get(Event $event): ?array
     {
-        $data = $this->pack->data($event);
-
-        return $data['pack'] === null || $data['pack']->version !== $run->pack_version
-            || ! hash_equals($run->card_fingerprint, $data['card']['fingerprint']) || $data['needsReview'];
-    }
-
-    /** @return Source */
-    public function get(Event $event): array
-    {
-        $data = $this->pack->data($event);
+        $data = $this->pack->get($event);
         if ($event->date === null || $data['pack'] === null || $data['needsReview'] || $data['unplaced'] !== [] || $data['running'] === []) {
-            throw LiveShowException::prepareRequired();
+            return null;
         }
 
         $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));

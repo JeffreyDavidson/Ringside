@@ -13,6 +13,7 @@ use App\Data\Events\EventData;
 use App\Data\Matches\EventMatchData;
 use App\Enums\Matches\MatchType;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -121,11 +122,12 @@ test('an undated card has no calendar conflict until a date is chosen', function
     $match = EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
     $query = resolve(EventRosterAvailabilityQuery::class);
+    $eligibility = resolve(EventRosterSchedulingEligibility::class);
 
     // Act
     $allowed = resolve(RosterDateAvailability::class)->allowsForEvent($person, $event);
-    $issues = $query->unavailable($event);
-    $query->ensureAt($event, null, lock: true);
+    $issues = $query->get($event);
+    $eligibility->ensureAvailableAt($event, null, lock: true);
 
     // Assert
     expect($allowed)->toBeTrue()->and($issues)->toBeEmpty()

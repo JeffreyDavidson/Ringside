@@ -91,7 +91,7 @@ class Calendar extends Component
             $events = Event::query()->where('promotion_id', $promotion->id)->where('date', '>=', $start->copy()->utc())
                 ->where('date', '<', $start->copy()->addDay()->utc())->orderBy('date')->orderBy('id')->get();
             foreach ($events as $event) {
-                $people = resolve(EventRosterAvailabilityQuery::class)->unavailable($event);
+                $people = resolve(EventRosterAvailabilityQuery::class)->get($event);
                 if ($people->isNotEmpty()) {
                     $eventIssues[] = ['event' => $event, 'names' => $people->map(fn (Wrestler|Referee $person): string => $person instanceof Referee ? $person->full_name : $person->name)->join(', ')];
                 }

@@ -43,7 +43,7 @@ class EventPackCardQuery
             'tag_team' => TagTeam::query()->bookable()->whereKey($teams->modelKeys())->get()->map(fn (Wrestler|TagTeam|Referee $person): int => $person->id)->values()->all(),
             'referee' => Referee::query()->bookable()->whereKey($referees->pluck('id')->all())->get()->map(fn (Wrestler|TagTeam|Referee $person): int => $person->id)->values()->all(),
         ];
-        $calendarUnavailable = $this->calendar->unavailable($event)->map(RosterDateAvailability::key(...))->all();
+        $calendarUnavailable = $this->calendar->get($event)->map(RosterDateAvailability::key(...))->all();
         $rows = [];
         $roster = [];
         foreach ($matches as $match) {

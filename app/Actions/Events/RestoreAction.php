@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Exceptions\Venues\CannotBeRestoredException;
+use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Tournaments\Tournament;
-use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +24,7 @@ class RestoreAction
         private readonly SchedulingSlotLock $slotLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
-        private readonly EventRosterAvailabilityQuery $rosterAvailability,
+        private readonly EventRosterSchedulingEligibility $rosterAvailability,
     ) {}
 
     /**
@@ -74,7 +74,7 @@ class RestoreAction
             $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $lockedEvent->date);
             Tournament::query()->whereKey($tournamentIds)->increment('version');
             if ($lockedEvent->date?->isFuture()) {
-                $this->rosterAvailability->ensureAt($lockedEvent, $lockedEvent->date, lock: true);
+                $this->rosterAvailability->ensureAvailableAt($lockedEvent, $lockedEvent->date, lock: true);
             }
             $this->deletionState->restore($lockedEvent, now());
         }, attempts: 3);

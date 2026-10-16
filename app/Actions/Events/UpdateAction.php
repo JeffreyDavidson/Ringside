@@ -8,6 +8,7 @@ use App\Data\Events\EventData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\NameTakenException;
 use App\Exceptions\Events\VenueDeletedException;
+use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Events\SchedulingSlotLock;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -16,7 +17,6 @@ use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Tournaments\Tournament;
-use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Carbon;
@@ -26,7 +26,7 @@ class UpdateAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $assignmentConflicts,
-        private readonly EventRosterAvailabilityQuery $rosterAvailability,
+        private readonly EventRosterSchedulingEligibility $rosterAvailability,
         private readonly SchedulingSlotLock $slotLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentMatchRequirementsService $tournamentRequirements,
@@ -94,7 +94,7 @@ class UpdateAction
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
-                $this->rosterAvailability->ensureAt($lockedEvent, $eventData->date, lock: true);
+                $this->rosterAvailability->ensureAvailableAt($lockedEvent, $eventData->date, lock: true);
             }
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
