@@ -29,10 +29,10 @@ class CorrectBudgetMovementAction
                 abort(404);
             }
             if ($movement->voided_at !== null) {
-                throw BudgetException::because('already_voided');
+                throw BudgetException::alreadyVoided();
             }
             if ($movements->where('source_id', $movementId)->whereNull('voided_at')->isNotEmpty()) {
-                throw BudgetException::because('dependent_refunds');
+                throw BudgetException::dependentRefunds();
             }
             $before = $movement->attributesToArray();
             $movement->voided_at = now();

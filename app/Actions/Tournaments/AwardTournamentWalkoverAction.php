@@ -32,17 +32,17 @@ class AwardTournamentWalkoverAction
                 throw RecordChangedException::changedKeepingInput();
             }
             if ($tournament->status !== TournamentStatus::Active) {
-                throw TournamentException::because('closed');
+                throw TournamentException::closed();
             }
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
             if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->complete || $bout->link instanceof TournamentMatchLink || $bout->first->withdrawn === $bout->second->withdrawn) {
-                throw TournamentException::because('walkover_invalid');
+                throw TournamentException::walkoverInvalid();
             }
             $winner = $bout->first->withdrawn ? $bout->second : $bout->first;
             $competitor = $tournament->entrant_kind->modelClass()::query()->whereKey($winner->competitor_id)->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->lockForUpdate()->first();
             if ($competitor === null || ! $this->eligibility->allows($competitor)) {
-                throw TournamentException::because('entrant_unavailable');
+                throw TournamentException::entrantUnavailable();
             }
             $node->forceFill(['walkover_entry_id' => $winner->id, 'walkover_reason' => $reason])->save();
             activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'winner_entry_id' => $winner->id, 'reason' => $reason])->log('tournament.walkover');

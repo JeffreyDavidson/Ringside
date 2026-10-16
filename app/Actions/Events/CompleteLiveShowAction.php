@@ -22,10 +22,10 @@ class CompleteLiveShowAction
             $run = $this->lock->handle($event, $version);
             $this->timing->ensureShowDay($run);
             if (collect($run->content['items'])->contains(fn (array $item): bool => in_array($item['state'], ['pending', 'running'], true))) {
-                throw LiveShowException::because('unfinished');
+                throw LiveShowException::unfinished();
             }
             if ($this->source->changed($run->event, $run)) {
-                throw LiveShowException::because('review_required');
+                throw LiveShowException::reviewRequired();
             }
             $before = ['status' => $run->status->value];
             $run->status = LiveShowStatus::Completed;

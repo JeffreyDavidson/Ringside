@@ -33,20 +33,20 @@ class BookTournamentMatchAction
     {
         $bout = $this->bracket->bout($node);
         if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry) {
-            throw TournamentException::because('unresolved');
+            throw TournamentException::unresolved();
         }
         $kind = $node->tournament()->firstOrFail()->entrant_kind;
         $first = $bout->first->competitor;
         $second = $bout->second->competitor;
         if ($kind === EntrantKind::Wrestler) {
             if (! $first instanceof Wrestler || ! $second instanceof Wrestler) {
-                throw TournamentException::because('entrants_changed');
+                throw TournamentException::entrantsChanged();
             }
 
             return $this->bookMatch->handle($event, new EventMatchData(MatchType::Singles, $referees, $titles ?? new Collection, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]]), null, $stipulation), $node, $version);
         }
         if (! $first instanceof TagTeam || ! $second instanceof TagTeam) {
-            throw TournamentException::because('entrants_changed');
+            throw TournamentException::entrantsChanged();
         }
 
         return $this->bookMatch->handle($event, new EventMatchData(MatchType::TagTeam, $referees, $titles ?? new Collection, collect([1 => ['tag_teams' => [$first]], 2 => ['tag_teams' => [$second]]]), null, $stipulation), $node, $version);

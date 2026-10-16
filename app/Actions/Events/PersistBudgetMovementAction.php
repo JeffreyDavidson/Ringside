@@ -24,32 +24,32 @@ class PersistBudgetMovementAction
     {
         $line->setRelation('movements', $line->movements()->orderBy('id')->lockForUpdate()->get());
         if ($line->archived_at !== null) {
-            throw BudgetException::because('archived');
+            throw BudgetException::archived();
         }
         if ($line->movements->count() >= 1000) {
-            throw BudgetException::because('movement_limit');
+            throw BudgetException::movementLimit();
         }
         if ($data->amount <= 0 || $data->amount > UsdAmount::MAX_CENTS) {
-            throw BudgetException::because('positive_amount');
+            throw BudgetException::positiveAmount();
         }
         if (! Carbon::hasFormatWithModifiers($data->date, 'Y-m-d') || ! Carbon::canBeCreatedFromFormat($data->date, 'Y-m-d') || $data->date > now($budget->timezone)->toDateString()) {
-            throw BudgetException::because('payment_date');
+            throw BudgetException::paymentDate();
         }
         if ($data->kind === BudgetMovementKind::Refund) {
             $source = $line->movements->firstWhere('id', $data->sourceId);
             if ($source === null || $source->voided_at !== null || $source->kind !== BudgetMovementKind::Payment || $data->date < $source->effective_date->toDateString()) {
-                throw BudgetException::because('refund_source');
+                throw BudgetException::refundSource();
             }
             $refunded = $line->movements->filter(fn (EventBudgetMovement $movement): bool => $movement->source_id === $source->id && $movement->voided_at === null)->sum(fn (EventBudgetMovement $movement): int => $movement->amount_cents);
             if ($data->amount > $source->amount_cents - $refunded) {
-                throw BudgetException::because('refund_cap');
+                throw BudgetException::refundCap();
             }
         }
         if ($data->kind === BudgetMovementKind::Payment && $data->sourceId !== null) {
-            throw BudgetException::because('refund_source');
+            throw BudgetException::refundSource();
         }
         if ($data->kind === BudgetMovementKind::Payment && $line->confirmed_cents !== null && $this->settlement->net($line) + $data->amount > $line->confirmed_cents && ! $data->acknowledge) {
-            throw BudgetException::because('excess');
+            throw BudgetException::excess();
         }
         $user = auth()->user();
         if (! $user instanceof User) {

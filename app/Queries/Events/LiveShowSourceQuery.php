@@ -33,7 +33,7 @@ class LiveShowSourceQuery
     {
         $data = $this->pack->data($event);
         if ($event->date === null || $data['pack'] === null || $data['needsReview'] || $data['unplaced'] !== [] || $data['running'] === []) {
-            throw LiveShowException::because('prepare_required');
+            throw LiveShowException::prepareRequired();
         }
 
         $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));

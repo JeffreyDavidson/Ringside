@@ -27,7 +27,7 @@ class SaveSponsorCommitmentAction
             $event = Event::query()->withTrashed()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             Gate::authorize('manageSponsors', $event);
             if ($event->promotion_id === null) {
-                throw SponsorCommitmentException::because('event_unavailable');
+                throw SponsorCommitmentException::eventUnavailable();
             }
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
             $commitment = $id === null ? null : EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
@@ -38,13 +38,13 @@ class SaveSponsorCommitmentAction
                 throw RecordChangedException::changedKeepingInput();
             }
             if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
-                throw SponsorCommitmentException::because('archived');
+                throw SponsorCommitmentException::archived();
             }
             if (($data->status === SponsorCommitmentStatus::Cancelled || ($commitment !== null && $commitment->status !== SponsorCommitmentStatus::Pending)) && mb_trim($reason ?? '') === '') {
-                throw SponsorCommitmentException::because('reason_required');
+                throw SponsorCommitmentException::reasonRequired();
             }
             if ($data->status === SponsorCommitmentStatus::Completed && (mb_trim($data->evidence ?? '') === '' || $data->completedAt?->isFuture())) {
-                throw SponsorCommitmentException::because('evidence_required');
+                throw SponsorCommitmentException::evidenceRequired();
             }
             $commitment ??= new EventSponsorCommitment;
             $isNew = ! $commitment->exists;

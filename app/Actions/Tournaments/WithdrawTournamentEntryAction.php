@@ -27,7 +27,7 @@ class WithdrawTournamentEntryAction
                 throw RecordChangedException::changedKeepingInput();
             }
             if ($tournament->status !== TournamentStatus::Active) {
-                throw TournamentException::because('closed');
+                throw TournamentException::closed();
             }
             $entry = $tournament->entries()->findOrFail($entry->id);
             if ($entry->withdrawn) {

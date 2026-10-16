@@ -67,7 +67,7 @@ class TournamentMatchRequirementsService
                     $first = $before->id === $event->id ? $date : $before->date;
                     $second = $after->id === $event->id ? $date : $after->date;
                     if ($first === null || $second === null || $second->lessThanOrEqualTo($first)) {
-                        throw TournamentException::because('chronology');
+                        throw TournamentException::chronology();
                     }
                 }
             }
@@ -84,7 +84,7 @@ class TournamentMatchRequirementsService
         $bout = $this->bracket->bout($link->node);
         $allowed = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->all();
         if ($link->active_node_id === null || $competitors->contains(fn (Wrestler|TagTeam $competitor): bool => ! in_array($competitor->getMorphClass().':'.$competitor->id, $allowed, true))) {
-            throw TournamentException::because('entrants_changed');
+            throw TournamentException::entrantsChanged();
         }
     }
 
@@ -92,7 +92,7 @@ class TournamentMatchRequirementsService
     {
         $link = TournamentMatchLink::query()->with('node', 'tournament')->where('match_id', $match->id)->first();
         if ($link !== null && $link->node->round !== (int) log($link->tournament->capacity, 2)) {
-            throw TournamentException::because('final_titles_only');
+            throw TournamentException::finalTitlesOnly();
         }
     }
 
@@ -111,7 +111,7 @@ class TournamentMatchRequirementsService
         $expected = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
         $type = $link->tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam;
         if ($requested !== $expected || $data->matchType !== $type) {
-            throw TournamentException::because('entrants_changed');
+            throw TournamentException::entrantsChanged();
         }
         if ($data->titles->isNotEmpty()) {
             $this->ensureFinalStakes($match);
@@ -121,14 +121,14 @@ class TournamentMatchRequirementsService
     public function ensureDeletable(EventMatch $match): void
     {
         if (TournamentMatchLink::query()->where('match_id', $match->id)->exists()) {
-            throw TournamentException::because('linked_delete');
+            throw TournamentException::linkedDelete();
         }
     }
 
     public function ensureEventDeletable(Event $event): void
     {
         if (TournamentMatchLink::query()->whereIn('match_id', EventMatch::query()->withoutGlobalScope(PromotionContextScope::class)->withTrashed()->where('event_id', $event->id)->select('events_matches.id'))->whereNotNull('active_node_id')->exists()) {
-            throw TournamentException::because('linked_delete');
+            throw TournamentException::linkedDelete();
         }
     }
 }

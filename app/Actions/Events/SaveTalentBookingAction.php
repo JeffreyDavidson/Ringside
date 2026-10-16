@@ -37,27 +37,27 @@ class SaveTalentBookingAction
             $person = match ($personType) {
                 (new Wrestler)->getMorphClass() => Wrestler::query()->withTrashed()->where('promotion_id', $event->promotion_id)->find($personId),
                 (new Referee)->getMorphClass() => Referee::query()->withTrashed()->where('promotion_id', $event->promotion_id)->find($personId),
-                default => throw TalentBookingException::because('person'),
+                default => throw TalentBookingException::person(),
             };
             if ($person === null && $booking === null) {
-                throw TalentBookingException::because('person');
+                throw TalentBookingException::person();
             }
             $key = $personType.':'.$personId;
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->context->fingerprint($event, $key), $fingerprint)) {
                 throw RecordChangedException::changedKeepingInput();
             }
             if ($booking?->status === TalentBookingStatus::Cancelled && $data->status !== TalentBookingStatus::Proposed) {
-                throw TalentBookingException::because('reopen');
+                throw TalentBookingException::reopen();
             }
             if (($data->status === TalentBookingStatus::Cancelled || ($booking?->status === TalentBookingStatus::Confirmed
                 && in_array($data->status, [TalentBookingStatus::Proposed, TalentBookingStatus::Contacted], true))) && blank($data->reason)) {
-                throw TalentBookingException::because('reason');
+                throw TalentBookingException::reasonRequired();
             }
             if ($data->status === TalentBookingStatus::Confirmed && ($event->date === null || ($booking?->status !== TalentBookingStatus::Confirmed && ! $data->attest))) {
-                throw TalentBookingException::because('confirm');
+                throw TalentBookingException::confirm();
             }
             if ($data->feeMinor !== null && $data->feeMinor < 0) {
-                throw TalentBookingException::because('fee');
+                throw TalentBookingException::fee();
             }
             $booking ??= new EventTalentBooking;
             $previousTerms = $this->terms($booking);
