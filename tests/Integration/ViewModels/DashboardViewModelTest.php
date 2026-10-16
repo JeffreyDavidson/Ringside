@@ -64,8 +64,7 @@ describe('roster availability', function (): void {
             ->filter(fn (array $statement): bool => str_contains($statement['sql'], 'employed_wrestlers'));
 
         // Assert
-        expect($statements)->toHaveCount(1)
-            ->and($statements->first()['sql'])->not->toContain('"wrestlers".*');
+        expect($statements->sole()['sql'])->not->toContain('"wrestlers".*');
     });
 
     it('reports zero for every count when nobody is under contract', function (): void {

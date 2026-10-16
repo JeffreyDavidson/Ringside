@@ -24,21 +24,26 @@ test('the screen reports revised planned starts and actual delay without inventi
     resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
     $run = $fixture['run']->refresh();
     $item = $run->content['items'][0];
-    $item['timing'] = ['planned_at' => now()->subMinutes(20)->format('Y-m-d\TH:i'), 'revised_at' => now()->subMinutes(8)->format('Y-m-d\TH:i')];
     $item['timezone'] = 'UTC';
-    $comparison = function (array $changes) use ($run, $item, $fixture): string {
-        $run->content = [...$run->content, 'items' => [[...$item, ...$changes]]];
+    $planned = ['planned_at' => now()->subMinutes(20)->format('Y-m-d\TH:i'), 'revised_at' => now()->subMinutes(8)->format('Y-m-d\TH:i')];
+    $comparison = function (array $timing, ?string $start) use ($run, $item, $fixture): string {
+        $content = $run->content;
+        $item['timing'] = $timing;
+        $item['start'] = $start;
+        $content['items'] = [$item];
+        $run->content = $content;
         $run->save();
 
         return resolve(LiveShowViewModel::class)->data($fixture['event'])['runComparisons'][$fixture['key']];
     };
+    $started = $item['start'];
 
     // Act / Assert
-    expect($comparison([]))->toBe('Started 8 minutes late')
-        ->and($comparison(['timing' => [...$item['timing'], 'revised_at' => now()->addMinutes(5)->format('Y-m-d\TH:i')]]))->toBe('Started 5 minutes early')
-        ->and($comparison(['timing' => [...$item['timing'], 'revised_at' => now()->format('Y-m-d\TH:i')]]))->toBe('Started on time')
-        ->and($comparison(['start' => null]))->toStartWith('Planned')
-        ->and($comparison(['start' => null, 'timing' => []]))->toBe('No planned start');
+    expect($comparison($planned, $started))->toBe('Started 8 minutes late')
+        ->and($comparison([...$planned, 'revised_at' => now()->addMinutes(5)->format('Y-m-d\TH:i')], $started))->toBe('Started 5 minutes early')
+        ->and($comparison([...$planned, 'revised_at' => now()->format('Y-m-d\TH:i')], $started))->toBe('Started on time')
+        ->and($comparison($planned, null))->toStartWith('Planned')
+        ->and($comparison([], null))->toBe('No planned start');
 });
 
 test('the screen labels recorded times and shows missing ones as not recorded', function (): void {
