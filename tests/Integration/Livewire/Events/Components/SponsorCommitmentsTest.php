@@ -5,15 +5,18 @@ declare(strict_types=1);
 require_once __DIR__.'/../../../../Fixtures/sponsor-commitment.php';
 
 use App\Actions\Events\SaveSponsorCommitmentAction;
+use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Exceptions\RecordChangedException;
 use App\Livewire\Events\Components\SponsorCommitments;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use App\Services\Promotions\PromotionContextService;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -92,7 +95,7 @@ test('stale form submissions preserve input and do not add a revision', function
     $component->set('form.description', 'My unsaved draft')->call('save');
 
     // Assert
-    $component->assertHasErrors('save')->assertSet('form.description', 'My unsaved draft')->assertSet('formShown', true);
+    $component->assertHasErrors(['save' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('form.description', 'My unsaved draft')->assertSet('formShown', true);
     expect($promise->refresh()->description)->toBe('Changed by another operator')->and($promise->revisions()->count())->toBe(2);
 });
 
@@ -176,6 +179,29 @@ test('choosing a sponsor resolves only current active records and keeps its iden
     // Assert
     $component->assertSet('form.sponsorId', $world['sponsor']->id)->assertSee('Harbor Hardware');
     $component->call('cancelDraft')->assertSet('formShown', false);
+});
+
+test('a stale instruction save keeps the reason and says so', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)
+        ->call('previewInstruction')
+        ->set('instructionReason', 'Moved to the entrance');
+    $save = Double::for(SaveSponsorInstructionAction::class);
+    $save->expects('handle')
+        ->throws(RecordChangedException::changed());
+    app()->instance(SaveSponsorInstructionAction::class, $save);
+
+    // Act
+    $component->call('saveInstruction');
+
+    // Assert
+    $component->assertHasErrors(['save' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+        ->assertSet('instructionReason', 'Moved to the entrance');
+    expect($world['event']->pack()->exists())->toBeFalse();
+    $save->verify();
 });
 
 test('a stale instruction preview is refused while the current saved wording remains visible', function (): void {

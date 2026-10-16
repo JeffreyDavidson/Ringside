@@ -17,6 +17,7 @@ use App\Data\Tournaments\TournamentBoutData;
 use App\Enums\Roster\BookableRosterKind;
 use App\Enums\Tournaments\TournamentOperation;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
 use App\Models\Events\Event;
@@ -41,6 +42,8 @@ use Livewire\Component;
 
 class Show extends Component
 {
+    use ExplainsKeptInput;
+
     #[Locked]
     public int $tournamentId;
 
@@ -244,7 +247,7 @@ class Show extends Component
         try {
             $operation();
         } catch (BaseBusinessException $exception) {
-            $this->addError('operation', $exception->getMessage());
+            $this->addError('operation', $this->failureMessageKeepingInput($exception));
 
             return;
         }

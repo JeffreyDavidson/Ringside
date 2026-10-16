@@ -111,7 +111,7 @@ test('a stale production editor keeps its draft and requires reload', function (
     $page->set('notes', 'Unsaved private draft')->call('save');
 
     // Assert
-    $page->assertHasErrors('production')->assertSet('notes', 'Unsaved private draft');
+    $page->assertHasErrors(['production' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('notes', 'Unsaved private draft');
     expect($event->pack()->firstOrFail()->version)->toBe(2);
     $page->call('reloadSaved')->assertSet('notes', 'PRIVATE-NOTE-7Q')->assertSet('version', 2);
 });

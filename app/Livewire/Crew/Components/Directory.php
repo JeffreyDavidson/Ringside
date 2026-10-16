@@ -8,6 +8,7 @@ use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Crew\SaveCrewContactAction;
 use App\Builders\Crew\CrewContactBuilder;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,8 @@ use Livewire\Component;
 
 class Directory extends Component
 {
+    use ExplainsKeptInput;
+
     #[Locked]
     public ?int $contactId = null;
 
@@ -88,7 +91,7 @@ class Directory extends Component
             $this->editing = false;
             $this->reset('name', 'phone', 'email', 'notes');
         } catch (BaseBusinessException $exception) {
-            $this->addError('contact', $exception->getMessage());
+            $this->addError('contact', $this->failureMessageKeepingInput($exception));
         }
     }
 

@@ -24,7 +24,7 @@ class PlanTournamentBoutAction
             $tournament = $this->locks->lock($node->tournament_id, $event instanceof Event ? [$event->id] : []);
             $event = $event instanceof Event ? Event::query()->withTrashed()->findOrFail($event->id) : null;
             if ($tournament->version !== $version || ($event !== null && ($event->trashed() || $event->promotion_id !== $tournament->promotion_id))) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
                 throw TournamentException::closed();

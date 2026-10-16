@@ -32,10 +32,10 @@ class SaveSponsorCommitmentAction
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
             $commitment = $id === null ? null : EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if (($commitment->version ?? 0) !== $version || ($commitment === null && EventSponsorCommitment::query()->where('event_id', $event->id)->where('submission_key', $submissionKey)->exists())) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
                 throw SponsorCommitmentException::archived();

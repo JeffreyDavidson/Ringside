@@ -27,7 +27,7 @@ class LockEventPublicationAction
     /** Must run inside the caller's transaction; the event lock also serializes first-draft creation.
      * @return array{event: Event, publication: EventPublication, source: Source}
      */
-    public function handle(Event $event, User $actor, int $version, string $fingerprint, bool $keepsInput = false): array
+    public function handle(Event $event, User $actor, int $version, string $fingerprint): array
     {
         $this->locks->lockEventSet($event->id);
         $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
@@ -44,7 +44,7 @@ class LockEventPublicationAction
         $publication = EventPublication::query()->withoutGlobalScope(PromotionContextScope::class)->where('event_id', $event->id)->lockForUpdate()->first();
         $source = $this->source->get($event);
         if (($publication->version ?? 0) !== $version || ! hash_equals($source['fingerprint'], $fingerprint)) {
-            throw $keepsInput ? RecordChangedException::changedKeepingInput() : RecordChangedException::changed();
+            throw RecordChangedException::changed();
         }
         if ($publication !== null && $publication->promotion_id !== $event->promotion_id) {
             throw EventPublicationException::invalid();

@@ -54,14 +54,14 @@ class AddMatchForEventAction
                 $event = Event::query()->withTrashed()->findOrFail($event->id);
                 $node = $tournament->nodes()->findOrFail($node->id);
                 if ($tournament->promotion_id !== $event->promotion_id) {
-                    throw RecordChangedException::changedKeepingInput();
+                    throw RecordChangedException::changed();
                 }
                 $bout = $this->bracket->bout($node);
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null && $this->sameBooking($bout->link->match, $event, $eventMatchData)) {
                     return $bout->link->match;
                 }
                 if ($tournament->version !== $version) {
-                    throw RecordChangedException::changedKeepingInput();
+                    throw RecordChangedException::changed();
                 }
                 if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
                     throw TournamentException::closed();

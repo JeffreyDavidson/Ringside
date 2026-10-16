@@ -14,6 +14,7 @@ use App\Enums\Events\BudgetMovementKind;
 use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
 use App\Exceptions\RecordChangedException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\BudgetLineForm;
 use App\Livewire\Events\Forms\BudgetMovementForm;
 use App\Models\Events\Event;
@@ -33,6 +34,7 @@ use Livewire\WithPagination;
 
 class Budget extends Component
 {
+    use ExplainsKeptInput;
     use WithPagination;
 
     #[Locked]
@@ -189,7 +191,7 @@ class Budget extends Component
                 BudgetOperation::ArchiveLine => app(ArchiveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
             };
         } catch (BudgetException|RecordChangedException $exception) {
-            $this->addError('budget', $exception->getMessage());
+            $this->addError('budget', $this->failureMessageKeepingInput($exception));
 
             return;
         }
