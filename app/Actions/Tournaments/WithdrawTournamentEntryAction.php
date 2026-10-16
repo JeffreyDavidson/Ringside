@@ -24,7 +24,7 @@ class WithdrawTournamentEntryAction
         DB::transaction(function () use ($entry, $version, $reason): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if ($tournament->status !== TournamentStatus::Active) {
                 throw TournamentException::closed();

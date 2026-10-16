@@ -38,7 +38,7 @@ class SaveTournamentAction
                 if ($existing !== null) {
                     $acceptedIds = array_values($existing->entries()->get()->map(fn (TournamentEntry $entry): int => $entry->competitor_id)->all());
                     if ($existing->name !== mb_trim($data->name) || $existing->description !== $data->description || $existing->entrant_kind !== $data->kind || $existing->capacity !== $data->capacity || $existing->repeat_appearances !== $data->repeatAppearances || $acceptedIds !== $data->competitorIds) {
-                        throw RecordChangedException::changedKeepingInput();
+                        throw RecordChangedException::changed();
                     }
 
                     return $existing;
@@ -46,7 +46,7 @@ class SaveTournamentAction
             }
             $locked = $tournament instanceof Tournament ? Tournament::query()->lockForUpdate()->findOrFail($tournament->id) : new Tournament;
             if ($locked->exists && ($locked->promotion_id !== $promotion->id || $locked->version !== $version)) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if ($locked->exists && $locked->status !== TournamentStatus::Draft) {
                 throw TournamentException::structureFrozen();

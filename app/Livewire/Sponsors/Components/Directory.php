@@ -6,6 +6,7 @@ namespace App\Livewire\Sponsors\Components;
 
 use App\Actions\Sponsors\SaveSponsorAction;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Sponsors\Forms\SponsorForm;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
@@ -20,6 +21,7 @@ use Livewire\WithPagination;
 
 class Directory extends Component
 {
+    use ExplainsKeptInput;
     use WithPagination;
 
     #[Locked]
@@ -89,7 +91,7 @@ class Directory extends Component
             $this->formShown = false;
             $this->notice = __('sponsors.sponsor_saved');
         } catch (BaseBusinessException $exception) {
-            $this->addError('save', $exception->getMessage());
+            $this->addError('save', $this->failureMessageKeepingInput($exception));
         }
     }
 

@@ -72,7 +72,7 @@ test('a stale editor preserves input and the newer saved agreement', function ()
     $component->call('save', true);
 
     // Assert
-    $component->assertHasErrors(['booking'])->assertSet('form.travelNotes', 'My unsaved note');
+    $component->assertHasErrors(['booking' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('form.travelNotes', 'My unsaved note');
     expect($fixture['booking']->refresh()->version)->toBe(2)->and(EventTalentBookingRevision::query()->count())->toBe(2);
 });
 

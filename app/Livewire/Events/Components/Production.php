@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveEventProductionAction;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
@@ -26,6 +27,8 @@ use Livewire\Component;
  */
 class Production extends Component
 {
+    use ExplainsKeptInput;
+
     #[Locked]
     public int $eventId;
 
@@ -195,7 +198,7 @@ class Production extends Component
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);
         } catch (BaseBusinessException $exception) {
-            $this->addError('production', $exception->getMessage());
+            $this->addError('production', $this->failureMessageKeepingInput($exception));
         }
     }
 

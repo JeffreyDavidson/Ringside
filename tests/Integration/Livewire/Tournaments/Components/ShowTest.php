@@ -7,9 +7,12 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
+use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Livewire\Tournaments\Components\Show;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -49,8 +52,31 @@ it('preserves the draft inputs on failure and lets the operator refresh a stale 
     $node = $world['tournament']->nodes()->firstOrFail();
     $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('eventId', $world['event']->id)->set('refereeIds', [$world['referees']->sole()->id]);
     resolve(RenameTournamentAction::class)->handle($world['tournament'], $world['tournament']->version, 'Revised Cup', null);
-    $page->call('confirm')->assertHasErrors('operation')->assertSet('eventId', $world['event']->id)->call('refreshState')->assertHasNoErrors()->assertSee('Revised Cup');
+    $page->call('confirm')->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('eventId', $world['event']->id)->call('refreshState')->assertHasNoErrors()->assertSee('Revised Cup');
     expect($world['event']->matches()->count())->toBe(0);
+});
+
+it('keeps the draft and says so when the tournament lock finds a change', function (): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])
+        ->call('begin', 'cancel')
+        ->set('reason', 'Venue closed')
+        ->set('confirmed', true);
+    $locks = Double::for(TournamentLocks::class);
+    $locks->expects('lock')
+        ->throws(RecordChangedException::changed());
+    app()->instance(TournamentLocks::class, $locks);
+
+    // Act
+    $page->call('confirm');
+
+    // Assert
+    $page->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+        ->assertSet('reason', 'Venue closed');
+    expect($world['tournament']->refresh()->status)->not->toBe(TournamentStatus::Cancelled);
+    $locks->verify();
 });
 
 it('edits a draft seed order and saves its reviewed configuration', function (): void {

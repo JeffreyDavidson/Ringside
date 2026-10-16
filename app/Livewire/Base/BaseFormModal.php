@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Base;
 
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,7 @@ use LogicException;
  */
 abstract class BaseFormModal extends BaseModal
 {
+    use ExplainsKeptInput;
     use GeneratesDummyData;
 
     protected ?string $createdEventName = null;
@@ -97,7 +99,7 @@ abstract class BaseFormModal extends BaseModal
         try {
             $save();
         } catch (BaseBusinessException $exception) {
-            $this->addError($this->businessErrorField($exception), $exception->getMessage());
+            $this->addError($this->businessErrorField($exception), $this->failureMessageKeepingInput($exception));
 
             return false;
         }

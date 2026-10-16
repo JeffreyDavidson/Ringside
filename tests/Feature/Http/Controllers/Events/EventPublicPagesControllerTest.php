@@ -791,7 +791,7 @@ describe('update', function (): void {
 
         // Assert
         $response
-            ->assertSessionHasErrors(['publication' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.']);
+            ->assertSessionHasErrors(['publication' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.']);
 
         expect(EventPublication::query()
             ->count())->toBe(0);

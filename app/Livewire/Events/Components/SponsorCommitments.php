@@ -7,6 +7,7 @@ namespace App\Livewire\Events\Components;
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\SponsorCommitmentForm;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
@@ -26,6 +27,7 @@ use Livewire\WithPagination;
 
 class SponsorCommitments extends Component
 {
+    use ExplainsKeptInput;
     use WithPagination;
 
     #[Locked]
@@ -146,7 +148,7 @@ class SponsorCommitments extends Component
             $this->notice = __('sponsors.promise_saved');
             $this->resetPage('commitmentsPage');
         } catch (BaseBusinessException $exception) {
-            $this->addError('save', $exception->getMessage());
+            $this->addError('save', $this->failureMessageKeepingInput($exception));
         }
     }
 
@@ -213,7 +215,7 @@ class SponsorCommitments extends Component
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');
         } catch (BaseBusinessException $exception) {
-            $this->addError('save', $exception->getMessage());
+            $this->addError('save', $this->failureMessageKeepingInput($exception));
         }
     }
 
