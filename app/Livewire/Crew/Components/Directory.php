@@ -81,16 +81,17 @@ class Directory extends Component
     {
         $contact = $this->contactId === null ? null : CrewContact::query()->findOrFail($this->contactId);
         Gate::authorize($contact === null ? 'create' : 'update', $contact ?? CrewContact::class);
-        $validated = Validator::make([
+        $input = [
             'name' => trim($this->name), 'phone' => trim($this->phone) ?: null,
             'email' => trim($this->email) ?: null, 'notes' => trim($this->notes) ?: null, 'client_id' => $this->clientId,
-        ], [
+        ];
+        Validator::make($input, [
             'name' => ['required', 'string', 'max:160'], 'phone' => ['nullable', 'string', 'max:80'],
             'email' => ['nullable', 'email', 'max:255'], 'notes' => ['nullable', 'string', 'max:2000'],
             'client_id' => ['required', 'uuid'],
         ])->validate();
         try {
-            app(SaveCrewContactAction::class)->handle($contact, $this->version, $this->clientId, CrewContactData::fromValidated($validated));
+            app(SaveCrewContactAction::class)->handle($contact, $this->version, $this->clientId, CrewContactData::fromValidated($input));
             $this->editing = false;
             $this->reset('name', 'phone', 'email', 'notes');
         } catch (BaseBusinessException $exception) {
