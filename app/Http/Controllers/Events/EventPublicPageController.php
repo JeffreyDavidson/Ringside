@@ -12,7 +12,7 @@ use App\Http\Requests\Events\SaveEventPublicationRequest;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Queries\Events\PublicEventSourceQuery;
-use App\Queries\Events\PublishedEventQuery;
+use App\ViewModels\PublicEventViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -33,11 +33,11 @@ class EventPublicPageController
         return view('events.publication', ['event' => $event, 'source' => $source, 'publication' => $publication, 'draft' => $draft, 'needsReview' => $needsReview]);
     }
 
-    public function show(Event $event, PublishedEventQuery $query): Response
+    public function show(Event $event, PublicEventViewModel $page): Response
     {
         $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
 
-        return response()->view('public-events.show', ['page' => $query->preview($event, $publication)])
+        return response()->view('public-events.show', ['page' => $page->preview($event, $publication)])
             ->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
