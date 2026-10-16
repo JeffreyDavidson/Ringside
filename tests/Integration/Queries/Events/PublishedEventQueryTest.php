@@ -23,7 +23,7 @@ describe('published event query', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $publication = EventPublication::factory()->for($fixture['event'])->create(['published_at' => now()]);
-        $publicId = $link === 'public id' ? 'unknown-public-id' : $publication->public_id;
+        $publicId = $link === 'public id' ? '00000000-0000-4000-8000-000000000000' : $publication->public_id;
         $slug = $link === 'slug' ? 'unknown-slug' : $publication->slug;
 
         // Act
