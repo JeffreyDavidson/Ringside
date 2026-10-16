@@ -114,7 +114,7 @@ it('refuses invalid tournament fields before anything is created', function (arr
     'a missing entrant' => [['form.entrants' => [1, null]], 'form.entrants.1'],
 ]);
 
-it('refuses a request id that is not a uuid', function (): void {
+it('refuses a request id that is not a valid uuid', function (): void {
     // Arrange
     $world = tournamentFixture();
     actingAs(administrator());
@@ -122,7 +122,10 @@ it('refuses a request id that is not a uuid', function (): void {
     $context->set($world['promotion']);
     $context->enforce();
     $ids = $world['tournament']->entries()->get()->map(fn ($entry): int => $entry->competitor_id)->all();
-    Str::createUuidsUsing(fn (): UuidInterface => Mockery::mock(UuidInterface::class, ['toString' => 'not-a-uuid']));
+    $uuid = Double::for(UuidInterface::class);
+    $uuid->allows('toString')
+        ->returns('not-a-uuid');
+    Str::createUuidsUsing(fn (): UuidInterface => $uuid);
 
     try {
         $page = livewire(Index::class)
