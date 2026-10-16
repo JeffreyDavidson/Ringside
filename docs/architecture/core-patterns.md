@@ -29,7 +29,7 @@ single-consumer relationship traits or speculative override helpers.
 - Roster-owned Eloquent models live under `app/Models/Roster/{Entity}/`; lifecycle records, matches, titles, events, and users remain in their owning model namespaces.
 - `AppServiceProvider` retains aliases for the former top-level roster model class names because immutable historical migrations reference them. Application code must use the `App\\Models\\Roster` classes directly.
 - Domain-organized builders in `app/Builders/{Domain}/`
-- Domain-organized, read-only services in `app/Services/{Domain}/`, with shared roster services under `app/Services/Roster/Relationships/` and cross-entity services kept in their owning domains. State-changing workflows belong in Actions.
+- Domain-organized, read-only services in `app/Services/{Domain}/` for cross-record calculations, lookups and the request's promotion context. Services throw no business exceptions, take no locks, validate nothing and never depend on `app/Lifecycle`; guards and locks live in Lifecycle and state-changing workflows belong in Actions.
 - Domain-organized enums in `app/Enums/{Domain}/`
 
 ## Related Model Resolution

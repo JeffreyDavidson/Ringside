@@ -93,7 +93,7 @@ Match assignment actions lock the complete scheduling event set, then the match,
 
 ### Canonical lock order for scheduling
 
-Every scheduling operation acquires locks in this order. `MatchAssignmentConflictService` owns the row-lock helpers (`lockEventSet()`, `lockMatchWithEventSet()`) and `SchedulingSlotLock` owns the date-slot lock:
+Every scheduling operation acquires locks in this order. `MatchSchedulingLock` owns the row-lock helpers (`lockEventSet()`, `lockMatchWithEventSet()`) and `SchedulingSlotLock` owns the date-slot lock:
 
 -1. Only for `Events\CreateAction` and `Events\UpdateAction`: the event name lock (`RecordNameLock`, see [Core Capabilities](core-capabilities.md)), before everything below. It rejects a name another event of the promotion already uses, which no index enforces. Every Action that takes name locks takes them before any other lock of its transaction, and no booking action ever waits for one, so a name-lock waiter holds nothing and the lock cannot join a deadlock cycle with the slot, event, venue and competitor locks.
 0. Only for actions that move an event to a date or bring one back at its date (`Events\UpdateAction`, `Events\RestoreAction`): the date-slot lock of the old and new date, ascending by timestamp (see below). Booking actions never take it.
@@ -133,7 +133,7 @@ Match assignments observe these collision rules:
 - A wrestler, tag team, or title may be assigned only once on an event card. A tournament may explicitly permit only its qualified sequential wrestler/tag-team appearances and recorded-draw rematches on that same card; title stakes remain once per card. See [Tournament Management](tournament-generation.md) for the exact linked-match exception and additional event-union lock order.
 - A wrestler, tag team, or title may not be assigned to different events scheduled for the same exact date and time.
 - A referee may officiate multiple matches on one event card, but may not officiate matches on different events scheduled for the same exact date and time.
-- A wrestler who is a current member of a tag team cannot be booked individually while that tag team is entered on the same card or at the same exact date and time, and a tag team cannot be entered while one of its current members is booked individually. `MatchCompetitorConflictService` checks these through the tag team's current membership; these are read-only checks and the canonical lock order is unchanged. Former members are ignored.
+- A wrestler who is a current member of a tag team cannot be booked individually while that tag team is entered on the same card or at the same exact date and time, and a tag team cannot be entered while one of its current members is booked individually. `MatchCompetitorAssignmentEligibility` checks these through the tag team's current membership; these are read-only checks and the canonical lock order is unchanged. Former members are ignored.
 - An unscheduled event still prevents duplicate assignments within its own card. Its missing date does not conflict with other unscheduled events.
 
 Assignment actions lock the affected event rows and enforce these rules inside their database transactions. This serializes assignment commands that use the application boundary. The schema cannot enforce overlapping match windows because individual matches do not currently have their own start and end times.

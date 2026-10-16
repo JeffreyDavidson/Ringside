@@ -90,8 +90,8 @@ continue to authorize on the server immediately before protected operations.
 **Status:** Audit ongoing.
 
 Use an Action for every state-changing application operation. Services are
-read-only collaborators for retrieval, calculation, or validation. Lifecycle
-persistence and eligibility remain under `app/Lifecycle`; do not create a
+read-only collaborators for retrieval and calculation. Lifecycle
+persistence, eligibility guards and locks remain under `app/Lifecycle`; do not create a
 write-oriented service merely to wrap one Action call. Existing write-oriented
 services should be folded into their coordinating Actions when touched.
 
