@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Lifecycle\Matches\MatchCompetitorRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +20,7 @@ class AddCompetitorsToMatchAction
         protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
         private readonly MatchCompetitorRequirements $requirements,
         private readonly MatchRosterLock $rosterLock,
-        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchSchedulingLock $schedulingLock,
     ) {}
 
     /**
@@ -46,7 +46,7 @@ class AddCompetitorsToMatchAction
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
         DB::transaction(function () use ($eventMatch, $competitors): void {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->handleWithinTransaction($lockedMatch, $competitors);
         }, attempts: 3);
     }

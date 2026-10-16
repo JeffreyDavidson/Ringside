@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Matches;
+namespace App\Lifecycle\Matches;
 
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use Illuminate\Support\Collection;
 
-final class MatchTitleConflictService
+final class MatchTitleAssignmentEligibility
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds

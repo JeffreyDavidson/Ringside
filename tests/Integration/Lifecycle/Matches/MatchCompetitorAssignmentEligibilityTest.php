@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Lifecycle\Matches\MatchCompetitorAssignmentEligibility;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Matches\MatchCompetitorConflictService;
 
 test('it rejects a wrestler already booked at another event time', function (): void {
     $eventDate = now()->addWeek();
@@ -19,7 +19,7 @@ test('it rejects a wrestler already booked at another event time', function (): 
         ->withCompetitors([$wrestler])
         ->create();
 
-    expect(fn () => resolve(MatchCompetitorConflictService::class)
+    expect(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
         ->ensureWrestlersCanBeAssigned(collect([$event->id]), collect([$wrestler])))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.");
 });
@@ -34,7 +34,7 @@ test('it rejects a tag team already booked at another event time', function (): 
         ->withCompetitors([$tagTeam])
         ->create();
 
-    expect(fn () => resolve(MatchCompetitorConflictService::class)
+    expect(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
         ->ensureTagTeamsCanBeAssigned(collect([$event->id]), collect([$tagTeam])))
         ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.");
 });
@@ -49,7 +49,7 @@ test('it rejects a wrestler booked individually when their tag team is entered a
 
     EventMatch::factory()->forEvent($bookedEvent)->withCompetitors([$tagTeam])->create();
 
-    expect(fn () => resolve(MatchCompetitorConflictService::class)
+    expect(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
         ->ensureWrestlersCanBeAssigned(collect([$bookedEvent->id, $checkedEvent->id]), collect([$member])))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$member->name}] is already booked at this event time.");
 })->with([
@@ -67,7 +67,7 @@ test('it rejects a tag team when one of its members is booked individually at th
 
     EventMatch::factory()->forEvent($bookedEvent)->withCompetitors([$partner])->create();
 
-    expect(fn () => resolve(MatchCompetitorConflictService::class)
+    expect(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
         ->ensureTagTeamsCanBeAssigned(collect([$bookedEvent->id, $checkedEvent->id]), collect([$tagTeam])))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$partner->name}] is already booked at this event time.");
 })->with([
@@ -85,10 +85,10 @@ test('it ignores former tag team members when checking individual bookings', fun
     EventMatch::factory()->forEvent($event)->withCompetitors([$former])->create();
     EventMatch::factory()->forEvent($event)->withCompetitors([$tagTeam])->create();
 
-    expect(fn () => resolve(MatchCompetitorConflictService::class)
+    expect(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
         ->ensureTagTeamsCanBeAssigned(collect([$event->id]), collect([$tagTeam])))
         ->not->toThrow(SchedulingConflictException::class, "Wrestler [{$former->name}]")
-        ->and(fn () => resolve(MatchCompetitorConflictService::class)
+        ->and(fn () => resolve(MatchCompetitorAssignmentEligibility::class)
             ->ensureWrestlersCanBeAssigned(collect([$event->id]), collect([$former])))
         ->not->toThrow(SchedulingConflictException::class, 'Tag team');
 });

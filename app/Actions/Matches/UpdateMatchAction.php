@@ -7,13 +7,13 @@ namespace App\Actions\Matches;
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Roster\RosterDateAvailability;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Tournaments\TournamentMatchLink;
-use App\Services\Matches\MatchAssignmentConflictService;
-use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateMatchAction
@@ -23,8 +23,8 @@ class UpdateMatchAction
         private readonly AddTitlesToMatchAction $addTitlesToMatchAction,
         private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
         private readonly MatchConfigurationRequirements $requirements,
-        private readonly MatchAssignmentConflictService $conflictService,
-        private readonly TournamentMatchRequirementsService $tournamentRequirements,
+        private readonly MatchSchedulingLock $schedulingLock,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
         private readonly MatchRosterLock $rosterLock,
     ) {}
 
@@ -33,7 +33,7 @@ class UpdateMatchAction
         $this->requirements->ensureComplete($data);
 
         return DB::transaction(function () use ($match, $data): EventMatch {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($match);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
 
             if ($lockedMatch->match_finish !== null) {
                 throw InvalidMatchConfigurationException::resultAlreadyRecorded();

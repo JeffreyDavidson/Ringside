@@ -13,6 +13,7 @@ use App\Exceptions\RecordChangedException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Events\Event;
@@ -24,7 +25,6 @@ use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
-use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +35,7 @@ class AddMatchForEventAction
         private readonly AddTitlesToMatchAction $addTitlesToMatchAction,
         private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
         private readonly MatchConfigurationRequirements $requirements,
-        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentBracketService $bracket,
         private readonly MatchRosterLock $rosterLock,
@@ -101,7 +101,7 @@ class AddMatchForEventAction
                 }
                 $node->forceFill(['planned_event_id' => $event->id])->save();
             }
-            $this->conflictService->lockEventSet($event->id);
+            $this->schedulingLock->lockEventSet($event->id);
             $lastMatch = $event->matches()
                 ->withTrashed()
                 ->orderByDesc('match_number')

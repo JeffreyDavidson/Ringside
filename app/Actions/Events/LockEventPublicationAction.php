@@ -7,13 +7,13 @@ namespace App\Actions\Events;
 use App\Enums\Users\UserStatus;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Users\User;
 use App\Queries\Events\PublicEventSourceQuery;
-use App\Services\Matches\MatchAssignmentConflictService;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
 /** @phpstan-import-type Source from PublicEventSourceQuery */
 class LockEventPublicationAction
 {
-    public function __construct(private readonly MatchAssignmentConflictService $locks, private readonly PublicEventSourceQuery $source, private readonly PromotionContextService $context) {}
+    public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceQuery $source, private readonly PromotionContextService $context) {}
 
     /** Must run inside the caller's transaction; the event lock also serializes first-draft creation.
      * @return array{event: Event, publication: EventPublication, source: Source}

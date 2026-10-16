@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Matches;
+namespace App\Lifecycle\Matches;
 
 use App\Builders\Matches\MatchCompetitorBuilder;
 use App\Exceptions\Scheduling\SchedulingConflictException;
@@ -13,7 +13,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Support\Collection;
 
-final class MatchCompetitorConflictService
+final class MatchCompetitorAssignmentEligibility
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds
