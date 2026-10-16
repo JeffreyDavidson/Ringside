@@ -9,8 +9,6 @@ use App\Enums\Storylines\StorylineStatus;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Storylines\Storyline;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 
 class TransitionStorylineAction
 {
@@ -18,8 +16,6 @@ class TransitionStorylineAction
 
     public function handle(Storyline $storyline, int $version, StorylineStatus $status, string $reason): void
     {
-        Gate::authorize('update', $storyline);
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($storyline, $version, $status, $reason): void {
             $story = $this->lock->handle($storyline, $version, allowClosed: true);
             if ($story->status === $status || ($story->status === StorylineStatus::Archived && $status !== $story->previous_status)

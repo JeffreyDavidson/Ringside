@@ -13,8 +13,6 @@ use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineStep;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 
 class SaveStepAction
 {
@@ -22,13 +20,6 @@ class SaveStepAction
 
     public function handle(Storyline $storyline, int $version, StepData $data, ?int $stepId = null): StorylineStep
     {
-        Gate::authorize('update', $storyline);
-        Validator::make(['heading' => $data->heading, 'description' => $data->description, 'sequence' => $data->sequence, 'submission' => $data->submissionId, 'reason' => $data->reason], [
-            'heading' => ['required', 'string', 'max:160'], 'description' => ['required', 'string', 'max:4000'],
-            'sequence' => ['required', 'integer', 'min:1', 'max:10000'], 'submission' => ['required', 'uuid'],
-            'reason' => [$stepId === null ? 'nullable' : 'required', 'string', 'max:2000'],
-        ])->validate();
-
         return DB::transaction(function () use ($storyline, $version, $data, $stepId): StorylineStep {
             $source = $this->source->handle($data->source, $storyline->promotion_id);
             $story = $this->lock->handle($storyline, $version);

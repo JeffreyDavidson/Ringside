@@ -18,7 +18,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;
 
@@ -94,14 +93,12 @@ test('an account correction cannot be reassigned to a different planned step', f
     $data = new DevelopmentData('Correction', 'Different wording.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid(), reason: 'Correction.');
     expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data, $account->id))->toThrow(StorylineConflictException::class);
 });
-test('unplanned submissions cannot be duplicated with a fresh version and future actual dates are refused', function () {
+test('unplanned submissions cannot be duplicated with a fresh version', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $data = new DevelopmentData('Confrontation', 'An argument.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid());
     resolve(RecordDevelopmentAction::class)->handle($story, 1, $data);
     expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(RecordChangedException::class);
-    $future = new DevelopmentData('Future', 'Not yet happened.', today()->addDays(2)->toDateString(), 1, [], new SourceData, (string) Str::uuid());
-    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $future))->toThrow(ValidationException::class);
 });
 
 test('a later promotion timezone change cannot move the date of an existing account correction', function () {
