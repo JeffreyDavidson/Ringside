@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Matches\EventMatch;
@@ -20,7 +21,7 @@ test('an operator prepares checks in runs and completes a show on mobile', funct
     $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
     EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
 
     // Act / Assert
     $page = visit(route('events.live-show.show', $event));

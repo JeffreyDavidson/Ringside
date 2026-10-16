@@ -7,6 +7,8 @@ use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventProductionAction;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
+use App\Data\Events\EventProductionData;
+use App\Data\Events\EventPublicationDraftData;
 use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicSection;
 use App\Enums\Matches\MatchFinish;
@@ -223,7 +225,7 @@ test('new drafts and renamed competitors cannot overwrite released facts', funct
     $source = app(PublicEventSourceQuery::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'summary' => 'New draft words']);
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'summary' => 'New draft words']));
     $fixture['left']->update(['name' => 'Private new ring name']);
 
     // Act
@@ -254,7 +256,7 @@ test('a newly reviewed card adopts its draft and current competitor name', funct
     $source = app(PublicEventSourceQuery::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
-    $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'summary' => 'New draft words']);
+    $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'summary' => 'New draft words']));
     $fixture['left']->update(['name' => 'Private new ring name']);
     $source = app(PublicEventSourceQuery::class)->get($event);
     $source = app(PublicEventSourceQuery::class)->get($event);
@@ -904,13 +906,13 @@ test('published event cards and results omit crew contacts and production cues',
         'name' => 'PRIVATE-CREW-7Q', 'phone' => 'PRIVATE-PHONE-7Q',
         'email' => 'private-crew-7q@example.test', 'notes' => 'PRIVATE-CONTACT-NOTE-7Q']);
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventProductionAction::class)->handle($event, 0, $data['card']['fingerprint'], [
+    resolve(SaveEventProductionAction::class)->handle($event, 0, $data['card']['fingerprint'], EventProductionData::fromValidated([
         'notes' => 'PRIVATE-NOTE-7Q',
         'assignments' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC']],
         'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$world['match']->id,
             'subject' => 'PRIVATE-SUBJECT-7Q', 'trigger' => 'PRIVATE-TRIGGER-7Q', 'instruction' => 'PRIVATE-CUE-7Q',
             'owner_id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001']],
-    ], false);
+    ]), false);
 
     // Act
     savePublicDraft($event);

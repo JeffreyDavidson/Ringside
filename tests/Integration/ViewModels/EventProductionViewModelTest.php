@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/../../Fixtures/live-show.php';
 
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
@@ -48,7 +49,7 @@ test('the live sheet asks for review only once the saved pack has moved on from 
     $viewModel = resolve(EventProductionViewModel::class);
     $before = $viewModel->data($fixture['event'], 'live')['needsReview'];
     $pack = resolve(EventPackViewModel::class)->data($fixture['event']);
-    resolve(SaveEventPackAction::class)->handle($fixture['event'], $pack['pack']->version ?? 0, $pack['card']['fingerprint'], $pack['content'], false);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], $pack['pack']->version ?? 0, $pack['card']['fingerprint'], EventPackData::fromValidated($pack['content']), false);
 
     // Act
     $after = $viewModel->data($fixture['event'], 'live')['needsReview'];

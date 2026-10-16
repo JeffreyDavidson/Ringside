@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\EventProductionData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventProductionRequirements;
@@ -14,7 +15,6 @@ use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
 use App\Queries\Events\EventPackSourceQuery;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 /** @phpstan-import-type Production from EventPack */
 class SaveEventProductionAction
@@ -22,12 +22,11 @@ class SaveEventProductionAction
     public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackSourceQuery $source,
         private readonly EventProductionRequirements $requirements) {}
 
-    /** @param array<string, mixed> $input The submitted production form input, checked inside the save */
-    public function handle(Event $event, int $version, string $fingerprint, array $input, bool $reviewed): void
+    /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */
+    public function handle(Event $event, int $version, string $fingerprint, EventProductionData $data, bool $reviewed): void
     {
-        DB::transaction(function () use ($event, $version, $fingerprint, $input, $reviewed): void {
+        DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('updateProduction', $event);
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
             $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
@@ -37,7 +36,7 @@ class SaveEventProductionAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
-            $input = $this->requirements->validatedInput($input);
+            $input = $this->requirements->validatedInput(['notes' => $data->notes, 'assignments' => $data->assignments, 'cues' => $data->cues]);
             $content = $pack->content ?? $this->source->get($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),
                 ...array_map(fn (array $segment): string => 'segment:'.$segment['id'], $content['segments'])];

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Data\Events\EventPackData;
+use App\Data\Events\EventProductionData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Components\Production;
@@ -11,6 +13,7 @@ use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionContextService;
 use App\ViewModels\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
@@ -44,7 +47,7 @@ test('an editor deliberately reattaches a retained cue to a current item', funct
     $fixture['match']->delete();
     $replacement = EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], $data['content'], true);
+    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), true);
     $id = $fixture['production']['cues'][0]['id'];
     $page = livewire(Production::class, ['eventId' => $event->id]);
 
@@ -140,7 +143,7 @@ test('a stale production editor keeps its draft and requires reload', function (
     $event = $fixture['event'];
     $page = livewire(Production::class, ['eventId' => $event->id]);
     $pack = $event->pack()->firstOrFail();
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $pack->card_fingerprint, $fixture['production'], false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $pack->card_fingerprint, EventProductionData::fromValidated($fixture['production']), false);
 
     // Act
     $page->set('notes', 'Unsaved private draft')->call('save');
@@ -166,4 +169,27 @@ test('a member forging the production component is forbidden', function (): void
 
     // Assert
     $component->assertForbidden();
+});
+
+test('a downgraded editor cannot save the production plan', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $promotion = Promotion::query()->findOrFail($event->promotion_id);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    get(route('events.pack.show', $event))->assertOk();
+    $component = livewire(Production::class, ['eventId' => $event->id])->set('notes', 'Forged note');
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
+    resolve(PromotionContextService::class)->forgetMemberships();
+    $before = $event->pack()->firstOrFail()->getAttributes();
+
+    // Act
+    $component->call('save');
+
+    // Assert
+    $component->assertForbidden();
+    expect($event->pack()->firstOrFail()->getAttributes())->toBe($before);
 });

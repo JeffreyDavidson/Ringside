@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/../../../Fixtures/live-show.php';
 
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
@@ -80,7 +81,7 @@ describe('live show source requirements', function (): void {
         $fixture = liveShowFixture();
         if ($change === 'pack') {
             $pack = $fixture['event']->pack()->firstOrFail();
-            resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Revised'], false);
+            resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Revised']), false);
         }
         if ($change === 'card') {
             EventMatch::query()->where('event_id', $fixture['event']->id)->firstOrFail()->delete();

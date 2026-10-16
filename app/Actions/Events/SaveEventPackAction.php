@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\EventPackData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
@@ -12,15 +13,13 @@ use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
 use Illuminate\Support\Facades\DB;
 
-/** @phpstan-import-type Content from EventPack */
 class SaveEventPackAction
 {
     public function __construct(private readonly EventPackCardQuery $card) {}
 
-    /** @param Content $content */
-    public function handle(Event $event, int $version, string $fingerprint, array $content, bool $reviewed): void
+    public function handle(Event $event, int $version, string $fingerprint, EventPackData $data, bool $reviewed): void
     {
-        DB::transaction(function () use ($event, $version, $fingerprint, $content, $reviewed): void {
+        DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
             // Card assignment actions also lock the owning event before changing its matches.
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
@@ -32,16 +31,24 @@ class SaveEventPackAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
-            unset($content['production']);
+            // Retain removed-match notes and omitted entries; identity is never inferred from card position.
+            $content = [
+                'timezone' => $data->timezone,
+                'doors_at' => $data->doorsAt,
+                'revision' => $data->revision,
+                'master' => $data->master,
+                'notes' => $data->notes,
+                'follow_up' => $data->followUp,
+                'matches' => array_values(collect($pack?->content['matches'] ?? [])->keyBy('match_id')
+                    ->replace(collect($data->matches)->keyBy('match_id'))->all()),
+                'segments' => $data->segments,
+            ];
+            $sponsorTasks = $data->sponsorTasks ?? $pack->content['sponsor_tasks'] ?? null;
+            if ($sponsorTasks !== null) {
+                $content['sponsor_tasks'] = $sponsorTasks;
+            }
             if (isset($pack?->content['production'])) {
                 $content['production'] = $pack->content['production'];
-            }
-            // Retain removed-match notes and omitted entries; identity is never inferred from card position.
-            $content['matches'] = array_values(collect($pack?->content['matches'] ?? [])->keyBy('match_id')
-                ->replace(collect($content['matches'])->keyBy('match_id'))->all());
-            $savedTasks = $pack->content['sponsor_tasks'] ?? null;
-            if (! array_key_exists('sponsor_tasks', $content) && $savedTasks !== null) {
-                $content['sponsor_tasks'] = $savedTasks;
             }
             $pack ??= new EventPack;
             $pack->event_id = $event->id;

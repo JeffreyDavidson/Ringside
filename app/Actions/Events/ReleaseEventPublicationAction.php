@@ -22,7 +22,7 @@ class ReleaseEventPublicationAction
     public function handle(Event $event, User $actor, int $version, string $fingerprint, PublicSection $section): void
     {
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
-            $locked = $this->lock->handle($event, $actor, $version, $fingerprint);
+            $locked = $this->lock->handle($event, $version, $fingerprint);
             $publication = $locked['publication'];
             $source = $locked['source'];
             $event = $locked['event'];

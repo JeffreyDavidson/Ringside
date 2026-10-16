@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventPublicationAction;
+use App\Data\Events\EventPublicationDraftData;
 use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicSection;
 use App\Enums\Matches\MatchFinish;
@@ -214,7 +215,7 @@ describe('edit', function (): void {
         $source = app(PublicEventSourceQuery::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
-        $publication = app(SaveEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], [...$publication->draft, 'summary' => 'New draft words']);
+        $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'summary' => 'New draft words']));
         $fixture['left']->update(['name' => 'Private new ring name']);
 
         // Act

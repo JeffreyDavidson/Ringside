@@ -5,6 +5,7 @@ use App\Actions\Events\LockEventPublicationAction;
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
+use App\Data\Events\EventPublicationDraftData;
 use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
@@ -25,7 +26,7 @@ test('stale copies and opposing publication operations cannot overwrite a newer 
     releasePublicPage($event);
 
     $call = match ($operation) {
-        'save' => fn () => app(SaveEventPublicationAction::class)->handle($event, $world['actor'], $stale, $source['fingerprint'], $publication->draft),
+        'save' => fn () => app(SaveEventPublicationAction::class)->handle($event, $stale, $source['fingerprint'], EventPublicationDraftData::fromValidated($publication->draft)),
         'release' => fn () => app(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $stale, $source['fingerprint'], PublicSection::Card),
         'unpublish' => fn () => app(UnpublishEventPublicationAction::class)->handle($event, $world['actor'], $stale, $source['fingerprint'], PublicSection::Card),
         default => throw new LogicException('Unknown test operation'),

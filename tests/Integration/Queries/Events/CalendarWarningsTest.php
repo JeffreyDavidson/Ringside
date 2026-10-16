@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Matches\MatchFinish;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -44,7 +45,7 @@ test('adding unavailability changes review warnings without rewriting a saved pa
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create(['match_finish' => null]);
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $pack = $event->pack()->firstOrFail();
     $savedPack = $pack->getAttributes();

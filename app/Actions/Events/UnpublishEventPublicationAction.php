@@ -17,7 +17,7 @@ class UnpublishEventPublicationAction
     public function handle(Event $event, User $actor, int $version, string $fingerprint, PublicSection $section): void
     {
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
-            $locked = $this->lock->handle($event, $actor, $version, $fingerprint);
+            $locked = $this->lock->handle($event, $version, $fingerprint);
             $publication = $locked['publication'];
             if (! $publication->exists) {
                 throw EventPublicationException::invalid();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveEventProductionAction;
+use App\Data\Events\EventProductionData;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Events\EventProductionRequirements;
 use App\Livewire\Concerns\ExplainsKeptInput;
@@ -190,7 +191,7 @@ class Production extends Component
         $previousVersion = $this->version;
         try {
             $input = $this->validatedInput();
-            app(SaveEventProductionAction::class)->handle($event, $this->version, $this->fingerprint, $input, $this->reviewed);
+            app(SaveEventProductionAction::class)->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed);
             $this->reloadSaved();
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
-use App\Enums\Users\UserStatus;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Matches\MatchSchedulingLock;
@@ -12,31 +11,21 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
 use App\Models\Scopes\PromotionContextScope;
-use App\Models\Users\User;
 use App\Queries\Events\PublicEventSourceQuery;
-use App\Services\Promotions\PromotionContextService;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 /** @phpstan-import-type Source from PublicEventSourceQuery */
 class LockEventPublicationAction
 {
-    public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceQuery $source, private readonly PromotionContextService $context) {}
+    public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceQuery $source) {}
 
     /** Must run inside the caller's transaction; the event lock also serializes first-draft creation.
      * @return array{event: Event, publication: EventPublication, source: Source}
      */
-    public function handle(Event $event, User $actor, int $version, string $fingerprint): array
+    public function handle(Event $event, int $version, string $fingerprint): array
     {
         $this->locks->lockEventSet($event->id);
         $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-        $actor = $actor->refresh();
-        $this->context->forgetMemberships();
-        if ($actor->status !== UserStatus::Active) {
-            throw new AuthorizationException;
-        }
-        Gate::forUser($actor)->authorize('preparePublication', $event);
         if ($event->promotion_id === null) {
             throw EventPublicationException::invalid();
         }

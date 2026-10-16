@@ -15,7 +15,6 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class PrepareLiveShowAction
 {
@@ -25,7 +24,6 @@ class PrepareLiveShowAction
     {
         return DB::transaction(function () use ($event, $version, $packVersion, $fingerprint): EventLiveRun {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('update', $event);
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
             EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->first();

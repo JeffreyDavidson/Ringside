@@ -6,6 +6,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\EventPackData;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\TalentBookingStatus;
@@ -708,7 +709,7 @@ test('concurrent live show commands commit once without replacing times or dupli
         $event = Event::factory()->create(['name' => 'Live race '.$operation, 'date' => now()]);
         EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
         $data = resolve(EventPackViewModel::class)->data($event);
-        resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+        resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
         $version = 0;
         $key = '';
         if ($operation !== 'prepare') {

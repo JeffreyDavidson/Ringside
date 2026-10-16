@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\LiveShowChangeData;
+use App\Data\Events\LiveShowReviewData;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
@@ -11,19 +13,16 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class ReviewLiveShowAction
 {
     public function __construct(private readonly LiveShowSourceRequirements $source, private readonly LockLiveShowAction $lock,
         private readonly PersistLiveShowAction $persist) {}
 
-    /** @param array<string, string> $removedReasons */
-    public function handle(Event $event, int $version, int $packVersion, string $fingerprint, array $removedReasons): void
+    public function handle(Event $event, int $version, int $packVersion, string $fingerprint, LiveShowReviewData $review): void
     {
-        DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $removedReasons): void {
+        DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $review): void {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('update', $event);
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
             EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $run = $this->lock->handle($event, $version);
@@ -36,12 +35,12 @@ class ReviewLiveShowAction
             $old = collect($content['items'])->keyBy('key');
             $sourceKeys = array_column($source['content']['items'], 'key');
             $removed = $old->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true));
-            if (array_diff(array_keys($removedReasons), $removed->keys()->all()) !== []) {
+            if (array_diff(array_keys($review->removedReasons), $removed->keys()->all()) !== []) {
                 throw LiveShowException::unknownItem();
             }
             $protected = $old->filter(fn (array $item): bool => $item['state'] !== 'pending')->values()->all();
             foreach ($removed as $key => $item) {
-                $reason = $removedReasons[$key] ?? '';
+                $reason = $review->removedReasons[$key] ?? '';
                 if (mb_trim($reason) === '' || mb_strlen($reason) > 2000) {
                     throw LiveShowException::reasonRequired();
                 }
@@ -77,8 +76,8 @@ class ReviewLiveShowAction
             $run->pack_version = $packVersion;
             $run->card_fingerprint = $fingerprint;
             $run->content = $content;
-            $this->persist->handle($run, 'review', 'show', $before,
-                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $removedReasons]);
+            $this->persist->handle($run, new LiveShowChangeData('review', 'show', $before,
+                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $review->removedReasons]));
         }, attempts: 3);
     }
 }

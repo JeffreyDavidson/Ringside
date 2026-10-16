@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\EventPackData;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
@@ -94,7 +95,7 @@ class SaveSponsorInstructionAction
                 $commitment->pack_key = $key;
                 $commitment->pack_instruction_hash = $this->instructions->hash($entry);
             }
-            $this->save->handle($event, $packVersion, $fingerprint, $content, false);
+            $this->save->handle($event, $packVersion, $fingerprint, EventPackData::fromValidated($content), false);
             $this->persist->handle($commitment, $mode === 'remove' ? 'retract_instruction' : 'review_instruction', $reason);
         }, attempts: 3);
     }
