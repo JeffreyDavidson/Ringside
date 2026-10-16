@@ -83,7 +83,7 @@ test('a stale unpublish request preserves the newer release and submitted input'
     // Assert
     $response
         ->assertRedirect(route('events.public-pages.edit', $event))
-        ->assertSessionHasErrors('publication')
+        ->assertSessionHasErrors(['publication' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.'])
         ->assertSessionHasInput('version', $staleVersion)
         ->assertSessionHasInput('section', 'card');
 

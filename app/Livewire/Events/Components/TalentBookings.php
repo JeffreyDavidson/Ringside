@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\TalentBookingForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
@@ -23,6 +24,7 @@ use Livewire\WithPagination;
 
 class TalentBookings extends Component
 {
+    use ExplainsKeptInput;
     use WithPagination;
 
     #[Locked]
@@ -119,7 +121,7 @@ class TalentBookings extends Component
             $this->message = __('talent-bookings.saved');
             $this->dispatch('talent-editor-closed');
         } catch (BaseBusinessException $exception) {
-            $this->addError('booking', $exception->getMessage());
+            $this->addError('booking', $this->failureMessageKeepingInput($exception));
         }
     }
 

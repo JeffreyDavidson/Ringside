@@ -50,7 +50,7 @@ class MutateBudgetAction
                 return $budget;
             }
             if (($budget->version ?? 0) !== $version) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if ($budget === null) {
                 $budget = new EventBudget;

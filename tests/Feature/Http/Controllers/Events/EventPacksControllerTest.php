@@ -635,7 +635,7 @@ describe('update', function (): void {
 
         // Assert
         $response
-            ->assertSessionHasErrors(['pack' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+            ->assertSessionHasErrors(['pack' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.'])
             ->assertSessionHasInput('notes', 'Stale notes');
 
         expect($event->pack()

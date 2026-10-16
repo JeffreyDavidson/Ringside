@@ -59,6 +59,6 @@ test('a stale directory form preserves its entered details', function (): void {
     $component->set('form.name', 'My draft')->call('save');
 
     // Assert
-    $component->assertHasErrors('save')->assertSet('form.name', 'My draft');
+    $component->assertHasErrors(['save' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('form.name', 'My draft');
     expect($sponsor->refresh()->name)->toBe('Renamed Harbor');
 });

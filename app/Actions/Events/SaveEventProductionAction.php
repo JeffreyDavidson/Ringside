@@ -31,7 +31,7 @@ class SaveEventProductionAction
             $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();

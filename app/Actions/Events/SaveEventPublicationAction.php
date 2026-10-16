@@ -18,7 +18,7 @@ class SaveEventPublicationAction
     public function handle(Event $event, User $actor, int $version, string $fingerprint, array $draft): EventPublication
     {
         return DB::transaction(function () use ($event, $actor, $version, $fingerprint, $draft): EventPublication {
-            $locked = $this->lock->handle($event, $actor, $version, $fingerprint, keepsInput: true);
+            $locked = $this->lock->handle($event, $actor, $version, $fingerprint);
             $publication = $locked['publication'];
             $publication->draft = $draft;
             $publication->version++;

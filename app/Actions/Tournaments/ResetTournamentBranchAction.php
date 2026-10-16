@@ -26,7 +26,7 @@ class ResetTournamentBranchAction
         DB::transaction(function () use ($node, $version, $reason, $includeCurrent): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {
-                throw RecordChangedException::changedKeepingInput();
+                throw RecordChangedException::changed();
             }
             $node = $tournament->nodes()->findOrFail($node->id);
             $ids = $this->bracket->descendantNodeIds($node);
