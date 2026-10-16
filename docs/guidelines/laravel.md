@@ -51,7 +51,7 @@ class Wrestler extends Model
 
 ```php
 // ✅ CORRECT - Thin controller with proper structure
-class WrestlersController extends Controller
+class WrestlerController
 {
     public function __construct(
         private WrestlerRepository $repository

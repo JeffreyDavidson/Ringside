@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Storylines;
 use App\Models\Storylines\Storyline;
 use Illuminate\Contracts\View\View;
 
-class StorylinesController
+class StorylineController
 {
     public function index(): View
     {

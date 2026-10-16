@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Referees;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
 
-class RefereesController
+class RefereeController
 {
     public function index(): View
     {

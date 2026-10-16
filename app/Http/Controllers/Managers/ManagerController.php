@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Managers;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Contracts\View\View;
 
-class ManagersController
+class ManagerController
 {
     public function index(): View
     {

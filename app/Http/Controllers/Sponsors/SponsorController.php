@@ -9,7 +9,7 @@ use App\Models\Sponsors\Sponsor;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\View\View;
 
-class SponsorsController
+class SponsorController
 {
     public function index(PromotionContextService $context): View
     {

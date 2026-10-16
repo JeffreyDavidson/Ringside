@@ -19,7 +19,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-class EventPublicPagesController
+class EventPublicPageController
 {
     public function edit(Event $event, PublicEventSourceQuery $query): View
     {

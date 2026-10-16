@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Promotions;
 
-use App\Http\Controllers\Controller;
 use App\Models\Promotions\Promotion;
 use Illuminate\Contracts\View\View;
 
-class PromotionsController extends Controller
+class PromotionController
 {
     /**
      * Display the platform promotion directory.

@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Venues;
 use App\Models\Events\Venue;
 use Illuminate\Contracts\View\View;
 
-class VenuesController
+class VenueController
 {
     public function index(): View
     {

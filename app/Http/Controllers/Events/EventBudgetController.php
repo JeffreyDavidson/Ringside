@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Events;
 use App\Models\Events\Event;
 use Illuminate\Contracts\View\View;
 
-class EventBudgetsController
+class EventBudgetController
 {
     public function show(Event $event): View
     {

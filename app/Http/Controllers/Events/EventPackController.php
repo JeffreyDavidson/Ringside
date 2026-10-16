@@ -14,7 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class EventPacksController
+class EventPackController
 {
     public function show(Event $event, Request $request, EventPackViewModel $viewModel): View
     {

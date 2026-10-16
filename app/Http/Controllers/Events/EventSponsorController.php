@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Events;
 use App\Models\Events\Event;
 use Illuminate\Contracts\View\View;
 
-class EventSponsorsController
+class EventSponsorController
 {
     public function show(Event $event): View
     {

@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Wrestlers;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
 
-class WrestlersController
+class WrestlerController
 {
     public function index(): View
     {
