@@ -54,6 +54,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | tests/** | .ai/rules/tests.md |
 | app/{Models,Queries}/Titles/** | .ai/rules/titles.md |
 | tests/Unit/** | .ai/rules/unit.md |
+| app/ViewModels/** | .ai/rules/view-models.md |
 | resources/views/livewire/** | .ai/rules/views-livewire.md |
 | resources/views/** | .ai/rules/views.md |
 | app/Models/Roster/{Wrestlers,TagTeams}/** | .ai/rules/wrestlers-tag-teams.md |

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Queries\Events\EventPackSourceQuery;
-use Illuminate\Support\Facades\Gate;
+use App\Queries\Events\LiveShowSourceQuery;
 
 /**
  * @phpstan-import-type Assignment from EventPack
@@ -20,13 +21,16 @@ use Illuminate\Support\Facades\Gate;
  */
 class EventProductionViewModel
 {
-    public function __construct(private readonly EventPackViewModel $pack, private readonly LiveShowViewModel $live) {}
+    public function __construct(private readonly EventPackSourceQuery $pack, private readonly LiveShowSourceQuery $live) {}
 
-    /** @return Sheet */
+    /**
+     * The production sheet of an event the caller has already authorized for viewProduction.
+     *
+     * @return Sheet
+     */
     public function data(Event $event, ?string $source = null, ?int $person = null, ?string $role = null): array
     {
-        Gate::authorize('viewProduction', $event);
-        $data = $this->pack->data($event);
+        $data = $this->pack->get($event);
         $run = EventLiveRun::query()->where('event_id', $event->id)->first();
         $source ??= $run === null ? 'plan' : 'live';
         if ($source === 'live') {
@@ -39,7 +43,7 @@ class EventProductionViewModel
             $zone = $run->content['timezone'];
             $revision = $run->content['revision'];
             $version = $run->pack_version;
-            $review = $this->live->data($event)['needsReview'];
+            $review = $run->status !== LiveShowStatus::Completed && $run->needsReview($this->live->get($event, $data));
         } else {
             $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
             $cues = $data['content']['production']['cues'] ?? [];

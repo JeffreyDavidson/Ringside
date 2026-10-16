@@ -11,7 +11,6 @@ use App\Models\Events\EventBudgetRevision;
 use App\Services\Events\BudgetSettlementService;
 use App\ValueObjects\UsdAmount;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 
 /** @phpstan-import-type Totals from BudgetSettlementService
  * @phpstan-import-type Row from BudgetSettlementService
@@ -24,7 +23,6 @@ class EventBudgetViewModel
     public function data(Event $event): array
     {
         $event = Event::query()->whereKey($event->id)->firstOrFail();
-        Gate::authorize('viewBudget', $event);
         $event->load('promotion');
         $budget = EventBudget::query()->where('event_id', $event->id)->with('lines.movements')->first();
         $lines = $budget->lines ?? new Collection;
@@ -40,8 +38,24 @@ class EventBudgetViewModel
             'totals' => $this->settlement->totals($lines)];
     }
 
+    /**
+     * The readable before and after of each revision on the history page, keyed by revision id.
+     *
+     * @param  iterable<EventBudgetRevision>  $revisions
+     * @return array<int, list<array{label: string, before: string, after: string}>>
+     */
+    public function historyChanges(iterable $revisions): array
+    {
+        $changes = [];
+        foreach ($revisions as $revision) {
+            $changes[$revision->id] = $this->changes($revision);
+        }
+
+        return $changes;
+    }
+
     /** @return list<array{label: string, before: string, after: string}> */
-    public function changes(EventBudgetRevision $revision): array
+    private function changes(EventBudgetRevision $revision): array
     {
         $after = is_array($revision->after['voided'] ?? null) ? $revision->after['voided'] : $revision->after;
         $before = $revision->before;

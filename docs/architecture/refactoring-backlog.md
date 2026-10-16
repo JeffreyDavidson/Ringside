@@ -174,10 +174,15 @@ Use API Resources for an actual API response boundary and ViewModels only when
 page payload assembly becomes nontrivial or reusable. Existing Blade and
 Livewire payloads should not gain ceremonial layers.
 
-`App\ViewModels\DashboardViewModel` is the first ViewModel: the Overview page
-combines upcoming events, roster availability counts and current champions.
-It queries Eloquent directly (no repository layer), relying on the promotion
-global scope, and the controller passes it to the view as `dashboard`.
+`App\ViewModels` holds one ViewModel per page payload (the Overview dashboard,
+the event pack, production sheet, live show, talent bookings, budget, sponsor
+promises, public event page and storyline summary). Each only builds its page's
+data and returns a typed, ready-to-render array; controllers and Livewire
+components are its only callers, and the view never receives or creates the
+object. The rules and the architecture checks that enforce them are in
+`.ai/rules/view-models.md` and `tests/Feature/Architecture/ViewModelArchitectureTest.php`.
+The Overview ViewModel still queries Eloquent directly (no repository layer),
+relying on the promotion global scope.
 
 ### Architecture tests
 

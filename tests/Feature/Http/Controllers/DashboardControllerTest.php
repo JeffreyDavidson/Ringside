@@ -11,7 +11,6 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\ViewModels\DashboardViewModel;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
@@ -92,7 +91,7 @@ test('the dashboard shows the roster, upcoming events and current champions', fu
     $response
         ->assertOk()
         ->assertViewIs('dashboard')
-        ->assertViewHas('dashboard', fn (mixed $dashboard): bool => $dashboard instanceof DashboardViewModel)
+        ->assertViewHas('availability', ['employed' => 4, 'available' => 3, 'injured' => 1, 'suspended' => 0])
         ->assertSeeInOrder(['Cleared to book', '3', 'Injured', '1', 'Suspended', '0', 'Under contract', '4'])
         ->assertSee('Winter Warfare')
         ->assertSee('Riverside Armory')

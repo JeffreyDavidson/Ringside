@@ -12,8 +12,8 @@ use App\Models\Events\EventPack;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
+use App\Queries\Events\EventPackSourceQuery;
 use App\Services\Events\SponsorInstructionService;
-use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 class SaveSponsorInstructionAction
 {
     public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardQuery $card,
-        private readonly EventPackViewModel $pack, private readonly SaveEventPackAction $save,
+        private readonly EventPackSourceQuery $source, private readonly SaveEventPackAction $save,
         private readonly PersistSponsorCommitmentAction $persist) {}
 
     public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, string $mode,
@@ -63,7 +63,7 @@ class SaveSponsorInstructionAction
                     throw SponsorCommitmentException::startedInstruction();
                 }
             }
-            $content = $pack->content ?? $this->pack->data($event)['content'];
+            $content = $pack->content ?? $this->source->get($event)['content'];
             if ($mode === 'remove') {
                 [$kind, $uuid] = explode(':', $commitment->pack_key);
                 if ($kind === 'segment') {

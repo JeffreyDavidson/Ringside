@@ -3,8 +3,11 @@
 declare(strict_types=1);
 use App\Actions\Events\RecordBudgetMovementAction;
 use App\Actions\Events\SaveBudgetLineAction;
+use App\Enums\Promotions\MembershipRole;
+use App\Models\Events\Event;
 use App\Models\Events\EventBudgetMovement;
 use App\Models\Events\EventBudgetRevision;
+use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use App\ViewModels\EventBudgetViewModel;
 use Illuminate\Support\Facades\Artisan;
@@ -70,8 +73,22 @@ test('a retained revision keeps its owning budget relationship and readable chan
     resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineInput(['planned' => '600.00', 'due_date' => today()->toDateString(), 'notes' => 'Private change']));
     $revision = $f['budget']->revisions()->firstOrFail();
     // Act
-    $changes = resolve(EventBudgetViewModel::class)->changes($revision);
+    $changes = resolve(EventBudgetViewModel::class)->historyChanges([$revision])[$revision->id];
     // Assert
     expect($revision->budget()->firstOrFail()->id)->toBe($f['budget']->id)
         ->and(collect($changes)->pluck('after')->all())->toContain('600.00 USD', today()->toDateString(), 'Private change');
+});
+
+test('the budget data is built for whoever the caller lets through', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion, 'promotion')->create();
+    actingAsPromotionMember($promotion, MembershipRole::Member);
+
+    // Act
+    $data = resolve(EventBudgetViewModel::class)->data($event);
+
+    // Assert
+    expect($data['event']->is($event))->toBeTrue()
+        ->and($data['rows'])->toBeEmpty();
 });

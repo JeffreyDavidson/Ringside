@@ -154,9 +154,7 @@
                             @if ($revision->snapshot['terms_need_review'] ?? false)
                                 <p class="text-warning">{{ __('talent-bookings.warnings.reconfirmation') }}</p>
                             @endif
-                            <p class="text-muted-foreground">
-                                USD {{ $screen->fee($revision->snapshot['fee_minor'] ?? null) }}
-                            </p>
+                            <p class="text-muted-foreground">{{ $historyFees[$revision->id] }}</p>
                             <p class="mt-2 break-words whitespace-pre-wrap">
                                 {{ $revision->snapshot['travel_notes'] ?? '' }}
                             </p>
@@ -249,9 +247,7 @@
                             <p>
                                 {{ $booking->confirmed_snapshot['context']['event_date'] }} · {{ $booking->confirmed_snapshot['context']['timezone'] }} · {{ $booking->confirmed_snapshot['context']['venue_name'] ?? __('talent-bookings.venue_unset') }}
                             </p>
-                            <p>
-                                {{ __('talent-bookings.agreed_terms') }}: USD {{ $screen->fee($booking->confirmed_snapshot['terms']['fee_minor']) }}
-                            </p>
+                            <p>{{ __('talent-bookings.agreed_terms') }}: {{ $agreedFee }}</p>
                             <p class="break-words whitespace-pre-wrap">
                                 {{ $booking->confirmed_snapshot['terms']['travel_notes'] }}
                             </p>

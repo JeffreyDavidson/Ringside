@@ -1,4 +1,4 @@
-@props(['person', 'event', 'run', 'complete', 'screen'])
+@props(['person', 'event', 'complete', 'attendance'])
 <article wire:key="person-{{ $person['key'] }}" class="flex flex-wrap items-start justify-between gap-4 py-5">
     <div class="min-w-0">
         <h3 class="text-lg font-semibold break-words">{{ $person['name'] }}</h3>
@@ -17,12 +17,8 @@
         @if ($person['warning'])
             <p class="text-warning mt-2">{{ __('live-show.unavailable') }}</p>
         @endif
-        <p class="mt-2 text-sm tabular-nums">
-            {{ __('live-show.arrival_time') }}: {{ $screen->actual($person['arrived'], $run->content['timezone']) }}
-        </p>
-        <p class="mt-1 text-sm tabular-nums">
-            {{ __('live-show.briefing_time') }}: {{ $screen->actual($person['briefed'], $run->content['timezone']) }}
-        </p>
+        <p class="mt-2 text-sm tabular-nums">{{ __('live-show.arrival_time') }}: {{ $attendance['arrived'] }}</p>
+        <p class="mt-1 text-sm tabular-nums">{{ __('live-show.briefing_time') }}: {{ $attendance['briefed'] }}</p>
     </div>
     @if (! $complete)
         @can('update', $event)

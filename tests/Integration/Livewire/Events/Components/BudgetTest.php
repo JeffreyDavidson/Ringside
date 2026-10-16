@@ -117,6 +117,27 @@ test('membership demotion after opening a form denies the next write', function 
     expect(EventBudget::query()->count())->toBe(0);
 });
 
+test('membership demotion after the page opened denies the next render', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion, 'promotion')->create();
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => 'manager', 'status' => 'active']);
+    actingAs($user);
+    $context = app(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+    $promotion->users()->updateExistingPivot($user->id, ['role' => 'member']);
+    $context->forgetMemberships();
+
+    // Act
+    $component->set('filter', 'to_pay');
+
+    // Assert
+    $component->assertForbidden();
+});
+
 test('invalid financial forms identify the bound field and retain the draft', function (): void {
     // Arrange
     $f = budgetFixture();

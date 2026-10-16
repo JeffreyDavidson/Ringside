@@ -17,6 +17,6 @@ class DashboardController
      */
     public function __invoke(DashboardViewModel $dashboard): View
     {
-        return view('dashboard', ['dashboard' => $dashboard]);
+        return view('dashboard', $dashboard->data());
     }
 }

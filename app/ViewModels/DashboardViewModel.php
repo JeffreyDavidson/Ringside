@@ -12,11 +12,16 @@ use App\Models\Titles\TitleChampionship;
 use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 
 /**
  * Data for the promotion Overview page: what is coming up, who can be booked,
  * and who holds the titles. Queries respect the active promotion scope; the dashboard route runs inside the
  * `promotion.context` middleware, so users without an active membership never reach this class.
+ *
+ * @phpstan-type Availability array{employed: int, available: int, injured: int, suspended: int}
+ * @phpstan-type Champion array{title: Title, championship: TitleChampionship, url: string, days: int}
+ * @phpstan-type Screen array{upcomingEvents: Collection<int, Event>, availability: Availability, champions: list<Champion>}
  */
 final readonly class DashboardViewModel
 {
@@ -26,10 +31,23 @@ final readonly class DashboardViewModel
 
     public function __construct(private RosterResourceRouteResolver $routeResolver, private TitleReignService $reigns) {}
 
+    /** @return Screen */
+    public function data(): array
+    {
+        $champions = [];
+        foreach ($this->championedTitles() as $title) {
+            $championship = $title->currentChampionship ?? throw new LogicException('A championed title has a current championship.');
+            $champions[] = ['title' => $title, 'championship' => $championship, 'url' => $this->routeResolver->urlFor($championship->champion),
+                'days' => $this->reigns->lengthInDays($championship)];
+        }
+
+        return ['upcomingEvents' => $this->upcomingEvents(), 'availability' => $this->rosterAvailability(), 'champions' => $champions];
+    }
+
     /**
      * @return Collection<int, Event>
      */
-    public function upcomingEvents(): Collection
+    private function upcomingEvents(): Collection
     {
         return Event::query()
             ->scheduled()
@@ -48,9 +66,9 @@ final readonly class DashboardViewModel
      * SQLite; a bare flag in a CASE condition reads correctly on all three. The derived table selects only the id
      * and the two flags, so the outer query does not carry every wrestler column through.
      *
-     * @return array{employed: int, available: int, injured: int, suspended: int}
+     * @return Availability
      */
-    public function rosterAvailability(): array
+    private function rosterAvailability(): array
     {
         $counts = DB::query()
             ->fromSub(
@@ -79,7 +97,7 @@ final readonly class DashboardViewModel
      *
      * @return Collection<int, Title>
      */
-    public function championedTitles(): Collection
+    private function championedTitles(): Collection
     {
         return Title::query()
             ->active()
@@ -88,15 +106,5 @@ final readonly class DashboardViewModel
             ->orderBy('name')
             ->limit(self::CHAMPION_LIMIT)
             ->get();
-    }
-
-    public function championUrl(TitleChampionship $championship): string
-    {
-        return $this->routeResolver->urlFor($championship->champion);
-    }
-
-    public function reignLengthInDays(TitleChampionship $championship): int
-    {
-        return $this->reigns->lengthInDays($championship);
     }
 }

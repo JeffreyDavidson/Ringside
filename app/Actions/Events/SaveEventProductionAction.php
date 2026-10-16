@@ -12,14 +12,14 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
-use App\ViewModels\EventPackViewModel;
+use App\Queries\Events\EventPackSourceQuery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 /** @phpstan-import-type Production from EventPack */
 class SaveEventProductionAction
 {
-    public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackViewModel $pack,
+    public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackSourceQuery $source,
         private readonly EventProductionRequirements $requirements) {}
 
     /** @param array<string, mixed> $input The submitted production form input, checked inside the save */
@@ -38,7 +38,7 @@ class SaveEventProductionAction
                 throw EventPackConflictException::reviewRequired();
             }
             $input = $this->requirements->validatedInput($input);
-            $content = $pack->content ?? $this->pack->data($event)['content'];
+            $content = $pack->content ?? $this->source->get($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),
                 ...array_map(fn (array $segment): string => 'segment:'.$segment['id'], $content['segments'])];
             $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)

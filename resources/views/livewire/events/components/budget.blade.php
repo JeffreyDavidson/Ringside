@@ -447,9 +447,8 @@
                         <summary class="min-h-11 cursor-pointer">
                             {{ __('event-budget.before') }} / {{ __('event-budget.after') }}
                         </summary>
-                        @php($changes = app(\App\ViewModels\EventBudgetViewModel::class)->changes($revision))
                         <dl class="space-y-3 py-3">
-                            @foreach ($changes as $change)
+                            @foreach ($historyChanges[$revision->id] as $change)
                                 <div>
                                     <dt class="font-semibold">{{ $change['label'] }}</dt>
                                     <dd class="break-words">

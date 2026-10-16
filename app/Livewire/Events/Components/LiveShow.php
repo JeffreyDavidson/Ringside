@@ -215,14 +215,12 @@ class LiveShow extends Component
     {
         $event = $this->event();
         Gate::authorize('view', $event);
-        $screen = app(LiveShowViewModel::class);
-
-        $data = $screen->data($event);
+        $data = app(LiveShowViewModel::class)->data($event, $this->refreshedAt);
         $this->version = $data['run']->version ?? 0;
         $this->packVersion = $data['source']['pack']->version ?? 0;
         $this->fingerprint = $data['source']['fingerprint'] ?? '';
 
-        return view('livewire.events.components.live-show', [...$data, 'screen' => $screen]);
+        return view('livewire.events.components.live-show', $data);
     }
 
     private function event(): Event

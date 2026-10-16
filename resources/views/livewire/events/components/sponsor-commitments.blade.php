@@ -323,17 +323,17 @@
                     <p class="mt-1 text-sm tabular-nums">
                         {{ $row->deadline_at ? __('sponsors.due_at', ['time' => $row->deadline_at->copy()->setTimezone($row->timezone)->format('M j, Y H:i P'), 'zone' => $row->timezone]) : __('sponsors.deadline').': '.__('sponsors.not_set') }}
                     </p>
-                    <p class="mt-2 font-semibold {{ $screen->status($row) === __('sponsors.overdue') ? 'text-warning' : '' }}">
-                        {{ $screen->status($row) }}
+                    <p class="mt-2 font-semibold {{ $details[$row->id]['overdue'] ? 'text-warning' : '' }}">
+                        {{ $details[$row->id]['status'] }}
                     </p>
-                    @if ($screen->eventNeedsReview($row))
+                    @if ($details[$row->id]['eventNeedsReview'])
                         <p class="text-warning mt-2 text-sm">{{ __('sponsors.event_review') }}</p>
                     @endif
-                    @if ($screen->instructionNeedsReview($row))
+                    @if ($details[$row->id]['instructionNeedsReview'])
                         <p class="text-warning mt-2 text-sm">{{ __('sponsors.pack_review') }}</p>
                     @endif
                     <p class="text-muted-foreground mt-2 text-sm">
-                        {{ $row->pack_key === null ? __('sponsors.no_instruction') : (str_starts_with($row->pack_key, 'setup:') ? __('sponsors.setup_linked') : ($screen->liveState($row) ?? __('sponsors.no_live_item'))) }}
+                        {{ $row->pack_key === null ? __('sponsors.no_instruction') : (str_starts_with($row->pack_key, 'setup:') ? __('sponsors.setup_linked') : ($details[$row->id]['liveState'] ?? __('sponsors.no_live_item'))) }}
                     </p>
                     <details class="mt-3 text-sm">
                         <summary class="min-h-11 cursor-pointer py-3">

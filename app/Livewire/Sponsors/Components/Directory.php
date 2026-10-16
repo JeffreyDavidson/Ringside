@@ -114,7 +114,7 @@ class Directory extends Component
             ->orderBy('agreement_reference')->orderBy('event_id')->orderBy('id')->paginate(20, pageName: 'sponsorHistoryPage');
 
         return view('livewire.sponsors.components.directory', ['promotion' => $promotion, 'sponsors' => $sponsors, 'selected' => $selected,
-            'history' => $history, 'screen' => app(SponsorCommitmentsViewModel::class)]);
+            'history' => $history, 'statuses' => app(SponsorCommitmentsViewModel::class)->statuses($history ?? [])]);
     }
 
     private function promotion(): Promotion
