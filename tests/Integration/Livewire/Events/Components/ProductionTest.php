@@ -98,6 +98,41 @@ test('the editor refuses more than the approved assignment and cue limits', func
     expect($page->get('cues'))->toHaveCount(20);
 });
 
+test('the editor refuses malformed production input and saves nothing', function (string $case, string $field): void {
+    // Arrange
+    require_once __DIR__.'/../../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $before = $event->pack()->firstOrFail()->content;
+    $page = livewire(Production::class, ['eventId' => $event->id]);
+    $assignments = $page->get('assignments');
+    $cues = $page->get('cues');
+
+    if ($case === 'duplicate assignment') {
+        $assignments[] = $assignments[0];
+    }
+    if ($case === 'duplicate cue') {
+        $cues[] = $cues[0];
+    }
+    if ($case === 'unsafe url') {
+        $cues[0]['url'] = 'javascript:alert(1)';
+    }
+
+    // Act
+    $page->set('assignments', $assignments)
+        ->set('cues', $cues)
+        ->call('save');
+
+    // Assert
+    $page->assertHasErrors([$field]);
+    expect($event->pack()->firstOrFail()->content)->toBe($before)
+        ->and($event->pack()->firstOrFail()->version)->toBe(1);
+})->with([
+    'duplicate assignment' => ['duplicate assignment', 'assignments.1.id'],
+    'duplicate cue' => ['duplicate cue', 'cues.1.id'],
+    'unsafe url' => ['unsafe url', 'cues.0.url'],
+]);
+
 test('a stale production editor keeps its draft and requires reload', function (): void {
     // Arrange
     require_once __DIR__.'/../../../../Fixtures/production.php';

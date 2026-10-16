@@ -8,16 +8,16 @@ use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Lifecycle\Events\LiveShowDayRequirements;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
-use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TransitionLiveItemAction
 {
     public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
-        private readonly LiveShowSourceRequirements $source, private readonly LiveShowTimingService $timing) {}
+        private readonly LiveShowSourceRequirements $source, private readonly LiveShowDayRequirements $showDay) {}
 
     public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
     {
@@ -43,7 +43,7 @@ class TransitionLiveItemAction
                 if ($this->source->hasChanged($run->event, $run)) {
                     throw LiveShowException::reviewRequired();
                 }
-                $this->timing->ensureShowDay($run);
+                $this->showDay->ensureShowDay($run);
                 $updated['state'] = LiveItemStatus::Running->value;
                 $updated['start'] = now()->utc()->toIso8601String();
                 $run->status = LiveShowStatus::Running;
@@ -59,7 +59,7 @@ class TransitionLiveItemAction
                 if ($state !== LiveItemStatus::Pending) {
                     throw LiveShowException::transitionInvalid();
                 }
-                $this->timing->ensureShowDay($run);
+                $this->showDay->ensureShowDay($run);
                 $updated['state'] = LiveItemStatus::Skipped->value;
             }
             if ($operation === LiveItemOperation::Correct) {

@@ -6,12 +6,12 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveEventProductionAction;
 use App\Exceptions\BaseBusinessException;
+use App\Lifecycle\Events\EventProductionRequirements;
 use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Queries\Events\EventPackSourceQuery;
-use App\Services\Events\EventProductionValidationService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -189,11 +189,7 @@ class Production extends Component
         $this->resetErrorBag();
         $previousVersion = $this->version;
         try {
-            $input = app(EventProductionValidationService::class)->validateInput([
-                'notes' => $this->notes,
-                'assignments' => array_map(fn (array $assignment): array => [...$assignment, 'refresh_name' => in_array($assignment['id'], $this->refreshNames, true)], $this->assignments),
-                'cues' => $this->cues,
-            ]);
+            $input = $this->validatedInput();
             app(SaveEventProductionAction::class)->handle($event, $this->version, $this->fingerprint, $input, $this->reviewed);
             $this->reloadSaved();
             $this->saved = true;
@@ -216,6 +212,16 @@ class Production extends Component
             'contacts' => $contacts->merge($selected)->sortBy('name')->values(),
             'missingCalls' => count(array_filter($this->assignments, fn (array $entry): bool => ! ($entry['call_at'] ?? null))),
             'missingOwners' => count(array_filter($this->cues, fn (array $cue): bool => ! ($cue['owner_id'] ?? null) || ! in_array($cue['owner_id'], array_column($this->assignments, 'id'), true)))]);
+    }
+
+    /** @return array<string, mixed> */
+    private function validatedInput(): array
+    {
+        return resolve(EventProductionRequirements::class)->validatedInput([
+            'notes' => $this->notes,
+            'assignments' => array_map(fn (array $assignment): array => [...$assignment, 'refresh_name' => in_array($assignment['id'], $this->refreshNames, true)], $this->assignments),
+            'cues' => $this->cues,
+        ]);
     }
 
     private function event(): Event

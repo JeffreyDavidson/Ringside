@@ -7,24 +7,26 @@ namespace App\Actions\Matches;
 use App\Enums\Matches\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchAssignmentEligibility;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Matches\MatchAssignmentConflictService;
-use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddWrestlersToMatchAction
 {
     public function __construct(
-        protected MatchAssignmentConflictService $conflictService,
+        protected MatchSchedulingLock $schedulingLock,
+        protected MatchAssignmentEligibility $assignmentEligibility,
         private readonly RosterBookingEligibility $bookingEligibility,
         private readonly RosterDateAvailability $dateAvailability,
         private readonly MatchConfigurationRequirements $configurationRequirements,
-        private readonly TournamentMatchRequirementsService $tournamentRequirements,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
     ) {}
 
     /**
@@ -68,7 +70,7 @@ class AddWrestlersToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
                 $lockedMatch->event()->firstOrFail(),
                 'wrestlers',
@@ -88,7 +90,7 @@ class AddWrestlersToMatchAction
     {
         $this->tournamentRequirements->ensureCompetitors($lockedMatch, $wrestlers);
         $requestedWrestlers = $wrestlers->unique('id')->values();
-        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
         $lockedWrestlers = Wrestler::query()
             ->whereKey($requestedWrestlers->pluck('id'))
             ->orderBy('id')
@@ -101,7 +103,7 @@ class AddWrestlersToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
-        $this->conflictService->ensureWrestlersCanBeAssigned(
+        $this->assignmentEligibility->ensureWrestlersCanBeAssigned(
             $conflictingEventIds,
             $lockedWrestlers,
             $lockedMatch,

@@ -88,6 +88,9 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     if ($case === 'unsafe url') {
         $input['cues'][0]['url'] = 'javascript:alert(1)';
     }
+    if ($case === 'missing role') {
+        unset($input['assignments'][0]['role']);
+    }
     if ($case === 'credential url') {
         $input['cues'][0]['url'] = 'https://secret:password@example.com/track';
     }
@@ -109,7 +112,29 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     expect($attempt)->toThrow(ValidationException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before)
         ->and($event->pack()->firstOrFail()->version)->toBe(1);
-})->with(['foreign contact', 'unknown owner', 'foreign item', 'duplicate assignment', 'duplicate cue', 'unsafe url', 'credential url', 'other description', 'gap', 'repeated', 'cue count']);
+})->with(['foreign contact', 'unknown owner', 'foreign item', 'duplicate assignment', 'duplicate cue', 'unsafe url', 'missing role', 'credential url', 'other description', 'gap', 'repeated', 'cue count']);
+
+test('saving production locks the referenced crew contacts after the event, its matches and its pack', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+
+    // Act
+    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $fixture['production'], false));
+
+    // Assert
+    $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
+    $matchLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events_matches"'));
+    $packLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "event_packs"'));
+    $contactLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "crew_contacts"'));
+    $packWrite = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'update "event_packs"'));
+    expect($eventLock)->toBeLessThan($matchLock)
+        ->and($matchLock)->toBeLessThan($packLock)
+        ->and($packLock)->toBeLessThan($contactLock)
+        ->and($contactLock)->toBeLessThan($packWrite);
+});
 
 test('explicit name refresh and offset call time change only the latest saved plan', function (): void {
     // Arrange

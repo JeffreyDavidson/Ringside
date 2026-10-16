@@ -5,22 +5,24 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchAssignmentEligibility;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Matches\MatchTitleRequirements;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
-use App\Services\Matches\MatchAssignmentConflictService;
-use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddTitlesToMatchAction
 {
     public function __construct(
-        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchSchedulingLock $schedulingLock,
+        private readonly MatchAssignmentEligibility $assignmentEligibility,
         private readonly MatchTitleRequirements $requirements,
         private readonly MatchConfigurationRequirements $configurationRequirements,
-        private readonly TournamentMatchRequirementsService $tournamentRequirements,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
     ) {}
 
     /**
@@ -60,7 +62,7 @@ class AddTitlesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
                 $lockedMatch->event()->firstOrFail(),
                 'titles',
@@ -84,7 +86,7 @@ class AddTitlesToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
         $lockedTitles = Title::query()
             ->whereKey($requestedTitles->pluck('id'))
             ->orderBy('id')
@@ -97,7 +99,7 @@ class AddTitlesToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        $this->conflictService->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
+        $this->assignmentEligibility->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
         $this->requirements->ensureSatisfied($lockedMatch, $lockedTitles);
 
         $lockedTitles->each(function (Title $title) use ($lockedMatch): void {

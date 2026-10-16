@@ -6,11 +6,12 @@ namespace App\Actions\Events;
 
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\EventProductionRequirements;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
-use App\Services\Events\EventProductionValidationService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -19,9 +20,9 @@ use Illuminate\Support\Facades\Gate;
 class SaveEventProductionAction
 {
     public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackViewModel $pack,
-        private readonly EventProductionValidationService $validator) {}
+        private readonly EventProductionRequirements $requirements) {}
 
-    /** @param array<string, mixed> $input */
+    /** @param array<string, mixed> $input The submitted production form input, checked inside the save */
     public function handle(Event $event, int $version, string $fingerprint, array $input, bool $reviewed): void
     {
         DB::transaction(function () use ($event, $version, $fingerprint, $input, $reviewed): void {
@@ -36,10 +37,13 @@ class SaveEventProductionAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
+            $input = $this->requirements->validatedInput($input);
             $content = $pack->content ?? $this->pack->data($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),
                 ...array_map(fn (array $segment): string => 'segment:'.$segment['id'], $content['segments'])];
-            $content['production'] = $this->validator->validate($event, $input, $content['production'] ?? null, $keys);
+            $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)
+                ->whereKey(data_get($input, 'assignments.*.contact_id', []))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $content['production'] = $this->requirements->ensureProduction($input, $content['production'] ?? null, $keys, $contacts);
             $pack ??= new EventPack;
             $pack->event_id = $event->id;
             $pack->version = $version + 1;

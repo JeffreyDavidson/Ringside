@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Tournaments;
+namespace App\Lifecycle\Tournaments;
 
 use App\Data\Matches\EventMatchData;
 use App\Data\Tournaments\TournamentBoutData;
@@ -18,12 +18,13 @@ use App\Models\Scopes\PromotionContextScope;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
+use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class TournamentMatchRequirementsService
+final readonly class TournamentMatchRequirements
 {
-    public function __construct(private readonly TournamentBracketService $bracket) {}
+    public function __construct(private TournamentBracketService $bracket) {}
 
     /** @return list<int> */
     public function permittedPriorMatchIds(?EventMatch $match): array

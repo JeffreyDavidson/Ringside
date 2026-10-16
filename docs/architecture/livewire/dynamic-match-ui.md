@@ -213,7 +213,7 @@ public function getWrestlers(): Collection
 }
 ```
 
-The availability query only selects candidates from persisted roster state. Assignment actions must still use `RosterBookingEligibility` and `MatchAssignmentConflictService` before attaching a wrestler to a match.
+The availability query only selects candidates from persisted roster state. Assignment actions must still use `RosterBookingEligibility` and `MatchAssignmentEligibility` before attaching a wrestler to a match.
 
 ## Testing Strategy
 

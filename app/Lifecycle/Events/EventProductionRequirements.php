@@ -2,30 +2,50 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Events;
+namespace App\Lifecycle\Events;
 
 use App\Enums\Crew\CrewRole;
 use App\Models\Crew\CrewContact;
-use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
+ * The state rules of a saved production plan: every assignment names a crew contact of the event's promotion who is
+ * not archived (unless the assignment already held that contact), call times exist on the wall clock, and every cue
+ * belongs to a current card item and an assignment of the plan. The shape of the submitted input is checked first, by the
+ * same rules the Production form shows on its fields, so a save is safe from any caller.
+ *
  * @phpstan-import-type Production from EventPack
- * @phpstan-import-type Assignment from EventPack
- * @phpstan-import-type Cue from EventPack
+ *
+ * @phpstan-type Input array{notes?: ?string, assignments: list<array{id: string, contact_id: int|numeric-string, role: string, station?: ?string, call_at?: ?string, timezone: string, offset?: ?string, setup?: ?string, during?: ?string, strike?: ?string, refresh_name?: bool}>, cues: list<array{id: string, item_key: string, subject: string, trigger: string, instruction: string, role?: ?string, owner_id?: ?string, pronunciation?: ?string, track?: ?string, url?: ?string}>}
  */
-class EventProductionValidationService
+final readonly class EventProductionRequirements
 {
-    public function __construct(private readonly LiveShowTimingService $timing) {}
+    public function __construct(private LiveShowTimingService $timing) {}
 
-    /** @return array<string, mixed> */
-    private function rules(): array
+    /**
+     * Turn blank strings into null, then check the shape of the submitted input: allowed keys, uuid ids, lengths, enums
+     * and https-only URLs.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     *
+     * @throws ValidationException
+     */
+    public function validatedInput(array $input): array
     {
-        return [
+        array_walk_recursive($input, function (mixed &$value): void {
+            if ($value === '') {
+                $value = null;
+            }
+        });
+
+        return Validator::make($input, [
             'notes' => ['nullable', 'string', 'max:10000'],
             'assignments' => ['present', 'array', 'max:100'],
             'assignments.*' => ['array:id,contact_id,name,role,station,call_at,timezone,offset,setup,during,strike,active,refresh_name'],
@@ -52,36 +72,23 @@ class EventProductionValidationService
             'cues.*.pronunciation' => ['nullable', 'string', 'max:500'],
             'cues.*.track' => ['nullable', 'string', 'max:500'],
             'cues.*.url' => ['nullable', 'url:https', 'max:2000'],
-        ];
-    }
-
-    /** @param array<string, mixed> $input
-     * @return array<string, mixed>
-     */
-    public function validateInput(array $input): array
-    {
-        array_walk_recursive($input, function (mixed &$value): void {
-            if ($value === '') {
-                $value = null;
-            }
-        });
-
-        return Validator::make($input, $this->rules())->validate();
+        ])->validate();
     }
 
     /**
-     * @param  array<string, mixed>  $input
+     * @param  array<string, mixed>  $input  The input returned by validatedInput()
+
      * @param  ?Production  $previous
      * @param  list<string>  $itemKeys
+     * @param  Collection<int, CrewContact>  $contacts  The locked contacts of the event's promotion, keyed by id
      * @return Production
+     *
+     * @throws ValidationException
      */
-    public function validate(Event $event, array $input, ?array $previous, array $itemKeys): array
+    public function ensureProduction(array $input, ?array $previous, array $itemKeys, Collection $contacts): array
     {
-        /** @var array{notes?: ?string, assignments: list<array{id: string, contact_id: int|numeric-string, role: string, station?: ?string, call_at?: ?string, timezone: string, offset?: ?string, setup?: ?string, during?: ?string, strike?: ?string, refresh_name?: bool}>, cues: list<array{id: string, item_key: string, subject: string, trigger: string, instruction: string, role?: ?string, owner_id?: ?string, pronunciation?: ?string, track?: ?string, url?: ?string}>} $input */
-        $input = $this->validateInput($input);
+        /** @var Input $input */
         $old = collect($previous['assignments'] ?? [])->keyBy('id');
-        $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)
-            ->whereKey(array_column($input['assignments'], 'contact_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
         $assignments = [];
         foreach ($input['assignments'] as $index => $entry) {
             $contact = $contacts->get((int) $entry['contact_id']);

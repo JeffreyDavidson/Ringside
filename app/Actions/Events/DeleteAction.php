@@ -6,16 +6,16 @@ namespace App\Actions\Events;
 
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Tournaments\TournamentLocks;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Tournaments\Tournament;
-use App\Services\Tournaments\TournamentMatchRequirementsService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState, private readonly TournamentLocks $tournamentLocks, private readonly TournamentMatchRequirementsService $tournamentRequirements) {}
+    public function __construct(private readonly DeletionStateManager $deletionState, private readonly TournamentLocks $tournamentLocks, private readonly TournamentMatchRequirements $tournamentRequirements) {}
 
     /**
      * Delete an event.
