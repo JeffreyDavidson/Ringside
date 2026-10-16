@@ -10,6 +10,8 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\EventPackData;
+use App\Data\Events\LiveShowReviewData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveShowStatus;
@@ -29,7 +31,7 @@ test('preparation saves a reviewed live snapshot without changing the event pack
     $event = Event::factory()->create(['date' => now()]);
     $match = EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create(['match_finish' => null]);
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $original = $event->pack()->firstOrFail()->content;
 
     // Act
@@ -50,7 +52,7 @@ test('arrival and briefing persist and a stale operator cannot replace them', fu
     $event = Event::factory()->create(['date' => now()]);
     EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $key = $run->content['roster'][0]['key'];
     $action = resolve(MarkLiveAttendanceAction::class);
@@ -74,7 +76,7 @@ test('the show runs one item at a time and completion never records a match resu
     $match = EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create(['match_finish' => null]);
     $data = resolve(EventPackViewModel::class)->data($event);
     $content = [...$data['content'], 'segments' => [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Intermission', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => 15, 'notes' => null]]];
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $content, false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($content), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $action = resolve(TransitionLiveItemAction::class);
     $first = $run->content['items'][0]['key'];
@@ -105,16 +107,16 @@ test('review adopts pending plan changes while retaining actual times and attend
     $event = Event::factory()->create(['date' => now()]);
     EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     resolve(MarkLiveAttendanceAction::class)->handle($event, 1, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true);
     resolve(TransitionLiveItemAction::class)->handle($event, 2, $run->content['items'][0]['key'], LiveItemOperation::Start);
     $before = $run->refresh()->content;
     $segment = ['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Closing promo', 'after_match_id' => null, 'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => 'Thank the crowd'];
-    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], [...$data['content'], 'segments' => [$segment]], false);
+    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'segments' => [$segment]]), false);
 
     // Act
-    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], []);
+    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]));
 
     // Assert
     expect($run->refresh()->content['items'][0])->toBe($before['items'][0])
@@ -143,7 +145,7 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     }
     $data = resolve(EventPackViewModel::class)->data($event);
     if ($case !== 'missing pack') {
-        resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+        resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     }
     if ($case === 'unreviewed') {
         $event->update(['name' => 'Renamed after pack review']);
@@ -151,7 +153,7 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     if ($case === 'old') {
         $event->update(['date' => now()->subDay()]);
         $data = resolve(EventPackViewModel::class)->data($event);
-        resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], $data['content'], true);
+        resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), true);
     }
     $version = $case === 'old' ? 2 : 1;
 
@@ -166,7 +168,7 @@ test('a stale preparation preview cannot create a run from a different pack', fu
     $event = Event::factory()->create(['date' => now()]);
     EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $version = $staleVersion ? 0 : 1;
     $fingerprint = $staleVersion ? $data['card']['fingerprint'] : str_repeat('0', 64);
 

@@ -9,6 +9,7 @@ use App\Actions\Events\MarkLiveAttendanceAction;
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\LiveShowReviewData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\BaseBusinessException;
@@ -179,7 +180,7 @@ class LiveShow extends Component
     {
         Validator::make(['removedReasons' => $this->removedReasons], ['removedReasons' => ['array'], 'removedReasons.*' => ['required', 'string', 'max:2000']])->validate();
         $this->perform(fn (Event $event) => app(ReviewLiveShowAction::class)->handle($event, $this->draftVersion,
-            $this->reviewPackVersion, $this->reviewFingerprint, $this->removedReasons));
+            $this->reviewPackVersion, $this->reviewFingerprint, LiveShowReviewData::fromValidated($this->removedReasons)));
     }
 
     public function cancelDraft(): void

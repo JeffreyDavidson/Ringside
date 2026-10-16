@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Data\Events\EventProductionData;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\EventLiveRun;
 use App\ViewModels\EventPackViewModel;
@@ -47,7 +48,7 @@ test('production save races with live preparation or review without changing an 
         if ($operation === 'review') {
             resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
             $input['cues'][0]['instruction'] = 'Adoptable version two';
-            resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $input, false);
+            resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
             $version = 2;
         }
         $input['cues'][0]['instruction'] = 'Next plan only';

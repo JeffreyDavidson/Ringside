@@ -20,6 +20,7 @@ use App\Actions\Tournaments\ReplaceTournamentEntryAction;
 use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Tournaments\WithdrawTournamentEntryAction;
 use App\Data\Events\EventData;
+use App\Data\Events\EventPackData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
 use App\Enums\Events\LiveItemOperation;
@@ -178,7 +179,7 @@ it('refuses resetting a bout that has already started in the live show', functio
     $event->update(['date' => now()]);
     $match = bookTournamentNode($world, $node);
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     resolve(TransitionLiveItemAction::class)->handle($event, $run->version, 'match:'.$match->id, LiveItemOperation::Start);
     expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Unbook started bout', true))->toThrow(TournamentException::class)

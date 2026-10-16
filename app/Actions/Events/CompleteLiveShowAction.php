@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\LiveShowChangeData;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
@@ -30,7 +31,7 @@ class CompleteLiveShowAction
             $before = ['status' => $run->status->value];
             $run->status = LiveShowStatus::Completed;
             $run->completed_at = now();
-            $this->persist->handle($run, 'complete', 'show', $before, ['status' => $run->status->value]);
+            $this->persist->handle($run, new LiveShowChangeData('complete', 'show', $before, ['status' => $run->status->value]));
         }, attempts: 3);
     }
 }

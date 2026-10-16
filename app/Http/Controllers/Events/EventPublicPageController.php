@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\StoreEventPosterAction;
+use App\Data\Events\EventPublicationDraftData;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\SaveEventPublicationRequest;
@@ -53,7 +54,7 @@ class EventPublicPageController
                     $newPosterKey = $posters->handle($upload);
                     $draft['poster'] = ['key' => $newPosterKey, 'alt' => $request->string('poster_alt')->toString(), 'caption' => $request->filled('poster_caption') ? $request->string('poster_caption')->toString() : null];
                 }
-                $save->handle($event, $request->user() ?? abort(403), $request->integer('version'), $request->string('fingerprint')->toString(), $draft);
+                $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), EventPublicationDraftData::fromValidated($draft));
                 $saved = true;
             } finally {
                 // This derivative was created for this request and never adopted by a saved draft.

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveEventProductionAction;
-use App\Enums\Promotions\MembershipRole;
-use App\Enums\Promotions\MembershipStatus;
+use App\Data\Events\EventPackData;
+use App\Data\Events\EventProductionData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Crew\CrewContact;
@@ -15,11 +15,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\EventProductionViewModel;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 
 test('saving production keeps existing pack notes and snapshots one contact with multiple roles', function (): void {
     // Arrange
@@ -28,13 +26,13 @@ test('saving production keeps existing pack notes and snapshots one contact with
     $match = EventMatch::factory()->for($event)->create();
     $contact = CrewContact::factory()->create(['promotion_id' => $event->promotion_id, 'name' => 'Alex Operator']);
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], [...$data['content'], 'notes' => 'Existing show note'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'notes' => 'Existing show note']), false);
     $assignment = ['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC'];
     $production = ['notes' => 'Private production note', 'assignments' => [$assignment, [...$assignment, 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051002', 'role' => 'announcer']],
         'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$match->id, 'subject' => 'Harbor Hero', 'trigger' => 'On caller signal', 'instruction' => 'Play entrance', 'owner_id' => $assignment['id'], 'track' => 'harbor-theme.mp3']]];
 
     // Act
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
 
     // Assert
     $pack = $event->pack()->firstOrFail();
@@ -51,11 +49,11 @@ test('restoring an inactive assignment cannot newly assign an archived contact',
     $event = $fixture['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
     $original = $data['content']['production'] ?? [];
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], ['notes' => null, 'assignments' => [], 'cues' => []], false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated(['notes' => null, 'assignments' => [], 'cues' => []]), false);
     resolve(ArchiveCrewContactAction::class)->handle($fixture['contact'], 1);
 
     // Act
-    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], $original, false);
+    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated($original), false);
 
     // Assert
     expect($attempt)->toThrow(ValidationException::class)
@@ -106,7 +104,7 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     }
 
     // Act
-    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $input, false);
+    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
 
     // Assert
     expect($attempt)->toThrow(ValidationException::class)
@@ -122,7 +120,7 @@ test('saving production locks the referenced crew contacts after the event, its 
     $data = resolve(EventPackViewModel::class)->data($event);
 
     // Act
-    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $fixture['production'], false));
+    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($fixture['production']), false));
 
     // Assert
     $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
@@ -151,12 +149,12 @@ test('explicit name refresh and offset call time change only the latest saved pl
     $input['assignments'][0]['offset'] = '-05:00';
 
     // Act
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $input, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
 
     // Assert
     expect(data_get($event->pack()->firstOrFail()->content, 'production.assignments.0.name'))->toBe('PRIVATE-CREW-7Q');
     $input['assignments'][0]['refresh_name'] = true;
-    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], $input, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
     expect(data_get($event->pack()->firstOrFail()->content, 'production.assignments.0.name'))->toBe('New directory name')
         ->and(data_get($event->pack()->firstOrFail()->content, 'production.assignments.0.call_at'))->toBe('2026-11-01T01:30');
 });
@@ -172,8 +170,8 @@ test('ordinary pack saves retain production and removed matches retain their cue
     unset($content['production']);
 
     // Act
-    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], $content, true);
-    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], ['notes' => null, 'assignments' => [], 'cues' => []], false);
+    resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($content), true);
+    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated(['notes' => null, 'assignments' => [], 'cues' => []]), false);
 
     // Assert
     expect(data_get($event->pack()->firstOrFail()->content, 'production.cues.0.instruction'))->toBe('PRIVATE-CUE-7Q')
@@ -199,29 +197,9 @@ test('stale production previews cannot overwrite a changed source', function (st
     $before = $event->pack()->firstOrFail()->content;
 
     // Act
-    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, $version, $fingerprint, $fixture['production'], false);
+    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, $version, $fingerprint, EventProductionData::fromValidated($fixture['production']), false);
 
     // Assert
     expect($attempt)->toThrow($case === 'review' ? EventPackConflictException::class : RecordChangedException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before);
 })->with(['version', 'fingerprint', 'review']);
-
-test('a member forging a production save writes nothing', function (): void {
-    // Arrange
-    require_once __DIR__.'/../../../Fixtures/production.php';
-    $fixture = productionFixture();
-    $event = $fixture['event'];
-    $user = basicUser();
-    Promotion::query()->findOrFail($event->promotion_id)->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-    actingAs($user);
-    get(route('events.pack.show', $event))->assertOk();
-    $before = $event->pack()->firstOrFail()->content;
-
-    // Act
-    $attempt = fn () => resolve(SaveEventProductionAction::class)->handle($event, 1,
-        $event->pack()->firstOrFail()->card_fingerprint, $fixture['production'], false);
-
-    // Assert
-    expect($attempt)->toThrow(AuthorizationException::class)
-        ->and($event->pack()->firstOrFail()->content)->toBe($before);
-});

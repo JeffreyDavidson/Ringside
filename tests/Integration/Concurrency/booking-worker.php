@@ -58,6 +58,9 @@ use App\Actions\Venues\CreateAction as CreateVenueAction;
 use App\Actions\Wrestlers\CreateAction as CreateWrestlerAction;
 use App\Actions\Wrestlers\UpdateAction as UpdateWrestlerAction;
 use App\Data\Events\EventData;
+use App\Data\Events\EventPackData;
+use App\Data\Events\EventProductionData;
+use App\Data\Events\LiveShowReviewData;
 use App\Data\Events\SponsorCommitmentData;
 use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
@@ -142,9 +145,9 @@ try {
         if (! is_array($production)) {
             throw new InvalidArgumentException('Production worker input must be a JSON object.');
         }
-        resolve(SaveEventProductionAction::class)->handle(Event::query()->findOrFail($spec['production_save_event_id']), $spec['version'], $spec['fingerprint'], [
+        resolve(SaveEventProductionAction::class)->handle(Event::query()->findOrFail($spec['production_save_event_id']), $spec['version'], $spec['fingerprint'], EventProductionData::fromValidated([
             'notes' => $production['notes'] ?? null, 'assignments' => $production['assignments'] ?? [], 'cues' => $production['cues'] ?? [],
-        ], false);
+        ]), false);
     } elseif (isset($spec['crew_archive_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
         resolve(ArchiveCrewContactAction::class)->handle(CrewContact::query()->findOrFail($spec['crew_archive_id']), $spec['version']);
@@ -186,11 +189,11 @@ try {
             resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], $spec['mode'], $spec['target_key'] ?: null, null, $spec['preview_hash']);
         } elseif ($spec['sponsor_operation'] === 'pack') {
             $source = resolve(EventPackViewModel::class)->data($event);
-            resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], [...$source['content'], 'notes' => 'Reviewed ordinary pack note'], false);
+            resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], EventPackData::fromValidated([...$source['content'], 'notes' => 'Reviewed ordinary pack note']), false);
         } elseif ($spec['sponsor_operation'] === 'prepare') {
             resolve(PrepareLiveShowAction::class)->handle($event, 0, $spec['pack_version'], $spec['fingerprint']);
         } elseif ($spec['sponsor_operation'] === 'review') {
-            resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], []);
+            resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]));
         } else {
             $status = match ($spec['sponsor_operation']) {
                 'complete' => SponsorCommitmentStatus::Completed,
@@ -207,7 +210,7 @@ try {
         $event = Event::query()->findOrFail($spec['live_event_id']);
         match ($spec['live_operation']) {
             'prepare' => resolve(PrepareLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint']),
-            'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], []),
+            'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([])),
             'attendance' => resolve(MarkLiveAttendanceAction::class)->handle($event, $spec['version'], $spec['key'], LiveAttendanceMark::Arrived, true),
             default => resolve(TransitionLiveItemAction::class)->handle($event, $spec['version'], $spec['key'], LiveItemOperation::from($spec['live_operation'])),
         };

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\LiveShowChangeData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
@@ -42,7 +43,7 @@ class MarkLiveAttendanceAction
                 $auditBefore = array_intersect_key($before, array_flip(['arrived', 'briefed', 'updated_by']));
                 $auditAfter = array_intersect_key($person, array_flip(['arrived', 'briefed', 'updated_by']));
             }
-            $this->persist->handle($run, 'attendance', $key, $auditBefore, $auditAfter);
+            $this->persist->handle($run, new LiveShowChangeData('attendance', $key, $auditBefore, $auditAfter));
         }, attempts: 3);
     }
 }

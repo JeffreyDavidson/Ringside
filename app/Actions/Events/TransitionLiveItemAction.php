@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Data\Events\LiveShowChangeData;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
@@ -90,7 +91,7 @@ class TransitionLiveItemAction
             $updated['updated_by'] = (int) auth()->id();
             $content['items'][$index] = $updated;
             $run->content = $content;
-            $this->persist->handle($run, $operation->value, $key, $before, $content['items'][$index], $reason);
+            $this->persist->handle($run, new LiveShowChangeData($operation->value, $key, $before, $content['items'][$index], $reason));
         }, attempts: 3);
     }
 }

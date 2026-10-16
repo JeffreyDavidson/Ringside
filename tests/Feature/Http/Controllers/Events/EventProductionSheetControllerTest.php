@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
+use App\Data\Events\EventProductionData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Crew\CrewContact;
@@ -33,7 +34,7 @@ test('long cue sheets retain full manual instructions and never print contact de
         'instruction' => str_repeat('Hold the entrance until the caller gives the signal. Fade under the announcement and keep the next entrance ready. ', 12),
     ], range(1, 6));
     resolve(SaveEventProductionAction::class)->handle($event, 1, $event->pack()
-        ->firstOrFail()->card_fingerprint, $input, false);
+        ->firstOrFail()->card_fingerprint, EventProductionData::fromValidated($input), false);
 
     // Act
     $response = get(route('events.production-sheet.show', [
@@ -129,7 +130,7 @@ test('production print defaults to the adopted live snapshot', function (): void
     resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $production = $fixture['production'];
     $production['cues'][0]['instruction'] = 'UNADOPTED-CUE-7Q';
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
 
     // Act
     $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
@@ -152,7 +153,7 @@ test('production print explicitly selects the unadopted plan', function (): void
     resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $production = $fixture['production'];
     $production['cues'][0]['instruction'] = 'UNADOPTED-CUE-7Q';
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
 
     // Act
     $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1, 'source' => 'plan']));

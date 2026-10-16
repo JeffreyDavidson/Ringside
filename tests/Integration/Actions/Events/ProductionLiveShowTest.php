@@ -8,6 +8,8 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\ReviewLiveShowAction;
 use App\Actions\Events\SaveEventProductionAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\EventProductionData;
+use App\Data\Events\LiveShowReviewData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
@@ -44,10 +46,10 @@ test('source adoption preserves started cue owners and removed crew attendance',
     $production = $fixture['production'];
     $production['assignments'] = [];
     $production['cues'][0]['instruction'] = 'Changed pending instructions';
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $production, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
 
     // Act
-    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], []);
+    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]));
 
     // Assert
     $content = $run->refresh()->content;
@@ -79,7 +81,7 @@ test('several production roles create one crew attendance entry and completion f
     $data = resolve(EventPackViewModel::class)->data($event);
     $input = $fixture['production'];
     $input['assignments'][] = [...$input['assignments'][0], 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051002', 'role' => 'announcer'];
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], $input, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 2, $data['card']['fingerprint']);
 
     // Act / Assert
@@ -89,7 +91,7 @@ test('several production roles create one crew attendance entry and completion f
     resolve(CompleteLiveShowAction::class)->handle($event, 3);
     $before = $run->refresh()->content;
     $input['cues'][0]['instruction'] = 'Later plan correction';
-    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], $input, false);
+    resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
     expect($run->refresh()->content)->toBe($before)
         ->and(fn () => resolve(MarkLiveAttendanceAction::class)->handle($event, 4, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true))->toThrow(LiveShowException::class);
 });

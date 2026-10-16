@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\UpdateEventPackRequest;
@@ -24,7 +25,7 @@ class EventPackController
     public function update(Event $event, UpdateEventPackRequest $request, SaveEventPackAction $save): RedirectResponse
     {
         try {
-            $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), $request->content(), $request->boolean('reviewed'));
+            $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), EventPackData::fromValidated($request->content()), $request->boolean('reviewed'));
         } catch (EventPackConflictException|RecordChangedException $exception) {
             return back()->withErrors(['pack' => $exception->getMessage()])->withInput();
         }

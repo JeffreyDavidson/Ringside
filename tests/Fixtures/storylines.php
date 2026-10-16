@@ -5,6 +5,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Storylines\RecordDevelopmentAction;
 use App\Actions\Storylines\SaveStepAction;
+use App\Data\Events\EventPackData;
 use App\Data\Storylines\DevelopmentData;
 use App\Data\Storylines\SourceData;
 use App\Data\Storylines\StepData;
@@ -34,7 +35,7 @@ function storylineSourceFixture(): array
     $segment = '1f64fc86-5bbf-4a41-952d-b85800358f00';
     $content = $pack['content'];
     $content['segments'] = [['id' => $segment, 'label' => 'Closing promo', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
-    resolve(SaveEventPackAction::class)->handle($event, 0, $pack['card']['fingerprint'], $content, false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $pack['card']['fingerprint'], EventPackData::fromValidated($content), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $pack['card']['fingerprint'])->refresh();
 
     return ['story' => $story, 'event' => $event, 'match' => $match, 'run' => $run, 'segment' => $segment];

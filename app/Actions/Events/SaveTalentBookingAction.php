@@ -18,7 +18,6 @@ use App\Queries\Events\TalentBookingContextQuery;
 use App\Services\Events\TalentBookingFingerprintService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 /** @phpstan-import-type Terms from EventTalentBooking */
 class SaveTalentBookingAction
@@ -30,7 +29,6 @@ class SaveTalentBookingAction
         return DB::transaction(function () use ($event, $personType, $personId, $version, $fingerprint, $data): EventTalentBooking {
             // Match edits and event rescheduling also lock the event before touching child records.
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('update', $event);
             $booking = $event->talentBookings()->where('person_type', $personType)->where('person_id', $personId)->lockForUpdate()->first();
             // Keep timezone and location stable while checking and recording the agreed context.
             $event->promotion()->lockForUpdate()->first();

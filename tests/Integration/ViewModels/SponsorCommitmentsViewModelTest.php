@@ -8,6 +8,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\EventSponsorCommitment;
@@ -123,7 +124,7 @@ test('setup review detects unpublished private edits changed pack text and remov
     expect($screen->details([$row])[$row->id]['instructionNeedsReview'])->toBeTrue();
     $data = app(EventPackViewModel::class)->data($world['event']);
     $data['content']['sponsor_tasks'] = [];
-    app(SaveEventPackAction::class)->handle($world['event'], 1, $data['card']['fingerprint'], $data['content'], false);
+    app(SaveEventPackAction::class)->handle($world['event'], 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $row = $screen->data($world['event'], 'pending')['rows']->getCollection()->firstOrFail();
     expect($screen->details([$row])[$row->id]['instructionNeedsReview'])->toBeTrue();
 });
