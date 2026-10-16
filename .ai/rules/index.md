@@ -40,6 +40,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Models,ValueObjects,Casts}/** | .ai/rules/models-value-objects-casts.md |
 | app/Models/** | .ai/rules/models.md |
 | app/Policies/** | .ai/rules/policies.md |
+| app/Queries/** | .ai/rules/queries.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |
 | app/{Actions/Stables/**,Services/Roster/Stables/**} | .ai/rules/roster-stables.md |
