@@ -9,7 +9,7 @@ use App\Models\Events\Event;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +24,7 @@ final readonly class DashboardViewModel
 
     private const int CHAMPION_LIMIT = 12;
 
-    public function __construct(private RosterResourceRouteResolver $routeResolver) {}
+    public function __construct(private RosterResourceRouteResolver $routeResolver, private TitleReignService $reigns) {}
 
     /**
      * @return Collection<int, Event>
@@ -97,6 +97,6 @@ final readonly class DashboardViewModel
 
     public function reignLengthInDays(TitleChampionship $championship): int
     {
-        return TitleChampionshipQuery::reignLengthInDays($championship);
+        return $this->reigns->lengthInDays($championship);
     }
 }

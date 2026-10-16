@@ -8,8 +8,8 @@ use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
-use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 class TransitionLiveItemAction
 {
     public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
-        private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing) {}
+        private readonly LiveShowSourceRequirements $source, private readonly LiveShowTimingService $timing) {}
 
     public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
     {
@@ -40,7 +40,7 @@ class TransitionLiveItemAction
                 if ($state !== LiveItemStatus::Pending || $running || (collect($content['items'])->firstWhere('state', 'pending')['key'] ?? null) !== $key) {
                     throw LiveShowException::transitionInvalid();
                 }
-                if ($this->source->changed($run->event, $run)) {
+                if ($this->source->hasChanged($run->event, $run)) {
                     throw LiveShowException::reviewRequired();
                 }
                 $this->timing->ensureShowDay($run);

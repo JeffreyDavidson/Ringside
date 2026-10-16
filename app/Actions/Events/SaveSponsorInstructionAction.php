@@ -12,7 +12,7 @@ use App\Models\Events\EventPack;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
 use App\Queries\Events\EventPackCardQuery;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorInstructionService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class SaveSponsorInstructionAction
 {
-    public function __construct(private readonly SponsorInstructionQuery $instructions, private readonly EventPackCardQuery $card,
+    public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardQuery $card,
         private readonly EventPackViewModel $pack, private readonly SaveEventPackAction $save,
         private readonly PersistSponsorCommitmentAction $persist) {}
 

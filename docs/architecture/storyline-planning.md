@@ -22,7 +22,7 @@ Actual cast labels are snapshots. Teams do not automatically claim their current
 
 ## Source authority
 
-SourceQuery reads current event, match, saved-segment UUID and live-item evidence. Match and segment links are exclusive and must belong to the chosen event and promotion. Removing/recreating a same-labelled segment cannot restore its old UUID. Deleted sources and unplaced segment anchors remain labelled historical evidence. Skipped, finished and missing live states never determine the creative outcome automatically. A changed/contradictory source needs explicit explanation at confirmation.
+StorylineSourceQuery reads current event, match, saved-segment UUID and live-item evidence. Match and segment links are exclusive and must belong to the chosen event and promotion; the planning form validates that combination before the query reads it. Removing/recreating a same-labelled segment cannot restore its old UUID. Deleted sources and unplaced segment anchors remain labelled historical evidence. Skipped, finished and missing live states never determine the creative outcome automatically. A changed/contradictory source needs explicit explanation at confirmation.
 
 Opening forms captures a current source fingerprint; mutations compare it under source locks. Event rescheduling changes the derived target but never shifts other steps. Saved event-date context exposes drift for review. Storyline screens link back to the authoritative pack/live workflows and cannot write their content, timing or results.
 

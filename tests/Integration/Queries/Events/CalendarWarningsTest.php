@@ -72,7 +72,7 @@ test('a completed past card is not retroactively flagged by calendar entries', f
     resolve(CreateAction::class)->handle($person, $day, $day, null, administrator());
 
     // Act
-    $issues = resolve(EventRosterAvailabilityQuery::class)->unavailable($event);
+    $issues = resolve(EventRosterAvailabilityQuery::class)->get($event);
     $card = resolve(EventPackCardQuery::class)->get($event);
 
     // Assert

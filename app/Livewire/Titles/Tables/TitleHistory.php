@@ -14,7 +14,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
@@ -75,7 +75,7 @@ class TitleHistory extends DataTableComponent
             Column::make(__('championships.dates_held'))
                 ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
             Column::make(__('championships.days_held'))
-                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
+                ->label(fn (TitleChampionship $row): int => resolve(TitleReignService::class)->lengthInDays($row)),
         ];
     }
 

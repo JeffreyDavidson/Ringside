@@ -6,16 +6,16 @@ namespace App\Actions\Events;
 
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\LiveShowSourceQuery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReviewLiveShowAction
 {
-    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LockLiveShowAction $lock,
+    public function __construct(private readonly LiveShowSourceRequirements $source, private readonly LockLiveShowAction $lock,
         private readonly PersistLiveShowAction $persist) {}
 
     /** @param array<string, string> $removedReasons */
@@ -27,9 +27,9 @@ class ReviewLiveShowAction
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
             EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $run = $this->lock->handle($event, $version);
-            $source = $this->source->get($run->event);
+            $source = $this->source->ensureSource($run->event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)
-                || ! $this->source->changed($run->event, $run)) {
+                || ! $this->source->hasChanged($run->event, $run)) {
                 throw RecordChangedException::changed();
             }
             $content = $run->content;

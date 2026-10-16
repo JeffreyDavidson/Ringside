@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Events;
+namespace App\Services\Events;
 
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Models\Events\Event;
@@ -14,7 +14,7 @@ use App\Models\Events\EventSponsorCommitment;
  * @phpstan-import-type Segment from EventPack
  * @phpstan-import-type SponsorTask from EventPack
  */
-class SponsorInstructionQuery
+class SponsorInstructionService
 {
     /** @return array{label: string, instruction: string, owner: ?string} */
     public function wording(EventSponsorCommitment $commitment): array

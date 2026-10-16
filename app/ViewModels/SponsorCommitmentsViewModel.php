@@ -8,8 +8,8 @@ use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
-use App\Queries\Events\SponsorCommitmentContextQuery;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorCommitmentContextService;
+use App\Services\Events\SponsorInstructionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Lang;
 
 class SponsorCommitmentsViewModel
 {
-    public function __construct(private readonly SponsorCommitmentContextQuery $context, private readonly SponsorInstructionQuery $instructions) {}
+    public function __construct(private readonly SponsorCommitmentContextService $context, private readonly SponsorInstructionService $instructions) {}
 
     /** @return LengthAwarePaginator<int, EventSponsorCommitment> */
     public function rows(Event $event, string $filter): LengthAwarePaginator

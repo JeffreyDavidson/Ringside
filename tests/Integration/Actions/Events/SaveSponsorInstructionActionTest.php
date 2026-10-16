@@ -17,9 +17,9 @@ use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\EventSponsorCommitment;
-use App\Queries\Events\LiveShowSourceQuery;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorInstructionService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Str;
 
@@ -31,7 +31,7 @@ test('reviewed setup wording enters the pack without private promise fields', fu
     $event = $promise->event;
     actingAs(administrator());
     $pack = app(EventPackViewModel::class)->data($event);
-    $preview = app(SponsorInstructionQuery::class)->preview($event, $promise, 'setup', null, null);
+    $preview = app(SponsorInstructionService::class)->preview($event, $promise, 'setup', null, null);
 
     // Act
     app(SaveSponsorInstructionAction::class)->handle($event, $promise->id, 1, 0, $pack['card']['fingerprint'], 'setup', null, null, $preview['hash']);
@@ -53,7 +53,7 @@ test('repeated announcements each enter the existing order once and require expl
     $promise = $save->handle($event, $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise,
         ['type' => SponsorCommitmentType::Announcement, 'instructionLabel' => 'Opening sponsor thanks', 'instruction' => 'Thank Harbor Hardware', 'instructionOwner' => 'Announcer']));
     $screen = app(EventPackViewModel::class);
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     $publisher = app(SaveSponsorInstructionAction::class);
     $preview = $query->preview($event, $promise, 'segment', null, null);
     $publisher->handle($event, $promise->id, 2, 0, $screen->data($event)['card']['fingerprint'], 'segment', null, null, $preview['hash']);
@@ -68,7 +68,7 @@ test('repeated announcements each enter the existing order once and require expl
     // Assert
     expect($event->pack()->firstOrFail()->content['segments'])->toHaveCount(2)
         ->and($run->refresh()->content['items'])->toHaveCount(1)
-        ->and(app(LiveShowSourceQuery::class)->changed($event, $run))->toBeTrue();
+        ->and(app(LiveShowSourceRequirements::class)->hasChanged($event, $run))->toBeTrue();
     app(ReviewLiveShowAction::class)->handle($event, 1, 2, $screen->data($event)['card']['fingerprint'], []);
     expect($run->refresh()->content['items'])->toHaveCount(2);
 });
@@ -80,7 +80,7 @@ test('started announcements retain their text and private fulfillment never writ
     $promise = $world['promise'];
     $save = app(SaveSponsorCommitmentAction::class);
     $promise = $save->handle($event, $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     $screen = app(EventPackViewModel::class);
     $publisher = app(SaveSponsorInstructionAction::class);
     $publisher->handle($event, $promise->id, 2, 0, $screen->data($event)['card']['fingerprint'], 'segment', null, null, $query->preview($event, $promise, 'segment', null, null)['hash']);
@@ -110,7 +110,7 @@ test('pack edits invalidate previews without losing setup instructions on an ord
     $event = $world['event'];
     $promise = app(SaveSponsorCommitmentAction::class)->handle($event, $world['promise']->id, 1, $world['promise']->submission_key,
         sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     $screen = app(EventPackViewModel::class);
     $publisher = app(SaveSponsorInstructionAction::class);
     $fingerprint = $screen->data($event)['card']['fingerprint'];
@@ -133,7 +133,7 @@ test('an existing pack item cannot satisfy a second promise and retraction keeps
     $event = $world['event'];
     $save = app(SaveSponsorCommitmentAction::class);
     $promise = $save->handle($event, $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     $publisher = app(SaveSponsorInstructionAction::class);
     $screen = app(EventPackViewModel::class);
     $fingerprint = $screen->data($event)['card']['fingerprint'];
@@ -158,7 +158,7 @@ test('missing wording foreign anchors and unknown destinations refuse pack publi
     if ($wording) {
         $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
     }
-    $preview = app(SponsorInstructionQuery::class)->preview($world['event'], $promise, $mode, null, $after);
+    $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, $mode, null, $after);
     $fingerprint = app(EventPackViewModel::class)->data($world['event'])['card']['fingerprint'];
 
     // Act and Assert
@@ -176,7 +176,7 @@ test('a changed card needs ordinary pack review before sponsor instructions can 
     app(SaveEventPackAction::class)->handle($world['event'], 0, $data['card']['fingerprint'], $data['content'], false);
     $world['event']->update(['name' => 'Revised Harbor Showcase']);
     $fingerprint = $screen->data($world['event'])['card']['fingerprint'];
-    $preview = app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'setup', null, null);
+    $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, 'setup', null, null);
 
     // Act and Assert
     expect(fn () => app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 1, $fingerprint, 'setup', null, null, $preview['hash']))
@@ -189,7 +189,7 @@ test('an unstarted announcement can be deliberately retracted without removing i
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     $fingerprint = app(EventPackViewModel::class)->data($world['event'])['card']['fingerprint'];
     $publisher = app(SaveSponsorInstructionAction::class);
     $publisher->handle($world['event'], $promise->id, 2, 0, $fingerprint, 'segment', null, null, $query->preview($world['event'], $promise, 'segment', null, null)['hash']);
@@ -211,7 +211,7 @@ test('sponsor publishing cannot exceed the existing fifty segment pack limit', f
     $content = $data['content'];
     $content['segments'] = array_values(array_map(fn (int $number): array => ['id' => (string) Str::uuid(), 'label' => "Segment {$number}", 'after_match_id' => null, 'planned_at' => null, 'revised_at' => null, 'minutes' => null, 'notes' => null], range(1, 50)));
     app(SaveEventPackAction::class)->handle($world['event'], 0, $data['card']['fingerprint'], $content, false);
-    $preview = app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'segment', null, null);
+    $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, 'segment', null, null);
 
     // Act and Assert
     expect(fn () => app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 1, $data['card']['fingerprint'], 'segment', null, null, $preview['hash']))
@@ -224,7 +224,7 @@ test('instruction adoption keeps the event match promise pack and run lock order
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    $preview = app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'setup', null, null);
+    $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, 'setup', null, null);
 
     // Act
     $statements = recordStatements(fn () => app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'setup', null, null, $preview['hash']));
@@ -246,7 +246,7 @@ test('sponsor adoption and production edits preserve each others saved pack sect
     $promise = EventSponsorCommitment::factory()->create(['event_id' => $event->id, 'promotion_id' => $event->promotion_id,
         'instruction_label' => 'Entrance banner', 'instruction' => 'Hang before doors', 'instruction_owner' => 'Ring crew']);
     $screen = app(EventPackViewModel::class)->data($event);
-    $preview = app(SponsorInstructionQuery::class)->preview($event, $promise, $mode, null, null);
+    $preview = app(SponsorInstructionService::class)->preview($event, $promise, $mode, null, null);
 
     // Act
     app(SaveSponsorInstructionAction::class)->handle($event, $promise->id, 1, 1, $screen['card']['fingerprint'], $mode, null, null, $preview['hash']);

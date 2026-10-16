@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Events;
 
+use App\Queries\Events\PublishedEventChangesQuery;
 use App\Queries\Events\PublishedEventQuery;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EventPosterController
 {
-    public function __invoke(string $publicId, string $slug, string $asset, PublishedEventQuery $query): StreamedResponse
+    public function __invoke(string $publicId, string $slug, string $asset, PublishedEventQuery $query, PublishedEventChangesQuery $changes): StreamedResponse
     {
-        $publication = $query->find($publicId, $slug);
-        $page = $query->page($publication);
-        abort_if($page->posterUrl === null || $publication->card === null || $publication->card['poster'] === null || ! hash_equals($publication->card['poster']['key'], $asset), 404);
+        $publication = $query->get($publicId, $slug) ?? abort(404);
+        $card = $publication->card ?? abort(404);
+        // A poster whose event schedule changed after release is no longer shown.
+        abort_if($card['poster'] === null || ! hash_equals($card['poster']['key'], $asset) || $changes->get($publication)['scheduleChanged'], 404);
 
-        return $this->image($publication->card['poster']['key']);
+        return $this->image($card['poster']['key']);
     }
 
     private function image(string $key): StreamedResponse

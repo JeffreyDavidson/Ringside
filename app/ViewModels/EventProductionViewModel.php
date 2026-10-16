@@ -7,12 +7,13 @@ namespace App\ViewModels;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
+use App\Queries\Events\EventPackSourceQuery;
 use Illuminate\Support\Facades\Gate;
 
 /**
  * @phpstan-import-type Assignment from EventPack
  * @phpstan-import-type Cue from EventPack
- * @phpstan-import-type RunningRow from EventPackViewModel
+ * @phpstan-import-type RunningRow from EventPackSourceQuery
  *
  * @phpstan-type SheetRow array{key: string, label: string, timing: array{planned_at?: ?string, revised_at?: ?string}, cues: list<Cue>}
  * @phpstan-type Sheet array{event: Event, source: string, hasLive: bool, version: int, eventName: string, eventDate: ?string, venue: ?string, timezone: string, needsReview: bool, assignments: list<Assignment>, allAssignments: list<Assignment>, rows: list<SheetRow>, revision: ?string, person: ?int, role: ?string}

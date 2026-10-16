@@ -8,19 +8,12 @@ use App\Data\Storylines\SourceData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
-class SourceQuery
+class StorylineSourceQuery
 {
     /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
     public function get(SourceData $source, int $promotionId, ?Event $loadedEvent = null, ?EventMatch $loadedMatch = null): array
     {
-        Validator::make(['event' => $source->eventId, 'match' => $source->matchId, 'segment' => $source->segmentId, 'target' => $source->targetOn], [
-            'event' => ['nullable', 'integer', 'required_with:match,segment'],
-            'match' => ['nullable', 'integer', Rule::prohibitedIf($source->segmentId !== null)],
-            'segment' => ['nullable', 'uuid', Rule::requiredIf($source->segmentId !== null)], 'target' => ['nullable', 'date_format:Y-m-d', Rule::requiredIf($source->targetOn !== null), Rule::prohibitedIf($source->eventId !== null)],
-        ])->validate();
         if ($source->eventId === null) {
             return ['context' => [], 'fingerprint' => hash('sha256', (string) $source->targetOn), 'warnings' => []];
         }

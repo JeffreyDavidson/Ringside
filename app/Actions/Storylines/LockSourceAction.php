@@ -10,11 +10,11 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Queries\Storylines\SourceQuery;
+use App\Queries\Storylines\StorylineSourceQuery;
 
 class LockSourceAction
 {
-    public function __construct(private readonly SourceQuery $query) {}
+    public function __construct(private readonly StorylineSourceQuery $query) {}
 
     /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
     public function handle(SourceData $source, int $promotionId, bool $historical = false): array

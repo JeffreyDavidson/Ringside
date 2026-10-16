@@ -15,6 +15,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use App\Queries\Events\TalentBookingContextQuery;
+use App\Services\Events\TalentBookingFingerprintService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Gate;
 /** @phpstan-import-type Terms from EventTalentBooking */
 class SaveTalentBookingAction
 {
-    public function __construct(private readonly TalentBookingContextQuery $context) {}
+    public function __construct(private readonly TalentBookingContextQuery $context, private readonly TalentBookingFingerprintService $fingerprints) {}
 
     public function handle(Event $event, string $personType, int $personId, int $version, string $fingerprint, TalentBookingData $data): EventTalentBooking
     {
@@ -43,7 +44,7 @@ class SaveTalentBookingAction
                 throw TalentBookingException::person();
             }
             $key = $personType.':'.$personId;
-            if (($booking->version ?? 0) !== $version || ! hash_equals($this->context->fingerprint($event, $key), $fingerprint)) {
+            if (($booking->version ?? 0) !== $version || ! hash_equals($this->fingerprints->fingerprint($event, $key), $fingerprint)) {
                 throw RecordChangedException::changed();
             }
             if ($booking?->status === TalentBookingStatus::Cancelled && $data->status !== TalentBookingStatus::Proposed) {
@@ -77,7 +78,7 @@ class SaveTalentBookingAction
             $booking->travel_notes = $terms['travel_notes'];
             $booking->terms_need_review = $booking->terms_need_review || ($data->status === TalentBookingStatus::Confirmed && $previousTerms !== $terms);
             if ($data->status === TalentBookingStatus::Confirmed && $data->attest) {
-                $booking->confirmed_snapshot = ['context' => $this->context->get($event), 'on_card' => $this->context->onCard($event, $key),
+                $booking->confirmed_snapshot = ['context' => $this->context->get($event), 'on_card' => $this->fingerprints->onCard($event, $key),
                     'terms' => $terms, 'confirmed_at' => now()->utc()->toIso8601String()];
                 $booking->terms_need_review = false;
             }

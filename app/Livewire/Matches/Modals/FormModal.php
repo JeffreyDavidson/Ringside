@@ -17,6 +17,8 @@ use App\Livewire\Concerns\Data\PresentsTitlesList;
 use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Support\BookableRosterSearch;
+use App\Livewire\Matches\Support\BookingHistoryLinks;
+use App\Livewire\Matches\Support\BookingHistorySelection;
 use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -30,7 +32,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 
 /**
- * @phpstan-import-type Snapshot from BookingHistoryQuery
+ * @phpstan-import-type LinkedSnapshot from BookingHistoryLinks
  *
  * @extends BaseFormModal<CreateEditForm, EventMatch>
  *
@@ -127,7 +129,7 @@ class FormModal extends BaseFormModal
             ->all();
     }
 
-    /** @return Snapshot|array{error: string} */
+    /** @return LinkedSnapshot|array{error: string} */
     #[Renderless]
     public function checkHistory(int $page = 1): array
     {
@@ -148,12 +150,16 @@ class FormModal extends BaseFormModal
         }
 
         try {
-            return resolve(BookingHistoryQuery::class)->forEvent(
-                $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
-            );
+            resolve(BookingHistorySelection::class)->validate($event, $this->form->matchType, $this->form->competitors);
         } catch (ValidationException) {
             return ['error' => __('matches.history.unavailable_selection')];
         }
+
+        $snapshot = resolve(BookingHistoryQuery::class)->get(
+            $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
+        );
+
+        return resolve(BookingHistoryLinks::class)->add($snapshot);
     }
 
     /**

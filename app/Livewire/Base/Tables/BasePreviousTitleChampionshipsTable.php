@@ -12,7 +12,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\TitleChampionship;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -71,7 +71,7 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
             DateColumn::make(__('championships.date_lost'), 'local_lost_at')
                 ->outputFormat('Y-m-d'),
             Column::make(__('championships.days_held'))
-                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
+                ->label(fn (TitleChampionship $row): int => resolve(TitleReignService::class)->lengthInDays($row)),
         ];
     }
 

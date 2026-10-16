@@ -33,6 +33,24 @@ it('checks the current selections without saving a match', function (): void {
     expect($event->matches()->count())->toBe(0);
 });
 
+it('returns the history with links to the profiles it names', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
+    [$first, $second] = Wrestler::factory()->count(2)->for($promotion, 'promotion')->create()->all();
+    $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+    $modal->set('form.matchType', MatchType::Singles);
+    $modal->set('form.competitors', [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]]);
+
+    // Act
+    $modal->call('checkHistory');
+
+    // Assert
+    $modal->assertReturned(fn (array $history): bool => $history['subjects'][0]['url'] === route('wrestlers.show', $first)
+        && $history['subjects'][1]['url'] === route('wrestlers.show', $second));
+});
+
 it('requires booking permission again when history is checked', function (): void {
     // Arrange
     actingAs(administrator());

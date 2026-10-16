@@ -63,7 +63,7 @@
     @endif
 
     @php
-        $calendarUnavailable = app(\App\Queries\Events\EventRosterAvailabilityQuery::class)->unavailable($event);
+        $calendarUnavailable = app(\App\Queries\Events\EventRosterAvailabilityQuery::class)->get($event);
     @endphp
     @if ($event->date === null)
         <p class="text-muted-foreground mb-5">{{ __('availability.not_checked') }}</p>

@@ -10,6 +10,7 @@ use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Queries\Events\EventPackSourceQuery;
 use App\Services\Events\EventProductionValidationService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -23,7 +24,7 @@ use Livewire\Component;
 /**
  * @phpstan-import-type Assignment from EventPack
  * @phpstan-import-type Cue from EventPack
- * @phpstan-import-type RunningRow from EventPackViewModel
+ * @phpstan-import-type RunningRow from EventPackSourceQuery
  */
 class Production extends Component
 {
