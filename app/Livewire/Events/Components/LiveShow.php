@@ -155,7 +155,7 @@ class LiveShow extends Component
             $start = $this->draftOperation === 'correct' ? $timing->wallTime($this->actualStart, $run->content['timezone'], $this->startOffset) : null;
             $finish = $this->actualFinish === '' ? null : $timing->wallTime($this->actualFinish, $run->content['timezone'], $this->finishOffset);
             if ($this->draftOperation === 'correct' && ($start === null || ($this->actualFinish !== '' && $finish === null))) {
-                throw LiveShowException::because('invalid_times');
+                throw LiveShowException::invalidTimes();
             }
             app(TransitionLiveItemAction::class)->handle($event, $this->draftVersion, $this->draftKey,
                 LiveItemOperation::from($this->draftOperation), $this->reason, $start, $finish);

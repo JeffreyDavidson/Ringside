@@ -24,7 +24,7 @@ class LockLiveShowAction
             throw RecordChangedException::changed();
         }
         if ($run->status === LiveShowStatus::Completed) {
-            throw LiveShowException::because('completed');
+            throw LiveShowException::completed();
         }
 
         return $run->setRelation('event', $event);

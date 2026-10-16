@@ -26,7 +26,7 @@ class CancelTournamentAction
                 throw RecordChangedException::changed();
             }
             if ($tournament->status === TournamentStatus::Completed) {
-                throw TournamentException::because('closed');
+                throw TournamentException::closed();
             }
             if ($tournament->status === TournamentStatus::Cancelled) {
                 return;

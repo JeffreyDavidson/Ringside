@@ -44,7 +44,7 @@ class MutateBudgetAction
             $prior = $budget?->revisions()->where('request_key', $requestKey)->first();
             if ($prior !== null) {
                 if (! hash_equals($prior->request_hash, $hash)) {
-                    throw BudgetException::because('key_conflict');
+                    throw BudgetException::keyConflict();
                 }
 
                 return $budget;

@@ -64,21 +64,21 @@ class AddMatchForEventAction
                     throw RecordChangedException::changed();
                 }
                 if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
-                    throw TournamentException::because('closed');
+                    throw TournamentException::closed();
                 }
                 if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->first->withdrawn || $bout->second->withdrawn || $bout->complete) {
-                    throw TournamentException::because('unresolved');
+                    throw TournamentException::unresolved();
                 }
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null) {
-                    throw TournamentException::because('already_booked');
+                    throw TournamentException::alreadyBooked();
                 }
                 $requested = $eventMatchData->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? []))->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
                 $expected = collect([$bout->first, $bout->second])->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
                 if ($requested !== $expected || $eventMatchData->matchType !== ($tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam)) {
-                    throw TournamentException::because('entrants_changed');
+                    throw TournamentException::entrantsChanged();
                 }
                 if ($eventMatchData->titles->isNotEmpty() && $node->round !== (int) log($tournament->capacity, 2)) {
-                    throw TournamentException::because('final_titles_only');
+                    throw TournamentException::finalTitlesOnly();
                 }
                 $priorBouts = $this->bracket->bouts($tournament)->only($this->bracket->ancestorNodeIds($node));
                 if ($bout->link instanceof TournamentMatchLink) {
@@ -93,7 +93,7 @@ class AddMatchForEventAction
                         continue;
                     }
                     if ($event->date === null || $priorEvent->date === null || $event->date->lessThanOrEqualTo($priorEvent->date)) {
-                        throw TournamentException::because('chronology');
+                        throw TournamentException::chronology();
                     }
                 }
                 if ($bout->link instanceof TournamentMatchLink) {

@@ -49,11 +49,11 @@ class SaveTournamentAction
                 throw RecordChangedException::changed();
             }
             if ($locked->exists && $locked->status !== TournamentStatus::Draft) {
-                throw TournamentException::because('structure_frozen');
+                throw TournamentException::structureFrozen();
             }
             $competitors = $data->kind->modelClass()::query()->where('promotion_id', $promotion->id)->whereKey($data->competitorIds)->orderBy('id')->when($data->kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->lockForUpdate()->get();
             if ($competitors->count() !== count($data->competitorIds) || $competitors->contains(fn (\App\Models\Roster\Wrestlers\Wrestler|\App\Models\Roster\Referees\Referee|TagTeam $competitor): bool => ! $this->eligibility->allows($competitor))) {
-                throw TournamentException::because('entrant_unavailable');
+                throw TournamentException::entrantUnavailable();
             }
             $locked->forceFill(['promotion_id' => $promotion->id, 'request_id' => $locked->exists ? $locked->request_id : $data->requestId, 'name' => mb_trim($data->name), 'description' => $data->description, 'entrant_kind' => $data->kind, 'capacity' => $data->capacity, 'repeat_appearances' => $data->repeatAppearances, 'status' => TournamentStatus::Draft, 'version' => $locked->exists ? $locked->version + 1 : 1])->save();
             $locked->nodes()->delete();

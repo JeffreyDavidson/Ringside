@@ -27,12 +27,12 @@ class PlanTournamentBoutAction
                 throw RecordChangedException::changed();
             }
             if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
-                throw TournamentException::because('closed');
+                throw TournamentException::closed();
             }
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
             if ($bout->link instanceof TournamentMatchLink && $bout->link->match->event_id !== $event?->id) {
-                throw TournamentException::because('already_booked');
+                throw TournamentException::alreadyBooked();
             }
             $node->forceFill(['planned_event_id' => $event?->id])->save();
             $tournament->forceFill(['version' => $tournament->version + 1])->save();

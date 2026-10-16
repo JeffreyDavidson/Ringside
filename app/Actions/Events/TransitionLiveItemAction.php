@@ -26,7 +26,7 @@ class TransitionLiveItemAction
             $content = $run->content;
             $index = array_search($key, array_column($content['items'], 'key'), true);
             if (! is_int($index)) {
-                throw LiveShowException::because('unknown_item');
+                throw LiveShowException::unknownItem();
             }
             $before = $content['items'][$index];
             $updated = $before;
@@ -34,14 +34,14 @@ class TransitionLiveItemAction
             $running = collect($content['items'])->contains('state', LiveItemStatus::Running->value);
             if (in_array($operation, [LiveItemOperation::Skip, LiveItemOperation::Correct, LiveItemOperation::Reopen], true)
                 && ($reason === null || mb_trim($reason) === '' || mb_strlen($reason) > 2000)) {
-                throw LiveShowException::because('reason_required');
+                throw LiveShowException::reasonRequired();
             }
             if ($operation === LiveItemOperation::Start) {
                 if ($state !== LiveItemStatus::Pending || $running || (collect($content['items'])->firstWhere('state', 'pending')['key'] ?? null) !== $key) {
-                    throw LiveShowException::because('transition_invalid');
+                    throw LiveShowException::transitionInvalid();
                 }
                 if ($this->source->changed($run->event, $run)) {
-                    throw LiveShowException::because('review_required');
+                    throw LiveShowException::reviewRequired();
                 }
                 $this->timing->ensureShowDay($run);
                 $updated['state'] = LiveItemStatus::Running->value;
@@ -50,14 +50,14 @@ class TransitionLiveItemAction
             }
             if ($operation === LiveItemOperation::Finish) {
                 if ($state !== LiveItemStatus::Running || $before['start'] === null || Carbon::parse($before['start'])->gt(now())) {
-                    throw LiveShowException::because('transition_invalid');
+                    throw LiveShowException::transitionInvalid();
                 }
                 $updated['state'] = LiveItemStatus::Finished->value;
                 $updated['finish'] = now()->utc()->toIso8601String();
             }
             if ($operation === LiveItemOperation::Skip) {
                 if ($state !== LiveItemStatus::Pending) {
-                    throw LiveShowException::because('transition_invalid');
+                    throw LiveShowException::transitionInvalid();
                 }
                 $this->timing->ensureShowDay($run);
                 $updated['state'] = LiveItemStatus::Skipped->value;
@@ -67,12 +67,12 @@ class TransitionLiveItemAction
                     || $start->gt(now()) || ($state === LiveItemStatus::Finished && ! $finish instanceof Carbon)
                     || ($state === LiveItemStatus::Running && $finish instanceof Carbon)
                     || ($finish instanceof Carbon && ($finish->lt($start) || $finish->gt(now())))) {
-                    throw LiveShowException::because('invalid_times');
+                    throw LiveShowException::invalidTimes();
                 }
                 foreach ($content['items'] as $position => $item) {
                     if (($position < $index && $item['finish'] !== null && Carbon::parse($item['finish'])->gt($start))
                         || ($position > $index && $item['start'] !== null && (! $finish instanceof Carbon || Carbon::parse($item['start'])->lt($finish)))) {
-                        throw LiveShowException::because('invalid_times');
+                        throw LiveShowException::invalidTimes();
                     }
                 }
                 $updated['start'] = $start->copy()->utc()->toIso8601String();
@@ -81,7 +81,7 @@ class TransitionLiveItemAction
             if ($operation === LiveItemOperation::Reopen) {
                 if (! in_array($state, [LiveItemStatus::Finished, LiveItemStatus::Skipped], true) || $running
                     || collect(array_slice($content['items'], $index + 1))->contains(fn (array $item): bool => $item['start'] !== null)) {
-                    throw LiveShowException::because('transition_invalid');
+                    throw LiveShowException::transitionInvalid();
                 }
                 $updated['state'] = $state === LiveItemStatus::Finished ? LiveItemStatus::Running->value : LiveItemStatus::Pending->value;
                 $updated['finish'] = null;
