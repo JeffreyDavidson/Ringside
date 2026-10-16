@@ -48,18 +48,6 @@ class EventLiveRun extends Model
             'content' => 'array', 'prepared_at' => 'datetime', 'completed_at' => 'datetime'];
     }
 
-    /**
-     * Whether the show must be reviewed before it runs on: its source is gone, or the saved pack or the card
-     * behind the run has changed since it was prepared.
-     *
-     * @param  array{pack: EventPack, fingerprint: string}|null  $source  the current source, null when none can be built
-     */
-    public function needsReview(?array $source): bool
-    {
-        return $source === null || $source['pack']->version !== $this->pack_version
-            || ! hash_equals($this->card_fingerprint, $source['fingerprint']);
-    }
-
     /** @return BelongsTo<Event, $this> */
     public function event(): BelongsTo
     {

@@ -8,6 +8,7 @@ use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Lang;
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing) {}
+    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison) {}
 
     /**
      * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant
@@ -50,7 +51,7 @@ class LiveShowViewModel
                 $source['content'] = $this->withoutProduction($source['content']);
             }
         }
-        $needsReview = $run !== null && ! $complete && $run->needsReview($source);
+        $needsReview = $run !== null && ! $complete && ($source === null || $this->comparison->hasMovedOn($run, $source['pack'], $source['fingerprint']));
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
         $zone = $run->content['timezone'] ?? 'UTC';

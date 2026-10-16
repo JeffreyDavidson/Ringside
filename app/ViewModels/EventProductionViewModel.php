@@ -10,6 +10,7 @@ use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Queries\Events\EventPackSourceQuery;
 use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\LiveRunSourceService;
 
 /**
  * @phpstan-import-type Assignment from EventPack
@@ -21,7 +22,7 @@ use App\Queries\Events\LiveShowSourceQuery;
  */
 class EventProductionViewModel
 {
-    public function __construct(private readonly EventPackSourceQuery $pack, private readonly LiveShowSourceQuery $live) {}
+    public function __construct(private readonly EventPackSourceQuery $pack, private readonly LiveShowSourceQuery $live, private readonly LiveRunSourceService $comparison) {}
 
     /**
      * The production sheet of an event the caller has already authorized for viewProduction.
@@ -43,7 +44,9 @@ class EventProductionViewModel
             $zone = $run->content['timezone'];
             $revision = $run->content['revision'];
             $version = $run->pack_version;
-            $review = $run->status !== LiveShowStatus::Completed && $run->needsReview($this->live->get($event, $data));
+            $liveSource = $this->live->get($event, $data);
+            $review = $run->status !== LiveShowStatus::Completed
+                && ($liveSource === null || $this->comparison->hasMovedOn($run, $liveSource['pack'], $liveSource['fingerprint']));
         } else {
             $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
             $cues = $data['content']['production']['cues'] ?? [];
