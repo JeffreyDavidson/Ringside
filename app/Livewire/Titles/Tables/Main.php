@@ -16,7 +16,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Queries\Titles\CurrentChampionQuery;
 use Illuminate\Database\Eloquent\Collection;
 
 /** @extends BaseTable<Title> */
@@ -72,7 +72,7 @@ class Main extends BaseTable
                 ->label(fn (Title $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             Column::make(__('titles.current_champion'), 'champion_name')
-                ->label(fn (Title $row) => TitleChampionshipQuery::currentChampion($row)->name ?? 'Vacant'),
+                ->label(fn (Title $row) => resolve(CurrentChampionQuery::class)->get($row)->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
     }

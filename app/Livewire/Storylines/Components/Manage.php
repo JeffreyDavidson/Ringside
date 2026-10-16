@@ -27,8 +27,8 @@ use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineStep;
-use App\Queries\Storylines\CreativeRosterSearch;
-use App\Queries\Storylines\SourceQuery;
+use App\Queries\Storylines\CreativeRosterQuery;
+use App\Queries\Storylines\StorylineSourceQuery;
 use App\ViewModels\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -200,7 +200,7 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('update', $story);
-        $this->sourceFingerprint = app(SourceQuery::class)->get($this->form->source(null), $story->promotion_id)['fingerprint'];
+        $this->sourceFingerprint = app(StorylineSourceQuery::class)->get($this->form->source(null), $story->promotion_id)['fingerprint'];
     }
 
     public function reload(): void
@@ -227,7 +227,7 @@ class Manage extends Component
         $story = $this->story();
         Gate::authorize('update', $story);
 
-        return app(CreativeRosterSearch::class)->search(BookableRosterKind::from($kind), mb_substr($term, 0, 160), $story->promotion_id);
+        return app(CreativeRosterQuery::class)->get(BookableRosterKind::from($kind), mb_substr($term, 0, 160), $story->promotion_id);
     }
 
     public function save(): void
@@ -270,12 +270,12 @@ class Manage extends Component
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);
         }
-        $source = app(SourceQuery::class)->get($this->form->source(null), $story->promotion_id);
+        $source = app(StorylineSourceQuery::class)->get($this->form->source(null), $story->promotion_id);
 
         $steps = $story->steps()->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'match.competitors', 'match.titles'])->orderBy('sequence')->orderBy('id')->paginate(15, pageName: 'stepsPage');
         $sourceStates = [];
         foreach ($steps as $step) {
-            $sourceStates[$step->id] = app(SourceQuery::class)->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match);
+            $sourceStates[$step->id] = app(StorylineSourceQuery::class)->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match);
         }
 
         return view('livewire.storylines.components.manage', [

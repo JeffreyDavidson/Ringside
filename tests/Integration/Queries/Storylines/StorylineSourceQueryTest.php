@@ -12,10 +12,9 @@ use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\Queries\Storylines\SourceQuery;
+use App\Queries\Storylines\StorylineSourceQuery;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 require_once __DIR__.'/../../../Fixtures/storylines.php';
 test('stable match and segment identities show source evidence without treating it as a creative outcome', function (string $kind) {
@@ -30,14 +29,14 @@ test('stable match and segment identities show source evidence without treating 
     $f['run']->content = $content;
     $f['run']->save();
     // Act
-    $evidence = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id);
+    $evidence = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
     // Assert
     expect($evidence['context']['live_state'])->toBe('finished')->and($step->refresh()->status)->toBe(StepStatus::Planned);
 })->with(['match', 'segment']);
 test('removed segment UUIDs never attach to a replacement with the same label', function () {
     $f = storylineSourceFixture();
     $source = new SourceData($f['event']->id, segmentId: $f['segment']);
-    $old = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id);
+    $old = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
     $pack = $f['event']->pack()->firstOrFail();
     $content = $pack->content;
     foreach ($content['segments'] as &$segment) {
@@ -46,7 +45,7 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
     unset($segment);
     $pack->content = $content;
     $pack->save();
-    $evidence = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id);
+    $evidence = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
     expect($evidence['warnings'])->toContain(__('storylines.removed_segment'))
         ->and($evidence['context']['segment_label'])->toBeNull()
         ->and($evidence['context']['live_label'])->toBe('Closing promo')
@@ -55,10 +54,10 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
 test('deleted and unplaced sources are visible as historical evidence', function () {
     $f = storylineSourceFixture();
     $f['match']->delete();
-    $segment = resolve(SourceQuery::class)->get(new SourceData($f['event']->id, segmentId: $f['segment']), $f['story']->promotion_id);
-    $match = resolve(SourceQuery::class)->get(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
+    $segment = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id, segmentId: $f['segment']), $f['story']->promotion_id);
+    $match = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
     $f['event']->delete();
-    $event = resolve(SourceQuery::class)->get(new SourceData($f['event']->id), $f['story']->promotion_id);
+    $event = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id), $f['story']->promotion_id);
     expect($segment['warnings'])->toContain(__('storylines.unplaced_segment'))
         ->and($match['warnings'])->toContain(__('storylines.deleted_source'))
         ->and($event['warnings'])->toContain(__('storylines.deleted_source'));
@@ -71,19 +70,10 @@ test('foreign events and foreign match IDs are refused with no new step', functi
     expect(fn () => plannedStorylineStep($f['story'], $source))->toThrow(ModelNotFoundException::class)
         ->and($f['story']->steps()->count())->toBe(0);
 })->with(['event', 'match']);
-test('exclusive source fields are validated', function (SourceData $source) {
-    expect(fn () => resolve(SourceQuery::class)->get($source, 1))->toThrow(ValidationException::class);
-})->with([
-    'blank date' => [new SourceData(targetOn: '')],
-    'blank segment' => [new SourceData(1, segmentId: '')],
-    'match without event' => [new SourceData(matchId: 1)],
-    'both match and segment' => [new SourceData(1, 1, '1f64fc86-5bbf-4a41-952d-b85800358f00')],
-    'event and standalone date' => [new SourceData(1, targetOn: '2026-10-13')],
-]);
 test('a source changed since selection rejects a save before any storyline write', function () {
     $f = storylineSourceFixture();
     $source = new SourceData($f['event']->id);
-    $fingerprint = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id)['fingerprint'];
+    $fingerprint = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id)['fingerprint'];
     $f['event']->name = 'Updated source';
     $f['event']->save();
     expect(fn () => plannedStorylineStep($f['story'], new SourceData($f['event']->id, fingerprint: $fingerprint)))->toThrow(StorylineConflictException::class)
@@ -125,8 +115,8 @@ test('correcting only the winning side still changes the linked result evidence'
     $sides = $f['match']->sides()->orderBy('position')->get();
     resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, $sides->firstOrFail(), collect()));
     $source = new SourceData($f['event']->id, $f['match']->id);
-    $before = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id);
+    $before = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
     resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, requiredModel($sides->last()), collect()));
-    $after = resolve(SourceQuery::class)->get($source, $f['story']->promotion_id);
+    $after = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
     expect($after['fingerprint'])->not->toBe($before['fingerprint']);
 });

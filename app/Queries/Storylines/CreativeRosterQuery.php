@@ -9,10 +9,10 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
-class CreativeRosterSearch
+class CreativeRosterQuery
 {
     /** @return list<array{id: int|string, name: string}> */
-    public function search(BookableRosterKind $kind, string $term, int $promotionId): array
+    public function get(BookableRosterKind $kind, string $term, int $promotionId): array
     {
         $query = match ($kind) {
             BookableRosterKind::Wrestlers => Wrestler::query(),

@@ -9,7 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
-use App\Queries\Roster\StableManagerHistoryQuery;
+use App\Queries\Roster\PreviousManagersQuery;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousManagersTable<Manager> */
@@ -28,7 +28,7 @@ class PreviousManagers extends BasePreviousManagersTable
     {
         $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
-        return StableManagerHistoryQuery::previousManagersForStableId($stableId)->withEmploymentStatusState();
+        return resolve(PreviousManagersQuery::class)->get($stableId)->withEmploymentStatusState();
     }
 
     /**
