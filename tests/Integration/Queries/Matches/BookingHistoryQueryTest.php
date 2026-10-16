@@ -13,7 +13,6 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Matches\BookingHistoryQuery;
-use Illuminate\Validation\ValidationException;
 
 it('shows direct wins and incomplete bookings without inferring a result', function (): void {
     // Arrange
@@ -26,7 +25,7 @@ it('shows direct wins and incomplete bookings without inferring a result', funct
     EventMatch::factory()->for($past)->withCompetitors([$first, $second])->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -50,7 +49,7 @@ it('counts supported finishes and swapped sides from the stored outcome', functi
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -76,7 +75,7 @@ it('keeps wrestler and team identities separate even when their numeric ids matc
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Gauntlet, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Gauntlet, [
         ['wrestlers' => [$wrestler->id]], ['tag_teams' => [$team->id]],
     ]);
 
@@ -97,7 +96,7 @@ it('limits each preview independently while calculating totals over the full rec
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -126,7 +125,7 @@ it('excludes later and deleted source records and keeps the local 90-day boundar
     EventMatch::factory()->for($deletedEvent)->withCompetitors([$first, $second])->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -145,7 +144,7 @@ it('keeps a finish on an incomplete match structure out of completed history', f
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -159,26 +158,10 @@ it('reports an unowned event as unavailable rather than empty history', function
     $event = Event::factory()->unscheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, []);
+    $history = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, []);
 
     // Assert
     expect($history['available'])->toBeFalse()->and($history['direct'])->toBeNull();
-});
-
-it('rejects foreign or nonexistent identities without returning their names', function (): void {
-    // Arrange
-    $promotion = Promotion::factory()->create();
-    $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
-    $own = Wrestler::factory()->for($promotion, 'promotion')->create();
-    $foreign = Wrestler::factory()->for(Promotion::factory(), 'promotion')->create();
-
-    // Act
-    $read = fn (): array => resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, [
-        ['wrestlers' => [$own->id]], ['wrestlers' => [$foreign->id]],
-    ]);
-
-    // Assert
-    expect($read)->toThrow(ValidationException::class);
 });
 
 it('keeps named-team results with the team after a membership changes', function (): void {
@@ -194,10 +177,10 @@ it('keeps named-team results with the team after a membership changes', function
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $teamHistory = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::TagTeam, [
+    $teamHistory = resolve(BookingHistoryQuery::class)->get($target, MatchType::TagTeam, [
         ['tag_teams' => [$first->id]], ['tag_teams' => [$second->id]],
     ]);
-    $individualHistory = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $individualHistory = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$former->id]], ['wrestlers' => [$current->id]],
     ]);
 
@@ -218,7 +201,7 @@ it('paginates opposing pairs from large individual-entrant formats without turni
     $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::BattleRoyal, [['wrestlers' => $wrestlers->modelKeys()]], page: 2);
+    $history = resolve(BookingHistoryQuery::class)->get($event, MatchType::BattleRoyal, [['wrestlers' => $wrestlers->modelKeys()]], page: 2);
 
     // Assert
     expect($history['direct'])->toBeNull()->and($history['totalNotices'])->toBe(6)
@@ -235,7 +218,7 @@ it('never counts former opponents as a repeated opposing pairing when they are s
     $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::TagTeam, [
+    $history = resolve(BookingHistoryQuery::class)->get($event, MatchType::TagTeam, [
         ['wrestlers' => [$first->id, $partner->id]], ['wrestlers' => [$other->id, $otherPartner->id]],
     ]);
 
@@ -252,20 +235,20 @@ it('uses a bounded number of relation queries as history grows', function (): vo
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
     $target->load('promotion');
     $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
-    $one = recordStatements(fn (): array => resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, $selection));
+    $one = recordStatements(fn (): array => resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, $selection));
     foreach (range(1, 25) as $number) {
         EventMatch::factory()->for($past)->withCompetitors([$first, $second])->create();
     }
 
     // Act
-    $many = recordStatements(fn (): array => resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, $selection));
+    $many = recordStatements(fn (): array => resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, $selection));
 
     // Assert
     expect($many)->toHaveSameSize($one);
 
 });
 
-it('retains deleted competitors without offering dead profile links', function (): void {
+it('retains deleted competitors and marks them deleted', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
     [$first, $second] = Wrestler::factory()->count(2)->for($promotion, 'promotion')->create()->all();
@@ -276,35 +259,26 @@ it('retains deleted competitors without offering dead profile links', function (
     $first->delete();
 
     // Act
-    $oneDeleted = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, $selection);
+    $oneDeleted = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, $selection);
 
     // Assert
-    expect($oneDeleted['subjects'][0]['url'])->toBeNull()
-        ->and($oneDeleted['subjects'][0]['deleted'])->toBeTrue()
-        ->and($oneDeleted['direct'])->toMatchArray(['neutral' => 1, 'url' => route('wrestlers.show', [$second, 'opponent' => 'wrestler:'.$first->id])]);
+    expect($oneDeleted['subjects'][0])->toMatchArray(['deleted' => true, 'type' => 'wrestler', 'id' => $first->id])
+        ->and($oneDeleted['direct'])->toMatchArray(['neutral' => 1, 'pair' => [
+            'first' => ['type' => 'wrestler', 'id' => $first->id, 'deleted' => true],
+            'second' => ['type' => 'wrestler', 'id' => $second->id, 'deleted' => false],
+        ]]);
 
     // Act
     $second->delete();
-    $bothDeleted = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, $selection);
+    $bothDeleted = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, $selection);
 
     // Assert
-    expect($bothDeleted['direct'])->toMatchArray(['neutral' => 1, 'url' => null])
-        ->and($bothDeleted['notices'][0]['url'])->toBeNull();
+    expect(data_get($bothDeleted, 'direct.pair'))->toMatchArray([
+        'first' => ['type' => 'wrestler', 'id' => $first->id, 'deleted' => true],
+        'second' => ['type' => 'wrestler', 'id' => $second->id, 'deleted' => true],
+    ])
+        ->and($bothDeleted['notices'][0]['pair']['second']['deleted'])->toBeTrue();
 });
-
-it('rejects prohibited identity types and undersized individual-entrant selections', function (MatchType $type, array $selection): void {
-    // Arrange
-    $event = Event::factory()->for(Promotion::factory(), 'promotion')->scheduled()->create();
-
-    // Act
-    $read = fn (): array => resolve(BookingHistoryQuery::class)->forEvent($event, $type, $selection);
-
-    // Assert
-    expect($read)->toThrow(ValidationException::class);
-})->with([
-    'team in singles' => [MatchType::Singles, [['tag_teams' => [1]], ['wrestlers' => [1]]]],
-    'too few rumble entrants' => [MatchType::RoyalRumble, [['wrestlers' => [1, 2, 3]]]],
-]);
 
 it('redacts a legacy foreign competitor and does not treat its result as complete', function (): void {
     // Arrange
@@ -316,7 +290,7 @@ it('redacts a legacy foreign competitor and does not treat its result as complet
     $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
@@ -335,13 +309,13 @@ it('reflects a corrected result on the next check without copying historical rec
     $match->update(['match_finish' => MatchFinish::Pinfall, 'winning_side_id' => $match->sides()->firstOrFail()->id]);
     $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
     $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
-    $before = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, $selection);
+    $before = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, $selection);
     resolve(RecordResultAction::class)->handle($match, new MatchResultData(
         MatchFinish::TimeLimitDraw, null, collect(),
     ));
 
     // Act
-    $after = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, $selection);
+    $after = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, $selection);
 
     // Assert
     expect($before['direct'])->toMatchArray(['firstWins' => 1, 'draws' => 0])
@@ -360,13 +334,13 @@ it('links the latest dated meeting rather than a later-created backfill', functi
     $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($event, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($event, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 
     // Assert
     expect($history['notices'][0])->toMatchArray([
-        'event' => 'Latest Dated Meeting', 'sourceUrl' => route('events.show', $latest), 'finish' => 'No Decision', 'recorded' => 2,
+        'event' => 'Latest Dated Meeting', 'eventId' => $latest->id, 'finish' => 'No Decision', 'recorded' => 2,
     ]);
 });
 
@@ -387,7 +361,7 @@ it('keeps malformed winner metadata out of the known head-to-head record', funct
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
-    $history = resolve(BookingHistoryQuery::class)->forEvent($target, MatchType::Singles, [
+    $history = resolve(BookingHistoryQuery::class)->get($target, MatchType::Singles, [
         ['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]],
     ]);
 

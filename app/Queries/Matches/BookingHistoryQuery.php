@@ -18,17 +18,16 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use stdClass;
 
 /**
  * Current retained source records, filtered by event time; this is not a reconstruction of past database revisions.
  *
- * @phpstan-type HistoryRow array{date: string, event: string, url: string, number: int, type: string, finish: string, recorded: bool, winnerSide: ?int, sides: list<array{name: string, side: int, deleted: bool}>}
- * @phpstan-type Subject array{key: string, name: string, url: ?string, deleted: bool, latestRecordedDate: ?string, recent: list<HistoryRow>}
- * @phpstan-type DirectRecord array{first: string, second: string, url: ?string, firstWins: int, secondWins: int, draws: int, neutral: int, incomplete: int, recorded: int}
- * @phpstan-type Notice array{first: string, second: string, url: ?string, recorded: int, incomplete: int, latestDate: string, event: string, number: int, sourceUrl: string, type: string, finish: string}
+ * @phpstan-type HistoryRow array{date: string, event: string, eventId: int, number: int, type: string, finish: string, recorded: bool, winnerSide: ?int, sides: list<array{name: string, side: int, deleted: bool}>}
+ * @phpstan-type Subject array{key: string, type: string, id: int, name: string, deleted: bool, latestRecordedDate: ?string, recent: list<HistoryRow>}
+ * @phpstan-type Pair array{type: string, id: int, deleted: bool}
+ * @phpstan-type DirectRecord array{first: string, second: string, pair: array{first: Pair, second: Pair}, firstWins: int, secondWins: int, draws: int, neutral: int, incomplete: int, recorded: int}
+ * @phpstan-type Notice array{first: string, second: string, pair: array{first: Pair, second: Pair}, recorded: int, incomplete: int, latestDate: string, event: string, eventId: int, number: int, type: string, finish: string}
  * @phpstan-type Snapshot array{available: bool, reference: string, from: string, subjects: list<Subject>, direct: ?DirectRecord, notices: list<Notice>, totalNotices: int, page: int, pages: int}
  */
 final class BookingHistoryQuery
@@ -38,10 +37,13 @@ final class BookingHistoryQuery
     public const int PREVIEW_ROWS = 5;
 
     /**
+     * The selection must already be validated (see BookingHistorySelection): every side has competitors the match type allows,
+     * and each belongs to the event's promotion.
+     *
      * @param  array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}>  $sides
      * @return Snapshot
      */
-    public function forEvent(Event $event, MatchType $type, array $sides, ?int $excludedMatchId = null, int $page = 1): array
+    public function get(Event $event, MatchType $type, array $sides, ?int $excludedMatchId = null, int $page = 1): array
     {
         $event->loadMissing('promotion');
         $checkedAt = now();
@@ -77,7 +79,7 @@ final class BookingHistoryQuery
 
         $snapshot['available'] = true;
         $snapshot['subjects'] = array_values($subjects->map(fn (Wrestler|TagTeam $subject): array => [
-            'key' => $this->key($subject), 'name' => $subject->name, 'url' => $this->profileUrl($subject), 'deleted' => $subject->trashed(),
+            'key' => $this->key($subject), 'type' => $subject->getMorphClass(), 'id' => $subject->id, 'name' => $subject->name, 'deleted' => $subject->trashed(),
             'latestRecordedDate' => isset($latest[$this->key($subject)])
                 ? Carbon::parse($latest[$this->key($subject)])->setTimezone(Promotion::zoneOf($event->promotion))->toDateString()
                 : null,
@@ -100,36 +102,14 @@ final class BookingHistoryQuery
      */
     private function selection(MatchType $type, array $sides): array
     {
-        Validator::make(['competitors' => $sides], [
-            'competitors' => ['required', 'array', 'list', 'size:'.($type->usesIndividualCompetitorSides() ? 1 : $type->numberOfSides())],
-            'competitors.*' => ['required', 'array:wrestlers,tag_teams'],
-            'competitors.*.wrestlers' => ['sometimes', 'array', 'list'],
-            'competitors.*.tag_teams' => ['sometimes', 'array', 'list'],
-            'competitors.*.wrestlers.*' => ['integer', 'min:1', 'distinct'],
-            'competitors.*.tag_teams.*' => ['integer', 'min:1', 'distinct'],
-        ])->validate();
         $selection = [];
 
         foreach ($sides as $side => $entries) {
-            $before = count($selection);
-
             foreach (['wrestlers' => (new Wrestler)->getMorphClass(), 'tag_teams' => (new TagTeam)->getMorphClass()] as $kind => $alias) {
                 foreach ($entries[$kind] ?? [] as $id) {
-                    if (! in_array($alias, $type->getAllowedCompetitorTypes(), true)) {
-                        throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
-                    }
-
                     $selection[] = ['type' => $alias, 'id' => (int) $id, 'side' => $type->usesIndividualCompetitorSides() ? count($selection) : $side];
                 }
             }
-
-            if (count($selection) === $before) {
-                throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
-            }
-        }
-
-        if (count($selection) < $type->getMinimumCompetitors()) {
-            throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
         }
 
         return $selection;
@@ -150,15 +130,10 @@ final class BookingHistoryQuery
         // Eloquent merge keys by numeric id, which would collapse a wrestler and team with the same id.
         $keyed = collect([...$wrestlers, ...$teams])->keyBy(fn (Wrestler|TagTeam $subject): string => $this->key($subject));
 
-        return new Collection(array_map(function (array $entry) use ($keyed): Wrestler|TagTeam {
-            $subject = $keyed->get($entry['type'].':'.$entry['id']);
-
-            if ($subject === null) {
-                throw ValidationException::withMessages(['history' => __('matches.history.unavailable_selection')]);
-            }
-
-            return $subject;
-        }, $selection));
+        return new Collection(array_map(
+            fn (array $entry): Wrestler|TagTeam => $keyed->firstOrFail(fn (Wrestler|TagTeam $subject, string $key): bool => $key === $entry['type'].':'.$entry['id']),
+            $selection,
+        ));
     }
 
     /**
@@ -201,7 +176,7 @@ final class BookingHistoryQuery
             ->selectRaw('COUNT(CASE WHEN history.history_recorded = 1 AND history.match_finish = ? THEN 1 END) AS neutral', [MatchFinish::NoDecision->value])->sole();
 
         return [
-            'first' => $first->name, 'second' => $second->name, 'url' => $this->opponentUrl($first, $second),
+            'first' => $first->name, 'second' => $second->name, 'pair' => $this->pair($first, $second),
             'recorded' => (int) $row->recorded, 'incomplete' => (int) $row->incomplete,
             'firstWins' => (int) $row->first_wins, 'secondWins' => (int) $row->second_wins,
             'draws' => (int) $row->draws, 'neutral' => (int) $row->neutral,
@@ -267,9 +242,9 @@ final class BookingHistoryQuery
                 $finish = is_string($rawFinish) ? MatchFinish::tryFrom($rawFinish) : null;
 
                 return ['first' => $first->name, 'second' => $second->name,
-                    'event' => $source->event->name, 'number' => $source->match_number, 'sourceUrl' => route('events.show', $source->event),
+                    'event' => $source->event->name, 'eventId' => $source->event->id, 'number' => $source->match_number,
                     'type' => $source->match_type->label(),
-                    'finish' => $source->getAttribute('history_recorded') && $finish !== null ? $finish->label() : __($rawFinish === null ? 'matches.history.result_missing' : 'matches.history.result_incomplete'), 'url' => $this->opponentUrl($first, $second),
+                    'finish' => $source->getAttribute('history_recorded') && $finish !== null ? $finish->label() : __($rawFinish === null ? 'matches.history.result_missing' : 'matches.history.result_incomplete'), 'pair' => $this->pair($first, $second),
                     'recorded' => (int) $row->recorded, 'incomplete' => (int) $row->incomplete,
                     'latestDate' => Carbon::parse($row->latest_date)->setTimezone(Promotion::zoneOf($subjects->firstOrFail()->promotion))->toDateString()];
             })->all()),
@@ -304,7 +279,7 @@ final class BookingHistoryQuery
 
         return [
             'event' => $match->event->name, 'date' => Promotion::toLocalTime($match->event->promotion, Carbon::parse($match->event->date))->toDateString(),
-            'url' => route('events.show', $match->event), 'number' => $match->match_number, 'type' => $match->match_type->label(),
+            'eventId' => $match->event->id, 'number' => $match->match_number, 'type' => $match->match_type->label(),
             'finish' => $finish?->label() ?? __('matches.history.result_missing'),
             'winnerSide' => $winner?->side->position,
             'recorded' => (bool) $match->getAttribute('history_recorded'),
@@ -329,21 +304,12 @@ final class BookingHistoryQuery
         return $subject->getMorphClass().':'.$subject->id;
     }
 
-    private function profileUrl(Wrestler|TagTeam $subject): ?string
+    /** @return array{first: Pair, second: Pair} */
+    private function pair(Wrestler|TagTeam $first, Wrestler|TagTeam $second): array
     {
-        return $subject->trashed() ? null : route($subject instanceof Wrestler ? 'wrestlers.show' : 'tag-teams.show', $subject);
-    }
-
-    private function opponentUrl(Wrestler|TagTeam $subject, Wrestler|TagTeam $opponent): ?string
-    {
-        if ($subject->trashed() && $opponent->trashed()) {
-            return null;
-        }
-
-        if ($subject->trashed()) {
-            return route($opponent instanceof Wrestler ? 'wrestlers.show' : 'tag-teams.show', [$opponent, 'opponent' => $this->key($subject)]);
-        }
-
-        return route($subject instanceof Wrestler ? 'wrestlers.show' : 'tag-teams.show', [$subject, 'opponent' => $this->key($opponent)]);
+        return [
+            'first' => ['type' => $first->getMorphClass(), 'id' => $first->id, 'deleted' => $first->trashed()],
+            'second' => ['type' => $second->getMorphClass(), 'id' => $second->id, 'deleted' => $second->trashed()],
+        ];
     }
 }
