@@ -35,3 +35,47 @@ test('a promotion owner cannot create an unowned or foreign story', function () 
     $page->set('promotionId', $foreign->id)->call('save')->assertForbidden();
     expect(Storyline::query()->count())->toBe(0);
 });
+
+test('a story needs a name and a premise within their limits', function (array $fields, string $error) {
+    // Arrange
+    actingAs(administrator());
+    $promotion = Promotion::factory()->create();
+    $page = livewire(Create::class, ['promotionId' => $promotion->id, 'title' => 'The betrayal', 'premise' => 'Partners become rivals.']);
+    foreach ($fields as $field => $value) {
+        $page->set($field, $value);
+    }
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors([$error]);
+    expect(Storyline::query()->count())->toBe(0);
+})->with([
+    'no name' => [['title' => ''], 'title'],
+    'overlong name' => [['title' => str_repeat('a', 161)], 'title'],
+    'no premise' => [['premise' => ''], 'premise'],
+    'overlong premise' => [['premise' => str_repeat('a', 4001)], 'premise'],
+    'overlong payoff' => [['payoff' => str_repeat('a', 4001)], 'payoff'],
+]);
+
+test('an owner downgraded while the form is open creates nothing', function () {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $page = livewire(Create::class, ['title' => 'Private', 'premise' => 'Private premise.']);
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member->value]);
+    $context->forgetMemberships();
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertForbidden();
+    expect(Storyline::query()->count())->toBe(0);
+});

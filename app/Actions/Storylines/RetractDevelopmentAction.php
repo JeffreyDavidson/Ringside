@@ -8,8 +8,6 @@ use App\Enums\Storylines\StepStatus;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Storylines\Storyline;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 
 class RetractDevelopmentAction
 {
@@ -17,8 +15,6 @@ class RetractDevelopmentAction
 
     public function handle(Storyline $storyline, int $version, int $developmentId, string $reason, bool $reopenStep): void
     {
-        Gate::authorize('update', $storyline);
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($storyline, $version, $developmentId, $reason, $reopenStep): void {
             $story = $this->lock->handle($storyline, $version);
             $development = $story->developments()->findOrFail($developmentId);

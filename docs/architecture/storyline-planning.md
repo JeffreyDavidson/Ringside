@@ -6,7 +6,7 @@ Storylines connect private creative plans and confirmed developments across show
 
 Every story, participation, step, development and revision has a required promotion owner. Storyline uses the existing promotion scope and an explicit policy allowing active Owners and Managers to read and write. Members have no creative read access. PromotionGate falls through to this policy before its ordinary promotion-content role handling. The platform administrator exception and foreign-promotion guard remain unchanged.
 
-Routes, each component render, roster/source searches and save Actions re-authorize. Child operations resolve through the authorized story. Event pages query related story titles only after the creative read check; pack printing, live JSON, event/match previews and public surfaces receive no story fields.
+Routes, each component render, roster/source searches and every `Manage`/`Create` save authorize `view`, `update` or `create` before an Action runs; the Actions do not check permissions or validate input. The components validate each form field (lengths, dates, reason requirements) before building the Data object. Child operations resolve through the authorized story. Event pages query related story titles only after the creative read check; pack printing, live JSON, event/match previews and public surfaces receive no story fields.
 
 ## State and persistence
 
@@ -28,7 +28,7 @@ Opening forms captures a current source fingerprint; mutations compare it under 
 
 ## Concurrency and history
 
-Source-linked Actions lock the event, all its matches in ID order, pack and live run before the story. Other mutations lock the story. Under that lock Actions re-read the expected story version, authorize again and check state. Stale/repeated transitions change nothing. New stories serialize on their promotion and use a unique form submission UUID; steps and accounts also have unique submission identities.
+Source-linked Actions lock the event, all its matches in ID order, pack and live run before the story. Other mutations lock the story. Under that lock Actions re-read the expected story version and check state; they do not authorize again, because the calling component already did. Stale/repeated transitions change nothing. New stories serialize on their promotion and use a unique form submission UUID; steps and accounts also have unique submission identities.
 
 RecordRevisionAction writes private before/after data with actor, timestamp and reason in the mutation transaction, then increments the story version. StorylineRevision is separate from general activity-log cleanup, so creative history is durable. Source FKs restrict hard deletion; ordinary source soft deletion retains links. There are no outward events/listeners, emails or scheduled creative transitions.
 

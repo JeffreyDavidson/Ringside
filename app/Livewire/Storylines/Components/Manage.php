@@ -34,6 +34,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -237,7 +238,8 @@ class Manage extends Component
         if ($this->needsReload) {
             return;
         }
-        $this->validate(['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer']]);
+        $rules = ['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer'], ...$this->modeRules($story)];
+        $this->validate($rules, attributes: $this->attributeNames($rules));
         try {
             match ($this->mode) {
                 'story' => app(UpdateAction::class)->handle($story, $this->version, new StorylineData($this->form->heading, $this->form->description, $this->form->payoff, $this->submissionId), $this->form->reason),
@@ -258,6 +260,67 @@ class Manage extends Component
         $this->version = $this->story()->version;
         $this->mode = '';
         $this->dispatch('storyline-saved');
+    }
+
+    /**
+     * The field rules for the open form; the Actions receive only input that passed them.
+     *
+     * @return array<string, list<mixed>>
+     */
+    private function modeRules(Storyline $story): array
+    {
+        $reason = ['string', 'max:2000'];
+        $changing = $this->editingId === null ? 'nullable' : 'required';
+        $entry = [
+            'form.heading' => ['required', 'string', 'max:160'],
+            'form.description' => ['required', 'string', 'max:4000'],
+        ];
+        $planned = [
+            'form.sequence' => ['required', 'integer', 'min:1', 'max:10000'],
+            'submissionId' => ['required', 'uuid'],
+            'form.reason' => [$changing, ...$reason],
+        ];
+
+        return match ($this->mode) {
+            'story' => [...$entry, 'form.payoff' => ['nullable', 'string', 'max:4000'], 'form.reason' => ['required', ...$reason]],
+            'step' => [...$entry, ...$planned],
+            'development' => [
+                ...$entry,
+                ...$planned,
+                'form.occurredOn' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($this->developmentTimezone($story))->toDateString()],
+                'form.participantIds' => ['array', 'list', 'max:100'],
+                'form.participantIds.*' => ['integer', 'distinct'],
+            ],
+            'participant', 'participant-end' => [
+                'form.type' => ['required', Rule::in(['wrestler', 'tag_team'])],
+                'form.participantId' => ['required', 'integer', 'min:1'],
+                'form.role' => ['nullable', 'string', 'max:160'],
+                'form.joinedOn' => ['required', 'date_format:Y-m-d'],
+                'form.leftOn' => [$changing, 'date_format:Y-m-d', 'after_or_equal:form.joinedOn'],
+                'form.reason' => [$changing, ...$reason],
+            ],
+            'step-status', 'story-status', 'retract' => ['form.reason' => ['required', ...$reason]],
+            default => [],
+        };
+    }
+
+    /** A new account is dated in the promotion's timezone; a correction keeps the timezone it was recorded in. */
+    private function developmentTimezone(Storyline $story): string
+    {
+        if ($this->editingId === null) {
+            return Promotion::query()->findOrFail($story->promotion_id)->timezone;
+        }
+
+        return $story->developments()->findOrFail($this->editingId)->timezone;
+    }
+
+    /**
+     * @param  array<string, list<mixed>>  $rules
+     * @return array<string, string>
+     */
+    private function attributeNames(array $rules): array
+    {
+        return collect($rules)->mapWithKeys(fn (array $fieldRules, string $field): array => [$field => Str::of($field)->afterLast('.')->replace('*', 'entry')->snake(' ')->toString()])->all();
     }
 
     public function render(): View

@@ -5,6 +5,7 @@ use App\Actions\Storylines\SaveParticipantAction;
 use App\Data\Storylines\ParticipantData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Storylines\StorylineStatus;
 use App\Livewire\Storylines\Components\Manage;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
@@ -124,3 +125,127 @@ test('switching the creative participant type clears the old identity before sav
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
     $page->call('begin', 'participant')->set('form.participantId', $wrestler->id)->set('form.type', 'tag_team')->assertSet('form.participantId', null);
 });
+
+test('a form that breaks a field rule saves nothing and names the field', function (string $mode, array $fields, string $error) {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', $mode);
+    $page->set('form.heading', 'A heading')->set('form.description', 'A description.')->set('form.reason', 'A reason.');
+    $page->set('form.joinedOn', today()->toDateString())->set('form.participantId', 1);
+    foreach ($fields as $field => $value) {
+        $page->set("form.{$field}", $value);
+    }
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors([$error]);
+    expect($story->refresh()->version)->toBe(1)->and($story->revisions()->count())->toBe(0);
+})->with([
+    'story without a name' => ['story', ['heading' => ''], 'form.heading'],
+    'story with an overlong premise' => ['story', ['description' => str_repeat('a', 4001)], 'form.description'],
+    'story with an overlong payoff' => ['story', ['payoff' => str_repeat('a', 4001)], 'form.payoff'],
+    'story without a reason' => ['story', ['reason' => ''], 'form.reason'],
+    'step without a heading' => ['step', ['heading' => ''], 'form.heading'],
+    'step with an overlong heading' => ['step', ['heading' => str_repeat('a', 161)], 'form.heading'],
+    'step without a description' => ['step', ['description' => ''], 'form.description'],
+    'step with a sequence of zero' => ['step', ['sequence' => 0], 'form.sequence'],
+    'step with an overlong reason' => ['step', ['reason' => str_repeat('a', 2001)], 'form.reason'],
+    'development without a heading' => ['development', ['heading' => ''], 'form.heading'],
+    'development with a malformed date' => ['development', ['occurredOn' => '13/10/2026'], 'form.occurredOn'],
+    'development with a sequence over the limit' => ['development', ['sequence' => 10001], 'form.sequence'],
+    'development with a repeated cast member' => ['development', ['participantIds' => [4, 4]], 'form.participantIds.0'],
+    'participant with an unknown kind' => ['participant', ['type' => 'manager'], 'form.type'],
+    'participant without a roster identity' => ['participant', ['participantId' => null], 'form.participantId'],
+    'participant with a malformed joining date' => ['participant', ['joinedOn' => 'yesterday'], 'form.joinedOn'],
+    'participant with an overlong role' => ['participant', ['role' => str_repeat('a', 161)], 'form.role'],
+]);
+
+test('a future actual date is refused before anything is recorded', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', 'development');
+    $page->set('form.heading', 'Future')->set('form.description', 'Not yet happened.')->set('form.occurredOn', today()->addDays(2)->toDateString());
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors(['form.occurredOn']);
+    expect($story->developments()->count())->toBe(0);
+});
+
+test('corrections, endings and status changes need a reason', function (string $mode) {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $development = confirmedStorylineDevelopment($story);
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $version = $story->refresh()->version;
+    $id = ['step-status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant-end' => $person->id, 'step' => $step->id][$mode] ?? null;
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', $mode, $id)->set('form.status', 'paused')->set('form.reason', '');
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors(['form.reason']);
+    expect($story->refresh()->version)->toBe($version);
+})->with(['step', 'development', 'participant-end', 'step-status', 'story-status', 'retract']);
+
+test('ending an involvement cannot precede its joining date', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', 'participant-end', $person->id)->set('form.leftOn', today()->subDay()->toDateString())->set('form.reason', 'Backdated.');
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors(['form.leftOn']);
+    expect($person->refresh()->left_on)->toBeNull();
+});
+
+test('a manager downgraded while a form is open writes nothing from any form', function (string $mode) {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $story = Storyline::factory()->for($promotion)->create();
+    $manager = basicUser();
+    $promotion->users()->attach($manager, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    actingAs($manager);
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $step = plannedStorylineStep($story);
+    $development = confirmedStorylineDevelopment($story);
+    $wrestler = Wrestler::factory()->for($promotion)->create();
+    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $version = $story->refresh()->version;
+    $id = ['step-status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant-end' => $person->id, 'step' => $step->id][$mode] ?? null;
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', $mode, $id)->set('form.heading', 'Downgraded')->set('form.description', 'Should not save.')->set('form.reason', 'Reason.')->set('form.status', $mode === 'step-status' ? 'postponed' : 'paused')->set('form.sequence', 7);
+    if ($mode === 'participant') {
+        $page->set('form.participantId', Wrestler::factory()->for($promotion)->create()->id);
+    }
+    $promotion->users()->updateExistingPivot($manager->id, ['role' => MembershipRole::Member->value]);
+    $context->forgetMemberships();
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertForbidden();
+    expect($story->refresh()->version)->toBe($version)->and($story->status)->toBe(StorylineStatus::Active)->and($step->refresh()->version)->toBe(1);
+})->with(['story', 'step', 'development', 'participant', 'participant-end', 'step-status', 'story-status', 'retract']);

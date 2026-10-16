@@ -38,7 +38,9 @@ class Create extends Component
     public function save(): void
     {
         Gate::authorize('create', Storyline::class);
-        $this->validate(['promotionId' => ['required', 'integer'], 'title' => ['required', 'string', 'max:160'], 'premise' => ['required', 'string', 'max:4000'], 'payoff' => ['nullable', 'string', 'max:4000']]);
+        $this->validate(['submissionId' => ['required', 'uuid'], 'promotionId' => ['required', 'integer'], 'title' => ['required', 'string', 'max:160'], 'premise' => ['required', 'string', 'max:4000'], 'payoff' => ['nullable', 'string', 'max:4000']]);
+        $context = app(PromotionContextService::class);
+        abort_if($context->isEnforced() && $context->current()?->id !== $this->promotionId, 403);
         $story = app(CreateAction::class)->handle(Promotion::query()->findOrFail($this->promotionId), new StorylineData($this->title, $this->premise, $this->payoff ?: null, $this->submissionId));
         $this->redirectRoute('storylines.show', ['storyline' => $story]);
     }

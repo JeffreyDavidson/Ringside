@@ -15,9 +15,6 @@ use App\Models\Storylines\StorylineParticipant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class SaveParticipantAction
 {
@@ -25,14 +22,6 @@ class SaveParticipantAction
 
     public function handle(Storyline $storyline, int $version, ParticipantData $data, ?int $participantId = null): StorylineParticipant
     {
-        Gate::authorize('update', $storyline);
-        Validator::make(['type' => $data->type, 'id' => $data->id, 'role' => $data->role, 'joined' => $data->joinedOn, 'left' => $data->leftOn, 'reason' => $data->reason], [
-            'type' => ['required', Rule::in(['wrestler', 'tag_team'])], 'id' => ['required', 'integer', 'min:1'],
-            'role' => ['nullable', 'string', 'max:160'], 'joined' => ['required', 'date_format:Y-m-d'],
-            'left' => [$participantId === null ? 'nullable' : 'required', 'date_format:Y-m-d', 'after_or_equal:joined'],
-            'reason' => [$participantId === null ? 'nullable' : 'required', 'string', 'max:2000'],
-        ])->validate();
-
         return DB::transaction(function () use ($storyline, $version, $data, $participantId): StorylineParticipant {
             $story = $this->lock->handle($storyline, $version);
             $person = match ($data->type) {

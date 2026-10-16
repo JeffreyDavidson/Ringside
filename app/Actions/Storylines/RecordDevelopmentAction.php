@@ -16,8 +16,6 @@ use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 
 class RecordDevelopmentAction
 {
@@ -25,16 +23,7 @@ class RecordDevelopmentAction
 
     public function handle(Storyline $storyline, int $version, DevelopmentData $data, ?int $developmentId = null): StorylineDevelopment
     {
-        Gate::authorize('update', $storyline);
         $zone = $developmentId === null ? Promotion::query()->findOrFail($storyline->promotion_id)->timezone : $storyline->developments()->findOrFail($developmentId)->timezone;
-        Validator::make(['heading' => $data->heading, 'description' => $data->description, 'occurred' => $data->occurredOn,
-            'sequence' => $data->sequence, 'participants' => $data->participantIds, 'submission' => $data->submissionId, 'reason' => $data->reason], [
-                'heading' => ['required', 'string', 'max:160'], 'description' => ['required', 'string', 'max:4000'],
-                'occurred' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($zone)->toDateString()],
-                'sequence' => ['required', 'integer', 'min:1', 'max:10000'], 'participants' => ['array', 'list', 'max:100'],
-                'participants.*' => ['integer', 'distinct'], 'submission' => ['required', 'uuid'],
-                'reason' => [$developmentId === null ? 'nullable' : 'required', 'string', 'max:2000'],
-            ])->validate();
 
         return DB::transaction(function () use ($storyline, $version, $data, $developmentId, $zone): StorylineDevelopment {
             $source = $this->source->handle($data->source, $storyline->promotion_id, historical: $data->reason !== null && mb_trim($data->reason) !== '');
