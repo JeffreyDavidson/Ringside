@@ -22,7 +22,7 @@ class SaveEventProductionAction
     public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackViewModel $pack,
         private readonly EventProductionRequirements $requirements) {}
 
-    /** @param array<string, mixed> $input The validated production form input */
+    /** @param array<string, mixed> $input The submitted production form input, checked inside the save */
     public function handle(Event $event, int $version, string $fingerprint, array $input, bool $reviewed): void
     {
         DB::transaction(function () use ($event, $version, $fingerprint, $input, $reviewed): void {
@@ -37,6 +37,7 @@ class SaveEventProductionAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
+            $input = $this->requirements->validatedInput($input);
             $content = $pack->content ?? $this->pack->data($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),
                 ...array_map(fn (array $segment): string => 'segment:'.$segment['id'], $content['segments'])];

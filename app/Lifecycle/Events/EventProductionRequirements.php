@@ -10,13 +10,15 @@ use App\Models\Events\EventPack;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
  * The state rules of a saved production plan: every assignment names a crew contact of the event's promotion who is
  * not archived (unless the assignment already held that contact), call times exist on the wall clock, and every cue
- * belongs to a current card item and an assignment of the plan. The shape of the submitted input is validated by the
- * form that feeds the save.
+ * belongs to a current card item and an assignment of the plan. The shape of the submitted input is checked first, by the
+ * same rules the Production form shows on its fields, so a save is safe from any caller.
  *
  * @phpstan-import-type Production from EventPack
  *
@@ -27,7 +29,55 @@ final readonly class EventProductionRequirements
     public function __construct(private LiveShowTimingService $timing) {}
 
     /**
-     * @param  array<string, mixed>  $input  The validated production form input
+     * Turn blank strings into null, then check the shape of the submitted input: allowed keys, uuid ids, lengths, enums
+     * and https-only URLs.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     *
+     * @throws ValidationException
+     */
+    public function validatedInput(array $input): array
+    {
+        array_walk_recursive($input, function (mixed &$value): void {
+            if ($value === '') {
+                $value = null;
+            }
+        });
+
+        return Validator::make($input, [
+            'notes' => ['nullable', 'string', 'max:10000'],
+            'assignments' => ['present', 'array', 'max:100'],
+            'assignments.*' => ['array:id,contact_id,name,role,station,call_at,timezone,offset,setup,during,strike,active,refresh_name'],
+            'assignments.*.id' => ['required', 'uuid', 'distinct'],
+            'assignments.*.contact_id' => ['required', 'integer', 'min:1'],
+            'assignments.*.role' => ['required', Rule::enum(CrewRole::class)],
+            'assignments.*.station' => ['nullable', 'string', 'max:160'],
+            'assignments.*.call_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
+            'assignments.*.timezone' => ['required', 'timezone:all'],
+            'assignments.*.offset' => ['nullable', 'regex:/^[+-]\d{2}:\d{2}$/'],
+            'assignments.*.setup' => ['nullable', 'string', 'max:2000'],
+            'assignments.*.during' => ['nullable', 'string', 'max:2000'],
+            'assignments.*.strike' => ['nullable', 'string', 'max:2000'],
+            'assignments.*.refresh_name' => ['sometimes', 'boolean'],
+            'cues' => ['present', 'array', 'max:1000'],
+            'cues.*' => ['array:id,item_key,subject,trigger,instruction,role,owner_id,owner_name,owner_station,owner_role,owner_contact_id,pronunciation,track,url'],
+            'cues.*.id' => ['required', 'uuid', 'distinct'],
+            'cues.*.item_key' => ['required', 'string', 'max:100'],
+            'cues.*.subject' => ['required', 'string', 'max:160'],
+            'cues.*.trigger' => ['required', 'string', 'max:160'],
+            'cues.*.instruction' => ['required', 'string', 'max:2000'],
+            'cues.*.role' => ['nullable', Rule::enum(CrewRole::class)],
+            'cues.*.owner_id' => ['nullable', 'uuid'],
+            'cues.*.pronunciation' => ['nullable', 'string', 'max:500'],
+            'cues.*.track' => ['nullable', 'string', 'max:500'],
+            'cues.*.url' => ['nullable', 'url:https', 'max:2000'],
+        ])->validate();
+    }
+
+    /**
+     * @param  array<string, mixed>  $input  The input returned by validatedInput()
+
      * @param  ?Production  $previous
      * @param  list<string>  $itemKeys
      * @param  Collection<int, CrewContact>  $contacts  The locked contacts of the event's promotion, keyed by id

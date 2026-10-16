@@ -79,6 +79,18 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     if ($case === 'foreign item') {
         $input['cues'][0]['item_key'] = 'match:'.EventMatch::factory()->create()->id;
     }
+    if ($case === 'duplicate assignment') {
+        $input['assignments'][] = $input['assignments'][0];
+    }
+    if ($case === 'duplicate cue') {
+        $input['cues'][] = $input['cues'][0];
+    }
+    if ($case === 'unsafe url') {
+        $input['cues'][0]['url'] = 'javascript:alert(1)';
+    }
+    if ($case === 'missing role') {
+        unset($input['assignments'][0]['role']);
+    }
     if ($case === 'credential url') {
         $input['cues'][0]['url'] = 'https://secret:password@example.com/track';
     }
@@ -100,7 +112,7 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     expect($attempt)->toThrow(ValidationException::class)
         ->and($event->pack()->firstOrFail()->content)->toBe($before)
         ->and($event->pack()->firstOrFail()->version)->toBe(1);
-})->with(['foreign contact', 'unknown owner', 'foreign item', 'credential url', 'other description', 'gap', 'repeated', 'cue count']);
+})->with(['foreign contact', 'unknown owner', 'foreign item', 'duplicate assignment', 'duplicate cue', 'unsafe url', 'missing role', 'credential url', 'other description', 'gap', 'repeated', 'cue count']);
 
 test('saving production locks the referenced crew contacts after the event, its matches and its pack', function (): void {
     // Arrange

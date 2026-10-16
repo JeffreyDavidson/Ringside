@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveEventProductionAction;
-use App\Enums\Crew\CrewRole;
 use App\Exceptions\BaseBusinessException;
+use App\Lifecycle\Events\EventProductionRequirements;
 use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -217,45 +217,11 @@ class Production extends Component
     /** @return array<string, mixed> */
     private function validatedInput(): array
     {
-        $input = [
+        return resolve(EventProductionRequirements::class)->validatedInput([
             'notes' => $this->notes,
             'assignments' => array_map(fn (array $assignment): array => [...$assignment, 'refresh_name' => in_array($assignment['id'], $this->refreshNames, true)], $this->assignments),
             'cues' => $this->cues,
-        ];
-        array_walk_recursive($input, function (mixed &$value): void {
-            if ($value === '') {
-                $value = null;
-            }
-        });
-
-        return Validator::make($input, [
-            'notes' => ['nullable', 'string', 'max:10000'],
-            'assignments' => ['present', 'array', 'max:100'],
-            'assignments.*' => ['array:id,contact_id,name,role,station,call_at,timezone,offset,setup,during,strike,active,refresh_name'],
-            'assignments.*.id' => ['required', 'uuid', 'distinct'],
-            'assignments.*.contact_id' => ['required', 'integer', 'min:1'],
-            'assignments.*.role' => ['required', Rule::enum(CrewRole::class)],
-            'assignments.*.station' => ['nullable', 'string', 'max:160'],
-            'assignments.*.call_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
-            'assignments.*.timezone' => ['required', 'timezone:all'],
-            'assignments.*.offset' => ['nullable', 'regex:/^[+-]\d{2}:\d{2}$/'],
-            'assignments.*.setup' => ['nullable', 'string', 'max:2000'],
-            'assignments.*.during' => ['nullable', 'string', 'max:2000'],
-            'assignments.*.strike' => ['nullable', 'string', 'max:2000'],
-            'assignments.*.refresh_name' => ['sometimes', 'boolean'],
-            'cues' => ['present', 'array', 'max:1000'],
-            'cues.*' => ['array:id,item_key,subject,trigger,instruction,role,owner_id,owner_name,owner_station,owner_role,owner_contact_id,pronunciation,track,url'],
-            'cues.*.id' => ['required', 'uuid', 'distinct'],
-            'cues.*.item_key' => ['required', 'string', 'max:100'],
-            'cues.*.subject' => ['required', 'string', 'max:160'],
-            'cues.*.trigger' => ['required', 'string', 'max:160'],
-            'cues.*.instruction' => ['required', 'string', 'max:2000'],
-            'cues.*.role' => ['nullable', Rule::enum(CrewRole::class)],
-            'cues.*.owner_id' => ['nullable', 'uuid'],
-            'cues.*.pronunciation' => ['nullable', 'string', 'max:500'],
-            'cues.*.track' => ['nullable', 'string', 'max:500'],
-            'cues.*.url' => ['nullable', 'url:https', 'max:2000'],
-        ])->validate();
+        ]);
     }
 
     private function event(): Event
