@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
+use App\Models\Events\EventSponsorCommitment;
+use App\Models\Events\EventSponsorCommitmentRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
@@ -13,6 +16,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
@@ -402,6 +406,127 @@ describe('non administrators on a subject that is not promotion owned', function
         // Assert
         expect($result)->toBeFalse();
     })->with(['venue', 'venue class']);
+});
+
+/*
+ * Sponsor and crew contact decisions are pinned per membership. The ability order of every expected
+ * list is: view, viewAny, create, update, archive, delete, manageSponsors.
+ */
+describe('sponsor and crew contact subjects', function () {
+    test('give owners and managers the sponsor abilities their role allows and nobody else any', function (string $membership, array $expected) {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $user = promotionGateUser($membership, $own, $foreign);
+        promotionGateContext('enforced', $own);
+        $sponsor = Sponsor::factory()->for($own, 'promotion')->create();
+        $abilities = ['view', 'viewAny', 'create', 'update', 'archive', 'delete', 'manageSponsors'];
+
+        // Act
+        $classResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [Sponsor::class]), $abilities);
+        $instanceResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [$sponsor]), $abilities);
+
+        // Assert
+        expect($classResults)->toBe($expected)
+            ->and($instanceResults)->toBe($expected);
+    })->with([
+        'owner' => ['owner', [true, true, true, true, false, true, true]],
+        'manager' => ['manager', [true, true, true, true, false, true, true]],
+        'member' => ['member', [false, false, false, false, false, false, false]],
+        'suspended owner' => ['suspended owner', [false, false, false, false, false, false, false]],
+        'owner of another promotion' => ['foreign owner', [false, false, false, false, false, false, false]],
+        'no membership' => ['none', [false, false, false, false, false, false, false]],
+        'administrator' => ['administrator', [true, true, true, true, true, true, true]],
+    ]);
+
+    test('give owners and managers the crew contact abilities listed for crew and nobody else any', function (string $membership, array $expected) {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $user = promotionGateUser($membership, $own, $foreign);
+        promotionGateContext('enforced', $own);
+        $contact = CrewContact::factory()->for($own, 'promotion')->create();
+        $abilities = ['view', 'viewAny', 'create', 'update', 'archive', 'delete', 'manageSponsors'];
+
+        // Act
+        $classResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [CrewContact::class]), $abilities);
+        $instanceResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [$contact]), $abilities);
+
+        // Assert
+        expect($classResults)->toBe($expected)
+            ->and($instanceResults)->toBe($expected);
+    })->with([
+        'owner' => ['owner', [true, true, true, true, true, false, false]],
+        'manager' => ['manager', [true, true, true, true, true, false, false]],
+        'member' => ['member', [false, false, false, false, false, false, false]],
+        'suspended owner' => ['suspended owner', [false, false, false, false, false, false, false]],
+        'owner of another promotion' => ['foreign owner', [false, false, false, false, false, false, false]],
+        'no membership' => ['none', [false, false, false, false, false, false, false]],
+        'administrator' => ['administrator', [true, true, true, true, true, true, true]],
+    ]);
+
+    test('treat the other sponsor commitment classes like sponsors', function (string $membership, bool $expected) {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $user = promotionGateUser($membership, $own, $foreign);
+        promotionGateContext('enforced', $own);
+
+        // Act
+        $results = [
+            Gate::forUser($user)->raw('view', [EventSponsorCommitment::class]),
+            Gate::forUser($user)->raw('view', [EventSponsorCommitmentRevision::class]),
+        ];
+
+        // Assert
+        expect($results)->toBe([$expected, $expected]);
+    })->with([
+        'owner' => ['owner', true],
+        'manager' => ['manager', true],
+        'member' => ['member', false],
+        'no membership' => ['none', false],
+    ]);
+
+    test('deny a non administrator both subjects when the context is enforced without a promotion', function (string $subject) {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $user = promotionGateUser('owner', $own, $foreign);
+        promotionGateContext('enforced without promotion', $own);
+
+        // Act
+        $result = Gate::forUser($user)->raw('view', [$subject]);
+
+        // Assert
+        expect($result)->toBeFalse();
+    })->with([Sponsor::class, CrewContact::class]);
+
+    test('stop administrators creating a crew contact without a current promotion', function (string $context, bool $expected) {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $admin = promotionGateUser('administrator', $own, $foreign);
+        promotionGateContext($context, $own);
+
+        // Act
+        $result = Gate::forUser($admin)->raw('create', [CrewContact::class]);
+
+        // Assert
+        expect($result)->toBe($expected);
+    })->with([
+        'no context' => ['unset', false],
+        'context set' => ['set only', true],
+        'enforced' => ['enforced', true],
+        'enforced without promotion' => ['enforced without promotion', false],
+    ]);
+
+    test('still let administrators create a sponsor without a current promotion', function () {
+        // Arrange
+        [$own, $foreign] = promotionGatePromotions();
+        $admin = promotionGateUser('administrator', $own, $foreign);
+        promotionGateContext('unset', $own);
+
+        // Act
+        $result = Gate::forUser($admin)->raw('create', [Sponsor::class]);
+
+        // Assert
+        expect($result)->toBeTrue();
+    });
 });
 
 function attachPromotionMember(User $user, Promotion $promotion, MembershipRole $role, MembershipStatus $status = MembershipStatus::Active): void
