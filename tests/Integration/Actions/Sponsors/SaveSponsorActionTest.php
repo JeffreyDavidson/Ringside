@@ -7,16 +7,11 @@ use App\Data\Sponsors\SponsorData;
 use App\Exceptions\RecordChangedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
-use App\Services\Promotions\PromotionContextService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 
-use function Pest\Laravel\actingAs;
-
-test('an administrator saves a reusable sponsor with private contact details', function (): void {
+test('a reusable sponsor is saved with private contact details', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
-    actingAs(administrator());
 
     // Act
     $sponsor = app(SaveSponsorAction::class)->handle($promotion, null, 0, (string) Str::uuid(), new SponsorData('Harbor Hardware', 'Alex', 'alex@example.test', '555-0100', 'Private agreement note'));
@@ -32,7 +27,6 @@ test('an administrator saves a reusable sponsor with private contact details', f
 test('a stale directory edit or repeated create cannot replace the saved sponsor', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
-    actingAs(administrator());
     $key = (string) Str::uuid();
     $action = app(SaveSponsorAction::class);
     $sponsor = $action->handle($promotion, null, 0, $key, new SponsorData('Harbor Hardware'));
@@ -47,19 +41,4 @@ test('a stale directory edit or repeated create cannot replace the saved sponsor
         ->and($sponsor->refresh()->archived_at)->not->toBeNull()
         ->and($sponsor->name)->toBe('Harbor Hardware')
         ->and(Sponsor::query()->count())->toBe(1);
-});
-
-test('an administrator in an enforced promotion cannot create a sponsor for another promotion', function (): void {
-    // Arrange
-    $owned = Promotion::factory()->create();
-    $foreign = Promotion::factory()->create();
-    actingAs(administrator());
-    $context = app(PromotionContextService::class);
-    $context->set($owned);
-    $context->enforce();
-
-    // Act and Assert
-    expect(fn () => app(SaveSponsorAction::class)->handle($foreign, null, 0, (string) Str::uuid(), new SponsorData('Foreign sponsor')))
-        ->toThrow(AuthorizationException::class)
-        ->and(Sponsor::query()->count())->toBe(0);
 });

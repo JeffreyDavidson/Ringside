@@ -167,6 +167,31 @@ test('a role downgrade refuses an already open private form without changing the
     expect($world['promise']->refresh()->version)->toBe(1);
 });
 
+test('a role downgrade refuses an already previewed instruction without changing the pack', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
+    $promotion = Promotion::query()->findOrFail($promise->promotion_id);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $context = app(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)->call('previewInstruction');
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
+    $context->forgetMemberships();
+
+    // Act
+    $component->call('saveInstruction');
+
+    // Assert
+    $component->assertForbidden();
+    expect($world['event']->pack()->exists())->toBeFalse()
+        ->and($promise->refresh()->version)->toBe(2);
+});
+
 test('choosing a sponsor resolves only current active records and keeps its identity in the draft', function (): void {
     // Arrange
     $world = sponsorFixture();

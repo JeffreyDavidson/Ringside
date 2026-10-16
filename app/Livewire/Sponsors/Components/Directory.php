@@ -85,6 +85,9 @@ class Directory extends Component
     {
         $promotion = $this->promotion();
         Gate::authorize('manageSponsors', $promotion);
+        if ($this->draftId !== null) {
+            Gate::authorize('manageSponsors', Sponsor::query()->where('promotion_id', $promotion->id)->findOrFail($this->draftId));
+        }
         $data = $this->form->toData();
         try {
             app(SaveSponsorAction::class)->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);

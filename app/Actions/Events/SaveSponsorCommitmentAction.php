@@ -13,7 +13,6 @@ use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
 use App\Services\Events\SponsorCommitmentContextService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class SaveSponsorCommitmentAction
@@ -25,7 +24,6 @@ class SaveSponsorCommitmentAction
     {
         return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
             $event = Event::query()->withTrashed()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('manageSponsors', $event);
             if ($event->promotion_id === null) {
                 throw SponsorCommitmentException::eventUnavailable();
             }
