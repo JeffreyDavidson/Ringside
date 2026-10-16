@@ -422,8 +422,8 @@ describe('sponsor and crew contact subjects', function () {
         $abilities = ['view', 'viewAny', 'create', 'update', 'archive', 'delete', 'manageSponsors'];
 
         // Act
-        $classResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [Sponsor::class]), $abilities);
-        $instanceResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [$sponsor]), $abilities);
+        $classResults = array_map(fn (string $ability): mixed => Gate::forUser($user)->raw($ability, [Sponsor::class]), $abilities);
+        $instanceResults = array_map(fn (string $ability): mixed => Gate::forUser($user)->raw($ability, [$sponsor]), $abilities);
 
         // Assert
         expect($classResults)->toBe($expected)
@@ -447,8 +447,8 @@ describe('sponsor and crew contact subjects', function () {
         $abilities = ['view', 'viewAny', 'create', 'update', 'archive', 'delete', 'manageSponsors'];
 
         // Act
-        $classResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [CrewContact::class]), $abilities);
-        $instanceResults = array_map(fn (string $ability): ?bool => Gate::forUser($user)->raw($ability, [$contact]), $abilities);
+        $classResults = array_map(fn (string $ability): mixed => Gate::forUser($user)->raw($ability, [CrewContact::class]), $abilities);
+        $instanceResults = array_map(fn (string $ability): mixed => Gate::forUser($user)->raw($ability, [$contact]), $abilities);
 
         // Assert
         expect($classResults)->toBe($expected)

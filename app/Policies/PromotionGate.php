@@ -127,7 +127,7 @@ class PromotionGate
         $role = $this->context->membershipRole($user, $promotion);
         $class = $subject instanceof Model ? $subject::class : $subject;
 
-        if (array_key_exists($class, self::MANAGER_ONLY_SUBJECTS)) {
+        if (is_string($class) && array_key_exists($class, self::MANAGER_ONLY_SUBJECTS)) {
             return $this->allowsManagerOnlySubject($role, $class, $ability);
         }
 
