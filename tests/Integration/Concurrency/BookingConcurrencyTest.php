@@ -31,7 +31,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Queries\Events\TalentBookingContextQuery;
+use App\Services\Events\TalentBookingFingerprintService;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\TalentBookingsViewModel;
 use Illuminate\Support\Carbon;
@@ -791,7 +791,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
         \Pest\Laravel\actingAs($user);
         $event = Event::factory()->create(['name' => 'Talent race '.$operation, 'date' => now()->addDay()]);
         $person = Wrestler::factory()->bookable()->create();
-        $context = resolve(TalentBookingContextQuery::class);
+        $context = resolve(TalentBookingFingerprintService::class);
         $version = 0;
         if ($operation !== 'first create') {
             resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $context->fingerprint($event, "wrestler:{$person->id}"),

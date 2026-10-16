@@ -11,7 +11,7 @@ use App\Livewire\Events\Forms\TalentBookingForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\TalentBookingContextQuery;
+use App\Services\Events\TalentBookingFingerprintService;
 use App\ViewModels\TalentBookingsViewModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -84,7 +84,7 @@ class TalentBookings extends Component
         $this->personId = $id;
         $this->personName = $person instanceof Wrestler ? $person->name : ($person->full_name ?? $booking->person_name ?? __('talent-bookings.unknown'));
         $this->version = $booking->version ?? 0;
-        $this->fingerprint = app(TalentBookingContextQuery::class)->fingerprint($event, $type.':'.$id);
+        $this->fingerprint = app(TalentBookingFingerprintService::class)->fingerprint($event, $type.':'.$id);
         $this->historyOpen = false;
         $this->resetPage('historyPage');
         $this->message = '';

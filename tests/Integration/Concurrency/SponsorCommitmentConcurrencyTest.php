@@ -13,7 +13,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
 use App\Models\Users\User;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorInstructionService;
 use App\ViewModels\EventPackViewModel;
 use Illuminate\Support\Str;
 
@@ -30,7 +30,7 @@ function sponsorWorkerSpec(array $world, string $operation): array
     return ['sponsor_event_id' => $world['event']->id, 'sponsor_id' => $world['sponsor']->id, 'promise_id' => $promise->id,
         'user_id' => User::query()->firstOrFail()->id, 'version' => $promise->version, 'submission_key' => $promise->submission_key,
         'sponsor_operation' => $operation, 'fingerprint' => $pack['card']['fingerprint'], 'pack_version' => $pack['pack']->version ?? 0,
-        'preview_hash' => app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'segment', $target, null)['hash'],
+        'preview_hash' => app(SponsorInstructionService::class)->preview($world['event'], $promise, 'segment', $target, null)['hash'],
         'target_key' => $target ?? '', 'mode' => 'segment', 'clock' => now()->toIso8601String()];
 }
 
@@ -42,7 +42,7 @@ function publishSponsorFixture(array $world): void
         sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'segment', null, null,
-        app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'segment', null, null)['hash']);
+        app(SponsorInstructionService::class)->preview($world['event'], $promise, 'segment', null, null)['hash']);
 }
 
 test('sponsor concurrency admits one repeated create and one atomic revision', function (): void {

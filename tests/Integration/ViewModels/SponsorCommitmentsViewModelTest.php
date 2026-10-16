@@ -11,7 +11,7 @@ use App\Actions\Events\SaveSponsorInstructionAction;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorInstructionService;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\SponsorCommitmentsViewModel;
 
@@ -73,7 +73,7 @@ test('a cancelled promise stays visible for review while its approved instructio
         sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'setup', null, null,
-        app(SponsorInstructionQuery::class)->preview($world['event'], $promise, 'setup', null, null)['hash']);
+        app(SponsorInstructionService::class)->preview($world['event'], $promise, 'setup', null, null)['hash']);
     $promise->refresh();
 
     // Act
@@ -91,7 +91,7 @@ test('linked announcement review preserves its live context and flags a removed 
     $match = EventMatch::factory()->for($world['event'])->create(['match_number' => 1]);
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'segment', null, $match->id, $query->preview($world['event'], $promise, 'segment', null, $match->id)['hash']);
     app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $pack['card']['fingerprint']);
     $screen = app(SponsorCommitmentsViewModel::class);
@@ -109,7 +109,7 @@ test('setup review detects unpublished private edits changed pack text and remov
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors', 'instructionOwner' => 'Ring crew']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    $query = app(SponsorInstructionQuery::class);
+    $query = app(SponsorInstructionService::class);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'setup', null, null, $query->preview($world['event'], $promise, 'setup', null, null)['hash']);
     $screen = app(SponsorCommitmentsViewModel::class);
     $row = $screen->rows($world['event'], 'pending')->getCollection()->firstOrFail();

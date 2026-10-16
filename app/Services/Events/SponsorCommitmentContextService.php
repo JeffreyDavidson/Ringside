@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Events;
+namespace App\Services\Events;
 
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 
-class SponsorCommitmentContextQuery
+class SponsorCommitmentContextService
 {
     /** @return array{name: string, date: ?string, venue_id: ?int, timezone: string, archived: bool, updated_at: ?string} */
     public function get(Event $event): array

@@ -11,14 +11,14 @@ use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
-use App\Queries\Events\SponsorCommitmentContextQuery;
+use App\Services\Events\SponsorCommitmentContextService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class SaveSponsorCommitmentAction
 {
-    public function __construct(private readonly SponsorCommitmentContextQuery $context, private readonly PersistSponsorCommitmentAction $persist) {}
+    public function __construct(private readonly SponsorCommitmentContextService $context, private readonly PersistSponsorCommitmentAction $persist) {}
 
     public function handle(Event $event, ?int $id, int $version, string $submissionKey, SponsorCommitmentData $data,
         ?string $reason = null, bool $reviewed = false, bool $refreshSponsorName = false): EventSponsorCommitment

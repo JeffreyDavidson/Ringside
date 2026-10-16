@@ -8,6 +8,7 @@ use App\Enums\Events\TalentBookingStatus;
 use App\Models\Events\Event;
 use App\Queries\Events\TalentBookingContextQuery;
 use App\Queries\Events\TalentBookingRosterQuery;
+use App\Services\Events\TalentBookingFingerprintService;
 
 /**
  * @phpstan-import-type PersonRow from TalentBookingRosterQuery
@@ -17,7 +18,7 @@ use App\Queries\Events\TalentBookingRosterQuery;
  */
 class TalentBookingsViewModel
 {
-    public function __construct(private readonly TalentBookingRosterQuery $roster, private readonly TalentBookingContextQuery $context) {}
+    public function __construct(private readonly TalentBookingRosterQuery $roster, private readonly TalentBookingContextQuery $context, private readonly TalentBookingFingerprintService $fingerprints) {}
 
     public function fee(?int $minor): string
     {
@@ -43,7 +44,7 @@ class TalentBookingsViewModel
                 if ($row['unavailable']) {
                     $warnings[] = 'unavailable';
                 }
-                if ($agreement === null || $booking->terms_need_review || $this->context->signature($context) !== $this->context->signature($agreement['context'])) {
+                if ($agreement === null || $booking->terms_need_review || $this->fingerprints->signature($context) !== $this->fingerprints->signature($agreement['context'])) {
                     $warnings[] = 'reconfirmation';
                 }
                 if (($agreement['on_card'] ?? false) && ! $row['on_card']) {

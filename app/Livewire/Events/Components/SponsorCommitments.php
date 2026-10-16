@@ -13,7 +13,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
-use App\Queries\Events\SponsorInstructionQuery;
+use App\Services\Events\SponsorInstructionService;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\SponsorCommitmentsViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -177,7 +177,7 @@ class SponsorCommitments extends Component
         $this->mode = $commitment->pack_key === null ? ($commitment->type->value === 'announcement' ? 'segment' : 'setup') : explode(':', $commitment->pack_key, 2)[0];
         $this->targetKey = $commitment->pack_key ?? '';
         $pack = $this->event()->pack()->first()->content ?? [];
-        $target = app(SponsorInstructionQuery::class)->target($pack, $commitment->pack_key);
+        $target = app(SponsorInstructionService::class)->target($pack, $commitment->pack_key);
         $this->afterMatchId = isset($target['after_match_id']) ? (string) $target['after_match_id'] : '';
         $this->previewHash = '';
         $this->instructionReason = '';
@@ -200,7 +200,7 @@ class SponsorCommitments extends Component
         $this->previewMode = $this->mode;
         $this->previewTarget = $this->mode === 'remove' ? null : ($this->targetKey ?: null);
         $this->previewAfter = $this->mode === 'segment' && $this->afterMatchId !== '' ? (int) $this->afterMatchId : null;
-        $this->previewHash = app(SponsorInstructionQuery::class)->preview($event, $commitment, $this->previewMode, $this->previewTarget, $this->previewAfter)['hash'];
+        $this->previewHash = app(SponsorInstructionService::class)->preview($event, $commitment, $this->previewMode, $this->previewTarget, $this->previewAfter)['hash'];
     }
 
     public function saveInstruction(): void
@@ -241,7 +241,7 @@ class SponsorCommitments extends Component
         $instruction = $this->instructionId === null ? null : $this->commitment($this->instructionId);
         $history = $this->historyId === null ? null : $this->commitment($this->historyId)->revisions()->orderByDesc('version')->paginate(10, pageName: 'historyPage');
 
-        $preview = ! $instruction instanceof EventSponsorCommitment || $this->previewHash === '' ? null : app(SponsorInstructionQuery::class)->preview($event, $instruction, $this->previewMode, $this->previewTarget, $this->previewAfter);
+        $preview = ! $instruction instanceof EventSponsorCommitment || $this->previewHash === '' ? null : app(SponsorInstructionService::class)->preview($event, $instruction, $this->previewMode, $this->previewTarget, $this->previewAfter);
 
         return view('livewire.events.components.sponsor-commitments', ['event' => $event, 'rows' => $screen->rows($event, $filter),
             'screen' => $screen, 'sponsors' => $sponsors, 'selected' => $selected, 'history' => $history, 'instruction' => $instruction,
