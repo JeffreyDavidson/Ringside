@@ -16,7 +16,7 @@ class LiveRunSourceService
      */
     public function hasMovedOn(EventLiveRun $run, ?EventPack $pack, string $cardFingerprint): bool
     {
-        return $pack === null || $pack->version !== $run->pack_version
+        return ! $pack instanceof EventPack || $pack->version !== $run->pack_version
             || ! hash_equals($run->card_fingerprint, $cardFingerprint);
     }
 }
