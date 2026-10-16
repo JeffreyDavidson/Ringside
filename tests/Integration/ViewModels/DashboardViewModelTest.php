@@ -23,7 +23,7 @@ describe('upcoming events', function (): void {
         EventMatch::factory()->forEvent($soonest)->count(2)->create();
 
         // Act
-        $events = app(DashboardViewModel::class)->upcomingEvents();
+        $events = app(DashboardViewModel::class)->data()['upcomingEvents'];
 
         // Assert
         expect($events->modelKeys())->toBe([$soonest->id, $middle->id, $later->id])
@@ -42,7 +42,7 @@ describe('roster availability', function (): void {
         Wrestler::factory()->retired()->create();
 
         // Act
-        $availability = app(DashboardViewModel::class)->rosterAvailability();
+        $availability = app(DashboardViewModel::class)->data()['availability'];
 
         // Assert
         expect($availability)->toBe([
@@ -60,11 +60,11 @@ describe('roster availability', function (): void {
         $viewModel = app(DashboardViewModel::class);
 
         // Act
-        $statements = recordStatements(fn (): array => $viewModel->rosterAvailability());
+        $statements = collect(recordStatements(fn (): array => $viewModel->data()))
+            ->filter(fn (array $statement): bool => str_contains($statement['sql'], 'employed_wrestlers'));
 
         // Assert
-        expect($statements)->toHaveCount(1)
-            ->and($statements[0]['sql'])->not->toContain('"wrestlers".*');
+        expect($statements->sole()['sql'])->not->toContain('"wrestlers".*');
     });
 
     it('reports zero for every count when nobody is under contract', function (): void {
@@ -72,7 +72,7 @@ describe('roster availability', function (): void {
         Wrestler::factory()->unemployed()->create();
 
         // Act
-        $availability = app(DashboardViewModel::class)->rosterAvailability();
+        $availability = app(DashboardViewModel::class)->data()['availability'];
 
         // Assert
         expect($availability)->toBe([
@@ -98,12 +98,11 @@ describe('current champions', function (): void {
         TitleChampionship::factory()->for($vacantTitle)->forWrestler()->ended()->create();
 
         // Act
-        $titles = app(DashboardViewModel::class)->championedTitles();
+        $champions = app(DashboardViewModel::class)->data()['champions'];
 
         // Assert
-        expect($titles->modelKeys())->toBe([$heavyweightTitle->id, $tagTitle->id])
-            ->and($titles->first()?->currentChampionship?->is($heavyweightReign))->toBeTrue()
-            ->and($titles->first()?->currentChampionship?->relationLoaded('champion'))->toBeTrue();
+        expect(array_map(fn (array $champion): int => $champion['title']->id, $champions))->toBe([$heavyweightTitle->id, $tagTitle->id])
+            ->and($champions[0]['championship']->is($heavyweightReign))->toBeTrue();
     });
 });
 
@@ -119,11 +118,11 @@ describe('champions list cap', function (): void {
         }
 
         // Act
-        $titles = app(DashboardViewModel::class)->championedTitles();
+        $champions = app(DashboardViewModel::class)->data()['champions'];
 
         // Assert
-        expect($titles)->toHaveCount(12)
-            ->and($titles->last()?->name)->toBe('Title 12');
+        expect($champions)->toHaveCount(12)
+            ->and($champions[11]['title']->name)->toBe('Title 12');
     });
 });
 
@@ -141,11 +140,11 @@ describe('promotion scope', function (): void {
         $context->enforce();
 
         // Act
-        $dashboard = app(DashboardViewModel::class);
+        $dashboard = app(DashboardViewModel::class)->data();
 
         // Assert
-        expect($dashboard->upcomingEvents()->modelKeys())->toBe([$ownEvent->id])
-            ->and($dashboard->rosterAvailability()['employed'])->toBe(1);
+        expect($dashboard['upcomingEvents']->modelKeys())->toBe([$ownEvent->id])
+            ->and($dashboard['availability']['employed'])->toBe(1);
     });
 });
 
@@ -153,34 +152,32 @@ describe('champion display helpers', function (): void {
     it('links each champion to their roster page and reports the reign length', function (): void {
         // Arrange
         $champion = Wrestler::factory()->create();
-        $championship = TitleChampionship::factory()
+        TitleChampionship::factory()
             ->for(Title::factory()->active())
             ->forWrestler($champion)
             ->current()
             ->create(['won_at' => now()->subDays(30)]);
-        $dashboard = app(DashboardViewModel::class);
 
         // Act
-        $url = $dashboard->championUrl($championship);
-        $days = $dashboard->reignLengthInDays($championship);
+        $row = app(DashboardViewModel::class)->data()['champions'][0];
 
         // Assert
-        expect($url)->toBe(route('wrestlers.show', $champion))
-            ->and($days)->toBe(30);
+        expect($row['url'])->toBe(route('wrestlers.show', $champion))
+            ->and($row['days'])->toBe(30);
     });
 });
 
 describe('champion reign length defence', function (): void {
     it('never reports a negative reign length', function (): void {
         // Arrange
-        $championship = TitleChampionship::factory()
+        TitleChampionship::factory()
             ->for(Title::factory()->active())
             ->forWrestler(Wrestler::factory()->create())
             ->current()
             ->create(['won_at' => now()->addDays(10)]);
 
         // Act
-        $days = app(DashboardViewModel::class)->reignLengthInDays($championship);
+        $days = app(DashboardViewModel::class)->data()['champions'][0]['days'];
 
         // Assert
         expect($days)->toBe(0);

@@ -9,6 +9,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Queries\Events\EventPackSourceQuery;
 use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\LiveRunSourceService;
 
 /**
  * A live show can only be prepared, reviewed or run from a dated event whose saved pack matches its card.
@@ -17,7 +18,7 @@ use App\Queries\Events\LiveShowSourceQuery;
  */
 final readonly class LiveShowSourceRequirements
 {
-    public function __construct(private LiveShowSourceQuery $source, private EventPackSourceQuery $pack) {}
+    public function __construct(private LiveShowSourceQuery $source, private EventPackSourceQuery $pack, private LiveRunSourceService $comparison) {}
 
     /** @return Source */
     public function ensureSource(Event $event): array
@@ -30,7 +31,6 @@ final readonly class LiveShowSourceRequirements
     {
         $data = $this->pack->get($event);
 
-        return $data['pack'] === null || $data['pack']->version !== $run->pack_version
-            || ! hash_equals($run->card_fingerprint, $data['card']['fingerprint']) || $data['needsReview'];
+        return $this->comparison->hasMovedOn($run, $data['pack'], $data['card']['fingerprint']) || $data['needsReview'];
     }
 }

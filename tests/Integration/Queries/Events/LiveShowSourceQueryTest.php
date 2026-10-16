@@ -7,6 +7,7 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Queries\Events\EventPackSourceQuery;
 use App\Queries\Events\LiveShowSourceQuery;
 
 use function Pest\Laravel\actingAs;
@@ -26,6 +27,20 @@ describe('live show source query', function (): void {
             ->and($source['content']['items'][0]['state'])->toBe('pending')
             ->and(array_column($source['content']['roster'], 'key'))->toContain($fixture['person'])
             ->and(data_get($source, 'content.production'))->toBe(['assignments' => []]);
+    });
+
+    it('reuses a pack source the caller already read instead of reading the pack again', function (): void {
+        // Arrange
+        $fixture = liveShowFixture();
+        $packSource = resolve(EventPackSourceQuery::class)->get($fixture['event']);
+        $query = resolve(LiveShowSourceQuery::class);
+
+        // Act
+        $statements = recordStatements(fn () => $query->get($fixture['event'], $packSource));
+
+        // Assert
+        expect(collect($statements)->filter(fn (array $statement): bool => str_contains($statement['sql'], 'from "event_packs"')))->toBeEmpty()
+            ->and($query->get($fixture['event'], $packSource))->toEqual($query->get($fixture['event']));
     });
 
     it('returns nothing for an event with no pack', function (): void {

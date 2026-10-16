@@ -150,7 +150,7 @@
                 <ol class="list-inside list-decimal space-y-2">
                     @foreach ($source['content']['items'] ?? [] as $item)
                         <li wire:key="preview-{{ $item['key'] }}">
-                            {{ $item['label'] }} · {{ $screen->comparison($item) }}
+                            {{ $item['label'] }} · {{ $sourceComparisons[$item['key']] }}
                             @if ($item['cues'] ?? [])
                                 <x-events.production.cues
                                     :cues="$item['cues']"
@@ -203,7 +203,7 @@
                     </h3>
                     @if ($current)
                         <p class="text-muted-foreground mt-1 lg:mt-2">{{ $current['details'] }}</p>
-                        <p class="text-muted-foreground mt-1 lg:mt-2">{{ $screen->comparison($current) }}</p>
+                        <p class="text-muted-foreground mt-1 lg:mt-2">{{ $runComparisons[$current['key']] }}</p>
                         @if ($current['warning'])
                             <p class="text-warning mt-3">{{ __('live-show.unavailable') }}</p>
                         @endif
@@ -247,7 +247,7 @@
                     </h3>
                     @if ($next)
                         <p class="text-muted-foreground mt-1 lg:mt-2">{{ $next['details'] }}</p>
-                        <p class="text-muted-foreground mt-1 lg:mt-2">{{ $screen->comparison($next) }}</p>
+                        <p class="text-muted-foreground mt-1 lg:mt-2">{{ $runComparisons[$next['key']] }}</p>
                         @if ($next['cues'] ?? [])
                             <details>
                                 <summary class="min-h-11 cursor-pointer py-3">
@@ -290,10 +290,10 @@
                     {{ $event->local_date?->format('M j, Y · H:i') }}
                     @if ($event->venue) ·{{ $event->venue->name }} @endif
                 </p>
-                <p>{{ __('live-show.refreshed') }}: {{ $screen->actual($refreshedAt, $run->content['timezone']) }}</p>
+                <p>{{ __('live-show.refreshed') }}: {{ $refreshedLabel }}</p>
                 <p>{{ __('live-show.online_help') }}</p>
                 <p class="text-muted-foreground text-sm">
-                    {{ __('live-show.revision') }}: {{ $run->content['revision'] ?: __('live-show.no_revision') }} · {{ __('live-show.timezone') }}: {{ $run->content['timezone'] }} · {{ __('live-show.saved') }}: {{ $screen->actual($run->updated_at->toIso8601String(), $run->content['timezone']) }}
+                    {{ __('live-show.revision') }}: {{ $run->content['revision'] ?: __('live-show.no_revision') }} · {{ __('live-show.timezone') }}: {{ $run->content['timezone'] }} · {{ __('live-show.saved') }}: {{ $savedLabel }}
                 </p>
             </div>
         </details>
@@ -384,7 +384,12 @@
             @php $people = $talent->filter(fn ($person) => ! in_array($rosterFilter, ['arrived', 'briefed'], true) || $person[$rosterFilter] === null); @endphp
             <div class="divide-border mt-5 divide-y">
                 @forelse ($people as $person)
-                    <x-events.production.attendance-person :$person :$event :$run :$complete :$screen />
+                    <x-events.production.attendance-person
+                        :$person
+                        :$event
+                        :$complete
+                        :attendance="$attendance[$person['key']]"
+                    />
                 @empty
                     <p class="text-muted-foreground py-5">{{ __('live-show.empty_filter') }}</p>
                 @endforelse
@@ -399,7 +404,12 @@
                 </p>
                 <div class="divide-border divide-y">
                     @foreach ($crew as $person)
-                        <x-events.production.attendance-person :$person :$event :$run :$complete :$screen />
+                        <x-events.production.attendance-person
+                            :$person
+                            :$event
+                            :$complete
+                            :attendance="$attendance[$person['key']]"
+                        />
                     @endforeach
                 </div>
             </section>
@@ -415,18 +425,14 @@
                             <span class="font-semibold">{{ \App\Enums\Events\LiveItemStatus::tryFrom($item['state'])?->label() ?? $item['state'] }}</span>
                         </div>
                         <p class="text-muted-foreground text-sm">
-                            {{ $screen->comparison($item) }} · {{ $item['details'] }} · {{ $item['referees'] }}
+                            {{ $runComparisons[$item['key']] }} · {{ $item['details'] }} · {{ $item['referees'] }}
                         </p>
                         @if ($item['timing']['notes'] ?? null)
                             <p class="whitespace-pre-wrap">{{ $item['timing']['notes'] }}</p>
                         @endif
                         <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm tabular-nums">
-                            <p>
-                                {{ __('live-show.actual_start') }}: {{ $screen->actual($item['start'], $run->content['timezone']) }}
-                            </p>
-                            <p>
-                                {{ __('live-show.actual_finish') }}: {{ $screen->actual($item['finish'], $run->content['timezone']) }}
-                            </p>
+                            <p>{{ __('live-show.actual_start') }}: {{ $itemTimes[$item['key']]['start'] }}</p>
+                            <p>{{ __('live-show.actual_finish') }}: {{ $itemTimes[$item['key']]['finish'] }}</p>
                             @if ($item['start'] && $item['finish'])
                                 <p>
                                     {{ __('live-show.duration') }}: {{ (int) \Illuminate\Support\Carbon::parse($item['start'])->diffInSeconds(\Illuminate\Support\Carbon::parse($item['finish'])) }} {{ __('live-show.seconds') }}

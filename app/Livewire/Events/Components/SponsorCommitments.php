@@ -233,7 +233,6 @@ class SponsorCommitments extends Component
     {
         $event = $this->event();
         Gate::authorize('manageSponsors', $event);
-        $screen = app(SponsorCommitmentsViewModel::class);
         $filter = in_array($this->filter, ['pending', 'completed', 'cancelled', 'all'], true) ? $this->filter : 'pending';
         $sponsors = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereNull('archived_at')
             ->whereLike('name', '%'.mb_substr($this->sponsorSearch, 0, 80).'%')->orderBy('name')->orderBy('id')->limit(20)->get(['id', 'name', 'contact_name']);
@@ -243,8 +242,8 @@ class SponsorCommitments extends Component
 
         $preview = ! $instruction instanceof EventSponsorCommitment || $this->previewHash === '' ? null : app(SponsorInstructionService::class)->preview($event, $instruction, $this->previewMode, $this->previewTarget, $this->previewAfter);
 
-        return view('livewire.events.components.sponsor-commitments', ['event' => $event, 'rows' => $screen->rows($event, $filter),
-            'screen' => $screen, 'sponsors' => $sponsors, 'selected' => $selected, 'history' => $history, 'instruction' => $instruction,
+        return view('livewire.events.components.sponsor-commitments', ['event' => $event, ...app(SponsorCommitmentsViewModel::class)->data($event, $filter),
+            'sponsors' => $sponsors, 'selected' => $selected, 'history' => $history, 'instruction' => $instruction,
             'preview' => $preview, 'packData' => $instruction instanceof EventSponsorCommitment ? app(EventPackViewModel::class)->data($event) : null]);
     }
 

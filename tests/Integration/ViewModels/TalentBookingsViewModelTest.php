@@ -9,6 +9,7 @@ use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
+use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -120,11 +121,39 @@ test('a cancelled person still on the card requires attention without losing ter
     expect($row['warnings'])->toContain('cancelled_card')->and($row['booking']?->fee_minor)->toBe(123456);
 });
 
-test('fee display distinguishes an unknown fee from an agreed zero without fractional rounding', function (): void {
+test('fees are formatted with a sign, grouping and exact cents, and an unknown fee stays distinct from zero', function (?int $minor, string $label): void {
     // Arrange
-    $screen = resolve(TalentBookingsViewModel::class);
+    $fixture = talentBookingFixture();
+    $booking = $fixture['booking'];
+    $booking->confirmed_snapshot = [...($booking->confirmed_snapshot ?? throw new LogicException('Confirmed fixture required')),
+        'terms' => [...$booking->confirmed_snapshot['terms'], 'fee_minor' => $minor]];
+    $revision = EventTalentBookingRevision::factory()->make(['snapshot' => ['status' => 'confirmed', 'fee_minor' => $minor]]);
+    $revision->id = 77;
 
-    // Act / Assert
-    expect($screen->fee(null))->toBe('Not recorded')->and($screen->fee(0))->toBe('0.00')
-        ->and($screen->fee(123456))->toBe('1,234.56')->and($screen->fee(9999999999))->toBe('99,999,999.99');
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($fixture['event'], $booking, [$revision]);
+
+    // Assert
+    expect($data['agreedFee'])->toBe($label)
+        ->and($data['historyFees'])->toBe([77 => $label]);
+})->with([
+    'unknown' => [null, 'USD Not recorded'],
+    'zero' => [0, 'USD 0.00'],
+    'positive' => [123456, 'USD 1,234.56'],
+    'large' => [9999999999, 'USD 99,999,999.99'],
+    'negative' => [-150, 'USD -1.50'],
+    'negative under a dollar' => [-5, 'USD -0.05'],
+    'negative with grouping' => [-123456, 'USD -1,234.56'],
+]);
+
+test('no booking and no history leave the fee labels empty', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($fixture['event']);
+
+    // Assert
+    expect($data['agreedFee'])->toBeNull()
+        ->and($data['historyFees'])->toBeEmpty();
 });

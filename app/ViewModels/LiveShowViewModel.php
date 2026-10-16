@@ -8,6 +8,7 @@ use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -18,14 +19,19 @@ use Illuminate\Support\Facades\Lang;
  * @phpstan-import-type Item from EventLiveRun
  * @phpstan-import-type Source from LiveShowSourceQuery
  *
- * @phpstan-type Screen array{event: Event, run: ?EventLiveRun, source: ?Source, sourceError: ?string, needsReview: bool, removed: list<Item>, current: ?Item, next: ?Item, complete: bool}
+ * @phpstan-type Times array{start: string, finish: string}
+ * @phpstan-type Attendance array{arrived: string, briefed: string}
+ * @phpstan-type Screen array{event: Event, run: ?EventLiveRun, source: ?Source, sourceError: ?string, needsReview: bool, removed: list<Item>, current: ?Item, next: ?Item, complete: bool, runComparisons: array<string, string>, sourceComparisons: array<string, string>, itemTimes: array<string, Times>, attendance: array<string, Attendance>, refreshedLabel: ?string, savedLabel: ?string}
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing) {}
+    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison) {}
 
-    /** @return Screen */
-    public function data(Event $event): array
+    /**
+     * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant
+     * @return Screen
+     */
+    public function data(Event $event, string $refreshedAt = ''): array
     {
         $event->load(['promotion', 'venue']);
         $run = EventLiveRun::query()->where('event_id', $event->id)->first();
@@ -45,13 +51,26 @@ class LiveShowViewModel
                 $source['content'] = $this->withoutProduction($source['content']);
             }
         }
-        $needsReview = $run !== null && ! $complete && ($source === null || $source['pack']->version !== $run->pack_version
-            || ! hash_equals($run->card_fingerprint, $source['fingerprint']));
+        $needsReview = $run !== null && ! $complete && ($source === null || $this->comparison->hasMovedOn($run, $source['pack'], $source['fingerprint']));
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
+        $zone = $run->content['timezone'] ?? 'UTC';
+        $itemTimes = [];
+        $attendance = [];
+        foreach ($items as $item) {
+            $itemTimes[$item['key']] = ['start' => $this->actual($item['start'], $zone), 'finish' => $this->actual($item['finish'], $zone)];
+        }
+        foreach ($run->content['roster'] ?? [] as $person) {
+            $attendance[$person['key']] = ['arrived' => $this->actual($person['arrived'], $zone), 'briefed' => $this->actual($person['briefed'], $zone)];
+        }
 
         return ['event' => $event, 'run' => $run, 'source' => $source, 'sourceError' => $sourceError,
             'needsReview' => $needsReview, 'complete' => $complete,
+            'runComparisons' => $this->comparisons($run?->content['items'] ?? []),
+            'sourceComparisons' => $this->comparisons($source['content']['items'] ?? []),
+            'itemTimes' => $itemTimes, 'attendance' => $attendance,
+            'refreshedLabel' => $run === null ? null : $this->actual($refreshedAt, $zone),
+            'savedLabel' => $run === null ? null : $this->actual($run->updated_at->toIso8601String(), $zone),
             'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true))->all()),
             'current' => $items->firstWhere('state', 'running'), 'next' => $items->firstWhere('state', 'pending')];
     }
@@ -72,13 +91,29 @@ class LiveShowViewModel
         return $content;
     }
 
-    public function actual(?string $instant, string $timezone): string
+    private function actual(?string $instant, string $timezone): string
     {
         return $instant === null ? __('live-show.not_recorded') : Carbon::parse($instant)->setTimezone($timezone)->format('M j H:i:s P');
     }
 
+    /**
+     * How each item's actual start compares with its plan, keyed by item key.
+     *
+     * @param  list<Item>  $items
+     * @return array<string, string>
+     */
+    private function comparisons(array $items): array
+    {
+        $comparisons = [];
+        foreach ($items as $item) {
+            $comparisons[$item['key']] = $this->comparison($item);
+        }
+
+        return $comparisons;
+    }
+
     /** @param Item $item */
-    public function comparison(array $item): string
+    private function comparison(array $item): string
     {
         $planned = $this->timing->wallTime($item['timing']['revised_at'] ?? $item['timing']['planned_at'] ?? null, $item['timezone']);
         if (! $planned instanceof Carbon) {

@@ -101,7 +101,7 @@
                         {{ $promise->event->name }}
                         @if ($promise->event->trashed()) ·{{ __('sponsors.archived_label') }}@endif
                     </p>
-                    <p class="mt-2 break-words">{{ $promise->description }} · {{ $screen->status($promise) }}</p>
+                    <p class="mt-2 break-words">{{ $promise->description }} · {{ $statuses[$promise->id] }}</p>
                     <p class="text-muted-foreground mt-2 text-sm">
                         {{ __('sponsors.reference') }}: {{ $promise->agreement_reference ?? __('sponsors.not_set') }}
                     </p>

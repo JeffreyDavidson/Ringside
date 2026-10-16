@@ -1,9 +1,3 @@
-@php
-    $availability = $dashboard->rosterAvailability();
-    $upcomingEvents = $dashboard->upcomingEvents();
-    $championedTitles = $dashboard->championedTitles();
-@endphp
-
 <x-layouts.app :title="__('dashboard.title')">
     <x-layouts.workspace-canvas class="flex flex-col gap-7.5">
         <x-layouts.table-header :title="__('dashboard.title')" :subtitle="__('dashboard.subtitle')" />
@@ -81,28 +75,28 @@
                 :link-label="__('dashboard.titles_link')"
                 data-test="dashboard-current-champions"
             >
-                @if ($championedTitles->isEmpty())
+                @if ($champions === [])
                     <p class="border-border bg-surface-header text-muted-foreground m-0 border px-5 py-5 text-sm">
                         {{ __('dashboard.no_champions') }}
                     </p>
                 @else
                     <ul class="border-border bg-surface-header m-0 list-none border p-0">
-                        @foreach ($championedTitles as $championedTitle)
-                            @php($championship = $championedTitle->currentChampionship)
+                        @foreach ($champions as $champion)
+                            @php($championship = $champion['championship'])
                             <li @class(['border-border flex flex-col gap-1 px-5 py-4', 'border-t' => ! $loop->first])>
                                 <a
-                                    href="{{ route('titles.show', $championedTitle) }}"
+                                    href="{{ route('titles.show', $champion['title']) }}"
                                     class="text-muted-foreground hover:text-foreground focus-visible:outline-foreground text-xs font-bold tracking-[0.08em] uppercase focus-visible:outline-2 focus-visible:outline-offset-2"
-                                >{{ $championedTitle->name }}</a>
+                                >{{ $champion['title']->name }}</a>
                                 <a
-                                    href="{{ $dashboard->championUrl($championship) }}"
+                                    href="{{ $champion['url'] }}"
                                     class="text-foreground decoration-border-strong hover:decoration-signal focus-visible:outline-foreground font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
                                 >{{ $championship->champion->name }}</a>
                                 <span class="text-muted-foreground text-sm">
                                     {{
-                                        trans_choice('dashboard.champion_since', $dashboard->reignLengthInDays($championship), [
+                                        trans_choice('dashboard.champion_since', $champion['days'], [
                                             'date' => $championship->local_won_at->format('M j, Y'),
-                                            'days' => $dashboard->reignLengthInDays($championship),
+                                            'days' => $champion['days'],
                                         ])
                                     }}
                                 </span>

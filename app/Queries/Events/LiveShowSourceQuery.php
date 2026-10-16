@@ -11,6 +11,7 @@ use App\Models\Events\EventPack;
 
 /**
  * @phpstan-import-type Content from EventLiveRun
+ * @phpstan-import-type PackSource from EventPackSourceQuery
  *
  * @phpstan-type Source array{pack: EventPack, fingerprint: string, content: Content}
  */
@@ -22,11 +23,12 @@ class LiveShowSourceQuery
      * The live show's source, or null while the event has no date, no saved pack, a pack that no longer matches
      * the card, segments without a match to follow, or nothing to run.
      *
+     * @param  PackSource|null  $packSource  the event's pack source when the caller has already read it
      * @return Source|null
      */
-    public function get(Event $event): ?array
+    public function get(Event $event, ?array $packSource = null): ?array
     {
-        $data = $this->pack->get($event);
+        $data = $packSource ?? $this->pack->get($event);
         if ($event->date === null || $data['pack'] === null || $data['needsReview'] || $data['unplaced'] !== [] || $data['running'] === []) {
             return null;
         }

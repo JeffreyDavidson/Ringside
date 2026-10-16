@@ -170,13 +170,13 @@ class TalentBookings extends Component
     {
         $event = $this->event();
         Gate::authorize('update', $event);
-        $data = app(TalentBookingsViewModel::class)->data($event);
-        $rows = array_values(array_filter($data['rows'], fn (array $row): bool => $this->filter === 'all'
-            || ($this->filter === 'attention' && $row['warnings'] !== []) || ($row['booking']?->status->value ?? 'not_tracked') === $this->filter));
         $booking = $event->talentBookings()->where('person_type', $this->personType)->where('person_id', $this->personId)->first();
         $history = $this->historyOpen && $booking !== null ? $booking->revisions()->orderByDesc('version')->paginate(10, pageName: 'historyPage') : null;
+        $data = app(TalentBookingsViewModel::class)->data($event, $booking, $history ?? []);
+        $rows = array_values(array_filter($data['rows'], fn (array $row): bool => $this->filter === 'all'
+            || ($this->filter === 'attention' && $row['warnings'] !== []) || ($row['booking']?->status->value ?? 'not_tracked') === $this->filter));
 
-        return view('livewire.events.components.talent-bookings', [...$data, 'rows' => $rows, 'event' => $event, 'booking' => $booking, 'history' => $history, 'screen' => app(TalentBookingsViewModel::class)]);
+        return view('livewire.events.components.talent-bookings', [...$data, 'rows' => $rows, 'event' => $event, 'booking' => $booking, 'history' => $history]);
     }
 
     private function event(): Event

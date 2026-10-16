@@ -201,7 +201,10 @@ class Budget extends Component
 
     public function render(): View
     {
-        $data = app(EventBudgetViewModel::class)->data($this->event());
+        $event = $this->event();
+        Gate::authorize('viewBudget', $event);
+        $screen = app(EventBudgetViewModel::class);
+        $data = $screen->data($event);
         $direction = BudgetDirection::tryFrom($this->lineForm->direction);
         $categories = array_filter(BudgetCategory::cases(), fn (BudgetCategory $category): bool => $direction !== null && $category->accepts($direction));
         $history = null;
@@ -219,6 +222,7 @@ class Budget extends Component
         $selectedLine = $this->lineId === null || $data['budget'] === null ? null : $data['budget']->lines->firstWhere('id', $this->lineId);
 
         return view('livewire.events.components.budget', [...$data, 'categories' => $categories, 'history' => $history,
+            'historyChanges' => $screen->historyChanges($history ?? []),
             'selectedLine' => $selectedLine, 'safeFilter' => in_array($this->filter, ['all', 'needs_amount', 'to_pay', 'to_collect', 'refunds'], true) ? $this->filter : 'all']);
     }
 
