@@ -37,7 +37,7 @@ class PrepareLiveShowAction
                 throw RecordChangedException::changed();
             }
             if (Promotion::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(Promotion::toLocalTime($event->promotion, now())->startOfDay())) {
-                throw LiveShowException::because('old_event');
+                throw LiveShowException::oldEvent();
             }
             $run = new EventLiveRun;
             $run->event_id = $event->id;

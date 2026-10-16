@@ -31,20 +31,20 @@ class TournamentOutcomeManager
             throw RecordChangedException::changed();
         }
         if ($link->tournament->status === TournamentStatus::Cancelled) {
-            throw TournamentException::because('closed');
+            throw TournamentException::closed();
         }
         if ($link->active_node_id === null && ($match->match_finish === null || $match->winning_side_id !== $result->winningSide?->id)) {
-            throw TournamentException::because('historical_attempt');
+            throw TournamentException::historicalAttempt();
         }
         if ($match->winning_side_id === $result->winningSide?->id) {
             return;
         }
         $descendants = $this->bracket->descendantNodeIds($link->node);
         if (TournamentMatchLink::query()->whereIn('node_id', $descendants)->whereNotNull('active_node_id')->exists()) {
-            throw TournamentException::because('dependent_bookings');
+            throw TournamentException::dependentBookings();
         }
         if (TournamentNode::query()->whereKey($descendants)->whereNotNull('walkover_entry_id')->exists()) {
-            throw TournamentException::because('dependent_bookings');
+            throw TournamentException::dependentBookings();
         }
     }
 

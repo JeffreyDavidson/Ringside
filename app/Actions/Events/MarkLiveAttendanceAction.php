@@ -22,12 +22,12 @@ class MarkLiveAttendanceAction
             $content = $run->content;
             $index = array_search($key, array_column($content['roster'], 'key'), true);
             if (! is_int($index)) {
-                throw LiveShowException::because('unknown_person');
+                throw LiveShowException::unknownPerson();
             }
             $before = $content['roster'][$index];
             $person = $before;
             if (($before[$mark->value] !== null) === $value || ($mark === LiveAttendanceMark::Briefed && $value && $before['arrived'] === null)) {
-                throw LiveShowException::because('attendance_invalid');
+                throw LiveShowException::attendanceInvalid();
             }
             $person[$mark->value] = $value ? now()->utc()->toIso8601String() : null;
             if ($mark === LiveAttendanceMark::Arrived && ! $value) {

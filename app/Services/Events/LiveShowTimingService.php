@@ -20,7 +20,7 @@ class LiveShowTimingService
         }
         $zone = Promotion::zoneOf($run->event->promotion);
         if ($run->event->date?->copy()->setTimezone($zone)->toDateString() !== now()->setTimezone($zone)->toDateString()) {
-            throw LiveShowException::because('show_day');
+            throw LiveShowException::showDay();
         }
     }
 

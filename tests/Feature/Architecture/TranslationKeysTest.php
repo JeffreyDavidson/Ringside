@@ -11,6 +11,7 @@ use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
+use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeFinder;
 use PhpParser\ParserFactory;
 use Symfony\Component\Finder\Finder;
@@ -92,6 +93,39 @@ test('every business exception message is built from a translation key', functio
     $hardCodedList = implode("\n", $hardCoded);
 
     expect($hardCoded)->toBeEmpty("Exception messages that are not translated:\n{$hardCodedList}");
+});
+
+test('every business exception translates a fixed key, never one passed in by the caller', function (): void {
+    // Arrange
+    $dynamicKeys = [];
+    $files = Finder::create()
+        ->files()
+        ->in(app_path('Exceptions'))
+        ->name('*.php');
+
+    // Act
+    foreach ($files as $file) {
+        $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($file->getContents()) ?? [];
+        $relativePath = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+
+        $translations = array_filter(
+            (new NodeFinder)->findInstanceOf($statements, FuncCall::class),
+            fn (FuncCall $call): bool => $call->name instanceof Name && in_array($call->name->toString(), ['__', 'trans_choice'], true),
+        );
+
+        foreach ($translations as $call) {
+            $key = ($call->args[0] ?? null) instanceof Arg ? $call->args[0]->value : null;
+
+            if (! $key instanceof String_) {
+                $dynamicKeys[] = "{$relativePath}:{$call->getStartLine()}";
+            }
+        }
+    }
+
+    // Assert
+    $dynamicList = implode("\n", $dynamicKeys);
+
+    expect($dynamicKeys)->toBeEmpty("Exception translation keys that are not fixed strings:\n{$dynamicList}");
 });
 
 test('every enum label resolves to a translation', function (): void {

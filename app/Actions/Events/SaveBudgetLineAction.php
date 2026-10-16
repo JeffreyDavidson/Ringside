@@ -36,7 +36,7 @@ class SaveBudgetLineAction
         $direction = BudgetDirection::from($data['direction']);
         $category = BudgetCategory::from($data['category']);
         if (! $category->accepts($direction)) {
-            throw BudgetException::because('category_direction');
+            throw BudgetException::categoryDirection();
         }
         $attributes = ['direction' => $direction, 'category' => $category,
             'description' => trim($data['description']), 'counterparty' => trim($data['counterparty']),
@@ -48,22 +48,22 @@ class SaveBudgetLineAction
         return $this->mutate->handle($event, $version, $key, BudgetOperation::SaveLine, ['line_id' => $lineId, ...$attributes, 'acknowledge' => (bool) ($data['acknowledge'] ?? false)], function (EventBudget $budget) use ($lineId, $attributes, $reason, $data): ?array {
             $line = $lineId === null ? new EventBudgetLine : $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
             if ($line->archived_at !== null) {
-                throw BudgetException::because('archived');
+                throw BudgetException::archived();
             }
             if ($lineId === null && $budget->lines()->count() >= 500) {
-                throw BudgetException::because('line_limit');
+                throw BudgetException::lineLimit();
             }
             $before = $line->exists ? $line->attributesToArray() : [];
             $line->setRelation('movements', $line->movements()->orderBy('id')->lockForUpdate()->get());
             if ($line->exists && ($line->direction !== $attributes['direction']) && $line->movements->isNotEmpty()) {
-                throw BudgetException::because('direction_locked');
+                throw BudgetException::directionLocked();
             }
             $confirmedChanged = $line->exists && $line->confirmed_cents !== $attributes['confirmed_cents'];
             if ($confirmedChanged && $reason === null) {
-                throw BudgetException::because('reason_required');
+                throw BudgetException::reasonRequired();
             }
             if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! ($data['acknowledge'] ?? false)) {
-                throw BudgetException::because('excess');
+                throw BudgetException::excess();
             }
             $line->forceFill($attributes);
             if ($line->exists && ! $line->isDirty()) {
