@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Crew\SaveCrewContactAction;
+use App\Data\Crew\CrewContactData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Crew\Components\Directory;
@@ -76,7 +77,7 @@ test('directory errors preserve an edit and cancel clears private draft fields',
     $contact = CrewContact::factory()->create();
     $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'My draft');
     resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
-        ['name' => 'Other editor', 'phone' => null, 'email' => null, 'notes' => null]);
+        new CrewContactData('Other editor', null, null, null));
 
     // Act
     $page->call('save');
@@ -94,7 +95,7 @@ test('a stale contact save and archive show the shared changed-by-someone-else m
     $contact = CrewContact::factory()->create();
     $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'My draft');
     resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
-        ['name' => 'Other editor', 'phone' => null, 'email' => null, 'notes' => null]);
+        new CrewContactData('Other editor', null, null, null));
 
     // Act
     $page->call('save');
@@ -137,4 +138,113 @@ test('a member forging the directory component is forbidden', function (): void 
 
     // Assert
     $component->assertForbidden();
+});
+
+test('an owner or manager archives a contact and keeps its private details', function (MembershipRole $role): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $contact = CrewContact::factory()->for($promotion)->create(['notes' => 'Retain this note']);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $page = livewire(Directory::class);
+
+    // Act
+    $page->call('archive', $contact->id, 1);
+
+    // Assert
+    $page->assertHasNoErrors();
+    expect($contact->refresh()->archived_at)->not->toBeNull()
+        ->and($contact->notes)->toBe('Retain this note')
+        ->and($contact->version)->toBe(2);
+})->with(['owner' => [MembershipRole::Owner], 'manager' => [MembershipRole::Manager]]);
+
+test('a membership downgrade refuses an archive opened as manager', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $contact = CrewContact::factory()->for($promotion)->create(['notes' => 'Retain this note']);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $page = livewire(Directory::class);
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
+    $context->forgetMemberships();
+
+    // Act
+    $page->call('archive', $contact->id, 1);
+
+    // Assert
+    $page->assertForbidden();
+    expect($contact->refresh()->archived_at)->toBeNull()
+        ->and($contact->version)->toBe(1);
+});
+
+test('a membership downgrade refuses an edit opened as manager', function (): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $contact = CrewContact::factory()->for($promotion)->create(['name' => 'Alex Sound']);
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    $context = resolve(PromotionContextService::class);
+    $context->set($promotion);
+    $context->enforce();
+    $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'Cannot save');
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
+    $context->forgetMemberships();
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertForbidden();
+    expect($contact->refresh()->name)->toBe('Alex Sound')
+        ->and($contact->version)->toBe(1);
+});
+
+test('the directory refuses invalid contact details without writing', function (array $input, string $field): void {
+    // Arrange
+    actingAs(administrator());
+    $context = resolve(PromotionContextService::class);
+    $context->set(Promotion::factory()->create());
+    $context->enforce();
+    $page = livewire(Directory::class)->call('newContact');
+
+    // Act
+    foreach ($input as $property => $value) {
+        $page->set($property, $value);
+    }
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors($field);
+    expect(CrewContact::query()->count())->toBe(0);
+})->with([
+    'missing name' => [['name' => ''], 'name'],
+    'overlong name' => [['name' => str_repeat('a', 161)], 'name'],
+    'overlong phone' => [['name' => 'Alex', 'phone' => str_repeat('1', 81)], 'phone'],
+    'bad email' => [['name' => 'Alex', 'email' => 'not-an-email'], 'email'],
+    'overlong notes' => [['name' => 'Alex', 'notes' => str_repeat('a', 2001)], 'notes'],
+]);
+
+test('the directory refuses a save without a submission key', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $context = resolve(PromotionContextService::class);
+    $context->set(Promotion::factory()->create());
+    $context->enforce();
+    $page = livewire(Directory::class);
+
+    // Act
+    $page->set('name', 'Alex Sound')->call('save');
+
+    // Assert
+    $page->assertHasErrors('client_id');
+    expect(CrewContact::query()->count())->toBe(0);
 });

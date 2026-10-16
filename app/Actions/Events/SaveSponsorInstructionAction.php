@@ -16,7 +16,6 @@ use App\Queries\Events\EventPackCardQuery;
 use App\Queries\Events\EventPackSourceQuery;
 use App\Services\Events\SponsorInstructionService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class SaveSponsorInstructionAction
@@ -30,7 +29,6 @@ class SaveSponsorInstructionAction
     {
         DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $mode, $targetKey, $afterMatchId, $previewHash, $reason): void {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('manageSponsors', $event);
             $matches = EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
             $commitment = EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();

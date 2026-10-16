@@ -9,7 +9,6 @@ use App\Exceptions\RecordChangedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class SaveSponsorAction
@@ -23,7 +22,6 @@ class SaveSponsorAction
                 $promotionQuery->lockForUpdate();
             }
             $promotion = $promotionQuery->firstOrFail();
-            Gate::authorize('manageSponsors', $promotion);
             $sponsor = $id === null ? null : Sponsor::query()->where('promotion_id', $promotion->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
                 throw RecordChangedException::changed();
@@ -33,7 +31,6 @@ class SaveSponsorAction
             }
             $sponsor ??= new Sponsor;
             $sponsor->promotion_id = $promotion->id;
-            Gate::authorize('manageSponsors', $sponsor);
             $sponsor->submission_key = $sponsor->exists ? $sponsor->submission_key : $submissionKey;
             $sponsor->name = mb_trim($data->name);
             $sponsor->contact_name = $data->contactName;

@@ -7,7 +7,6 @@ namespace App\Actions\Crew;
 use App\Exceptions\RecordChangedException;
 use App\Models\Crew\CrewContact;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class ArchiveCrewContactAction
 {
@@ -15,7 +14,6 @@ class ArchiveCrewContactAction
     {
         DB::transaction(function () use ($contact, $version): void {
             $contact = CrewContact::query()->whereKey($contact->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('archive', $contact);
             if ($contact->version !== $version || $contact->archived_at !== null) {
                 throw RecordChangedException::changed();
             }
