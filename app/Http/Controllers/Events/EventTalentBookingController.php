@@ -7,10 +7,10 @@ namespace App\Http\Controllers\Events;
 use App\Models\Events\Event;
 use Illuminate\Contracts\View\View;
 
-class EventLiveShowsController
+class EventTalentBookingController
 {
     public function show(Event $event): View
     {
-        return view('events.live', ['event' => $event]);
+        return view('events.talent-bookings', ['event' => $event]);
     }
 }

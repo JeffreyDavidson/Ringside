@@ -7,7 +7,7 @@ namespace App\Http\Controllers\TagTeams;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
 
-class TagTeamsController
+class TagTeamController
 {
     public function index(): View
     {

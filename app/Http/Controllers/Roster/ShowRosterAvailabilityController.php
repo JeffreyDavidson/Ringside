@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Roster;
 
-use App\Http\Controllers\Controller;
 use Illuminate\View\View;
 
-class ShowRosterAvailabilityController extends Controller
+class ShowRosterAvailabilityController
 {
     public function __invoke(): View
     {

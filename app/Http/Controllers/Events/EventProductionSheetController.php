@@ -9,7 +9,7 @@ use App\Models\Events\Event;
 use App\ViewModels\EventProductionViewModel;
 use Illuminate\Contracts\View\View;
 
-class EventProductionSheetsController
+class EventProductionSheetController
 {
     public function show(Event $event, EventProductionSheetRequest $request, EventProductionViewModel $viewModel): View
     {

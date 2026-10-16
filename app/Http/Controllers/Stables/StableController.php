@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Stables;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Contracts\View\View;
 
-class StablesController
+class StableController
 {
     public function index(): View
     {

@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Matches;
 use App\Models\Events\Event;
 use Illuminate\Contracts\View\View;
 
-class EventMatchesController
+class EventMatchController
 {
     public function index(Event $event): View
     {

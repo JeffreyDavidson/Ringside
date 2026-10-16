@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
-class EventsController
+class EventController
 {
     public function index(): View
     {

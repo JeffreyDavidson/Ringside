@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Users;
 use App\Models\Users\User;
 use Illuminate\Contracts\View\View;
 
-class UsersController
+class UserController
 {
     public function index(): View
     {

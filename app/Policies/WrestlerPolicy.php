@@ -8,11 +8,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
 /**
- * Simplified WrestlerPolicy with business logic moved to Actions.
- *
- * This policy only handles authorization (who can do what), not validation
- * (whether the action is valid). Business rules and entity state validation
- * are handled in the corresponding Actions using custom exceptions.
+ * Stub: PromotionGate (Gate::before) decides every ability on this model from the user's
+ * promotion membership role, so these methods only run when the gate falls through and deny.
  */
 class WrestlerPolicy
 {

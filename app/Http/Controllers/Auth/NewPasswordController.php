@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\Users\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class NewPasswordController extends Controller
+class NewPasswordController
 {
     /**
      * Display the password reset view.

@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Crew;
 
 use Illuminate\Contracts\View\View;
 
-class CrewContactsController
+class CrewContactController
 {
     public function index(): View
     {

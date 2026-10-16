@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Events\EventController;
+use Illuminate\Routing\Controller;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -86,7 +86,7 @@ test('controllers are resourceful or invokable', function () {
     expect($controllerCount)->toBeGreaterThan(0);
 });
 
-test('domain resource controllers use plural resource names', function () {
+test('domain resource controllers use singular resource names', function () {
     foreach (applicationControllers() as $controller) {
         if (str_starts_with($controller, 'App\\Http\\Controllers\\Auth\\')) {
             continue;
@@ -100,7 +100,7 @@ test('domain resource controllers use plural resource names', function () {
 
         $resource = Str::beforeLast(class_basename($controller), 'Controller');
 
-        expect($resource)->toBe(Str::pluralStudly(Str::singular($resource)));
+        expect($resource)->toBe(Str::studly(Str::singular($resource)));
     }
 });
 
@@ -249,14 +249,14 @@ test('controller matching accepts only a matching file with an executable test b
     // Arrange
     $directory = sys_get_temp_dir().'/ringside-controller-tests-'.Str::uuid();
     File::ensureDirectoryExists($directory.'/Events');
-    File::put($directory.'/Events/EventsControllerTest.php', $source);
+    File::put($directory.'/Events/EventControllerTest.php', $source);
 
     try {
         // Act
-        $problems = controllerTestProblems([EventsController::class], $directory);
+        $problems = controllerTestProblems([EventController::class], $directory);
 
         // Assert
-        expect($problems)->toBe($valid ? [] : ['Events/EventsControllerTest.php: missing executable Pest test']);
+        expect($problems)->toBe($valid ? [] : ['Events/EventControllerTest.php: missing executable Pest test']);
     } finally {
         File::deleteDirectory($directory);
     }

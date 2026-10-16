@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Titles;
 use App\Models\Titles\Title;
 use Illuminate\Contracts\View\View;
 
-class TitlesController
+class TitleController
 {
     public function index(): View
     {

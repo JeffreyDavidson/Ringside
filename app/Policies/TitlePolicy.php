@@ -8,10 +8,8 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 
 /**
- * Simplified TitlePolicy using global Gate hook.
- *
- * All repetitive administrator checks are handled by the global Gate hook.
- * Business validation is handled in Actions using custom exceptions.
+ * Stub: PromotionGate (Gate::before) decides every ability on this model from the user's
+ * promotion membership role, so these methods only run when the gate falls through and deny.
  */
 class TitlePolicy
 {

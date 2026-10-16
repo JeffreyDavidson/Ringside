@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Tournaments;
 use App\Models\Tournaments\Tournament;
 use Illuminate\Contracts\View\View;
 
-class TournamentsController
+class TournamentController
 {
     public function index(): View
     {

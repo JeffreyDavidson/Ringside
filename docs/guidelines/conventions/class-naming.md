@@ -69,18 +69,18 @@ class WrestlerService {}                  // Wrong suffix
 
 ### Controller Naming Standards
 - **Domain Organization**: Group controllers by domain/entity
-- **Resource Controllers**: Use a plural resource name for endpoints belonging to one resource
+- **Resource Controllers**: Use the singular resource name (`WrestlerController`) for endpoints belonging to one resource
 - **Invokable Controllers**: Use an action-oriented name for standalone endpoints that do not fit a resource method
 
 ```php
 // ✅ CORRECT
 namespace App\Http\Controllers\Events;
-class EventsController {
+class EventController {
     public function index(): View {}
     public function show(Event $event): View {}
 }
 
-class EventMatchesController {
+class EventMatchController {
     public function index(Event $event): View {}
 }
 
