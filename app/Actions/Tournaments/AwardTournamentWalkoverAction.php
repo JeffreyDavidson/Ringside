@@ -17,7 +17,6 @@ use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class AwardTournamentWalkoverAction
 {
@@ -25,7 +24,6 @@ class AwardTournamentWalkoverAction
 
     public function handle(TournamentNode $node, int $version, string $reason): void
     {
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($node, $version, $reason): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {

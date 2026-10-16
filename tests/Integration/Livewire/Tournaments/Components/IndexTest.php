@@ -7,7 +7,9 @@ use App\Livewire\Tournaments\Components\Index;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\Tournament;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Str;
 use JMac\Testing\Double;
+use Ramsey\Uuid\UuidInterface;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -77,4 +79,65 @@ it('retains invalid roster selections with a clear business error', function ():
     Wrestler::query()->findOrFail($ids[0])->delete();
     livewire(Index::class)->call('start')->set('form.name', 'Unavailable Cup')->set('form.capacity', 4)->set('form.entrants', $ids)->call('save')->assertHasErrors('operation')->assertSet('form.entrants', $ids);
     expect(Tournament::query()->where('name', 'Unavailable Cup')->exists())->toBeFalse();
+});
+
+it('refuses invalid tournament fields before anything is created', function (array $changes, string $error): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $context = app(PromotionContextService::class);
+    $context->set($world['promotion']);
+    $context->enforce();
+    $ids = $world['tournament']->entries()->get()->map(fn ($entry): int => $entry->competitor_id)->all();
+    $page = livewire(Index::class)
+        ->call('start')
+        ->set('form.name', 'Second Cup')
+        ->set('form.capacity', 4)
+        ->set('form.entrants', $ids);
+    foreach ($changes as $field => $value) {
+        $page->set($field, $value);
+    }
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors($error);
+    expect(Tournament::query()->count())->toBe(1);
+})->with([
+    'blank name' => [['form.name' => ''], 'form.name'],
+    'name over 255 characters' => [['form.name' => str_repeat('a', 256)], 'form.name'],
+    'capacity outside 4, 8 and 16' => [['form.capacity' => 5], 'form.capacity'],
+    'a single entrant' => [['form.entrants' => [1]], 'form.entrants'],
+    'more entrants than capacity' => [['form.entrants' => [1, 2, 3, 4, 5]], 'form.entrants'],
+    'a repeated entrant' => [['form.entrants' => [1, 1]], 'form.entrants.1'],
+    'a missing entrant' => [['form.entrants' => [1, null]], 'form.entrants.1'],
+]);
+
+it('refuses a request id that is not a uuid', function (): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $context = app(PromotionContextService::class);
+    $context->set($world['promotion']);
+    $context->enforce();
+    $ids = $world['tournament']->entries()->get()->map(fn ($entry): int => $entry->competitor_id)->all();
+    Str::createUuidsUsing(fn (): UuidInterface => Mockery::mock(UuidInterface::class, ['toString' => 'not-a-uuid']));
+
+    try {
+        $page = livewire(Index::class)
+            ->call('start')
+            ->set('form.name', 'Second Cup')
+            ->set('form.capacity', 4)
+            ->set('form.entrants', $ids);
+
+        // Act
+        $page->call('save');
+    } finally {
+        Str::createUuidsNormally();
+    }
+
+    // Assert
+    $page->assertHasErrors('form.requestId');
+    expect(Tournament::query()->count())->toBe(1);
 });

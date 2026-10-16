@@ -130,6 +130,7 @@ class Show extends Component
     {
         $tournament = $this->tournament();
         Gate::authorize('update', $tournament);
+        $this->form->validateNaming();
         $this->perform(fn () => $rename->handle($tournament, $this->version, $this->form->name, $this->form->description));
     }
 

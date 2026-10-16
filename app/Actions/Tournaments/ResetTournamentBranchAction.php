@@ -14,7 +14,6 @@ use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class ResetTournamentBranchAction
 {
@@ -22,7 +21,6 @@ class ResetTournamentBranchAction
 
     public function handle(TournamentNode $node, int $version, string $reason, bool $includeCurrent = false): void
     {
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($node, $version, $reason, $includeCurrent): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {

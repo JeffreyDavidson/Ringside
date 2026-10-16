@@ -11,7 +11,6 @@ use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Tournaments\Tournament;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class CancelTournamentAction
 {
@@ -19,7 +18,6 @@ class CancelTournamentAction
 
     public function handle(Tournament $tournament, int $version, string $reason): void
     {
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($tournament, $version, $reason): void {
             $tournament = $this->locks->lock($tournament->id);
             if ($tournament->version !== $version) {

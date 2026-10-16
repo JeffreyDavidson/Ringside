@@ -8,7 +8,6 @@ use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Models\Tournaments\Tournament;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class RenameTournamentAction
 {
@@ -16,7 +15,6 @@ class RenameTournamentAction
 
     public function handle(Tournament $tournament, int $version, string $name, ?string $description): void
     {
-        Validator::make(['name' => $name, 'description' => $description], ['name' => ['required', 'string', 'max:255'], 'description' => ['nullable', 'string', 'max:10000']])->validate();
         DB::transaction(function () use ($tournament, $version, $name, $description): void {
             $tournament = $this->locks->lock($tournament->id);
             if ($tournament->version !== $version) {

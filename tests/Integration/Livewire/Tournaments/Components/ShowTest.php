@@ -150,3 +150,79 @@ it('labels current unavailability without erasing historical qualifiers', functi
     livewire(Show::class, ['tournamentId' => $t->id])->assertSee('No longer bookable');
     expect($t->links()->count())->toBe(0)->and($t->entries()->count())->toBe(4);
 })->with(EntrantKind::cases());
+
+it('refuses an invalid name or description when renaming and changes nothing', function (string $field, string $value, string $error): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $tournament = $world['tournament'];
+    $name = $tournament->name;
+
+    // Act
+    $page = livewire(Show::class, ['tournamentId' => $tournament->id])
+        ->set($field, $value)
+        ->call('rename');
+
+    // Assert
+    $page->assertHasErrors([$field => $error]);
+    expect($tournament->refresh()->name)->toBe($name)
+        ->and($tournament->version)->toBe(1);
+})->with([
+    'blank name' => ['form.name', '', 'required'],
+    'name over 255 characters' => ['form.name', str_repeat('a', 256), 'max'],
+    'description over 10000 characters' => ['form.description', str_repeat('a', 10001), 'max'],
+]);
+
+it('refuses a reason that is missing, too long or unconfirmed before any tournament operation runs', function (string $operation, string $reason, bool $confirmed, string $field): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $tournament = $world['tournament'];
+    $target = in_array($operation, ['replace', 'withdraw'], true) ? $tournament->entries()->firstOrFail()->id : $tournament->nodes()->firstOrFail()->id;
+    $page = livewire(Show::class, ['tournamentId' => $tournament->id])
+        ->call('begin', $operation, $target)
+        ->set('reason', $reason)
+        ->set('confirmed', $confirmed)
+        ->set('replacementId', Wrestler::factory()->employed()->for($world['promotion'])->create()->id);
+
+    // Act
+    $page->call('confirm');
+
+    // Assert
+    $page->assertHasErrors($field);
+    expect($tournament->refresh()->version)->toBe(1)
+        ->and($tournament->status)->not->toBe(TournamentStatus::Cancelled);
+})->with(function (): Generator {
+    foreach (['reset', 'unbook', 'withdraw', 'replace', 'walkover', 'cancel'] as $operation) {
+        yield "{$operation} without a reason" => [$operation, '', true, 'reason'];
+        yield "{$operation} with a reason over 2000 characters" => [$operation, str_repeat('a', 2001), true, 'reason'];
+        yield "{$operation} unconfirmed" => [$operation, 'Because.', false, 'confirmed'];
+    }
+});
+
+it('refuses invalid tournament fields when saving an existing tournament', function (array $changes, string $error): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $tournament = $world['tournament'];
+    $name = $tournament->name;
+    $page = livewire(Show::class, ['tournamentId' => $tournament->id]);
+    foreach ($changes as $field => $value) {
+        $page->set($field, $value);
+    }
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors($error);
+    expect($tournament->refresh()->name)->toBe($name)
+        ->and($tournament->version)->toBe(1);
+})->with([
+    'blank name' => [['form.name' => ''], 'form.name'],
+    'capacity outside 4, 8 and 16' => [['form.capacity' => 5], 'form.capacity'],
+    'a single entrant' => [['form.entrants' => [1]], 'form.entrants'],
+    'more entrants than capacity' => [['form.capacity' => 4, 'form.entrants' => [1, 2, 3, 4, 5]], 'form.entrants'],
+    'a repeated entrant' => [['form.entrants' => [1, 1]], 'form.entrants.1'],
+    'a missing entrant' => [['form.entrants' => [1, null]], 'form.entrants.1'],
+]);
