@@ -9,7 +9,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\EventRosterAvailabilityQuery;
+use App\Services\Events\EventRosterAvailabilityService;
 use App\Services\Promotions\PromotionContextService;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,7 +76,7 @@ class Calendar extends Component
         return true;
     }
 
-    public function render(EventRosterAvailabilityQuery $availability): View
+    public function render(EventRosterAvailabilityService $availability): View
     {
         Gate::authorize('viewAny', Wrestler::class);
         $promotion = $this->promotionContext->current();

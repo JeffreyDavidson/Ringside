@@ -10,12 +10,12 @@ use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\EventPackCardQuery;
+use App\Services\Events\EventPackCardService;
 use Illuminate\Support\Facades\DB;
 
 class SaveEventPackAction
 {
-    public function __construct(private readonly EventPackCardQuery $card) {}
+    public function __construct(private readonly EventPackCardService $card) {}
 
     public function handle(Event $event, int $version, string $fingerprint, EventPackData $data, bool $reviewed): void
     {

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Events;
+namespace App\Services\Events;
 
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Queries\Events\EventPackQuery;
 
 /**
  * The saved pack of an event together with its current card, running order and the ways the two have drifted apart.
@@ -15,20 +16,20 @@ use App\Models\Events\EventPack;
  * @phpstan-import-type Timing from EventPack
  * @phpstan-import-type MatchEntry from EventPack
  * @phpstan-import-type Segment from EventPack
- * @phpstan-import-type Card from EventPackCardQuery
+ * @phpstan-import-type Card from EventPackCardService
  *
  * @phpstan-type RunningRow array{key: string, label: string, details: string, referees: string, warning: bool, timing: Timing|array{}}
  * @phpstan-type PackSource array{event: Event, pack: ?EventPack, card: Card, content: Content, needsReview: bool, removed: list<MatchEntry>, running: list<RunningRow>, unplaced: list<Segment>}
  */
-class EventPackSourceQuery
+class EventPackSourceService
 {
-    public function __construct(private readonly EventPackCardQuery $card) {}
+    public function __construct(private readonly EventPackCardService $card, private readonly EventPackQuery $packs) {}
 
     /** @return PackSource */
     public function get(Event $event): array
     {
         $card = $this->card->get($event);
-        $pack = $event->pack()->first();
+        $pack = $this->packs->get($event);
         $content = $pack->content ?? ['timezone' => $card['timezone'], 'doors_at' => null, 'revision' => null, 'master' => null, 'notes' => null, 'follow_up' => null, 'matches' => [], 'segments' => []];
         $ids = array_column($card['rows'], 'id');
         $timings = collect($content['matches'])->keyBy('match_id');
@@ -48,6 +49,6 @@ class EventPackSourceQuery
         return ['event' => $event, 'pack' => $pack, 'card' => $card, 'content' => $content,
             'removed' => array_values($timings->whereNotIn('match_id', $ids)->all()), 'running' => $running,
             'unplaced' => array_values($segments->filter(fn (array $segment): bool => $segment['after_match_id'] !== null && ! in_array($segment['after_match_id'], $ids, true))->all()),
-            'needsReview' => $pack !== null && $pack->card_fingerprint !== $card['fingerprint']];
+            'needsReview' => $pack instanceof EventPack && $pack->card_fingerprint !== $card['fingerprint']];
     }
 }

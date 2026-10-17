@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Events;
 
 use App\Models\Events\Event;
-use App\Queries\Events\EventPackCardQuery;
 use App\Queries\Events\TalentBookingContextQuery;
 
 class TalentBookingFingerprintService
 {
-    public function __construct(private readonly TalentBookingContextQuery $context, private readonly EventPackCardQuery $card) {}
+    public function __construct(private readonly TalentBookingContextQuery $context, private readonly EventPackCardService $card) {}
 
     /**
      * Names are historical display context, not agreement invalidation.
