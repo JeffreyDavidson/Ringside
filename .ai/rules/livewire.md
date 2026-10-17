@@ -11,8 +11,9 @@ Authorize every protected Livewire operation with Gate::authorize() immediately 
 ## Direct Eloquent access
 Query Eloquent models directly in Livewire query components. Move reusable query behavior into typed custom Eloquent Builders; do not create repositories that merely wrap Eloquent.
 
-## Resolve actions at Livewire boundaries
-Resolve Action classes from the container at Livewire execution boundaries and call handle().
+## Inject collaborators into Livewire components
+Livewire components receive Actions, Queries, Services, ViewModels and Lifecycle classes by dependency injection, never through inline app() or resolve() calls. Type-hint a collaborator on the Livewire action or render() method that uses it, placing injected parameters before the parameters Livewire passes from the client (`public function cancelInvitation(RemovePromotionInvitationAction $action, int $invitationId)` in Promotions\Members\Manage) and call handle(). Inject in boot() only in two cases, and keep the collaborator in a protected property so it is never serialized into component state: several methods or hooks share it (EventPackViewModel in Events\Components\SponsorCommitments), or the method that needs it is also called by other component methods, which cannot pass an argument (TalentBookingFingerprintService for TalentBookings::edit()).
+A Livewire Form object is not built by the container and cannot receive injected parameters. Pass the collaborator in from the component method that calls the form (`$this->form->toData($timing)`). Only when Livewire itself calls the form, as in rules() run by validate(), keep one narrowly commented app() resolution.
 
 ## Blade and Livewire frontend
 Build server-driven interactive UI with class-based Livewire components and Blade views; do not introduce an Inertia or SPA page layer without an explicit architectural change.

@@ -64,6 +64,13 @@ class Production extends Component
 
     public bool $saved = false;
 
+    protected EventPackViewModel $packs;
+
+    public function boot(EventPackViewModel $packs): void
+    {
+        $this->packs = $packs;
+    }
+
     public function mount(int $eventId): void
     {
         $this->eventId = $eventId;
@@ -74,7 +81,7 @@ class Production extends Component
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
-        $data = app(EventPackViewModel::class)->data($event);
+        $data = $this->packs->data($event);
         $this->version = $data['pack']->version ?? 0;
         $this->fingerprint = $data['card']['fingerprint'];
         $this->items = $data['running'];
@@ -103,7 +110,7 @@ class Production extends Component
 
             return;
         }
-        $data = app(EventPackViewModel::class)->data($event);
+        $data = $this->packs->data($event);
         $this->assignments[] = ['id' => (string) Str::uuid(), 'contact_id' => 0, 'name' => '', 'role' => 'sound',
             'station' => null, 'call_at' => null, 'timezone' => $data['content']['timezone'], 'offset' => null,
             'setup' => null, 'during' => null, 'strike' => null, 'active' => true];
@@ -149,7 +156,7 @@ class Production extends Component
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
-        $data = app(EventPackViewModel::class)->data($event);
+        $data = $this->packs->data($event);
         $retained = array_values(array_filter($data['content']['production']['cues'] ?? [], fn (array $cue): bool => ! in_array($cue['item_key'], array_column($this->items, 'key'), true)));
         $key = $this->retainedTargets[$id] ?? '';
         Validator::make(['cue' => $id, 'item' => $key], [
@@ -183,15 +190,15 @@ class Production extends Component
         $this->saved = false;
     }
 
-    public function save(): void
+    public function save(SaveEventProductionAction $action, EventProductionRequirements $requirements): void
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
         $this->resetErrorBag();
         $previousVersion = $this->version;
         try {
-            $input = $this->validatedInput();
-            app(SaveEventProductionAction::class)->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed);
+            $input = $this->validatedInput($requirements);
+            $action->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed);
             $this->reloadSaved();
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);
@@ -204,7 +211,7 @@ class Production extends Component
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
-        $data = app(EventPackViewModel::class)->data($event);
+        $data = $this->packs->data($event);
         $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)->whereNull('archived_at')
             ->matchingName($this->search)->orderBy('name')->orderBy('id')->limit(20)->get();
         $selected = CrewContact::query()->where('promotion_id', $event->promotion_id)->whereKey(array_column($this->assignments, 'contact_id'))->get();
@@ -216,9 +223,9 @@ class Production extends Component
     }
 
     /** @return array<string, mixed> */
-    private function validatedInput(): array
+    private function validatedInput(EventProductionRequirements $requirements): array
     {
-        return resolve(EventProductionRequirements::class)->validatedInput([
+        return $requirements->validatedInput([
             'notes' => $this->notes,
             'assignments' => array_map(fn (array $assignment): array => [...$assignment, 'refresh_name' => in_array($assignment['id'], $this->refreshNames, true)], $this->assignments),
             'cues' => $this->cues,

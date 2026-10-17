@@ -63,6 +63,7 @@ class CreateEditForm extends BaseForm
             return $this->event()->promotion;
         }
 
+        // Livewire calls rules() from validate() and a Form is not container-built, so the component cannot pass this in.
         $context = app(PromotionContextService::class);
 
         return $context->isEnforced() ? $context->current() : null;

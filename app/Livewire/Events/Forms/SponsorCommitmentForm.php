@@ -103,18 +103,19 @@ class SponsorCommitmentForm extends Form
             'instructionOwner' => ['nullable', 'string', 'max:160'], 'reviewed' => ['boolean'], 'refreshSponsorName' => ['boolean']];
     }
 
-    public function toData(): SponsorCommitmentData
+    /** A Livewire form cannot take injected collaborators, so the component passes the timing service in. */
+    public function toData(LiveShowTimingService $timing): SponsorCommitmentData
     {
         $this->validate();
 
         return new SponsorCommitmentData($this->sponsorId, SponsorCommitmentType::from($this->type), $this->description,
-            $this->owner ?: null, $this->instant('deadline', $this->deadline, $this->deadlineOffset, $this->originalDeadline), $this->timezone,
+            $this->owner ?: null, $this->instant($timing, 'deadline', $this->deadline, $this->deadlineOffset, $this->originalDeadline), $this->timezone,
             $this->notes ?: null, $this->agreement ?: null, SponsorCommitmentStatus::from($this->status),
-            $this->evidence ?: null, $this->evidenceUrl ?: null, $this->instant('completedAt', $this->completedAt, $this->completedOffset, $this->originalCompletion),
+            $this->evidence ?: null, $this->evidenceUrl ?: null, $this->instant($timing, 'completedAt', $this->completedAt, $this->completedOffset, $this->originalCompletion),
             $this->instructionLabel ?: null, $this->instruction ?: null, $this->instructionOwner ?: null);
     }
 
-    private function instant(string $field, string $value, string $offset, ?string $original): ?Carbon
+    private function instant(LiveShowTimingService $timing, string $field, string $value, string $offset, ?string $original): ?Carbon
     {
         if ($value === '') {
             return null;
@@ -125,8 +126,8 @@ class SponsorCommitmentForm extends Form
                 return $recorded->utc();
             }
         }
-        $instant = app(LiveShowTimingService::class)->wallTime($value, $this->timezone, $offset ?: null);
-        if ($instant === null) {
+        $instant = $timing->wallTime($value, $this->timezone, $offset ?: null);
+        if (! $instant instanceof Carbon) {
             throw ValidationException::withMessages(['form.'.$field => __('sponsors.invalid_time')]);
         }
 

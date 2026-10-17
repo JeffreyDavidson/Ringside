@@ -63,7 +63,7 @@ Each detail page (wrestlers, managers, referees, tag teams, stables, titles) ren
 These are the only Livewire entry points for lifecycle transitions; the index tables
 expose row actions such as delete but no lifecycle methods.
 
-- Each roster transition method resolves its typed Action from the container and runs it
+- Each roster transition method receives its typed Action by injection (method injection, or `boot()` when methods share it) and runs it
   through `ExecutesRosterActions::executeAuthorizedRosterAction()`, which authorizes with
   `Gate::authorize()`, executes the Action, translates `BaseBusinessException` into a
   localized failure message, and dispatches `{entity}-updated` plus a `flash-message` for the

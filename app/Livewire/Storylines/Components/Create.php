@@ -28,28 +28,33 @@ class Create extends Component
     #[Locked]
     public string $submissionId;
 
+    protected PromotionContextService $promotionContext;
+
+    public function boot(PromotionContextService $promotionContext): void
+    {
+        $this->promotionContext = $promotionContext;
+    }
+
     public function mount(): void
     {
         Gate::authorize('create', Storyline::class);
         $this->submissionId = (string) Str::uuid();
-        $this->promotionId = app(PromotionContextService::class)->current()?->id;
+        $this->promotionId = $this->promotionContext->current()?->id;
     }
 
-    public function save(): void
+    public function save(CreateAction $create): void
     {
         Gate::authorize('create', Storyline::class);
         $this->validate(['submissionId' => ['required', 'uuid'], 'promotionId' => ['required', 'integer'], 'title' => ['required', 'string', 'max:160'], 'premise' => ['required', 'string', 'max:4000'], 'payoff' => ['nullable', 'string', 'max:4000']]);
-        $context = app(PromotionContextService::class);
-        abort_if($context->isEnforced() && $context->current()?->id !== $this->promotionId, 403);
-        $story = app(CreateAction::class)->handle(Promotion::query()->findOrFail($this->promotionId), new StorylineData($this->title, $this->premise, $this->payoff ?: null, $this->submissionId));
+        abort_if($this->promotionContext->isEnforced() && $this->promotionContext->current()?->id !== $this->promotionId, 403);
+        $story = $create->handle(Promotion::query()->findOrFail($this->promotionId), new StorylineData($this->title, $this->premise, $this->payoff ?: null, $this->submissionId));
         $this->redirectRoute('storylines.show', ['storyline' => $story]);
     }
 
     public function render(): View
     {
         Gate::authorize('create', Storyline::class);
-        $context = app(PromotionContextService::class);
 
-        return view('livewire.storylines.components.create', ['promotions' => $context->isEnforced() ? collect([$context->required()]) : Promotion::query()->orderBy('name')->orderBy('id')->get()]);
+        return view('livewire.storylines.components.create', ['promotions' => $this->promotionContext->isEnforced() ? collect([$this->promotionContext->required()]) : Promotion::query()->orderBy('name')->orderBy('id')->get()]);
     }
 }

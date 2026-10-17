@@ -72,6 +72,16 @@ class Manage extends Component
 
     public string $eventSearch = '';
 
+    protected StorylineSourceQuery $sourceQuery;
+
+    protected CreativeRosterQuery $roster;
+
+    public function boot(StorylineSourceQuery $sourceQuery, CreativeRosterQuery $roster): void
+    {
+        $this->sourceQuery = $sourceQuery;
+        $this->roster = $roster;
+    }
+
     public function mount(int $storylineId): void
     {
         $this->storylineId = $storylineId;
@@ -201,7 +211,7 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('update', $story);
-        $this->sourceFingerprint = app(StorylineSourceQuery::class)->get($this->form->source(null), $story->promotion_id)['fingerprint'];
+        $this->sourceFingerprint = $this->sourceQuery->get($this->form->source(null), $story->promotion_id)['fingerprint'];
     }
 
     public function reload(): void
@@ -228,11 +238,18 @@ class Manage extends Component
         $story = $this->story();
         Gate::authorize('update', $story);
 
-        return app(CreativeRosterQuery::class)->get(BookableRosterKind::from($kind), mb_substr($term, 0, 160), $story->promotion_id);
+        return $this->roster->get(BookableRosterKind::from($kind), mb_substr($term, 0, 160), $story->promotion_id);
     }
 
-    public function save(): void
-    {
+    public function save(
+        UpdateAction $updateStory,
+        SaveStepAction $saveStep,
+        RecordDevelopmentAction $recordDevelopment,
+        SaveParticipantAction $saveParticipant,
+        TransitionStepAction $transitionStep,
+        TransitionStorylineAction $transitionStory,
+        RetractDevelopmentAction $retractDevelopment,
+    ): void {
         $story = $this->story();
         Gate::authorize('update', $story);
         if ($this->needsReload) {
@@ -242,13 +259,13 @@ class Manage extends Component
         $this->validate($rules, attributes: $this->attributeNames($rules));
         try {
             match ($this->mode) {
-                'story' => app(UpdateAction::class)->handle($story, $this->version, new StorylineData($this->form->heading, $this->form->description, $this->form->payoff, $this->submissionId), $this->form->reason),
-                'step' => app(SaveStepAction::class)->handle($story, $this->version, new StepData($this->form->heading, $this->form->description, $this->form->sequence, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->form->reason ?: null), $this->editingId),
-                'development' => app(RecordDevelopmentAction::class)->handle($story, $this->version, new DevelopmentData($this->form->heading, $this->form->description, $this->form->occurredOn, $this->form->sequence, $this->form->participantIds, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->stepId, $this->form->reason ?: null), $this->editingId),
-                'participant', 'participant-end' => app(SaveParticipantAction::class)->handle($story, $this->version, new ParticipantData($this->form->type, $this->form->participantId ?? 0, $this->form->role ?: null, $this->form->joinedOn, $this->form->leftOn, $this->form->reason ?: null), $this->editingId),
-                'step-status' => app(TransitionStepAction::class)->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason),
-                'story-status' => app(TransitionStorylineAction::class)->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason),
-                'retract' => app(RetractDevelopmentAction::class)->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep),
+                'story' => $updateStory->handle($story, $this->version, new StorylineData($this->form->heading, $this->form->description, $this->form->payoff, $this->submissionId), $this->form->reason),
+                'step' => $saveStep->handle($story, $this->version, new StepData($this->form->heading, $this->form->description, $this->form->sequence, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->form->reason ?: null), $this->editingId),
+                'development' => $recordDevelopment->handle($story, $this->version, new DevelopmentData($this->form->heading, $this->form->description, $this->form->occurredOn, $this->form->sequence, $this->form->participantIds, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->stepId, $this->form->reason ?: null), $this->editingId),
+                'participant', 'participant-end' => $saveParticipant->handle($story, $this->version, new ParticipantData($this->form->type, $this->form->participantId ?? 0, $this->form->role ?: null, $this->form->joinedOn, $this->form->leftOn, $this->form->reason ?: null), $this->editingId),
+                'step-status' => $transitionStep->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason),
+                'story-status' => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason),
+                'retract' => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep),
                 default => abort(404),
             };
         } catch (BaseBusinessException $exception) {
@@ -323,7 +340,7 @@ class Manage extends Component
         return collect($rules)->mapWithKeys(fn (array $fieldRules, string $field): array => [$field => Str::of($field)->afterLast('.')->replace('*', 'entry')->snake(' ')->toString()])->all();
     }
 
-    public function render(): View
+    public function render(StorylineViewModel $summary): View
     {
         $story = $this->story();
         Gate::authorize('view', $story);
@@ -333,16 +350,16 @@ class Manage extends Component
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);
         }
-        $source = app(StorylineSourceQuery::class)->get($this->form->source(null), $story->promotion_id);
+        $source = $this->sourceQuery->get($this->form->source(null), $story->promotion_id);
 
         $steps = $story->steps()->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'match.competitors', 'match.titles'])->orderBy('sequence')->orderBy('id')->paginate(15, pageName: 'stepsPage');
         $sourceStates = [];
         foreach ($steps as $step) {
-            $sourceStates[$step->id] = app(StorylineSourceQuery::class)->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match);
+            $sourceStates[$step->id] = $this->sourceQuery->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match);
         }
 
         return view('livewire.storylines.components.manage', [
-            'story' => $story, ...app(StorylineViewModel::class)->summary($story),
+            'story' => $story, ...$summary->summary($story),
             'participants' => $story->participants()->orderBy('joined_on')->orderBy('id')->get(),
             'steps' => $steps, 'sourceStates' => $sourceStates,
             'developments' => $story->developments()->with('event.promotion')->orderByDesc('occurred_on')->orderByDesc('sequence')->orderByDesc('id')->paginate(15, pageName: 'historyPage'),

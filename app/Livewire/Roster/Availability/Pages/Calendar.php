@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Roster\Availability\Pages;
 
 use App\Models\Events\Event;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -33,11 +34,18 @@ class Calendar extends Component
     #[Url]
     public string $search = '';
 
+    protected PromotionContextService $promotionContext;
+
+    public function boot(PromotionContextService $promotionContext): void
+    {
+        $this->promotionContext = $promotionContext;
+    }
+
     public function mount(): void
     {
         Gate::authorize('viewAny', Wrestler::class);
         if ($this->date === '') {
-            $this->date = now()->setTimezone(PromotionTimeZoneService::zoneOf(app(PromotionContextService::class)->current()))->toDateString();
+            $this->date = now()->setTimezone(PromotionTimeZoneService::zoneOf($this->promotionContext->current()))->toDateString();
         }
     }
 
@@ -68,13 +76,13 @@ class Calendar extends Component
         return true;
     }
 
-    public function render(): View
+    public function render(EventRosterAvailabilityQuery $availability): View
     {
         Gate::authorize('viewAny', Wrestler::class);
-        $promotion = app(PromotionContextService::class)->current();
+        $promotion = $this->promotionContext->current();
         $entries = null;
         $eventIssues = [];
-        if ($promotion !== null && $this->validDate()) {
+        if ($promotion instanceof Promotion && $this->validDate()) {
             $needle = mb_trim(str_replace(['%', '_', '\\'], '', $this->search));
             $types = match ($this->kind) {
                 'wrestlers' => [Wrestler::class],
@@ -91,7 +99,7 @@ class Calendar extends Component
             $events = Event::query()->where('promotion_id', $promotion->id)->where('date', '>=', $start->copy()->utc())
                 ->where('date', '<', $start->copy()->addDay()->utc())->orderBy('date')->orderBy('id')->get();
             foreach ($events as $event) {
-                $people = resolve(EventRosterAvailabilityQuery::class)->get($event);
+                $people = $availability->get($event);
                 if ($people->isNotEmpty()) {
                     $eventIssues[] = ['event' => $event, 'names' => $people->map(fn (Wrestler|Referee $person): string => $person instanceof Referee ? $person->full_name : $person->name)->join(', ')];
                 }

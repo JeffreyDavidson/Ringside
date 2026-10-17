@@ -51,7 +51,7 @@ class Manage extends Component
         Gate::authorize('view', $this->promotion());
     }
 
-    public function addMember(): void
+    public function addMember(InvitePromotionMemberAction $invite): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
@@ -80,7 +80,7 @@ class Manage extends Component
 
         RateLimiter::hit($rateLimitKey, 3600);
 
-        $outcome = app(InvitePromotionMemberAction::class)->handle($promotion, $validated['email'], $role, User::query()->findOrFail(auth()->id()));
+        $outcome = $invite->handle($promotion, $validated['email'], $role, User::query()->findOrFail(auth()->id()));
 
         // The owner already sees every member and pending invitation of the promotion, so these two cases
         // reveal nothing new. Every other email gets the same message whether or not it belongs to an account.
@@ -100,7 +100,7 @@ class Manage extends Component
         $this->dispatchActionSuccess(__('promotions.invitation_sent', ['role' => $role->label()]));
     }
 
-    public function cancelInvitation(int $invitationId): void
+    public function cancelInvitation(RemovePromotionInvitationAction $removeInvitation, int $invitationId): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
@@ -109,13 +109,13 @@ class Manage extends Component
             ->whereKey($invitationId)
             ->firstOrFail();
 
-        app(RemovePromotionInvitationAction::class)->handle($promotion, $invitation->email);
+        $removeInvitation->handle($promotion, $invitation->email);
 
         $this->resetErrorBag(['email', 'member']);
         $this->dispatchActionSuccess(__('promotions.invitation_cancelled'));
     }
 
-    public function updateMemberRole(int $userId): void
+    public function updateMemberRole(UpdatePromotionMemberRoleAction $updateRole, int $userId): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
@@ -129,7 +129,7 @@ class Manage extends Component
         $role = MembershipRole::from($this->memberRoles[$userId]);
 
         try {
-            app(UpdatePromotionMemberRoleAction::class)->handle(
+            $updateRole->handle(
                 $promotion,
                 $user,
                 $role,
@@ -145,7 +145,7 @@ class Manage extends Component
         $this->dispatchActionSuccess(__('promotions.member_role_updated', ['name' => $user->full_name, 'role' => $role->label()]));
     }
 
-    public function updateMemberStatus(int $userId, string $status): void
+    public function updateMemberStatus(UpdatePromotionMemberStatusAction $updateStatus, int $userId, string $status): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageMembers', $promotion);
@@ -162,7 +162,7 @@ class Manage extends Component
         $membershipStatus = MembershipStatus::from($status);
 
         try {
-            app(UpdatePromotionMemberStatusAction::class)->handle(
+            $updateStatus->handle(
                 $promotion,
                 $user,
                 $membershipStatus,
