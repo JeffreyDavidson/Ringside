@@ -11,4 +11,9 @@ enum LiveItemOperation: string
     case Skip = 'skip';
     case Correct = 'correct';
     case Reopen = 'reopen';
+
+    public function label(): string
+    {
+        return __("live-show.{$this->value}");
+    }
 }

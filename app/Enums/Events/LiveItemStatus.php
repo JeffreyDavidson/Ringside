@@ -10,4 +10,9 @@ enum LiveItemStatus: string
     case Running = 'running';
     case Finished = 'finished';
     case Skipped = 'skipped';
+
+    public function label(): string
+    {
+        return __("live-show.{$this->value}");
+    }
 }

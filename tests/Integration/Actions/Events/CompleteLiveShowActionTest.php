@@ -7,6 +7,7 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 use App\Actions\Events\CompleteLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
 use Spatie\Activitylog\Models\Activity;
@@ -34,7 +35,7 @@ test('a changed source prevents completion without writing an audit or completio
     $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
     $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
     $pack = $fixture['event']->pack()->firstOrFail();
-    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Changed before completion'], false);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Changed before completion']), false);
     $audits = Activity::query()->where('log_name', 'live-show')->count();
 
     // Act / Assert

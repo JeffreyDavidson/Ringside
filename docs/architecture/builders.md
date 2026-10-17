@@ -52,11 +52,11 @@ Existence projections carry the facts behind lifecycle status (`status_*_exists`
 - History tables that display status (for example stable previous managers) add the projection to their query.
 - Table status counts and the total (`DataTableComponent::metadata()`) are remembered in the locked `metadataSnapshot` property, because searching, filtering and paging cannot change them. `refreshDatatable`, every table `delete()` method (the roster, title, venue and event tables and the event `MatchesTable`) and the users table `changeStatus()` call `forgetMetadata()`; any new table action that can change a count or the total must call it too. The paginator still runs its own count so a change made by another user can never corrupt page links.
 
-`EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and deterministic ordering by event date, card, and match number. Competitor and referee history relationships reuse its persisted past-event constraint rather than defining their own date comparisons. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
+`EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and deterministic ordering by event date, card, and match number. Competitor and referee history relationships reuse its persisted past-event constraint rather than defining their own date comparisons. Scheduling policy and conflict exceptions remain in `MatchAssignmentEligibility`.
 
-`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
+`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. `TitleBuilder::withCurrentChampion()` eager loads each title's current champion for lists, and reign-length calculation stays in `TitleReignService`.
 
-`MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
+`MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentEligibility`.
 
 `MatchSideBuilder` owns canonical match-side ordering by persisted position. `EventMatch::sides()` applies the same ordering so side collections remain deterministic regardless of insertion order.
 
@@ -69,7 +69,7 @@ Builders express database queries over relationships and stored lifecycle period
 - define stable ordering used by multiple callers;
 - return the concrete typed builder for fluent composition.
 
-Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`.
+Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`, which only read (see `.ai/rules/queries.md`).
 
 ## Usage
 

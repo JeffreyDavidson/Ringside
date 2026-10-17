@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Users;
 
-use App\Support\Enums\ProvidesFilterOptions;
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 enum UserStatus: string
 {
@@ -16,10 +16,6 @@ enum UserStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Unverified => 'Unverified',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
-        };
+        return __("users.status.{$this->value}");
     }
 }

@@ -260,8 +260,8 @@ jobs:
 
     postgres-tests:
         name: Postgres tests
-        runs-on: ubuntu-latest
-        timeout-minutes: 15
+        runs-on: ubuntu-24.04
+        timeout-minutes: 30
         env:
             DB_CONNECTION: pgsql
             DB_HOST: 127.0.0.1
@@ -270,26 +270,19 @@ jobs:
             DB_USERNAME: ringside
             DB_PASSWORD: ringside
 
-        services:
-            postgres:
-                # Official Docker library image via Amazon's public mirror: Docker Hub rate-limits
-                # anonymous pulls from shared GitHub runners.
-                image: public.ecr.aws/docker/library/postgres:17
-                env:
-                    POSTGRES_DB: ringside_test
-                    POSTGRES_USER: ringside
-                    POSTGRES_PASSWORD: ringside
-                ports:
-                    - 5432:5432
-                options: >-
-                    --health-cmd "pg_isready -U ringside -d ringside_test"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-
+        # The runner's preinstalled PostgreSQL (16 on ubuntu-24.04) is used instead of a service container:
+        # pulling an image from a public registry fails when shared runner IPs hit its anonymous limits.
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Start the runner's PostgreSQL
+              run: |
+                  sudo systemctl start postgresql.service
+                  for attempt in $(seq 1 30); do pg_isready -h 127.0.0.1 -p 5432 && break; sleep 1; done
+                  sudo -u postgres psql -v ON_ERROR_STOP=1 \
+                      -c "CREATE ROLE ringside WITH LOGIN SUPERUSER PASSWORD 'ringside';" \
+                      -c "CREATE DATABASE ringside_test OWNER ringside;"
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -312,8 +305,8 @@ jobs:
 
     mysql-tests:
         name: MySQL tests
-        runs-on: ubuntu-latest
-        timeout-minutes: 20
+        runs-on: ubuntu-24.04
+        timeout-minutes: 30
         env:
             DB_CONNECTION: mysql
             DB_HOST: 127.0.0.1
@@ -322,26 +315,28 @@ jobs:
             DB_USERNAME: ringside
             DB_PASSWORD: ringside
 
-        services:
-            mysql:
-                # Official Docker library image via Amazon's public mirror (see the postgres service).
-                image: public.ecr.aws/docker/library/mysql:8.0
-                env:
-                    MYSQL_DATABASE: ringside_test
-                    MYSQL_USER: ringside
-                    MYSQL_PASSWORD: ringside
-                    MYSQL_ROOT_PASSWORD: ringside-root
-                ports:
-                    - 3306:3306
-                options: >-
-                    --health-cmd "mysqladmin ping -h 127.0.0.1 -u ringside -pringside"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 10
-
+        # The runner's preinstalled MySQL is used instead of a service container: ubuntu-24.04 ships
+        # MySQL 8.0 from Ubuntu's packages, the same build production runs, and nothing is pulled from a
+        # public registry that can rate-limit shared runner IPs. Its root password is "root".
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Start the runner's MySQL
+              run: |
+                  # Throwaway test data: skip forcing each commit to disk. This changes durability only, not how
+                  # queries, locks or deadlocks behave.
+                  printf '[mysqld]\ninnodb_flush_log_at_trx_commit = 2\ninnodb_doublewrite = OFF\nsync_binlog = 0\ndisable_log_bin\n' \
+                      | sudo tee /etc/mysql/mysql.conf.d/zz-ci.cnf
+                  # Keep the data directory in memory, as the old service container did (--tmpfs /var/lib/mysql).
+                  sudo cp -a /var/lib/mysql /tmp/mysql-seed
+                  sudo mount -t tmpfs -o size=2g tmpfs /var/lib/mysql
+                  sudo cp -a /tmp/mysql-seed/. /var/lib/mysql/
+                  sudo systemctl start mysql.service
+                  for attempt in $(seq 1 30); do mysqladmin ping -h127.0.0.1 -uroot -proot --silent && break; sleep 1; done
+                  mysql --version
+                  mysql -h127.0.0.1 -uroot -proot -e "SHOW VARIABLES WHERE Variable_name IN ('innodb_flush_log_at_trx_commit', 'innodb_doublewrite', 'log_bin');"
+                  mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE ringside_test; CREATE USER 'ringside'@'%' IDENTIFIED BY 'ringside'; GRANT ALL PRIVILEGES ON ringside_test.* TO 'ringside'@'%';"
 
             - name: Setup PHP and Composer
               uses: ./.github/actions/setup-php-composer
@@ -359,7 +354,7 @@ jobs:
 
             - name: Allow the test user to observe locks and deadlocks
               run: >-
-                  mysql -h127.0.0.1 -uroot -pringside-root -e
+                  mysql -h127.0.0.1 -uroot -proot -e
                   "GRANT PROCESS ON *.* TO 'ringside'@'%'; GRANT SELECT ON performance_schema.* TO 'ringside'@'%'; SET GLOBAL innodb_monitor_enable = 'lock_deadlocks';"
 
             - name: Run MySQL concurrency tests

@@ -1,443 +1,60 @@
-# Tournament Generation
-
-## Overview
-
-The Tournament Generation system is designed to support complex multi-match tournament scenarios including elimination brackets, round-robin competitions, and championship tournaments. While the core match generation system is complete, this document outlines the architecture for future tournament features.
-
-## Tournament Types
-
-### Single Elimination Bracket
-
-Traditional knockout tournament format:
-
-```
-Round 1:        Round 2:      Finals:
-A vs B    ──────→
-                  Winner 1 ──────→
-C vs D    ──────→              Final Winner
-                  Winner 2 ──────→
-E vs F    ──────→
-                  Winner 3 ──────→
-G vs H    ──────→
-```
-
-### Double Elimination
-
-Advanced bracket with winner's and loser's brackets:
-
-```
-Winner's Bracket:
-A vs B ──→ Winner 1 ──→ WB Final ──→ Grand Final
-C vs D ──→ Winner 2 ──→         ──→
-
-Loser's Bracket:
-Loser 1 ──→ LB Semi ──→ LB Final ──→ Grand Final
-Loser 2 ──→         ──→         ──→ (if needed)
-```
-
-### Round Robin
-
-Every competitor faces every other competitor:
-
-```php
-// 4-person round robin
-Matches:
-A vs B, A vs C, A vs D
-B vs C, B vs D  
-C vs D
-
-// Winner determined by record (wins/losses)
-```
-
-### King of the Ring Style
-
-Multi-stage tournament with different rules per round:
-
-```php
-// First Round: Standard matches
-// Semi-Finals: No DQ matches  
-// Finals: Special stipulation
-```
-
-## Core Tournament Architecture
-
-### TournamentFactory (Future Implementation)
-
-```php
-class TournamentFactory extends Factory
-{
-    public function singleElimination(array $competitors, array $config = []): Tournament
-    {
-        return $this->createTournament('single_elimination', $competitors, $config);
-    }
-    
-    public function doubleElimination(array $competitors, array $config = []): Tournament
-    {
-        return $this->createTournament('double_elimination', $competitors, $config);
-    }
-    
-    public function roundRobin(array $competitors, array $config = []): Tournament
-    {
-        return $this->createTournament('round_robin', $competitors, $config);
-    }
-}
-```
-
-### Tournament Model Structure
-
-```php
-class Tournament extends Model
-{
-    protected $fillable = [
-        'name',
-        'type',              // single_elimination, double_elimination, round_robin
-        'status',            // upcoming, in_progress, completed
-        'start_date',
-        'end_date',
-        'bracket_data',      // JSON field for bracket structure
-        'rules',             // JSON field for tournament rules
-    ];
-    
-    public function competitors(): BelongsToMany
-    {
-        return $this->belongsToMany(Model::class, 'tournament_competitors')
-            ->using(TournamentCompetitor::class);
-    }
-    
-    public function matches(): HasMany
-    {
-        return $this->hasMany(EventMatch::class);
-    }
-    
-    public function rounds(): HasMany
-    {
-        return $this->hasMany(TournamentRound::class);
-    }
-}
-```
-
-### Tournament Round Management
-
-```php
-class TournamentRound extends Model
-{
-    protected $fillable = [
-        'tournament_id',
-        'round_number',
-        'round_name',        // "Quarterfinals", "Semifinals", "Finals"
-        'status',
-        'start_date',
-        'match_configuration', // JSON field for round-specific rules
-    ];
-    
-    public function matches(): HasMany
-    {
-        return $this->hasMany(EventMatch::class);
-    }
-}
-```
-
-## Tournament Generation Process
-
-### 1. Bracket Creation
-
-```php
-public function generateBracket(array $competitors, string $type): array
-{
-    return match($type) {
-        'single_elimination' => $this->createSingleEliminationBracket($competitors),
-        'double_elimination' => $this->createDoubleEliminationBracket($competitors),
-        'round_robin' => $this->createRoundRobinSchedule($competitors),
-        default => throw new InvalidArgumentException("Unknown tournament type: {$type}")
-    };
-}
-
-private function createSingleEliminationBracket(array $competitors): array
-{
-    // Ensure power of 2 competitors (add byes if needed)
-    $paddedCompetitors = $this->padToPowerOfTwo($competitors);
-    
-    // Create first round matchups
-    $firstRound = [];
-    for ($i = 0; $i < count($paddedCompetitors); $i += 2) {
-        $firstRound[] = [
-            'competitor_1' => $paddedCompetitors[$i],
-            'competitor_2' => $paddedCompetitors[$i + 1] ?? null, // bye
-            'round' => 1
-        ];
-    }
-    
-    return $this->generateSubsequentRounds($firstRound);
-}
-```
-
-### 2. Match Scheduling
-
-```php
-public function scheduleMatches(Tournament $tournament, Event $event): void
-{
-    $bracket = $tournament->bracket_data;
-    $currentRound = $tournament->getCurrentRound();
-    
-    foreach ($currentRound->plannedMatches as $matchData) {
-        $match = MatchFactory::new()->generateFullMatch([
-            'match_type' => $matchData['match_type'] ?? 'singles',
-            'competitors' => $this->resolveCompetitors($matchData),
-            'tournament_id' => $tournament->id,
-            'round_id' => $currentRound->id,
-            'winner_strategy' => 'random', // Will be updated with actual result
-        ])->forEvent($event)->create();
-        
-        $this->linkTournamentMatch($tournament, $match, $matchData);
-    }
-}
-```
-
-### 3. Advancement Logic
-
-```php
-public function advanceWinners(TournamentRound $round): void
-{
-    $completedMatches = $round->matches()->whereNotNull('match_finish')->get();
-    
-    foreach ($completedMatches as $match) {
-        $this->advanceSide($match->winningSide, $round->tournament, $round->round_number + 1);
-    }
-    
-    // Check if round is complete
-    if ($this->isRoundComplete($round)) {
-        $this->createNextRound($round->tournament);
-    }
-}
-
-private function advanceSide(MatchSide $winningSide, Tournament $tournament, int $nextRound): void
-{
-    // Find next round bracket position
-    $nextRoundPosition = $this->calculateNextPosition($tournament, $winningSide, $nextRound);
-    
-    // Update tournament bracket
-    $bracketData = $tournament->bracket_data;
-    $bracketData['rounds'][$nextRound]['matches'][$nextRoundPosition]['side'] = $winningSide;
-    
-    $tournament->update(['bracket_data' => $bracketData]);
-}
-```
-
-## Championship Tournament Integration
-
-### Title Tournament Generation
-
-```php
-public function createChampionshipTournament(Title $title, array $competitors): Tournament
-{
-    return TournamentFactory::new()->singleElimination($competitors, [
-        'championship' => $title,
-        'finals_config' => [
-            'match_type' => $title->type->value === 'tag-team' ? 'tagteam' : 'singles',
-            'titles' => [$title],
-            'decision_type' => 'pinfall'
-        ]
-    ]);
-}
-```
-
-### Tournament Finals with Title
-
-```php
-public function generateTournamentFinal(Tournament $tournament): EventMatch
-{
-    $finalists = $this->getTournamentFinalists($tournament);
-    
-    $config = [
-        'match_type' => $tournament->rules['finals_match_type'] ?? 'singles',
-        'competitors' => $finalists,
-        'winner_strategy' => 'random'
-    ];
-    
-    // Add championship if tournament is for a title
-    if ($tournament->championship) {
-        $config['titles'] = [$tournament->championship];
-    }
-    
-    return MatchFactory::new()->generateFullMatch($config)->create();
-}
-```
-
-## Advanced Tournament Features
-
-### Seeded Tournaments
-
-```php
-public function createSeededBracket(array $seededCompetitors): array
-{
-    // Sort by seed (1 is highest seed)
-    usort($seededCompetitors, fn($a, $b) => $a['seed'] <=> $b['seed']);
-    
-    // Create bracket with strategic placement
-    return $this->arrangeSeedsInBracket($seededCompetitors);
-}
-
-private function arrangeSeedsInBracket(array $seeds): array
-{
-    // Traditional seeding: 1 vs lowest, 2 vs second-lowest, etc.
-    $bracket = [];
-    $count = count($seeds);
-    
-    for ($i = 0; $i < $count / 2; $i++) {
-        $bracket[] = [
-            'high_seed' => $seeds[$i],
-            'low_seed' => $seeds[$count - 1 - $i]
-        ];
-    }
-    
-    return $bracket;
-}
-```
-
-### Multi-Stage Tournaments
-
-```php
-public function createMultiStageTournament(array $config): Tournament
-{
-    $tournament = Tournament::create($config['tournament_data']);
-    
-    // Stage 1: Qualifying rounds
-    $qualifiers = $this->createQualifyingRounds($config['qualifiers']);
-    
-    // Stage 2: Main bracket  
-    $qualifiedCompetitors = $this->getQualifiedCompetitors($qualifiers);
-    $mainBracket = $this->createMainBracket($qualifiedCompetitors);
-    
-    return $tournament;
-}
-```
-
-### Round Robin Scheduling
-
-```php
-public function generateRoundRobinMatches(array $competitors): array
-{
-    $matches = [];
-    $count = count($competitors);
-    
-    // Generate all possible pairings
-    for ($i = 0; $i < $count; $i++) {
-        for ($j = $i + 1; $j < $count; $j++) {
-            $matches[] = [
-                'competitor_1' => $competitors[$i],
-                'competitor_2' => $competitors[$j],
-                'round' => $this->calculateRoundRobinRound($i, $j, $count)
-            ];
-        }
-    }
-    
-    return $matches;
-}
-```
-
-## Tournament Reporting
-
-### Bracket Visualization
-
-```php
-public function generateBracketVisualization(Tournament $tournament): array
-{
-    $bracket = $tournament->bracket_data;
-    
-    return [
-        'tournament_name' => $tournament->name,
-        'type' => $tournament->type,
-        'rounds' => $this->formatRoundsForDisplay($bracket['rounds']),
-        'current_round' => $tournament->getCurrentRound()->round_number,
-        'status' => $tournament->status
-    ];
-}
-```
-
-### Tournament Statistics
-
-```php
-public function getTournamentStats(Tournament $tournament): array
-{
-    return [
-        'total_competitors' => $tournament->competitors()->count(),
-        'matches_played' => $tournament->matches()->whereNotNull('result_id')->count(),
-        'matches_remaining' => $tournament->matches()->whereNull('result_id')->count(),
-        'rounds_completed' => $tournament->rounds()->where('status', 'completed')->count(),
-        'current_leader' => $this->getCurrentTournamentLeader($tournament)
-    ];
-}
-```
-
-## Testing Tournament Generation
-
-### Unit Tests
-
-```php
-test('single elimination bracket creates correct number of matches', function () {
-    $competitors = Wrestler::factory()->count(8)->create();
-    $tournament = TournamentFactory::new()->singleElimination($competitors);
-    
-    // 8 competitors = 7 matches total (4 + 2 + 1)
-    expect($tournament->calculateTotalMatches())->toBe(7);
-});
-
-test('round robin creates all necessary pairings', function () {
-    $competitors = Wrestler::factory()->count(4)->create();
-    $tournament = TournamentFactory::new()->roundRobin($competitors);
-    
-    // 4 competitors = 6 matches (4C2)
-    expect($tournament->matches()->count())->toBe(6);
-});
-```
-
-### Integration Tests
-
-```php
-test('tournament final crowns champion', function () {
-    $title = Title::factory()->create();
-    $competitors = Wrestler::factory()->count(4)->create();
-    
-    $tournament = TournamentFactory::new()->createChampionshipTournament($title, $competitors);
-    
-    // Simulate tournament progression
-    $this->playTournamentToCompletion($tournament);
-    
-    $winner = $tournament->getWinner();
-    expect($title->currentChampion())->toBe($winner);
-});
-```
-
-## Performance Considerations
-
-### Bracket Caching
-
-Large tournaments benefit from bracket caching:
-
-```php
-public function getCachedBracket(Tournament $tournament): array
-{
-    return Cache::remember(
-        "tournament_bracket_{$tournament->id}",
-        3600,
-        fn() => $this->generateBracketVisualization($tournament)
-    );
-}
-```
-
-### Batch Match Creation
-
-Create tournament matches efficiently:
-
-```php
-public function createTournamentMatches(Tournament $tournament, array $matchData): void
-{
-    $matches = collect($matchData)->map(function ($data) use ($tournament) {
-        return MatchFactory::new()->generateFullMatch($data)->make();
-    });
-    
-    $tournament->matches()->saveMany($matches);
-}
-```
-
-The Tournament Generation system provides a comprehensive framework for complex multi-match competitions while leveraging the existing match generation infrastructure for consistent match creation and result handling.
+# Tournament Management
+
+Ringside supports promotion-owned single elimination tournaments for individual wrestlers or established tag teams. A tournament uses one entrant kind, 4, 8 or 16 bracket slots, and between two and the selected capacity of unique entrants. Eight is the default capacity. Rounds can span different events; the optional **Allow multiple rounds on one card** setting enables the bounded same-event exception described below.
+
+## Storage and ownership
+
+Four additive tables hold tournament planning and links to ordinary matches:
+
+- `tournaments`: promotion, name/description, entrant kind, capacity, repeat-appearance setting, Draft/Active/Completed/Cancelled status, version and optional client create request UUID.
+- `tournament_entries`: promotion/tournament, manual seed, wrestler or tag-team morph identity, and withdrawal state. Unique seeds and competitor identities are enforced per tournament. Competitor relationships include deleted records so history remains readable.
+- `tournament_nodes`: promotion/tournament, round/position, first-round seed inputs, optional planned event and an explicitly audited administrative walkover. Unique round/position is enforced per tournament.
+- `tournament_match_links`: promotion/tournament/node, ordinary match, attempt number and nullable active-node key. A match has one link; a node has at most one active link. Superseded attempts remain historical links.
+
+All four models use `BelongsToPromotion` and protected mass assignment. `Tournament` fills only its setup fields (name, description, entrant kind, capacity, repeat appearances) through `fill()`; the promotion key, request id, status and version are assigned explicitly by the Action. `TournamentNode` fills only the administrative walkover reason; `TournamentEntry` and `TournamentMatchLink` have no user-input fields (seeds, positions, competitor identity, links and attempt numbers are derived by the Actions), so their fillable lists are empty and the Actions write them with `forceFill()`. Match-link lookups by match share `TournamentMatchLinkBuilder::forMatchId()`. HTTP routes and every Livewire operation authorize through the existing promotion gate: Owners/Managers operate, Members read, and an enforced promotion context remains binding for administrators. The ordinary event and roster ownership checks still apply to every booking.
+
+## Seeds, byes and planning
+
+The Livewire form validates the shape of the input (name length, a capacity of 4, 8 or 16, two to capacity distinct entrant ids, a UUID request id) and the reason on every administrative operation (up to 2000 characters, with an explicit confirmation) before an Action runs; the Tournament Actions do not validate input or check permissions. `SaveTournamentAction` checks under lock that every entrant belongs to the promotion and is eligible (a business check that throws `TournamentException`) and creates bracket nodes without creating any real matches. `BracketLayout` produces standard seeded positions; eight slots pair 1–8, 4–5, 2–7 and 3–6. `TournamentBracketService` resolves nodes in round/position order from the recorded predecessor winners. Missing first-round seeds become byes, and empty branches collapse deterministically. Byes create neither results nor championship history.
+
+Draft setup may change capacity, kind, seed order and the repeat setting. The first confirmed real booking makes the tournament Active, freezes those settings and audits the accepted configuration. Name and description remain editable. A planned event on an unresolved node is tentative: it reserves no appearance and creates no event-card match.
+
+## Actual booking and outcomes
+
+`BookTournamentMatchAction` builds the existing `EventMatchData` from resolved entrants and calls `AddMatchForEventAction`. The latter locks and rechecks tournament version, entrants, format, current event state, chronology, ordinary competitor eligibility/conflicts, referees and optional final title stakes. It creates a normal `EventMatch`, then the link, and invokes the existing assignment actions in the same transaction. Identical pending booking retries return the existing match; conflicting stale reviews require a refresh.
+
+Only Singles or standard TagTeam matches are accepted for the corresponding kind. Titles are optional on the final only and retain all ordinary type, promotion, champion and once-per-card rules. Unknown qualifiers and byes cannot be booked. Advancement never automatically creates a later match.
+
+The ordinary result modal and `RecordResultAction` remain the sole competitive outcome writers. Linked result forms carry an expected tournament version. Winner-changing edits to recorded outcomes require the current version; independent first results for untouched sibling bouts may both commit despite a sibling version increment. Identical result retries do not advance the tournament version again.
+
+`TournamentOutcomeManager` guards edits and synchronizes completion within the same outer transaction as match results and championship reconciliation. The bracket derives its competitive winner from `match_finish` and `winning_side_id`; it stores no duplicate competitive result. Every decisive finish advances its winning side. Time-limit draw and no-decision leave the bout unresolved and require an explicitly booked rematch. The prior attempt and result remain intact. DQ/countout advance the tournament winner while existing championship rules retain the title. A decisive final completes the tournament; a permitted correction can reopen it.
+
+## Same-card exception and chronology
+
+Repeat appearances are disabled by default. When enabled, `TournamentMatchRequirements` supplies only the exact prior linked appearances on the entrant's ancestor path, or an earlier recorded attempt of the same node, for this same tournament and event. `MatchCompetitorAssignmentEligibility` excludes those match ids only from the matching identity booking query. Unrelated matches, another tournament, parallel branches, different events at the same instant, and wrestler/team-member overlaps remain conflicts. Referees continue to work multiple bouts on one card. Standalone assignment actions check linked entrants and final-only stakes too.
+
+Across distinct events, a descendant or rematch event must be strictly later than its qualifying or previous attempt event. Same-event progression depends on recorded qualification and the enabled repeat setting. First-round matches may be booked on unscheduled events, but the ordinary result guard still refuses future/undated events. Event Update/Restore actions recheck linked chronology. Rescheduling, deleting or restoring a tentative planned event increments the affected tournament versions so an old review cannot silently use changed event state.
+
+## Corrections and administration
+
+Winner-preserving corrections need no dependency reset. Winner-changing corrections refuse when a descendant has an active booked match or administrative advancement. `ResetTournamentBranchAction` requires a reason and explicit UI review, locks the affected branch, and soft-deletes only unplayed bookings. It preserves the old matches/links and audits affected ids. A reset with no booked or administrative dependency is a no-op and cannot activate a draft. Recorded or live-started descendants cannot be reset. Ordinary match deletion refuses any tournament-linked match; ordinary event deletion refuses active tournament links.
+
+Withdrawals mark an entry without erasing its played results. An unplayed linked bout involving that entry is removed through the reviewed reset flow. Replacements are limited to entrants with no recorded bout or administrative advancement, clear their unplayed branch and recheck the replacement under lock, then increment the tournament version even when no booking needed resetting. A walkover requires exactly one withdrawn entrant and an eligible opposing entrant, known inputs and no active match; it is an audited administrative advancement, never a title transfer. Cancellation preserves played history and removes reviewed pending bookings; a completed tournament cannot be cancelled.
+
+The Livewire screen retains entered review values after a business refusal. Reset, removal, withdrawal, replacement, walkover and cancellation require an accepted preview and reason. Audit records use the `tournaments` activity log with promotion/tournament ids, actor supplied by Activitylog, relevant records and the reason.
+
+The tournament list reads through `TournamentIndexQuery` (one query with entry and recorded result counts; the Livewire component paginates it, 20 per page) and the tournament screen through `TournamentShowViewModel` (entries, bookable competitor ids, and the promotion's events, titles and stipulations) next to `TournamentBracketService`. The components receive these, the Actions and `BookableRosterSearch` by method injection and keep only locked ids as state.
+
+## Transactions and locking
+
+`TournamentLocks` snapshots all linked/planned event ids and date peers, locks that complete event union in ascending id order, then tournament rows in ascending id order. It rechecks event membership and dates after obtaining locks and refuses a changed snapshot rather than acquiring late event locks. Existing name/date-slot locks still precede this union. Match, assignment, competitor, live-run and title locks follow their established order. Outer mutation transactions retry boundedly where their database-only work permits it.
+
+SQLite tests prove rollback and invariant behavior; native PostgreSQL/MySQL process tests are required to establish row-lock behavior. The bounded tournament worker covers duplicate booking, opposing results, sibling qualification, correction versus dependent booking, ordinary assignment versus exemption, event reschedule and employment release. A release after a committed booking remains allowed under the existing roster lifecycle rules; it makes that competitor unavailable for a subsequent booking without erasing an already booked match.
+
+## Event packs, live show and interface
+
+Actual tournament matches enter the ordinary event card, pack and live-show source query. Adding a qualified later-round match changes the card fingerprint and requires explicit pack review followed by live-show review. Existing completed item timings and arrivals are retained; completing a live item never records a competitive result. Projected entrants remain planning data, and labelled show segments remain segments.
+
+Tournament routes use the existing operations shell and visual identity. Phones default to readable round rows; the optional conventional bracket scrolls within a bounded region. Standard result modals refresh the bracket through `refreshDatatable`. Manual seeding has accessible move controls, review panels name affected records, dates use promotion-local time, and winner/draw/bye/walkover states use text alongside color.
+
+Round robin, points, double elimination, custom bracket graphs, mixed kinds, automatic booking, retroactive linking, public brackets, exports and communications are deferred. No availability, settlement, appearance-fee or storyline semantics are implied by tournament qualification.

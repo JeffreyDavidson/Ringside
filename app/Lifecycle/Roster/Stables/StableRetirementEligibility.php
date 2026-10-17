@@ -61,16 +61,18 @@ final readonly class StableRetirementEligibility
             throw CannotBeUnretiredException::notRetired($stable);
         }
 
-        $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);
+        $availableFormerMembers = $this->formerMemberEligibility->availableMembersFor($stable);
 
         if ($availableFormerMembers->isEmpty()) {
             throw CannotBeUnretiredException::noAvailableFormerMembers($stable);
         }
 
-        if ($availableFormerMembers->count() < StableMembershipRequirements::MINIMUM_MEMBER_COUNT) {
+        $availableHeadcount = $availableFormerMembers->getTotalMemberCount();
+
+        if (! StableMembershipRequirements::hasMinimumHeadcount($availableHeadcount)) {
             throw CannotBeUnretiredException::insufficientFormerMembers(
                 $stable,
-                $availableFormerMembers->count(),
+                $availableHeadcount,
                 StableMembershipRequirements::MINIMUM_MEMBER_COUNT,
             );
         }

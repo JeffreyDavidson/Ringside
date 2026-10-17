@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use JMac\Testing\DoubleInterface;
 use JMac\Testing\Matching\Argument;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -26,7 +27,28 @@ describe('detail page actions components', function (): void {
         // Assert
         $livewire->assertOk();
         $assertView($livewire);
-        expect($livewire->get($property))->toEqual($record);
+        expect($livewire->get("{$property}Id"))->toBe($record->getKey());
+    })->with('lifecycle action components');
+
+    it('locks the record id against client tampering', function (
+        string $component,
+        string $property,
+        string $model,
+        Closure $assertView,
+    ): void {
+        // Arrange
+        $record = $model::factory()->create();
+        $other = $model::factory()->create();
+
+        actingAs(administrator());
+        $livewire = livewire($component, [$property => $record]);
+
+        // Act
+        $tamper = fn () => $livewire->set("{$property}Id", $other->getKey());
+
+        // Assert
+        expect($tamper)->toThrow(CannotUpdateLockedPropertyException::class)
+            ->and($livewire->get("{$property}Id"))->toBe($record->getKey());
     })->with('lifecycle action components');
 
     it('delegates lifecycle actions and dispatches feedback', function (

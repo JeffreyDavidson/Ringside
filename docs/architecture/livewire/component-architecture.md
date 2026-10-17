@@ -34,8 +34,8 @@ Modals own the user interaction:
 ### Actions
 
 Actions are the application boundary for mutations. They own business rules,
-transactions, model writes, and relationship changes. A Livewire component resolves
-Actions from Laravel's container and calls `handle()`.
+transactions, model writes, and relationship changes. A Livewire component receives
+Actions by injection (method injection, or `boot()` when several methods share one) and calls `handle()`.
 
 ### Models and Builders
 
@@ -101,6 +101,9 @@ Detail pages render two kinds of shared Livewire component (details in
 
 - `{Domain}\Components\Actions` exposes lifecycle transitions and `canPerform()`,
   and dispatches `{entity}-updated` after each success.
+  The component keeps only a `#[Locked]` id (`wrestlerId`, `tagTeamId`, ...); `mount()` accepts
+  the bound model, and a `#[Computed]` method reloads the record from that id once per request.
+  Eligibility services arrive through `boot()` (or a trait boot hook), not `app()`.
 - `App\Livewire\Components\GeneralInfo` wraps the General Info card, listens for that
   event, and re-queries the model so the card refreshes without a reload.
 

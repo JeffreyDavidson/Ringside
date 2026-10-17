@@ -50,7 +50,7 @@ class CreateAction
     public function handle(StableData $stableData, ?int $promotionId = null): Stable
     {
         return DB::transaction(function () use ($stableData, $promotionId): Stable {
-            $name = $stableData->getTrimmedName();
+            $name = mb_trim($stableData->name);
             $promotionId ??= $this->promotionContext->isEnforced() ? $this->promotionContext->current()?->id : null;
 
             if ($promotionId === null) {
@@ -81,13 +81,10 @@ class CreateAction
                 throw CannotBeCreatedException::nameTaken($name);
             }
 
-            // Use enhanced DTO methods
-            $joinDate = $stableData->getJoinDate();
+            // Members join on the start date, or today when the stable has none.
+            $this->addStableMembersAction->handle($stable, $stableData->members, $stableData->start_date ?? now());
 
-            $this->addStableMembersAction->handle($stable, $stableData->members, $joinDate);
-
-            // Use enhanced DTO method instead of isset check
-            if ($stableData->shouldEstablish()) {
+            if ($stableData->start_date instanceof Carbon) {
                 $this->establishAction->handle(
                     $stable,
                     $stableData->start_date,

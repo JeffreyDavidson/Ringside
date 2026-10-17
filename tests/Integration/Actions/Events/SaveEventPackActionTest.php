@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
-use App\Exceptions\Events\EventPackConflictException;
+use App\Data\Events\EventPackData;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 test('saving locks the owning event then its matches then the pack before inserting', function (): void {
     // Arrange
@@ -15,7 +16,7 @@ test('saving locks the owning event then its matches then the pack before insert
     $data = resolve(EventPackViewModel::class)->data($event);
 
     // Act
-    $statements = recordStatements(fn () => resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false));
+    $statements = recordStatements(fn () => resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false));
 
     // Assert
     $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
@@ -38,13 +39,13 @@ test('a repeated first save fails without replacing the existing document', func
     $event = Event::factory()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     $action = resolve(SaveEventPackAction::class);
-    $action->handle($event, 0, $data['card']['fingerprint'], [...$data['content'], 'notes' => 'Saved first'], false);
+    $action->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'notes' => 'Saved first']), false);
 
     // Act
-    $repeat = fn () => $action->handle($event, 0, $data['card']['fingerprint'], [...$data['content'], 'notes' => 'Repeated'], false);
+    $repeat = fn () => $action->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'notes' => 'Repeated']), false);
 
     // Assert
-    expect($repeat)->toThrow(EventPackConflictException::class)
+    expect($repeat)->toThrow(RecordChangedException::class)
         ->and($event->pack()->firstOrFail()->content['notes'])->toBe('Saved first')
         ->and($event->pack()->count())->toBe(1);
 });

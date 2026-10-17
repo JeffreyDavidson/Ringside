@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Events;
 
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 
 final class NameTakenException extends BaseBusinessException

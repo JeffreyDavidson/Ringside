@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Support\MatchFormDummyData;

@@ -7,6 +7,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Queries\Roster\PreviousManagersQuery;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
@@ -65,6 +66,7 @@ describe('PreviousManagers query', function (): void {
             'hired_at' => Date::now()->subMonths(2),
         ]);
         $table = new PreviousManagers;
+        $table->boot(resolve(PreviousManagersQuery::class));
         $table->stableId = $stable->id;
 
         // Act
@@ -105,6 +107,7 @@ describe('PreviousManagers query', function (): void {
             'fired_at' => $boundary,
         ]);
         $table = new PreviousManagers;
+        $table->boot(resolve(PreviousManagersQuery::class));
         $table->stableId = $stable->id;
 
         // Act

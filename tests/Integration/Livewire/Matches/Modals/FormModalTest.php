@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Data\Matches\EventMatchData;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\RecordChangedException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Livewire\Matches\Modals\FormModal;
@@ -464,6 +465,38 @@ describe('authorized match form interactions', function (): void {
         expect($modal->instance()->getErrorBag()->first('form.configuration'))
             ->toBe('Wrestler [John Cena] is already booked at this event time.')
             ->and(EventMatch::query()->whereBelongsTo($event)->doesntExist())->toBeTrue();
+        $action->verify();
+    });
+
+    it('keeps the form open and says so when the match was changed by someone else', function (): void {
+        ['event' => $event] = livewireMatchesModalsFormModalEventFixtures();
+
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')
+            ->throws(RecordChangedException::changed());
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.configuration' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('form.referees', [$referee->id]);
+        expect(EventMatch::query()->whereBelongsTo($event)->doesntExist())->toBeTrue();
         $action->verify();
     });
 

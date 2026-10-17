@@ -36,7 +36,7 @@
                 <p class="hero-badge">{{ __('marketing.hero_badge') }}</p>
                 <h1 id="hero-title" class="display hero-title">
                     <span>{{ __('marketing.hero.first') }}</span>
-                    <span class="text-signal">{{ __('marketing.hero.second') }}</span>
+                    <span>{{ __('marketing.hero.second') }}</span>
                 </h1>
                 <p class="hero-description">{{ __('marketing.hero.description') }}</p>
                 <div class="hero-actions">

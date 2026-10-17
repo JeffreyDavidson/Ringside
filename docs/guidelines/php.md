@@ -26,6 +26,7 @@ namespace App\Models\Roster\Wrestlers;
 
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
+use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -33,7 +34,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property string $name
  * @property string $hometown
- * @property HeightValueObject $height
+ * @property Height $height
  * @property int $weight
  */
 class Wrestler extends Model

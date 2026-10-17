@@ -72,7 +72,7 @@ test('a stale editor preserves input and the newer saved agreement', function ()
     $component->call('save', true);
 
     // Assert
-    $component->assertHasErrors(['booking'])->assertSet('form.travelNotes', 'My unsaved note');
+    $component->assertHasErrors(['booking' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('form.travelNotes', 'My unsaved note');
     expect($fixture['booking']->refresh()->version)->toBe(2)->and(EventTalentBookingRevision::query()->count())->toBe(2);
 });
 
@@ -208,6 +208,26 @@ test('the private timeline can reach older agreements beyond the first page', fu
     // Assert
     $component->assertSee('LEAK-TRAVEL-7Q');
     $component->call('closeEditor')->assertSet('personId', 0)->assertDispatched('talent-editor-closed');
+});
+
+test('history shows an unknown stored agreement status as stored instead of failing', function (): void {
+    // Arrange
+    $fixture = talentBookingFixture();
+    saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Contacted, null, null, 'UTC', 'Correction', false, 'Correction'));
+    $revision = EventTalentBookingRevision::query()->latest('id')->firstOrFail();
+    $snapshot = $revision->snapshot;
+    $snapshot['status'] = 'legacy_status';
+    EventTalentBookingRevision::query()
+        ->whereKey($revision->id)
+        ->toBase()
+        ->update(['snapshot' => json_encode($snapshot)]);
+    $component = livewire(TalentBookings::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('showHistory', 'wrestler', $fixture['person']->id);
+
+    // Assert
+    $component->assertSee('legacy_status')->assertDontSee('talent-bookings.states.legacy_status');
 });
 
 test('a pre-card referee can be proposed through the same private editor', function (): void {

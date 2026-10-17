@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
+use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Rules\TagTeams\IsBookable as TagTeamIsBookable;
 use App\Rules\Wrestlers\IsBookable as WrestlerIsBookable;
 use Illuminate\Validation\Rule;
@@ -16,7 +18,7 @@ use Illuminate\Validation\Rules\Exists;
  */
 final readonly class MatchCompetitorRuleSet
 {
-    public function __construct(private ?MatchType $matchType, private ?int $promotionId) {}
+    public function __construct(private ?MatchType $matchType, private ?int $promotionId, private ?Event $event = null, private ?EventMatch $match = null) {}
 
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
@@ -49,9 +51,9 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['sometimes', 'array'],
             'competitors.*.wrestlers' => ['sometimes', 'array'],
-            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable],
+            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable],
+            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable($this->event, $this->match)],
         ];
     }
 
@@ -65,7 +67,7 @@ final readonly class MatchCompetitorRuleSet
 
         foreach (range(0, $sideCount - 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}.wrestlers"] = ['required', 'array', 'size:1'];
-            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable];
+            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)];
         }
 
         return $rules;
@@ -83,9 +85,9 @@ final readonly class MatchCompetitorRuleSet
         foreach (range(0, 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}"] = ['required', 'array'];
             $rules["competitors.{$sideIndex}.wrestlers"] = ['sometimes', 'array', 'min:2'];
-            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable];
+            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)];
             $rules["competitors.{$sideIndex}.tag_teams"] = ['sometimes', 'array', 'min:1'];
-            $rules["competitors.{$sideIndex}.tag_teams.*"] = ['bail', 'integer', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable];
+            $rules["competitors.{$sideIndex}.tag_teams.*"] = ['bail', 'integer', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable($this->event, $this->match)];
         }
 
         return $rules;
@@ -105,9 +107,9 @@ final readonly class MatchCompetitorRuleSet
             $tagTeams = "competitors.{$sideIndex}.tag_teams";
 
             $rules[$wrestlers] = ['required_without:'.$tagTeams, 'array', 'max:1', 'prohibits:'.$tagTeams];
-            $rules["{$wrestlers}.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable];
+            $rules["{$wrestlers}.*"] = ['bail', 'integer', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)];
             $rules[$tagTeams] = ['required_without:'.$wrestlers, 'array', 'max:1', 'prohibits:'.$wrestlers];
-            $rules["{$tagTeams}.*"] = ['bail', 'integer', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable];
+            $rules["{$tagTeams}.*"] = ['bail', 'integer', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable($this->event, $this->match)];
         }
 
         return $rules;
@@ -126,7 +128,7 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['required', 'array', 'list', 'size:1'],
             'competitors.0.wrestlers' => [...$wrestlerRules, 'list'],
-            'competitors.0.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable],
+            'competitors.0.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)],
         ];
     }
 
@@ -138,9 +140,9 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['required', 'array', 'list', $requiredSides === null ? 'min:2' : "size:{$requiredSides}"],
             'competitors.*.wrestlers' => ['required_without:competitors.*.tag_teams', 'array'],
-            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable],
+            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('wrestlers'), new WrestlerIsBookable($this->event, $this->match)],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable],
+            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', $this->existsInPromotion('tag_teams'), new TagTeamIsBookable($this->event, $this->match)],
         ];
     }
 

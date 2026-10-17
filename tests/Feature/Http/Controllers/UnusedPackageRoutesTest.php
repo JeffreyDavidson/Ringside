@@ -9,5 +9,6 @@ test('the removed tenancy asset route does not exist', function (): void {
     $response = get('/tenancy/assets/x');
 
     // Assert
-    $response->assertNotFound();
+    $response
+        ->assertNotFound();
 });

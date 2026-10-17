@@ -65,7 +65,7 @@ test('a retired tag team without current partners cannot be unretired', function
     $tagTeam->retirements()->create(['started_at' => now()->subDays(2)]);
 
     expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam->refresh()))
-        ->toThrow(CannotBeUnretiredException::class, 'no current partners are available');
+        ->toThrow(CannotBeUnretiredException::class, 'none of its partners are available');
 });
 
 test('a retired tag team with fewer than two members at retirement cannot be unretired', function () {
@@ -73,7 +73,7 @@ test('a retired tag team with fewer than two members at retirement cannot be unr
     TagTeamWrestler::query()->forTagTeamId($tagTeam->id)->firstOrFail()->update(['left_at' => now()->subDays(3)]);
 
     expect(fn () => resolve(TagTeamRetirementEligibility::class)->ensureCanUnretire($tagTeam))
-        ->toThrow(CannotBeUnretiredException::class, 'only 1 partners available');
+        ->toThrow(CannotBeUnretiredException::class, 'only 1 partner is available and 2 are required');
 });
 
 test('a retired tag team cannot be unretired while a partner is injured', function () {

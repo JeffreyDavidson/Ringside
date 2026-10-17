@@ -4,26 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
-use App\Enums\Events\LiveShowStatus;
-use App\Exceptions\Events\LiveShowException;
-use App\Models\Events\EventLiveRun;
-use App\Models\Promotions\Promotion;
 use DateTimeZone;
 use Illuminate\Support\Carbon;
 
 class LiveShowTimingService
 {
-    public function ensureShowDay(EventLiveRun $run): void
-    {
-        if ($run->status === LiveShowStatus::Running) {
-            return;
-        }
-        $zone = Promotion::zoneOf($run->event->promotion);
-        if ($run->event->date?->copy()->setTimezone($zone)->toDateString() !== now()->setTimezone($zone)->toDateString()) {
-            throw LiveShowException::because('show_day');
-        }
-    }
-
     /** A repeated or skipped wall-clock hour needs an explicit valid UTC offset; unknown planned times stay unknown. */
     public function wallTime(?string $value, string $zone, ?string $offset = null): ?Carbon
     {

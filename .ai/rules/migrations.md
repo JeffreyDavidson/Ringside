@@ -8,6 +8,9 @@ paths:
 ## Store enums in string columns
 Store PHP enum values in string columns rather than database enum columns.
 
+## Write enum values as literals
+Write enum values in migrations as their stored literals (`'singles'`), never through the enum class (`MatchType::Singles->value`). A migration runs on every fresh database for the life of the app; referencing an enum couples it to a class that may later move, be renamed or lose a case, and the only fix then is editing a merged migration.
+
 ## Model-backed foreign keys
 Define application model-backed foreign keys with foreignIdFor(Model::class), supplying a custom column name when necessary. Use foreignId() only when no application model represents the referenced table.
 

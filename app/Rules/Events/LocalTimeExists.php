@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Events;
 
 use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Carbon\Exceptions\InvalidFormatException;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -21,13 +22,13 @@ class LocalTimeExists implements ValidationRule
         }
 
         try {
-            $exists = Promotion::localTimeExists($this->promotion, $value);
+            $exists = PromotionTimeZoneService::localTimeExists($this->promotion, $value);
         } catch (InvalidFormatException) {
             return;
         }
 
         if (! $exists) {
-            $fail(__('events.date_does_not_exist', ['timezone' => Promotion::zoneOf($this->promotion)]));
+            $fail(__('events.date_does_not_exist', ['timezone' => PromotionTimeZoneService::zoneOf($this->promotion)]));
         }
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Livewire\Matches\Support\MatchCompetitorRuleSet;
 
 describe('match competitor validation rules', function (): void {

@@ -8,21 +8,28 @@ use App\Data\Events\EventData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\NameTakenException;
 use App\Exceptions\Events\VenueDeletedException;
+use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Events\SchedulingSlotLock;
+use App\Lifecycle\Matches\MatchAssignmentEligibility;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Tournaments\TournamentLocks;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Matches\MatchAssignmentConflictService;
+use App\Models\Tournaments\Tournament;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
     public function __construct(
-        private readonly MatchAssignmentConflictService $assignmentConflicts,
+        private readonly MatchAssignmentEligibility $assignmentEligibility,
+        private readonly EventRosterSchedulingEligibility $rosterAvailability,
         private readonly SchedulingSlotLock $slotLock,
+        private readonly TournamentLocks $tournamentLocks,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
         private readonly RecordNameLock $nameLock,
     ) {}
 
@@ -52,6 +59,10 @@ class UpdateAction
                 $this->slotLock->lock($event->date, $eventData->date);
             }
 
+            $tournamentIds = $this->tournamentLocks->forEvent($event->id);
+            if ($tournamentIds !== []) {
+                $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $eventData->date);
+            }
             $lockedEvent = $event->refreshForUpdate();
 
             $nameTaken = Event::query()
@@ -65,6 +76,7 @@ class UpdateAction
                 throw NameTakenException::name($name);
             }
 
+            $this->tournamentRequirements->ensureEventChronology($lockedEvent, $eventData->date);
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
             $venue = $eventData->venue?->refreshForUpdate();
 
@@ -81,9 +93,13 @@ class UpdateAction
             }
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
-                $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
+                $this->assignmentEligibility->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
+                $this->rosterAvailability->ensureAvailableAt($lockedEvent, $eventData->date, lock: true);
             }
 
+            if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
+                Tournament::query()->whereKey($tournamentIds)->increment('version');
+            }
             $lockedEvent->update([
                 'name' => $name,
                 'date' => $eventData->date,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Models\Factories\Matches;
 
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Titles\TitleType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

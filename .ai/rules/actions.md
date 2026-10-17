@@ -14,6 +14,9 @@ Implement individual application operations as focused Action classes with a pub
 ## Inject action collaborators
 Acquire Action and service collaborators through constructor injection inside application operations.
 
+## Take Data objects; leave validation and permissions to the caller
+Actions take typed readonly Data objects (app/Data), never arrays, so they are safe to call from a controller, component, job or command; a non-HTTP caller validates its input itself before building the Data object with its static named constructor. Validate input in the Form Request or Livewire form and check permissions at the route (`->can()`) or the component (`Gate::authorize`) before calling an Action. Actions do not call `Validator::make`, `Gate::authorize`, `Gate::allows`, `Gate::forUser` or `abort()`: they lock, check business and state rules (including version and fingerprint conflicts), write, and throw the application's business exceptions. The one standing exception is SaveEventProductionAction, which re-runs the shared structural check EventProductionRequirements::validatedInput() inside its save. MutateBudgetAction keeps an `array $payload` because it is the internal operation fingerprint hashed into `event_budget_revisions.request_hash` for retry identity, not caller input; retyping it would change stored hashes.
+
 ## Lock lifecycle period transitions
 Acquire the owning model row lock inside a transaction before validating and mutating lifecycle periods. Start operations create a new period only when no open period exists; reject an existing open period instead of rewriting it. End operations require an open period and must reject an end date before its start.
 

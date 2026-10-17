@@ -41,7 +41,7 @@ The factory integrates with several key models:
 - **MatchCompetitor**: Links competitors to matches
 - **EventMatch**: Stores the current finish and winning side
 - **MatchSide**: Groups the competitors who compete and win together
-- **MatchType**: Defines match rules and competitor requirements
+- **MatchType**: Enum (`App\Enums\Matches\MatchType`) that defines match rules and competitor requirements; see [Match Type System](match-type-system.md)
 - **MatchFinish**: Specifies how matches end and whether a winning side is required
 
 ## Architecture Patterns
@@ -53,13 +53,13 @@ The factory uses Laravel's state pattern extensively:
 ```php
 public function singles(): static
 {
-    return $this->createMatchType('singles');
+    return $this->createMatchType(MatchType::Singles);
 }
 
-private function createMatchType(string $factoryMethod): static
+private function createMatchType(MatchType $matchType): static
 {
     return $this->state([
-        'match_type_id' => MatchType::factory()->{$factoryMethod}()->create()->id,
+        'match_type' => $matchType,
     ])->afterCreating(function (EventMatch $eventMatch) {
         $this->addCompetitors($eventMatch);
         $this->addResult($eventMatch);
@@ -71,7 +71,7 @@ private function createMatchType(string $factoryMethod): static
 
 The `generateFullMatch()` method uses a resolution pattern to convert configuration arrays into database entities:
 
-1. **Match Type Resolution**: String slugs → MatchType models
+1. **Match Type Resolution**: String values such as `'tag-team'` → `MatchType` enum cases
 2. **Competitor Resolution**: Mixed types → Competitor models
 3. **Finish Resolution**: String values → MatchFinish enum cases
 4. **Strategy Resolution**: Winner strategies → Competitor collections
@@ -86,7 +86,7 @@ public function generateFullMatch(array $config): static
     $this->matchConfig = $config;
     
     return $this->state([
-        'match_type_id' => $matchType->id,
+        'match_type' => $matchType,
     ])->afterCreating(function (EventMatch $eventMatch) {
         $this->configureFullMatch($eventMatch, $this->matchConfig);
     });
@@ -98,7 +98,7 @@ public function generateFullMatch(array $config): static
 ### Match Creation Process
 
 1. **Configuration Parsing**: Input configuration is validated and parsed
-2. **Match Type Creation**: MatchType is resolved and assigned
+2. **Match Type Creation**: `MatchType` case is resolved and assigned
 3. **Base Match Creation**: EventMatch record is created
 4. **Competitor Generation**: Competitors are created and linked
 5. **Result Generation**: Match results, winners, and losers are created
@@ -131,7 +131,7 @@ The factory enforces business rules through match type validation:
 private function createCompetitorWithMatchTypeRestrictions(MatchType $matchType): Model
 {
     // Royal Rumble and Singles only allow wrestlers
-    if (in_array($matchType->slug, ['royal-rumble', 'singles'])) {
+    if (in_array($matchType, [MatchType::RoyalRumble, MatchType::Singles], true)) {
         return Wrestler::factory()->create();
     }
     
@@ -143,8 +143,8 @@ private function createCompetitorWithMatchTypeRestrictions(MatchType $matchType)
 
 ### Adding New Match Types
 
-1. Create new MatchType factory method
-2. Add match type resolution in `resolveMatchType()`
+1. Add the case to the `MatchType` enum (see [Match Type System](match-type-system.md#adding-a-match-type))
+2. Add the spelling to `resolveMatchType()` if factory configuration should accept it
 3. Define competitor restrictions if needed
 4. Add any specific business logic
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\Individuals;
 
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
@@ -16,20 +16,20 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is currently unemployed and cannot be retired.");
+        return self::forReason(BusinessRuleReason::Unemployed, __('individuals.errors.retire.unemployed', ['context' => $context]));
     }
 
     public static function alreadyRetired(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return self::forReason(BusinessRuleReason::AlreadyRetired, "{$context} is already retired and cannot be retired again.");
+        return self::forReason(BusinessRuleReason::AlreadyRetired, __('individuals.errors.retire.already_retired', ['context' => $context]));
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} has future employment scheduled and cannot be retired.");
+        return new self(__('individuals.errors.retire.future_employment', ['context' => $context]));
     }
 }

@@ -27,11 +27,14 @@ class Wrestler extends Model
         'weight',
     ];
 
-    protected $casts = [
-        'height' => HeightValueObject::class,
-        'weight' => 'integer',
-        'started_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'height' => Height::class,
+            'weight' => 'integer',
+            'started_at' => 'datetime',
+        ];
+    }
 
     public function currentEmployment(): HasOne
     {
@@ -51,7 +54,7 @@ class Wrestler extends Model
 
 ```php
 // ✅ CORRECT - Thin controller with proper structure
-class WrestlersController extends Controller
+class WrestlerController
 {
     public function __construct(
         private WrestlerRepository $repository

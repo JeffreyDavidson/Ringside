@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -32,8 +32,8 @@ test('it adds wrestler competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0);
-    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1);
+    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
+    $addWrestlersToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
@@ -60,8 +60,8 @@ test('it adds tag team competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0);
-    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1);
+    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 0, []);
+    $addTagTeamsToMatchAction->expects('handleWithinTransaction')->with(Argument::type(EventMatch::class), Argument::type(Collection::class), 1, []);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 

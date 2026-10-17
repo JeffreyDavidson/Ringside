@@ -28,7 +28,7 @@
         <section class="space-y-3" aria-labelledby="match-competitors-heading">
             <h3
                 id="match-competitors-heading"
-                class="border-ringside-outline text-ringside-ink border-b pb-2 text-sm font-semibold"
+                class="border-outline text-foreground border-b pb-2 text-sm font-semibold"
             >
                 {{ __('matches.competitors') }}
             </h3>
@@ -70,7 +70,7 @@
                                     class="min-w-0 space-y-3"
                                     @error("form.competitors.{$sideIndex}") aria-describedby="form.competitors.{{ $sideIndex }}-error" @enderror
                                 >
-                                    <legend class="text-ringside-ink mb-3 text-sm font-semibold">
+                                    <legend class="text-foreground mb-3 text-sm font-semibold">
                                         {{ $form->sideLabel($sideIndex) }}
                                     </legend>
                                     <x-form.error
@@ -177,7 +177,7 @@
                             :labels="$this->selectedRosterLabels['wrestlers']"
                             multiple
                         />
-                        <p class="text-ringside-muted mt-1 text-sm">
+                        <p class="text-muted-foreground mt-1 text-sm">
                             {{ __('matches.form.competitors_multiple_hint') }}
                         </p>
                     </x-form-modal.modal-input>
@@ -190,7 +190,7 @@
                         >
                             @foreach ($form->competitors as $sideIndex => $competitors)
                                 <fieldset wire:key="competitor-side-{{ $sideIndex }}" class="min-w-0 space-y-3">
-                                    <legend class="text-ringside-ink mb-3 text-sm font-semibold">
+                                    <legend class="text-foreground mb-3 text-sm font-semibold">
                                         {{ $form->sideLabel($loop->index) }}
                                     </legend>
                                     <x-form.inputs.roster-combobox
@@ -223,11 +223,13 @@
     @else
         {{-- No match type selected - show helper text --}}
         <x-form-modal.modal-input>
-            <div class="text-ringside-muted py-8 text-center">
+            <div class="text-muted-foreground py-8 text-center">
                 <p class="text-sm">{{ __('matches.form.select_match_type_helper') }}</p>
             </div>
         </x-form-modal.modal-input>
     @endif
+
+    <x-matches.booking-history />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-officials-grid">
         <x-form-modal.modal-input>

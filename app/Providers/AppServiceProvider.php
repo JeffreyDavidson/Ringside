@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Auth\CaseInsensitiveEmailUserProvider;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EstablishPromotionContext;
 use App\Models\Events\Event;
@@ -18,7 +19,6 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Policies\PromotionGate;
 use App\Services\Promotions\PromotionContextService;
-use App\Support\Auth\CaseInsensitiveEmailUserProvider;
 use App\View\Composers\PromotionSwitcherComposer;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;

@@ -11,8 +11,10 @@ Authorize every protected Livewire operation with Gate::authorize() immediately 
 ## Direct Eloquent access
 Query Eloquent models directly in Livewire query components. Move reusable query behavior into typed custom Eloquent Builders; do not create repositories that merely wrap Eloquent.
 
-## Resolve actions at Livewire boundaries
-Resolve Action classes from the container at Livewire execution boundaries and call handle().
+## Inject collaborators into Livewire components
+Livewire components receive Actions, Queries, Services, ViewModels and Lifecycle classes by dependency injection, never through inline app() or resolve() calls. Type-hint a collaborator on the Livewire action or render() method that uses it, placing injected parameters before the parameters Livewire passes from the client (`public function cancelInvitation(RemovePromotionInvitationAction $action, int $invitationId)` in Promotions\Members\Manage) and call handle(). Inject in boot() (or a trait boot hook) only in three cases, and keep the collaborator in a non-public (protected or private) property so it is never serialized into component state: several methods or hooks share it (EventPackViewModel in Events\Components\SponsorCommitments), or the method that needs it is also called by other component methods, which cannot pass an argument (TalentBookingFingerprintService for TalentBookings::edit()), or the framework calls the method without arguments, so it cannot take the collaborator as a parameter (a table's builder() or projectRowState(), as in Stables\Tables\PreviousManagers and Users\Tables\Main).
+A Livewire Form object is not built by the container and cannot receive injected parameters. Pass the collaborator in from the component method that calls the form (`$this->form->toData($timing)`). Only when Livewire itself calls the form, as in rules() run by validate(), keep one narrowly commented app() resolution.
+`tests/Feature/Architecture/LivewireArchitectureTest.php` fails on inline `app(...)`, `resolve(...)`, `App::make(...)`, `app()->make(...)` or `Container::getInstance()` in `app/Livewire` and Blade views; its allow-list names only the two form `rules()` exceptions above.
 
 ## Blade and Livewire frontend
 Build server-driven interactive UI with class-based Livewire components and Blade views; do not introduce an Inertia or SPA page layer without an explicit architectural change.
@@ -22,6 +24,8 @@ Implement Livewire behavior in namespaced PHP classes using shared base classes 
 
 ## Translate only domain failures
 Catch and translate BaseBusinessException at Livewire user-interaction boundaries. Do not catch generic Exception or Throwable to produce business flash messages; let programmer, infrastructure, and framework failures propagate through Laravel's normal exception reporting.
+
+Actions throw the plain `RecordChangedException::changed()`. A screen that keeps the user's unsaved input on screen after the failure shows the message through `ExplainsKeptInput::failureMessageKeepingInput()`, which adds "Your changes are still here."; a screen that loses any of it (a redirect whose reload drops flashed input, an unsaved upload) shows the plain message.
 
 ## Populate development data through typed forms
 Implement dummy-data population by assigning directly to the concrete Livewire form's typed properties. Do not return generic field-name arrays or dynamically assign arbitrary properties; dedicated collaborators such as match form population must accept the concrete form type.
@@ -34,6 +38,8 @@ Use RosterResourceRouteResolver for Wrestler and TagTeam resource URLs shared by
 
 ## Resolve models from locked identifiers
 Livewire preserves public state between requests, not protected model properties. Keep the model identifier on the form as a locked public property and resolve the current Eloquent model from it whenever validation, authorization, modal titles, or submission behavior needs model context. Do not use protected model instances as cross-request state.
+
+A component that shows or acts on one record follows the same rule: no public Eloquent model property. `mount()` accepts the model and stores only its key in a `#[Locked]` id, and a `#[Computed]` method loads the record from that id when the component needs it, so every action authorizes the freshly loaded row.
 
 ## Project lifecycle status once, for the loaded rows only
 Show-page components load the status projection with their model query or loadExists() in render(); tables paginate first and project through DataTableComponent::projectRowState() for the page rows instead of adding with*State() to builder(). Do not read status, isInjured() or isSuspended() on models that were loaded without the projection in a loop or per render: each call falls back to its own exists query. Any table action that changes the counts must call forgetMetadata().

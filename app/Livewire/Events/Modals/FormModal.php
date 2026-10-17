@@ -7,7 +7,7 @@ namespace App\Livewire\Events\Modals;
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
 use App\Builders\Events\VenueBuilder;
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;

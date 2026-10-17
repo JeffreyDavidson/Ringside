@@ -14,9 +14,12 @@ use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Titles\Title;
+use App\Support\ModelKey;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -27,16 +30,41 @@ use Livewire\Component;
  * This component is designed to be reusable across different contexts (tables,
  * detail pages, cards, etc.) while maintaining consistent authorization and
  * error handling patterns.
+ *
+ * @property-read Title $title
  */
 class Actions extends Component
 {
     use ExecutesBusinessActions;
 
-    public Title $title;
+    private TitleLifecycleEligibility $lifecycleEligibility;
+
+    #[Locked]
+    public int|string $titleId;
+
+    /** The record route binding resolved for the mounting request; never persisted, so later requests reload it. */
+    protected ?Title $mountedTitle = null;
+
+    public function boot(TitleLifecycleEligibility $lifecycleEligibility): void
+    {
+        $this->lifecycleEligibility = $lifecycleEligibility;
+    }
 
     public function mount(Title $title): void
     {
-        $this->title = $title;
+        $this->titleId = ModelKey::of($title);
+        $this->mountedTitle = $title;
+    }
+
+    /**
+     * Loaded from the locked id once per request, so every action authorizes the current row. Global scopes
+     * (soft deletes, promotion) are skipped exactly as when Livewire restored the former model property: the
+     * id was set at mount from a record that route binding had already resolved within them.
+     */
+    #[Computed]
+    public function title(): Title
+    {
+        return $this->mountedTitle ?? Title::query()->withoutGlobalScopes()->findOrFail($this->titleId);
     }
 
     public function debut(DebutAction $debutAction): void
@@ -67,7 +95,7 @@ class Actions extends Component
     public function canPerform(TitleLifecycleTransition $transition): bool
     {
         return Gate::allows($transition->ability(), $this->title)
-            && app(TitleLifecycleEligibility::class)->allows($this->title, $transition);
+            && $this->lifecycleEligibility->allows($this->title, $transition);
     }
 
     public function render(): View

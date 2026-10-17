@@ -225,7 +225,7 @@ invitation stays saved and the outcome is still `Invited`, and the owner can
 still see it in the application. Text lives in `lang/en/mail.php`.
 
 Promotion roles apply only within the active promotion context. Members can
-view promotion-owned data. Managers can view and manage promotion-owned roster,
+view ordinary promotion-owned data and explicitly reviewed sponsor instructions in the event pack. Sponsor contacts, commitments, evidence and revision history require the private `manageSponsors` ability granted only to active Owners/Managers. Managers can view and manage promotion-owned roster,
 event, match, stable, and title data, but cannot update promotion settings or
 membership roles. Owners have the manager capabilities and can also update
 promotion settings and manage that promotion's memberships. Every promotion
@@ -350,8 +350,8 @@ promotions behave as before). It is edited on the promotion form and validated w
 
 `events.date` is always stored in UTC. People enter and read event dates in the
 promotion's zone: the event form reads the `datetime-local` value as that zone and stores
-the UTC instant (`Promotion::parseLocalTime()`), and shows the stored value back in it
-(`Event::local_date`, backed by `Promotion::toLocalTime()`). For a new event the zone is the
+the UTC instant (`PromotionTimeZoneService::parseLocalTime()`), and shows the stored value back in it
+(`Event::local_date`, backed by `PromotionTimeZoneService::toLocalTime()`). For a new event the zone is the
 enforced promotion context, the same promotion the creating hook assigns; an event with no
 promotion uses the application time zone. The reschedule validation rule (`DateCanBeChanged`)
 converts the entered value the same way, so it compares real instants.
@@ -372,15 +372,15 @@ time zone select when an existing promotion has events; nothing else is moved au
 Clock changes are handled at the form boundary. A wall-clock time that the zone skips when
 clocks move forward (for example `2026-03-08T02:30` in America/New_York) is rejected by the
 `LocalTimeExists` rule with a translated message instead of being silently shifted
-(`Promotion::localTimeExists()`; `parseLocalTime()` itself still just parses). In the repeated
+(`PromotionTimeZoneService::localTimeExists()`; `parseLocalTime()` itself still just parses). In the repeated
 hour when clocks move back, a typed time reads as the first occurrence, but an edit that
-leaves the date as prefilled keeps the event's stored instant (`Event::parseLocalDate()`), so
+leaves the date as prefilled keeps the event's stored instant (`PromotionTimeZoneService::parseEventLocalDate()`), so
 renaming an event in the second occurrence neither moves it an hour nor trips the
 "already occurred" check.
 
 Roster and title start dates work the same way, but as whole days. The date typed into the
 wrestler, tag team, manager, referee, title and stable forms (employment, debut or start date) means
-that day in the record's promotion: the form reads it with `Promotion::parseLocalTime()` through
+that day in the record's promotion: the form reads it with `PromotionTimeZoneService::parseLocalTime()` through
 `BaseForm::parseLocalDate()` (the edited record's promotion, or the enforced promotion context for a
 new record, or the application time zone without one) and stores the start of that local day as the
 matching UTC instant. The dates shown back in the edit forms use the promotion's local day
@@ -408,3 +408,7 @@ development, instead of becoming a hidden N+1. Load relationships explicitly wit
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
 - [Championship System](championship-system.md)
+
+## Private storyline planning
+
+Owners and Managers can plan creative steps across events, link existing matches and saved pack segments, and record what actually happened with retained cast and revision history. Members cannot read these plans. Storylines never change bookings, outcomes, championships or live operations. See [Storyline planning](storyline-planning.md) for state, history, privacy and source authority.

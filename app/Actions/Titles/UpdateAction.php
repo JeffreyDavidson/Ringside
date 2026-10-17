@@ -14,6 +14,7 @@ use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Models\Promotions\Promotion;
 use App\Models\Scopes\PromotionContextScope;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -95,8 +96,8 @@ class UpdateAction
         $scheduledPeriod = $activityPeriods->first();
 
         // The debut date is a day in the promotion's time zone, so "same day" is judged there, not in UTC.
-        $isSameLocalDay = Promotion::toLocalTime($title->promotion, $scheduledPeriod->started_at)
-            ->isSameDay(Promotion::toLocalTime($title->promotion, $debutDate));
+        $isSameLocalDay = PromotionTimeZoneService::toLocalTime($title->promotion, $scheduledPeriod->started_at)
+            ->isSameDay(PromotionTimeZoneService::toLocalTime($title->promotion, $debutDate));
 
         if ($activityPeriods->count() > 1 || ! $scheduledPeriod->started_at->isFuture() || $isSameLocalDay) {
             return;

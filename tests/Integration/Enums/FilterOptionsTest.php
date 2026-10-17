@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Enums\Shared\EmploymentStatus;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Users\UserStatus;
@@ -31,7 +31,7 @@ test('title statuses expose filter options in case order', function (): void {
     expect(TitleStatus::filterOptions())->toBe([
         '' => __('core.all'),
         'undebuted' => 'Not Yet Debuted',
-        'pending_debut' => 'Schedule to Debut',
+        'pending_debut' => 'Scheduled to Debut',
         'active' => 'Active',
         'inactive' => 'Inactive',
         'retired' => 'Retired',

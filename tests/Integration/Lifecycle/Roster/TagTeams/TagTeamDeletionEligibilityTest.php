@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\BusinessRuleReason;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;

@@ -4,7 +4,7 @@
     <x-layouts.workspace-canvas class="flex flex-col gap-5 p-4 lg:gap-7.5 lg:p-7">
         @if ($title)
             <div>
-                <h1 class="font-display text-ringside-ink text-2xl leading-none tracking-tight uppercase">
+                <h1 class="font-display text-foreground text-2xl leading-none tracking-tight uppercase">
                     {{ $title }}
                 </h1>
             </div>

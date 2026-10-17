@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'status' => [
+        'unformed' => 'Not Yet Formed',
+        'pending_establishment' => 'Not Yet Established',
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'retired' => 'Retired',
+    ],
     'name' => 'Stable Name',
     'date_joined' => 'Date Joined',
     'date_left' => 'Date Left',

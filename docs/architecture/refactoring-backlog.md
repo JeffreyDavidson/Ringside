@@ -80,9 +80,12 @@ field.
 **Priority:** Medium  
 **Status:** Mostly established; continue auditing.
 
-Keep request validation in Form Requests, reusable domain constraints in Rules,
-and model authorization in Policies or route middleware. Livewire actions must
-continue to authorize on the server immediately before protected operations.
+Keep request validation in Form Requests (or the Livewire form), reusable domain
+constraints in Rules, and authorization at the route (`->can()`) or the Livewire
+component, decided by `PromotionGate`. Livewire actions must continue to authorize
+on the server immediately before protected operations. Actions neither validate
+nor authorize: they take Data objects and enforce business and state rules
+(`.ai/rules/actions.md`).
 
 ### Actions, Services, and Lifecycle managers
 
@@ -90,10 +93,10 @@ continue to authorize on the server immediately before protected operations.
 **Status:** Audit ongoing.
 
 Use an Action for every state-changing application operation. Services are
-read-only collaborators for retrieval, calculation, or validation. Lifecycle
-persistence and eligibility remain under `app/Lifecycle`; do not create a
-write-oriented service merely to wrap one Action call. Existing write-oriented
-services should be folded into their coordinating Actions when touched.
+read-only collaborators for retrieval and calculation (`ServiceArchitectureTest`
+enforces it). Lifecycle persistence, eligibility guards and locks live under
+`app/Lifecycle`; do not create a write-oriented service merely to wrap one Action
+call.
 
 ### Pipelines and composable workflows
 
@@ -174,27 +177,36 @@ Use API Resources for an actual API response boundary and ViewModels only when
 page payload assembly becomes nontrivial or reusable. Existing Blade and
 Livewire payloads should not gain ceremonial layers.
 
-`App\ViewModels\DashboardViewModel` is the first ViewModel: the Overview page
-combines upcoming events, roster availability counts and current champions.
-It queries Eloquent directly (no repository layer), relying on the promotion
-global scope, and the controller passes it to the view as `dashboard`.
+`App\ViewModels` holds one ViewModel per page payload, in domain folders
+(`Dashboard/` for the Overview, `Events/` for the event pack, production sheet,
+live show, talent bookings, budget, sponsor promises and public event page,
+`Storylines/`, `Matches/` and `Tournaments/` for their pages). Each only builds its page's
+data and returns a typed, ready-to-render array; controllers and Livewire
+components are its only callers, and the view never receives or creates the
+object. The rules and the architecture checks that enforce them are in
+`.ai/rules/view-models.md` and `tests/Feature/Architecture/ViewModelArchitectureTest.php`.
+The Overview ViewModel still queries Eloquent directly (no repository layer),
+relying on the promotion global scope.
 
 ### Architecture tests
 
 **Priority:** High  
 **Status:** In progress; `tests/Feature/Architecture` now enforces controller
-structure, exception construction, morph aliases, roster model namespaces, test
-suite boundaries, translation-key resolution, orphaned docblocks, locked Livewire
-context identifiers, that Livewire components neither create records through
-factories nor write directly through Eloquent models, and that
+structure and singular names, exception construction and folders, morph aliases,
+roster model namespaces, test suite boundaries, translation-key resolution,
+orphaned docblocks, locked Livewire context identifiers, no inline container
+resolution in Livewire code and Blade, that Livewire components neither create
+records through factories nor write directly through Eloquent models, read-only
+Services (`ServiceArchitectureTest`), single-purpose Queries
+(`QueryArchitectureTest`), ViewModels in domain folders that only the view layer
+calls (`ViewModelArchitectureTest`), readonly Data objects with no extra methods
+(`DataArchitectureTest`), the Support rules (`SupportArchitectureTest`), and that
 `MembershipRole::CONTENT_ABILITIES`, the policy methods and the lifecycle enums'
 `ability()` values stay in agreement (`PolicyAbilityArchitectureTest`).
 
 Still to enforce from the decisions above:
 
 - model concerns expose persistence relationships, not new workflow commands;
-- Lifecycle eligibility classes remain in `app/Lifecycle`;
-- Services remain under their responsibility domains;
 - custom collections are tied to Eloquent models and remain type-safe;
 - no new repository layer is introduced around Eloquent.
 
@@ -227,7 +239,8 @@ a new uncovered line as either a missing behavior test or dead code.
 **Status:** Completed (#1886, #1889, #1910).
 
 Removed code that only tests called: the `TitleChampionshipQuery` reporting
-methods beyond `currentChampion()` and `reignLengthInDays()`, `Promotion::hasActiveMember()`
+methods beyond `currentChampion()` and `reignLengthInDays()` (the class itself
+has since gone; the current champion comes from `TitleBuilder::withCurrentChampion()`), `Promotion::hasActiveMember()`
 and `hasMemberWithRole()` (tests use helpers in `tests/Helpers/TestHelpers.php`), the
 `LifecyclePeriodBuilder` instance scopes (the static `constrainTo*()` helpers remain),
 `withActivityStatusState()` and `withAvailabilityState()` (use `withExists()` or
@@ -317,6 +330,9 @@ into `App\Policies\PromotionGate::before()`, covered by the characterization
 suite in `tests/Integration/Policies/PromotionGateTest.php`. The promotion
 context middleware is registered as Livewire persistent middleware so update
 requests keep the same scope as page loads.
+
+The gate stays the permission engine on purpose; see
+[Decision 0001](../decisions/0001-promotion-gate-is-the-permission-engine.md).
 
 Known quirk, deliberately frozen: the gate inspects only the first ability
 argument, so `[Wrestler::class, $foreignWrestler]` is authorized as a class
@@ -488,7 +504,8 @@ base would save little code and weaken the typed boundaries those rules protect.
 Most policy methods return `false` because `PromotionGate` (via `Gate::before`)
 makes the real decision. They look redundant, but `.ai/rules/policies.md`
 requires conventional signatures and they document the ability surface for each
-model. Related: `PromotionPolicy` instance abilities can never be reached through
+model, and the gate is a recorded decision (see
+[Decision 0001](../decisions/0001-promotion-gate-is-the-permission-engine.md)). Related: `PromotionPolicy` instance abilities can never be reached through
 the Gate, because `PromotionGate` always decides for a `Promotion` subject. They
 are kept and covered by direct policy tests.
 

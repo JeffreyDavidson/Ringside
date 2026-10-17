@@ -14,6 +14,14 @@ enum MembershipRole: string
      * @var list<string>
      */
     private const array CONTENT_ABILITIES = [
+        'viewBudget',
+        'updateBudget',
+        'viewProduction',
+        'updateProduction',
+        'preparePublication',
+        'publishPublication',
+        'unpublishPublication',
+        'uploadPublicationPoster',
         'view',
         'viewAny',
         'create',
@@ -35,15 +43,12 @@ enum MembershipRole: string
         'reunite',
         'debut',
         'pull',
+        'manageSponsors',
     ];
 
     public function label(): string
     {
-        return match ($this) {
-            self::Owner => 'Owner',
-            self::Manager => 'Manager',
-            self::Member => 'Member',
-        };
+        return __("promotions.roles.{$this->value}");
     }
 
     public function allows(string $ability): bool

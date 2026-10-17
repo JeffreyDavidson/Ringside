@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\Events;
+
+use App\Data\Events\BudgetMovementData;
+use App\Enums\Events\BudgetOperation;
+use App\Models\Events\Event;
+use App\Models\Events\EventBudget;
+
+class RecordBudgetMovementAction
+{
+    public function __construct(private readonly MutateBudgetAction $mutate, private readonly PersistBudgetMovementAction $persist) {}
+
+    public function handle(Event $event, int $version, string $key, int $lineId, BudgetMovementData $data): EventBudget
+    {
+        return $this->mutate->handle($event, $version, $key, BudgetOperation::RecordMovement, ['line_id' => $lineId, ...(array) $data], function (EventBudget $budget) use ($lineId, $data): array {
+            $line = $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
+            $movement = $this->persist->handle($budget, $line, $data);
+
+            return ['target' => $movement->id, 'before' => [], 'after' => $movement->attributesToArray()];
+        });
+    }
+}

@@ -16,14 +16,14 @@
 
 <x-layouts.auth :title="$title">
     <div class="flex flex-col gap-8">
-        <header class="border-ringside-line border-b pb-6">
+        <header class="border-border border-b pb-6">
             @if ($code !== null)
-                <p class="text-ringside-signal-soft text-sm font-bold tracking-wider uppercase">
+                <p class="text-signal-soft text-sm font-bold tracking-wider uppercase">
                     {{ __('errors.code', ['code' => $code]) }}
                 </p>
             @endif
             <h1 class="font-display mt-3 text-4xl leading-tight tracking-tight uppercase sm:text-5xl">{{ $title }}</h1>
-            <p class="text-ringside-muted mt-4 text-base leading-relaxed">{{ $description }}</p>
+            <p class="text-muted-foreground mt-4 text-base leading-relaxed">{{ $description }}</p>
         </header>
 
         {{ $slot }}

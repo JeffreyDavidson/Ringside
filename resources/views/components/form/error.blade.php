@@ -6,7 +6,7 @@
     <div
         {{
             $attributes->merge([
-                'class' => 'text-sm text-ringside-error mt-1 flex items-start gap-1.5',
+                'class' => 'text-sm text-error mt-1 flex items-start gap-1.5',
                 'role' => 'alert',
                 'aria-live' => 'polite',
             ])

@@ -156,6 +156,26 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         'tag team' => [TagTeam::class, 'tag-teams.show'],
     ]);
 
+    it('heads the reign date columns Date Won and Date Lost', function (): void {
+        $wrestler = Wrestler::factory()->create();
+
+        // Arrange
+        TitleChampionship::factory()
+            ->forWrestler($wrestler)
+            ->wonOn('2024-01-01')
+            ->lostOn('2024-06-01')
+            ->create();
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $wrestler->id]);
+
+        // Assert
+        $component
+            ->assertSee('Date Won')
+            ->assertSee('Date Lost')
+            ->assertDontSee('Dates Held');
+    });
+
     it('renders the title championship history search control', function (): void {
         $wrestler = Wrestler::factory()->create();
 

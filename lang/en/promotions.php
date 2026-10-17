@@ -3,6 +3,15 @@
 declare(strict_types=1);
 
 return [
+    'roles' => [
+        'owner' => 'Owner',
+        'manager' => 'Manager',
+        'member' => 'Member',
+    ],
+    'status' => [
+        'active' => 'Active',
+        'suspended' => 'Suspended',
+    ],
     'active_promotion' => 'Active promotion',
     'actions' => 'Actions',
     'add' => 'Add',
@@ -59,7 +68,7 @@ return [
     'slug' => 'Slug',
     'suspend' => 'Suspend access',
     'timezone' => 'Time zone',
-    'timezone_change_hint' => 'Existing event times keep their moment in time and will be shown in the new time zone.',
+    'timezone_change_hint' => 'Existing event times keep their moment in time and will be shown in the new time zone. Unavailable dates keep their calendar dates; review affected bookings after changing the zone.',
     'switch' => 'Switch promotion',
     'switched' => 'Promotion switched.',
     'user' => 'User',

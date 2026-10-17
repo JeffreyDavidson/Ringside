@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
-use App\Enums\BusinessRuleReason;
-use App\Exceptions\Events\CannotBeRestoredException;
+use App\Enums\Shared\BusinessRuleReason;
+use App\Exceptions\Venues\CannotBeRestoredException;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;

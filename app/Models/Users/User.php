@@ -9,6 +9,7 @@ use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionMembership;
+use App\Support\EmailAddress;
 use App\ValueObjects\PhoneNumber;
 use Database\Factories\Users\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,7 +28,6 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -44,7 +44,7 @@ use Illuminate\Support\Str;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- * @property-read Role $role
+ * @property Role $role
  * @property-read Collection<int, Promotion> $promotions
  * @property-read Collection<int, PromotionMembership> $promotionMemberships
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
@@ -53,7 +53,7 @@ use Illuminate\Support\Str;
  *
  * @mixin \Eloquent
  */
-#[Fillable('first_name', 'last_name', 'email', 'email_verified_at', 'password', 'role', 'status', 'avatar_path', 'phone_number')]
+#[Fillable('first_name', 'last_name', 'email', 'email_verified_at', 'password', 'avatar_path', 'phone_number')]
 #[Hidden('password', 'remember_token')]
 #[UseFactory(UserFactory::class)]
 #[UseEloquentBuilder(UserBuilder::class)]
@@ -84,7 +84,7 @@ class User extends Authenticatable
      */
     protected function email(): Attribute
     {
-        return Attribute::set(fn (string $value): string => Str::lower(mb_trim($value)));
+        return Attribute::set(fn (string $value): string => EmailAddress::normalize($value));
     }
 
     /**

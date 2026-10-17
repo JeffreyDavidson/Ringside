@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\BusinessRuleReason;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Events\Event;

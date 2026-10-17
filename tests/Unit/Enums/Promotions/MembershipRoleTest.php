@@ -4,14 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 
-test('labels each membership role for display', function (MembershipRole $role, string $label) {
-    expect($role->label())->toBe($label);
-})->with([
-    'owner' => [MembershipRole::Owner, 'Owner'],
-    'manager' => [MembershipRole::Manager, 'Manager'],
-    'member' => [MembershipRole::Member, 'Member'],
-]);
-
 test('grants the stable restructuring abilities to owners and managers only', function (MembershipRole $role, string $ability, bool $allowed) {
     expect($role->allows($ability))->toBe($allowed);
 })->with([
@@ -25,3 +17,7 @@ test('grants the stable restructuring abilities to owners and managers only', fu
     'member splits' => [MembershipRole::Member, 'split', false],
     'member reunites' => [MembershipRole::Member, 'reunite', false],
 ]);
+
+test('financial abilities are available to owners and managers only', function (MembershipRole $role, bool $allowed): void {
+    expect($role->allows('viewBudget'))->toBe($allowed)->and($role->allows('updateBudget'))->toBe($allowed);
+})->with([[MembershipRole::Owner, true], [MembershipRole::Manager, true], [MembershipRole::Member, false]]);

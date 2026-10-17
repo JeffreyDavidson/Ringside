@@ -38,6 +38,16 @@ class SplitModal extends ModalComponent
 
     public SplitForm $form;
 
+    private StableMembershipService $membership;
+
+    private StableRestructuringEligibility $eligibility;
+
+    public function boot(StableMembershipService $membership, StableRestructuringEligibility $eligibility): void
+    {
+        $this->membership = $membership;
+        $this->eligibility = $eligibility;
+    }
+
     public function mount(int $stableId): void
     {
         $this->stableId = $stableId;
@@ -80,14 +90,14 @@ class SplitModal extends ModalComponent
     #[Computed]
     public function wrestlers(): Collection
     {
-        return $this->presentMembers(resolve(StableMembershipService::class)->currentMembers($this->stable)->wrestlers);
+        return $this->presentMembers($this->membership->currentMembers($this->stable)->wrestlers);
     }
 
     /** @return Collection<int, array{id: int, name: string, unavailability: StableMemberUnavailability|null}> */
     #[Computed]
     public function tagTeams(): Collection
     {
-        return $this->presentMembers(resolve(StableMembershipService::class)->currentMembers($this->stable)->tagTeams);
+        return $this->presentMembers($this->membership->currentMembers($this->stable)->tagTeams);
     }
 
     public function minimumMemberCount(): int
@@ -111,12 +121,10 @@ class SplitModal extends ModalComponent
      */
     private function presentMembers(?Collection $members): Collection
     {
-        $eligibility = resolve(StableRestructuringEligibility::class);
-
         return ($members ?? collect())->map(fn (Wrestler|TagTeam $member): array => [
             'id' => $member->id,
             'name' => $member->name,
-            'unavailability' => $eligibility->unavailabilityOf($member),
+            'unavailability' => $this->eligibility->unavailabilityOf($member),
         ]);
     }
 }

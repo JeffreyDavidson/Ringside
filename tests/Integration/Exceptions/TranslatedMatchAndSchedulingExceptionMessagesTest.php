@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
-use App\Exceptions\Events\CannotBeRestoredException as VenueCannotBeRestoredException;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Exceptions\Venues\CannotBeRestoredException as VenueCannotBeRestoredException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Roster\TagTeams\TagTeam;

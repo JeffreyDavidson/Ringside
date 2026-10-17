@@ -3,10 +3,7 @@
         <x-dynamic-component :component="$beforeWrapperView" />
     @endif
 
-    <section
-        class="border-ringside-line bg-ringside-surface-header min-w-0 border"
-        aria-label="{{ __('titles.index_title') }}"
-    >
+    <section class="border-border bg-surface-header min-w-0 border" aria-label="{{ __('titles.index_title') }}">
         <x-tables.status-filters
             :metadata="$this->metadata"
             :label="__('titles.filter_status')"
@@ -26,21 +23,21 @@
                 :clear-label="__('titles.clear_search')"
             />
             <details class="group relative w-full sm:w-auto">
-                <summary class="border-ringside-line text-ringside-muted hover:bg-ringside-surface-hover hover:text-ringside-ink focus-visible:outline-ringside-ink inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <summary class="border-border text-muted-foreground hover:bg-surface-hover hover:text-foreground focus-visible:outline-foreground inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                     {{ __('titles.filters') }}
                     <x-heroicon-o-chevron-down
                         class="size-4 transition-transform group-open:rotate-180"
                         aria-hidden="true"
                     />
                 </summary>
-                <div class="border-ringside-line bg-ringside-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
+                <div class="border-border bg-surface-header mt-2 grid w-full gap-4 border p-4 shadow-xl sm:absolute sm:end-0 sm:top-full sm:z-20 sm:mt-2 sm:w-[22rem]">
                     <div class="grid gap-1">
-                        <label for="titles-type" class="text-ringside-muted text-xs"> {{ __('titles.type') }} </label>
+                        <label for="titles-type" class="text-muted-foreground text-xs"> {{ __('titles.type') }} </label>
                         <div class="relative">
                             <select
                                 id="titles-type"
                                 wire:model.live="filterValues.type"
-                                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2"
+                                class="border-outline bg-surface text-foreground focus-visible:outline-foreground min-h-11 w-full appearance-none border py-2 ps-3 pe-10 text-sm focus-visible:outline-2"
                             >
                                 <option value="">{{ __('titles.all_types') }}</option>
                                 @foreach (\App\Enums\Titles\TitleType::cases() as $type)
@@ -48,34 +45,34 @@
                                 @endforeach
                             </select>
                             <x-heroicon-o-chevron-down
-                                class="text-ringside-muted pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2"
+                                class="text-muted-foreground pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2"
                                 aria-hidden="true"
                             />
                         </div>
                     </div>
                     <fieldset class="grid gap-2">
-                        <legend class="text-ringside-muted text-xs">{{ __('titles.activation_date') }}</legend>
+                        <legend class="text-muted-foreground text-xs">{{ __('titles.activation_date') }}</legend>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="grid gap-1">
-                                <label for="titles-date-from" class="text-ringside-muted text-xs">
+                                <label for="titles-date-from" class="text-muted-foreground text-xs">
                                     {{ __('titles.from') }}
                                 </label>
                                 <input
                                     id="titles-date-from"
                                     type="date"
                                     wire:model.live="filterValues.activation_date.minDate"
-                                    class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
+                                    class="border-outline bg-surface text-foreground focus-visible:outline-foreground min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
                                 />
                             </div>
                             <div class="grid gap-1">
-                                <label for="titles-date-to" class="text-ringside-muted text-xs">
+                                <label for="titles-date-to" class="text-muted-foreground text-xs">
                                     {{ __('titles.to') }}
                                 </label>
                                 <input
                                     id="titles-date-to"
                                     type="date"
                                     wire:model.live="filterValues.activation_date.maxDate"
-                                    class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
+                                    class="border-outline bg-surface text-foreground focus-visible:outline-foreground min-h-11 min-w-0 border px-2 text-sm focus-visible:outline-2"
                                 />
                             </div>
                         </div>
@@ -84,13 +81,13 @@
                         type="button"
                         wire:click="clearFilters"
                         @disabled($search === '' && ($filterValues['status'] ?? '') === '' && ($filterValues['type'] ?? '') === '' && empty($filterValues['activation_date']['minDate'] ?? null) && empty($filterValues['activation_date']['maxDate'] ?? null))
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground min-h-11 cursor-pointer justify-self-start border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-50"
                     >
                         {{ __('titles.clear_filters') }}
                     </button>
                 </div>
             </details>
-            <span wire:loading.delay role="status" class="text-ringside-muted text-xs">
+            <span wire:loading.delay role="status" class="text-muted-foreground text-xs">
                 {{ __('titles.updating') }}
             </span>
         </div>
@@ -101,7 +98,7 @@
                     <caption class="sr-only">
                         {{ __('titles.index_title') }}
                     </caption>
-                    <thead class="border-ringside-line bg-ringside-surface text-ringside-muted border-y text-xs">
+                    <thead class="border-border bg-surface text-muted-foreground border-y text-xs">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium sm:px-5">{{ __('titles.name') }}</th>
                             <th scope="col" class="hidden w-48 px-4 py-3 font-medium md:table-cell">
@@ -118,25 +115,22 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-ringside-line divide-y">
+                    <tbody class="divide-border divide-y">
                         @foreach ($rows as $row)
                             @php
-                                $champion = \App\Queries\Titles\TitleChampionshipQuery::currentChampion($row);
+                                $champion = $row->currentChampionship?->champion;
                             @endphp
-                            <tr
-                                wire:key="title-{{ $row->id }}"
-                                class="hover:bg-ringside-surface-hover/40 transition-colors"
-                            >
+                            <tr wire:key="title-{{ $row->id }}" class="hover:bg-surface-hover/40 transition-colors">
                                 <td class="px-4 py-4 align-top sm:px-5">
                                     <x-tables.record-name :record="$row" :href="route('titles.show', $row)">
                                         {{ $row->name }}</x-tables.record-name>
-                                    <p class="text-ringside-muted m-0 mt-1 text-xs leading-5">
+                                    <p class="text-muted-foreground m-0 mt-1 text-xs leading-5">
                                         {{ $row->type->label() }}
                                     </p>
                                     <div class="mt-2 sm:hidden">
                                         <x-tables.status :status="$row->status" />
                                     </div>
-                                    <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 wrap-break-word md:hidden">
+                                    <p class="text-muted-foreground m-0 mt-2 text-xs leading-5 wrap-break-word md:hidden">
                                         @if ($champion instanceof \App\Models\Roster\Wrestlers\Wrestler)
                                             <a
                                                 class="underline-offset-4 hover:underline"
@@ -151,29 +145,29 @@
                                             {{ __('titles.vacant') }}
                                         @endif
                                     </p>
-                                    <p class="text-ringside-muted m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
+                                    <p class="text-muted-foreground m-0 mt-2 text-xs leading-5 tabular-nums lg:hidden">
                                         {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
                                     </p>
                                 </td>
                                 <td class="hidden px-4 py-4 align-top md:table-cell">
                                     @if ($champion instanceof \App\Models\Roster\Wrestlers\Wrestler)
                                         <a
-                                            class="text-ringside-ink focus-visible:outline-ringside-ink font-medium underline-offset-4 hover:underline focus-visible:outline-2"
+                                            class="text-foreground focus-visible:outline-foreground font-medium underline-offset-4 hover:underline focus-visible:outline-2"
                                             href="{{ route('wrestlers.show', $champion) }}"
                                         >{{ $champion->name }}</a>
                                     @elseif ($champion instanceof \App\Models\Roster\TagTeams\TagTeam)
                                         <a
-                                            class="text-ringside-ink focus-visible:outline-ringside-ink font-medium underline-offset-4 hover:underline focus-visible:outline-2"
+                                            class="text-foreground focus-visible:outline-foreground font-medium underline-offset-4 hover:underline focus-visible:outline-2"
                                             href="{{ route('tag-teams.show', $champion) }}"
                                         >{{ $champion->name }}</a>
                                     @else
-                                        <span class="text-ringside-muted">{{ __('titles.vacant') }}</span>
+                                        <span class="text-muted-foreground">{{ __('titles.vacant') }}</span>
                                     @endif
                                 </td>
                                 <td class="hidden px-4 py-4 align-top sm:table-cell">
                                     <x-tables.status :status="$row->status" />
                                 </td>
-                                <td class="text-ringside-muted hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
+                                <td class="text-muted-foreground hidden px-4 py-4 align-top text-xs leading-5 tabular-nums lg:table-cell">
                                     {{ $row->firstActivityPeriod?->started_at?->format('M j, Y') ?? '—' }}
                                 </td>
                                 <td class="px-2 py-3 align-top">
@@ -195,7 +189,7 @@
                     <button
                         type="button"
                         wire:click="clearFilters"
-                        class="text-ringside-ink border-ringside-line hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="text-foreground border-border hover:bg-surface-hover focus-visible:outline-foreground mt-2 min-h-11 cursor-pointer border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                         {{ __('titles.clear_filters') }}
                     </button>

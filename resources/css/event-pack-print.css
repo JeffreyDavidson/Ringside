@@ -2,8 +2,8 @@
 @import './tokens.css';
 .event-pack-print {
     margin: 0;
-    background: var(--color-ringside-ink);
-    color: var(--color-ringside-black);
+    background: var(--color-foreground);
+    color: var(--color-ink);
     font:
         12px/1.45 Arial,
         sans-serif;
@@ -27,8 +27,8 @@
 }
 .pack-print-controls button {
     padding: 0.75rem 1.5rem;
-    background: var(--color-ringside-black);
-    color: var(--color-ringside-white);
+    background: var(--color-ink);
+    color: var(--color-white);
     border: 0;
     cursor: pointer;
     font: inherit;
@@ -42,7 +42,7 @@
     margin: auto;
 }
 .event-pack-print section {
-    background: var(--color-ringside-white);
+    background: var(--color-white);
     padding: 28px;
     margin: 0 0 24px;
 }
@@ -53,7 +53,7 @@
     display: flex;
     gap: 20px;
     align-items: center;
-    border-bottom: 3px solid var(--color-ringside-black);
+    border-bottom: 3px solid var(--color-ink);
     padding-bottom: 12px;
 }
 .pack-print-heading div {
@@ -88,7 +88,7 @@
     text-transform: uppercase;
 }
 .event-pack-print tbody td {
-    border: 1px solid var(--color-ringside-outline);
+    border: 1px solid var(--color-outline);
     padding: 10px;
     vertical-align: top;
     overflow-wrap: anywhere;
@@ -118,7 +118,7 @@
     width: 30%;
 }
 .pack-write-line {
-    border-bottom: 1px solid var(--color-ringside-outline);
+    border-bottom: 1px solid var(--color-outline);
     height: 25px;
 }
 .pack-checkbox {
@@ -173,3 +173,11 @@
         font-size: 8pt;
     }
 }
+
+.production-cue { border-top: 1px solid var(--color-outline); padding-block: 8px; overflow-wrap: anywhere; }
+@media print {
+    .event-pack-print [data-section='cues'] tbody tr { break-inside: auto; }
+    .production-cue { break-inside: avoid; }
+}
+
+.production-preserve { white-space: pre-wrap; }

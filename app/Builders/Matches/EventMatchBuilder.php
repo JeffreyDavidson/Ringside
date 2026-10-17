@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace App\Builders\Matches;
 
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @template TModel of EventMatch
@@ -20,6 +27,125 @@ use Illuminate\Support\Collection;
  */
 class EventMatchBuilder extends Builder
 {
+    /** Earlier source bookings in one promotion; date passage alone does not prove a result. */
+    public function forPromotionHistory(int $promotionId, Carbon $before, ?int $excludedMatchId = null): static
+    {
+        self::constrainToPromotionHistory($this, $promotionId, $before, $excludedMatchId);
+
+        return $this;
+    }
+
+    /** @param Builder<*> $query */
+    public static function constrainToPromotionHistory(Builder $query, int $promotionId, Carbon $before, ?int $excludedMatchId = null): void
+    {
+        $query->whereHas('event', fn (Builder $event): Builder => $event
+            ->where('promotion_id', $promotionId)->where('date', '<', $before));
+
+        if ($excludedMatchId !== null) {
+            $query->whereKeyNot($excludedMatchId);
+        }
+    }
+
+    /** Compare persisted opposing sides without attributing a partner or multi-way loss to a direct opponent. */
+    public function opposedTo(Wrestler|TagTeam $subject, Wrestler|TagTeam $opponent): static
+    {
+        return $this->whereExists(fn (QueryBuilder $query): QueryBuilder => $query
+            ->selectRaw('1')
+            ->from('events_matches_competitors as history_subject')
+            ->join('events_matches_competitors as history_opponent', 'history_subject.match_id', '=', 'history_opponent.match_id')
+            ->whereColumn('history_subject.match_id', 'events_matches.id')
+            ->whereColumn('history_subject.match_side_id', '<>', 'history_opponent.match_side_id')
+            ->where('history_subject.competitor_type', $subject->getMorphClass())
+            ->where('history_subject.competitor_id', $subject->id)
+            ->where('history_opponent.competitor_type', $opponent->getMorphClass())
+            ->where('history_opponent.competitor_id', $opponent->id));
+    }
+
+    public function directMeetings(Wrestler|TagTeam $first, Wrestler|TagTeam $second): static
+    {
+        $types = $first instanceof Wrestler
+            ? [MatchType::Singles]
+            : [MatchType::TagTeam, MatchType::TornadoTagTeam, MatchType::SixManTagTeam, MatchType::EightManTagTeam, MatchType::TenManTagTeam];
+
+        return $this->opposedTo($first, $second)
+            ->whereIn('match_type', $types)
+            ->has('competitors', '=', 2)
+            ->has('sides', '=', 2);
+    }
+
+    /**
+     * Project known results without hydrating an entire career. A finish with malformed winner metadata is unknown.
+     *
+     * @param  Builder<*>  $query
+     */
+    public static function addRecordedResultFlag(Builder $query): void
+    {
+        $query->addSelect('events_matches.*')->selectRaw(<<<'SQL'
+            CASE WHEN ((events_matches.match_finish IN (?, ?) AND events_matches.winning_side_id IS NULL) OR
+                (events_matches.match_finish IN (?, ?, ?, ?, ?, ?, ?) AND EXISTS (
+                    SELECT 1 FROM events_matches_sides AS outcome_side
+                    WHERE outcome_side.id = events_matches.winning_side_id AND outcome_side.match_id = events_matches.id
+                    AND EXISTS (SELECT 1 FROM events_matches_competitors AS outcome_competitor
+                        WHERE outcome_competitor.match_side_id = outcome_side.id AND outcome_competitor.match_id = events_matches.id))))
+                AND (SELECT COUNT(DISTINCT structural_entry.match_side_id) FROM events_matches_competitors AS structural_entry
+                    INNER JOIN events_matches_sides AS structural_side ON structural_side.id = structural_entry.match_side_id
+                        AND structural_side.match_id = structural_entry.match_id
+                    WHERE structural_entry.match_id = events_matches.id) >= 2
+                AND NOT EXISTS (SELECT 1 FROM events_matches_competitors AS owned_entry
+                    WHERE owned_entry.match_id = events_matches.id AND NOT (
+                        (owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM wrestlers
+                            WHERE wrestlers.id = owned_entry.competitor_id
+                            AND wrestlers.promotion_id = (SELECT promotion_id FROM events WHERE events.id = events_matches.event_id))) OR
+                        (owned_entry.competitor_type = ? AND EXISTS (SELECT 1 FROM tag_teams
+                            WHERE tag_teams.id = owned_entry.competitor_id
+                            AND tag_teams.promotion_id = (SELECT promotion_id FROM events WHERE events.id = events_matches.event_id)))))
+                THEN 1 ELSE 0 END AS history_recorded
+            SQL, [
+            MatchFinish::TimeLimitDraw->value, MatchFinish::NoDecision->value,
+            MatchFinish::Pinfall->value, MatchFinish::Submission->value, MatchFinish::Knockout->value,
+            MatchFinish::Stipulation->value, MatchFinish::Forfeit->value, MatchFinish::Disqualification->value, MatchFinish::Countout->value,
+            (new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass(),
+        ]);
+    }
+
+    public function withRecordedResultFlag(): static
+    {
+        self::addRecordedResultFlag($this);
+
+        return $this;
+    }
+
+    /**
+     * These matches as plain rows aliased `history`, each carrying `history_recorded` (a complete recorded result)
+     * and `history_date` (the event date), ready to join to the competitor entries and aggregate. The builder itself is
+     * left unchanged.
+     */
+    public function asHistorySource(): QueryBuilder
+    {
+        return DB::query()->fromSub(
+            (clone $this)->withRecordedResultFlag()
+                ->join('events as history_event', 'history_event.id', '=', 'events_matches.event_id')
+                ->addSelect('history_event.date as history_date')
+                ->toBase(),
+            'history',
+        );
+    }
+
+    /**
+     * Keep the rows whose competitor entry (joined as `$alias`) is one of the selected wrestlers or tag teams.
+     *
+     * @param  list<array{type: string, id: int, side: int}>  $selection
+     */
+    public static function whereSelectedCompetitors(QueryBuilder $query, string $alias, array $selection): void
+    {
+        $query->where(function (QueryBuilder $query) use ($alias, $selection): void {
+            foreach (array_unique(array_column($selection, 'type')) as $type) {
+                $ids = array_column(array_filter($selection, fn (array $entry): bool => $entry['type'] === $type), 'id');
+                $query->orWhere(fn (QueryBuilder $kind): QueryBuilder => $kind->where("{$alias}.competitor_type", $type)->whereIn("{$alias}.competitor_id", $ids));
+            }
+        });
+    }
+
     public function forEventId(int $eventId): static
     {
         $this->where('event_id', $eventId);
@@ -76,6 +202,26 @@ class EventMatchBuilder extends Builder
             'competitors.side',
             'winningSide.competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
             'winningSide.competitors.competitor',
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Eager load the current members of every tag team competing in the matches, in the same read as the competitors,
+     * so the people on a card come from one result set. Pass a constraint to change how the members are read; by default
+     * they come in id order.
+     *
+     * @param  (Closure(Relation<*, *, *>): mixed)|null  $members
+     */
+    public function withTagTeamMembers(?Closure $members = null): static
+    {
+        $this->with([
+            'competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
+            // The eager load hands the competitor relation (a MorphTo) to this constraint.
+            'competitors.competitor' => fn (Relation $competitor): Relation => $competitor instanceof MorphTo
+                ? $competitor->morphWith([TagTeam::class => ['currentWrestlers' => $members ?? fn (Relation $wrestlers): Relation => $wrestlers->orderBy('wrestlers.id')]])
+                : $competitor,
         ]);
 
         return $this;

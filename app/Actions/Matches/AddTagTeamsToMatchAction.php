@@ -6,20 +6,28 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchAssignmentEligibility;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterDateAvailability;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddTagTeamsToMatchAction
 {
     public function __construct(
-        protected MatchAssignmentConflictService $conflictService,
+        protected MatchSchedulingLock $schedulingLock,
+        protected MatchAssignmentEligibility $assignmentEligibility,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly RosterDateAvailability $dateAvailability,
+        private readonly MatchRosterLock $rosterLock,
         private readonly MatchConfigurationRequirements $configurationRequirements,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
     ) {}
 
     /**
@@ -65,7 +73,7 @@ class AddTagTeamsToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
                 $lockedMatch->event()->firstOrFail(),
                 'tag teams',
@@ -79,11 +87,14 @@ class AddTagTeamsToMatchAction
      * Assign tag teams while the caller owns the match transaction and lock.
      *
      * @param  Collection<int, TagTeam>  $tagTeams
+     * @param  list<string>  $retainedKeys  Server-derived assignments retained by the locked match update.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber): void
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber, array $retainedKeys = []): void
     {
+        $this->tournamentRequirements->ensureCompetitors($lockedMatch, $tagTeams);
         $requestedTagTeams = $tagTeams->unique('id')->values();
-        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
+        $this->rosterLock->lock(collect(), collect(), $requestedTagTeams);
         $lockedTagTeams = TagTeam::query()
             ->whereKey($requestedTagTeams->pluck('id'))
             ->with('currentWrestlers')
@@ -97,10 +108,17 @@ class AddTagTeamsToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
-        $this->conflictService->ensureTagTeamsCanBeAssigned(
+        $this->assignmentEligibility->ensureTagTeamsCanBeAssigned(
             $conflictingEventIds,
             $lockedTagTeams,
+            $lockedMatch,
         );
+        $event = $lockedMatch->event()->firstOrFail();
+        foreach ($lockedTagTeams as $person) {
+            if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
+                $this->dateAvailability->ensureForEvent($person, $event);
+            }
+        }
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
         $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {

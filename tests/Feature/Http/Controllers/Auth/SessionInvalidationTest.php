@@ -14,30 +14,66 @@ use function Pest\Laravel\post;
 
 test('a session ends once the account password changes', function (): void {
     // Arrange
-    $user = User::factory()->administrator()->create(['email' => 'promoter@example.com', 'status' => UserStatus::Active]);
-    post(route('login'), ['email' => 'promoter@example.com', 'password' => 'secret']);
-    get(route('promotions.index'))->assertSuccessful();
-    DB::table('users')->where('id', $user->id)->update(['password' => Hash::make('a-brand-new-password')]);
+    $user = User::factory()
+        ->administrator()
+        ->create([
+            'email' => 'promoter@example.com',
+            'status' => UserStatus::Active,
+        ]);
+    post(route('login'), [
+        'email' => 'promoter@example.com',
+        'password' => 'secret',
+    ]);
+
+    // Act
+    $response = get(route('promotions.index'));
+
+    // Assert
+    $response
+        ->assertSuccessful();
+
+    // Arrange
+    DB::table('users')
+        ->where('id', $user->id)
+        ->update(['password' => Hash::make('a-brand-new-password')]);
     auth()->forgetGuards();
 
     // Act
     $response = get(route('promotions.index'));
 
     // Assert
-    $response->assertRedirect(route('login'));
+    $response
+        ->assertRedirect(route('login'));
+
     assertGuest();
 });
 
 test('a session continues while the account password is unchanged', function (): void {
     // Arrange
-    User::factory()->administrator()->create(['email' => 'promoter@example.com', 'status' => UserStatus::Active]);
-    post(route('login'), ['email' => 'promoter@example.com', 'password' => 'secret']);
-    get(route('promotions.index'))->assertSuccessful();
+    User::factory()
+        ->administrator()
+        ->create([
+            'email' => 'promoter@example.com',
+            'status' => UserStatus::Active,
+        ]);
+    post(route('login'), [
+        'email' => 'promoter@example.com',
+        'password' => 'secret',
+    ]);
 
     // Act
     $response = get(route('promotions.index'));
 
     // Assert
-    $response->assertSuccessful();
+    $response
+        ->assertSuccessful();
+
+    // Act
+    $response = get(route('promotions.index'));
+
+    // Assert
+    $response
+        ->assertSuccessful();
+
     assertAuthenticated();
 });

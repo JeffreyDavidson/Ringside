@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View as ViewFactory;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 function composePromotionSwitcher(string $viewName): View
 {
@@ -161,4 +163,22 @@ it('leaves an expired invitation out of the switcher', function () {
 
     // Assert
     expect($view->getData()['promotionInvitations']->pluck('id')->all())->toBe([$pending->id]);
+});
+
+it('is wired into the authenticated layout', function () {
+    // Arrange
+    $user = User::factory()
+        ->basicUser()
+        ->create(['status' => UserStatus::Active]);
+    joinPromotion($user, 'Ringside Wrestling');
+    actingAs($user);
+
+    // Act
+    $response = get(route('dashboard'));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertSee('Ringside Wrestling')
+        ->assertSee(__('promotions.switch'));
 });

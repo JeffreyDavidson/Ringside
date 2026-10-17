@@ -6,7 +6,7 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Actions\Wrestlers\UpdateAction;
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Enums\Shared\UnitedStatesState;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;

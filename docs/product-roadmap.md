@@ -50,7 +50,7 @@ sequence as a current delivery commitment.
 | --- | --- |
 | API and integrations | Documented API, rate limits, webhooks, calendar export, social publishing, email marketing, ticketing integrations |
 | Creative planning | Storylines, feuds, alliances, angles, character development, booking assistance |
-| Business operations | Contracts, payroll, event revenue and expenses, budgets, forecasts |
+| Business operations | Contracts, payroll and forecasts. Manual event budgets, income/expenses and settlement are implemented; see the [system overview](architecture/system-overview.md#event-budget-and-settlement). |
 | Cross-promotion work | Shared events, talent loans/trades, working agreements, comparative analytics |
 | Team operations | Multi-user access, approval workflows, audit trails, import/export |
 | Fan and media tools | Public promotion information, statistics, voting, comments, press releases, media assets, commentary and broadcast tools |

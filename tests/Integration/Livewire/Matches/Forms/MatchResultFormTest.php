@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\Matches\MatchResultData;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Livewire\Matches\Forms\MatchResultForm;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;

@@ -14,12 +14,6 @@ enum StableStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Unformed => 'Not Yet Formed',
-            self::PendingEstablishment => 'Not Yet Established',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
-            self::Retired => 'Retired',
-        };
+        return __("stables.status.{$this->value}");
     }
 }

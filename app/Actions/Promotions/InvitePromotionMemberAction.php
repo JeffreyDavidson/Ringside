@@ -11,6 +11,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\Support\EmailAddress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -47,11 +48,12 @@ final class InvitePromotionMemberAction
             // An expired invitation for the email is replaced, so the unique (promotion, email) key never blocks a new one.
             $lockedPromotion->invitations()->forEmail($email)->delete();
 
-            $invitation = $lockedPromotion->invitations()->create([
+            $invitation = $lockedPromotion->invitations()->make([
                 'email' => $email,
-                'role' => $role,
                 'expires_at' => now()->addDays(PromotionInvitation::EXPIRES_AFTER_DAYS),
             ]);
+            $invitation->role = $role;
+            $invitation->save();
 
             app(PromotionContextService::class)->forgetMemberships();
 
@@ -78,7 +80,7 @@ final class InvitePromotionMemberAction
 
     private function hasMembership(Promotion $promotion, string $email): bool
     {
-        $normalized = PromotionInvitation::normalizeEmail($email);
+        $normalized = EmailAddress::normalize($email);
 
         // whereLike only narrows the candidates (case-insensitively on every engine); the exact comparison is done in PHP so
         // `%` and `_` in the input can never widen the match.

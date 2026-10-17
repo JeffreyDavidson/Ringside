@@ -8,11 +8,13 @@ use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
+use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
-use App\Services\Matches\MatchAssignmentConflictService;
+use App\Models\Tournaments\TournamentMatchLink;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -21,13 +23,16 @@ class RecordResultAction
     public function __construct(
         private readonly MatchOutcomeRequirements $requirements,
         private readonly ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
-        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchSchedulingLock $schedulingLock,
+        private readonly TournamentOutcomeManager $tournaments,
     ) {}
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
         return DB::transaction(function () use ($match, $result): EventMatch {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($match);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
+            $this->tournaments->ensureResultCanChange($lockedMatch, $result);
+            $changed = $lockedMatch->match_finish !== $result->finish || $lockedMatch->winning_side_id !== $result->winningSide?->id;
             $lockedMatch->setRelation('event', Event::query()->findOrFail($lockedMatch->event_id));
 
             $eventDate = $lockedMatch->event->date;
@@ -49,9 +54,13 @@ class RecordResultAction
                 finish: $result->finish,
                 winningSide: $lockedWinningSide,
                 eliminations: $result->eliminations,
+                tournamentVersion: $result->tournamentVersion,
             );
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
+            if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
+                return $lockedMatch;
+            }
             $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([
@@ -74,6 +83,8 @@ class RecordResultAction
                     'eliminated_by_match_competitor_id' => $elimination->eliminatedBy?->id,
                 ])->save();
             });
+
+            $this->tournaments->resultRecorded($lockedMatch);
 
             return $lockedMatch->refresh();
         });

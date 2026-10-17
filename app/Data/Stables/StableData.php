@@ -17,36 +17,4 @@ readonly class StableData
         public StableMembershipData $members,
         public ?Carbon $end_date = null,
     ) {}
-
-    /**
-     * Get the join date for members, defaulting to now if no start date.
-     */
-    public function getJoinDate(): Carbon
-    {
-        return $this->start_date ?? now();
-    }
-
-    /**
-     * Check if a start date has been provided.
-     */
-    public function hasStartDate(): bool
-    {
-        return $this->start_date instanceof Carbon;
-    }
-
-    /**
-     * Check if the stable should be immediately established.
-     */
-    public function shouldEstablish(): bool
-    {
-        return $this->hasStartDate();
-    }
-
-    /**
-     * Get a trimmed version of the stable name.
-     */
-    public function getTrimmedName(): string
-    {
-        return mb_trim($this->name);
-    }
 }

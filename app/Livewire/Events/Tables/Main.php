@@ -8,7 +8,7 @@ use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Builders\Events\VenueBuilder;
-use App\Enums\EventStatus;
+use App\Enums\Events\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Table\Column;
@@ -21,6 +21,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Facades\Date;
 
 /**
@@ -31,6 +32,8 @@ use Illuminate\Support\Facades\Date;
 class Main extends BaseTable
 {
     use PresentsVenuesList;
+
+    protected PromotionContextService $promotionContext;
 
     #[\Override]
     protected bool $showActionColumn = true;
@@ -147,12 +150,11 @@ class Main extends BaseTable
                         return;
                     }
 
-                    $context = app(PromotionContextService::class);
-                    $promotion = $context->isEnforced() ? $context->current() : null;
+                    $promotion = $this->promotionContext->isEnforced() ? $this->promotionContext->current() : null;
 
                     $builder->heldBetween(
-                        Promotion::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
-                        Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
+                        PromotionTimeZoneService::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
+                        PromotionTimeZoneService::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
                     );
                 }),
             SelectFilter::make(__('core.venue'), 'venue')
@@ -167,6 +169,11 @@ class Main extends BaseTable
                     $builder->forVenueId((int) $value);
                 }),
         ];
+    }
+
+    public function boot(PromotionContextService $promotionContext): void
+    {
+        $this->promotionContext = $promotionContext;
     }
 
     public function delete(Event $event, DeleteAction $deleteAction): void

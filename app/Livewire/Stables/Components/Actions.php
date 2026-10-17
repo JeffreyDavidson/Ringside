@@ -17,21 +17,59 @@ use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
+use App\Support\ModelKey;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+/**
+ * @property-read Stable $stable
+ */
 class Actions extends Component
 {
     use ExecutesBusinessActions;
 
-    public Stable $stable;
+    private StableActivityEligibility $activityEligibility;
+
+    private StableRetirementEligibility $retirementEligibility;
+
+    private StableRestructuringEligibility $restructuringEligibility;
+
+    #[Locked]
+    public int|string $stableId;
+
+    /** The record route binding resolved for the mounting request; never persisted, so later requests reload it. */
+    protected ?Stable $mountedStable = null;
+
+    public function boot(
+        StableActivityEligibility $activityEligibility,
+        StableRetirementEligibility $retirementEligibility,
+        StableRestructuringEligibility $restructuringEligibility,
+    ): void {
+        $this->activityEligibility = $activityEligibility;
+        $this->retirementEligibility = $retirementEligibility;
+        $this->restructuringEligibility = $restructuringEligibility;
+    }
 
     public function mount(Stable $stable): void
     {
-        $this->stable = $stable;
+        $this->stableId = ModelKey::of($stable);
+        $this->mountedStable = $stable;
+    }
+
+    /**
+     * Loaded from the locked id once per request, so every action authorizes the current row. Global scopes
+     * (soft deletes, promotion) are skipped exactly as when Livewire restored the former model property: the
+     * id was set at mount from a record that route binding had already resolved within them.
+     */
+    #[Computed]
+    public function stable(): Stable
+    {
+        return $this->mountedStable ?? Stable::query()->withoutGlobalScopes()->findOrFail($this->stableId);
     }
 
     public function establish(EstablishAction $establishAction): void
@@ -72,7 +110,7 @@ class Actions extends Component
     #[On('stable-restructured')]
     public function refreshAfterRestructuring(): void
     {
-        $this->stable->refresh();
+        unset($this->stable);
         $this->dispatch('stable-updated');
         $this->dispatch('refreshDatatable');
     }
@@ -84,14 +122,14 @@ class Actions extends Component
         }
 
         return match ($action) {
-            StableLifecycleAction::Establish => app(StableActivityEligibility::class)->allows($this->stable, StableActivityTransition::Establish),
-            StableLifecycleAction::Disband => app(StableActivityEligibility::class)->allows($this->stable, StableActivityTransition::Disband),
-            StableLifecycleAction::Retire => app(StableRetirementEligibility::class)->canRetire($this->stable),
-            StableLifecycleAction::Unretire => app(StableRetirementEligibility::class)->canUnretire($this->stable),
-            StableLifecycleAction::Merge => app(StableRestructuringEligibility::class)->canStartMerge($this->stable)
-                && app(StableRestructuringEligibility::class)->hasMergeCandidate($this->stable),
-            StableLifecycleAction::Split => app(StableRestructuringEligibility::class)->canSplit($this->stable),
-            StableLifecycleAction::Reunite => app(StableActivityEligibility::class)->allows($this->stable, StableActivityTransition::Reunite),
+            StableLifecycleAction::Establish => $this->activityEligibility->allows($this->stable, StableActivityTransition::Establish),
+            StableLifecycleAction::Disband => $this->activityEligibility->allows($this->stable, StableActivityTransition::Disband),
+            StableLifecycleAction::Retire => $this->retirementEligibility->canRetire($this->stable),
+            StableLifecycleAction::Unretire => $this->retirementEligibility->canUnretire($this->stable),
+            StableLifecycleAction::Merge => $this->restructuringEligibility->canStartMerge($this->stable)
+                && $this->restructuringEligibility->hasMergeCandidate($this->stable),
+            StableLifecycleAction::Split => $this->restructuringEligibility->canSplit($this->stable),
+            StableLifecycleAction::Reunite => $this->activityEligibility->allows($this->stable, StableActivityTransition::Reunite),
         };
     }
 

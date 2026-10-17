@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Titles;
 
-use App\Support\Enums\ProvidesFilterOptions;
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 enum TitleStatus: string
 {
@@ -18,12 +18,6 @@ enum TitleStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Undebuted => 'Not Yet Debuted',
-            self::PendingDebut => 'Schedule to Debut',
-            self::Active => 'Active',
-            self::Inactive => 'Inactive',
-            self::Retired => 'Retired',
-        };
+        return __("titles.status.{$this->value}");
     }
 }

@@ -23,7 +23,7 @@
         <div class="min-w-0">
             <h1 class="font-display text-3xl">{{ __('talent-bookings.title') }}</h1>
             <p class="mt-2 text-lg font-semibold break-words">{{ $event->name }}</p>
-            <p class="text-ringside-muted mt-1">
+            <p class="text-muted-foreground mt-1">
                 {{ $event->local_date?->format('M j, Y · H:i') ?? __('talent-bookings.unscheduled') }} · {{ $context['timezone'] }}
             </p>
         </div>
@@ -33,47 +33,50 @@
             wire:loading.attr="disabled"
         >{{ __('talent-bookings.refresh') }}</x-button>
     </header>
-    <p class="text-ringside-muted max-w-prose">{{ __('talent-bookings.intro') }} {{ __('talent-bookings.private') }}</p>
+    <p class="text-muted-foreground max-w-prose">
+        {{ __('talent-bookings.intro') }} {{ __('talent-bookings.private') }}
+    </p>
     @if ($event->date?->isPast())
-        <p class="text-ringside-warning">{{ __('talent-bookings.historical_warning') }}</p>
+        <p class="text-warning">{{ __('talent-bookings.historical_warning') }}</p>
     @endif
     @if ($card_warning)
-        <p class="text-ringside-warning flex items-start gap-2">
+        <p class="text-warning flex items-start gap-2">
             <x-heroicon-s-exclamation-triangle class="mt-1 size-4 shrink-0" />{{ __('talent-bookings.card_warning') }}
         </p>
     @endif
     <dl
-        class="border-ringside-line flex flex-wrap gap-x-8 gap-y-3 border-y py-4"
+        class="border-border flex flex-wrap gap-x-8 gap-y-3 border-y py-4"
         aria-label="{{ __('talent-bookings.title') }}"
     >
         @foreach (['attention', 'confirmed', 'contacted', 'proposed', 'not_tracked', 'cancelled'] as $count)
             <div>
-                <dt class="text-ringside-muted text-sm">
-                    {{ $count === 'attention' ? __('talent-bookings.attention') : __('talent-bookings.states.'.$count) }}
+                <dt class="text-muted-foreground text-sm">
+                    {{ $count === 'attention' ? __('talent-bookings.attention') : (\App\Enums\Events\TalentBookingStatus::tryFrom($count)?->label() ?? __('talent-bookings.states.not_tracked')) }}
                 </dt>
                 <dd class="text-xl font-semibold tabular-nums">{{ $counts[$count] }}</dd>
             </div>
         @endforeach
     </dl>
-    <p class="text-ringside-muted text-sm">{{ __('talent-bookings.clear') }}: {{ $counts['confirmed_clear'] }}</p>
+    <p class="text-muted-foreground text-sm">{{ __('talent-bookings.clear') }}: {{ $counts['confirmed_clear'] }}</p>
     @if ($message)
-        <p role="status" class="text-ringside-success">{{ $message }}</p>
+        <p role="status" class="text-success">{{ $message }}</p>
     @endif
     <div class="flex flex-col gap-2 sm:max-w-xs">
         <x-form.label for="booking-filter">{{ __('talent-bookings.filter') }}</x-form.label>
         <select
             id="booking-filter"
             wire:model.live="filter"
-            class="border-ringside-outline bg-ringside-surface-panel min-h-11 border px-3"
+            class="border-outline bg-surface-panel min-h-11 border px-3"
         >
             <option value="all">{{ __('talent-bookings.all') }}</option>
             <option value="attention">{{ __('talent-bookings.attention') }}</option>
-            @foreach (['not_tracked', 'proposed', 'contacted', 'confirmed', 'cancelled'] as $state)
-                <option value="{{ $state }}">{{ __('talent-bookings.states.'.$state) }}</option>
+            <option value="not_tracked">{{ __('talent-bookings.states.not_tracked') }}</option>
+            @foreach (\App\Enums\Events\TalentBookingStatus::cases() as $state)
+                <option value="{{ $state->value }}">{{ $state->label() }}</option>
             @endforeach
         </select>
     </div>
-    <ul class="divide-ringside-line divide-y">
+    <ul class="divide-border divide-y">
         @forelse ($rows as $row)
             <li
                 wire:key="talent-{{ $row['key'] }}"
@@ -82,19 +85,19 @@
             >
                 <div class="min-w-0 flex-1">
                     <h2 class="text-lg font-semibold break-words">{{ $row['name'] }}</h2>
-                    <p class="text-ringside-muted mt-1 text-sm">
+                    <p class="text-muted-foreground mt-1 text-sm">
                         {{ $row['role'] }} · {{ __('talent-bookings.'.($row['on_card'] ? 'on_card' : 'off_card')) }}
                     </p>
                     @if ($row['matches'])
-                        <p class="text-ringside-muted text-sm">
+                        <p class="text-muted-foreground text-sm">
                             {{ __('talent-bookings.matches', ['numbers' => implode(', ', $row['matches'])]) }}
                         </p>
                     @endif
                     <p class="mt-2 font-semibold">
-                        {{ __('talent-bookings.states.'.($row['booking']?->status->value ?? 'not_tracked')) }}
+                        {{ ($row['booking']?->status->label() ?? __('talent-bookings.states.not_tracked')) }}
                     </p>
                     @foreach ($row['warnings'] as $warning)
-                        <p class="text-ringside-warning mt-2 flex items-start gap-2">
+                        <p class="text-warning mt-2 flex items-start gap-2">
                             <x-heroicon-s-exclamation-triangle
                                 class="mt-1 size-4 shrink-0"
                             /><span>{{ __('talent-bookings.warnings.'.$warning) }}</span>
@@ -121,7 +124,7 @@
                 </div>
             </li>
         @empty
-            <li class="text-ringside-muted py-6">
+            <li class="text-muted-foreground py-6">
                 {{ __('talent-bookings.'.(array_sum($counts) === 0 ? 'empty' : 'no_results')) }}
             </li>
         @endforelse
@@ -129,7 +132,7 @@
     @if ($personId)
         <section
             id="booking-editor"
-            class="border-ringside-line scroll-mt-20 border-y py-5"
+            class="border-border scroll-mt-20 border-y py-5"
             aria-labelledby="booking-editor-heading"
         >
             <div class="flex items-start justify-between gap-4">
@@ -139,19 +142,19 @@
                 <x-button variant="secondary" wire:click="closeEditor">{{ __('talent-bookings.close') }}</x-button>
             </div>
             @if ($historyOpen)
-                <ol class="divide-ringside-line mt-4 divide-y">
+                <ol class="divide-border mt-4 divide-y">
                     @forelse ($history ?? [] as $revision)
                         <li class="py-4">
                             <p class="font-semibold">
                                 #{{ $revision->version }} · {{ $revision->actor_name }} · {{ $revision->created_at->copy()->setTimezone($context['timezone'])->format('M j, Y H:i') }}
                             </p>
-                            <p>{{ __('talent-bookings.states.'.$revision->snapshot['status']) }}</p>
-                            @if ($revision->snapshot['terms_need_review'] ?? false)
-                                <p class="text-ringside-warning">{{ __('talent-bookings.warnings.reconfirmation') }}</p>
-                            @endif
-                            <p class="text-ringside-muted">
-                                USD {{ $screen->fee($revision->snapshot['fee_minor'] ?? null) }}
+                            <p>
+                                {{ \App\Enums\Events\TalentBookingStatus::tryFrom($revision->snapshot['status'])?->label() ?? $revision->snapshot['status'] }}
                             </p>
+                            @if ($revision->snapshot['terms_need_review'] ?? false)
+                                <p class="text-warning">{{ __('talent-bookings.warnings.reconfirmation') }}</p>
+                            @endif
+                            <p class="text-muted-foreground">{{ $historyFees[$revision->id] }}</p>
                             <p class="mt-2 break-words whitespace-pre-wrap">
                                 {{ $revision->snapshot['travel_notes'] ?? '' }}
                             </p>
@@ -177,19 +180,17 @@
                 <form wire:submit="save" class="mt-5 flex flex-col gap-5">
                     <x-form.error name="booking" />
                     @if ($booking?->status === \App\Enums\Events\TalentBookingStatus::Cancelled)
-                        <p class="text-ringside-warning">{{ __('talent-bookings.reopen') }}</p>
+                        <p class="text-warning">{{ __('talent-bookings.reopen') }}</p>
                     @endif
                     <div class="flex flex-col gap-2">
                         <x-form.label for="talent-state">{{ __('talent-bookings.status') }}</x-form.label
                         ><select
                             id="talent-state"
                             wire:model.live="form.status"
-                            class="border-ringside-outline bg-ringside-surface-panel min-h-11 border px-3"
+                            class="border-outline bg-surface-panel min-h-11 border px-3"
                         >
                             @foreach (\App\Enums\Events\TalentBookingStatus::cases() as $state)
-                                <option value="{{ $state->value }}">
-                                    {{ __('talent-bookings.states.'.$state->value) }}
-                                </option>
+                                <option value="{{ $state->value }}">{{ $state->label() }}</option>
                             @endforeach</select
                         ><x-form.error name="form.status" />
                     </div>
@@ -203,7 +204,7 @@
                                 inputmode="decimal"
                                 aria-describedby="talent-fee-hint"
                             />
-                            <p id="talent-fee-hint" class="text-ringside-muted text-sm">
+                            <p id="talent-fee-hint" class="text-muted-foreground text-sm">
                                 {{ __('talent-bookings.unknown_fee') }}
                             </p>
                             <x-form.error name="form.fee" />
@@ -217,7 +218,7 @@
                                 wire:model="form.arrival"
                                 aria-describedby="talent-arrival-hint"
                             />
-                            <p id="talent-arrival-hint" class="text-ringside-muted text-sm">
+                            <p id="talent-arrival-hint" class="text-muted-foreground text-sm">
                                 {{ __('talent-bookings.arrival_hint', ['timezone' => $context['timezone']]) }}
                             </p>
                             <x-form.error name="form.arrival" />
@@ -235,7 +236,7 @@
                     <div class="flex flex-col gap-2">
                         <x-form.label for="talent-reason">{{ __('talent-bookings.reason') }}</x-form.label
                         ><x-form.inputs.textarea id="talent-reason" wire:model="form.reason" maxlength="500" rows="2" />
-                        <p class="text-ringside-muted text-sm">{{ __('talent-bookings.reason_hint') }}</p>
+                        <p class="text-muted-foreground text-sm">{{ __('talent-bookings.reason_hint') }}</p>
                         <x-form.error name="form.reason" />
                     </div>
                     @if ($booking?->confirmed_snapshot)
@@ -246,9 +247,7 @@
                             <p>
                                 {{ $booking->confirmed_snapshot['context']['event_date'] }} · {{ $booking->confirmed_snapshot['context']['timezone'] }} · {{ $booking->confirmed_snapshot['context']['venue_name'] ?? __('talent-bookings.venue_unset') }}
                             </p>
-                            <p>
-                                {{ __('talent-bookings.agreed_terms') }}: USD {{ $screen->fee($booking->confirmed_snapshot['terms']['fee_minor']) }}
-                            </p>
+                            <p>{{ __('talent-bookings.agreed_terms') }}: {{ $agreedFee }}</p>
                             <p class="break-words whitespace-pre-wrap">
                                 {{ $booking->confirmed_snapshot['terms']['travel_notes'] }}
                             </p>
@@ -258,7 +257,7 @@
                         </details>
                     @endif
                     @if ($form->status === 'confirmed')
-                        <p class="text-ringside-muted max-w-prose">{{ __('talent-bookings.attest_help') }}</p>
+                        <p class="text-muted-foreground max-w-prose">{{ __('talent-bookings.attest_help') }}</p>
                     @endif
                     <div class="flex flex-wrap gap-3">
                         @if ($form->status === 'confirmed')
@@ -286,7 +285,7 @@
             @endif
         </section>
     @endif
-    <section class="border-ringside-line border-t pt-5" aria-labelledby="add-person-heading">
+    <section class="border-border border-t pt-5" aria-labelledby="add-person-heading">
         <h2 id="add-person-heading" class="text-xl font-semibold">{{ __('talent-bookings.add') }}</h2>
         <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
             <div class="flex flex-col gap-2">
@@ -294,7 +293,7 @@
                 ><select
                     id="search-kind"
                     wire:model.live="searchKind"
-                    class="border-ringside-outline bg-ringside-surface-panel min-h-11 border px-3"
+                    class="border-outline bg-surface-panel min-h-11 border px-3"
                 >
                     <option value="wrestlers">{{ __('talent-bookings.wrestlers') }}</option>
                     <option value="referees">{{ __('talent-bookings.referees') }}</option>

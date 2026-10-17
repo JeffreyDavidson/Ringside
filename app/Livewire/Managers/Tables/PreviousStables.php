@@ -9,7 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Livewire\Table\Column;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
-use App\Queries\Roster\StableManagerHistoryQuery;
+use App\Queries\Roster\PreviousStablesQuery;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -27,6 +27,13 @@ class PreviousStables extends BasePreviousStablesTable
     #[\Override]
     protected string $resourceName = 'stables';
 
+    protected PreviousStablesQuery $previousStables;
+
+    public function boot(PreviousStablesQuery $previousStables): void
+    {
+        $this->previousStables = $previousStables;
+    }
+
     /**
      * Get stables that the manager was associated with through wrestlers/tag teams they managed.
      *
@@ -36,7 +43,7 @@ class PreviousStables extends BasePreviousStablesTable
     {
         $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
-        return StableManagerHistoryQuery::previousStablesForManagerId($managerId);
+        return $this->previousStables->get($managerId);
     }
 
     #[\Override]

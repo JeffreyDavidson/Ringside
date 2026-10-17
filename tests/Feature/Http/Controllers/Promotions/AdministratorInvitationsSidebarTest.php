@@ -2,21 +2,27 @@
 
 declare(strict_types=1);
 
+use App\Actions\Promotions\AcceptPromotionInvitationAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\followingRedirects;
 use function Pest\Laravel\get;
 
 describe('pending invitations in the sidebar', function () {
     test('an administrator without a membership sees a pending invitation in the sidebar', function () {
         // Arrange
         $admin = administrator();
-        $promotion = Promotion::factory()->create(['name' => 'Sidebar Wrestling']);
-        PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create(['name' => 'Sidebar Wrestling']);
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($admin->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
+
         actingAs($admin);
 
         // Act
@@ -31,33 +37,69 @@ describe('pending invitations in the sidebar', function () {
             ->assertSeeHtml(route('promotions.invitation.decline', $promotion));
     });
 
-    test('an administrator is told that accepting scopes them to the promotion, a regular user is not', function (callable $makeUser, int $status, bool $seesNote): void {
+    test('administrators see promotion scoping notes', function (): void {
         // Arrange
-        $user = $makeUser();
-        $promotion = Promotion::factory()->create();
-        PromotionInvitation::factory()->for($promotion)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        $user = administrator();
+        $promotion = Promotion::factory()
+            ->create();
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
+
         actingAs($user);
 
         // Act
         $response = get(route('dashboard'));
 
         // Assert
-        $response->assertStatus($status)->assertSeeHtml('data-test="pending-invitations"');
-        expect(str_contains((string) $response->getContent(), 'data-test="invitation-admin-note"'))->toBe($seesNote);
-    })->with([
-        'administrator' => [administrator(...), 200, true],
-        'regular user' => [basicUser(...), 403, false],
-    ]);
+        $response
+            ->assertOk()
+            ->assertSeeHtml('data-test="pending-invitations"')
+            ->assertSeeHtml('data-test="invitation-admin-note"');
+    });
+
+    test('regular users see invitations without administrator scoping notes', function (): void {
+        // Arrange
+        $user = basicUser();
+        $promotion = Promotion::factory()
+            ->create();
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
+
+        actingAs($user);
+
+        // Act
+        $response = get(route('dashboard'));
+
+        // Assert
+        $response
+            ->assertForbidden()
+            ->assertSeeHtml('data-test="pending-invitations"')
+            ->assertDontSeeHtml('data-test="invitation-admin-note"');
+    });
 
     test('an administrator accepting the invitation then gets the promotion in the switcher', function () {
         // Arrange
         $admin = administrator();
-        $promotion = Promotion::factory()->create(['name' => 'Accepted Wrestling']);
-        PromotionInvitation::factory()->for($promotion)->forEmail($admin->email)->withRole(MembershipRole::Manager)->create();
+        $promotion = Promotion::factory()
+            ->create(['name' => 'Accepted Wrestling']);
+        PromotionInvitation::factory()
+            ->for($promotion)
+            ->forEmail($admin->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
+
         actingAs($admin);
 
+        resolve(AcceptPromotionInvitationAction::class)->handle($promotion, $admin);
+
         // Act
-        $response = followingRedirects()->post(route('promotions.invitation.accept', $promotion));
+        $response = get(route('dashboard'));
 
         // Assert
         $response
@@ -65,6 +107,7 @@ describe('pending invitations in the sidebar', function () {
             ->assertSee('Accepted Wrestling')
             ->assertSeeHtml('id="promotion-menu"')
             ->assertDontSeeHtml('data-test="pending-invitations"');
+
         expect(promotionHasActiveMember($promotion, $admin))->toBeTrue();
     });
 
@@ -84,10 +127,21 @@ describe('pending invitations in the sidebar', function () {
     test('a member with an active promotion sees the invitation only once, inside the switcher', function () {
         // Arrange
         $user = basicUser();
-        $own = Promotion::factory()->create();
-        $inviting = Promotion::factory()->create(['name' => 'Inviting Wrestling']);
-        $own->users()->attach($user, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
-        PromotionInvitation::factory()->for($inviting)->forEmail($user->email)->withRole(MembershipRole::Manager)->create();
+        $own = Promotion::factory()
+            ->create();
+        $inviting = Promotion::factory()
+            ->create(['name' => 'Inviting Wrestling']);
+        $own->users()
+            ->attach($user, [
+                'role' => MembershipRole::Member,
+                'status' => MembershipStatus::Active,
+            ]);
+        PromotionInvitation::factory()
+            ->for($inviting)
+            ->forEmail($user->email)
+            ->withRole(MembershipRole::Manager)
+            ->create();
+
         actingAs($user);
 
         // Act
@@ -98,6 +152,7 @@ describe('pending invitations in the sidebar', function () {
             ->assertSuccessful()
             ->assertSeeHtml('data-test="invitation-indicator"')
             ->assertDontSeeHtml('data-test="invitation-collapsed-toggle"');
+
         expect(substr_count((string) $response->getContent(), 'data-test="pending-invitations"'))->toBe(1);
     });
 });

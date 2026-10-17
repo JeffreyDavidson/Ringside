@@ -6,7 +6,7 @@ namespace App\Livewire\Titles\Modals;
 
 use App\Actions\Titles\CreateAction;
 use App\Actions\Titles\UpdateAction;
-use App\Enums\BusinessRuleReason;
+use App\Enums\Shared\BusinessRuleReason;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Titles\TitleTypeEligibility;

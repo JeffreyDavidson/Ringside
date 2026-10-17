@@ -5,19 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Matches\MatchAssignmentEligibility;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddRefereesToMatchAction
 {
     public function __construct(
-        private readonly MatchAssignmentConflictService $conflictService,
+        private readonly MatchSchedulingLock $schedulingLock,
+        private readonly MatchAssignmentEligibility $assignmentEligibility,
         private readonly RosterBookingEligibility $bookingEligibility,
+        private readonly RosterDateAvailability $dateAvailability,
         private readonly MatchConfigurationRequirements $configurationRequirements,
     ) {}
 
@@ -58,7 +62,7 @@ class AddRefereesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedReferees): void {
-            $lockedMatch = $this->conflictService->lockMatchWithEventSet($eventMatch);
+            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
                 $lockedMatch->event()->firstOrFail(),
                 'referees',
@@ -72,8 +76,9 @@ class AddRefereesToMatchAction
      * Assign referees while the caller owns the match transaction and lock.
      *
      * @param  Collection<int, Referee>  $referees
+     * @param  list<string>  $retainedKeys  Server-derived assignments retained by the locked match update.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $referees): void
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $referees, array $retainedKeys = []): void
     {
         $requestedReferees = $referees->unique('id')->values();
 
@@ -81,7 +86,7 @@ class AddRefereesToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
-        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
         $lockedReferees = Referee::query()
             ->whereKey($requestedReferees->pluck('id'))
             ->orderBy('id')
@@ -94,7 +99,14 @@ class AddRefereesToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
-        $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
+        $this->assignmentEligibility->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
+
+        $event = $lockedMatch->event()->firstOrFail();
+        foreach ($lockedReferees as $person) {
+            if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
+                $this->dateAvailability->ensureForEvent($person, $event);
+            }
+        }
 
         $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->pluck('id'));
     }

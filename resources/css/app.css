@@ -46,110 +46,13 @@
     unicode-range: U+0000-00FF, U+0100-024F, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+2318, U+FEFF, U+FFFD;
 }
 
+/* Modal width classes are selected dynamically by the modal package. */
 @source inline("{sm:,md:,lg:,xl:,2xl:,}max-w-{sm,md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl}");
 
 @theme {
     --font-sans: Inter, system-ui, sans-serif;
-
-    --spacing-1.25: 0.275rem;
-    --spacing-2.25: 0.563rem;
-    --spacing-4.5: 1.125rem;
-    --spacing-5.5: 1.375rem;
-    --spacing-7.5: 1.875rem;
-    --spacing-8.5: 2.125rem;
-
-    --leading-4.25: 1.125rem;
-
-    /* Metronic Color Palette */
-    --color-primary: #1B84FF;
-    --color-primary-active: #056EE9;
-    --color-primary-light: #EFF6FF;
-    --color-primary-clarity: rgba(27, 132, 255, 0.20);
-    --color-primary-inverse: #ffffff;
-
-    --color-success: #17C653;
-    --color-success-active: #04B440;
-    --color-success-light: #EAFFF1;
-    --color-success-clarity: rgba(23, 198, 83, 0.20);
-    --color-success-inverse: #ffffff;
-
-    --color-danger: #F8285A;
-    --color-danger-active: #D81A48;
-    --color-danger-light: #FFEEF3;
-    --color-danger-clarity: rgba(248, 40, 90, 0.20);
-    --color-danger-inverse: #ffffff;
-
-    --color-warning: #F6B100;
-    --color-warning-active: #DFA000;
-    --color-warning-light: #FFF8DD;
-    --color-warning-clarity: rgba(246, 177, 0, 0.20);
-    --color-warning-inverse: #ffffff;
-
-    --color-info: #7239EA;
-    --color-info-active: #5014D0;
-    --color-info-light: #F8F5FF;
-    --color-info-clarity: rgba(114, 57, 234, 0.20);
-    --color-info-inverse: #ffffff;
-
-    --color-dark: #1E2129;
-    --color-dark-active: #111318;
-    --color-dark-light: #F9F9F9;
-    --color-dark-clarity: rgba(30, 33, 41, 0.20);
-    --color-dark-inverse: #ffffff;
-
-    --color-light: #ffffff;
-    --color-light-active: #FCFCFC;
-    --color-light-light: #ffffff;
-    --color-light-clarity: rgba(255, 255, 255, 0.20);
-    --color-light-inverse: #4B5675;
-
-    --color-secondary: #F9F9F9;
-    --color-secondary-active: #f9f9f9;
-    --color-secondary-light: #F9F9F9;
-    --color-secondary-clarity: rgba(249, 249, 249, 0.20);
-    --color-secondary-inverse: #4B5675;
-
-    /* Gray Scale */
-    --color-gray-100: #F9F9F9;
-    --color-gray-200: #F1F1F4;
-    --color-gray-300: #DBDFE9;
-    --color-gray-400: #C4CADA;
-    --color-gray-500: #99A1B7;
-    --color-gray-600: #78829D;
-    --color-gray-700: #4B5675;
-    --color-gray-800: #252F4A;
-    --color-gray-900: #071437;
-
-    /* Coal (dark mode palette) */
-    --color-coal-100: #15171C;
-    --color-coal-200: #13141A;
-    --color-coal-300: #111217;
-    --color-coal-400: #0F1014;
-    --color-coal-500: #0D0E12;
-    --color-coal-600: #0B0C10;
-    --color-coal-black: #000000;
-    --color-coal-clarity: rgba(24, 25, 31, 0.50);
-
-    /* Custom Font Sizes */
-    --text-3xs: 0.625rem;
     --text-2xs: 0.6875rem;
     --text-2sm: 0.8125rem;
-    --text-md: 0.9375rem;
-
-    /* Box Shadows */
-    --box-shadow-card: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
-    --box-shadow-default: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
-    --box-shadow-light: 0px 3px 4px 0px rgba(0, 0, 0, 0.03);
-    --box-shadow-input: oklab(0 0 0 / 0.05) 0px 1px 2px 0px;
-    --box-shadow-primary: 0px 4px 12px 0px rgba(40, 132, 239, 0.35);
-    --box-shadow-success: 0px 4px 12px 0px rgba(53, 189, 100, 0.35);
-    --box-shadow-danger: 0px 4px 12px 0px rgba(241, 65, 108, 0.35);
-    --box-shadow-info: 0px 4px 12px 0px rgba(114, 57, 234, 0.35);
-    --box-shadow-warning: 0px 4px 12px 0px rgba(246, 192, 0, 0.35);
-    --box-shadow-dark: 0px 4px 12px 0px rgba(37, 47, 74, 0.35);
-
-    /* Border Radius */
-    --radius: 0.5rem;
 }
 
 /* Layout Variables */
@@ -239,38 +142,6 @@ html[data-sidebar-initializing] * {
 }
 
 @layer components {
-    /* Form Input Utilities */
-    .form-input-base {
-        @apply appearance-none shadow-none outline-none font-medium text-sm leading-none
-               bg-light-active rounded-md border border-solid border-gray-300
-               text-gray-600 w-full;
-    }
-
-    .form-input-states {
-        @apply hover:border-gray-400 focus:border-primary focus:text-gray-700;
-    }
-
-    .form-input-default {
-        @apply h-10 ps-3 pe-3;
-    }
-
-    .form-input-textarea {
-        @apply py-[.55rem] px-3 h-[100px];
-    }
-
-    .form-input-container {
-        @apply flex gap-1.5 items-center appearance-none shadow-none outline-none
-               text-gray-600 w-full font-medium text-sm leading-none
-               bg-light-active rounded-md h-10 ps-3 pe-3 border border-solid
-               border-gray-300 hover:border-gray-400 has-[:focus]:border-primary
-               has-[:focus]:text-gray-700 has-[:invalid]:border-red-600;
-    }
-
-    .form-input-element {
-        @apply grow bg-transparent border-transparent text-inherit outline-none
-               m-0 p-0 text-sm focus:ring-0 focus:border-none;
-    }
-
     /* Checkbox styling */
     input[type="checkbox"]:checked {
         background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3E%3C/svg%3E");

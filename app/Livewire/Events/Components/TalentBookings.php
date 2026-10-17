@@ -6,12 +6,13 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\TalentBookingForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\TalentBookingContextQuery;
-use App\ViewModels\TalentBookingsViewModel;
+use App\Services\Events\TalentBookingFingerprintService;
+use App\ViewModels\Events\TalentBookingsViewModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +24,7 @@ use Livewire\WithPagination;
 
 class TalentBookings extends Component
 {
+    use ExplainsKeptInput;
     use WithPagination;
 
     #[Locked]
@@ -56,6 +58,13 @@ class TalentBookings extends Component
 
     public string $message = '';
 
+    protected TalentBookingFingerprintService $fingerprints;
+
+    public function boot(TalentBookingFingerprintService $fingerprints): void
+    {
+        $this->fingerprints = $fingerprints;
+    }
+
     public function mount(int $eventId): void
     {
         $this->eventId = $eventId;
@@ -82,7 +91,7 @@ class TalentBookings extends Component
         $this->personId = $id;
         $this->personName = $person instanceof Wrestler ? $person->name : ($person->full_name ?? $booking->person_name ?? __('talent-bookings.unknown'));
         $this->version = $booking->version ?? 0;
-        $this->fingerprint = app(TalentBookingContextQuery::class)->fingerprint($event, $type.':'.$id);
+        $this->fingerprint = $this->fingerprints->fingerprint($event, $type.':'.$id);
         $this->historyOpen = false;
         $this->resetPage('historyPage');
         $this->message = '';
@@ -104,7 +113,7 @@ class TalentBookings extends Component
         $this->edit($this->searchKind === 'referees' ? (new Referee)->getMorphClass() : (new Wrestler)->getMorphClass(), $this->selectedPerson ?? 0);
     }
 
-    public function save(bool $attest = false): void
+    public function save(SaveTalentBookingAction $action, bool $attest = false): void
     {
         $event = $this->event();
         Gate::authorize('update', $event);
@@ -113,13 +122,13 @@ class TalentBookings extends Component
         $data = $this->form->toData($event, $booking, $attest);
         $this->resetErrorBag();
         try {
-            app(SaveTalentBookingAction::class)->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data);
+            $action->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data);
             $this->personId = 0;
             $this->form->reset();
             $this->message = __('talent-bookings.saved');
             $this->dispatch('talent-editor-closed');
         } catch (BaseBusinessException $exception) {
-            $this->addError('booking', $exception->getMessage());
+            $this->addError('booking', $this->failureMessageKeepingInput($exception));
         }
     }
 
@@ -164,17 +173,17 @@ class TalentBookings extends Component
             'name' => $person instanceof Wrestler ? $person->name : $person->full_name])->all();
     }
 
-    public function render(): View
+    public function render(TalentBookingsViewModel $bookings): View
     {
         $event = $this->event();
         Gate::authorize('update', $event);
-        $data = app(TalentBookingsViewModel::class)->data($event);
-        $rows = array_values(array_filter($data['rows'], fn (array $row): bool => $this->filter === 'all'
-            || ($this->filter === 'attention' && $row['warnings'] !== []) || ($row['booking']?->status->value ?? 'not_tracked') === $this->filter));
         $booking = $event->talentBookings()->where('person_type', $this->personType)->where('person_id', $this->personId)->first();
         $history = $this->historyOpen && $booking !== null ? $booking->revisions()->orderByDesc('version')->paginate(10, pageName: 'historyPage') : null;
+        $data = $bookings->data($event, $booking, $history ?? []);
+        $rows = array_values(array_filter($data['rows'], fn (array $row): bool => $this->filter === 'all'
+            || ($this->filter === 'attention' && $row['warnings'] !== []) || ($row['booking']?->status->value ?? 'not_tracked') === $this->filter));
 
-        return view('livewire.events.components.talent-bookings', [...$data, 'rows' => $rows, 'event' => $event, 'booking' => $booking, 'history' => $history, 'screen' => app(TalentBookingsViewModel::class)]);
+        return view('livewire.events.components.talent-bookings', [...$data, 'rows' => $rows, 'event' => $event, 'booking' => $booking, 'history' => $history]);
     }
 
     private function event(): Event

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Titles\TitleType;
@@ -16,6 +16,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -319,3 +320,25 @@ it('requires an administrator to open the result modal', function (bool $authent
     'guest' => [false, 403],
     'authenticated non-administrator' => [true, 404],
 ]);
+
+it('refreshes the linked version after saving so a cached modal can correct its own result', function (): void {
+    $world = tournamentFixture();
+    $match = bookTournamentNode($world, $world['tournament']->nodes()->firstOrFail());
+    actingAs(administrator());
+    $page = livewire(ResultModal::class, ['matchId' => $match->id]);
+    $page->set('form.finish', MatchFinish::Pinfall->value);
+    $page->set('form.winningSideId', $match->sides()->firstOrFail()->id);
+    $page->call('save')->assertHasNoErrors();
+    $page->set('form.finish', MatchFinish::TimeLimitDraw->value);
+    $page->call('save')->assertHasNoErrors();
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
+        ->and($match->winning_side_id)->toBeNull();
+});
+
+it('sends a disposable result component to the modal host so reopening reads a fresh result', function (): void {
+    $world = tournamentFixture();
+    $match = bookTournamentNode($world, $world['tournament']->nodes()->firstOrFail());
+    actingAs(administrator());
+    $host = livewire(Modal::class)->call('openModal', 'matches.modals.result-modal', ['matchId' => $match->id]);
+    $host->assertSet('components', fn (array $components): bool => data_get($components, '*.modalAttributes.destroyOnClose') === [true]);
+});

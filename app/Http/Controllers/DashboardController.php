@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\ViewModels\DashboardViewModel;
+use App\ViewModels\Dashboard\DashboardViewModel;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -17,6 +17,6 @@ class DashboardController
      */
     public function __invoke(DashboardViewModel $dashboard): View
     {
-        return view('dashboard', ['dashboard' => $dashboard]);
+        return view('dashboard', $dashboard->data());
     }
 }

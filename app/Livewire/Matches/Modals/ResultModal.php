@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Modals;
 
 use App\Actions\Matches\RecordResultAction;
-use App\Enums\MatchFinish;
+use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Matches\Forms\MatchResultForm;
 use App\Models\Matches\EventMatch;
@@ -60,8 +60,15 @@ class ResultModal extends ModalComponent
             unset($this->match);
         }
 
+        $this->form->fillFrom($this->match);
         $this->dispatch('refreshDatatable');
         $this->dispatch('closeModal');
+    }
+
+    #[\Override]
+    public static function destroyOnClose(): bool
+    {
+        return true;
     }
 
     public function updatedFormFinish(?string $finish): void

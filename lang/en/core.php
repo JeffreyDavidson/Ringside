@@ -178,6 +178,10 @@ return [
     ],
 
     'errors' => [
+        'record' => [
+            'changed' => 'This was changed by someone else. Reload to see the latest version, review it, then try again.',
+            'input_kept' => 'Your changes are still here.',
+        ],
         'date_range' => [
             'end_before_start' => 'Invalid date range: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',
             'end_before_start_for_context' => 'Invalid date range for :context: end date (:end) cannot be before start date (:start). Ensure logical date ordering.',

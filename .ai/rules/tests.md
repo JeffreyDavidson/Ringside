@@ -15,7 +15,7 @@ Use JMac\Testing\Double::for() for doubles of application collaborators. Bind co
 Keep each test file focused on one subject, group related behavior with describe blocks, and make Arrange, Act, and Assert phases explicit. Keep each Act call on its own line.
 
 ## Keep test suites aligned to application boundaries
-Feature tests cover HTTP endpoints and authorization; Integration tests cover database, framework, component, and multi-action domain behavior; Unit tests remain framework- and database-free; Browser tests cover real user journeys in Pest Browser. Place each test beside the application boundary it exercises.
+Feature tests cover HTTP endpoints and authorization; Integration tests cover database, framework, component, and multi-action domain behavior; Unit tests remain framework- and database-free; Browser tests cover real user journeys in Pest Browser. Place each test beside the application boundary it exercises. A test of a Blade view that has no class in `app/` (an anonymous component, a layout, a vendor view override) goes in the Integration suite at its `resources/views` path under `tests/Integration/View`: `components/sidebar` → `tests/Integration/View/Components/SidebarTest.php`, `vendor/wire-elements-modal/modal` → `tests/Integration/View/Vendor/WireElementsModal/ModalTest.php`. A view rendered by a class (a Livewire component's placeholder or render view) is tested with that class. There is no `tests/Feature/Pages`.
 
 ## Assert observable behavior
 Test rendered output, returned data, persisted state, dispatched events, authorization, and validation outcomes. Do not inspect source strings, imports, comments, method counts, or private implementation structure with reflection; reserve reflection for architecture constraints that cannot be expressed through Pest architecture expectations.
@@ -37,3 +37,6 @@ A query without ORDER BY returns rows in whatever order the engine picks: SQLite
 
 ## Make guard tests fail when the guard is removed
 A test for an authorization check, lock, filter or escape must fail if that one line is deleted. Pair every allowed case with a refused one that reaches the guarded line (a view-only member calling a delete action, a membership downgraded between opening a form and saving it), assert the refusal and that nothing was written, and pick data that only the guard tells apart (a search term whose wildcard would match, a stored email that a LIKE pattern would match). Assert locks with recordStatements(): which row is locked, in which order, and before which write.
+
+## Compare reordered JSON-column objects with toEqual
+Associative arrays whose key order the database may change (MySQL JSON, Postgres jsonb) are compared with `toEqual()`; keep lists and scalar values on `toBe()`.

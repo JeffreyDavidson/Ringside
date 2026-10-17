@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 
@@ -20,7 +21,7 @@ test('an operator prepares checks in runs and completes a show on mobile', funct
     $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
     EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
 
     // Act / Assert
     $page = visit(route('events.live-show.show', $event));
@@ -76,7 +77,7 @@ test('two browser screens do not overwrite the first saved start', function (): 
 
     // Act / Assert
     $first->click('Start item')->assertSee('Finish item');
-    $stale->click('Start item')->assertSee('This show changed on another screen.')->assertNoJavaScriptErrors();
+    $stale->click('Start item')->assertSee('This was changed by someone else.')->assertNoJavaScriptErrors();
     expect($fixture['run']->refresh()->version)->toBe(2);
 });
 

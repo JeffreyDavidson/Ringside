@@ -1,23 +1,26 @@
+@php $stackRowsOnMobile ??= false; @endphp
 <div @class(['flex flex-col', 'gap-3' => $tableHeading, 'gap-6' => ! $tableHeading])>
     @if ($beforeWrapperView)
         <x-dynamic-component :component="$beforeWrapperView" />
     @endif
 
     @if ($tableHeading)
-        <h2 class="font-display text-ringside-ink m-0 text-xl leading-none tracking-tight uppercase">
+        <h2 class="font-display text-foreground m-0 text-xl leading-none tracking-tight uppercase">
             {{ $tableHeading }}
         </h2>
     @endif
 
-    @if ($tableHeading && $rows->isEmpty() && ! $hasActiveFilters)
+    @if ($historyUnavailable ?? false)
+        <p class="text-muted-foreground text-sm">{{ __('matches.history.unavailable') }}</p>
+    @elseif ($tableHeading && $rows->isEmpty() && ! $hasActiveFilters)
         <p
-            class="border-ringside-line bg-ringside-surface-header text-ringside-muted m-0 border px-4 py-4 text-sm"
+            class="border-border bg-surface-header text-muted-foreground m-0 border px-4 py-4 text-sm"
             data-test="{{ $this->resourceName }}-empty-state"
         >
             {{ __('core.no_related_records', ['resource' => Str::lower($tableHeading)]) }}
         </p>
     @else
-        <div class="border-ringside-line bg-ringside-surface-header border">
+        <div class="border-border bg-surface-header border">
             <x-tables.toolbar
                 :id="$this->resourceName.'-search'"
                 model="search"
@@ -38,7 +41,7 @@
                             <select
                                 id="table-filter-{{ $filter->getKey() }}"
                                 wire:model.live="filterValues.{{ $filter->getKey() }}"
-                                class="border-ringside-outline bg-ringside-surface text-ringside-ink focus-visible:outline-ringside-ink min-h-11 appearance-none border px-3 text-sm focus-visible:outline-2"
+                                class="border-outline bg-surface text-foreground focus-visible:outline-foreground min-h-11 appearance-none border px-3 text-sm focus-visible:outline-2"
                             >
                                 @foreach ($filter->getOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -52,7 +55,7 @@
             @if ($rows->isNotEmpty())
                 <p
                     id="{{ $this->resourceName }}-table-scroll-hint"
-                    class="border-ringside-line text-ringside-muted flex items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden"
+                    @class(['border-border text-muted-foreground items-center justify-end gap-2 border-b px-4 py-2 text-xs md:hidden', 'hidden' => $stackRowsOnMobile, 'flex' => ! $stackRowsOnMobile])
                 >
                     {{ __('core.table_scroll_hint') }}
                     <x-heroicon-o-arrow-right class="size-4 shrink-0" aria-hidden="true" />
@@ -64,10 +67,10 @@
                     tabindex="0"
                     aria-label="{{ __('core.table_results_region') }}"
                     aria-describedby="{{ $this->resourceName }}-table-scroll-hint"
-                    class="focus-visible:outline-ringside-ink overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                    @class(['focus-visible:outline-foreground focus-visible:outline-2 focus-visible:outline-offset-[-2px]', 'overflow-x-auto' => ! $stackRowsOnMobile, 'md:overflow-x-auto' => $stackRowsOnMobile])
                 >
-                    <table class="w-full min-w-[40rem] table-auto border-collapse text-left text-sm">
-                        <thead>
+                    <table @class(['w-full table-auto border-collapse text-left text-sm', 'min-w-[40rem]' => ! $stackRowsOnMobile, 'block md:table' => $stackRowsOnMobile])>
+                        <thead @class(['hidden md:table-header-group' => $stackRowsOnMobile])>
                             <tr>
                                 @foreach ($columns as $column)
                                     @php
@@ -81,7 +84,7 @@
                                     <th
                                         scope="col"
                                         @if ($columnSort) aria-sort="{{ $columnSort }}" @endif
-                                        class="border-ringside-line bg-ringside-surface-panel text-ringside-muted px-4 py-3 align-middle text-xs font-semibold tracking-[0.08em] uppercase
+                                        class="border-border bg-surface-panel text-muted-foreground px-4 py-3 align-middle text-xs font-semibold tracking-[0.08em] uppercase
                                 {{ !$loop->last ? 'border-e' : '' }}
                                 {{ $column->getTitle() === __('core.actions') ? 'w-[60px]' : '' }}"
                                     >
@@ -89,7 +92,7 @@
                                             <button
                                                 type="button"
                                                 wire:click="sort('{{ $column->getField() }}')"
-                                                class="text-ringside-muted hover:text-ringside-ink focus-visible:outline-ringside-ink flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2"
+                                                class="text-muted-foreground hover:text-foreground focus-visible:outline-foreground flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2"
                                             >
                                                 {{ $column->getTitle() }}
                                                 @if ($columnSort === 'ascending')
@@ -105,17 +108,17 @@
                                 @endforeach
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody @class(['block md:table-row-group' => $stackRowsOnMobile])>
                             @foreach ($rows as $row)
                                 <tr
                                     wire:key="row-{{ $row->{$this->primaryKey ?? 'id'} }}"
-                                    class="border-ringside-line hover:bg-ringside-surface-hover border-b transition-colors"
+                                    @class(['border-border hover:bg-surface-hover border-b transition-colors', 'block md:table-row' => $stackRowsOnMobile])
                                 >
                                     @foreach ($columns as $column)
-                                        <td
-                                            class="text-ringside-ink px-4 py-4
-                                    {{ !$loop->last ? 'border-ringside-line border-e' : '' }}"
-                                        >
+                                        <td @class(['text-foreground px-4 py-4', 'border-border border-e' => ! $loop->last && ! $stackRowsOnMobile, 'block md:table-cell' => $stackRowsOnMobile])>
+                                            @if ($stackRowsOnMobile)
+                                                <span class="text-muted-foreground mb-1 block text-xs font-semibold md:hidden">{{ $column->getTitle() }}</span>
+                                            @endif
                                             @if ($column->isHtml())
                                                 {{ $column->resolveHtmlValue($row) }}
                                             @else
@@ -139,7 +142,7 @@
                     <button
                         type="button"
                         wire:click="clearFilters"
-                        class="text-ringside-ink hover:bg-ringside-surface-hover focus-visible:outline-ringside-ink border-ringside-line mt-2 inline-flex min-h-11 items-center border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        class="text-foreground hover:bg-surface-hover focus-visible:outline-foreground border-border mt-2 inline-flex min-h-11 items-center border px-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                         {{ $hasAppliedFilters ? __('core.clear_filters') : __('core.clear_search') }}
                     </button>
@@ -172,7 +175,7 @@
         wire:loading.delay
         role="status"
         data-test="table-updating-status"
-        class="border-ringside-line bg-ringside-surface-header text-ringside-muted fixed end-4 bottom-4 z-50 border px-4 py-3 text-sm shadow-xl"
+        class="border-border bg-surface-header text-muted-foreground fixed end-4 bottom-4 z-50 border px-4 py-3 text-sm shadow-xl"
     >
         {{ __('core.updating') }}
     </div>

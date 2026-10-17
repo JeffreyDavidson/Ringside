@@ -8,6 +8,12 @@ paths:
 ## Attribute-based fillable declarations
 Declare intentionally mass-assignable fields with #[Fillable(...)] on every Eloquent model, including custom pivot models. Do not use the $fillable property.
 
+## Privileged fields are never fillable
+Keep privileged and system-managed fields out of #[Fillable(...)]: `role`, `status`, tenant and ownership keys (`promotion_id`, `user_id`), versions and similar. The code that sets one does so explicitly (a direct assignment, `forceFill()`, or the relationship that owns the key, such as `$promotion->invitations()->make(...)` or `attach()`), never by passing it through `create()`, `update()` or `fill()` with other attributes. A pivot model written through `attach()` or `updateExistingPivot()` is the one exception to the explicit-assignment rule: Laravel fills the pivot class with the attributes to cast them, so `PromotionMembership` keeps `role` and `status` fillable; nothing may pass user input to it, and only relation methods in Actions write it. Prove the protection where untrusted input arrives (the route or Livewire form), not by calling `forceFill()` on a factory.
+
+## Models hold small facts, not rules or conversions
+A model may answer small yes/no facts about itself from its own (eager-loaded) data, such as `TagTeam::hasInjuredMember()`, when they only drive display. A model never decides whether an action is allowed (that is Lifecycle eligibility) and holds no cross-record rules, calculations or time-zone conversions. Time-zone conversion lives in `PromotionTimeZoneService`, email normalization in `App\Support\EmailAddress`, and other calculations in a Service, Query, Lifecycle class or Action.
+
 ## Custom Eloquent builders
 Put reusable model query operations on typed custom Eloquent Builder classes and bind them with #[UseEloquentBuilder]; do not add local model scopes.
 

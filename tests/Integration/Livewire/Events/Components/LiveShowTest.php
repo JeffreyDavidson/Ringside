@@ -6,6 +6,7 @@ require_once __DIR__.'/../../../../Fixtures/live-show.php';
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Events\LiveShowStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
@@ -14,8 +15,9 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -28,7 +30,7 @@ test('promotion members can view but only managers and owners operate the live s
     EventMatch::factory()->for($event)->create();
     actingAs(administrator());
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => $role, 'status' => MembershipStatus::Active]);
     actingAs($user);
@@ -59,7 +61,7 @@ test('a stale screen is refreshed without overwriting the first operator start',
     $event = Event::factory()->create(['date' => now()]);
     EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $first = livewire(LiveShow::class, ['eventId' => $event->id]);
     $stale = livewire(LiveShow::class, ['eventId' => $event->id]);
@@ -81,7 +83,7 @@ test('polling does not replace an open correction draft or its original version'
     $event = Event::factory()->create(['date' => now()]);
     EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
     $key = $run->content['items'][0]['key'];
     $component = livewire(LiveShow::class, ['eventId' => $event->id]);
@@ -106,7 +108,7 @@ test('membership suspension after mount refuses all further live changes', funct
     EventMatch::factory()->for($event)->create();
     actingAs(administrator());
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], $data['content'], false);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
     actingAs($user);
@@ -172,7 +174,7 @@ test('source review requires a removal reason and preserves checked in people', 
     $data = resolve(EventPackViewModel::class)->data($fixture['event']);
     $content = $data['content'];
     $content['segments'] = array_map(fn (array $segment): array => [...$segment, 'after_match_id' => null], $content['segments']);
-    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $data['card']['fingerprint'], $content, true);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $data['card']['fingerprint'], EventPackData::fromValidated($content), true);
 
     // Act
     $component->call('beginReview');
@@ -245,3 +247,35 @@ test('completing from the live screen saves a read only show and removes live co
     expect($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Completed)
         ->and($fixture['run']->completed_at)->not->toBeNull()->and($fixture['run']->version)->toBe(4);
 });
+
+test('a downgraded editor is refused every live show write and the run is unchanged', function (string $operation): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion)->create(['date' => now()]);
+    $wrestlers = Wrestler::factory()->count(2)->for($promotion)->bookable()->create();
+    EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->withReferees()->create();
+    actingAs(administrator());
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'])->refresh();
+    $fixture = ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
+    $user = basicUser();
+    $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);
+    actingAs($user);
+    get(route('events.live-show.show', $event))->assertOk();
+    $component = livewire(LiveShow::class, ['eventId' => $event->id]);
+    $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
+    resolve(PromotionContextService::class)->forgetMemberships();
+    $before = $run->getAttributes();
+
+    // Act
+    $component->call($operation, ...match ($operation) {
+        'attendance' => [$fixture['person'], 'arrived', true],
+        'item' => [$fixture['key'], 'start'],
+        default => [],
+    });
+
+    // Assert
+    $component->assertForbidden();
+    expect(EventLiveRun::query()->sole()->getAttributes())->toBe($before);
+})->with(['prepare', 'attendance', 'item', 'saveCorrection', 'acceptReview', 'complete']);

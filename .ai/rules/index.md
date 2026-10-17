@@ -11,6 +11,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Actions/Matches/** | .ai/rules/actions-matches.md |
 | app/Actions/** | .ai/rules/actions.md |
 | app/** | .ai/rules/app.md |
+| app/Auth/** | .ai/rules/auth.md |
 | app/Lifecycle/Roster/Booking/** | .ai/rules/booking.md |
 | tests/Browser/** | .ai/rules/browser.md |
 | app/Builders/** | .ai/rules/builders.md |
@@ -20,7 +21,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/css/** | .ai/rules/css.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |
-| app/{Actions/Venues,Exceptions/Events,Lifecycle}/** | .ai/rules/events-lifecycle.md |
+| app/{Actions/Venues,Exceptions/Venues,Lifecycle}/** | .ai/rules/events-lifecycle.md |
 | app/{Actions,Exceptions,Lifecycle,Rules,Livewire}/Events/** | .ai/rules/events.md |
 | app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |
@@ -29,9 +30,9 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Livewire,Actions,Lifecycle}/Matches/** | .ai/rules/livewire-actions-lifecycle-matches.md |
 | app/{Livewire,Actions}/Matches/** | .ai/rules/livewire-actions-matches.md |
 | app/Livewire/** | .ai/rules/livewire.md |
-| app/{Enums/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/MatchCompetitorRequirements.php} | .ai/rules/matches-matches.md |
+| app/{Enums/Matches/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/Matches/MatchCompetitorRequirements.php} | .ai/rules/matches-matches.md |
 | app/Exceptions/{Matches,Scheduling}/** | .ai/rules/matches-scheduling.md |
-| app/{Actions/Matches,Services}/** | .ai/rules/matches-services.md |
+| app/{Actions/Matches,Lifecycle/Matches}/** | .ai/rules/matches-lifecycle.md |
 | app/{Actions,Models}/Matches/** | .ai/rules/matches.md |
 | database/migrations/** | .ai/rules/migrations.md |
 | app/{Models,Lifecycle}/** | .ai/rules/models-lifecycle.md |
@@ -39,6 +40,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Models,ValueObjects,Casts}/** | .ai/rules/models-value-objects-casts.md |
 | app/Models/** | .ai/rules/models.md |
 | app/Policies/** | .ai/rules/policies.md |
+| app/Queries/** | .ai/rules/queries.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |
 | app/{Actions/Stables/**,Services/Roster/Stables/**} | .ai/rules/roster-stables.md |
@@ -46,11 +48,13 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Rules/** | .ai/rules/rules.md |
 | app/Exceptions/Scheduling/** | .ai/rules/scheduling.md |
 | app/Services/** | .ai/rules/services.md |
-| app/{Actions/Stables/**,Lifecycle/Stable*Eligibility.php} | .ai/rules/stables.md |
-| app/{Actions,Lifecycle}/TagTeams/** | .ai/rules/tag-teams.md |
+| app/Support/** | .ai/rules/support.md |
+| app/{Actions/Stables/**,Lifecycle/Roster/Stables/Stable*Eligibility.php} | .ai/rules/stables.md |
+| app/{Actions/TagTeams,Lifecycle/Roster/TagTeams}/** | .ai/rules/tag-teams.md |
 | tests/** | .ai/rules/tests.md |
 | app/{Models,Queries}/Titles/** | .ai/rules/titles.md |
 | tests/Unit/** | .ai/rules/unit.md |
+| app/ViewModels/** | .ai/rules/view-models.md |
 | resources/views/livewire/** | .ai/rules/views-livewire.md |
 | resources/views/** | .ai/rules/views.md |
 | app/Models/Roster/{Wrestlers,TagTeams}/** | .ai/rules/wrestlers-tag-teams.md |

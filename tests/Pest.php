@@ -18,6 +18,8 @@ use Pest\Browser\Api\PendingAwaitablePage;
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\withoutVite;
 
+require_once __DIR__.'/Support/TournamentHelpers.php';
+
 pest()->tia()->baselined();
 
 pest()->tia()->watch([
@@ -47,6 +49,7 @@ pest()
     })
     ->in(
         'Integration/Actions',
+        'Integration/Auth',
         'Integration/Builders',
         'Integration/Casts',
         'Integration/Collections',
@@ -65,7 +68,6 @@ pest()
         'Integration/Queries',
         'Integration/Rules',
         'Integration/Services',
-        'Integration/Support',
         'Integration/Validation',
         'Integration/View',
         'Integration/ViewModels',

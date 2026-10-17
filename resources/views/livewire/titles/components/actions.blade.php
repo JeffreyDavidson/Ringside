@@ -10,7 +10,7 @@
     @if ($this->canPerform(TitleLifecycleTransition::Retire))
         <x-buttons.danger
             wire:click="retire"
-            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $title->name])"
+            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $this->title->name])"
             wire:loading.attr="disabled"
             wire:target="retire"
         >
@@ -27,7 +27,7 @@
     @if ($this->canPerform(TitleLifecycleTransition::Pull))
         <x-buttons.warning
             wire:click="deactivate"
-            :wire:confirm="__('core.lifecycle_confirmations.deactivate', ['name' => $title->name])"
+            :wire:confirm="__('core.lifecycle_confirmations.deactivate', ['name' => $this->title->name])"
             wire:loading.attr="disabled"
             wire:target="deactivate"
         >

@@ -12,9 +12,10 @@ use App\Actions\Matches\RecordResultAction;
 use App\Actions\Matches\UpdateMatchAction;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
@@ -247,3 +248,27 @@ test('it gives up after three deadlocked booking attempts', function (Closure $s
     // Assert
     expect($tracker->lockQueries)->toBe(3);
 })->with(['add match for event' => [$bookingScenarios['add match for event'][0]]]);
+
+test('mixed sides prelock every team parent before the complete ordered wrestler set', function (): void {
+    // Arrange
+    $teams = TagTeam::factory()->bookable()->count(2)->create();
+    $direct = Wrestler::factory()->bookable()->count(2)->create();
+    $teams->load('currentWrestlers');
+    $memberIds = $teams->flatMap(fn (TagTeam $team): array => $team->currentWrestlers->modelKeys());
+    $sides = collect([
+        1 => ['wrestlers' => $direct->reverse()->all()],
+        2 => ['tag_teams' => $teams->reverse()->all()],
+    ]);
+
+    // Act
+    $statements = recordStatements(fn () => resolve(MatchRosterLock::class)->forSides($sides));
+
+    // Assert
+    $teamPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "tag_teams"'));
+    $wrestlerPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "wrestlers"'));
+    preg_match('/ in \(([\d, ]+)\)/', $statements[$wrestlerPosition]['sql'], $selectedIds);
+    expect($teamPosition)->toBeLessThan($wrestlerPosition)
+        ->and($statements[$teamPosition]['sql'])->toContain('order by "id" asc')
+        ->and($statements[$wrestlerPosition]['sql'])->toContain('order by "id" asc')
+        ->and(array_map(intval(...), explode(',', $selectedIds[1] ?? '')))->toEqualCanonicalizing($direct->pluck('id')->merge($memberIds)->unique()->values()->all());
+});

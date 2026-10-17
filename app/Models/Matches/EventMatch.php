@@ -6,8 +6,8 @@ namespace App\Models\Matches;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Collections\MatchCompetitorsCollection;
-use App\Enums\MatchFinish;
-use App\Enums\MatchType;
+use App\Enums\Matches\MatchFinish;
+use App\Enums\Matches\MatchType;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;

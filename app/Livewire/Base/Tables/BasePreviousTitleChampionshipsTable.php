@@ -6,13 +6,13 @@ namespace App\Livewire\Base\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\TitleChampionship;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -21,12 +21,21 @@ use Illuminate\Database\Eloquent\Builder;
 abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
-    use UsesRosterRouteResolver;
 
     protected string $databaseTableName = 'titles_championships';
 
     #[\Override]
     protected string $resourceName = 'title championships';
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    protected TitleReignService $titleReignService;
+
+    public function boot(RosterResourceRouteResolver $routeResolver, TitleReignService $titleReignService): void
+    {
+        $this->routeResolver = $routeResolver;
+        $this->titleReignService = $titleReignService;
+    }
 
     protected function configure(): void
     {
@@ -66,12 +75,12 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
                         ? null
                         : $this->routeResolver->urlFor($champion);
                 }),
-            DateColumn::make(__('championships.dates_held'), 'local_won_at')
+            DateColumn::make(__('championships.date_won'), 'local_won_at')
                 ->outputFormat('Y-m-d'),
-            DateColumn::make(__('championships.dates_held'), 'local_lost_at')
+            DateColumn::make(__('championships.date_lost'), 'local_lost_at')
                 ->outputFormat('Y-m-d'),
             Column::make(__('championships.days_held'))
-                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
+                ->label(fn (TitleChampionship $row): int => $this->titleReignService->lengthInDays($row)),
         ];
     }
 

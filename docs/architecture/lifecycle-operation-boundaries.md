@@ -50,6 +50,12 @@ Shared lifecycle components perform one reusable persistence responsibility, suc
 
 These components own consistent record mutation and effective-date handling. They participate in the transaction established by the coordinating action or workflow so the primary mutation and its cascades remain atomic. They do not decide every entity's eligibility or discover supported capabilities dynamically.
 
+### Lifecycle and Services
+
+`app/Lifecycle` holds the rules about a record's state: `ensureCan...` and `can...` eligibility guards that throw typed business exceptions, requirement checks that refuse an operation the current state does not allow (`Match...Requirements`, `TournamentMatchRequirements`, `LiveShowDayRequirements`, `EventProductionRequirements`), lifecycle period writers, and the row locks that keep concurrent operations in a single order (`MatchSchedulingLock`, `TournamentLocks`, `SchedulingSlotLock`). A Lifecycle class may read through a Service or a Query.
+
+`app/Services` is read-only: cross-record calculations and lookups, and the request's promotion context. A Service throws no business exception, validates nothing, takes no lock and writes nothing, and it never depends on `app/Lifecycle` or `app/Actions`. The dependency therefore runs one way only, from Lifecycle to Services (for example `StableActivityEligibility` reads current members through `StableMembershipService`, and `TournamentMatchRequirements` reads the bracket through `TournamentBracketService`). Validation of submitted input belongs to the Form Request or Livewire component that feeds the Action; the Action locks, checks the state rules and writes. `ServiceArchitectureTest` enforces the Service side of this boundary.
+
 ### Workflows
 
 A workflow coordinates multiple independently meaningful actions across a business use case or multiple entities.
@@ -106,9 +112,9 @@ Employment does not implicitly end retirement. Wrestlers, managers, and referees
 
 Employment cascades use explicit capability and domain collaborators. Both tag teams and wrestlers delegate current-manager employment to `Managers\EmployCurrentManagersAction`, which accepts the existing `Manageable` contract. Tag teams separately delegate current-wrestler employment to `TagTeams\EmployCurrentWrestlersAction`. Each collaborator invokes complete typed employment actions only for currently unemployed related entities.
 
-Membership persistence remains separate from employment orchestration. `ManagerAssignmentService` establishes and synchronizes manager relationships for any model implementing `Manageable`, dates assignments that have ended, and preserves their historical pivot rows. `TagTeamMembershipService` owns the corresponding tag-team wrestler relationships and delegates manager persistence to that shared service. Eligibility is validated before the Action receives its data, while wrestler and tag-team Actions coordinate typed employment cascades when an employment date is supplied.
+Membership persistence remains separate from employment orchestration. Manager relationships for any model implementing `Manageable` are established, synchronized, ended and dated by the manager Actions (`AssignManagersAction`, `SynchronizeManagerAssignmentsAction`, `EndManagerAssignmentsAction`), which preserve historical pivot rows. The tag-team wrestler relationships are owned by the tag-team Actions (`EstablishMembershipAction`, `EndMembershipsAction`, `RejoinMembersAction`), which delegate manager persistence to the manager Actions. Eligibility is validated before the Action receives its data, while wrestler and tag-team Actions coordinate typed employment cascades when an employment date is supplied.
 
-Stable membership persistence follows the same boundary. `StableMembershipService` adds, ends, and synchronizes wrestler and tag-team membership records while preserving history. `MergeStablesAction` owns the merge workflow and composes those persistence operations inside its transaction before deleting the secondary stable through `DeletionStateManager` (which records the `Deleted` transition, as `DeleteAction` does). It records a `Merged` transition on both stables, as `SplitStableAction` records `Split` on the original and the new stable, and `ReuniteAction` adds the returning members it is given after reopening the activity period.
+Stable membership persistence follows the same boundary. Stable Actions (`AddStableMembersAction`, `RemoveStableMembersAction`, `SynchronizeStableMembersAction`) add, end and synchronize wrestler and tag-team membership records while preserving history; `StableMembershipService` only reads the current members. `MergeStablesAction` owns the merge workflow and composes those persistence operations inside its transaction before deleting the secondary stable through `DeletionStateManager` (which records the `Deleted` transition, as `DeleteAction` does). It records a `Merged` transition on both stables, as `SplitStableAction` records `Split` on the original and the new stable, and `ReuniteAction` adds the returning members it is given after reopening the activity period.
 
 Tag-team suspension delegates eligible current wrestler and manager transitions to `SuspendCurrentMembersAction`. The collaborator invokes each member's complete typed suspension action, while the tag-team action retains its own validation, suspension-period persistence, effective-date handling, and transaction boundary.
 
@@ -122,11 +128,9 @@ Stable retirement eligibility is isolated in `StableRetirementEligibility`. Reti
 
 Stable deletion eligibility is isolated in `StableDeletionEligibility`. Deletion requires the stable to have already been disbanded and its current memberships to have already ended, so `DeleteAction` changes only the soft-deletion state. Restoration remains paired with deletion and restores only the historical record without reuniting it.
 
-### Transition policies
+### Eligibility classes
 
-A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
-
-Policies may remain close to models while rules are straightforward. They may be extracted when rules are reused or complex enough to earn a separate domain boundary. Persistence components must not select validation methods from transition strings.
+A transition's rules live in a typed eligibility class under `app/Lifecycle` (`TagTeamEmploymentEligibility`, `StableActivityEligibility`, `TitleLifecycleEligibility`, ...). Each decides whether the transition is permitted and provides the relevant domain failure. They are not Laravel authorization policies: who may attempt an operation is decided at the route or component (`PromotionGate`), and what state allows it is decided here. Persistence components must not select validation methods from transition strings.
 
 ### Pipelines
 
@@ -147,7 +151,7 @@ The intended dependency direction is:
 ```text
 Controller or Livewire component
     -> typed Action
-        -> transition policy
+        -> eligibility class (reads through Services and Queries)
         -> shared lifecycle mechanic
         -> typed cascade collaborators
 
@@ -233,7 +237,7 @@ Retirement transitions use the same audit boundary for every retirable model. `R
 
 The former stable- and title-specific status-change tables are migrated into the shared transition log as legacy activity changes before those duplicate tables are removed. New lifecycle dimensions should extend the shared transition enum and recorder in focused changes while retaining their existing period models as authoritative state.
 
-Stable retirement and soft deletion eligibility are isolated in `StableRetirementEligibility` and `StableDeletionEligibility`. Deleted stables cannot enter retirement transitions, deletion requires the stable to be inactive and without current members, and restoration preserves historical state without implicitly reuniting members. Stable split and merge state and member-availability eligibility lives in `StableRestructuringEligibility`; their Actions own selection-specific invariants, membership mutations, activity closure, and transaction boundaries. `StableFormerMemberEligibility` owns the former-member rules shared by reunion and unretirement eligibility, keeping those business decisions outside the Eloquent model. `StableMembershipService::currentMembers()` maps the current wrestler and tag-team relationships into `StableMembershipData`, which owns the minimum weighted-headcount policy and value-level membership calculations. The former model validation concerns and unused `StableRetirementValidation` strategy have been removed.
+Stable retirement and soft deletion eligibility are isolated in `StableRetirementEligibility` and `StableDeletionEligibility`. Deleted stables cannot enter retirement transitions, deletion requires the stable to be inactive and without current members, and restoration preserves historical state without implicitly reuniting members. Stable split and merge state and member-availability eligibility lives in `StableRestructuringEligibility`; their Actions own selection-specific invariants, membership mutations, activity closure, and transaction boundaries. `StableFormerMemberEligibility` owns the former-member rules shared by reunion and unretirement eligibility, keeping those business decisions outside the Eloquent model. `StableMembershipService::currentMembers()` maps the current wrestler and tag-team relationships into `StableMembershipData`, which counts a wrestler as one and a tag team as two (`getTotalMemberCount()`); the minimum of three is `StableMembershipRequirements::MINIMUM_MEMBER_COUNT` in Lifecycle, so the Data object carries the count and Lifecycle owns the rule. The former model validation concerns and unused `StableRetirementValidation` strategy have been removed.
 
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 

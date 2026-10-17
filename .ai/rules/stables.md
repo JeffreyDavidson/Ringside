@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'app/{Actions/Stables/**,Lifecycle/Stable*Eligibility.php}'
+  - 'app/{Actions/Stables/**,Lifecycle/Roster/Stables/Stable*Eligibility.php}'
 ---
 
 # Stables

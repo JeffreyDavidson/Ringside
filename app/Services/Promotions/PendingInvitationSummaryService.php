@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Promotions;
 
 use App\Models\Promotions\PromotionInvitation;
+use App\Support\EmailAddress;
 use Illuminate\Support\Collection;
 
 /**
@@ -38,6 +39,6 @@ class PendingInvitationSummaryService
     /** The summary for a single email, or null when it has no pending invitations. */
     public function forEmail(string $email): ?string
     {
-        return $this->forEmails([$email])[PromotionInvitation::normalizeEmail($email)] ?? null;
+        return $this->forEmails([$email])[EmailAddress::normalize($email)] ?? null;
     }
 }

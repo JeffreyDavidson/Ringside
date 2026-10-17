@@ -3,7 +3,7 @@
         <x-stables.modal-error />
 
         @if ($this->candidates->isEmpty())
-            <p class="text-ringside-muted text-sm">{{ __('stables.modals.merge.no_candidates') }}</p>
+            <p class="text-muted-foreground text-sm">{{ __('stables.modals.merge.no_candidates') }}</p>
         @else
             <x-form.inputs.select
                 id="otherStableId"
@@ -14,7 +14,7 @@
                 required
             />
 
-            <p class="text-ringside-muted text-sm" data-test="merge-summary">
+            <p class="text-muted-foreground text-sm" data-test="merge-summary">
                 @if ($this->selectedStable)
                     {{ __('stables.modals.merge.summary', ['name' => $this->stable->name, 'other' => $this->selectedStable->name]) }}
                 @else

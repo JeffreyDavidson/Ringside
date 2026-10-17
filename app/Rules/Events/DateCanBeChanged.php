@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Rules\Events;
 
 use App\Exceptions\Events\CannotBeRescheduledException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Models\Events\Event;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -24,12 +27,16 @@ class DateCanBeChanged implements ValidationRule
             return;
         }
 
+        $date = $value === null ? null : PromotionTimeZoneService::parseEventLocalDate($this->event, $value);
         try {
             EventSchedulingEligibility::ensureDateCanChange(
                 $this->event,
-                $value === null ? null : $this->event->parseLocalDate($value),
+                $date,
             );
-        } catch (CannotBeRescheduledException $exception) {
+            if (EventSchedulingEligibility::isDateChanging($this->event, $date)) {
+                resolve(EventRosterSchedulingEligibility::class)->ensureAvailableAt($this->event, $date);
+            }
+        } catch (CannotBeRescheduledException|EntityNotAvailableException $exception) {
             $fail($exception->getMessage());
         }
     }

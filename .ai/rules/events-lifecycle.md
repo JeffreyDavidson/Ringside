@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'app/{Actions/Venues,Exceptions/Events,Lifecycle}/**'
+  - 'app/{Actions/Venues,Exceptions/Venues,Lifecycle}/**'
 ---
 
 # Events Lifecycle

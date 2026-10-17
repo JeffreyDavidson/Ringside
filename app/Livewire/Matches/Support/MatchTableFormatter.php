@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
+use App\Enums\Matches\MatchFinish;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;
@@ -44,6 +45,45 @@ final readonly class MatchTableFormatter
         $marker = $unbookable ? MatchCompetitorRouteResolver::unbookableMarker() : '';
 
         return '<a href="'.e(route('referees.show', $referee->id)).'">'.e($referee->full_name).'</a>'.$marker;
+    }
+
+    /** Safe retained-history labels even when a legacy competitor reference is missing or foreign. */
+    public function historyCompetitorLinks(EventMatch $match): string
+    {
+        return $match->competitors->toBase()
+            ->groupBy(fn (MatchCompetitor $entry): int => $entry->side->position)->sortKeys()
+            ->map(fn (Collection $entries): string => $entries
+                ->map(fn (MatchCompetitor $entry): string => $this->historyLink($entry, $match->event->promotion_id))
+                ->join(' & '))->join(' vs ');
+    }
+
+    public function historyResult(EventMatch $match): string
+    {
+        $rawFinish = $match->getRawOriginal('match_finish');
+        $finish = is_string($rawFinish) ? MatchFinish::tryFrom($rawFinish) : null;
+
+        if (! $match->getAttribute('history_recorded') || $finish === null) {
+            return e(__($match->getRawOriginal('match_finish') === null ? 'matches.history.result_missing' : 'matches.history.result_incomplete'));
+        }
+
+        if ($match->winningSide === null) {
+            return e($finish->label());
+        }
+
+        return $match->winningSide->competitors
+            ->map(fn (MatchCompetitor $entry): string => $this->historyLink($entry, $match->event->promotion_id))
+            ->join(' & ').' by '.e($finish->label());
+    }
+
+    private function historyLink(MatchCompetitor $entry, ?int $promotionId): string
+    {
+        $competitor = $entry->getRelation('competitor');
+
+        if ((! $competitor instanceof Wrestler && ! $competitor instanceof TagTeam) || $competitor->promotion_id !== $promotionId) {
+            return e(__('matches.history.record_unavailable'));
+        }
+
+        return $this->routeResolver->link($competitor).($competitor->trashed() ? ' ('.e(__('matches.history.deleted')).')' : '');
     }
 
     public function result(EventMatch $match): string

@@ -10,14 +10,15 @@ use App\Actions\Events\SaveTalentBookingAction;
 use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Exceptions\Events\TalentBookingException;
+use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\TalentBookingContextQuery;
-use App\ViewModels\TalentBookingsViewModel;
+use App\Services\Events\TalentBookingFingerprintService;
+use App\ViewModels\Events\TalentBookingsViewModel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
@@ -27,7 +28,7 @@ test('confirmation stores one individual agreement and durable private history',
     actingAs(administrator());
     $event = Event::factory()->create(['date' => now()->addDay()]);
     $person = Wrestler::factory()->bookable()->create();
-    $fingerprint = resolve(TalentBookingContextQuery::class)->fingerprint($event, "wrestler:{$person->id}");
+    $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}");
 
     // Act
     $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $fingerprint,
@@ -47,15 +48,15 @@ test('stale first creation and opposite transitions never overwrite or duplicate
     actingAs(administrator());
     $event = Event::factory()->create(['date' => now()->addDay()]);
     $person = Wrestler::factory()->bookable()->create();
-    $fingerprint = resolve(TalentBookingContextQuery::class)->fingerprint($event, "wrestler:{$person->id}");
+    $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}");
     $action = resolve(SaveTalentBookingAction::class);
     $data = new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true);
     $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data);
 
     // Act / Assert
-    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data))->toThrow(TalentBookingException::class);
+    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data))->toThrow(RecordChangedException::class);
     expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled')))->toThrow(TalentBookingException::class)
+        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled')))->toThrow(RecordChangedException::class)
         ->and(EventTalentBooking::query()->sole()->status)->toBe(TalentBookingStatus::Confirmed)
         ->and(EventTalentBookingRevision::query()->count())->toBe(1);
 });
@@ -130,12 +131,12 @@ test('an unchanged save adds no revision and requires no invented contact step',
 test('a changed event refuses a stale reconfirmation without overwriting it', function (): void {
     // Arrange
     $fixture = talentBookingFixture();
-    $fingerprint = resolve(TalentBookingContextQuery::class)->fingerprint($fixture['event'], "wrestler:{$fixture['person']->id}");
+    $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($fixture['event'], "wrestler:{$fixture['person']->id}");
     $fixture['event']->update(['date' => now()->addDays(2)]);
 
     // Act / Assert
     expect(fn () => resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'wrestler', $fixture['person']->id, 1, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true)))->toThrow(TalentBookingException::class);
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true)))->toThrow(RecordChangedException::class);
     expect($fixture['booking']->refresh()->version)->toBe(1);
 });
 
@@ -201,7 +202,7 @@ test('a referee agreement remains distinct from a wrestler with the same numeric
     // Arrange
     $fixture = talentBookingFixture();
     $referee = Referee::factory()->bookable()->create();
-    $context = resolve(TalentBookingContextQuery::class);
+    $context = resolve(TalentBookingFingerprintService::class);
 
     // Act
     $booking = resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'referee', $referee->id, 0,

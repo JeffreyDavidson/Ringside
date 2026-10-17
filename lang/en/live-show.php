@@ -32,7 +32,7 @@ return [
     'review' => 'Review show changes', 'review_intro' => 'Started, finished and skipped items keep their records. The following order replaces pending items only; existing attendance is retained.',
     'adopt' => 'Adopt reviewed pending order', 'removed' => 'Removed pending items — give a skip reason for each',
     'revision' => 'Pack revision', 'no_revision' => 'No revision label', 'timezone' => 'Actual timing timezone',
-    'roster' => 'Roster checklist', 'roster_help' => 'Assigned wrestlers and referees only; includes current tag-team members. Extra crew are on the print backup.',
+    'roster' => 'Roster checklist', 'roster_help' => 'Assigned wrestlers and referees, including current tag-team members.',
     'all' => 'All people', 'not_arrived' => 'Not arrived', 'not_briefed' => 'Not briefed', 'filter' => 'Roster filter',
     'arrived_count' => ':count / :total arrived', 'briefed_count' => ':count / :total briefed',
     'arrived' => 'Mark arrived', 'briefed' => 'Mark briefed', 'clear_arrival' => 'Clear arrival', 'clear_briefing' => 'Clear briefing',
@@ -51,6 +51,5 @@ return [
     'empty_filter' => 'No people match this filter.',
     'title' => 'Live show', 'prepare' => 'Prepare live show',
     'prepare_required' => 'Save and review an event pack with a scheduled event and a valid running order before preparing the live show.',
-    'conflict' => 'This show changed on another screen. Refresh to see what was saved before trying again.',
     'old_event' => 'Live shows can be prepared for today or a future event. Past shows cannot start a new live record.',
 ];

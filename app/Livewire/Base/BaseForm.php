@@ -6,6 +6,7 @@ namespace App\Livewire\Base;
 
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use App\Support\ModelKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -84,6 +85,8 @@ abstract class BaseForm extends Form
             return $this->modelPromotionId;
         }
 
+        // A form object has a single boot() hook whose signature subclasses already vary (stables, matches), so a base
+        // class cannot inject this collaborator without breaking them; resolve it here, at the one point it is read.
         $context = app(PromotionContextService::class);
 
         return $context->isEnforced() ? $context->current()?->id : null;
@@ -95,13 +98,13 @@ abstract class BaseForm extends Form
      */
     protected function parseLocalDate(string $value): Carbon
     {
-        return Promotion::parseLocalTime($this->formPromotion(), $value);
+        return PromotionTimeZoneService::parseLocalTime($this->formPromotion(), $value);
     }
 
     /** Show a stored instant back as its day in the form promotion's time zone, the way the date field expects it. */
     protected function localDateString(?Carbon $date): ?string
     {
-        return $date instanceof Carbon ? Promotion::toLocalTime($this->formPromotion(), $date)->toDateString() : null;
+        return $date instanceof Carbon ? PromotionTimeZoneService::toLocalTime($this->formPromotion(), $date)->toDateString() : null;
     }
 
     private function formPromotion(): ?Promotion

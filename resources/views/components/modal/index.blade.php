@@ -4,7 +4,7 @@
 
 <div {{
     $attributes->class([
-        'relative mx-auto flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden border border-ringside-line bg-ringside-surface-panel text-ringside-ink shadow-2xl outline-none',
+        'relative mx-auto flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden border border-border bg-surface-panel text-foreground shadow-2xl outline-none',
         'max-w-[400px]' => $size === 'sm',
         'max-w-[800px]' => $size === null || $size === '',
         'max-w-[1100px]' => $size === 'lg',

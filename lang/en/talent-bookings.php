@@ -24,7 +24,6 @@ return [
     'warnings' => ['unavailable' => 'Confirmed — unavailable', 'reconfirmation' => 'Reconfirmation needed', 'removed' => 'Removed from card — review',
         'cancelled_card' => 'On card — cancelled', 'venue_unset' => 'Venue not set', 'venue_deleted' => 'Venue unavailable', 'not_tracked' => 'On card — not tracked'],
     'errors' => ['person' => 'Choose a wrestler or referee from this event’s promotion.',
-        'stale' => 'This booking or its event details changed. Your input is still here. Close and reopen the booking to review the latest details before saving.',
         'reopen' => 'Reopen a cancelled booking as Proposed before recording a new agreement.',
         'reason' => 'Add a reason for this cancellation or correction.', 'confirm' => 'Schedule the event and explicitly record the person’s agreement before confirming.',
         'fee' => 'Enter a non-negative USD amount, up to 99999999.99, with at most two decimal places.'],

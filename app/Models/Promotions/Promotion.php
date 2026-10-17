@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Date;
 
 /**
  * @property int $id
@@ -31,31 +29,6 @@ class Promotion extends Model
 {
     /** @use HasFactory<PromotionFactory> */
     use HasFactory;
-
-    /** Show a stored (UTC) instant as wall-clock time in the promotion's time zone; no promotion means the application time zone. */
-    public static function toLocalTime(?self $promotion, Carbon $date): Carbon
-    {
-        return $date->copy()->setTimezone(self::zoneOf($promotion));
-    }
-
-    /** Read a wall-clock time entered in the promotion's time zone (a datetime-local value) as the UTC instant to store. */
-    public static function parseLocalTime(?self $promotion, string $value): Carbon
-    {
-        return Date::parse($value, self::zoneOf($promotion))->utc();
-    }
-
-    /** Whether a wall-clock time exists in the promotion's zone; the hour skipped when clocks move forward does not. */
-    public static function localTimeExists(?self $promotion, string $value): bool
-    {
-        $format = 'Y-m-d H:i:s';
-
-        return Date::parse($value, self::zoneOf($promotion))->format($format) === Date::parse($value, 'UTC')->format($format);
-    }
-
-    public static function zoneOf(?self $promotion): string
-    {
-        return $promotion instanceof self ? $promotion->timezone : config()->string('app.timezone');
-    }
 
     /** @return BelongsToMany<User, $this, PromotionMembership> */
     public function users(): BelongsToMany

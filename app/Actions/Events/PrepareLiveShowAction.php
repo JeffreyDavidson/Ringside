@@ -6,37 +6,36 @@ namespace App\Actions\Events;
 
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Models\Promotions\Promotion;
-use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class PrepareLiveShowAction
 {
-    public function __construct(private readonly LiveShowSourceQuery $source) {}
+    public function __construct(private readonly LiveShowSourceRequirements $source) {}
 
     public function handle(Event $event, int $version, int $packVersion, string $fingerprint): EventLiveRun
     {
         return DB::transaction(function () use ($event, $version, $packVersion, $fingerprint): EventLiveRun {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('update', $event);
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
-            $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->first();
             if ($run !== null || $version !== 0) {
-                throw LiveShowException::because('conflict');
+                throw RecordChangedException::changed();
             }
-            $source = $this->source->get($event);
+            $source = $this->source->ensureSource($event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
-                throw LiveShowException::because('conflict');
+                throw RecordChangedException::changed();
             }
-            if (Promotion::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(Promotion::toLocalTime($event->promotion, now())->startOfDay())) {
-                throw LiveShowException::because('old_event');
+            if (PromotionTimeZoneService::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(PromotionTimeZoneService::toLocalTime($event->promotion, now())->startOfDay())) {
+                throw LiveShowException::oldEvent();
             }
             $run = new EventLiveRun;
             $run->event_id = $event->id;

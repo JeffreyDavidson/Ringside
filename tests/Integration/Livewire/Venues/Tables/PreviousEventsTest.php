@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Enums\Promotions\MembershipRole;
+use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Users\UserStatus;
 use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 beforeEach(function (): void {
@@ -116,5 +121,31 @@ describe('PreviousEvents rendering', function (): void {
             ->assertSee('Winter Warfare')
             ->assertDontSee('Summer Elsewhere')
             ->assertDontSee('Summer Deleted');
+    });
+});
+
+describe('venue event history', function (): void {
+    it('lists only the events of the active promotion for an administrator with a membership', function (): void {
+        // Arrange
+        $world = createIsolatedPromotions();
+        $admin = User::factory()->administrator()->create(['status' => UserStatus::Active]);
+        $world['attacker']->users()->attach($admin, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
+        $venue = Venue::factory()->create();
+        Event::factory()->for($world['attacker'], 'promotion')->scheduled()->create(['name' => 'AttackerEvent', 'venue_id' => $venue->id]);
+        Event::factory()->for($world['victim'], 'promotion')->scheduled()->create(['name' => 'VictimEventAtVenue', 'venue_id' => $venue->id]);
+        actingAs($admin);
+        $page = get(route('venues.show', $venue))->assertOk();
+
+        // Act
+        $response = postLivewireUpdate(
+            snapshotOf((string) $page->getContent(), 'venues.tables.previous-events'),
+            [['method' => '$refresh']],
+        );
+
+        // Assert
+        $response->assertOk();
+        expect($response->json('components.0.effects.html'))
+            ->toContain('AttackerEvent')
+            ->not->toContain('VictimEventAtVenue');
     });
 });

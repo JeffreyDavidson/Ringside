@@ -39,3 +39,6 @@ logs/
 .phpstorm.meta.php
 _ide_helper.php
 _ide_helper_models.php
+
+# Pest Browser captures
+tests/Browser/Screenshots/

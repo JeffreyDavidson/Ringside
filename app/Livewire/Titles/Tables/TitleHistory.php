@@ -6,7 +6,7 @@ namespace App\Livewire\Titles\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
@@ -14,7 +14,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Queries\Titles\TitleChampionshipQuery;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
@@ -22,7 +22,10 @@ use Livewire\Attributes\Locked;
 class TitleHistory extends DataTableComponent
 {
     use ShowTableTrait;
-    use UsesRosterRouteResolver;
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    protected TitleReignService $titleReignService;
 
     protected string $databaseTableName = 'titles_championships';
 
@@ -34,6 +37,12 @@ class TitleHistory extends DataTableComponent
      */
     #[Locked]
     public ?int $titleId = null;
+
+    public function boot(RosterResourceRouteResolver $routeResolver, TitleReignService $titleReignService): void
+    {
+        $this->routeResolver = $routeResolver;
+        $this->titleReignService = $titleReignService;
+    }
 
     protected function configure(): void
     {
@@ -75,7 +84,7 @@ class TitleHistory extends DataTableComponent
             Column::make(__('championships.dates_held'))
                 ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
             Column::make(__('championships.days_held'))
-                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
+                ->label(fn (TitleChampionship $row): int => $this->titleReignService->lengthInDays($row)),
         ];
     }
 

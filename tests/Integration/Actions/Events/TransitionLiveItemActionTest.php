@@ -6,8 +6,10 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\TransitionLiveItemAction;
+use App\Data\Events\EventPackData;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
+use App\Exceptions\RecordChangedException;
 use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Laravel\travel;
@@ -21,7 +23,7 @@ test('repeated starts and unknown keys preserve the committed actual start and a
     $audits = Activity::query()->where('log_name', 'live-show')->count();
 
     // Act / Assert
-    expect(fn () => $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start))->toThrow(LiveShowException::class);
+    expect(fn () => $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start))->toThrow(RecordChangedException::class);
     expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Start))->toThrow(LiveShowException::class)
         ->and(fn () => $action->handle($fixture['event'], 2, 'segment:foreign', LiveItemOperation::Finish))->toThrow(LiveShowException::class)
         ->and($fixture['run']->refresh()->content)->toBe($before)
@@ -102,7 +104,7 @@ test('a changed pack blocks the next start but does not block finishing the curr
     $action = resolve(TransitionLiveItemAction::class);
     $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
     $pack = $fixture['event']->pack()->firstOrFail();
-    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, [...$pack->content, 'notes' => 'Changed'], false);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Changed']), false);
 
     // Act
     $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);

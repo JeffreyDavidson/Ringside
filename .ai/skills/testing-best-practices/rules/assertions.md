@@ -1,0 +1,126 @@
+# Assertions
+
+## Arrange, Act, Assert
+
+Write each behavior test around one named behavior. Use explicit `// Arrange`, `// Act`, and `// Assert` comments, with a blank line between phases. Put fixture/context preparation in Arrange, the target operation in Act, and response/state/effect checks in Assert. Apply this to new and materially rewritten tests; nearby unlabelled legacy tests do not waive the requirement. Do not invent empty phases for a declaration-only architecture rule or a single literal-value expectation.
+
+Group Arrange statements by meaning: target records and relationships, contrast/foreign fixtures, actor and authentication context, relevant fakes, and payload or baseline preparation. Use a blank line when the subject changes. Keep dependent records together and preserve creation order; do not insert a blank line after every statement or impose one universal setup order.
+
+Prepare payloads and prerequisite lookups before Act. For an HTTP test, assign the target response to `$response`, with assertions in Assert. Prefer one response chain with each assertion on its own line, then separate state/authentication/event assertions with a blank line; explicit project formatting rules take precedence. Do not make requests inside assertion callbacks.
+
+Use Pest Laravel's function helpers for requests, authentication, time travel and framework assertions when the installed plugin provides them. Do not replace `$this->travelTo()` with `test()->travelTo()` when `travelTo()` is available. Use the underlying test instance only for an API without a suitable helper, or for project-owned test state.
+
+Put each chained method call on its own line, including factory and test-double configuration. Prepare a complex return payload separately when that makes the double easier to read. A stub/interaction expectation configured in Arrange is legitimate setup, not a reason to mix the target request with assertions. Keep prerequisites and post-action reads visible; do not bury mutations or deep query/refresh chains inside `expect()` arguments.
+
+Separate independent save, reopen, delete, restore or publication behaviors that repeat Arrange/Act/Assert cycles. Do not conceal those cycles in a helper. Read fixture helpers: a method named as setup may issue requests and assertions.
+
+Retain a sequence only when the named defect needs it, such as replaying a submission, challenging a stale form after an earlier save, or comparing query counts before and after growth. Make the baseline or first operation visible as setup and the challenged operation the target; explain why the sequence is necessary. Do not create tests that depend on another test's state. A long test named 'workflow' is not an exemption.
+
+Several assertions about one response, saved record and dispatched event are one contract, not several test scenarios. Split changes in scenario or target behavior, not complementary outcome assertions.
+
+A type/null guard is usually a prerequisite assertion, not a new business case. Prefer a suitable runtime assertion with supported static type narrowing over a hand-written exception. Loops that build fixtures or check one uniform collection are not automatically mixed scenarios.
+
+Keep each test self-contained. Do not use values created by another test.
+
+## How to Find the Correct Assertion
+
+First identify the subject of the check, then find an assertion designed for it. A subject-specific assertion identifies the incorrect value when the test fails.
+
+1. Search Laravel's assertions for framework subjects such as responses, the database, sessions, models, queues, events, mail, and notifications.
+2. Fetch `https://pestphp.com/docs/expectations.md` for the expectations of Pest for a plain value, a type, a format, or a shape.
+3. Build the check by hand only if no assertion exists for the subject.
+4. Confirm the name in the documentation before you use it. Do not write an assertion that you did not confirm.
+
+Use the assertion in this table for each subject.
+
+| Subject | Assertion to use |
+| --- | --- |
+| A return value, the state of an object, or a transformation of a value | an `expect()` chain |
+| An HTTP status, JSON, a session, or Inertia | a Laravel response assertion |
+| The state in the database | a Laravel database assertion |
+| The existence of a model | `assertModelExists($model)` rather than `assertDatabaseHas('users', ['id' => $user->id])` |
+
+In Pest suites, prefer the appropriate Laravel assertion or Pest expectation. In PHPUnit suites, use Laravel and PHPUnit assertions directly; do not migrate the suite to Pest just to match an example.
+
+Assert each meaningful fact once. Content and status are different facts: `assertSee()` checks response content and does not establish a successful status. Keep the appropriate named status assertion alongside content, view or payload assertions.
+
+## Named Response Assertions
+
+Use a named response assertion, such as `assertNotFound()`, rather than `assertStatus(404)`. A failure then identifies the broken contract. Laravel provides named assertions for commonly tested status codes.
+
+Chain related assertions about one outcome with `->and()`. Different values can belong in the same chain, such as a saved record's title, status and publication date. Start a separate chain when the assertions concern a different outcome or the chain becomes difficult to follow. Multiple subjects alone are not a style violation; judge their relationship to the named behavior. Keep multiple HTTP assertions on the same response in one fluent chain.
+
+Preserve the project's configured Rector expectation-chaining behavior. Do not switch to PHPUnit assertions, add filler comments or change tooling solely to evade that behavior. Split independently testable scenarios when a chain joins unrelated outcomes; complementary response, state and effect facts can still protect one coherent contract.
+
+```php
+// Assert
+$response
+    ->assertOk()
+    ->assertSeeText('Profile');
+
+expect($card->textContent)->toContain('Reader')
+    ->and($cardHeadings->length)
+    ->toBe(0);
+```
+
+## Format Expectations
+
+Use Pest's format expectations rather than regular expressions because they provide clearer failure messages. Pest covers email addresses, URLs, UUIDs, IP addresses, and other common formats, and each expectation supports `not` for the negative case.
+
+## Assert a Known Value
+
+Write the expected value in the test, or calculate the expected value by a different method. Do not calculate the expected value with the logic of the implementation, because the test then passes when that logic is wrong.
+
+```php
+// The test calculates the value with the logic of the implementation...
+$expected = now()->subHours(24)->floorSeconds(30)->toJson();
+expect($from)->toBe($expected);
+
+// The test sets a fixed input and asserts a known value...
+travelTo('2025-01-01 00:00:00');
+expect($from)->toBe('2024-12-31T00:00:00.000000Z');
+```
+
+## Assert the Complete Result
+
+A status code is not the complete result of a write operation. Assert each of the following if the operation changes it:
+
+- The response or the return value.
+- The state in the database.
+- The jobs and the events that the operation dispatches.
+- The notifications and the mail that the operation sends.
+
+On the failure path, assert that the operation makes none of these changes. A test that asserts only `assertOk()` passes even when the application saves no record.
+
+## Database-Portable JSON Assertions
+
+Inspect the cast, storage type and configured database engines. JSON object member order is generally not an application contract; MySQL can reorder object keys when storing JSON ([MySQL JSON documentation](https://dev.mysql.com/doc/refman/8.0/en/json.html)). Persist and reload before asserting a storage round trip. Do not use strict whole-array identity merely to require PHP insertion order after JSON object storage, or weaken meaningful values/types to avoid a database failure.
+
+For Pest, `toEqual()` compares object-shaped associative arrays without requiring key insertion order but also allows loose scalar equality. Pair it with strict checks for contractual identities, booleans, numeric/zero-string distinctions and other relevant types. PHPUnit suites use the equivalent equality and strict assertions. Example assertion phase after a payload has been saved and reloaded:
+
+```php
+// Assert
+expect($storedPayload)
+    ->toEqual([
+        'enabled' => false,
+        'label' => '0',
+        'items' => [
+            ['item_id' => 42, 'minutes' => 5],
+            ['item_id' => 7, 'minutes' => null],
+        ],
+    ])
+    ->and($storedPayload['enabled'])
+    ->toBeFalse()
+    ->and($storedPayload['label'])
+    ->toBe('0')
+    ->and(array_column($storedPayload['items'], 'item_id'))
+    ->toBe([42, 7])
+    ->and($storedPayload['items'][0]['minutes'])
+    ->toBe(5)
+    ->and($storedPayload['items'][1]['minutes'])
+    ->toBeNull();
+```
+
+Keep list positions and duplicates when they carry meaning. Do not apply `toEqualCanonicalizing()`, recursive sorting or JSON string comparison indiscriminately to a payload containing ordered lists. Canonicalization remains appropriate for an actually unordered collection; sorting only object keys while preserving lists and scalar types is another option when an existing project helper provides it. Check the installed comparator's semantics and run required native-database gates; a SQLite-only pass is not cross-engine proof.
+
+For redirected validation failures, read [FormRequest old-input contracts](form-requests.md#refusals-and-old-input), including nullable values and sensitive-field exclusions.

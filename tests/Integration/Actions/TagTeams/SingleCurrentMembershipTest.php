@@ -34,7 +34,7 @@ test('creating a tag team rejects a wrestler who is on another current tag team'
     // Assert
     expect($create)->toThrow(
         CannotBeEstablishedException::class,
-        "Wrestler '{$sharedWrestler->name}' is already a member of TagTeam '{$existingTagTeam->name}'",
+        "{$sharedWrestler->name} is already a member of {$existingTagTeam->name} and cannot join another tag team.",
     )
         ->and(TagTeam::query()->count())->toBe($tagTeamCount)
         ->and(TagTeamWrestler::query()->current()->where('wrestler_id', $sharedWrestler->id)->count())->toBe(1)
@@ -80,7 +80,7 @@ test('a wrestler on a soft-deleted tag team with a current membership is rejecte
     $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Duplicate Team', $sharedWrestler, Wrestler::factory()->create()));
 
     // Assert
-    expect($create)->toThrow(CannotBeEstablishedException::class, "TagTeam '{$existingTagTeam->name}'");
+    expect($create)->toThrow(CannotBeEstablishedException::class, "is already a member of {$existingTagTeam->name} and cannot join another tag team.");
 });
 
 test('updating a tag team rejects adding a wrestler who is on another current tag team', function () {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums\Shared;
 
-use App\Support\Enums\ProvidesFilterOptions;
+use App\Enums\Concerns\ProvidesFilterOptions;
 
 /**
  * Employment status enum for entities that can be employed.
@@ -25,12 +25,6 @@ enum EmploymentStatus: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Employed => 'Employed',
-            self::FutureEmployment => 'Awaiting Employment',
-            self::Released => 'Released',
-            self::Retired => 'Retired',
-            self::Unemployed => 'Unemployed',
-        };
+        return __("employments.status.{$this->value}");
     }
 }
