@@ -27,11 +27,14 @@ class Wrestler extends Model
         'weight',
     ];
 
-    protected $casts = [
-        'height' => HeightValueObject::class,
-        'weight' => 'integer',
-        'started_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'height' => Height::class,
+            'weight' => 'integer',
+            'started_at' => 'datetime',
+        ];
+    }
 
     public function currentEmployment(): HasOne
     {
