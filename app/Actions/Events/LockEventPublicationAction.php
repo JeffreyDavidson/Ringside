@@ -11,13 +11,13 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
 use App\Models\Scopes\PromotionContextScope;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Support\Str;
 
-/** @phpstan-import-type Source from PublicEventSourceQuery */
+/** @phpstan-import-type Source from PublicEventSourceService */
 class LockEventPublicationAction
 {
-    public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceQuery $source) {}
+    public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceService $source) {}
 
     /** Must run inside the caller's transaction; the event lock also serializes first-draft creation.
      * @return array{event: Event, publication: EventPublication, source: Source}

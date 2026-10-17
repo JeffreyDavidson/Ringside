@@ -10,7 +10,8 @@ use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\EventPublication;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventCardService;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use JMac\Testing\Double;
@@ -22,7 +23,7 @@ test('stale copies and opposing publication operations cannot overwrite a newer 
     $event = $world['event'];
     $publication = savePublicDraft($event);
     $stale = $publication->version;
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     releasePublicPage($event);
 
     $call = match ($operation) {
@@ -73,7 +74,7 @@ test('results reject future events and unannounced or unrecorded matches', funct
         releasePublicPage($event);
     }
     $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     expect(fn () => app(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Results))->toThrow(EventPublicationException::class)
         ->and(freshModel($publication)->results_published_at)->toBeNull();
@@ -113,7 +114,7 @@ test('card release refuses missing schedule assets and removed announced competi
     if ($condition === 'poster') {
         Storage::disk('local')->delete('event-posters/'.publicPosterKey($publication));
     }
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     // Act / Assert
     expect(fn () => app(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Card))
@@ -127,8 +128,8 @@ test('an incomplete result projection fails closed before a snapshot is saved', 
     $event = $world['event'];
     savePublicDraft($event);
     $publication = releasePublicPage($event);
-    $source = app(PublicEventSourceQuery::class)->get($event);
-    $query = Double::for(PublicEventSourceQuery::class);
+    $source = app(PublicEventSourceService::class)->get($event);
+    $query = Double::for(PublicEventCardService::class);
     $query->expects('cardFingerprint')->returns($publication->card_fingerprint);
     $query->expects('resultSource')->returns([]);
     $action = new ReleaseEventPublicationAction(app(LockEventPublicationAction::class), $query);

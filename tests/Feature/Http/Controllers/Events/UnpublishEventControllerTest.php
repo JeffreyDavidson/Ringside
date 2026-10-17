@@ -7,7 +7,7 @@ use App\Enums\Events\PublicSection;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\EventPublication;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 
 use function Pest\Laravel\delete;
 use function Pest\Laravel\from;
@@ -24,10 +24,10 @@ test('an authorized unpublish request updates the release and returns to its edi
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $publication->version,
@@ -64,11 +64,11 @@ test('a stale unpublish request preserves the newer release and submitted input'
             'results' => [$fixture['match']->id],
         ]]);
     $staleVersion = $publication->version;
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $released = $publication;
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $staleVersion,
@@ -102,7 +102,7 @@ test('unpublishing results preserves the separately released card', function ():
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -142,12 +142,12 @@ test('guest cannot unpublish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -176,12 +176,12 @@ test('member cannot unpublish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -212,12 +212,12 @@ test('outsider cannot unpublish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -256,11 +256,11 @@ test('invalid unpublish controls preserve the released card', function (string $
         ],
     ];
     $publication->save();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $original = $publication->getRawOriginal();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $publication->version,

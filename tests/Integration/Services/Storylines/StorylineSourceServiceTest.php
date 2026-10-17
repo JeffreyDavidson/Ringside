@@ -12,11 +12,18 @@ use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\Queries\Storylines\StorylineSourceQuery;
+use App\Services\Storylines\StorylineSourceService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
 require_once __DIR__.'/../../../Fixtures/storylines.php';
+
+/** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
+function storylineEvidence(SourceData $source, int $promotionId): array
+{
+    return resolve(StorylineSourceService::class)->get($source, $promotionId) ?? throw new LogicException('Expected the source to exist');
+}
+
 test('stable match and segment identities show source evidence without treating it as a creative outcome', function (string $kind) {
     // Arrange
     $f = storylineSourceFixture();
@@ -29,14 +36,14 @@ test('stable match and segment identities show source evidence without treating 
     $f['run']->content = $content;
     $f['run']->save();
     // Act
-    $evidence = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
+    $evidence = storylineEvidence($source, $f['story']->promotion_id);
     // Assert
     expect($evidence['context']['live_state'])->toBe('finished')->and($step->refresh()->status)->toBe(StepStatus::Planned);
 })->with(['match', 'segment']);
 test('removed segment UUIDs never attach to a replacement with the same label', function () {
     $f = storylineSourceFixture();
     $source = new SourceData($f['event']->id, segmentId: $f['segment']);
-    $old = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
+    $old = storylineEvidence($source, $f['story']->promotion_id);
     $pack = $f['event']->pack()->firstOrFail();
     $content = $pack->content;
     foreach ($content['segments'] as &$segment) {
@@ -45,7 +52,7 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
     unset($segment);
     $pack->content = $content;
     $pack->save();
-    $evidence = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
+    $evidence = storylineEvidence($source, $f['story']->promotion_id);
     expect($evidence['warnings'])->toContain(__('storylines.removed_segment'))
         ->and($evidence['context']['segment_label'])->toBeNull()
         ->and($evidence['context']['live_label'])->toBe('Closing promo')
@@ -54,10 +61,10 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
 test('deleted and unplaced sources are visible as historical evidence', function () {
     $f = storylineSourceFixture();
     $f['match']->delete();
-    $segment = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id, segmentId: $f['segment']), $f['story']->promotion_id);
-    $match = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
+    $segment = storylineEvidence(new SourceData($f['event']->id, segmentId: $f['segment']), $f['story']->promotion_id);
+    $match = storylineEvidence(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
     $f['event']->delete();
-    $event = resolve(StorylineSourceQuery::class)->get(new SourceData($f['event']->id), $f['story']->promotion_id);
+    $event = storylineEvidence(new SourceData($f['event']->id), $f['story']->promotion_id);
     expect($segment['warnings'])->toContain(__('storylines.unplaced_segment'))
         ->and($match['warnings'])->toContain(__('storylines.deleted_source'))
         ->and($event['warnings'])->toContain(__('storylines.deleted_source'));
@@ -73,7 +80,7 @@ test('foreign events and foreign match IDs are refused with no new step', functi
 test('a source changed since selection rejects a save before any storyline write', function () {
     $f = storylineSourceFixture();
     $source = new SourceData($f['event']->id);
-    $fingerprint = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id)['fingerprint'];
+    $fingerprint = storylineEvidence($source, $f['story']->promotion_id)['fingerprint'];
     $f['event']->name = 'Updated source';
     $f['event']->save();
     expect(fn () => plannedStorylineStep($f['story'], new SourceData($f['event']->id, fingerprint: $fingerprint)))->toThrow(StorylineConflictException::class)
@@ -115,8 +122,62 @@ test('correcting only the winning side still changes the linked result evidence'
     $sides = $f['match']->sides()->orderBy('position')->get();
     resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, $sides->firstOrFail(), collect()));
     $source = new SourceData($f['event']->id, $f['match']->id);
-    $before = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
+    $before = storylineEvidence($source, $f['story']->promotion_id);
     resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, requiredModel($sides->last()), collect()));
-    $after = resolve(StorylineSourceQuery::class)->get($source, $f['story']->promotion_id);
+    $after = storylineEvidence($source, $f['story']->promotion_id);
     expect($after['fingerprint'])->not->toBe($before['fingerprint']);
+});
+
+test('a source without an event fingerprints only its target date', function () {
+    // Act
+    $dated = storylineEvidence(new SourceData(null, targetOn: '2026-10-20'), 1);
+    $undated = storylineEvidence(new SourceData, 1);
+
+    // Assert
+    expect($dated)->toBe(['context' => [], 'fingerprint' => hash('sha256', '2026-10-20'), 'warnings' => []])
+        ->and($undated['fingerprint'])->toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+});
+
+test('an event source fingerprints exactly the context it reports', function () {
+    // Arrange
+    $f = storylineSourceFixture();
+    $event = $f['event'];
+
+    // Act
+    $evidence = storylineEvidence(new SourceData($event->id), $f['story']->promotion_id);
+
+    // Assert
+    $context = ['event_id' => $event->id, 'event_name' => 'Harbor Show', 'event_date' => $event->date?->toIso8601String(), 'event_deleted' => false,
+        'event_timezone' => 'UTC', 'live_state' => null, 'live_label' => null];
+    expect($evidence['context'])->toEqual($context)
+        ->and($evidence['fingerprint'])->toBe(hash('sha256', json_encode($context, JSON_THROW_ON_ERROR)))
+        ->and($evidence['warnings'])->toBeEmpty();
+});
+
+test('a source that names an event or match the promotion does not have yields nothing', function (string $kind) {
+    // Arrange
+    $f = storylineSourceFixture();
+    $foreign = Event::factory()->for(Promotion::factory())->create();
+    $other = EventMatch::factory()->for($foreign)->create();
+    $source = $kind === 'event' ? new SourceData($foreign->id) : new SourceData($f['event']->id, $other->id);
+
+    // Act
+    $evidence = resolve(StorylineSourceService::class)->get($source, $f['story']->promotion_id);
+
+    // Assert
+    expect($evidence)->toBeNull();
+})->with(['event', 'match']);
+
+test('a loaded event and match are used without reading them again', function () {
+    // Arrange
+    $f = storylineSourceFixture();
+    $event = Event::query()->with(['promotion', 'pack', 'liveRun', 'matches'])->findOrFail($f['event']->id);
+    $match = EventMatch::query()->with(['competitors', 'titles'])->findOrFail($f['match']->id);
+    $service = resolve(StorylineSourceService::class);
+
+    // Act
+    $statements = recordStatements(fn () => $service->get(new SourceData($event->id, $match->id, null), $f['story']->promotion_id, $event, $match));
+
+    // Assert
+    expect($statements)->toBeEmpty();
 });

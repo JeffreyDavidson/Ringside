@@ -29,6 +29,12 @@ class TitleBuilder extends Builder
     use LoadsFirstActivityPeriod;
     use ProjectsActivityStatus;
 
+    /** Loads each title's current champion (a wrestler or a tag team) so a list reads it from the row without a query per title. */
+    public function withCurrentChampion(): static
+    {
+        return $this->with('currentChampionship.champion');
+    }
+
     public function whereType(TitleType $type): static
     {
         return $this->where('type', $type->value);

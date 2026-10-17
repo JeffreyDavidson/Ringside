@@ -46,6 +46,13 @@ class Main extends BaseTable
             ->oldest('id');
     }
 
+    protected PendingInvitationSummaryService $pendingInvitations;
+
+    public function boot(PendingInvitationSummaryService $pendingInvitations): void
+    {
+        $this->pendingInvitations = $pendingInvitations;
+    }
+
     /** @var array<string, string> Pending invitation summaries by normalized email, for the unverified users on this page. */
     protected array $pendingInvitationSummaries = [];
 
@@ -53,7 +60,7 @@ class Main extends BaseTable
     #[\Override]
     protected function projectRowState(Collection $rows): void
     {
-        $this->pendingInvitationSummaries = resolve(PendingInvitationSummaryService::class)->forEmails(
+        $this->pendingInvitationSummaries = $this->pendingInvitations->forEmails(
             $rows->where('status', UserStatus::Unverified)->map(fn (User $user): string => $user->email)->all(),
         );
     }

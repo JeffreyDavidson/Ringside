@@ -15,7 +15,7 @@ use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 
 use function Pest\Laravel\from;
 use function Pest\Laravel\get;
@@ -85,7 +85,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         $event->update(['name' => 'Changed private event name']);
@@ -116,7 +116,7 @@ describe('edit', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -147,7 +147,7 @@ describe('edit', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -180,7 +180,7 @@ describe('edit', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -212,7 +212,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'summary' => 'New draft words']));
@@ -241,7 +241,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -271,7 +271,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -301,7 +301,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -331,7 +331,7 @@ describe('edit', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         $before = $publication->getAttributes();
@@ -399,7 +399,7 @@ describe('show', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -430,7 +430,7 @@ describe('show', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -463,7 +463,7 @@ describe('show', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -495,7 +495,7 @@ describe('show', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         $before = $publication->getAttributes();
@@ -556,7 +556,7 @@ describe('show', function (): void {
                 'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
                 'results' => [$fixture['match']->id],
             ]]);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
         $publication->refresh();
         app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -587,7 +587,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -634,7 +634,7 @@ describe('update', function (): void {
             ->refresh();
         $foreignMatch = EventMatch::factory()
             ->create();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -662,7 +662,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -688,7 +688,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'version' => 0,
@@ -715,7 +715,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'doors_at' => $local, 'doors_offset' => $offset];
 
         // Act
@@ -734,7 +734,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'doors_at' => $local, 'doors_offset' => $offset];
 
         // Act
@@ -757,7 +757,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'A night at the harbor.', 'matches' => []];
 
         // Act
@@ -783,7 +783,7 @@ describe('update', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $event->update(['name' => 'Changed private event name']);
         $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled'];
 
@@ -812,7 +812,7 @@ describe('update', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -843,7 +843,7 @@ describe('update', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -876,7 +876,7 @@ describe('update', function (): void {
             ]]);
         $publication->refresh();
         $original = $publication->getAttributes();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
         auth()->logout();
@@ -903,7 +903,7 @@ describe('validated publication draft', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -954,7 +954,7 @@ describe('validated publication draft', function (): void {
         $excluded = EventMatch::factory()
             ->for($event)
             ->create();
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -1023,7 +1023,7 @@ describe('validated publication draft', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,
@@ -1050,7 +1050,7 @@ describe('validated publication draft', function (): void {
         // Arrange
         $fixture = publicEventFixture();
         $event = $fixture['event'];
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
 
         $requestData = [
             'complete' => 1,

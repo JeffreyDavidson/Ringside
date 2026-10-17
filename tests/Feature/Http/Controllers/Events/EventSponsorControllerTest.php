@@ -11,7 +11,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use App\Services\Events\SponsorInstructionService;
 use App\Services\Promotions\PromotionContextService;
 use App\ViewModels\Events\EventPackViewModel;
@@ -353,7 +353,7 @@ test('the public card and results omit all sponsor and reviewed-instruction mark
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
@@ -423,7 +423,7 @@ test('the private public-page preview omits all sponsor and instruction markers'
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);

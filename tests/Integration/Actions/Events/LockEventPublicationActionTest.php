@@ -5,7 +5,7 @@ use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Gate;
 
@@ -19,7 +19,7 @@ test('missing promotion ownership cannot release even a fresh version', function
     if ($condition === 'mismatched') {
         $publication->forceFill(['promotion_id' => Promotion::factory()->create()->id])->save();
     }
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     expect(fn () => app(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Card))
         ->toThrow(EventPublicationException::class)

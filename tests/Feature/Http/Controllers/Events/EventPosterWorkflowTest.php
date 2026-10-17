@@ -8,7 +8,7 @@ use App\Actions\Events\UnpublishEventPublicationAction;
 use App\Data\Events\EventPublicationDraftData;
 use App\Enums\Events\PublicSection;
 use App\Models\Events\EventPublication;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use JMac\Testing\Double;
@@ -30,7 +30,7 @@ test('uploading a poster strips metadata and preserves public alternative text',
     $bytes = substr($original, 0, -12).pack('N', strlen($chunk) - 4).$chunk.pack('N', crc32($chunk)).substr($original, -12);
     $upload = UploadedFile::fake()
         ->createWithContent('private-camera-name.png', $bytes);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -94,7 +94,7 @@ test('a pending replacement cannot revoke the approved released poster', functio
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -126,7 +126,7 @@ test('a pending replacement cannot expose its new asset publicly', function (): 
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -159,7 +159,7 @@ test('a reviewed replacement revokes the previously approved poster key', functi
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -167,7 +167,7 @@ test('a reviewed replacement revokes the previously approved poster key', functi
         ->image('replacement.png', 50, 50));
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
         EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $key = $oldKey;
@@ -195,7 +195,7 @@ test('a reviewed replacement serves its new poster key', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -203,7 +203,7 @@ test('a reviewed replacement serves its new poster key', function (): void {
         ->image('replacement.png', 50, 50));
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
         EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $key = $newKey;
@@ -231,7 +231,7 @@ test('public pages adopt reviewed replacement metadata without the old asset key
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -239,7 +239,7 @@ test('public pages adopt reviewed replacement metadata without the old asset key
         ->image('replacement.png', 50, 50));
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
         EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
 
@@ -269,7 +269,7 @@ test('unpublishing a replaced card also revokes its current poster', function ()
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $oldKey = $key;
@@ -277,7 +277,7 @@ test('unpublishing a replaced card also revokes its current poster', function ()
         ->image('replacement.png', 50, 50));
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'],
         EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => ['key' => $newKey, 'alt' => 'Replacement event poster', 'caption' => null]]));
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     app(UnpublishEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
@@ -299,7 +299,7 @@ test('SVG upload cannot create a publication draft or poster asset', function ()
     $event = $fixture['event'];
     $upload = UploadedFile::fake()
         ->createWithContent('active.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -323,7 +323,7 @@ test('corrupt image bytes cannot create a publication draft or poster asset', fu
     $event = $fixture['event'];
     $upload = UploadedFile::fake()
         ->createWithContent('broken.png', 'not pixels');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -347,7 +347,7 @@ test('oversized image dimensions cannot create a publication draft or poster ass
     $event = $fixture['event'];
     $upload = UploadedFile::fake()
         ->image('wide.png', 4100, 1);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -372,7 +372,7 @@ test('oversized file cannot create a publication draft or poster asset', functio
     $upload = UploadedFile::fake()
         ->image('large.png')
         ->size(5121);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -396,7 +396,7 @@ test('missing alternative text cannot create a publication draft or poster asset
     $event = $fixture['event'];
     $upload = UploadedFile::fake()
         ->image('poster.png');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => '', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -428,7 +428,7 @@ test('removing a draft poster cannot change its released public poster', functio
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => null]));
@@ -457,7 +457,7 @@ test('a removed draft poster is absent from the private preview', function (): v
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => null]));
@@ -485,11 +485,11 @@ test('a reviewed removal omits the poster from the public page', function (): vo
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication = app(SaveEventPublicationAction::class)->handle($event, $publication->version, $source['fingerprint'], EventPublicationDraftData::fromValidated([...$publication->draft, 'poster' => null]));
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
 
@@ -509,7 +509,7 @@ test('an unselected multipart file control does not block a text-only draft', fu
     $event = $fixture['event'];
     $upload = UploadedFile::fake()
         ->createWithContent('', '');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -548,7 +548,7 @@ test('a stale upload preserves approved draft attributes and bytes without an or
         ->get('event-posters/'.$key);
     $upload = UploadedFile::fake()
         ->image('stale.png');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -581,7 +581,7 @@ test('a persistence failure discards only this request derivative and propagates
     app()->instance(SaveEventPublicationAction::class, $save);
     $upload = UploadedFile::fake()
         ->image('pending.png');
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'poster' => $upload, 'poster_alt' => 'Harbor Night event poster', 'poster_caption' => 'Join us by the harbor.'];
 
     // Act
@@ -614,7 +614,7 @@ test('removing a poster through the editor saves only the draft change', functio
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $releasedCard = $publication->card;
@@ -668,7 +668,7 @@ test('zero alternative text retains existing poster text while zero caption is p
         ],
     ];
     $publication->save();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'complete' => 1,

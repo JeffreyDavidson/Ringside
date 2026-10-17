@@ -12,6 +12,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Titles\TitleReignService;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
@@ -32,7 +33,7 @@ describe('TitleHistory configuration', function (): void {
             'lost_at' => '2025-01-11',
         ]);
         $table = new TitleHistory;
-        $table->boot(app(RosterResourceRouteResolver::class));
+        $table->boot(app(RosterResourceRouteResolver::class), app(TitleReignService::class));
 
         // Act
         $reignLength = $table->columns()[2]->resolveValue($championship);

@@ -6,7 +6,7 @@ use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 
 // Reuse the existing engine-aware start barrier; these are genuine process races, not SQLite lock assertions.
 test('racing publishers and unpublishing never release two copies of the same reviewed version', function (string $other): void {
@@ -15,7 +15,7 @@ test('racing publishers and unpublishing never release two copies of the same re
         $event = $world['event'];
         savePublicDraft($event);
         $publication = releasePublicPage($event);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $spec = ['public_event_id' => $event->id, 'public_actor_id' => $world['actor']->id, 'public_version' => $publication->version,
             'public_fingerprint' => $source['fingerprint'], 'public_operation' => 'card', 'public_match_id' => $world['match']->id, 'public_clock' => now()->toIso8601String()];
         $deadlocks = resolvedDeadlocks();
@@ -34,7 +34,7 @@ test('result and card source edits race safely with publication without releasin
         $event = $world['event'];
         savePublicDraft($event);
         $publication = releasePublicPage($event);
-        $source = app(PublicEventSourceQuery::class)->get($event);
+        $source = app(PublicEventSourceService::class)->get($event);
         $spec = ['public_event_id' => $event->id, 'public_actor_id' => $world['actor']->id, 'public_version' => $publication->version,
             'public_fingerprint' => $source['fingerprint'], 'public_operation' => $other === 'result' ? 'results' : 'card', 'public_match_id' => $world['match']->id, 'public_clock' => now()->toIso8601String()];
         $deadlocks = resolvedDeadlocks();

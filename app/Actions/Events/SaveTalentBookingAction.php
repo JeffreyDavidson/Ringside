@@ -14,7 +14,7 @@ use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Queries\Events\TalentBookingContextQuery;
+use App\Services\Events\TalentBookingContextService;
 use App\Services\Events\TalentBookingFingerprintService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 /** @phpstan-import-type Terms from EventTalentBooking */
 class SaveTalentBookingAction
 {
-    public function __construct(private readonly TalentBookingContextQuery $context, private readonly TalentBookingFingerprintService $fingerprints) {}
+    public function __construct(private readonly TalentBookingContextService $context, private readonly TalentBookingFingerprintService $fingerprints) {}
 
     public function handle(Event $event, string $personType, int $personId, int $version, string $fingerprint, TalentBookingData $data): EventTalentBooking
     {
