@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Data\TagTeams\TagTeamData;
+use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -55,13 +56,16 @@ class CreateAction
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            // Get membership data
-            $membershipData = $tagTeamData->getMembershipData();
+            $membershipData = TagTeamMembershipData::fromWrestlers(
+                $tagTeamData->wrestlerA,
+                $tagTeamData->wrestlerB,
+                $tagTeamData->managers,
+            );
 
             $this->establishMembershipAction->handle(
                 $tagTeam,
                 $membershipData,
-                $tagTeamData->getJoinDate(),
+                now(),
             );
 
             if ($tagTeamData->employment_date instanceof Carbon) {

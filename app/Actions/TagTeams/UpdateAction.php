@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -59,7 +60,7 @@ class UpdateAction
             $updateDate = now();
 
             // Handle partnership changes through membership service using membership data
-            $membershipData = $tagTeamData->getMembershipData();
+            $membershipData = TagTeamMembershipData::fromWrestlers($tagTeamData->wrestlerA, $tagTeamData->wrestlerB, $tagTeamData->managers);
 
             $this->synchronizeMembershipAction->handle(
                 $lockedTagTeam,

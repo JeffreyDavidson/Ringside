@@ -12,6 +12,7 @@ use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -54,7 +55,7 @@ class CreateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            if ($wrestlerData->hasManagers()) {
+            if ($wrestlerData->managers instanceof Collection && $wrestlerData->managers->isNotEmpty()) {
                 $this->assignManagersAction->handle(
                     $wrestler,
                     $wrestlerData->managers,
