@@ -76,7 +76,7 @@ class SplitStableAction
                 members: $membersForNewStable
             );
 
-            $this->eligibility->ensureSplitNameAvailable($lockedStable, $stableData->getTrimmedName());
+            $this->eligibility->ensureSplitNameAvailable($lockedStable, mb_trim($stableData->name));
 
             $this->removeStableMembersAction->handle($lockedStable, $membersForNewStable, $date);
 

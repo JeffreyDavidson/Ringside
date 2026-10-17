@@ -61,7 +61,7 @@ class UpdateAction
         }
 
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            $name = $stableData->getTrimmedName();
+            $name = mb_trim($stableData->name);
 
             if ($stable->promotion_id === null) {
                 $this->nameLock->lock($name);

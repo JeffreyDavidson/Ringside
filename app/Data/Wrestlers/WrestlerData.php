@@ -39,12 +39,4 @@ readonly class WrestlerData
         $this->height = $height instanceof Height ? $height : Height::fromInches($height);
         $this->weight = $weight instanceof Weight ? $weight : new Weight($weight);
     }
-
-    /**
-     * Check if wrestler has any managers assigned.
-     */
-    public function hasManagers(): bool
-    {
-        return $this->managers instanceof Collection && $this->managers->isNotEmpty();
-    }
 }
