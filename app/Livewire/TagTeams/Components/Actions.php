@@ -19,20 +19,58 @@ use App\Lifecycle\Roster\TagTeams\TagTeamSuspensionEligibility;
 use App\Livewire\Concerns\DescribesUpcomingBookings;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Support\ModelKey;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+/**
+ * @property-read TagTeam $tagTeam
+ */
 class Actions extends Component
 {
     use DescribesUpcomingBookings;
     use ExecutesRosterActions;
 
-    public TagTeam $tagTeam;
+    private TagTeamEmploymentEligibility $employmentEligibility;
+
+    private TagTeamSuspensionEligibility $suspensionEligibility;
+
+    private TagTeamRetirementEligibility $retirementEligibility;
+
+    #[Locked]
+    public int|string $tagTeamId;
+
+    /** The record route binding resolved for the mounting request; never persisted, so later requests reload it. */
+    protected ?TagTeam $mountedTagTeam = null;
+
+    public function boot(
+        TagTeamEmploymentEligibility $employmentEligibility,
+        TagTeamSuspensionEligibility $suspensionEligibility,
+        TagTeamRetirementEligibility $retirementEligibility,
+    ): void {
+        $this->employmentEligibility = $employmentEligibility;
+        $this->suspensionEligibility = $suspensionEligibility;
+        $this->retirementEligibility = $retirementEligibility;
+    }
 
     public function mount(TagTeam $tagTeam): void
     {
-        $this->tagTeam = $tagTeam;
+        $this->tagTeamId = ModelKey::of($tagTeam);
+        $this->mountedTagTeam = $tagTeam;
+    }
+
+    /**
+     * Loaded from the locked id once per request, so every action authorizes the current row. Global scopes
+     * (soft deletes, promotion) are skipped exactly as when Livewire restored the former model property: the
+     * id was set at mount from a record that route binding had already resolved within them.
+     */
+    #[Computed]
+    public function tagTeam(): TagTeam
+    {
+        return $this->mountedTagTeam ?? TagTeam::query()->withoutGlobalScopes()->findOrFail($this->tagTeamId);
     }
 
     public function employ(EmployAction $employAction): void
@@ -72,12 +110,12 @@ class Actions extends Component
         }
 
         return match ($action) {
-            RosterLifecycleAction::Employ => app(TagTeamEmploymentEligibility::class)->canEmploy($this->tagTeam),
-            RosterLifecycleAction::Release => app(TagTeamEmploymentEligibility::class)->canRelease($this->tagTeam),
-            RosterLifecycleAction::Suspend => app(TagTeamSuspensionEligibility::class)->canSuspend($this->tagTeam),
-            RosterLifecycleAction::Reinstate => app(TagTeamSuspensionEligibility::class)->canReinstate($this->tagTeam),
-            RosterLifecycleAction::Retire => app(TagTeamRetirementEligibility::class)->canRetire($this->tagTeam),
-            RosterLifecycleAction::Unretire => app(TagTeamRetirementEligibility::class)->canUnretire($this->tagTeam),
+            RosterLifecycleAction::Employ => $this->employmentEligibility->canEmploy($this->tagTeam),
+            RosterLifecycleAction::Release => $this->employmentEligibility->canRelease($this->tagTeam),
+            RosterLifecycleAction::Suspend => $this->suspensionEligibility->canSuspend($this->tagTeam),
+            RosterLifecycleAction::Reinstate => $this->suspensionEligibility->canReinstate($this->tagTeam),
+            RosterLifecycleAction::Retire => $this->retirementEligibility->canRetire($this->tagTeam),
+            RosterLifecycleAction::Unretire => $this->retirementEligibility->canUnretire($this->tagTeam),
             default => false,
         };
     }

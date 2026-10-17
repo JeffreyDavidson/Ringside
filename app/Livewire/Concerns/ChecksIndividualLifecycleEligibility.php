@@ -16,6 +16,30 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 trait ChecksIndividualLifecycleEligibility
 {
+    private IndividualEmploymentEligibility $employmentEligibility;
+
+    private IndividualSuspensionEligibility $suspensionEligibility;
+
+    private IndividualInjuryEligibility $injuryEligibility;
+
+    private IndividualRetirementEligibility $retirementEligibility;
+
+    /**
+     * Livewire calls this trait boot hook with container-injected arguments on every request, which lets the
+     * trait share the eligibility checks without resolving them from the container inline.
+     */
+    public function bootChecksIndividualLifecycleEligibility(
+        IndividualEmploymentEligibility $employmentEligibility,
+        IndividualSuspensionEligibility $suspensionEligibility,
+        IndividualInjuryEligibility $injuryEligibility,
+        IndividualRetirementEligibility $retirementEligibility,
+    ): void {
+        $this->employmentEligibility = $employmentEligibility;
+        $this->suspensionEligibility = $suspensionEligibility;
+        $this->injuryEligibility = $injuryEligibility;
+        $this->retirementEligibility = $retirementEligibility;
+    }
+
     /**
      * Project the lifecycle state the eligibility checks read, in one query, so rendering
      * the available actions does not run a fallback existence query per check.
@@ -28,14 +52,14 @@ trait ChecksIndividualLifecycleEligibility
     protected function isEligibleFor(RosterLifecycleAction $action, Wrestler|Manager|Referee $individual): bool
     {
         return match ($action) {
-            RosterLifecycleAction::Employ => app(IndividualEmploymentEligibility::class)->canEmploy($individual),
-            RosterLifecycleAction::Release => app(IndividualEmploymentEligibility::class)->canRelease($individual),
-            RosterLifecycleAction::Suspend => app(IndividualSuspensionEligibility::class)->canSuspend($individual),
-            RosterLifecycleAction::Reinstate => app(IndividualSuspensionEligibility::class)->canReinstate($individual),
-            RosterLifecycleAction::Injure => app(IndividualInjuryEligibility::class)->canInjure($individual),
-            RosterLifecycleAction::ClearFromInjury => app(IndividualInjuryEligibility::class)->canBeClearedFromInjury($individual),
-            RosterLifecycleAction::Retire => app(IndividualRetirementEligibility::class)->canRetire($individual),
-            RosterLifecycleAction::Unretire => app(IndividualRetirementEligibility::class)->canUnretire($individual),
+            RosterLifecycleAction::Employ => $this->employmentEligibility->canEmploy($individual),
+            RosterLifecycleAction::Release => $this->employmentEligibility->canRelease($individual),
+            RosterLifecycleAction::Suspend => $this->suspensionEligibility->canSuspend($individual),
+            RosterLifecycleAction::Reinstate => $this->suspensionEligibility->canReinstate($individual),
+            RosterLifecycleAction::Injure => $this->injuryEligibility->canInjure($individual),
+            RosterLifecycleAction::ClearFromInjury => $this->injuryEligibility->canBeClearedFromInjury($individual),
+            RosterLifecycleAction::Retire => $this->retirementEligibility->canRetire($individual),
+            RosterLifecycleAction::Unretire => $this->retirementEligibility->canUnretire($individual),
         };
     }
 }

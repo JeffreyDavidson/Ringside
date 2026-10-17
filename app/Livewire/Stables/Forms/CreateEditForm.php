@@ -36,6 +36,13 @@ class CreateEditForm extends BaseForm
     /** @var array<int> */
     public array $tag_teams = [];
 
+    private StableActivityEligibility $activityEligibility;
+
+    public function boot(StableActivityEligibility $activityEligibility): void
+    {
+        $this->activityEligibility = $activityEligibility;
+    }
+
     protected function loadModelData(Model $model): void
     {
         $this->started_at = $this->localDateString($model->firstActivityPeriod?->started_at);
@@ -67,7 +74,7 @@ class CreateEditForm extends BaseForm
         $memberJoinDate = $this->isEditing() ? now() : $this->parseStartDate();
         $members = $this->selectedMembers();
         $stable = $this->isEditing() ? $this->stable() : null;
-        $canHaveMembers = ! $stable instanceof Stable || app(StableActivityEligibility::class)->canHaveMembers($stable);
+        $canHaveMembers = ! $stable instanceof Stable || $this->activityEligibility->canHaveMembers($stable);
 
         $rules = [
             'name' => [
