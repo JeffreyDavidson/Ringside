@@ -56,8 +56,11 @@ class CreateAction
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            // Get membership data
-            $membershipData = TagTeamMembershipData::fromWrestlers($tagTeamData->wrestlerA, $tagTeamData->wrestlerB, $tagTeamData->managers);
+            $membershipData = TagTeamMembershipData::fromWrestlers(
+                $tagTeamData->wrestlerA,
+                $tagTeamData->wrestlerB,
+                $tagTeamData->managers,
+            );
 
             $this->establishMembershipAction->handle(
                 $tagTeam,
