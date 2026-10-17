@@ -12,9 +12,9 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PendingInvitationSummaryService;
+use App\Support\EmailAddress;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -88,7 +88,7 @@ class Main extends BaseTable
     /** Activation lets the account accept every pending invitation for its email, so the administrator is told which. */
     private function activationConfirmationFor(User $user): ?string
     {
-        $invitations = $this->pendingInvitationSummaries[PromotionInvitation::normalizeEmail($user->email)] ?? null;
+        $invitations = $this->pendingInvitationSummaries[EmailAddress::normalize($user->email)] ?? null;
 
         if ($invitations === null) {
             return null;

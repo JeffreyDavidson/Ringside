@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property MembershipRole $role
  * @property MembershipStatus $status
  */
-#[Fillable('promotion_id', 'user_id', 'role', 'status')]
+#[Fillable('role', 'status')]
 #[Table(name: 'promotion_user')]
 #[UseEloquentBuilder(PromotionMembershipBuilder::class)]
 class PromotionMembership extends Pivot

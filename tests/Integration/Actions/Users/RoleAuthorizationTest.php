@@ -122,7 +122,7 @@ describe('User Role Integration Tests', function () {
             expect(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Change role to administrator
-            $user->update(['role' => Role::Administrator]);
+            $user->forceFill(['role' => Role::Administrator])->save();
             $user->refresh();
 
             // Should now have administrator permissions
@@ -141,7 +141,7 @@ describe('User Role Integration Tests', function () {
             expect(Gate::forUser($admin)->allows('create', User::class))->toBeTrue();
 
             // Change status
-            $admin->update(['status' => UserStatus::Inactive]);
+            $admin->forceFill(['status' => UserStatus::Inactive])->save();
             $admin->refresh();
 
             // Should still have administrator permissions
@@ -201,7 +201,7 @@ describe('User Role Integration Tests', function () {
                 ->and(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Promote to administrator
-            $user->update(['role' => Role::Administrator]);
+            $user->forceFill(['role' => Role::Administrator])->save();
             $user->refresh();
 
             // Verify promotion worked across all systems
@@ -228,7 +228,7 @@ describe('User Role Integration Tests', function () {
                 ->and(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
 
             // Demote to basic user
-            $user->update(['role' => Role::Basic]);
+            $user->forceFill(['role' => Role::Basic])->save();
             $user->refresh();
 
             // Verify demotion worked across all systems

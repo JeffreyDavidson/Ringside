@@ -11,6 +11,7 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
@@ -42,7 +43,7 @@ it('stores the time entered in the promotion zone as UTC and shows it back uncha
     $promotion = Promotion::factory()->create(['timezone' => $timezone]);
 
     // Act
-    $utc = Promotion::parseLocalTime($promotion, $entered);
+    $utc = PromotionTimeZoneService::parseLocalTime($promotion, $entered);
     $event = Event::factory()->for($promotion, 'promotion')->create(['date' => $utc]);
     $event->refresh();
 
@@ -55,7 +56,7 @@ it('reads a stored date back as the entered wall-clock time', function (string $
     // Arrange
     $promotion = Promotion::factory()->create(['timezone' => $timezone]);
     $event = Event::factory()->for($promotion, 'promotion')->create([
-        'date' => Promotion::parseLocalTime($promotion, $entered),
+        'date' => PromotionTimeZoneService::parseLocalTime($promotion, $entered),
     ]);
 
     // Act
@@ -74,11 +75,11 @@ it('treats a missing promotion and an unscheduled event as the application time 
     $event = Event::factory()->unscheduled()->create(['promotion_id' => null]);
 
     // Act
-    $parsed = Promotion::parseLocalTime(null, '2026-03-01T20:00');
+    $parsed = PromotionTimeZoneService::parseLocalTime(null, '2026-03-01T20:00');
 
     // Assert
     expect($parsed->toDateTimeString())->toBe('2026-03-01 20:00:00')
-        ->and(Promotion::toLocalTime(null, $parsed)->format('H:i'))->toBe('20:00')
+        ->and(PromotionTimeZoneService::toLocalTime(null, $parsed)->format('H:i'))->toBe('20:00')
         ->and($event->local_date)->toBeNull();
 });
 
@@ -119,7 +120,7 @@ it('fills the edit form with the date in the promotion zone', function () {
     // Arrange
     $promotion = Promotion::factory()->create(['timezone' => 'Asia/Tokyo']);
     $event = Event::factory()->for($promotion, 'promotion')->create([
-        'date' => Promotion::parseLocalTime($promotion, '2027-01-15T20:00'),
+        'date' => PromotionTimeZoneService::parseLocalTime($promotion, '2027-01-15T20:00'),
     ]);
 
     // Act
@@ -133,7 +134,7 @@ it('reads a rescheduled date in the event promotion zone', function () {
     // Arrange
     $promotion = Promotion::factory()->create(['timezone' => 'Asia/Tokyo']);
     $event = Event::factory()->for($promotion, 'promotion')->create([
-        'date' => Promotion::parseLocalTime($promotion, '2027-01-15T20:00'),
+        'date' => PromotionTimeZoneService::parseLocalTime($promotion, '2027-01-15T20:00'),
     ]);
 
     // Act
@@ -149,7 +150,7 @@ it('reads a rescheduled date in the event promotion zone', function () {
 it('opens the result gate at the local start time of the event', function () {
     // Arrange
     $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
-    $startsAt = Promotion::parseLocalTime($promotion, '2026-06-01T20:00');
+    $startsAt = PromotionTimeZoneService::parseLocalTime($promotion, '2026-06-01T20:00');
     $match = EventMatch::factory()
         ->for(Event::factory()->for($promotion, 'promotion')->create(['date' => $startsAt]))
         ->create();
@@ -182,7 +183,7 @@ describe('clock changes', function () {
         $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
 
         // Act
-        $result = Promotion::localTimeExists($promotion, $entered);
+        $result = PromotionTimeZoneService::localTimeExists($promotion, $entered);
 
         // Assert
         expect($result)->toBe($exists);
@@ -221,7 +222,7 @@ describe('clock changes', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
         $event = Event::factory()->for($promotion, 'promotion')->create([
-            'date' => Promotion::parseLocalTime($promotion, '2027-03-07T20:00'),
+            'date' => PromotionTimeZoneService::parseLocalTime($promotion, '2027-03-07T20:00'),
         ]);
 
         // Act

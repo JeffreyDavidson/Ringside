@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Validator;
 
@@ -84,7 +85,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
             $pastEvent = Event::factory()->for($promotion)->make(['date' => $eventDate]);
             $rule = new DateCanBeChanged($pastEvent);
             $failCalled = false;
-            $localDate = Promotion::toLocalTime($promotion, $eventDate)->format('Y-m-d\TH:i');
+            $localDate = PromotionTimeZoneService::toLocalTime($promotion, $eventDate)->format('Y-m-d\TH:i');
 
             // Act
             $rule->validate('date', $localDate, validationFailureCallback(

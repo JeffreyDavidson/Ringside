@@ -7,6 +7,7 @@ namespace App\Rules\Shared;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -37,12 +38,12 @@ class CanChangeDebutDate implements ValidationRule
 
         // A typed date means that day in the model's promotion (the application time zone without one), the way the form reads it.
         $targetDate = is_string($value)
-            ? Promotion::parseLocalTime($this->model->promotion, $value)
+            ? PromotionTimeZoneService::parseLocalTime($this->model->promotion, $value)
             : Carbon::parse($value);
 
         $debutDate = ($this->model->firstActivityPeriod ?? $currentActivityPeriod)?->started_at;
 
-        if ($debutDate === null || Promotion::toLocalTime($this->model->promotion, $debutDate)->isSameDay(Promotion::toLocalTime($this->model->promotion, $targetDate))) {
+        if ($debutDate === null || PromotionTimeZoneService::toLocalTime($this->model->promotion, $debutDate)->isSameDay(PromotionTimeZoneService::toLocalTime($this->model->promotion, $targetDate))) {
             return;
         }
 

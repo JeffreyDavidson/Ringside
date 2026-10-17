@@ -38,7 +38,7 @@ test('it uses the current persisted user state when changing status', function (
     $staleUser = $user->replicate(['id']);
     $staleUser->id = $user->id;
     $staleUser->exists = true;
-    $user->update(['status' => UserStatus::Inactive]);
+    $user->forceFill(['status' => UserStatus::Inactive])->save();
 
     $updatedUser = resolve(ChangeStatusAction::class)->handle($staleUser, UserStatus::Active);
 

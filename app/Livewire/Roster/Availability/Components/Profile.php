@@ -10,10 +10,10 @@ use App\Enums\Roster\BookableRosterKind;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Roster\UpcomingBookings;
 use App\Models\Events\Event;
-use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -179,7 +179,7 @@ class Profile extends Component
         $person = $this->person();
         Gate::authorize('view', $person);
         $person->loadMissing('promotion');
-        $zone = Promotion::zoneOf($person->promotion);
+        $zone = PromotionTimeZoneService::zoneOf($person->promotion);
         $day = now()->setTimezone($zone)->toDateString();
 
         return view('livewire.roster.availability.components.profile', [

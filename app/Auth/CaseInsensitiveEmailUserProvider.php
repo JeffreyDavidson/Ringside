@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth;
 
 use App\Models\Users\User;
+use App\Support\EmailAddress;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +26,7 @@ class CaseInsensitiveEmailUserProvider extends EloquentUserProvider
             return parent::retrieveByCredentials($credentials);
         }
 
-        $email = Str::lower(mb_trim($credentials['email']));
+        $email = EmailAddress::normalize($credentials['email']);
 
         // whereLike only narrows the candidates case-insensitively; the exact comparison happens in PHP so
         // `%` and `_` in the input can never widen the match.

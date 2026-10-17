@@ -6,6 +6,7 @@ namespace App\Models\Promotions;
 
 use App\Builders\Promotions\PromotionInvitationBuilder;
 use App\Enums\Promotions\MembershipRole;
+use App\Support\EmailAddress;
 use Database\Factories\Promotions\PromotionInvitationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 /**
  * A pending invitation to join a promotion, keyed by the invited email address rather than by an account.
@@ -32,7 +32,7 @@ use Illuminate\Support\Str;
  * @property Carbon|null $updated_at
  * @property-read Promotion $promotion
  */
-#[Fillable('promotion_id', 'email', 'role', 'expires_at')]
+#[Fillable('email', 'expires_at')]
 #[UseEloquentBuilder(PromotionInvitationBuilder::class)]
 #[UseFactory(PromotionInvitationFactory::class)]
 class PromotionInvitation extends Model
@@ -55,12 +55,6 @@ class PromotionInvitation extends Model
         return static::query()->expired();
     }
 
-    /** The stored form of an email address: trimmed and lowercase, like User::email, so lookups never depend on case. */
-    public static function normalizeEmail(string $email): string
-    {
-        return Str::lower(mb_trim($email));
-    }
-
     /** @return BelongsTo<Promotion, $this> */
     public function promotion(): BelongsTo
     {
@@ -70,7 +64,7 @@ class PromotionInvitation extends Model
     /** @return Attribute<string, string> */
     protected function email(): Attribute
     {
-        return Attribute::set(fn (string $value): string => self::normalizeEmail($value));
+        return Attribute::set(fn (string $value): string => EmailAddress::normalize($value));
     }
 
     /** @return array<string, string> */

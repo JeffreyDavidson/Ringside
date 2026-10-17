@@ -16,12 +16,15 @@ class CreateAction
             throw new InvalidArgumentException('A password is required to create a user.');
         }
 
-        return User::query()->create([
+        $user = User::query()->make([
             'first_name' => $data->firstName,
             'last_name' => $data->lastName,
             'email' => $data->email,
-            'role' => $data->role,
             'password' => $data->password,
         ]);
+        $user->role = $data->role;
+        $user->save();
+
+        return $user;
     }
 }

@@ -38,13 +38,14 @@ class RegisteredUserController
         }
 
         try {
-            $user = User::query()->create([
+            $user = User::query()->make([
                 'first_name' => $request->string('first_name')->value(),
                 'last_name' => $request->string('last_name')->value(),
                 'email' => $request->string('email')->value(),
                 'password' => $request->string('password')->value(),
-                'role' => Role::Basic,
             ]);
+            $user->role = Role::Basic;
+            $user->save();
         } catch (UniqueConstraintViolationException) {
             return $this->accountPending();
         }

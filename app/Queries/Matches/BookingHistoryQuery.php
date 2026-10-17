@@ -13,6 +13,7 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -48,7 +49,7 @@ final class BookingHistoryQuery
         $event->loadMissing('promotion');
         $checkedAt = now();
         $reference = $event->date instanceof Carbon && $event->date->lessThan($checkedAt) ? $event->date->copy() : $checkedAt;
-        $from = $reference->copy()->setTimezone(Promotion::zoneOf($event->promotion))
+        $from = $reference->copy()->setTimezone(PromotionTimeZoneService::zoneOf($event->promotion))
             ->subDays(self::RECENT_DAYS)->setTimezone('UTC');
         $snapshot = [
             'available' => false, 'reference' => $reference->toIso8601String(), 'from' => $from->toIso8601String(),
@@ -81,7 +82,7 @@ final class BookingHistoryQuery
         $snapshot['subjects'] = array_values($subjects->map(fn (Wrestler|TagTeam $subject): array => [
             'key' => $this->key($subject), 'type' => $subject->getMorphClass(), 'id' => $subject->id, 'name' => $subject->name, 'deleted' => $subject->trashed(),
             'latestRecordedDate' => isset($latest[$this->key($subject)])
-                ? Carbon::parse($latest[$this->key($subject)])->setTimezone(Promotion::zoneOf($event->promotion))->toDateString()
+                ? Carbon::parse($latest[$this->key($subject)])->setTimezone(PromotionTimeZoneService::zoneOf($event->promotion))->toDateString()
                 : null,
             'recent' => array_values($subject->matches->map(fn (EventMatch $match): array => $this->row($match))->all()),
         ])->all());
@@ -246,7 +247,7 @@ final class BookingHistoryQuery
                     'type' => $source->match_type->label(),
                     'finish' => $source->getAttribute('history_recorded') && $finish !== null ? $finish->label() : __($rawFinish === null ? 'matches.history.result_missing' : 'matches.history.result_incomplete'), 'pair' => $this->pair($first, $second),
                     'recorded' => (int) $row->recorded, 'incomplete' => (int) $row->incomplete,
-                    'latestDate' => Carbon::parse($row->latest_date)->setTimezone(Promotion::zoneOf($subjects->firstOrFail()->promotion))->toDateString()];
+                    'latestDate' => Carbon::parse($row->latest_date)->setTimezone(PromotionTimeZoneService::zoneOf($subjects->firstOrFail()->promotion))->toDateString()];
             })->all()),
             'totalNotices' => $total, 'page' => $page, 'pages' => $pages,
         ];
@@ -278,7 +279,7 @@ final class BookingHistoryQuery
         $winner = $match->competitors->firstWhere('match_side_id', $match->winning_side_id);
 
         return [
-            'event' => $match->event->name, 'date' => Promotion::toLocalTime($match->event->promotion, Carbon::parse($match->event->date))->toDateString(),
+            'event' => $match->event->name, 'date' => PromotionTimeZoneService::toLocalTime($match->event->promotion, Carbon::parse($match->event->date))->toDateString(),
             'eventId' => $match->event->id, 'number' => $match->match_number, 'type' => $match->match_type->label(),
             'finish' => $finish?->label() ?? __('matches.history.result_missing'),
             'winnerSide' => $winner?->side->position,

@@ -268,7 +268,7 @@
                                 <td class="text-foreground px-5 py-4 lg:px-6">{{ $invitation->email }}</td>
                                 <td class="text-muted-foreground px-4 py-4">{{ $invitation->role->label() }}</td>
                                 <td class="text-muted-foreground px-4 py-4" data-test="invitation-expires">
-                                    {{ __('promotions.invitation_expires', ['date' => \App\Models\Promotions\Promotion::toLocalTime($promotion, $invitation->expires_at)->format('M j, Y')]) }}
+                                    {{ __('promotions.invitation_expires', ['date' => \App\Services\Promotions\PromotionTimeZoneService::toLocalTime($promotion, $invitation->expires_at)->format('M j, Y')]) }}
                                 </td>
                                 <td class="text-muted-foreground px-4 py-4">
                                     <span class="border-outline inline-flex min-h-7 items-center border px-2 text-xs">

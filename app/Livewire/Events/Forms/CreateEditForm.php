@@ -12,6 +12,7 @@ use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
 use App\Rules\Events\LocalTimeExists;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
@@ -45,14 +46,14 @@ class CreateEditForm extends BaseForm
         );
     }
 
-    /** An edited event keeps its stored instant when the date is the one the form was prefilled with (see Event::parseLocalDate()). */
+    /** An edited event keeps its stored instant when the date is the one the form was prefilled with (see PromotionTimeZoneService::parseEventLocalDate()). */
     private function parseDate(string $value): Carbon
     {
         if ($this->isEditing()) {
-            return $this->event()->parseLocalDate($value);
+            return PromotionTimeZoneService::parseEventLocalDate($this->event(), $value);
         }
 
-        return Promotion::parseLocalTime($this->promotion(), $value);
+        return PromotionTimeZoneService::parseLocalTime($this->promotion(), $value);
     }
 
     /** The promotion whose time zone the entered date is read in: the event's own, or the current one for a new event. */

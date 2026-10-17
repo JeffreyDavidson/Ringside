@@ -9,6 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -91,7 +92,7 @@ class TitleChampionship extends Model
     protected function localWonAt(): Attribute
     {
         return Attribute::make(
-            get: fn (): Carbon => Promotion::toLocalTime($this->title?->promotion, $this->won_at)
+            get: fn (): Carbon => PromotionTimeZoneService::toLocalTime($this->title?->promotion, $this->won_at)
         );
     }
 
@@ -104,7 +105,7 @@ class TitleChampionship extends Model
     {
         return Attribute::make(
             get: fn (): ?Carbon => $this->lost_at instanceof Carbon
-                ? Promotion::toLocalTime($this->title?->promotion, $this->lost_at)
+                ? PromotionTimeZoneService::toLocalTime($this->title?->promotion, $this->lost_at)
                 : null
         );
     }

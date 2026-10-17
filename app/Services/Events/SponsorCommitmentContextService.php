@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Events;
 
 use App\Models\Events\Event;
-use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionTimeZoneService;
 
 class SponsorCommitmentContextService
 {
@@ -15,6 +15,6 @@ class SponsorCommitmentContextService
         $event->loadMissing('promotion');
 
         return ['name' => $event->name, 'date' => $event->date?->toIso8601String(), 'venue_id' => $event->venue_id,
-            'timezone' => Promotion::zoneOf($event->promotion), 'archived' => $event->trashed(), 'updated_at' => $event->updated_at?->toIso8601String()];
+            'timezone' => PromotionTimeZoneService::zoneOf($event->promotion), 'archived' => $event->trashed(), 'updated_at' => $event->updated_at?->toIso8601String()];
     }
 }

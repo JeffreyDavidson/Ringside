@@ -10,8 +10,8 @@ use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetRevision;
-use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -51,7 +51,7 @@ class MutateBudgetAction
                 $budget = new EventBudget;
                 $budget->event_id = $event->id;
                 $budget->currency = 'USD';
-                $budget->timezone = Promotion::zoneOf($event->promotion);
+                $budget->timezone = PromotionTimeZoneService::zoneOf($event->promotion);
                 $budget->version = 0;
                 $budget->save();
             }

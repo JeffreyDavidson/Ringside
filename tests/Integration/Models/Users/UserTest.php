@@ -38,11 +38,26 @@ describe('User Model Integration Tests', function () {
                 'email',
                 'email_verified_at',
                 'password',
-                'role',
-                'status',
                 'avatar_path',
                 'phone_number',
             ]);
+        });
+
+        test('keeps role and status out of mass assignment', function () {
+            // Arrange
+            $attributes = [
+                'first_name' => 'Jeffrey',
+                'role' => Role::Administrator,
+                'status' => UserStatus::Active,
+            ];
+
+            // Act
+            $user = new User($attributes);
+
+            // Assert
+            expect($user->first_name)->toBe('Jeffrey')
+                ->and($user->getAttributes())->not->toHaveKey('role')
+                ->and($user->status)->toBe(UserStatus::Unverified);
         });
 
         test('has correct casts configuration', function () {

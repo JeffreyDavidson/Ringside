@@ -56,6 +56,33 @@ test('creates an active membership with the role the owner chose and deletes the
     'member' => MembershipRole::Member,
 ]);
 
+test('ignores a role or status sent with the acceptance and uses the invited role', function () {
+    // Arrange
+    $promotion = Promotion::factory()
+        ->create();
+
+    $invitee = basicUser();
+    inviteTo($promotion, $invitee, MembershipRole::Member);
+
+    actingAs($invitee);
+
+    // Act
+    $response = post(route('promotions.invitation.accept', $promotion), [
+        'role' => MembershipRole::Owner->value,
+        'status' => MembershipStatus::Suspended->value,
+    ]);
+
+    // Assert
+    $response->assertRedirect(route('dashboard'));
+
+    $membership = $promotion->memberships()
+        ->where('user_id', $invitee->id)
+        ->firstOrFail();
+
+    expect($membership->role)->toBe(MembershipRole::Member)
+        ->and($membership->status)->toBe(MembershipStatus::Active);
+});
+
 test('gives the new member access to the promotion records', function () {
     // Arrange
     $promotion = Promotion::factory()
