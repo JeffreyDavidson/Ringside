@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Users;
 
 use App\Models\Users\User;
+use App\Support\EmailAddress;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,7 +32,7 @@ class UniqueEmail implements ValidationRule
 
     public function isTaken(string $value): bool
     {
-        $email = Str::lower(mb_trim($value));
+        $email = EmailAddress::normalize($value);
 
         // whereLike only narrows the candidates case-insensitively; the exact comparison happens in PHP so
         // `%` and `_` in the input can never widen the match.

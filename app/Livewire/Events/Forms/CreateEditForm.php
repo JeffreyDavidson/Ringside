@@ -46,7 +46,7 @@ class CreateEditForm extends BaseForm
         );
     }
 
-    /** An edited event keeps its stored instant when the date is the one the form was prefilled with (see Event::parseLocalDate()). */
+    /** An edited event keeps its stored instant when the date is the one the form was prefilled with (see PromotionTimeZoneService::parseEventLocalDate()). */
     private function parseDate(string $value): Carbon
     {
         if ($this->isEditing()) {
