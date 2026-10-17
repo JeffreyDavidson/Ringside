@@ -34,8 +34,8 @@ Modals own the user interaction:
 ### Actions
 
 Actions are the application boundary for mutations. They own business rules,
-transactions, model writes, and relationship changes. A Livewire component resolves
-Actions from Laravel's container and calls `handle()`.
+transactions, model writes, and relationship changes. A Livewire component receives
+Actions by injection (method injection, or `boot()` when several methods share one) and calls `handle()`.
 
 ### Models and Builders
 
