@@ -9,9 +9,6 @@ use App\Models\Events\EventBudgetMovement;
 use App\Models\Promotions\Promotion;
 use App\Services\Events\BudgetSettlementService;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Support\Str;
-use Ramsey\Uuid\Lazy\LazyUuidFromString;
-use Ramsey\Uuid\UuidInterface;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -236,41 +233,40 @@ test('a reason longer than the limit is refused', function (): void {
     expect($f['line']->refresh()->archived_at)->toBeNull();
 });
 
-test('a draft whose request key is not a UUID is refused before the budget changes', function (): void {
-    // Arrange
-    $f = budgetFixture();
-    Str::createUuidsUsing(fn (): UuidInterface => new LazyUuidFromString('not-a-uuid'));
-    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
-
-    // Act
-    $component->call('beginLine', $f['line']->id)
-        ->set('lineForm.description', 'Changed')
-        ->call('save');
-
-    // Assert
-    Str::createUuidsNormally();
-    $component->assertHasErrors('request_key');
-    expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->revisions()->count())->toBe(0);
-});
-
-test('suspended and foreign-context users cannot open the budget component', function (string $case): void {
+test('a suspended owner cannot open the budget component', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
     $event = Event::factory()->for($promotion, 'promotion')->create();
-    $user = $case === 'foreign' ? administrator() : basicUser();
+    $user = basicUser();
     $promotion->users()->attach($user, ['role' => 'owner', 'status' => 'suspended']);
     actingAs($user);
     $context = app(PromotionContextService::class);
-    $context->set($case === 'foreign' ? Promotion::factory()->create() : $promotion);
+    $context->set($promotion);
     $context->enforce();
 
     // Act
     $component = livewire(Budget::class, ['eventId' => $event->id]);
 
     // Assert
-    $case === 'foreign' ? $component->assertNotFound() : $component->assertForbidden();
+    $component->assertForbidden();
     expect(EventBudget::query()->count())->toBe(0);
-})->with(['suspended', 'foreign']);
+});
+
+test('an administrator in a foreign promotion context cannot find the event budget', function (): void {
+    // Arrange
+    $event = Event::factory()->for(Promotion::factory(), 'promotion')->create();
+    actingAs(administrator());
+    $context = app(PromotionContextService::class);
+    $context->set(Promotion::factory()->create());
+    $context->enforce();
+
+    // Act
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+
+    // Assert
+    $component->assertNotFound();
+    expect(EventBudget::query()->count())->toBe(0);
+});
 
 test('guests cannot open the budget component', function (): void {
     // Arrange

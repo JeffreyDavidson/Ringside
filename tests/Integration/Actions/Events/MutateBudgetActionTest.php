@@ -34,3 +34,16 @@ test('a failed financial mutation rolls back both its state and retained history
     }))->toThrow(RuntimeException::class);
     expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->refresh()->version)->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);
 });
+
+test('a budget write without an authenticated actor is refused and leaves no history', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    auth()->logout();
+
+    // Act
+    $write = fn () => resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): null => null);
+
+    // Assert
+    expect($write)->toThrow(LogicException::class);
+    expect($f['budget']->revisions()->count())->toBe(0);
+});

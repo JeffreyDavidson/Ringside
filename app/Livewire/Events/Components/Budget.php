@@ -178,7 +178,6 @@ class Budget extends Component
 
             return;
         }
-        Validator::make(['version' => $this->draftVersion, 'request_key' => $this->requestKey], ['version' => ['integer', 'min:0'], 'request_key' => ['required', 'uuid']])->validate();
         $lineInput = $this->operation === BudgetOperation::SaveLine ? $this->lineForm->validate() : [];
         $movementInput = $this->operation === BudgetOperation::RecordMovement || ($this->operation === BudgetOperation::CorrectMovement && $this->replaceMovement)
             ? $this->movementForm->validate()
