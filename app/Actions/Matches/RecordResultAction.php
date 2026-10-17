@@ -58,7 +58,7 @@ class RecordResultAction
             );
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
-            if (! $changed && TournamentMatchLink::query()->where('match_id', $lockedMatch->id)->exists()) {
+            if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
                 return $lockedMatch;
             }
             $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);

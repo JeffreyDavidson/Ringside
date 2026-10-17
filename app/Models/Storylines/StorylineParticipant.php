@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property-read Wrestler|TagTeam|null $participant
  * @property-read Storyline $storyline
  */
-#[Fillable([])]
+#[Fillable(['role', 'joined_on', 'left_on'])]
 #[UseFactory(StorylineParticipantFactory::class)]
 class StorylineParticipant extends Model
 {
@@ -38,9 +38,13 @@ class StorylineParticipant extends Model
     /** @use HasFactory<StorylineParticipantFactory> */
     use HasFactory;
 
+    #[\Override]
     protected function casts(): array
     {
-        return ['joined_on' => 'date', 'left_on' => 'date'];
+        return [
+            'joined_on' => 'date',
+            'left_on' => 'date',
+        ];
     }
 
     /** @return BelongsTo<Storyline, $this> */

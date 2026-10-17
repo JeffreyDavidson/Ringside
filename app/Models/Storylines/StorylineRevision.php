@@ -35,9 +35,13 @@ class StorylineRevision extends Model
     /** @use HasFactory<StorylineRevisionFactory> */
     use HasFactory;
 
+    #[\Override]
     protected function casts(): array
     {
-        return ['before' => 'array', 'after' => 'array'];
+        return [
+            'before' => 'array',
+            'after' => 'array',
+        ];
     }
 
     /** @return BelongsTo<Storyline, $this> */

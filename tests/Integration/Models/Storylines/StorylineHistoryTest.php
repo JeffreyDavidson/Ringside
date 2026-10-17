@@ -6,7 +6,6 @@ use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineStep;
-use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -40,6 +39,6 @@ test('the database refuses two open participations for the same creative identit
 test('story records cannot be mass assigned privileged ownership status or versions', function () {
     $story = new Storyline(['title' => 'Private', 'promotion_id' => 999, 'status' => 'completed', 'version' => 999]);
     expect($story->getAttributes())->toBe(['title' => 'Private'])
-        ->and(fn () => new StorylineStep(['heading' => 'Injected', 'storyline_id' => 999, 'promotion_id' => 999]))->toThrow(MassAssignmentException::class);
+        ->and(new StorylineStep(['heading' => 'Injected', 'storyline_id' => 999, 'promotion_id' => 999])->getAttributes())->toBe(['heading' => 'Injected']);
 });
 require_once __DIR__.'/../../../Fixtures/storylines.php';

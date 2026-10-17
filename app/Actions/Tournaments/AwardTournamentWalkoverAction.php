@@ -42,7 +42,9 @@ class AwardTournamentWalkoverAction
             if ($competitor === null || ! $this->eligibility->allows($competitor)) {
                 throw TournamentException::entrantUnavailable();
             }
-            $node->forceFill(['walkover_entry_id' => $winner->id, 'walkover_reason' => $reason])->save();
+            $node->fill(['walkover_reason' => $reason]);
+            $node->walkover_entry_id = $winner->id;
+            $node->save();
             activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'winner_entry_id' => $winner->id, 'reason' => $reason])->log('tournament.walkover');
             $this->outcomes->synchronize($tournament);
         }, attempts: 3);

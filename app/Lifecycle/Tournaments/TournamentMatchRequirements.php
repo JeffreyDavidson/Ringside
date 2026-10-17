@@ -32,7 +32,7 @@ final readonly class TournamentMatchRequirements
         if (! $match instanceof EventMatch) {
             return [];
         }
-        $link = TournamentMatchLink::query()->with('node', 'tournament')->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
         if ($link === null || $link->active_node_id === null || ! $link->tournament->repeat_appearances) {
             return [];
         }
@@ -78,7 +78,7 @@ final readonly class TournamentMatchRequirements
     /** @param Collection<int, covariant \App\Models\Roster\Wrestlers\Wrestler|TagTeam> $competitors */
     public function ensureCompetitors(EventMatch $match, Collection $competitors): void
     {
-        $link = TournamentMatchLink::query()->with('node')->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->with('node')->forMatchId($match->id)->first();
         if ($link === null) {
             return;
         }
@@ -91,7 +91,7 @@ final readonly class TournamentMatchRequirements
 
     public function ensureFinalStakes(EventMatch $match): void
     {
-        $link = TournamentMatchLink::query()->with('node', 'tournament')->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
         if ($link !== null && $link->node->round !== (int) log($link->tournament->capacity, 2)) {
             throw TournamentException::finalTitlesOnly();
         }
@@ -99,7 +99,7 @@ final readonly class TournamentMatchRequirements
 
     public function ensureEditable(EventMatch $match, EventMatchData $data): void
     {
-        $link = TournamentMatchLink::query()->with('node', 'tournament')->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
         if ($link === null) {
             return;
         }
@@ -121,7 +121,7 @@ final readonly class TournamentMatchRequirements
 
     public function ensureDeletable(EventMatch $match): void
     {
-        if (TournamentMatchLink::query()->where('match_id', $match->id)->exists()) {
+        if (TournamentMatchLink::query()->forMatchId($match->id)->exists()) {
             throw TournamentException::linkedDelete();
         }
     }

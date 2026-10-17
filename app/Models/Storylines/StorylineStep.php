@@ -37,7 +37,7 @@ use Illuminate\Support\Carbon;
  * @property-read EventMatch|null $match
  * @property-read Storyline $storyline
  */
-#[Fillable([])]
+#[Fillable(['heading', 'description', 'sequence', 'target_on'])]
 #[UseFactory(StorylineStepFactory::class)]
 class StorylineStep extends Model
 {
@@ -46,9 +46,17 @@ class StorylineStep extends Model
     /** @use HasFactory<StorylineStepFactory> */
     use HasFactory;
 
+    #[\Override]
     protected function casts(): array
     {
-        return ['status' => StepStatus::class, 'target_on' => 'date', 'target_at' => 'datetime', 'source_context' => 'array', 'sequence' => 'integer', 'version' => 'integer'];
+        return [
+            'status' => StepStatus::class,
+            'target_on' => 'date',
+            'target_at' => 'datetime',
+            'source_context' => 'array',
+            'sequence' => 'integer',
+            'version' => 'integer',
+        ];
     }
 
     /** @return BelongsTo<Storyline, $this> */

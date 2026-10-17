@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, TournamentNode> $nodes
  * @property-read Collection<int, TournamentMatchLink> $links
  */
-#[Fillable([])]
+#[Fillable(['name', 'description', 'entrant_kind', 'capacity', 'repeat_appearances'])]
 #[UseFactory(TournamentFactory::class)]
 class Tournament extends Model
 {
@@ -39,10 +39,16 @@ class Tournament extends Model
     /** @use HasFactory<TournamentFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['entrant_kind' => EntrantKind::class, 'status' => TournamentStatus::class, 'capacity' => 'integer', 'repeat_appearances' => 'boolean', 'version' => 'integer'];
+        return [
+            'entrant_kind' => EntrantKind::class,
+            'status' => TournamentStatus::class,
+            'capacity' => 'integer',
+            'repeat_appearances' => 'boolean',
+            'version' => 'integer',
+        ];
     }
 
     /** @return HasMany<TournamentEntry, $this> */

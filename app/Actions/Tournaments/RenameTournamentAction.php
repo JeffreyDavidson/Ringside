@@ -20,7 +20,9 @@ class RenameTournamentAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
-            $tournament->forceFill(['name' => mb_trim($name), 'description' => $description, 'version' => $tournament->version + 1])->save();
+            $tournament->fill(['name' => mb_trim($name), 'description' => $description]);
+            $tournament->version++;
+            $tournament->save();
             activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'name' => $name, 'description' => $description])->log('tournament.renamed');
         }, attempts: 3);
     }

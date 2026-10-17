@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read ?Event $plannedEvent
  * @property-read Collection<int, TournamentMatchLink> $links
  */
-#[Fillable([])]
+#[Fillable(['walkover_reason'])]
 #[UseFactory(TournamentNodeFactory::class)]
 class TournamentNode extends Model
 {

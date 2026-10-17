@@ -35,10 +35,13 @@ class TournamentEntry extends Model
     /** @use HasFactory<TournamentEntryFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['seed' => 'integer', 'withdrawn' => 'boolean'];
+        return [
+            'seed' => 'integer',
+            'withdrawn' => 'boolean',
+        ];
     }
 
     /** @return BelongsTo<Tournament, $this> */

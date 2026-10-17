@@ -41,9 +41,11 @@ class SaveParticipantAction
             $participant->participant_type = $person->getMorphClass();
             $participant->participant_id = $person->id;
             $participant->label = $participantId === null ? $person->name : $participant->label;
-            $participant->role = $data->role;
-            $participant->joined_on = $participantId === null ? Carbon::parse($data->joinedOn) : $participant->joined_on;
-            $participant->left_on = $data->leftOn === null ? null : Carbon::parse($data->leftOn);
+            $participant->fill([
+                'role' => $data->role,
+                'joined_on' => $participantId === null ? Carbon::parse($data->joinedOn) : $participant->joined_on,
+                'left_on' => $data->leftOn === null ? null : Carbon::parse($data->leftOn),
+            ]);
             if ($participant->left_on instanceof Carbon && $participant->left_on->lt($participant->joined_on)) {
                 throw StorylineConflictException::state();
             }
