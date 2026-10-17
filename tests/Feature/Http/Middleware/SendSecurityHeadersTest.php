@@ -37,7 +37,7 @@ test('responses short-circuited by later web middleware still send the headers',
         ->create(['status' => UserStatus::Active]);
 
     actingAs($user);
-    $user->update(['status' => UserStatus::Inactive]);
+    $user->forceFill(['status' => UserStatus::Inactive])->save();
 
     // Act
     $response = get(route('dashboard'));

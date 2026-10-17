@@ -26,6 +26,22 @@ test('it stores the email trimmed and lowercase', function (string $email) {
     'surrounding whitespace' => ["  new.wrestler@example.test\t"],
 ]);
 
+test('it keeps the promotion and role out of mass assignment', function () {
+    // Arrange
+    $attributes = [
+        'promotion_id' => 1,
+        'email' => 'new.wrestler@example.test',
+        'role' => MembershipRole::Owner,
+    ];
+
+    // Act
+    $invitation = new PromotionInvitation($attributes);
+
+    // Assert
+    expect($invitation->email)->toBe('new.wrestler@example.test')
+        ->and($invitation->getAttributes())->not->toHaveKeys(['promotion_id', 'role']);
+});
+
 test('it casts the role to the membership role enum', function () {
     // Arrange
     $invitation = PromotionInvitation::factory()->withRole(MembershipRole::Manager)->create();

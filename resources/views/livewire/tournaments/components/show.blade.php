@@ -78,7 +78,7 @@
                     <x-form.inputs.select
                         wire:model="eventId"
                         :label="__('tournaments.event')"
-                        :options="$events->mapWithKeys(fn ($event) => [$event->id => $event->name.' · '.(($event->date === null ? null : \App\Models\Promotions\Promotion::toLocalTime($tournament->promotion, $event->date)->format('Y-m-d H:i T')) ?? __('tournaments.unscheduled'))])->all()"
+                        :options="$events->mapWithKeys(fn ($event) => [$event->id => $event->name.' · '.(($event->date === null ? null : \App\Services\Promotions\PromotionTimeZoneService::toLocalTime($tournament->promotion, $event->date)->format('Y-m-d H:i T')) ?? __('tournaments.unscheduled'))])->all()"
                         :placeholder="__('tournaments.choose_event')"
                         class="min-h-11"
                     />

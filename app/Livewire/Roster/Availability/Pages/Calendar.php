@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Roster\Availability\Pages;
 
 use App\Models\Events\Event;
-use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Events\EventRosterAvailabilityQuery;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -37,7 +37,7 @@ class Calendar extends Component
     {
         Gate::authorize('viewAny', Wrestler::class);
         if ($this->date === '') {
-            $this->date = now()->setTimezone(Promotion::zoneOf(app(PromotionContextService::class)->current()))->toDateString();
+            $this->date = now()->setTimezone(PromotionTimeZoneService::zoneOf(app(PromotionContextService::class)->current()))->toDateString();
         }
     }
 

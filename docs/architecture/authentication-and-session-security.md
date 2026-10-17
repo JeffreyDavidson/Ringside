@@ -21,6 +21,15 @@ the login page with the same `auth-forms.account_pending` status as a new accoun
 Other validation errors are still shown. A duplicate that only the database unique index catches (a concurrent
 registration, or an email the MySQL collation treats as equal) gets the same response and creates no user.
 
+Privileged fields are never mass assignable. `User` `role` and `status`, and `PromotionInvitation` `role`, are not in
+their models' fillable lists, so a request field named `role` or `status` is discarded even if a controller passes it
+on. `PromotionMembership` is the exception: Laravel fills a pivot class with the attributes it writes through
+`attach()` and `updateExistingPivot()`, so its `role` and `status` stay fillable; only the promotion membership
+actions write it and no request input reaches it. The code that sets them does
+so explicitly: registration (always `Basic`; a new account starts `Unverified`), `Users\CreateAction` and
+`Users\UpdateAction` (the administrator form's role), `ChangeStatusAction` (status), `InvitePromotionMemberAction`
+(the invitation role the owner chose) and the promotion membership actions.
+
 Submitting the password reset form answers every failed reset, whether the email is unknown, the token is invalid or
 expired, or the broker throttled it, with the same `passwords.token` error on the email field and the email kept as
 old input, so the form cannot be used to discover which emails are registered.

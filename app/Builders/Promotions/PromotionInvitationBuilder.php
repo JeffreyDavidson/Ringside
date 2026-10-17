@@ -6,6 +6,7 @@ namespace App\Builders\Promotions;
 
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
+use App\Support\EmailAddress;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -23,7 +24,7 @@ class PromotionInvitationBuilder extends Builder
     /** Invitations are stored normalized, so the email is normalized the same way before the exact comparison. */
     public function forEmail(string $email): static
     {
-        return $this->where('email', PromotionInvitation::normalizeEmail($email));
+        return $this->where('email', EmailAddress::normalize($email));
     }
 
     /**
@@ -31,7 +32,7 @@ class PromotionInvitationBuilder extends Builder
      */
     public function forEmails(array $emails): static
     {
-        return $this->whereIn('email', array_values(array_unique(array_map(PromotionInvitation::normalizeEmail(...), $emails))));
+        return $this->whereIn('email', array_values(array_unique(array_map(EmailAddress::normalize(...), $emails))));
     }
 
     /** Invitations that can still be accepted: the expiry moment itself counts as expired. */

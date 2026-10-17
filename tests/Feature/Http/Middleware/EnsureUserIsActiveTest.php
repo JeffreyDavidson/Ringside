@@ -27,7 +27,7 @@ test('signed in users who are not active are logged out with a status message', 
 
     actingAs($user);
     withSession(['private_session_marker' => 'account-only']);
-    $user->update(['status' => $status]);
+    $user->forceFill(['status' => $status])->save();
 
     // Act
     $response = get(route('dashboard'));

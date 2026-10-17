@@ -15,6 +15,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Facades\Date;
 
 test('it updates a title', function () {
@@ -177,7 +178,7 @@ describe('changing a scheduled debut date', function (): void {
         $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
         $title = Title::factory()->unactivated()->for($promotion, 'promotion')->create();
         resolve(DebutAction::class)->handle($title, Date::parse('2026-10-13 01:00:00'));
-        $sameLocalDay = Promotion::parseLocalTime($promotion, '2026-10-12');
+        $sameLocalDay = PromotionTimeZoneService::parseLocalTime($promotion, '2026-10-12');
 
         // Act
         resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $sameLocalDay));

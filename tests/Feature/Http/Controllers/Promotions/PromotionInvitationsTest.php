@@ -292,7 +292,7 @@ describe('seeing invitations', function () {
                 'email' => 'future.wrestler@example.test',
                 'status' => UserStatus::Unverified,
             ]);
-        $registered->update(['status' => UserStatus::Active]);
+        $registered->forceFill(['status' => UserStatus::Active])->save();
 
         actingAs($registered);
 

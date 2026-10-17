@@ -12,6 +12,7 @@ use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -128,23 +129,9 @@ class Event extends Model implements SoftDeletable
     {
         return Attribute::make(
             get: fn (): ?Carbon => $this->date instanceof Carbon
-                ? Promotion::toLocalTime($this->promotion, $this->date)
+                ? PromotionTimeZoneService::toLocalTime($this->promotion, $this->date)
                 : null
         );
-    }
-
-    /**
-     * Read a form date entered in the promotion's time zone as the instant to store. The value the form was prefilled
-     * with keeps the stored instant: in the repeated hour of a clock change it would otherwise read as the first
-     * occurrence and silently move an event that sits in the second.
-     */
-    public function parseLocalDate(string $value): Carbon
-    {
-        if ($this->date instanceof Carbon && $this->local_date?->format('Y-m-d\\TH:i') === $value) {
-            return $this->date;
-        }
-
-        return Promotion::parseLocalTime($this->promotion, $value);
     }
 
     /**

@@ -40,7 +40,7 @@
             >{{ $bout->link->match->event->name }}</a>
             @if ($bout->link->match->event->date)
                 <p class="text-muted-foreground mt-1">
-                    {{ \App\Models\Promotions\Promotion::toLocalTime($tournament->promotion, $bout->link->match->event->date)->format('M j, Y · g:i A T') }}
+                    {{ \App\Services\Promotions\PromotionTimeZoneService::toLocalTime($tournament->promotion, $bout->link->match->event->date)->format('M j, Y · g:i A T') }}
                 </p>
             @endif
             <p class="mt-1">{{ $bout->link->match->match_finish?->label() ?? __('tournaments.awaiting_result') }}</p>

@@ -17,6 +17,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -199,7 +200,7 @@ final class ChampionshipReignManager
         $event = $match->event;
 
         return $event->local_date?->isBefore(
-            Promotion::toLocalTime($event->promotion, now())->startOfDay(),
+            PromotionTimeZoneService::toLocalTime($event->promotion, now())->startOfDay(),
         ) ?? false;
     }
 
@@ -212,13 +213,13 @@ final class ChampionshipReignManager
     private function endReignIfChampionHasSinceLeft(TitleChampionship $reign, EventMatch $match, Wrestler|TagTeam $champion): void
     {
         $promotion = $match->event->promotion;
-        $eventDay = Promotion::toLocalTime($promotion, $reign->won_at)->startOfDay();
+        $eventDay = PromotionTimeZoneService::toLocalTime($promotion, $reign->won_at)->startOfDay();
 
         $leftAt = $champion->employments()->whereNotNull('ended_at')->get()
             ->map(fn (Employment $employment): ?Carbon => $employment->ended_at)
             ->merge($champion->retirements()->get()->map(fn (Retirement $retirement): Carbon => $retirement->started_at))
             ->filter(fn (?Carbon $date): bool => $date instanceof Carbon
-                && Promotion::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
+                && PromotionTimeZoneService::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
             ->min();
 
         if (! $leftAt instanceof Carbon) {

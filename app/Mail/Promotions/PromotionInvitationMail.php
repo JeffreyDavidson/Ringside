@@ -7,6 +7,7 @@ namespace App\Mail\Promotions;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -43,7 +44,7 @@ final class PromotionInvitationMail extends Mailable
                 'inviter' => $this->invitedBy->full_name,
                 'promotion' => $promotion->name,
                 'role' => $this->invitation->role->label(),
-                'expires' => Promotion::toLocalTime($promotion, $this->invitation->expires_at)->format('M j, Y'),
+                'expires' => PromotionTimeZoneService::toLocalTime($promotion, $this->invitation->expires_at)->format('M j, Y'),
                 'loginUrl' => route('login'),
                 'registerUrl' => route('register'),
             ],

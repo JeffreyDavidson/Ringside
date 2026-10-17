@@ -7,11 +7,11 @@ namespace App\Queries\Events;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as ModelCollection;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -78,7 +78,7 @@ class EventPackCardQuery
                 'referees' => implode(', ', $match->referees->map(fn (Referee $referee): string => $referee->full_name)->all()), 'warning' => $warning,
             ];
         }
-        $zone = Promotion::zoneOf($event->promotion);
+        $zone = PromotionTimeZoneService::zoneOf($event->promotion);
         $roster = array_values($roster);
 
         return [

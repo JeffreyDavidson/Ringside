@@ -11,9 +11,9 @@ use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\SponsorCommitmentForm;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
-use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use App\Services\Events\SponsorInstructionService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use App\ViewModels\EventPackViewModel;
 use App\ViewModels\SponsorCommitmentsViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -103,7 +103,7 @@ class SponsorCommitments extends Component
             return;
         }
         $this->form->reset();
-        $this->form->timezone = Promotion::zoneOf($event->loadMissing('promotion')->promotion);
+        $this->form->timezone = PromotionTimeZoneService::zoneOf($event->loadMissing('promotion')->promotion);
         $this->draftId = null;
         $this->draftVersion = 0;
         $this->submissionKey = (string) Str::uuid();

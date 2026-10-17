@@ -9,9 +9,9 @@ use App\Actions\Users\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Users\Forms\CreateEditForm;
-use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use App\Services\Promotions\PendingInvitationSummaryService;
+use App\Support\EmailAddress;
 use Illuminate\View\View;
 
 /**
@@ -86,7 +86,7 @@ class FormModal extends BaseFormModal
     /** Changing an email moves the account onto that address's invitations, so the administrator is told which. */
     private function warnAboutInvitationsReachedByEmailChange(User $user, string $previousEmail): void
     {
-        if (PromotionInvitation::normalizeEmail($previousEmail) === PromotionInvitation::normalizeEmail($user->email)) {
+        if (EmailAddress::normalize($previousEmail) === EmailAddress::normalize($user->email)) {
             return;
         }
 

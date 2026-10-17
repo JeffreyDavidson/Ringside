@@ -21,6 +21,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Facades\Date;
 
 /**
@@ -151,8 +152,8 @@ class Main extends BaseTable
                     $promotion = $context->isEnforced() ? $context->current() : null;
 
                     $builder->heldBetween(
-                        Promotion::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
-                        Promotion::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
+                        PromotionTimeZoneService::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
+                        PromotionTimeZoneService::parseLocalTime($promotion, "{$dateRange['maxDate']} 23:59:59.999999"),
                     );
                 }),
             SelectFilter::make(__('core.venue'), 'venue')

@@ -12,7 +12,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +34,7 @@ class PrepareLiveShowAction
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
             }
-            if (Promotion::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(Promotion::toLocalTime($event->promotion, now())->startOfDay())) {
+            if (PromotionTimeZoneService::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(PromotionTimeZoneService::toLocalTime($event->promotion, now())->startOfDay())) {
                 throw LiveShowException::oldEvent();
             }
             $run = new EventLiveRun;

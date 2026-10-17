@@ -26,13 +26,13 @@ class UpdateAction
                 'first_name' => $data->firstName,
                 'last_name' => $data->lastName,
                 'email' => $data->email,
-                'role' => $data->role,
             ];
 
             if ($data->password !== null) {
                 $attributes['password'] = $data->password;
             }
 
+            $lockedUser->role = $data->role;
             $lockedUser->update($attributes);
 
             return $lockedUser;

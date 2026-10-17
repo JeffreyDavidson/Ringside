@@ -113,7 +113,7 @@ describe('store', function (): void {
             ->create(['status' => UserStatus::Active]);
 
         actingAs($user);
-        $user->update(['status' => UserStatus::Inactive]);
+        $user->forceFill(['status' => UserStatus::Inactive])->save();
 
         // Act
         $response = get(route('dashboard'));
