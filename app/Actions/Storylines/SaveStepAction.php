@@ -33,14 +33,16 @@ class SaveStepAction
             $before = $step->attributesToArray();
             $step->promotion_id = $story->promotion_id;
             $step->storyline_id = $story->id;
-            $step->heading = $data->heading;
-            $step->description = $data->description;
-            $step->sequence = $data->sequence;
             $step->event_id = $data->source->eventId;
             $step->match_id = $data->source->matchId;
             $step->segment_id = $data->source->segmentId;
             $previousTarget = $step->target_on?->toDateString();
-            $step->target_on = $data->source->targetOn === null ? null : Carbon::parse($data->source->targetOn);
+            $step->fill([
+                'heading' => $data->heading,
+                'description' => $data->description,
+                'sequence' => $data->sequence,
+                'target_on' => $data->source->targetOn === null ? null : Carbon::parse($data->source->targetOn),
+            ]);
             $step->timezone = $stepId === null || $previousTarget !== $data->source->targetOn ? Promotion::query()->findOrFail($story->promotion_id)->timezone : $step->timezone;
             $step->target_at = $data->source->targetOn === null ? null : Carbon::parse($data->source->targetOn, $step->timezone)->utc();
             $step->source_context = $source['context'];

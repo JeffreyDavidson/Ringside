@@ -30,7 +30,7 @@ class MatchResultForm extends Form
 
     public function fillFrom(EventMatch $match): void
     {
-        $this->tournamentVersion = TournamentMatchLink::query()->with('tournament')->where('match_id', $match->id)->first()?->tournament->version;
+        $this->tournamentVersion = TournamentMatchLink::query()->with('tournament')->forMatchId($match->id)->first()?->tournament->version;
         $this->finish = $match->match_finish?->value;
         $this->winningSideId = $match->winning_side_id;
         $this->eliminations = $match->competitors

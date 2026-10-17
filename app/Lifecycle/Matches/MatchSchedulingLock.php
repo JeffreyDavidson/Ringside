@@ -61,7 +61,7 @@ final readonly class MatchSchedulingLock
      */
     public function lockMatchWithEventSet(EventMatch $eventMatch): EventMatch
     {
-        $link = TournamentMatchLink::query()->where('match_id', $eventMatch->id)->first();
+        $link = TournamentMatchLink::query()->forMatchId($eventMatch->id)->first();
         if ($link !== null) {
             $this->tournamentLocks->lock($link->tournament_id);
         }

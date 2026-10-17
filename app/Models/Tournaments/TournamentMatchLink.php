@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Tournaments;
 
+use App\Builders\Tournaments\TournamentMatchLinkBuilder;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Matches\EventMatch;
 use App\Models\Scopes\PromotionContextScope;
 use Database\Factories\Tournaments\TournamentMatchLinkFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 #[Fillable([])]
 #[UseFactory(TournamentMatchLinkFactory::class)]
+#[UseEloquentBuilder(TournamentMatchLinkBuilder::class)]
 class TournamentMatchLink extends Model
 {
     use BelongsToPromotion;

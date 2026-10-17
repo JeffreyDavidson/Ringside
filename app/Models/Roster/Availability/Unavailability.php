@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $created_at
  * @property-read Model $person
  */
-#[Fillable([])]
+#[Fillable(['starts_on', 'ends_on', 'reason'])]
 #[UseFactory(UnavailabilityFactory::class)]
 #[UseEloquentBuilder(UnavailabilityBuilder::class)]
 #[Table(name: 'roster_unavailabilities')]
@@ -47,9 +47,11 @@ class Unavailability extends Model
         return $this->morphTo();
     }
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['cancelled_at' => 'datetime'];
+        return [
+            'cancelled_at' => 'datetime',
+        ];
     }
 }

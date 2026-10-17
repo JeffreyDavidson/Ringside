@@ -20,7 +20,7 @@ class TournamentOutcomeManager
 
     public function ensureResultCanChange(EventMatch $match, MatchResultData $result): void
     {
-        $link = TournamentMatchLink::query()->with('node', 'tournament')->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
         if ($link === null) {
             return;
         }
@@ -60,7 +60,7 @@ class TournamentOutcomeManager
 
     public function resultRecorded(EventMatch $match): void
     {
-        $link = TournamentMatchLink::query()->where('match_id', $match->id)->first();
+        $link = TournamentMatchLink::query()->forMatchId($match->id)->first();
         if ($link !== null) {
             $this->synchronize($link->tournament()->firstOrFail());
         }

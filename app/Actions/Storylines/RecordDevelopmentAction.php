@@ -70,11 +70,13 @@ class RecordDevelopmentAction
             $development->promotion_id = $story->promotion_id;
             $development->storyline_id = $story->id;
             $development->storyline_step_id = $data->stepId;
-            $development->heading = $data->heading;
-            $development->description = $data->description;
-            $development->occurred_on = Carbon::parse($data->occurredOn);
+            $development->fill([
+                'heading' => $data->heading,
+                'description' => $data->description,
+                'occurred_on' => Carbon::parse($data->occurredOn),
+                'sequence' => $data->sequence,
+            ]);
             $development->timezone = $developmentId === null ? $zone : $development->timezone;
-            $development->sequence = $data->sequence;
             $development->event_id = $data->source->eventId;
             $development->match_id = $data->source->matchId;
             $development->segment_id = $data->source->segmentId;

@@ -65,7 +65,7 @@ class UpdateMatchAction
                 $this->addTitlesToMatchAction->handleWithinTransaction($lockedMatch, $data->titles);
             }
 
-            $link = TournamentMatchLink::query()->where('match_id', $lockedMatch->id)->first();
+            $link = TournamentMatchLink::query()->forMatchId($lockedMatch->id)->first();
             if ($link !== null) {
                 $tournament = $link->tournament()->firstOrFail();
                 $tournament->forceFill(['version' => $tournament->version + 1])->save();

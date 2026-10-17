@@ -26,10 +26,12 @@ class CreateAction
                 throw UnavailabilityException::duplicate();
             }
             $entry = new Unavailability;
-            $entry->forceFill([
-                'promotion_id' => $person->promotion_id, 'person_type' => $person->getMorphClass(), 'person_id' => $person->id,
-                'starts_on' => $startsOn, 'ends_on' => $endsOn, 'reason' => $reason, 'created_by' => $actor->id,
-            ])->save();
+            $entry->fill(['starts_on' => $startsOn, 'ends_on' => $endsOn, 'reason' => $reason]);
+            $entry->promotion_id = $person->promotion_id;
+            $entry->person_type = $person->getMorphClass();
+            $entry->person_id = $person->id;
+            $entry->created_by = $actor->id;
+            $entry->save();
             activity('availability')->performedOn($person)->causedBy($actor)
                 ->withProperties(['entry_id' => $entry->id, 'starts_on' => $startsOn, 'ends_on' => $endsOn])->log('create');
 

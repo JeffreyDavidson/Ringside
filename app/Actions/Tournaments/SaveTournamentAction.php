@@ -49,7 +49,18 @@ class SaveTournamentAction
             if ($competitors->count() !== count($data->competitorIds) || $competitors->contains(fn (\App\Models\Roster\Wrestlers\Wrestler|\App\Models\Roster\Referees\Referee|TagTeam $competitor): bool => ! $this->eligibility->allows($competitor))) {
                 throw TournamentException::entrantUnavailable();
             }
-            $locked->forceFill(['promotion_id' => $promotion->id, 'request_id' => $locked->exists ? $locked->request_id : $data->requestId, 'name' => mb_trim($data->name), 'description' => $data->description, 'entrant_kind' => $data->kind, 'capacity' => $data->capacity, 'repeat_appearances' => $data->repeatAppearances, 'status' => TournamentStatus::Draft, 'version' => $locked->exists ? $locked->version + 1 : 1])->save();
+            $locked->fill([
+                'name' => mb_trim($data->name),
+                'description' => $data->description,
+                'entrant_kind' => $data->kind,
+                'capacity' => $data->capacity,
+                'repeat_appearances' => $data->repeatAppearances,
+            ]);
+            $locked->promotion_id = $promotion->id;
+            $locked->request_id = $locked->exists ? $locked->request_id : $data->requestId;
+            $locked->status = TournamentStatus::Draft;
+            $locked->version = $locked->exists ? $locked->version + 1 : 1;
+            $locked->save();
             $locked->nodes()->delete();
             $locked->entries()->delete();
             foreach ($data->competitorIds as $offset => $id) {
