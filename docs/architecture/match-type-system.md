@@ -29,6 +29,8 @@ The enum answers structural questions about a format: how many sides, which comp
 
 The table mirrors the enum; the enum is the source of truth.
 
+Minimum and maximum entrants are enforced by `MatchCompetitorRequirements` only for the individual-side formats (Battle Royal and Royal Rumble). For every other format the values equal the side count, and the tag formats hold 4 to 10 wrestlers through their roster-member requirements.
+
 ## Enum methods
 
 - `label()` returns the translated name from `matches.type.{value}`.
@@ -41,7 +43,7 @@ The table mirrors the enum; the enum is the source of truth.
 
 ## Where the enum is used
 
-- **Match form** (`app/Livewire/Matches/Forms/CreateEditForm.php`): `matchType` is a nullable `MatchType` property validated with the `Enum` rule. `resetCompetitorsFor()` rebuilds the sides when the type changes, using `numberOfSides()` or one side per entrant. `MatchCompetitorRuleSet` adds the competitor validation for the chosen type.
+- **Match form** (`app/Livewire/Matches/Forms/CreateEditForm.php`): `matchType` is a nullable `MatchType` property validated with the `Enum` rule. `resetCompetitorsFor()` rebuilds the form's competitor list when the type changes: one side for Battle Royal and Royal Rumble (a single entrant list that `toData()` later expands to one side per entrant), otherwise `numberOfSides()` sides. `MatchCompetitorRuleSet` adds the competitor validation for the chosen type.
 - **Competitor layout** (`app/Livewire/Matches/Enums/CompetitorSelectionLayout.php`): `forMatchType()` maps each case to the layout of the competitor picker (singles, tag team, triple threat, fatal four way, battle royal or generic).
 - **Booking rules** (`app/Lifecycle/Matches/MatchCompetitorRequirements.php`, `AddCompetitorsToMatchAction`): enforce the required entries and roster members per side.
 
@@ -60,12 +62,18 @@ EventMatch::factory()->fatalFourWay()->create();
 EventMatch::factory()->battleRoyal()->create();
 ```
 
-`generateFullMatch()` takes a `match_type` string in its configuration array. `resolveMatchType()` maps the accepted spellings (`singles`, `tagteam` or `tag-team`, `triple` or `triple-threat`, `fatal4way` or `fatal-4-way`, `battleroyal` or `battle-royal`, `royalrumble` or `royal-rumble`) to cases and falls back to `Singles`. Other cases are set with `withMatchType()`.
+`generateFullMatch()` takes a `match_type` string in its configuration array. `resolveMatchType()` maps the accepted spellings (`singles`, `tagteam` or `tag-team`, `triple` or `triple-threat`, `fatal4way` or `fatal-4-way`, `battleroyal` or `battle-royal`, `royalrumble` or `royal-rumble`) to cases and falls back to `Singles`. `generateFullMatch()` cannot reach cases that `resolveMatchType()` does not list, and an unlisted string (for example `'triangle'`) silently becomes `Singles`. Use `withMatchType()` for those cases.
 
 ## Adding a match type
 
-1. Add the case to `MatchType` and every `match` expression that must handle it (`numberOfSides()`, the competitor and roster requirements, minimum and maximum).
-2. Add the `matches.type.{value}` translation.
-3. Map it in `CompetitorSelectionLayout::forMatchType()`.
-4. Add a migration only if existing rows need changing; the stored value is a plain string.
-5. Update the table above and add a spelling to `MatchFactory::resolveMatchType()` if factory configuration should accept it.
+1. Add the case to `MatchType` and to every `match` in it that must handle the case (`numberOfSides()`, `getAllowedCompetitorTypes()`, the roster and entry requirements, `getMinimumCompetitors()`, `getMaximumCompetitors()`).
+2. Add the label under `type.{value}` in `lang/en/matches.php` (`TranslationKeysTest` checks the literal keys).
+3. Add the case to `MatchCompetitorRuleSet::rules()` (`app/Livewire/Matches/Support/`). A case not listed there falls to the default `mixedCompetitorSideRules()`.
+4. If the format is a direct one-on-one or tag meeting, add it to the hard-coded type lists in `EventMatchBuilder::directMeetings()` and `BookingHistoryViewModel::directType()`.
+5. Optionally map it in `CompetitorSelectionLayout::forMatchType()`; unmapped cases use `Generic`.
+6. Add the spelling to `MatchFactory::resolveMatchType()` if factory configuration should accept it.
+7. Add rows to `tests/Unit/Enums/Matches/MatchTypeTest.php` and `tests/Unit/Livewire/Matches/Enums/CompetitorSelectionLayoutTest.php`; the project requires 100% coverage.
+8. Add a migration only if existing rows need changing; the stored value is a plain string.
+9. Update the table above.
+
+Other code compares against specific cases (`MatchEntryOrderRequirement` and `AddWrestlersToMatchAction` for Royal Rumble, tournament booking for Singles and Tag Team); a new case does not need to change them unless it shares that behaviour.

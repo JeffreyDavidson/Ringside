@@ -246,11 +246,11 @@ Side N: Nth competitor
 
 ### Configuration Validation
 
-The factory validates configurations and throws descriptive exceptions:
+The factory validates most configuration and throws descriptive exceptions; an unrecognised match type is not one of them:
 
 ```php
-// Invalid match type
-'match_type' => 'invalid'  // Throws InvalidArgumentException
+// Unrecognised match type
+'match_type' => 'invalid'  // Falls back to MatchType::Singles
 
 // Insufficient competitors for match type
 'match_type' => 'tagteam',
