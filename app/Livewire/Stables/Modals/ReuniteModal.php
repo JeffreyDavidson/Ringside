@@ -38,6 +38,13 @@ class ReuniteModal extends ModalComponent
 
     public ReuniteForm $form;
 
+    private StableFormerMemberEligibility $eligibility;
+
+    public function boot(StableFormerMemberEligibility $eligibility): void
+    {
+        $this->eligibility = $eligibility;
+    }
+
     public function mount(int $stableId): void
     {
         $this->stableId = $stableId;
@@ -80,7 +87,7 @@ class ReuniteModal extends ModalComponent
     #[Computed]
     public function formerMembers(): StableMembershipData
     {
-        return resolve(StableFormerMemberEligibility::class)->availableMembersFor($this->stable);
+        return $this->eligibility->availableMembersFor($this->stable);
     }
 
     /** @return Collection<int, Wrestler> */

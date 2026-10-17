@@ -62,6 +62,8 @@ class FormModal extends BaseFormModal
 
     private UpdateMatchAction $updateMatchAction;
 
+    private BookableRosterSearch $rosterSearch;
+
     #[\Override]
     public function mount(int|string|null $modelId = null, ?int $eventId = null): void
     {
@@ -76,10 +78,12 @@ class FormModal extends BaseFormModal
         MatchFormDummyData $dummyData,
         AddMatchForEventAction $addMatchForEventAction,
         UpdateMatchAction $updateMatchAction,
+        BookableRosterSearch $rosterSearch,
     ): void {
         $this->dummyData = $dummyData;
         $this->addMatchForEventAction = $addMatchForEventAction;
         $this->updateMatchAction = $updateMatchAction;
+        $this->rosterSearch = $rosterSearch;
     }
 
     protected function getModelClass(): string
@@ -131,8 +135,12 @@ class FormModal extends BaseFormModal
 
     /** @return LinkedSnapshot|array{error: string} */
     #[Renderless]
-    public function checkHistory(int $page = 1): array
-    {
+    public function checkHistory(
+        BookingHistorySelection $selection,
+        BookingHistoryQuery $historyQuery,
+        BookingHistoryLinks $historyLinks,
+        int $page = 1,
+    ): array {
         $editedMatch = null;
 
         if ($this->form->isEditing()) {
@@ -150,16 +158,16 @@ class FormModal extends BaseFormModal
         }
 
         try {
-            resolve(BookingHistorySelection::class)->validate($event, $this->form->matchType, $this->form->competitors);
+            $selection->validate($event, $this->form->matchType, $this->form->competitors);
         } catch (ValidationException) {
             return ['error' => __('matches.history.unavailable_selection')];
         }
 
-        $snapshot = resolve(BookingHistoryQuery::class)->get(
+        $snapshot = $historyQuery->get(
             $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
         );
 
-        return resolve(BookingHistoryLinks::class)->add($snapshot);
+        return $historyLinks->add($snapshot);
     }
 
     /**
@@ -183,7 +191,7 @@ class FormModal extends BaseFormModal
         $event = $this->bookedEvent();
         $event->loadMissing('promotion');
 
-        return resolve(BookableRosterSearch::class)->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString());
+        return $this->rosterSearch->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString());
     }
 
     /**
@@ -220,7 +228,7 @@ class FormModal extends BaseFormModal
     #[Computed]
     public function selectedRosterLabels(): array
     {
-        $search = resolve(BookableRosterSearch::class);
+        $search = $this->rosterSearch;
         $sides = collect($this->form->competitors);
 
         return [
