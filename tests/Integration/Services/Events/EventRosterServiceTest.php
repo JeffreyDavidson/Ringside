@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Matches\MatchFinish;
+use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
@@ -131,4 +132,15 @@ test('has nobody on the roster of an event that has no matches', function (): vo
     // Assert
     expect($roster['entries'])->toBeEmpty()
         ->and($roster['people'])->toBeEmpty();
+});
+
+test('keys people the same way the roster date availability does', function (): void {
+    // Arrange
+    $people = [Wrestler::factory()->create(), TagTeam::factory()->create(), Referee::factory()->create()];
+
+    // Act
+    $keys = array_map(EventRosterService::key(...), $people);
+
+    // Assert
+    expect($keys)->toBe(array_map(RosterDateAvailability::key(...), $people));
 });

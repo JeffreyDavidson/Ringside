@@ -52,7 +52,7 @@ test('reads the matches of a card once with the current members of its tag teams
         ->and($team->currentWrestlers->modelKeys())->toBe([$lower->id, $higher->id]);
 });
 
-test('reads the same matches for a restored event that is still deleted, whatever promotion is current', function (): void {
+test('still reads the matches of an event that is soft-deleted, as a restore needs', function (): void {
     // Arrange
     $event = Event::factory()
         ->create(['date' => now()->addWeek()]);

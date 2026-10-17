@@ -15,6 +15,7 @@ use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineStep;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -135,6 +136,8 @@ describe('show', function (): void {
         // Assert
         $response
             ->assertOk()
+            ->assertViewIs('events.show')
+            ->assertViewHas('calendarUnavailable', fn (SupportCollection $people): bool => $people->pluck('id')->all() === [$blocked->id])
             ->assertSee(__('availability.card_warning'))
             ->assertSeeHtml("Blocked Bruiser · {$day}")
             ->assertDontSeeHtml('Free Fighter ·');
@@ -163,6 +166,8 @@ describe('show', function (): void {
         // Assert
         $response
             ->assertOk()
+            ->assertViewIs('events.show')
+            ->assertViewHas('calendarUnavailable', fn (SupportCollection $people): bool => $people->isEmpty())
             ->assertDontSee(__('availability.card_warning'));
     });
 
