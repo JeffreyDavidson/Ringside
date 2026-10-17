@@ -227,7 +227,7 @@ For full usage — backend examples, browser testing, screenshots, responsive ch
 
 ## Meta Repo
 
-Plans, the status list, and brand work for Ringside live in the private `ringside-meta` repository, checked out at `~/Projects/ringside-meta`, not in this repository. This replaces the global `tasks/todo.md`, `_plans/status.md`, and `branding/` locations for this project.
+Plans, the status list, and brand work for Ringside live in the private `ringside-meta` repository, checked out at `~/Projects/infinity-digital-llc/ringside-meta`, not in this repository. This replaces the global `tasks/todo.md`, `_plans/status.md`, and `branding/` locations for this project.
 
 - Write the plan for a piece of work to `cycles/YYYY-MM-DD-short-name/summary.md` there, keep its progress notes current, and finish with the review section in the same file.
 - Keep the status list at `status.md` there.
