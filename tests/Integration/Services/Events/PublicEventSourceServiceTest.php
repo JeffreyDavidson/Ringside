@@ -149,12 +149,12 @@ describe('public event source service', function (): void {
         $service = resolve(PublicEventSourceService::class);
         $wrestlers = Wrestler::factory()->bookable()->for($promotion)->count(6)->create();
         EventMatch::factory()->for($event)->withCompetitors([$wrestlers[0], $wrestlers[1]])->create();
-        $one = recordStatements(fn () => $service->get($event->refresh()));
+        $one = recordStatements(fn () => $service->get($event));
         EventMatch::factory()->for($event)->withCompetitors([$wrestlers[2], $wrestlers[3]])->create();
         EventMatch::factory()->for($event)->withCompetitors([TagTeam::factory()->for($promotion)->create(), $wrestlers[4]])->create();
 
         // Act
-        $many = recordStatements(fn () => $service->get($event->refresh()));
+        $many = recordStatements(fn () => $service->get($event));
 
         // Assert
         expect($many)->toHaveCount(count($one) + 1);
