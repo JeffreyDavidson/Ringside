@@ -31,6 +31,8 @@ single-consumer relationship traits or speculative override helpers.
 - Domain-organized builders in `app/Builders/{Domain}/`
 - Domain-organized, read-only services in `app/Services/{Domain}/` for cross-record calculations, lookups and the request's promotion context. Services throw no business exceptions, take no locks, validate nothing and never depend on `app/Lifecycle`; guards and locks live in Lifecycle and state-changing workflows belong in Actions.
 - Domain-organized enums in `app/Enums/{Domain}/`
+- Domain-organized queries in `app/Queries/{Domain}/`: one `{Purpose}Query` runs one database query (plus its eager loads) and returns the results or the prepared builder; the caller finishes it. A page that needs several reads has a ViewModel in `app/ViewModels/{Domain}/`, called only from controllers and Livewire components, which returns a ready-to-render array. See `.ai/rules/queries.md` and `.ai/rules/view-models.md`.
+- Lifecycle (`app/Lifecycle`) holds eligibility guards, requirement checks, period writers and row locks; Services read; Actions lock, check the rules, write and throw business exceptions. See [Lifecycle Operation Boundaries](lifecycle-operation-boundaries.md).
 
 ## Related Model Resolution
 
@@ -98,65 +100,49 @@ single-consumer relationship traits or speculative override helpers.
 
 ## Data Object Pattern
 
-**Data objects are pure data containers - NEVER add methods:**
+Actions take typed readonly Data objects from `app/Data`, never arrays, so they are safe to call from a controller, a Livewire component, a job or a command. A Data object carries data only: constructor-promoted public readonly properties, an optional static named constructor such as `fromValidated()`, and simple value-level checks on its own fields (`StableMembershipData::isEmpty()`, `getTotalMemberCount()`). It never reads the clock, queries the database or decides whether an operation is allowed. `tests/Feature/Architecture/DataArchitectureTest.php` enforces this. See `.ai/rules/data.md`.
 
 ```php
-// ✅ CORRECT: Pure data container
+// Pure data container with a named constructor
 readonly class StableData
 {
     public function __construct(
         public string $name,
         public ?Carbon $start_date,
-        public Collection $tagTeams,
-        public Collection $wrestlers,
+        public StableMembershipData $members,
+        public ?Carbon $end_date = null,
     ) {}
 }
 
-// ✅ CORRECT: Access properties directly in Actions
-$stable = Stable::create([
-    'name' => $stableData->name,
-]);
-
-// ❌ WRONG: Never add toArray() or other methods to Data objects
-readonly class StableData
-{
-    public function toArray(): array { /* NEVER DO THIS */ }
-}
+// Actions read the properties
+$stable = Stable::query()->create(['name' => $stableData->name]);
 ```
 
-**Key Principles:**
-- Data objects should ONLY have constructor and public readonly properties
-- Actions access data via properties: `$data->property`
-- No `toArray()`, `validate()`, `transform()`, or other methods on Data objects
-- Keep Data objects as simple, immutable data containers
+Input is validated before the Data object is built: in the Form Request or Livewire form, with permissions checked at the route (`->can()`) or the component (`Gate::authorize`). Actions do not call `Validator::make`, `Gate::authorize` or `abort()`; they lock, check business and state rules, write, and throw business exceptions. A non-HTTP caller validates its own input first.
 
 ## Policy Pattern
 
-**All policies use before hook pattern:**
-```php
-public function before(User $user, string $ability): ?bool
-{
-    if ($user->isAdministrator()) {
-        return true; // Bypass all checks for admins
-    }
-    return null; // Continue to individual method checks
-}
+`PromotionGate` (`Gate::before`) decides every ability on promotion-owned models from the user's membership role, so the model policies are stubs that deny whatever the gate leaves alone. The single `before()` hook lives in `PromotionGate`, not in each policy. This is a deliberate exception to the usual "super-admin bypass only" use of `Gate::before`; the reasons and costs are in [Decision 0001](../decisions/0001-promotion-gate-is-the-permission-engine.md).
 
-public function viewAny(User $user): bool
+```php
+class WrestlerPolicy
 {
-    return false; // Will be bypassed by before hook for administrators
+    public function view(User $user, Wrestler $wrestler): bool
+    {
+        return false; // PromotionGate answers first; this only runs when it falls through
+    }
 }
 ```
 
-**Benefits:** Eliminates repetitive administrator checks in every method.
+New role rules go in `MembershipRole` or the gate's subject tables, with a case per role in `tests/Integration/Policies/PromotionGateTest.php`.
 
 ## Controller Patterns
 
-### Invokable Controllers
-- Domain-organized in `app/Http/Controllers/{Domain}/`
-- Always authorize using `Gate::authorize()` before business logic
-- Return views with explicit data arrays when needed
-- Example: `return view('tag-teams.index', ['data' => $data]);`
+### Resource and invokable controllers
+- Domain-organized in `app/Http/Controllers/{Domain}/`, with no base controller; each class stands alone.
+- A resource controller is named after the singular resource (`WrestlerController`, `EventPackController`) and uses only the standard resource methods it needs. Plural URIs do not make the class name plural. A standalone action is an invokable controller named after the action (`UnpublishEventController`).
+- Authorize in the route file with `->can('view', 'wrestler')` or `->can('viewAny', Wrestler::class)`, not inside the controller. Controllers return views with explicit data arrays: `return view('wrestlers.show', ['wrestler' => $wrestler]);`.
+- A controller that writes validates through a Form Request and hands a Data object to an Action (`EventPackController::update`).
 
 ### View Naming Convention
 - Controller view names use dot notation: `tag-teams.index`

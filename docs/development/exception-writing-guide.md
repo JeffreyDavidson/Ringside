@@ -12,14 +12,14 @@ Three shared folders exist:
 - `Scheduling` for booking and availability conflicts across domains.
 - `Lifecycle` for lifecycle rules that belong to no single record.
 
-Do not create type folders such as `BusinessRules/` or `Data/`. A future shared "changed by someone else" exception goes at the top level next to `BaseBusinessException`.
+Do not create type folders such as `BusinessRules/` or `Data/`. The shared "changed by someone else" exception, `RecordChangedException`, sits at the top level next to `BaseBusinessException`; actions throw `RecordChangedException::changed()` when a version or fingerprint no longer matches, instead of writing a per-domain copy.
 
 ## How to name it
 
 Use one of two families:
 
 - `CannotBe{Verb}edException` for a disallowed state change (`CannotBeRetiredException`), with one static factory per reason.
-- `{Feature}Exception` for a feature error (`BudgetException`).
+- `{Feature}Exception` for a feature error (`BudgetException`), with one named static factory per failure (`BudgetException::archived()`), never a catch-all factory that takes a message key.
 
 Classes are `final`, extend `BaseBusinessException` and end in `Exception`.
 
@@ -43,7 +43,7 @@ final class CannotBeRetiredException extends BaseBusinessException
 
 ## Messages
 
-Messages are shown to users, so they are translated. Use the key `<domain>.errors.<operation>.<case>` (for example `titles.errors.retired.already_retired`) and say what went wrong and, where useful, what to do next.
+Messages are shown to users, so they are translated, never hard-coded English. Use the key `<domain>.errors.<operation>.<case>` (for example `titles.errors.retired.already_retired`) and say what went wrong and, where useful, what to do next. Several older feature exceptions (budget, live show, sponsors, storylines, tournaments) still read flat keys from their feature file, such as `event-budget.archived`; they are translated too, so leave their keys alone and use the full pattern for new factories.
 
 ## Documentation
 

@@ -25,7 +25,7 @@ Laravel's usual shape is one policy per model, each answering "may this user do 
 
 ## Trade-off
 
-Laravel's own guidance, and the global convention in this developer's rules, is that `Gate::before` is for a genuine super-admin bypass and that straightforward model permissions belong in the model's policy. Ringside deliberately breaks that for the reasons above. The cost:
+Laravel's own guidance, and the project owner's global convention, is that `Gate::before` is for a genuine super-admin bypass and that straightforward model permissions belong in the model's policy. Ringside deliberately breaks that for the reasons above. The cost:
 
 - A reader who opens `WrestlerPolicy` finds only denials and has to know to look in `PromotionGate`. The stub docblocks and `.ai/rules/policies.md` say so.
 - Per-model rules that genuinely differ (sponsors, crew contacts, storylines) need a table entry or a real policy instead of being obvious from the model's policy file.

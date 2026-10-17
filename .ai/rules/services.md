@@ -6,7 +6,7 @@ paths:
 # Services
 
 ## Services only read
-A Service answers a question about records without changing anything: a cross-record calculation, a lookup that spans several models, or the request's promotion context (PromotionContextService). It takes no row lock, opens no transaction, writes nothing, validates nothing and throws no business exception. Guards that throw, locks and lifecycle period writes live in app/Lifecycle; validation lives in the Form Request or Livewire component that feeds the Action; transactions, locks and persistence live in Actions. A class that mostly refuses an operation belongs in Lifecycle even when it is named `...Service`.
+A Service answers a question about records without changing anything: a cross-record calculation, a lookup that spans several models, or the request's promotion context (PromotionContextService). It takes no row lock, opens no transaction, writes nothing, validates nothing and throws no business exception. Guards that throw, locks and lifecycle period writes live in app/Lifecycle; validation lives in the Form Request or Livewire component that feeds the Action (the Production screen also calls the shared Lifecycle check, `EventProductionRequirements`, which the save re-runs); transactions, locks and persistence live in Actions. A class that mostly refuses an operation belongs in Lifecycle even when it is named `...Service`.
 
 ## Services never depend on Lifecycle or Actions
 Lifecycle may read through a Service (StableActivityEligibility reads current members through StableMembershipService, TournamentMatchRequirements reads the bracket through TournamentBracketService), so the dependency runs from Lifecycle to Services only. A Service never injects a Lifecycle guard, writer or lock, an Action, or anything from the view layer. ServiceArchitectureTest fails when a Service uses the Validator, ValidationException, App\Exceptions, App\Lifecycle, App\Actions, the database connection or the DB facade.
@@ -19,3 +19,6 @@ Keep membership Services focused on reading current and historical relationship 
 
 ## Organize services by responsibility domain
 Keep Services organized by technical layer first and responsibility domain second (Events, Promotions, Roster/Stables, Titles, Tournaments) and name each class after what it computes followed by `Service`. Do not create a parallel Lifecycle service namespace.
+
+## One owner for the roster key
+`EventRosterService::key()` builds the `type:id` key (`wrestler:12`, `tag_team:3`, `referee:7`) that tells wrestlers, tag teams and referees apart. Call it, or `RosterDateAvailability::key()`, which delegates to it, instead of concatenating `getMorphClass()` and the id again. `EventRosterServiceTest` pins the two to the same format.

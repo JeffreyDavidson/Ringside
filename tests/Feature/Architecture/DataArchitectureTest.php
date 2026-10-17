@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Data\Stables\StableMembershipData;
 
 /*
- * Data objects carry data (.ai/rules/data.md): readonly, a promoted constructor, static named constructors and the
- * named value-level checks below. No other methods, no now() and no queries.
+ * Data objects carry data (.ai/rules/data.md): readonly, a promoted constructor, static named constructors (static methods
+ * that return static, self or the class) and the named value-level checks below. No other methods, no now() and no queries.
  */
 $dataDirectory = __DIR__.'/../../../app/Data/';
 
@@ -39,7 +39,7 @@ test('data objects only have a constructor, static named constructors and allowe
     // Act
     $unexpectedMethods = collect($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
         ->reject(fn (ReflectionMethod $method): bool => $method->isConstructor()
-            || $method->isStatic()
+            || ($method->isStatic() && in_array((string) $method->getReturnType(), ['static', 'self', $class], true))
             || in_array($method->getName(), $allowedChecks[$class] ?? [], true))
         ->map(fn (ReflectionMethod $method): string => $method->getName())
         ->values()
