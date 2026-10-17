@@ -42,9 +42,15 @@ class CreateEdit extends Form
 
     public function data(): TournamentData
     {
-        $this->validate(['name' => ['required', 'string', 'max:255'], 'description' => ['nullable', 'string', 'max:10000'], 'kind' => ['required', Rule::enum(EntrantKind::class)], 'capacity' => [Rule::in([4, 8, 16])], 'repeatAppearances' => ['boolean'], 'entrants' => ['required', 'list', 'min:2', 'max:'.$this->capacity], 'entrants.*' => ['integer', 'distinct']]);
+        $this->validate([...$this->namingRules(), 'requestId' => ['nullable', 'uuid'], 'kind' => ['required', Rule::enum(EntrantKind::class)], 'capacity' => [Rule::in([4, 8, 16])], 'repeatAppearances' => ['boolean'], 'entrants' => ['required', 'list', 'min:2', 'max:'.$this->capacity], 'entrants.*' => ['integer', 'distinct']]);
 
         return new TournamentData($this->name, $this->description, EntrantKind::from($this->kind), $this->capacity, $this->repeatAppearances, array_map(intval(...), $this->entrants), $this->requestId);
+    }
+
+    /** Validates only the name and description, for renaming a tournament that is already running. */
+    public function validateNaming(): void
+    {
+        $this->validate($this->namingRules());
     }
 
     public function move(int $index, int $direction): void
@@ -55,5 +61,11 @@ class CreateEdit extends Form
         $entrants = $this->entrants;
         [$entrants[$index],$entrants[$index + $direction]] = [$entrants[$index + $direction], $entrants[$index]];
         $this->entrants = array_values($entrants);
+    }
+
+    /** @return array<string, list<string>> */
+    private function namingRules(): array
+    {
+        return ['name' => ['required', 'string', 'max:255'], 'description' => ['nullable', 'string', 'max:10000']];
     }
 }

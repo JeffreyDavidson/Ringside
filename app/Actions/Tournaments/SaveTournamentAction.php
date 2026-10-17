@@ -18,8 +18,6 @@ use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class SaveTournamentAction
 {
@@ -27,10 +25,6 @@ class SaveTournamentAction
 
     public function handle(Promotion $promotion, TournamentData $data, ?Tournament $tournament = null, ?int $version = null): Tournament
     {
-        Validator::make(['name' => $data->name, 'capacity' => $data->capacity, 'competitors' => $data->competitorIds], ['name' => ['required', 'string', 'max:255'], 'capacity' => [Rule::in([4, 8, 16])], 'competitors' => ['required', 'list', 'min:2', 'max:'.$data->capacity], 'competitors.*' => ['required', 'integer', 'distinct']])->validate();
-
-        Validator::make(['request_id' => $data->requestId], ['request_id' => ['nullable', 'uuid']])->validate();
-
         return DB::transaction(function () use ($promotion, $data, $tournament, $version): Tournament {
             if (! $tournament instanceof Tournament && $data->requestId !== null) {
                 Promotion::query()->whereKey($promotion->id)->lockForUpdate()->firstOrFail();

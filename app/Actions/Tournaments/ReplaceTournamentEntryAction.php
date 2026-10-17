@@ -15,7 +15,6 @@ use App\Models\Tournaments\TournamentEntry;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class ReplaceTournamentEntryAction
 {
@@ -23,7 +22,6 @@ class ReplaceTournamentEntryAction
 
     public function handle(TournamentEntry $entry, int $competitorId, int $version, string $reason): void
     {
-        Validator::make(['reason' => $reason], ['reason' => ['required', 'string', 'max:2000']])->validate();
         DB::transaction(function () use ($entry, $competitorId, $version, $reason): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
