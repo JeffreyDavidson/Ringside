@@ -21,7 +21,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Events\PublicEventSourceQuery;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Assert;
 

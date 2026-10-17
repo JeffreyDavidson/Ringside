@@ -7,7 +7,7 @@ use App\Actions\Events\SaveEventProductionAction;
 use App\Data\Events\EventProductionData;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\EventLiveRun;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 require_once __DIR__.'/BookingConcurrencyTest.php';
 require_once __DIR__.'/../../Fixtures/production.php';

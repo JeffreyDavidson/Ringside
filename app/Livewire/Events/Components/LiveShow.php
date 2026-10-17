@@ -17,7 +17,7 @@ use App\Exceptions\Events\LiveShowException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Services\Events\LiveShowTimingService;
-use App\ViewModels\LiveShowViewModel;
+use App\ViewModels\Events\LiveShowViewModel;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;

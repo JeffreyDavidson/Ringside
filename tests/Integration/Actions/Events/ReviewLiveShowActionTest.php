@@ -15,7 +15,7 @@ use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Matches\EventMatch;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 test('removed pending matches need an explicit skip and retained attendance is labelled unassigned', function (): void {
     // Arrange

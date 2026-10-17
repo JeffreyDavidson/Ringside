@@ -8,7 +8,7 @@ use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 /** @return array{event: Event, contact: CrewContact, match: EventMatch, production: array{notes: ?string, assignments: list<array{id: string, contact_id: int, name: string, role: string, station: ?string, call_at: ?string, timezone: string, offset: ?string, setup: ?string, during: ?string, strike: ?string, active: bool}>, cues: list<array{id: string, item_key: string, subject: string, trigger: string, instruction: string, role: ?string, owner_id: ?string, owner_name: ?string, owner_station: ?string, owner_role: ?string, owner_contact_id: ?int, pronunciation: ?string, track: ?string, url: ?string}>}} */
 function productionFixture(): array

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../../Fixtures/live-show.php';
+require_once __DIR__.'/../../../Fixtures/live-show.php';
 
 use App\Actions\Events\SaveEventPackAction;
 use App\Data\Events\EventPackData;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Promotions\Promotion;
-use App\ViewModels\EventPackViewModel;
-use App\ViewModels\EventProductionViewModel;
+use App\ViewModels\Events\EventPackViewModel;
+use App\ViewModels\Events\EventProductionViewModel;
 
 /** @return int how many statements read the event's saved pack */
 function packReads(Closure $callback): int
@@ -61,7 +61,7 @@ test('the live sheet asks for review only once the saved pack has moved on from 
 
 test('the sheet leaves the permission check to its caller', function (): void {
     // Arrange
-    require_once __DIR__.'/../../Fixtures/production.php';
+    require_once __DIR__.'/../../../Fixtures/production.php';
     $event = productionFixture()['event'];
     actingAsPromotionMember(Promotion::query()->findOrFail($event->promotion_id), MembershipRole::Member);
 

@@ -23,7 +23,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
 use App\ValueObjects\UsdAmount;
-use App\ViewModels\EventBudgetViewModel;
+use App\ViewModels\Events\EventBudgetViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;

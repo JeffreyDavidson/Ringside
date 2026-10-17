@@ -9,7 +9,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\DashboardViewModel;
+use App\ViewModels\Dashboard\DashboardViewModel;
 
 describe('upcoming events', function (): void {
     it('lists the next scheduled events soonest first with their match counts', function (): void {

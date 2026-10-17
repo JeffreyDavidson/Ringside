@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ViewModels;
+namespace App\ViewModels\Storylines;
 
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;

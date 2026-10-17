@@ -37,7 +37,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Services\Tournaments\TournamentBracketService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Database\Eloquent\Collection;
 
 it('protects linked bookings from ordinary match and event deletion', function (): void {

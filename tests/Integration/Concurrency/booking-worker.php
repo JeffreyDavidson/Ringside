@@ -96,7 +96,7 @@ use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;

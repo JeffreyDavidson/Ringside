@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Events;
 
 use App\Queries\Events\PublishedEventQuery;
-use App\ViewModels\PublicEventViewModel;
+use App\ViewModels\Events\PublicEventViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 

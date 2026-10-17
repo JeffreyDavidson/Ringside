@@ -14,7 +14,7 @@ use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
 use App\Models\Users\User;
 use App\Services\Events\SponsorInstructionService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Str;
 
 /**

@@ -7,7 +7,7 @@ use App\Data\Events\EventPackData;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 test('saving locks the owning event then its matches then the pack before inserting', function (): void {
     // Arrange

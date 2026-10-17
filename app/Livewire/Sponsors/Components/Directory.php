@@ -11,7 +11,7 @@ use App\Livewire\Sponsors\Forms\SponsorForm;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\SponsorCommitmentsViewModel;
+use App\ViewModels\Events\SponsorCommitmentsViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;

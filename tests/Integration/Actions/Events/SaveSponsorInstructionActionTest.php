@@ -23,7 +23,7 @@ use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\EventSponsorCommitment;
 use App\Services\Events\SponsorInstructionService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;

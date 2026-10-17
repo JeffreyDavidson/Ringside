@@ -13,7 +13,7 @@ use App\Data\Events\LiveShowReviewData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Spatie\Activitylog\Models\Activity;
 
 require_once __DIR__.'/../../../Fixtures/production.php';

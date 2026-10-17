@@ -17,7 +17,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineStep;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;

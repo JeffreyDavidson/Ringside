@@ -29,7 +29,7 @@ use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineStep;
 use App\Queries\Storylines\CreativeRosterQuery;
 use App\Queries\Storylines\StorylineSourceQuery;
-use App\ViewModels\StorylineViewModel;
+use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;

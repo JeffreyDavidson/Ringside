@@ -9,7 +9,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 
