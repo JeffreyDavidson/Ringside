@@ -6,7 +6,7 @@ paths:
 # Queries
 
 ## One class, one database query
-A Query runs exactly one database query and returns what it found, or the prepared builder for the caller to finish (for example a Livewire page that calls `paginate()`). It is named `{Purpose}Query` in a domain folder. The caller decides what to do with the result: paginate it, count it, reshape it or combine it with other reads. Eager loads (`with`, `withCount` and similar subqueries) belong to that one query; a second `get()`, `count()`, `find()`, `load()` or lazy relation access on a different table does not.
+A Query runs one database query plus the eager loads of that same result set, and returns what it found, or the prepared builder for the caller to finish (for example a Livewire page that calls `paginate()`). It is named `{Purpose}Query` in a domain folder. The caller decides what to do with the result: paginate it, count it, reshape it or combine it with other reads. Eager loads (`with`, `withCount` and similar subqueries) of that result set belong to the query; a Query may eager-load a relation onto models it was given only if it returns them, and the caller then uses the returned models, not its own copies; a second `get()`, `count()`, `find()`, `load()` or lazy relation access on a different table does not.
 
 ## Several reads for a page are a ViewModel
 A class that gathers several reads for one page or payload is that page's ViewModel (`app/ViewModels`, see view-models.md), or the ViewModel calls one single-query Query per read. Do not grow a Query into a bag of reads, a pipeline of dependent lookups or a payload builder. Reusable, chainable filters on one model live on its Builder (builders.md); a Query composes them into its one query.

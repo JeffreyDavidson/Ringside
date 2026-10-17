@@ -144,3 +144,18 @@ it('refuses a request id that is not a valid uuid', function (): void {
     $page->assertHasErrors('form.requestId');
     expect(Tournament::query()->count())->toBe(1);
 });
+
+it('renders twenty tournaments a page and offers a second page', function (): void {
+    // Arrange
+    actingAs(administrator());
+    Tournament::factory()
+        ->count(21)
+        ->create();
+
+    // Act
+    $page = livewire(Index::class);
+
+    // Assert
+    expect($page->viewData('tournaments')->count())->toBe(20);
+    $page->assertSeeHtml('aria-label="Go to page 2"');
+});

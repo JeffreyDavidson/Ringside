@@ -77,8 +77,11 @@ class BookingHistoryViewModel
             ->mapWithKeys(fn (stdClass $row): array => [$row->competitor_type.':'.$row->competitor_id => (string) $row->latest_date])
             ->all();
 
+        $withMatches = [];
         foreach ($subjects->groupBy(fn (Wrestler|TagTeam $subject): string => $subject->getMorphClass()) as $group) {
-            $this->recentMatchesQuery->get(new Collection($group->all()), $event->promotion_id, $reference, $excludedMatchId, self::PREVIEW_ROWS);
+            foreach ($this->recentMatchesQuery->get(new Collection($group->all()), $event->promotion_id, $reference, $excludedMatchId, self::PREVIEW_ROWS) as $loaded) {
+                $withMatches[$this->key($loaded)] = $loaded;
+            }
         }
 
         $snapshot['available'] = true;
@@ -87,7 +90,7 @@ class BookingHistoryViewModel
             'latestRecordedDate' => isset($latest[$this->key($subject)])
                 ? Carbon::parse($latest[$this->key($subject)])->setTimezone(PromotionTimeZoneService::zoneOf($event->promotion))->toDateString()
                 : null,
-            'recent' => array_values($subject->matches->map(fn (EventMatch $match): array => $this->row($match))->all()),
+            'recent' => array_values($withMatches[$this->key($subject)]->matches->map(fn (EventMatch $match): array => $this->row($match))->all()),
         ])->all());
 
         if (count($selection) === 2 && $selection[0]['side'] !== $selection[1]['side']
