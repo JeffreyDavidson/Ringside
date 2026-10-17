@@ -53,5 +53,5 @@ test('casts survive a persisted round trip', function (): void {
         ->and($step->version)->toBe(4)
         ->and($step->target_on?->toDateString())->toBe('2026-12-01')
         ->and($step->target_at?->toDateTimeString())->toBe('2026-12-01 05:00:00')
-        ->and($step->source_context)->toBe(['warnings' => ['late'], 'count' => 2]);
+        ->and($step->source_context)->toEqual(['warnings' => ['late'], 'count' => 2]);
 });

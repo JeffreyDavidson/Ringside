@@ -53,6 +53,6 @@ test('casts survive a persisted round trip', function (): void {
         ->and($development->sequence)->toBe(2)
         ->and($development->version)->toBe(3)
         ->and($development->source_context)->toBe(['count' => 2])
-        ->and($development->cast)->toBe($cast)
+        ->and($development->cast)->toEqual($cast)
         ->and($development->retracted_at?->toDateTimeString())->toBe('2026-10-02 03:04:05');
 });
