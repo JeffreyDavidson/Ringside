@@ -103,7 +103,7 @@ single-consumer relationship traits or speculative override helpers.
 Actions take typed readonly Data objects from `app/Data`, never arrays, so they are safe to call from a controller, a Livewire component, a job or a command. A Data object carries data only: constructor-promoted public readonly properties, an optional static named constructor such as `fromValidated()`, and simple value-level checks on its own fields (`StableMembershipData::isEmpty()`, `getTotalMemberCount()`). It never reads the clock, queries the database or decides whether an operation is allowed. `tests/Feature/Architecture/DataArchitectureTest.php` enforces this. See `.ai/rules/data.md`.
 
 ```php
-// Pure data container with a named constructor
+// Pure data container
 readonly class StableData
 {
     public function __construct(

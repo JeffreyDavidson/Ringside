@@ -23,7 +23,7 @@ It does not validate input or persist a model.
 (`name` by default; Managers, Referees and Users use `full_name`). The strings live in
 `core.modal.edit` (`Edit :name`) and `core.modal.add` (`Add :model`). Modals that need
 different wording (the Stables split, merge and reunite modals under `stables.modals.*.title`,
-and the Matches form and result modals under `matches.modal.*`) override `getModalTitle()` and
+and the Matches form modal when editing and the result modal, under `matches.modal.*`) override `getModalTitle()` and
 read a translation key. Never hard-code English titles in the modal.
 
 ## Base form modal responsibilities

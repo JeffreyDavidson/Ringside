@@ -18,7 +18,7 @@ The folder is the domain of the record the rule protects, and it matches a domai
 Use `CannotBe{Verb}edException` for disallowed state changes, with one static factory per reason. Use `{Feature}Exception` for feature errors.
 
 ## Keep exceptions as failure descriptions
-Actions, validation concerns, and domain policies decide when a rule fails. Exception classes describe the failure and must not perform validation, query application state, or orchestrate behavior.
+Actions, validation concerns, and eligibility classes decide when a rule fails. Exception classes describe the failure and must not perform validation, query application state, or orchestrate behavior.
 
 ## Create exception factories from enforced rules
 Add an exception factory only alongside an enforced caller. Do not pre-populate exception classes with hypothetical scenarios or future business rules.
