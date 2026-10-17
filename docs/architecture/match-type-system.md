@@ -66,8 +66,8 @@ EventMatch::factory()->battleRoyal()->create();
 
 ## Adding a match type
 
-1. Add the case to `MatchType` and to every `match` in it that must handle the case (`numberOfSides()`, `getAllowedCompetitorTypes()`, the roster and entry requirements, `getMinimumCompetitors()`, `getMaximumCompetitors()`).
-2. Add the label under `type.{value}` in `lang/en/matches.php` (`TranslationKeysTest` checks the literal keys).
+1. Add the case to `MatchType` and to every `match` in it that must handle the case (`numberOfSides()`, `getAllowedCompetitorTypes()`, the roster and entry requirements, `getMinimumCompetitors()`, `getMaximumCompetitors()`), and, if its entrants compete individually in one list, `usesIndividualCompetitorSides()` (an `in_array`, not a `match`), which the form, the competitor rules, the requirements and the result modal all read.
+2. Add the label under `type.{value}` in `lang/en/matches.php` (`TranslationKeysTest` fails if any enum label is untranslated).
 3. Add the case to `MatchCompetitorRuleSet::rules()` (`app/Livewire/Matches/Support/`). A case not listed there falls to the default `mixedCompetitorSideRules()`.
 4. If the format is a direct one-on-one or tag meeting, add it to the hard-coded type lists in `EventMatchBuilder::directMeetings()` and `BookingHistoryViewModel::directType()`.
 5. Optionally map it in `CompetitorSelectionLayout::forMatchType()`; unmapped cases use `Generic`.
