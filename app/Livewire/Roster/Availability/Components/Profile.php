@@ -99,7 +99,7 @@ class Profile extends Component
         $this->reviewSignature = $this->signature();
     }
 
-    public function save(): void
+    public function save(CreateAction $create): void
     {
         $person = $this->person();
         Gate::authorize('update', $person);
@@ -110,7 +110,7 @@ class Profile extends Component
             return;
         }
         try {
-            $entry = resolve(CreateAction::class)->handle($person, $this->startsOn, $this->endsOn, $this->reason, $this->actor());
+            $entry = $create->handle($person, $this->startsOn, $this->endsOn, $this->reason, $this->actor());
         } catch (BaseBusinessException $exception) {
             $this->addError('startsOn', $exception->getMessage());
 
@@ -131,14 +131,14 @@ class Profile extends Component
         $this->cancelId = $id;
     }
 
-    public function cancel(): void
+    public function cancel(CancelAction $cancel): void
     {
         $person = $this->person();
         Gate::authorize('update', $person);
         if ($this->cancelId === null) {
             return;
         }
-        resolve(CancelAction::class)->handle($person, $this->cancelId, $this->actor());
+        $cancel->handle($person, $this->cancelId, $this->actor());
         $this->cancelId = null;
         $this->savedEntryId = null;
         $this->status = __('availability.cancelled');
@@ -153,7 +153,7 @@ class Profile extends Component
     }
 
     /** @return Collection<int, Event> */
-    private function affected(Wrestler|Referee $person): Collection
+    private function affected(UpcomingBookings $upcomingBookings, Wrestler|Referee $person): Collection
     {
         $startsOn = $this->startsOn;
         $endsOn = $this->endsOn;
@@ -165,7 +165,7 @@ class Profile extends Component
             return collect();
         }
 
-        return resolve(UpcomingBookings::class)->events($person, $person->promotion_id)
+        return $upcomingBookings->events($person, $person->promotion_id)
             ->filter(function (Event $event) use ($startsOn, $endsOn): bool {
                 $day = $event->local_date?->toDateString();
 
@@ -174,7 +174,7 @@ class Profile extends Component
             ->values();
     }
 
-    public function render(): View
+    public function render(UpcomingBookings $upcomingBookings): View
     {
         $person = $this->person();
         Gate::authorize('view', $person);
@@ -183,7 +183,7 @@ class Profile extends Component
         $day = now()->setTimezone($zone)->toDateString();
 
         return view('livewire.roster.availability.components.profile', [
-            'person' => $person, 'zone' => $zone, 'affected' => $this->affected($person),
+            'person' => $person, 'zone' => $zone, 'affected' => $this->affected($upcomingBookings, $person),
             'entries' => $person->unavailabilities()->where('promotion_id', $person->promotion_id)->active()->where('ends_on', '>=', $day)
                 ->orderBy('starts_on')->orderBy('id')->paginate(10, pageName: 'availabilityPage'),
             'history' => $person->unavailabilities()->where('promotion_id', $person->promotion_id)

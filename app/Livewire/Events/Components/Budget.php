@@ -169,8 +169,12 @@ class Budget extends Component
         $this->historyOpen = false;
     }
 
-    public function save(): void
-    {
+    public function save(
+        SaveBudgetLineAction $saveLine,
+        RecordBudgetMovementAction $recordMovement,
+        CorrectBudgetMovementAction $correctMovement,
+        ArchiveBudgetLineAction $archiveLine,
+    ): void {
         $event = $this->event();
         Gate::authorize('updateBudget', $event);
         if (! $this->operation instanceof BudgetOperation) {
@@ -187,10 +191,10 @@ class Budget extends Component
         }
         try {
             match ($this->operation) {
-                BudgetOperation::SaveLine => app(SaveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput)),
-                BudgetOperation::RecordMovement => app(RecordBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput)),
-                BudgetOperation::CorrectMovement => app(CorrectBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null),
-                BudgetOperation::ArchiveLine => app(ArchiveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
+                BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput)),
+                BudgetOperation::RecordMovement => $recordMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput)),
+                BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null),
+                BudgetOperation::ArchiveLine => $archiveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
             };
         } catch (BudgetException|RecordChangedException $exception) {
             $this->addError('budget', $this->failureMessageKeepingInput($exception));
@@ -201,11 +205,10 @@ class Budget extends Component
         $this->dispatch('budget-saved');
     }
 
-    public function render(): View
+    public function render(EventBudgetViewModel $screen): View
     {
         $event = $this->event();
         Gate::authorize('viewBudget', $event);
-        $screen = app(EventBudgetViewModel::class);
         $data = $screen->data($event);
         $direction = BudgetDirection::tryFrom($this->lineForm->direction);
         $categories = array_filter(BudgetCategory::cases(), fn (BudgetCategory $category): bool => $direction !== null && $category->accepts($direction));

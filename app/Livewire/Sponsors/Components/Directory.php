@@ -47,6 +47,13 @@ class Directory extends Component
 
     public string $notice = '';
 
+    protected PromotionContextService $promotionContext;
+
+    public function boot(PromotionContextService $promotionContext): void
+    {
+        $this->promotionContext = $promotionContext;
+    }
+
     public function mount(int $promotionId, ?int $sponsorId = null): void
     {
         $this->promotionId = $promotionId;
@@ -81,7 +88,7 @@ class Directory extends Component
         $this->resetErrorBag();
     }
 
-    public function save(): void
+    public function save(SaveSponsorAction $action): void
     {
         $promotion = $this->promotion();
         Gate::authorize('manageSponsors', $promotion);
@@ -90,7 +97,7 @@ class Directory extends Component
         }
         $data = $this->form->toData();
         try {
-            app(SaveSponsorAction::class)->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);
+            $action->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);
             $this->formShown = false;
             $this->notice = __('sponsors.sponsor_saved');
         } catch (BaseBusinessException $exception) {
@@ -105,7 +112,7 @@ class Directory extends Component
         $this->resetErrorBag();
     }
 
-    public function render(): View
+    public function render(SponsorCommitmentsViewModel $commitments): View
     {
         $promotion = $this->promotion();
         Gate::authorize('manageSponsors', $promotion);
@@ -117,14 +124,14 @@ class Directory extends Component
             ->orderBy('agreement_reference')->orderBy('event_id')->orderBy('id')->paginate(20, pageName: 'sponsorHistoryPage');
 
         return view('livewire.sponsors.components.directory', ['promotion' => $promotion, 'sponsors' => $sponsors, 'selected' => $selected,
-            'history' => $history, 'statuses' => app(SponsorCommitmentsViewModel::class)->statuses($history ?? [])]);
+            'history' => $history, 'statuses' => $commitments->statuses($history ?? [])]);
     }
 
     private function promotion(): Promotion
     {
         $promotion = Promotion::query()->findOrFail($this->promotionId);
-        if (app(PromotionContextService::class)->isEnforced()) {
-            abort_unless(app(PromotionContextService::class)->current()?->id === $promotion->id, 404);
+        if ($this->promotionContext->isEnforced()) {
+            abort_unless($this->promotionContext->current()?->id === $promotion->id, 404);
         }
 
         return $promotion;

@@ -77,7 +77,7 @@ class Directory extends Component
         $this->resetErrorBag();
     }
 
-    public function save(): void
+    public function save(SaveCrewContactAction $action): void
     {
         $contact = $this->contactId === null ? null : CrewContact::query()->findOrFail($this->contactId);
         Gate::authorize($contact === null ? 'create' : 'update', $contact ?? CrewContact::class);
@@ -91,7 +91,7 @@ class Directory extends Component
             'client_id' => ['required', 'uuid'],
         ])->validate();
         try {
-            app(SaveCrewContactAction::class)->handle($contact, $this->version, $this->clientId, CrewContactData::fromValidated($input));
+            $action->handle($contact, $this->version, $this->clientId, CrewContactData::fromValidated($input));
             $this->editing = false;
             $this->reset('name', 'phone', 'email', 'notes');
         } catch (BaseBusinessException $exception) {
@@ -99,12 +99,12 @@ class Directory extends Component
         }
     }
 
-    public function archive(int $id, int $version): void
+    public function archive(ArchiveCrewContactAction $action, int $id, int $version): void
     {
         $contact = CrewContact::query()->findOrFail($id);
         Gate::authorize('archive', $contact);
         try {
-            app(ArchiveCrewContactAction::class)->handle($contact, $version);
+            $action->handle($contact, $version);
         } catch (BaseBusinessException $exception) {
             $this->addError('contact', $exception->getMessage());
         }

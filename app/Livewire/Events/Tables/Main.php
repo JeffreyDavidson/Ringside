@@ -33,6 +33,8 @@ class Main extends BaseTable
 {
     use PresentsVenuesList;
 
+    protected PromotionContextService $promotionContext;
+
     #[\Override]
     protected bool $showActionColumn = true;
 
@@ -148,8 +150,7 @@ class Main extends BaseTable
                         return;
                     }
 
-                    $context = app(PromotionContextService::class);
-                    $promotion = $context->isEnforced() ? $context->current() : null;
+                    $promotion = $this->promotionContext->isEnforced() ? $this->promotionContext->current() : null;
 
                     $builder->heldBetween(
                         PromotionTimeZoneService::parseLocalTime($promotion, "{$dateRange['minDate']} 00:00:00"),
@@ -168,6 +169,11 @@ class Main extends BaseTable
                     $builder->forVenueId((int) $value);
                 }),
         ];
+    }
+
+    public function boot(PromotionContextService $promotionContext): void
+    {
+        $this->promotionContext = $promotionContext;
     }
 
     public function delete(Event $event, DeleteAction $deleteAction): void
