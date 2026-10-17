@@ -20,7 +20,7 @@ use LogicException;
 class MutateBudgetAction
 {
     /**
-     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $payload  The internal operation fingerprint hashed into event_budget_revisions.request_hash for retry identity, not caller input; retyping it would change stored hashes.
      * @param  Closure(EventBudget): ?array{target: int, before: array<string, mixed>, after: array<string, mixed>}  $change
      */
     public function handle(Event $event, int $version, string $requestKey, BudgetOperation $operation, array $payload, Closure $change, ?string $reason = null): EventBudget
