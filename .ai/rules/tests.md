@@ -37,3 +37,6 @@ A query without ORDER BY returns rows in whatever order the engine picks: SQLite
 
 ## Make guard tests fail when the guard is removed
 A test for an authorization check, lock, filter or escape must fail if that one line is deleted. Pair every allowed case with a refused one that reaches the guarded line (a view-only member calling a delete action, a membership downgraded between opening a form and saving it), assert the refusal and that nothing was written, and pick data that only the guard tells apart (a search term whose wildcard would match, a stored email that a LIKE pattern would match). Assert locks with recordStatements(): which row is locked, in which order, and before which write.
+
+## Compare reordered JSON-column objects with toEqual
+Associative arrays whose key order the database may change (MySQL JSON, Postgres jsonb) are compared with `toEqual()`; keep lists and scalar values on `toBe()`.

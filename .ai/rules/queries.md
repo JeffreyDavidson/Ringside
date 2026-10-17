@@ -24,7 +24,7 @@ A Query never depends on a ViewModel, Presenter or ViewComposer, and it does not
 Actions, Lifecycle classes and Services may call a Query. When they need several reads combined, split them into single-query Queries plus a Service that combines the results; they never go through a ViewModel (view-models.md).
 
 ## Scope and keys
-Bypass `PromotionContextScope` only for public or owner reads and always pair it with an explicit `promotion_id` constraint. Obtain polymorphic aliases through `getMorphClass()` and build `type:id` keys with `RosterDateAvailability::key()`.
+Bypass `PromotionContextScope` only for public or owner reads and always pair it with an explicit `promotion_id` constraint. Obtain polymorphic aliases through `getMorphClass()`. A Query returns models and leaves `type:id` keys to its caller, which builds them with `EventRosterService::key()`, the one owner of that format (see services.md).
 
 ## Architecture check
 `QueryArchitectureTest` fails when a Query depends on the Validator, `ValidationException`, a ViewModel, a business exception, a Lifecycle lock or the `abort()` and `route()` helpers, and requires the `Query` suffix. "One query" is reviewed by hand and by the Query's own test, which asserts the number of statements where it matters.

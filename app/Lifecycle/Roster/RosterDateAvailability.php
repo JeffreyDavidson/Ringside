@@ -11,6 +11,7 @@ use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Events\EventRosterService;
 
 final class RosterDateAvailability
 {
@@ -44,9 +45,10 @@ final class RosterDateAvailability
         }
     }
 
+    /** The `type:id` key is owned by EventRosterService::key(); this keeps the Lifecycle callers on one format. */
     public static function key(Wrestler|Referee|TagTeam $person): string
     {
-        return $person->getMorphClass().':'.$person->id;
+        return EventRosterService::key($person);
     }
 
     /** Only persisted assignments on this match may retain a calendar restriction. */

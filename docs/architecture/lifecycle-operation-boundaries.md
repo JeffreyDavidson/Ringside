@@ -128,11 +128,9 @@ Stable retirement eligibility is isolated in `StableRetirementEligibility`. Reti
 
 Stable deletion eligibility is isolated in `StableDeletionEligibility`. Deletion requires the stable to have already been disbanded and its current memberships to have already ended, so `DeleteAction` changes only the soft-deletion state. Restoration remains paired with deletion and restores only the historical record without reuniting it.
 
-### Transition policies
+### Eligibility classes
 
-A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
-
-Policies may remain close to models while rules are straightforward. They may be extracted when rules are reused or complex enough to earn a separate domain boundary. Persistence components must not select validation methods from transition strings.
+A transition's rules live in a typed eligibility class under `app/Lifecycle` (`TagTeamEmploymentEligibility`, `StableActivityEligibility`, `TitleLifecycleEligibility`, ...). Each decides whether the transition is permitted and provides the relevant domain failure. They are not Laravel authorization policies: who may attempt an operation is decided at the route or component (`PromotionGate`), and what state allows it is decided here. Persistence components must not select validation methods from transition strings.
 
 ### Pipelines
 
@@ -153,7 +151,7 @@ The intended dependency direction is:
 ```text
 Controller or Livewire component
     -> typed Action
-        -> transition policy
+        -> eligibility class (reads through Services and Queries)
         -> shared lifecycle mechanic
         -> typed cascade collaborators
 
@@ -239,7 +237,7 @@ Retirement transitions use the same audit boundary for every retirable model. `R
 
 The former stable- and title-specific status-change tables are migrated into the shared transition log as legacy activity changes before those duplicate tables are removed. New lifecycle dimensions should extend the shared transition enum and recorder in focused changes while retaining their existing period models as authoritative state.
 
-Stable retirement and soft deletion eligibility are isolated in `StableRetirementEligibility` and `StableDeletionEligibility`. Deleted stables cannot enter retirement transitions, deletion requires the stable to be inactive and without current members, and restoration preserves historical state without implicitly reuniting members. Stable split and merge state and member-availability eligibility lives in `StableRestructuringEligibility`; their Actions own selection-specific invariants, membership mutations, activity closure, and transaction boundaries. `StableFormerMemberEligibility` owns the former-member rules shared by reunion and unretirement eligibility, keeping those business decisions outside the Eloquent model. `StableMembershipService::currentMembers()` maps the current wrestler and tag-team relationships into `StableMembershipData`, which owns the minimum weighted-headcount policy and value-level membership calculations. The former model validation concerns and unused `StableRetirementValidation` strategy have been removed.
+Stable retirement and soft deletion eligibility are isolated in `StableRetirementEligibility` and `StableDeletionEligibility`. Deleted stables cannot enter retirement transitions, deletion requires the stable to be inactive and without current members, and restoration preserves historical state without implicitly reuniting members. Stable split and merge state and member-availability eligibility lives in `StableRestructuringEligibility`; their Actions own selection-specific invariants, membership mutations, activity closure, and transaction boundaries. `StableFormerMemberEligibility` owns the former-member rules shared by reunion and unretirement eligibility, keeping those business decisions outside the Eloquent model. `StableMembershipService::currentMembers()` maps the current wrestler and tag-team relationships into `StableMembershipData`, which counts a wrestler as one and a tag team as two (`getTotalMemberCount()`); the minimum of three is `StableMembershipRequirements::MINIMUM_MEMBER_COUNT` in Lifecycle, so the Data object carries the count and Lifecycle owns the rule. The former model validation concerns and unused `StableRetirementValidation` strategy have been removed.
 
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
