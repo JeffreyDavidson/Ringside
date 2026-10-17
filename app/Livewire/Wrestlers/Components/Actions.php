@@ -18,21 +18,43 @@ use App\Livewire\Concerns\ChecksIndividualLifecycleEligibility;
 use App\Livewire\Concerns\DescribesUpcomingBookings;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Support\ModelKey;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+/**
+ * @property-read Wrestler $wrestler
+ */
 class Actions extends Component
 {
     use ChecksIndividualLifecycleEligibility;
     use DescribesUpcomingBookings;
     use ExecutesRosterActions;
 
-    public Wrestler $wrestler;
+    #[Locked]
+    public int|string $wrestlerId;
+
+    /** The record route binding resolved for the mounting request; never persisted, so later requests reload it. */
+    protected ?Wrestler $mountedWrestler = null;
 
     public function mount(Wrestler $wrestler): void
     {
-        $this->wrestler = $wrestler;
+        $this->wrestlerId = ModelKey::of($wrestler);
+        $this->mountedWrestler = $wrestler;
+    }
+
+    /**
+     * Loaded from the locked id once per request, so every action authorizes the current row. Global scopes
+     * (soft deletes, promotion) are skipped exactly as when Livewire restored the former model property: the
+     * id was set at mount from a record that route binding had already resolved within them.
+     */
+    #[Computed]
+    public function wrestler(): Wrestler
+    {
+        return $this->mountedWrestler ?? Wrestler::query()->withoutGlobalScopes()->findOrFail($this->wrestlerId);
     }
 
     public function employ(EmployAction $employAction): void

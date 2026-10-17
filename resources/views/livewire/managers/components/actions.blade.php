@@ -10,7 +10,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Release))
         <x-buttons.danger
             wire:click="release"
-            :wire:confirm="__('core.lifecycle_confirmations.release', ['name' => $manager->full_name])"
+            :wire:confirm="__('core.lifecycle_confirmations.release', ['name' => $this->manager->full_name])"
             wire:loading.attr="disabled"
             wire:target="release"
         >
@@ -21,7 +21,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Suspend))
         <x-buttons.warning
             wire:click="suspend"
-            :wire:confirm="__('core.lifecycle_confirmations.suspend', ['name' => $manager->full_name])"
+            :wire:confirm="__('core.lifecycle_confirmations.suspend', ['name' => $this->manager->full_name])"
             wire:loading.attr="disabled"
             wire:target="suspend"
         >
@@ -38,7 +38,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Injure))
         <x-buttons.warning
             wire:click="injure"
-            :wire:confirm="__('core.lifecycle_confirmations.injure', ['name' => $manager->full_name])"
+            :wire:confirm="__('core.lifecycle_confirmations.injure', ['name' => $this->manager->full_name])"
             wire:loading.attr="disabled"
             wire:target="injure"
         >
@@ -55,7 +55,7 @@
     @if ($this->canPerform(RosterLifecycleAction::Retire))
         <x-buttons.danger
             wire:click="retire"
-            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $manager->full_name])"
+            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $this->manager->full_name])"
             wire:loading.attr="disabled"
             wire:target="retire"
         >

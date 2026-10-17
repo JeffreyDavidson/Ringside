@@ -6,7 +6,7 @@ namespace App\Livewire\Base\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Concerns\UsesRosterRouteResolver;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -21,12 +21,21 @@ use Illuminate\Database\Eloquent\Builder;
 abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
-    use UsesRosterRouteResolver;
 
     protected string $databaseTableName = 'titles_championships';
 
     #[\Override]
     protected string $resourceName = 'title championships';
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    protected TitleReignService $titleReignService;
+
+    public function boot(RosterResourceRouteResolver $routeResolver, TitleReignService $titleReignService): void
+    {
+        $this->routeResolver = $routeResolver;
+        $this->titleReignService = $titleReignService;
+    }
 
     protected function configure(): void
     {
@@ -71,7 +80,7 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
             DateColumn::make(__('championships.date_lost'), 'local_lost_at')
                 ->outputFormat('Y-m-d'),
             Column::make(__('championships.days_held'))
-                ->label(fn (TitleChampionship $row): int => resolve(TitleReignService::class)->lengthInDays($row)),
+                ->label(fn (TitleChampionship $row): int => $this->titleReignService->lengthInDays($row)),
         ];
     }
 

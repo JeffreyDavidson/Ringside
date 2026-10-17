@@ -17,6 +17,14 @@ use Livewire\Attributes\Renderless;
  */
 trait SearchesRosterMembers
 {
+    private RosterMemberSearch $rosterMemberSearch;
+
+    /** Livewire calls this trait boot hook with the container-injected collaborator on every request. */
+    public function bootSearchesRosterMembers(RosterMemberSearch $rosterMemberSearch): void
+    {
+        $this->rosterMemberSearch = $rosterMemberSearch;
+    }
+
     /**
      * @return array<int, array{id: int|string, name: string}>
      */
@@ -31,7 +39,7 @@ trait SearchesRosterMembers
             return [];
         }
 
-        return resolve(RosterMemberSearch::class)->search($memberKind, $term, $this->form->formPromotionId());
+        return $this->rosterMemberSearch->search($memberKind, $term, $this->form->formPromotionId());
     }
 
     /** @return array<int, RosterMemberKind> */
@@ -43,7 +51,7 @@ trait SearchesRosterMembers
      */
     protected function rosterLabels(RosterMemberKind $kind, array $ids): array
     {
-        return resolve(RosterMemberSearch::class)->labels($kind, $ids, $this->form->formPromotionId());
+        return $this->rosterMemberSearch->labels($kind, $ids, $this->form->formPromotionId());
     }
 
     private function authorizeRosterSearch(): void
