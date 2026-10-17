@@ -114,3 +114,110 @@ test('component context identifiers are locked', function (string $component, st
     [App\Livewire\Wrestlers\Tables\PreviousTagTeams::class, 'wrestlerId'],
     [App\Livewire\Wrestlers\Tables\PreviousTitleChampionships::class, 'wrestlerId'],
 ]);
+
+/**
+ * Container-resolution calls that fetch a collaborator inline. Plain `app()`
+ * calls on the application instance such as `app()->environment()`,
+ * `app()->getLocale()` or `app()->isProduction()` do not resolve anything and are not matched.
+ *
+ * @return array<string, string>
+ */
+function inlineResolutionPatterns(): array
+{
+    $resolver = 'make|makeWith|get|resolve|call|build';
+
+    return [
+        'app(Class::class) / app(\'...\')' => '/(?<![\w>:$])app\s*\(\s*[^\s)]/',
+        'resolve(...)' => '/(?<![\w>:$])resolve\s*\(/',
+        'App::make(...)' => "/(?<![\\w>$])App::(?:{$resolver})\\s*\\(/",
+        'app()->make(...)' => "/(?<![\\w>:$])app\\s*\\(\\s*\\)\\s*->\\s*(?:{$resolver})\\s*\\(/",
+        'Container::getInstance()' => '/(?<![\w>$])Container::getInstance\s*\(/',
+    ];
+}
+
+/**
+ * @param  array<string, string>  $allowed  Relative path => reason
+ * @return list<string>
+ */
+function inlineResolutionViolations(string $directory, string $suffix, array $allowed = []): array
+{
+    $violations = [];
+
+    foreach (Finder::create()->files()->in($directory)->name($suffix) as $file) {
+        $relativePath = str_replace(base_path().'/', '', $file->getRealPath());
+
+        if (array_key_exists($relativePath, $allowed)) {
+            continue;
+        }
+
+        foreach (explode("\n", $file->getContents()) as $index => $line) {
+            foreach (inlineResolutionPatterns() as $description => $pattern) {
+                if (preg_match($pattern, $line) === 1) {
+                    $number = $index + 1;
+                    $violations[] = "{$relativePath}:{$number} resolves a collaborator inline with {$description}: ".trim($line);
+                }
+            }
+        }
+    }
+
+    return $violations;
+}
+
+test('Livewire components receive collaborators by injection instead of resolving them inline', function (): void {
+    // Documented exceptions: Livewire calls these methods itself, so they cannot take injected parameters.
+    $allowed = [
+        'app/Livewire/Events/Forms/CreateEditForm.php' => 'rules() is called by Livewire validate(); needs PromotionContextService',
+        'app/Livewire/Base/BaseForm.php' => 'rules() is called by Livewire validate(); needs PromotionContextService',
+    ];
+
+    // Act
+    $violations = inlineResolutionViolations(app_path('Livewire'), '*.php', $allowed);
+
+    // Assert
+    expect($violations)->toBeEmpty(implode("\n", $violations));
+});
+
+test('the Livewire inline resolution allow-list only names files that still resolve inline', function (): void {
+    // Arrange
+    $allowed = ['app/Livewire/Events/Forms/CreateEditForm.php', 'app/Livewire/Base/BaseForm.php'];
+
+    // Act
+    $stale = array_filter(
+        $allowed,
+        fn (string $path): bool => inlineResolutionViolations(dirname(base_path($path)), basename($path)) === [],
+    );
+
+    // Assert
+    expect($stale)->toBeEmpty();
+});
+
+test('Blade views never resolve classes from the container', function (): void {
+    // Act
+    $violations = inlineResolutionViolations(resource_path('views'), '*.blade.php');
+
+    // Assert
+    expect($violations)->toBeEmpty(implode("\n", $violations));
+});
+
+test('the inline resolution patterns ban resolving calls and allow application helper calls', function (string $line, bool $banned): void {
+    // Act
+    $matches = array_filter(
+        inlineResolutionPatterns(),
+        fn (string $pattern): bool => preg_match($pattern, $line) === 1,
+    );
+
+    // Assert
+    expect($matches !== [])->toBe($banned);
+})->with([
+    ['$a = app(SomeAction::class);', true],
+    ["\$a = app('cache');", true],
+    ['$a = resolve(SomeAction::class);', true],
+    ['$a = App::make(SomeAction::class);', true],
+    ['$a = app()->make(SomeAction::class);', true],
+    ['$a = \\Illuminate\\Container\\Container::getInstance();', true],
+    ["abort_unless(app()->environment(['local']), 404);", false],
+    ['{{ app()->getLocale() }}', false],
+    ['$a = app()->isProduction();', false],
+    ['$a = $this->resolve($x);', false],
+    ['$a = $query->resolve();', false],
+]);
