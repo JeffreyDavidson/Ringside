@@ -9,6 +9,9 @@ use App\Models\Events\EventBudgetMovement;
 use App\Models\Promotions\Promotion;
 use App\Services\Events\BudgetSettlementService;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Str;
+use Ramsey\Uuid\Lazy\LazyUuidFromString;
+use Ramsey\Uuid\UuidInterface;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -165,4 +168,118 @@ test('switching from a refund to a payment clears the hidden original-payment se
     // Act / Assert
     $component->call('beginMovement', $f['line']->id, 'refund')->set('movementForm.source_id', $source->id)->set('movementForm.kind', 'payment')->assertSet('movementForm.source_id', null)
         ->set('movementForm.kind', 'refund')->assertSet('movementForm.source_id', null);
+});
+
+test('movement forms refuse invalid amounts dates kinds and methods before any action runs', function (string $field, string $value): void {
+    // Arrange
+    $f = budgetFixture();
+    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
+
+    // Act
+    $component->call('beginMovement', $f['line']->id)
+        ->set('movementForm.amount', '200.00')
+        ->set("movementForm.{$field}", $value)
+        ->call('save');
+
+    // Assert
+    $component->assertHasErrors("movementForm.{$field}");
+    expect($f['line']->movements()->count())->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);
+})->with([
+    'negative amount' => ['amount', '-1.00'],
+    'precision' => ['amount', '1.001'],
+    'invalid date' => ['effective_date', '2026-02-31'],
+    'invalid kind' => ['kind', 'payroll'],
+    'invalid method' => ['method', 'stripe'],
+]);
+
+test('line forms refuse invalid amounts before any action runs', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
+
+    // Act
+    $component->call('beginLine', $f['line']->id)
+        ->set('lineForm.planned', '1.001')
+        ->call('save');
+
+    // Assert
+    $component->assertHasErrors('lineForm.planned');
+    expect($f['budget']->revisions()->count())->toBe(0)->and($f['budget']->refresh()->version)->toBe(0);
+});
+
+test('correcting a movement requires a reason', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $movement = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
+    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
+
+    // Act
+    $component->call('beginMovement', $f['line']->id, 'payment', $movement->id)->call('save');
+
+    // Assert
+    $component->assertHasErrors('reason');
+    expect($movement->refresh()->voided_at)->toBeNull()->and($f['budget']->revisions()->count())->toBe(0);
+});
+
+test('a reason longer than the limit is refused', function (): void {
+    // Arrange
+    $f = budgetFixture(['confirmed_cents' => null]);
+    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
+
+    // Act
+    $component->call('beginArchive', $f['line']->id)
+        ->set('reason', str_repeat('x', 1001))
+        ->call('save');
+
+    // Assert
+    $component->assertHasErrors('reason');
+    expect($f['line']->refresh()->archived_at)->toBeNull();
+});
+
+test('a draft whose request key is not a UUID is refused before the budget changes', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    Str::createUuidsUsing(fn (): UuidInterface => new LazyUuidFromString('not-a-uuid'));
+    $component = livewire(Budget::class, ['eventId' => $f['event']->id]);
+
+    // Act
+    $component->call('beginLine', $f['line']->id)
+        ->set('lineForm.description', 'Changed')
+        ->call('save');
+
+    // Assert
+    Str::createUuidsNormally();
+    $component->assertHasErrors('request_key');
+    expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->revisions()->count())->toBe(0);
+});
+
+test('suspended and foreign-context users cannot open the budget component', function (string $case): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion, 'promotion')->create();
+    $user = $case === 'foreign' ? administrator() : basicUser();
+    $promotion->users()->attach($user, ['role' => 'owner', 'status' => 'suspended']);
+    actingAs($user);
+    $context = app(PromotionContextService::class);
+    $context->set($case === 'foreign' ? Promotion::factory()->create() : $promotion);
+    $context->enforce();
+
+    // Act
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+
+    // Assert
+    $case === 'foreign' ? $component->assertNotFound() : $component->assertForbidden();
+    expect(EventBudget::query()->count())->toBe(0);
+})->with(['suspended', 'foreign']);
+
+test('guests cannot open the budget component', function (): void {
+    // Arrange
+    $event = Event::factory()->create();
+
+    // Act
+    $component = livewire(Budget::class, ['eventId' => $event->id]);
+
+    // Assert
+    $component->assertForbidden();
+    expect(EventBudget::query()->count())->toBe(0);
 });

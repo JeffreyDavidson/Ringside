@@ -168,7 +168,7 @@ test('member event surfaces omit every financial marker and finance link', funct
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
 
     actingAsPromotionMember($promotion, MembershipRole::Member);
 
@@ -197,7 +197,7 @@ test('outsiders cannot change any business records by opening finance', function
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
     $other = Promotion::factory()
         ->create();
     actingAsPromotionMember($other, MembershipRole::Owner);
@@ -221,7 +221,7 @@ test('read-only members cannot change any business records by opening finance', 
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'PRIVATE_FINANCIAL_NOTE_937', 'counterparty' => 'PRIVATE_PAYEE_937']));
     actingAsPromotionMember($promotion, MembershipRole::Member);
     $before = budgetBusinessFingerprint();
 
@@ -243,7 +243,7 @@ test('owners can read financial markers without mutating business records', func
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
 
     actingAsPromotionMember($promotion, MembershipRole::Owner);
     $before = budgetBusinessFingerprint();
@@ -270,7 +270,7 @@ test('ordinary owner event outputs omit all private financial markers', function
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
 
     actingAsPromotionMember($promotion, MembershipRole::Owner);
 
@@ -302,7 +302,7 @@ test('the public homepage cannot expose event finances', function (): void {
         ->for($promotion)
         ->create();
     actingAs(administrator());
-    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineInput(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
+    resolve(SaveBudgetLineAction::class)->handle($event, 0, budgetKey(), null, budgetLineData(['confirmed' => '8149.37', 'notes' => 'LEAK-BUDGET-NOTE-7Q', 'counterparty' => 'LEAK-BUDGET-PAYEE-7Q']));
 
     actingAsPromotionMember($promotion, MembershipRole::Owner);
     auth()->logout();

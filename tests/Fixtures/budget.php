@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use App\Data\Events\BudgetLineData;
+use App\Data\Events\BudgetMovementData;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
@@ -24,20 +26,32 @@ function budgetFixture(array $lineAttributes = []): array
     return ['event' => $event, 'budget' => $budget, 'line' => $line];
 }
 
-/** @param array<string, mixed> $overrides
- * @return array<string, mixed>
+/** @param array{kind?: string, amount?: string, effective_date?: string, method?: string, reference?: ?string, notes?: ?string, source_id?: ?int, acknowledge?: bool} $overrides
+ * @return array{kind: string, amount: string, effective_date: string, method: string, reference?: ?string, notes?: ?string, source_id?: ?int, acknowledge?: bool}
  */
 function budgetPayment(array $overrides = []): array
 {
     return [...['kind' => 'payment', 'amount' => '200.00', 'effective_date' => today()->toDateString(), 'method' => 'cash'], ...$overrides];
 }
 
-/** @param array<string, mixed> $overrides
- * @return array<string, mixed>
+/** @param array{direction?: string, category?: string, description?: string, counterparty?: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, acknowledge?: bool} $overrides
+ * @return array{direction: string, category: string, description: string, counterparty: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, acknowledge?: bool}
  */
 function budgetLineInput(array $overrides = []): array
 {
     return [...['direction' => 'expense', 'category' => 'talent', 'description' => 'Main event fee', 'counterparty' => 'Casey', 'planned' => '500.00', 'confirmed' => '500.00', 'due_date' => '', 'notes' => '', 'reason' => '', 'acknowledge' => false], ...$overrides];
+}
+
+/** @param array{kind?: string, amount?: string, effective_date?: string, method?: string, reference?: ?string, notes?: ?string, source_id?: ?int, acknowledge?: bool} $overrides */
+function budgetMovementData(array $overrides = []): BudgetMovementData
+{
+    return BudgetMovementData::fromValidated(budgetPayment($overrides));
+}
+
+/** @param array{direction?: string, category?: string, description?: string, counterparty?: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, acknowledge?: bool} $overrides */
+function budgetLineData(array $overrides = []): BudgetLineData
+{
+    return BudgetLineData::fromValidated(budgetLineInput($overrides));
 }
 
 function budgetKey(): string

@@ -53,6 +53,11 @@ final class BudgetException extends BaseBusinessException
         return new self(__('event-budget.line_limit'));
     }
 
+    public static function movementMissing(): self
+    {
+        return new self(__('event-budget.movement_missing'));
+    }
+
     public static function movementLimit(): self
     {
         return new self(__('event-budget.movement_limit'));

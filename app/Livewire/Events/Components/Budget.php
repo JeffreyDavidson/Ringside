@@ -8,6 +8,8 @@ use App\Actions\Events\ArchiveBudgetLineAction;
 use App\Actions\Events\CorrectBudgetMovementAction;
 use App\Actions\Events\RecordBudgetMovementAction;
 use App\Actions\Events\SaveBudgetLineAction;
+use App\Data\Events\BudgetLineData;
+use App\Data\Events\BudgetMovementData;
 use App\Enums\Events\BudgetCategory;
 use App\Enums\Events\BudgetDirection;
 use App\Enums\Events\BudgetMovementKind;
@@ -176,6 +178,7 @@ class Budget extends Component
 
             return;
         }
+        Validator::make(['version' => $this->draftVersion, 'request_key' => $this->requestKey], ['version' => ['integer', 'min:0'], 'request_key' => ['required', 'uuid']])->validate();
         $lineInput = $this->operation === BudgetOperation::SaveLine ? $this->lineForm->validate() : [];
         $movementInput = $this->operation === BudgetOperation::RecordMovement || ($this->operation === BudgetOperation::CorrectMovement && $this->replaceMovement)
             ? $this->movementForm->validate()
@@ -185,9 +188,9 @@ class Budget extends Component
         }
         try {
             match ($this->operation) {
-                BudgetOperation::SaveLine => app(SaveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, $lineInput),
-                BudgetOperation::RecordMovement => app(RecordBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $movementInput),
-                BudgetOperation::CorrectMovement => app(CorrectBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? $movementInput : null),
+                BudgetOperation::SaveLine => app(SaveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput)),
+                BudgetOperation::RecordMovement => app(RecordBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput)),
+                BudgetOperation::CorrectMovement => app(CorrectBudgetMovementAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null),
                 BudgetOperation::ArchiveLine => app(ArchiveBudgetLineAction::class)->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
             };
         } catch (BudgetException|RecordChangedException $exception) {

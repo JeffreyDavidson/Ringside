@@ -14,7 +14,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Auth\Access\AuthorizationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -125,10 +124,34 @@ test('the review names affected dated and undated events while excluding unrelat
     $component->assertSee('Booked While Form Open')->assertSee('Affected Saturday')->assertDontSee('Different Sunday');
 });
 
-test('a view-only member sees availability but cannot write it through the component or Action', function (): void {
+test('invalid calendar ranges and reasons are refused before anything is saved', function (string $start, string $end, string $reason, string $field): void {
+    // Arrange
+    actingAs(administrator());
+    $person = Wrestler::factory()->for(Promotion::factory())->create();
+    $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
+
+    // Act
+    $component->set('startsOn', $start);
+    $component->set('endsOn', $end);
+    $component->set('reason', $reason);
+    $component->call('save');
+
+    // Assert
+    $component->assertHasErrors($field);
+    expect(Unavailability::query()->count())->toBe(0);
+})->with([
+    'end before start' => ['2026-10-19', '2026-10-17', '', 'endsOn'],
+    'impossible date' => ['2026-02-30', '2026-03-01', '', 'startsOn'],
+    'not a date' => ['tomorrow', '2026-10-17', '', 'startsOn'],
+    'missing end' => ['2026-10-17', '', '', 'endsOn'],
+    'reason too long' => ['2026-10-17', '2026-10-17', str_repeat('x', 256), 'reason'],
+]);
+
+test('a view-only member sees availability but cannot review save or cancel through the component', function (string $method): void {
     // Arrange
     $promotion = Promotion::factory()->create();
     $person = Wrestler::factory()->for($promotion)->create();
+    $entry = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
     $member = User::factory()->create();
     $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     $context = app(PromotionContextService::class);
@@ -138,10 +161,9 @@ test('a view-only member sees availability but cannot write it through the compo
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act
-    $component->call('review');
-    $save = fn () => resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, $member);
+    $component->call($method, ...($method === 'requestCancel' ? [$entry->id] : []));
 
     // Assert
     $component->assertForbidden();
-    expect($save)->toThrow(AuthorizationException::class)->and(Unavailability::query()->count())->toBe(0);
-});
+    expect(Unavailability::query()->count())->toBe(1)->and($entry->refresh()->cancelled_at)->toBeNull();
+})->with(['review', 'save', 'requestCancel', 'cancel']);

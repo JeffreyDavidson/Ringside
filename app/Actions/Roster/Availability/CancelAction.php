@@ -9,7 +9,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class CancelAction
 {
@@ -17,7 +16,6 @@ class CancelAction
     {
         DB::transaction(function () use ($person, $entryId, $actor): void {
             $person = $person->newQuery()->whereKey($person->id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($actor)->authorize('update', $person);
             $entry = Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
                 ->whereKey($entryId)->lockForUpdate()->firstOrFail();
             if ($entry->cancelled_at !== null) {

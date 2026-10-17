@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use App\Actions\Events\RecordBudgetMovementAction;
+use App\Data\Events\BudgetMovementData;
 use App\Exceptions\Events\BudgetException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
@@ -78,7 +79,7 @@ test('concurrent first saves keep one budget and exact retries keep one line', f
         $event = Event::factory()->create();
         $user = administrator();
         $key = budgetKey();
-        $spec = ['event_id' => $event->id, 'user_id' => $user->id, 'operation' => 'line', 'version' => 0, 'key' => $key, 'input' => budgetLineInput(), 'clock' => now()->toIso8601String()];
+        $spec = ['event_id' => $event->id, 'user_id' => $user->id, 'operation' => 'line', 'version' => 0, 'key' => $key, 'input' => serialize(budgetLineData()), 'clock' => now()->toIso8601String()];
         // Act
         $results = runBudgetWorkers([$spec, [...$spec, 'key' => $sameKey ? $key : budgetKey()]]);
         // Assert
@@ -103,7 +104,7 @@ test('native payment and refund races keep one financial write per version or re
             $source = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
             $input = budgetPayment(['kind' => 'refund', 'source_id' => $source->id, 'amount' => '150.00']);
         }
-        $spec = ['event_id' => $f['event']->id, 'user_id' => $user->id, 'operation' => 'movement', 'line_id' => $f['line']->id, 'version' => 0, 'key' => $key, 'input' => $input, 'clock' => now()->toIso8601String()];
+        $spec = ['event_id' => $f['event']->id, 'user_id' => $user->id, 'operation' => 'movement', 'line_id' => $f['line']->id, 'version' => 0, 'key' => $key, 'input' => serialize(BudgetMovementData::fromValidated($input)), 'clock' => now()->toIso8601String()];
         // Act
         $results = runBudgetWorkers([$spec, [...$spec, 'key' => $case === 'retry' ? $key : budgetKey()]]);
         // Assert
@@ -114,7 +115,7 @@ test('native payment and refund races keep one financial write per version or re
             expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
         if ($case === 'refund') {
-            expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, $input))->toThrow(BudgetException::class);
+            expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input)))->toThrow(BudgetException::class);
         }
     });
 })->with(['retry', 'distinct', 'refund'])->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)->group('concurrency', 'postgres-concurrency');
@@ -124,8 +125,8 @@ test('a payment racing an obligation change archive or deletion never writes aft
         // Arrange
         $f = budgetFixture(['confirmed_cents' => $case === 'archive' ? null : 50000]);
         $user = User::query()->findOrFail(auth()->id());
-        $spec = ['event_id' => $f['event']->id, 'user_id' => $user->id, 'operation' => 'movement', 'line_id' => $f['line']->id, 'version' => 0, 'key' => budgetKey(), 'input' => budgetPayment(), 'clock' => now()->toIso8601String()];
-        $opposite = [...$spec, 'key' => budgetKey(), 'operation' => $case, 'input' => budgetLineInput(['confirmed' => '50.00', 'reason' => 'Agreed reduction', 'acknowledge' => true])];
+        $spec = ['event_id' => $f['event']->id, 'user_id' => $user->id, 'operation' => 'movement', 'line_id' => $f['line']->id, 'version' => 0, 'key' => budgetKey(), 'input' => serialize(budgetMovementData()), 'clock' => now()->toIso8601String()];
+        $opposite = [...$spec, 'key' => budgetKey(), 'operation' => $case, 'input' => serialize(budgetLineData(['confirmed' => '50.00', 'reason' => 'Agreed reduction', 'acknowledge' => true]))];
         // Act
         $results = runBudgetWorkers([$spec, $opposite]);
         // Assert

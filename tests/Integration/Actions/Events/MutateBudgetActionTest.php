@@ -12,7 +12,7 @@ test('budget mutation locks the owning event budget and line before the write', 
     // Arrange
     $f = budgetFixture();
     // Act
-    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineInput(['description' => 'Updated fee'])));
+    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['description' => 'Updated fee'])));
     // Assert
     $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
     $budgetLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "event_budgets"'));

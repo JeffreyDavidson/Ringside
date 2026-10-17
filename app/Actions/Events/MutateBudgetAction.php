@@ -13,10 +13,8 @@ use App\Models\Events\EventBudgetRevision;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
 use Closure;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
+use LogicException;
 
 /** The shared transaction, retry identity and retained history boundary for budget writes. */
 class MutateBudgetAction
@@ -27,17 +25,14 @@ class MutateBudgetAction
      */
     public function handle(Event $event, int $version, string $requestKey, BudgetOperation $operation, array $payload, Closure $change, ?string $reason = null): EventBudget
     {
-        Validator::make(['version' => $version, 'request_key' => $requestKey], ['version' => ['integer', 'min:0'], 'request_key' => ['required', 'uuid']])->validate();
-
         $requestKey = mb_strtolower($requestKey);
         $user = auth()->user();
         if (! $user instanceof User) {
-            throw new AuthorizationException;
+            throw new LogicException('A budget write requires an actor.');
         }
 
         return DB::transaction(function () use ($event, $version, $requestKey, $operation, $payload, $change, $reason, $user): EventBudget {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            Gate::authorize('updateBudget', $event);
             $event->load('promotion');
             $budget = EventBudget::query()->where('event_id', $event->id)->lockForUpdate()->first();
             $hash = hash('sha256', json_encode([$operation->value, $payload, $reason], JSON_THROW_ON_ERROR));
