@@ -20,7 +20,10 @@ arch('view models do not run actions')
     ->not->toUse('App\Actions');
 
 // A namespace expectation ignores uses inside the same namespace, so each ViewModel is checked against the others.
-$viewModels = array_map(fn (string $file): string => basename($file, '.php'), glob(__DIR__.'/../../../app/ViewModels/*.php') ?: []);
+$viewModels = array_map(
+    fn (string $file): string => str_replace('/', '\\', substr($file, strlen(__DIR__.'/../../../app/ViewModels/'), -4)),
+    glob(__DIR__.'/../../../app/ViewModels/{,*/}*.php', GLOB_BRACE) ?: [],
+);
 
 foreach ($viewModels as $viewModel) {
     arch("{$viewModel} does not depend on another view model")

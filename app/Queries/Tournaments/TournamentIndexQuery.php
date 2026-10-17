@@ -6,15 +6,12 @@ namespace App\Queries\Tournaments;
 
 use App\Models\Tournaments\Tournament;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Pagination\LengthAwarePaginator;
 
-/** Reads one page of the tournament list with each tournament's entry and recorded result counts. */
+/** Reads the promotion's tournaments, newest first, with each tournament's entry and recorded result counts. */
 final class TournamentIndexQuery
 {
-    public const int PER_PAGE = 20;
-
-    /** @return LengthAwarePaginator<int, Tournament> */
-    public function get(): LengthAwarePaginator
+    /** @return Builder<Tournament> The caller paginates it. */
+    public function get(): Builder
     {
         return Tournament::query()
             ->withCount([
@@ -24,7 +21,6 @@ final class TournamentIndexQuery
                     fn (Builder $match) => $match->whereNotNull('match_finish'),
                 ),
             ])
-            ->orderByDesc('id')
-            ->paginate(self::PER_PAGE);
+            ->orderByDesc('id');
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Tournaments;
+namespace App\ViewModels\Tournaments;
 
 use App\Models\Events\Event;
 use App\Models\Matches\MatchStipulation;
@@ -14,21 +14,21 @@ use App\Models\Tournaments\TournamentEntry;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Reads what the tournament screen lists besides the bracket: the entries, which of their competitors can
+ * Builds what the tournament screen lists besides the bracket: the entries, which of their competitors can
  * still be booked, and the events, titles and stipulations a bout can be booked with.
  *
- * @phpstan-type TournamentShowRead array{
+ * @phpstan-type TournamentShowData array{
  *     entries: Collection<int, TournamentEntry>,
- *     availableIds: list<int>,
+ *     availableIds: array<int, int>,
  *     events: Collection<int, Event>,
  *     titles: Collection<int, Title>,
  *     stipulations: Collection<int, MatchStipulation>
  * }
  */
-final class TournamentShowQuery
+class TournamentShowViewModel
 {
-    /** @return TournamentShowRead */
-    public function get(Tournament $tournament): array
+    /** @return TournamentShowData */
+    public function data(Tournament $tournament): array
     {
         $entries = $tournament->entries()
             ->with('competitor')
@@ -36,14 +36,12 @@ final class TournamentShowQuery
 
         return [
             'entries' => $entries,
-            'availableIds' => array_values(
-                $tournament->entrant_kind->modelClass()::query()
-                    ->whereKey($entries->map(fn (TournamentEntry $entry): int => $entry->competitor_id))
-                    ->bookable()
-                    ->get()
-                    ->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id)
-                    ->all(),
-            ),
+            'availableIds' => $tournament->entrant_kind->modelClass()::query()
+                ->whereKey($entries->pluck('competitor_id'))
+                ->bookable()
+                ->get(['id'])
+                ->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id)
+                ->all(),
             'events' => Event::query()
                 ->where('promotion_id', $tournament->promotion_id)
                 ->orderByDesc('date')

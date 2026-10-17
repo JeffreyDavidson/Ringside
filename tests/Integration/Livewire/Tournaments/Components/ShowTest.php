@@ -226,3 +226,21 @@ it('refuses invalid tournament fields when saving an existing tournament', funct
     'a repeated entrant' => [['form.entrants' => [1, 1]], 'form.entrants.1'],
     'a missing entrant' => [['form.entrants' => [1, null]], 'form.entrants.1'],
 ]);
+
+it('refuses to draft an operation that does not exist and opens no draft', function (): void {
+    // Arrange
+    $world = tournamentFixture();
+    actingAs(administrator());
+    $tournament = $world['tournament'];
+    $node = $tournament->nodes()->firstOrFail();
+    $page = livewire(Show::class, ['tournamentId' => $tournament->id]);
+
+    // Act
+    $page->call('begin', 'teleport', $node->id);
+
+    // Assert
+    $page->assertHasErrors('operation')
+        ->assertSet('draftOperation', '')
+        ->assertSet('nodeId', null);
+    expect($tournament->refresh()->version)->toBe(1);
+});

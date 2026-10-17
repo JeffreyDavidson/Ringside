@@ -6,7 +6,7 @@ paths:
 # ViewModels
 
 ## A ViewModel only builds a page's data
-A ViewModel is named after the page or payload it builds (`EventBudgetViewModel`) and exists only when a page combines several sources or needs reusable display logic. It reads through Queries, Builders and read-only Services and returns the page's data. It writes nothing, takes no locks and runs no Action.
+A ViewModel is named after the page or payload it builds (`EventBudgetViewModel`) and exists only when a page combines several sources or needs reusable display logic. It reads through Queries (each runs one database query, queries.md), Builders and read-only Services and returns the page's data. When a class gathers several reads for one page, it is that page's ViewModel, not a Query. It writes nothing, takes no locks and runs no Action.
 
 ## Called only from the view layer
 Only controllers and Livewire components call a ViewModel (controllers method-inject it, Livewire components resolve it in `render()` or an action). Actions, Queries, Services, Lifecycle classes and other ViewModels never depend on one, and Blade never resolves one. When a write path needs the same data, it uses the underlying Query (`EventPackSourceQuery`, `EventPackCardQuery`), which the ViewModel also uses. A page builds its data once per render: share a Query, do not nest ViewModels.

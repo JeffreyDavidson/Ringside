@@ -134,3 +134,26 @@ it('allows active owners and managers to check their promotion history', functio
     // Assert
     $modal->assertReturned(fn (array $history): bool => $history['available']);
 })->with([MembershipRole::Owner, MembershipRole::Manager]);
+
+it('returns the requested page of opposing pairs', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $promotion = Promotion::factory()->create();
+    $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
+    $wrestlers = Wrestler::factory()->count(4)->for($promotion, 'promotion')->create();
+    $past = Event::factory()->for($promotion, 'promotion')->past()->create();
+    EventMatch::factory()->for($past)->withCompetitors($wrestlers->all())->create(['match_type' => MatchType::BattleRoyal]);
+    $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+    $modal->set('form.matchType', MatchType::BattleRoyal);
+    $modal->set('form.competitors', [['wrestlers' => $wrestlers->modelKeys()]]);
+
+    // Act
+    $modal->call('checkHistory', 2);
+
+    // Assert
+    $modal->assertReturned(fn (array $history): bool => $history['page'] === 2
+        && $history['pages'] === 2
+        && $history['totalNotices'] === 6
+        && count($history['notices']) === 1
+        && $history['notices'][0]['sourceUrl'] === route('events.show', $past));
+});

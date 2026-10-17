@@ -88,7 +88,7 @@ class Index extends Component
         $kind = $this->form->kind === 'tag_team' ? BookableRosterKind::TagTeams : BookableRosterKind::Wrestlers;
 
         return view('livewire.tournaments.components.index', [
-            'tournaments' => $read->get(),
+            'tournaments' => $read->get()->paginate(20),
             'labels' => $search->labels($kind, $this->form->entrants),
             'kind' => $kind,
         ]);
