@@ -28,7 +28,7 @@ class Wrestler extends Model
     ];
 
     protected $casts = [
-        'height' => HeightValueObject::class,
+        'height' => Height::class,
         'weight' => 'integer',
         'started_at' => 'datetime',
     ];

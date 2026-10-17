@@ -1,3 +1,5 @@
+> Historical note: this release describes a dynamic match UI built on a `MatchType` model, since replaced by the `App\Enums\Matches\MatchType` enum. See [Match Type System](../architecture/match-type-system.md) for the current design.
+
 # What's New: Dynamic Match Competitor UI System v2.0
 
 ## 🎉 Major Enhancement Released!

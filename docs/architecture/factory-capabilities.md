@@ -211,7 +211,7 @@ The factory enforces business rules:
 
 - **Royal Rumble**: Only allows wrestlers (no tag teams)
 - **Singles**: Only allows wrestlers (no tag teams)
-- **Other types**: Use the competitor types exposed by `MatchType::getAllowedCompetitorTypes()`
+- **Other types**: Use the competitor types exposed by the `MatchType` enum's `getAllowedCompetitorTypes()`
 
 ### Championship Integration
 

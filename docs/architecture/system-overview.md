@@ -364,8 +364,8 @@ Match data supports comprehensive analytics:
 
 ### Adding New Match Types
 
-1. Create MatchType factory method
-2. Add type resolution logic
+1. Add the case to the `MatchType` enum
+2. Add the spelling to `MatchFactory::resolveMatchType()`
 3. Define business rules
 4. Update documentation
 
