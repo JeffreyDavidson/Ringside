@@ -21,6 +21,13 @@ class PreviousManagers extends BasePreviousManagersTable
     #[Locked]
     public ?int $stableId = null;
 
+    protected PreviousManagersQuery $previousManagers;
+
+    public function boot(PreviousManagersQuery $previousManagers): void
+    {
+        $this->previousManagers = $previousManagers;
+    }
+
     /**
      * @return ManagerBuilder<Manager>
      */
@@ -28,7 +35,7 @@ class PreviousManagers extends BasePreviousManagersTable
     {
         $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
-        return resolve(PreviousManagersQuery::class)->get($stableId)->withEmploymentStatusState();
+        return $this->previousManagers->get($stableId)->withEmploymentStatusState();
     }
 
     /**

@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Roster;
+namespace App\Builders\Concerns;
 
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
-/** Shared association checks for the previous stables of a manager and the previous managers of a stable. */
-abstract class StableManagerHistoryQuery
+/**
+ * Association checks shared by the manager and stable builders: a manager is associated with a stable when a
+ * wrestler or tag team the manager managed was in the stable while the manager managed them (the two periods overlap).
+ */
+trait ChecksStableManagerAssociations
 {
     protected function previousWrestlerAssociation(QueryBuilder $query): QueryBuilder
     {

@@ -27,6 +27,13 @@ class PreviousStables extends BasePreviousStablesTable
     #[\Override]
     protected string $resourceName = 'stables';
 
+    protected PreviousStablesQuery $previousStables;
+
+    public function boot(PreviousStablesQuery $previousStables): void
+    {
+        $this->previousStables = $previousStables;
+    }
+
     /**
      * Get stables that the manager was associated with through wrestlers/tag teams they managed.
      *
@@ -36,7 +43,7 @@ class PreviousStables extends BasePreviousStablesTable
     {
         $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
-        return resolve(PreviousStablesQuery::class)->get($managerId);
+        return $this->previousStables->get($managerId);
     }
 
     #[\Override]

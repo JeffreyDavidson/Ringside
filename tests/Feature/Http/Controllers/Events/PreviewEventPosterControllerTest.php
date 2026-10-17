@@ -8,7 +8,7 @@ use App\Enums\Events\PublicSection;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\EventPublication;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -122,7 +122,7 @@ test('guest cannot preview the private poster or change publication', function (
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $original = $publication->getAttributes();
@@ -153,7 +153,7 @@ test('member cannot preview the private poster or change publication', function 
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $original = $publication->getAttributes();
@@ -186,7 +186,7 @@ test('outsider cannot preview the private poster or change publication', functio
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $original = $publication->getAttributes();

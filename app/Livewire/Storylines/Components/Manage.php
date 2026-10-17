@@ -28,7 +28,7 @@ use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineStep;
 use App\Queries\Storylines\CreativeRosterQuery;
-use App\Queries\Storylines\StorylineSourceQuery;
+use App\Services\Storylines\StorylineSourceService;
 use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -72,13 +72,13 @@ class Manage extends Component
 
     public string $eventSearch = '';
 
-    protected StorylineSourceQuery $sourceQuery;
+    protected StorylineSourceService $sources;
 
     protected CreativeRosterQuery $roster;
 
-    public function boot(StorylineSourceQuery $sourceQuery, CreativeRosterQuery $roster): void
+    public function boot(StorylineSourceService $sources, CreativeRosterQuery $roster): void
     {
-        $this->sourceQuery = $sourceQuery;
+        $this->sources = $sources;
         $this->roster = $roster;
     }
 
@@ -211,7 +211,7 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('update', $story);
-        $this->sourceFingerprint = $this->sourceQuery->get($this->form->source(null), $story->promotion_id)['fingerprint'];
+        $this->sourceFingerprint = ($this->sources->get($this->form->source(null), $story->promotion_id) ?? abort(404))['fingerprint'];
     }
 
     public function reload(): void
@@ -350,12 +350,12 @@ class Manage extends Component
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);
         }
-        $source = $this->sourceQuery->get($this->form->source(null), $story->promotion_id);
+        $source = $this->sources->get($this->form->source(null), $story->promotion_id) ?? abort(404);
 
         $steps = $story->steps()->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'match.competitors', 'match.titles'])->orderBy('sequence')->orderBy('id')->paginate(15, pageName: 'stepsPage');
         $sourceStates = [];
         foreach ($steps as $step) {
-            $sourceStates[$step->id] = $this->sourceQuery->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match);
+            $sourceStates[$step->id] = $this->sources->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match) ?? abort(404);
         }
 
         return view('livewire.storylines.components.manage', [

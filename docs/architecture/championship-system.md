@@ -6,7 +6,7 @@ Title matches and championship validation rules.
 
 The championship system manages title matches and ensures proper competitor validation.
 
-`Title` owns only the championship relationships. Current-champion lookup is provided by `CurrentChampionQuery` and reign-length calculation by `TitleReignService`, keeping reporting queries and in-memory summaries outside the Eloquent model.
+`Title` owns only the championship relationships. Lists read the current champion from `currentChampionship.champion`, eager loaded by `TitleBuilder::withCurrentChampion()`, and reign-length calculation is provided by `TitleReignService`, keeping reporting queries and in-memory summaries outside the Eloquent model.
 
 The previous-championship history tables show, for each ended reign, the reign it followed: `TitleChampionshipBuilder::withPreviousChampionshipId()` selects the latest non-deleted reign of the same title won before it. Its subquery aliases the table as `previous_championships`, and Eloquent qualifies the soft-delete constraint with that alias, so a deleted reign (for example one removed by a result correction) is never reported as the previous champion.
 
@@ -28,7 +28,7 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 
 ## Match Outcomes
 
-`ApplyMatchTitleOutcomesAction` is the match-side championship orchestrator composed by `RecordResultAction`. The parent action locks the match, its event date, and its complete competitor collection, then passes that shared snapshot into championship reconciliation. The title action locks every attached title and its reigns before applying the result, so winner metadata and championship changes commit or roll back together. `ChampionshipReignManager` is the single reign write boundary: it opens, closes, and reconciles persisted reigns for match outcomes, title retirement, title deletion, and champion relationship cleanup. Reporting remains in `CurrentChampionQuery` and `TitleReignService`.
+`ApplyMatchTitleOutcomesAction` is the match-side championship orchestrator composed by `RecordResultAction`. The parent action locks the match, its event date, and its complete competitor collection, then passes that shared snapshot into championship reconciliation. The title action locks every attached title and its reigns before applying the result, so winner metadata and championship changes commit or roll back together. `ChampionshipReignManager` is the single reign write boundary: it opens, closes, and reconciles persisted reigns for match outcomes, title retirement, title deletion, and champion relationship cleanup. Reporting remains in `TitleReignService` and the champion eager loads on `TitleBuilder`.
 
 Assign match competitors before attaching championship stakes. The match form applies the data-aware `CurrentChampionIsCompeting` rule to each selected title so invalid title defenses receive field-level validation before data construction. `AddTitlesToMatchAction` repeats the invariant authoritatively and rejects any non-vacant title whose current wrestler or tag-team champion is not already assigned as a competitor; vacant titles do not require a defending champion.
 

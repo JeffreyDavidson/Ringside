@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Events;
 
-use App\Queries\Events\PublishedEventChangesQuery;
 use App\Queries\Events\PublishedEventQuery;
+use App\Services\Events\PublishedEventChangesService;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EventPosterController
 {
-    public function __invoke(string $publicId, string $slug, string $asset, PublishedEventQuery $query, PublishedEventChangesQuery $changes): StreamedResponse
+    public function __invoke(string $publicId, string $slug, string $asset, PublishedEventQuery $query, PublishedEventChangesService $changes): StreamedResponse
     {
         $publication = $query->get($publicId, $slug) ?? abort(404);
         $card = $publication->card ?? abort(404);

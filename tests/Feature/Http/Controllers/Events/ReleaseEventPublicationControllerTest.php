@@ -7,7 +7,7 @@ use App\Enums\Events\PublicSection;
 use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\EventPublication;
 use App\Models\Promotions\Promotion;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\from;
@@ -25,7 +25,7 @@ test('an authorized publish request updates the release and returns to its edito
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $publication->version,
@@ -65,11 +65,11 @@ test('a stale publish request preserves the newer release and submitted input', 
             'results' => [$fixture['match']->id],
         ]]);
     $staleVersion = $publication->version;
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $released = $publication;
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $staleVersion,
@@ -103,7 +103,7 @@ test('a publish request requires deliberate review', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'section' => 'card'];
 
     // Act
@@ -128,7 +128,7 @@ test('reviewed results are released separately without replacing the card', func
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $beforeMatch = DB::table('events_matches')
@@ -173,12 +173,12 @@ test('guest cannot publish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -207,12 +207,12 @@ test('member cannot publish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -243,12 +243,12 @@ test('outsider cannot publish a private publication', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->refresh();
     $original = $publication->getAttributes();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     $requestData = ['complete' => 1, 'version' => $publication->version, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'summary' => 'Do not save', 'section' => 'card', 'reviewed' => 1];
 
     auth()->logout();
@@ -277,7 +277,7 @@ test('invalid release controls preserve the existing draft', function (string $f
         ->create()
         ->refresh();
     $original = $publication->getRawOriginal();
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
 
     $requestData = [
         'version' => $publication->version,

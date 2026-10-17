@@ -10,11 +10,12 @@ use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Queries\Storylines\StorylineSourceQuery;
+use App\Services\Storylines\StorylineSourceService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class LockSourceAction
 {
-    public function __construct(private readonly StorylineSourceQuery $query) {}
+    public function __construct(private readonly StorylineSourceService $sources) {}
 
     /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
     public function handle(SourceData $source, int $promotionId, bool $historical = false): array
@@ -25,7 +26,7 @@ class LockSourceAction
             EventPack::query()->forEventId($source->eventId)->lockForUpdate()->first();
             EventLiveRun::query()->forEventId($source->eventId)->lockForUpdate()->first();
         }
-        $result = $this->query->get($source, $promotionId);
+        $result = $this->sources->get($source, $promotionId) ?? throw new ModelNotFoundException;
         if ($source->fingerprint !== null && ! hash_equals($source->fingerprint, $result['fingerprint'])) {
             throw StorylineConflictException::source();
         }

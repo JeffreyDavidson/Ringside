@@ -10,14 +10,14 @@ use App\Exceptions\Events\EventPublicationException;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Models\Users\User;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventCardService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ReleaseEventPublicationAction
 {
-    public function __construct(private readonly LockEventPublicationAction $lock, private readonly PublicEventSourceQuery $source) {}
+    public function __construct(private readonly LockEventPublicationAction $lock, private readonly PublicEventCardService $cards) {}
 
     public function handle(Event $event, User $actor, int $version, string $fingerprint, PublicSection $section): void
     {
@@ -44,10 +44,10 @@ class ReleaseEventPublicationAction
                 if ($announcement->isNotice() || $publication->published_at === null || $publication->card === null || $event->date === null || $event->date->isFuture()
                     || $draft['results'] === [] || array_diff($draft['results'], array_column($publication->card_source ?? [], 'id')) !== []
                     || $publication->schedule_fingerprint !== $source['schedule']
-                    || $publication->card_fingerprint !== $this->source->cardFingerprint($source, $publication->card_source ?? [])) {
+                    || $publication->card_fingerprint !== $this->cards->cardFingerprint($source, $publication->card_source ?? [])) {
                     throw EventPublicationException::invalid();
                 }
-                $results = $this->source->resultSource($source, $draft['results']);
+                $results = $this->cards->resultSource($source, $draft['results']);
                 if (count($results) !== count($draft['results'])) {
                     throw EventPublicationException::invalid();
                 }
@@ -60,24 +60,24 @@ class ReleaseEventPublicationAction
                 }
                 $publication->results = ['rows' => $rows, 'corrected_at' => $publication->results === null ? null : now()->toIso8601String()];
                 $publication->results_source = $draft['results'];
-                $publication->results_fingerprint = $this->source->fingerprint($results);
+                $publication->results_fingerprint = $this->cards->fingerprint($results);
                 $publication->results_published_at = now();
                 $publication->results_published_by = $actor->id;
                 $this->save($publication, $event, $actor, 'results');
 
                 return;
             }
-            $rows = $this->source->rows($source, $draft['matches']);
+            $rows = $this->cards->rows($source, $draft['matches']);
             if (collect($rows)->contains(fn (array $row): bool => $row['label'] === '')) {
                 throw EventPublicationException::invalid();
             }
             if ($publication->card === null) {
                 $publication->slug = Str::limit(Str::slug($source['title']), 120, '') ?: 'event';
             }
-            $publication->card = $this->source->card($source, $draft);
+            $publication->card = $this->cards->card($source, $draft);
             $publication->card_source = $draft['matches'];
             $publication->schedule_fingerprint = $source['schedule'];
-            $publication->card_fingerprint = $this->source->cardFingerprint($source, $draft['matches']);
+            $publication->card_fingerprint = $this->cards->cardFingerprint($source, $draft['matches']);
             $publication->published_at = now();
             $publication->published_by = $actor->id;
             $publication->unpublished_at = null;

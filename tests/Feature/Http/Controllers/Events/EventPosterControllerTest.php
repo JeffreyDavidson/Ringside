@@ -6,7 +6,7 @@ use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\StoreEventPosterAction;
 use App\Enums\Events\PublicSection;
 use App\Models\Events\EventPublication;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,7 +27,7 @@ test('the released poster streams approved bytes with private security headers',
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $bytes = Storage::disk('local')
@@ -62,7 +62,7 @@ test('a missing file cannot expose a public poster', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     Storage::disk('local')
@@ -92,7 +92,7 @@ test('an unapproved key cannot expose a public poster', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $key = '00000000-0000-4000-8000-000000000000.png';
@@ -121,7 +121,7 @@ test('the wrong slug cannot expose a public poster', function (): void {
             'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
             'results' => [$fixture['match']->id],
         ]]);
-    $source = app(PublicEventSourceQuery::class)->get($event);
+    $source = app(PublicEventSourceService::class)->get($event);
     app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
     $publication->refresh();
     $publication->slug = 'wrong-slug';

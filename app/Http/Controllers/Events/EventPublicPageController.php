@@ -12,7 +12,8 @@ use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\SaveEventPublicationRequest;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
-use App\Queries\Events\PublicEventSourceQuery;
+use App\Services\Events\PublicEventSourceService;
+use App\Services\Events\PublishedEventChangesService;
 use App\ViewModels\Events\PublicEventViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -22,14 +23,17 @@ use Illuminate\Support\Facades\Storage;
 
 class EventPublicPageController
 {
-    public function edit(Event $event, PublicEventSourceQuery $query): View
+    public function edit(Event $event, PublicEventSourceService $sources, PublishedEventChangesService $changes): View
     {
-        $source = $query->get($event);
+        $source = $sources->get($event);
         $publication = EventPublication::query()->forEventId($event->id)->with(['publisher', 'resultsPublisher'])->first();
         $draft = $publication->draft ?? ['announcement' => 'scheduled', 'summary' => null, 'notice' => null, 'address' => false, 'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => null, 'matches' => [], 'results' => []];
-        $needsReview = $publication?->card !== null && ($publication->schedule_fingerprint !== $source['schedule'] || $publication->card_fingerprint !== $query->cardFingerprint($source, $publication->card_source ?? []));
-        $needsReview = $needsReview || ($publication?->results_published_at !== null
-            && $publication->results_fingerprint !== $query->fingerprint($query->resultSource($source, $publication->results_source ?? [])));
+        $needsReview = false;
+        if ($publication !== null) {
+            $changed = $changes->compare($publication, $source);
+            $needsReview = ($publication->card !== null && ($changed['scheduleChanged'] || $changed['cardChanged']))
+                || ($publication->results_published_at !== null && $changed['resultsChanged']);
+        }
 
         return view('events.publication', ['event' => $event, 'source' => $source, 'publication' => $publication, 'draft' => $draft, 'needsReview' => $needsReview]);
     }

@@ -9,6 +9,7 @@ use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
+use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -145,6 +146,73 @@ test('fees are formatted with a sign, grouping and exact cents, and an unknown f
     'negative under a dollar' => [-5, 'USD -0.05'],
     'negative with grouping' => [-123456, 'USD -1,234.56'],
 ]);
+
+test('the roster lists everyone on the card and everyone booked, sorted by name, with whether they are on the card and bookable', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()
+        ->create(['date' => now()->addDay()]);
+    $zed = Wrestler::factory()
+        ->bookable()
+        ->create(['name' => 'zed Last']);
+    $amy = Wrestler::factory()
+        ->bookable()
+        ->create(['name' => 'Amy First']);
+    $injured = Wrestler::factory()
+        ->unemployed()
+        ->create(['name' => 'Mid Unavailable']);
+    $bookedOnly = Wrestler::factory()
+        ->bookable()
+        ->create(['name' => 'Bea Booked Only']);
+    EventMatch::factory()
+        ->for($event)
+        ->withCompetitors([$zed, $amy, $injured])
+        ->withReferees()
+        ->create();
+    $booking = EventTalentBooking::factory()
+        ->for($event)
+        ->create(['person_type' => 'wrestler', 'person_id' => $bookedOnly->id, 'person_name' => 'Bea Booked Only', 'person_role' => 'Wrestler']);
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($event);
+
+    // Assert
+    $rowOf = fn (Wrestler $wrestler): array => collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$wrestler->id}");
+    expect($data['rows'])->toHaveCount(5)
+        ->and(collect($data['rows'])->where('type', 'wrestler')->pluck('name')->all())->toBe(['Amy First', 'Bea Booked Only', 'Mid Unavailable', 'zed Last'])
+        ->and($rowOf($amy)['on_card'])->toBeTrue()
+        ->and($rowOf($amy)['unavailable'])->toBeFalse()
+        ->and($rowOf($amy)['matches'])->toBe([1])
+        ->and($rowOf($amy)['booking'])->toBeNull()
+        ->and($rowOf($injured)['unavailable'])->toBeTrue()
+        ->and($rowOf($bookedOnly)['on_card'])->toBeFalse()
+        ->and($rowOf($bookedOnly)['booking']?->is($booking))->toBeTrue()
+        ->and($data['card_warning'])->toBeTrue();
+});
+
+test('the roster reads the same statements for a bigger card', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()
+        ->create(['date' => now()->addDay()]);
+    EventMatch::factory()
+        ->for($event)
+        ->withCompetitors(Wrestler::factory()->bookable()->count(2)->create()->all())
+        ->create();
+    $viewModel = resolve(TalentBookingsViewModel::class);
+    $small = recordStatements(fn () => $viewModel->data($event));
+    EventMatch::factory()
+        ->for($event)
+        ->count(3)
+        ->withCompetitors(Wrestler::factory()->bookable()->count(2)->create()->all())
+        ->create();
+
+    // Act
+    $large = recordStatements(fn () => $viewModel->data($event));
+
+    // Assert
+    expect($large)->toHaveSameSize($small);
+});
 
 test('no booking and no history leave the fee labels empty', function (): void {
     // Arrange

@@ -8,8 +8,9 @@ use App\Data\Events\PublicEventData;
 use App\Enums\Events\PublicAnnouncement;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
-use App\Queries\Events\PublicEventPreviewCardQuery;
-use App\Queries\Events\PublishedEventChangesQuery;
+use App\Services\Events\PublicEventCardService;
+use App\Services\Events\PublicEventSourceService;
+use App\Services\Events\PublishedEventChangesService;
 
 /**
  * Builds the public event page from a publication's released card, hiding what the event's current schedule or results have outdated.
@@ -19,7 +20,7 @@ use App\Queries\Events\PublishedEventChangesQuery;
  */
 class PublicEventViewModel
 {
-    public function __construct(private readonly PublishedEventChangesQuery $changes, private readonly PublicEventPreviewCardQuery $previewCard) {}
+    public function __construct(private readonly PublishedEventChangesService $changes, private readonly PublicEventSourceService $source, private readonly PublicEventCardService $cards) {}
 
     /**
      * The caller has checked that the publication has a released card (and released results when $results is true).
@@ -42,7 +43,7 @@ class PublicEventViewModel
 
     public function preview(Event $event, EventPublication $publication): PublicEventData
     {
-        $card = $this->previewCard->get($event, $publication);
+        $card = $this->cards->card($this->source->get($event), $publication->draft);
 
         return $this->project($card, route('shows.show', ['publicId' => $publication->public_id, 'slug' => $publication->slug]), null,
             $card['poster'] === null ? null : route('events.public-pages.poster', $event), preview: true);

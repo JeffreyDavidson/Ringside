@@ -7,6 +7,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Queries\Roster\PreviousStablesQuery;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -56,6 +57,7 @@ describe('PreviousStables query', function (): void {
             'hired_at' => Date::now()->subMonths(5),
         ]);
         $table = new PreviousStables;
+        $table->boot(resolve(PreviousStablesQuery::class));
         $table->managerId = $manager->id;
 
         // Act
@@ -96,6 +98,7 @@ describe('PreviousStables query', function (): void {
             'left_at' => $boundary->copy()->addMonth(),
         ]);
         $table = new PreviousStables;
+        $table->boot(resolve(PreviousStablesQuery::class));
         $table->managerId = $manager->id;
 
         // Act

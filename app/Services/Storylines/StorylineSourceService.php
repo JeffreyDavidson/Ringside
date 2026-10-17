@@ -2,23 +2,45 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Storylines;
+namespace App\Services\Storylines;
 
 use App\Data\Storylines\SourceData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Queries\Storylines\StorylineSourceEventQuery;
+use App\Queries\Storylines\StorylineSourceMatchQuery;
+use App\Queries\Storylines\StorylineSourcePlacementQuery;
 
-class StorylineSourceQuery
+/**
+ * What a storyline step or development records about its event, match or segment, the warnings about it, and the
+ * fingerprint that tells a save the source has changed since it was selected. Fingerprints are compared with ones a
+ * browser held earlier, so what goes into them must not change.
+ *
+ * @phpstan-type SourceEvidence array{context: array<string, mixed>, fingerprint: string, warnings: list<string>}
+ */
+class StorylineSourceService
 {
-    /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
-    public function get(SourceData $source, int $promotionId, ?Event $loadedEvent = null, ?EventMatch $loadedMatch = null): array
+    public function __construct(
+        private readonly StorylineSourceEventQuery $events,
+        private readonly StorylineSourceMatchQuery $matches,
+        private readonly StorylineSourcePlacementQuery $placements,
+    ) {}
+
+    /**
+     * Null when the source names an event of another promotion, or a match the event does not have.
+     *
+     * @return SourceEvidence|null
+     */
+    public function get(SourceData $source, int $promotionId, ?Event $loadedEvent = null, ?EventMatch $loadedMatch = null): ?array
     {
         if ($source->eventId === null) {
             return ['context' => [], 'fingerprint' => hash('sha256', (string) $source->targetOn), 'warnings' => []];
         }
-        $event = $loadedEvent ?? Event::query()->withTrashed()->where('promotion_id', $promotionId)
-            ->with(['promotion', 'pack', 'liveRun'])->findOrFail($source->eventId);
+        $event = $loadedEvent ?? $this->events->get($promotionId, $source->eventId);
+        if (! $event instanceof Event) {
+            return null;
+        }
         $context = ['event_id' => $event->id, 'event_name' => $event->name, 'event_date' => $event->date?->toIso8601String(),
             'event_deleted' => $event->trashed(), 'event_timezone' => $event->promotion?->timezone];
         $warnings = [];
@@ -30,7 +52,10 @@ class StorylineSourceQuery
         }
         $key = null;
         if ($source->matchId !== null) {
-            $match = $loadedMatch ?? EventMatch::query()->withTrashed()->where('event_id', $event->id)->with(['competitors', 'titles'])->findOrFail($source->matchId);
+            $match = $loadedMatch ?? $this->matches->get($event->id, $source->matchId);
+            if (! $match instanceof EventMatch) {
+                return null;
+            }
             $context['match_id'] = $match->id;
             $context['match_label'] = __('storylines.match_number', ['number' => $match->match_number]);
             $context['match_result'] = $match->match_finish?->value;
@@ -54,7 +79,7 @@ class StorylineSourceQuery
             if ($segment === null) {
                 $warnings[] = __('storylines.removed_segment');
             }
-            if ($segment !== null && $segment['after_match_id'] !== null && ! ($event->relationLoaded('matches') ? $event->matches->contains('id', $segment['after_match_id']) : $event->matches()->whereKey($segment['after_match_id'])->exists())) {
+            if ($segment !== null && $segment['after_match_id'] !== null && ! ($event->relationLoaded('matches') ? $event->matches->contains('id', $segment['after_match_id']) : $this->placements->get($event, $segment['after_match_id']))) {
                 $warnings[] = __('storylines.unplaced_segment');
             }
         }

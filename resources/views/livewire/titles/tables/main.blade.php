@@ -118,7 +118,7 @@
                     <tbody class="divide-border divide-y">
                         @foreach ($rows as $row)
                             @php
-                                $champion = resolve(\App\Queries\Titles\CurrentChampionQuery::class)->get($row);
+                                $champion = $row->currentChampionship?->champion;
                             @endphp
                             <tr wire:key="title-{{ $row->id }}" class="hover:bg-surface-hover/40 transition-colors">
                                 <td class="px-4 py-4 align-top sm:px-5">

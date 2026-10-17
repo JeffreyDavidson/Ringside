@@ -7,6 +7,7 @@ use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -209,6 +210,35 @@ describe('titles table', function (): void {
         // Assert
         expect($loadedTitle->relationLoaded('currentChampionship'))->toBeTrue()
             ->and($loadedTitle->currentChampionship?->relationLoaded('champion'))->toBeTrue();
+    });
+
+    it('reads every champion in the same statements however many titles are listed', function (): void {
+        // Arrange
+        TitleChampionship::factory()
+            ->for(Title::factory()->active()->singles()->create(), 'title')
+            ->for(Wrestler::factory()->create(), 'champion')
+            ->current()
+            ->create();
+        $oneTitle = queriesDuring(fn () => livewire(Main::class));
+        TitleChampionship::factory()
+            ->for(Title::factory()->active()->singles()->create(), 'title')
+            ->for(Wrestler::factory()->create(['name' => 'Second Champion']), 'champion')
+            ->current()
+            ->create();
+        TitleChampionship::factory()
+            ->for(Title::factory()->active()->tagTeam()->create(), 'title')
+            ->for(TagTeam::factory()->create(['name' => 'Champion Duo']), 'champion')
+            ->current()
+            ->create();
+
+        // Act
+        $threeTitles = queriesDuring(fn () => livewire(Main::class));
+
+        // Assert
+        expect($threeTitles)->toHaveCount(count($oneTitle) + 1);
+        livewire(Main::class)
+            ->assertSee('Second Champion')
+            ->assertSee('Champion Duo');
     });
 
     it('renders a newly assigned champion after a refresh', function (): void {

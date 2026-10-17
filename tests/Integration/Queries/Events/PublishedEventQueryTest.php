@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Events\EventPublication;
+use App\Models\Promotions\Promotion;
 use App\Queries\Events\PublishedEventQuery;
 
 describe('published event query', function (): void {
@@ -17,6 +18,33 @@ describe('published event query', function (): void {
         // Assert
         expect($found?->is($publication))->toBeTrue()
             ->and($found?->event->is($fixture['event']))->toBeTrue();
+    });
+
+    it('reads the publication and its event in one query plus the eager load of that result', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $publication = EventPublication::factory()->for($fixture['event'])->create(['published_at' => now()]);
+        $query = resolve(PublishedEventQuery::class);
+
+        // Act
+        $statements = recordStatements(fn () => $query->get($publication->public_id, $publication->slug)?->event);
+
+        // Assert
+        expect($statements)->toHaveCount(2)
+            ->and($statements[0]['sql'])->toContain('from "event_publications"');
+    });
+
+    it('reads nothing when the publication names an event of another promotion', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $publication = EventPublication::factory()->for($fixture['event'])->create(['published_at' => now()]);
+        $publication->forceFill(['promotion_id' => Promotion::factory()->create()->id])->save();
+
+        // Act
+        $found = resolve(PublishedEventQuery::class)->get($publication->public_id, $publication->slug);
+
+        // Assert
+        expect($found)->toBeNull();
     });
 
     it('reads nothing for a link that names no publication', function (string $link): void {

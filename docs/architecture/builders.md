@@ -54,7 +54,7 @@ Existence projections carry the facts behind lifecycle status (`status_*_exists`
 
 `EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and deterministic ordering by event date, card, and match number. Competitor and referee history relationships reuse its persisted past-event constraint rather than defining their own date comparisons. Scheduling policy and conflict exceptions remain in `MatchAssignmentEligibility`.
 
-`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. Current-champion reads remain in `CurrentChampionQuery` and reign-length calculation in `TitleReignService`.
+`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. `TitleBuilder::withCurrentChampion()` eager loads each title's current champion for lists, and reign-length calculation stays in `TitleReignService`.
 
 `MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentEligibility`.
 
