@@ -29,8 +29,8 @@ use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
-use App\Queries\Tournaments\TournamentShowQuery;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ViewModels\Tournaments\TournamentShowViewModel;
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -261,14 +261,14 @@ class Show extends Component
         return $rosterKind === null ? [] : $search->search($rosterKind, $term, $tournament->promotion_id);
     }
 
-    public function render(TournamentBracketService $bracket, TournamentShowQuery $read, BookableRosterSearch $search): View
+    public function render(TournamentBracketService $bracket, TournamentShowViewModel $page, BookableRosterSearch $search): View
     {
         $tournament = $this->tournament();
         Gate::authorize('view', $tournament);
         $bouts = $bracket->bouts($tournament);
         $tournament->setRelation('nodes', new Collection($bouts->map(fn (TournamentBoutData $bout): TournamentNode => $bout->node)->all()));
         $kind = $tournament->entrant_kind === EntrantKind::TagTeam ? BookableRosterKind::TagTeams : BookableRosterKind::Wrestlers;
-        $reads = $read->get($tournament);
+        $reads = $page->data($tournament);
 
         return view('livewire.tournaments.components.show', [
             'tournament' => $tournament,
@@ -343,19 +343,21 @@ class Show extends Component
      */
     private function affectedBouts(Tournament $tournament, SupportCollection $bouts, TournamentBracketService $bracket): SupportCollection
     {
-        if (in_array($this->draftOperation, ['reset', 'unbook'], true) && $this->nodeId !== null) {
+        $operation = TournamentOperation::tryFrom($this->draftOperation);
+
+        if (in_array($operation, [TournamentOperation::Reset, TournamentOperation::Unbook], true) && $this->nodeId !== null) {
             $node = $this->node($tournament);
             $ids = $bracket->descendantNodeIds($node);
-            if ($this->draftOperation === 'unbook') {
+            if ($operation === TournamentOperation::Unbook) {
                 $ids[] = $node->id;
             }
 
             return $bouts->only($ids);
         }
-        if (in_array($this->draftOperation, ['withdraw', 'replace'], true) && $this->entryId !== null) {
+        if (in_array($operation, self::ENTRY_OPERATIONS, true) && $this->entryId !== null) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->first?->id === $this->entryId || $bout->second?->id === $this->entryId);
         }
-        if ($this->draftOperation === 'cancel') {
+        if ($operation === TournamentOperation::Cancel) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null);
         }
 
@@ -366,7 +368,7 @@ class Show extends Component
      * The first bout that is ready to book: both entrants known, still in the tournament and bookable.
      *
      * @param  SupportCollection<int, TournamentBoutData>  $bouts
-     * @param  list<int>  $availableIds
+     * @param  array<int, int>  $availableIds
      */
     private function nextBout(SupportCollection $bouts, array $availableIds): ?TournamentBoutData
     {

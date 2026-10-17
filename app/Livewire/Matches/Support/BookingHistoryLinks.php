@@ -6,14 +6,14 @@ namespace App\Livewire\Matches\Support;
 
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Matches\BookingHistoryQuery;
+use App\ViewModels\Matches\BookingHistoryViewModel;
 
 /**
  * Adds the page links to a booking history snapshot: profiles of competitors that still exist, the match history
  * filtered to an opponent, and the events the matches came from.
  *
- * @phpstan-import-type Snapshot from BookingHistoryQuery
- * @phpstan-import-type Pair from BookingHistoryQuery
+ * @phpstan-import-type Snapshot from BookingHistoryViewModel
+ * @phpstan-import-type Pair from BookingHistoryViewModel
  *
  * @phpstan-type LinkedSnapshot array{available: bool, reference: string, from: string, subjects: list<array<string, mixed>>, direct: array<string, mixed>|null, notices: list<array<string, mixed>>, totalNotices: int, page: int, pages: int}
  */

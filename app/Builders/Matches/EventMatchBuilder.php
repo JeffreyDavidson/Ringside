@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @template TModel of EventMatch
@@ -110,6 +111,37 @@ class EventMatchBuilder extends Builder
         self::addRecordedResultFlag($this);
 
         return $this;
+    }
+
+    /**
+     * These matches as plain rows aliased `history`, each carrying `history_recorded` (a complete recorded result)
+     * and `history_date` (the event date), ready to join to the competitor entries and aggregate. The builder itself is
+     * left unchanged.
+     */
+    public function asHistorySource(): QueryBuilder
+    {
+        return DB::query()->fromSub(
+            (clone $this)->withRecordedResultFlag()
+                ->join('events as history_event', 'history_event.id', '=', 'events_matches.event_id')
+                ->addSelect('history_event.date as history_date')
+                ->toBase(),
+            'history',
+        );
+    }
+
+    /**
+     * Keep the rows whose competitor entry (joined as `$alias`) is one of the selected wrestlers or tag teams.
+     *
+     * @param  list<array{type: string, id: int, side: int}>  $selection
+     */
+    public static function whereSelectedCompetitors(QueryBuilder $query, string $alias, array $selection): void
+    {
+        $query->where(function (QueryBuilder $query) use ($alias, $selection): void {
+            foreach (array_unique(array_column($selection, 'type')) as $type) {
+                $ids = array_column(array_filter($selection, fn (array $entry): bool => $entry['type'] === $type), 'id');
+                $query->orWhere(fn (QueryBuilder $kind): QueryBuilder => $kind->where("{$alias}.competitor_type", $type)->whereIn("{$alias}.competitor_id", $ids));
+            }
+        });
     }
 
     public function forEventId(int $eventId): static

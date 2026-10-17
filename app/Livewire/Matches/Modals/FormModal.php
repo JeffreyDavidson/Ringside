@@ -23,7 +23,7 @@ use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
-use App\Queries\Matches\BookingHistoryQuery;
+use App\ViewModels\Matches\BookingHistoryViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -137,7 +137,7 @@ class FormModal extends BaseFormModal
     #[Renderless]
     public function checkHistory(
         BookingHistorySelection $selection,
-        BookingHistoryQuery $historyQuery,
+        BookingHistoryViewModel $history,
         BookingHistoryLinks $historyLinks,
         int $page = 1,
     ): array {
@@ -163,7 +163,7 @@ class FormModal extends BaseFormModal
             return ['error' => __('matches.history.unavailable_selection')];
         }
 
-        $snapshot = $historyQuery->get(
+        $snapshot = $history->snapshot(
             $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
         );
 
