@@ -18,6 +18,7 @@ $dataClasses = array_map(
 dataset('data classes', array_combine($dataClasses, array_map(static fn (string $class): array => [$class], $dataClasses)));
 
 test('data objects are readonly', function (string $class) {
+    /** @var class-string $class */
     // Arrange
     $reflection = new ReflectionClass($class);
 
@@ -29,6 +30,7 @@ test('data objects are readonly', function (string $class) {
 })->with('data classes');
 
 test('data objects only have a constructor, static named constructors and allowed checks', function (string $class) {
+    /** @var class-string $class */
     // Arrange
     // Value-level checks on a data object's own fields that data.md explicitly allows.
     $allowedChecks = [StableMembershipData::class => ['isEmpty', 'isNotEmpty', 'getTotalMemberCount']];
@@ -44,12 +46,13 @@ test('data objects only have a constructor, static named constructors and allowe
         ->all();
 
     // Assert
-    expect($unexpectedMethods)->toBe([]);
+    expect($unexpectedMethods)->toBeEmpty();
 })->with('data classes');
 
 test('data objects do not read the clock', function (string $class) {
+    /** @var class-string $class */
     // Arrange
-    $source = file_get_contents((new ReflectionClass($class))->getFileName());
+    $source = (string) file_get_contents((string) new ReflectionClass($class)->getFileName());
 
     // Act
     $readsClock = preg_match('/\bnow\(|Carbon::now|Date::now/', $source) === 1;
