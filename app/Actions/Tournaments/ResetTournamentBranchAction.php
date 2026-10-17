@@ -37,7 +37,7 @@ class ResetTournamentBranchAction
             }
             foreach ($links as $link) {
                 $match = $link->match->refreshForUpdate();
-                $run = EventLiveRun::query()->where('event_id', $match->event_id)->lockForUpdate()->first();
+                $run = EventLiveRun::query()->forEventId($match->event_id)->lockForUpdate()->first();
                 $item = collect($run?->content['items'] ?? [])->firstWhere('key', 'match:'.$match->id);
                 if ($match->match_finish !== null || ($item !== null && $item['state'] !== 'pending')) {
                     throw TournamentException::playedDependency();

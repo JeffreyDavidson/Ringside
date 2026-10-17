@@ -34,7 +34,7 @@ class MutateBudgetAction
         return DB::transaction(function () use ($event, $version, $requestKey, $operation, $payload, $change, $reason, $user): EventBudget {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $event->load('promotion');
-            $budget = EventBudget::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            $budget = EventBudget::query()->forEventId($event->id)->lockForUpdate()->first();
             $hash = hash('sha256', json_encode([$operation->value, $payload, $reason], JSON_THROW_ON_ERROR));
             $prior = $budget?->revisions()->where('request_key', $requestKey)->first();
             if ($prior !== null) {

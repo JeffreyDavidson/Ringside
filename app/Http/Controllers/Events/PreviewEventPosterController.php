@@ -13,7 +13,7 @@ class PreviewEventPosterController
 {
     public function __invoke(Event $event): StreamedResponse
     {
-        $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
+        $publication = EventPublication::query()->forEventId($event->id)->firstOrFail();
         $poster = $publication->draft['poster'];
         abort_if($poster === null, 404);
         abort_unless(Storage::disk('local')->exists('event-posters/'.$poster['key']), 404);

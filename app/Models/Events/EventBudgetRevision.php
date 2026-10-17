@@ -37,10 +37,15 @@ class EventBudgetRevision extends Model
     /** @use HasFactory<EventBudgetRevisionFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'operation' => BudgetOperation::class, 'before' => 'array', 'after' => 'array'];
+        return [
+            'version' => 'integer',
+            'operation' => BudgetOperation::class,
+            'before' => 'array',
+            'after' => 'array',
+        ];
     }
 
     /** @return BelongsTo<EventBudget, $this> */

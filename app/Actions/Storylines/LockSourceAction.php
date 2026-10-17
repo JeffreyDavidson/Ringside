@@ -22,8 +22,8 @@ class LockSourceAction
         if ($source->eventId !== null) {
             Event::query()->withTrashed()->where('promotion_id', $promotionId)->whereKey($source->eventId)->lockForUpdate()->firstOrFail();
             EventMatch::query()->withTrashed()->where('event_id', $source->eventId)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->where('event_id', $source->eventId)->lockForUpdate()->first();
-            EventLiveRun::query()->where('event_id', $source->eventId)->lockForUpdate()->first();
+            EventPack::query()->forEventId($source->eventId)->lockForUpdate()->first();
+            EventLiveRun::query()->forEventId($source->eventId)->lockForUpdate()->first();
         }
         $result = $this->query->get($source, $promotionId);
         if ($source->fingerprint !== null && ! hash_equals($source->fingerprint, $result['fingerprint'])) {

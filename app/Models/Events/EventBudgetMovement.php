@@ -34,17 +34,23 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  * @property-read EventBudgetLine $line
  */
-#[Fillable([])]
+#[Fillable('kind', 'amount_cents', 'effective_date', 'method', 'reference', 'notes')]
 #[UseFactory(EventBudgetMovementFactory::class)]
 class EventBudgetMovement extends Model
 {
     /** @use HasFactory<EventBudgetMovementFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['kind' => BudgetMovementKind::class, 'method' => BudgetPaymentMethod::class, 'amount_cents' => 'integer', 'effective_date' => 'date', 'voided_at' => 'datetime'];
+        return [
+            'kind' => BudgetMovementKind::class,
+            'method' => BudgetPaymentMethod::class,
+            'amount_cents' => 'integer',
+            'effective_date' => 'date',
+            'voided_at' => 'datetime',
+        ];
     }
 
     /** @return BelongsTo<EventBudgetLine, $this> */

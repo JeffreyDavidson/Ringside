@@ -28,11 +28,11 @@ class SaveSponsorCommitmentAction
                 throw SponsorCommitmentException::eventUnavailable();
             }
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
-            $commitment = $id === null ? null : EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
+            $commitment = $id === null ? null : EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             if (! Str::isUuid($submissionKey)) {
                 throw RecordChangedException::changed();
             }
-            if (($commitment->version ?? 0) !== $version || ($commitment === null && EventSponsorCommitment::query()->where('event_id', $event->id)->where('submission_key', $submissionKey)->exists())) {
+            if (($commitment->version ?? 0) !== $version || ($commitment === null && EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists())) {
                 throw RecordChangedException::changed();
             }
             if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
@@ -54,20 +54,22 @@ class SaveSponsorCommitmentAction
             }
             $commitment->sponsor_id = $sponsor->id;
             $commitment->submission_key = $isNew ? $submissionKey : $commitment->submission_key;
-            $commitment->type = $data->type;
-            $commitment->description = mb_trim($data->description);
-            $commitment->responsible = $data->owner;
-            $commitment->deadline_at = $data->deadline?->copy()->utc();
-            $commitment->timezone = $data->timezone;
-            $commitment->notes = $data->notes;
-            $commitment->agreement_reference = $data->agreement;
+            $commitment->fill([
+                'type' => $data->type,
+                'description' => mb_trim($data->description),
+                'responsible' => $data->owner,
+                'deadline_at' => $data->deadline?->copy()->utc(),
+                'timezone' => $data->timezone,
+                'notes' => $data->notes,
+                'agreement_reference' => $data->agreement,
+                'evidence_note' => $data->status === SponsorCommitmentStatus::Completed ? $data->evidence : null,
+                'evidence_url' => $data->status === SponsorCommitmentStatus::Completed ? $data->evidenceUrl : null,
+                'instruction_label' => $data->instructionLabel,
+                'instruction' => $data->instruction,
+                'instruction_owner' => $data->instructionOwner,
+            ]);
             $commitment->status = $data->status;
-            $commitment->evidence_note = $data->status === SponsorCommitmentStatus::Completed ? $data->evidence : null;
-            $commitment->evidence_url = $data->status === SponsorCommitmentStatus::Completed ? $data->evidenceUrl : null;
             $commitment->completed_at = $data->status === SponsorCommitmentStatus::Completed ? ($data->completedAt ?? $commitment->completed_at ?? now()) : null;
-            $commitment->instruction_label = $data->instructionLabel;
-            $commitment->instruction = $data->instruction;
-            $commitment->instruction_owner = $data->instructionOwner;
             if ($isNew || $reviewed) {
                 $commitment->event_context = $this->context->get($event);
             }

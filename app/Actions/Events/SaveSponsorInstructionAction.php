@@ -30,9 +30,9 @@ class SaveSponsorInstructionAction
         DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $mode, $targetKey, $afterMatchId, $previewHash, $reason): void {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $matches = EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            $commitment = EventSponsorCommitment::query()->where('event_id', $event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
-            $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
-            $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            $commitment = EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
+            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             $preview = $this->instructions->preview($event, $commitment, $mode, $targetKey, $afterMatchId);
             if ($commitment->version !== $version || ($pack->version ?? 0) !== $packVersion || ! hash_equals($card['fingerprint'], $fingerprint)
@@ -74,7 +74,7 @@ class SaveSponsorInstructionAction
                 $commitment->pack_instruction_hash = null;
             } else {
                 $key = $targetKey ?? $mode.':'.Str::uuid();
-                if (EventSponsorCommitment::query()->where('event_id', $event->id)->where('pack_key', $key)->whereKeyNot($commitment->id)->exists()) {
+                if (EventSponsorCommitment::query()->forEventId($event->id)->where('pack_key', $key)->whereKeyNot($commitment->id)->exists()) {
                     throw SponsorCommitmentException::usedTarget();
                 }
                 $uuid = explode(':', $key, 2)[1];

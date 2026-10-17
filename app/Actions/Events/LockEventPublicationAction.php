@@ -30,7 +30,7 @@ class LockEventPublicationAction
             throw EventPublicationException::invalid();
         }
         EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-        $publication = EventPublication::query()->withoutGlobalScope(PromotionContextScope::class)->where('event_id', $event->id)->lockForUpdate()->first();
+        $publication = EventPublication::query()->forEventId($event->id)->withoutGlobalScope(PromotionContextScope::class)->lockForUpdate()->first();
         $source = $this->source->get($event);
         if (($publication->version ?? 0) !== $version || ! hash_equals($source['fingerprint'], $fingerprint)) {
             throw RecordChangedException::changed();

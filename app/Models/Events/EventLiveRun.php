@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Builders\Events\EventLiveRunBuilder;
 use App\Enums\Events\LiveShowStatus;
 use Database\Factories\Events\EventLiveRunFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,16 +38,23 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([])]
 #[UseFactory(EventLiveRunFactory::class)]
+#[UseEloquentBuilder(EventLiveRunBuilder::class)]
 class EventLiveRun extends Model
 {
     /** @use HasFactory<EventLiveRunFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'pack_version' => 'integer', 'status' => LiveShowStatus::class,
-            'content' => 'array', 'prepared_at' => 'datetime', 'completed_at' => 'datetime'];
+        return [
+            'version' => 'integer',
+            'pack_version' => 'integer',
+            'status' => LiveShowStatus::class,
+            'content' => 'array',
+            'prepared_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
     }
 
     /** @return BelongsTo<Event, $this> */

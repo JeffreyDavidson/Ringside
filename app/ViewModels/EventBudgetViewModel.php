@@ -24,7 +24,7 @@ class EventBudgetViewModel
     {
         $event = Event::query()->whereKey($event->id)->firstOrFail();
         $event->load('promotion');
-        $budget = EventBudget::query()->where('event_id', $event->id)->with('lines.movements')->first();
+        $budget = EventBudget::query()->forEventId($event->id)->with('lines.movements')->first();
         $lines = $budget->lines ?? new Collection;
         $rows = [];
         foreach ($lines as $line) {

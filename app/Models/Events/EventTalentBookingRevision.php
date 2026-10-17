@@ -34,10 +34,13 @@ class EventTalentBookingRevision extends Model
     /** @use HasFactory<EventTalentBookingRevisionFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'snapshot' => 'array'];
+        return [
+            'version' => 'integer',
+            'snapshot' => 'array',
+        ];
     }
 
     /** @return BelongsTo<EventTalentBooking, $this> */

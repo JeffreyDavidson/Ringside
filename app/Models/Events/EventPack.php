@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Builders\Events\EventPackBuilder;
 use Database\Factories\Events\EventPackFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,17 +32,21 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  * @property-read Event $event
  */
-#[Fillable([])]
+#[Fillable('content')]
 #[UseFactory(EventPackFactory::class)]
+#[UseEloquentBuilder(EventPackBuilder::class)]
 class EventPack extends Model
 {
     /** @use HasFactory<EventPackFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'content' => 'array'];
+        return [
+            'version' => 'integer',
+            'content' => 'array',
+        ];
     }
 
     /** @return BelongsTo<Event, $this> */

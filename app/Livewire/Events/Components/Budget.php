@@ -148,7 +148,7 @@ class Budget extends Component
     public function refreshState(): void
     {
         Gate::authorize('viewBudget', $this->event());
-        $this->draftVersion = EventBudget::query()->where('event_id', $this->eventId)->first()->version ?? 0;
+        $this->draftVersion = EventBudget::query()->forEventId($this->eventId)->first()->version ?? 0;
         $this->dispatch('budget-refreshed');
     }
 
@@ -235,7 +235,7 @@ class Budget extends Component
 
     private function line(int $id): EventBudgetLine
     {
-        $budget = EventBudget::query()->where('event_id', $this->eventId)->firstOrFail();
+        $budget = EventBudget::query()->forEventId($this->eventId)->firstOrFail();
 
         return $budget->lines()->with('budget')->whereKey($id)->firstOrFail();
     }
@@ -251,7 +251,7 @@ class Budget extends Component
         $this->replaceMovement = false;
         $this->reason = '';
         $this->requestKey = (string) Str::uuid();
-        $this->draftVersion = EventBudget::query()->where('event_id', $this->eventId)->first()->version ?? 0;
+        $this->draftVersion = EventBudget::query()->forEventId($this->eventId)->first()->version ?? 0;
         $this->resetErrorBag();
         $this->dispatch('budget-draft-opened');
     }

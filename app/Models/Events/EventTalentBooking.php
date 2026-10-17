@@ -37,18 +37,25 @@ use Illuminate\Support\Carbon;
  * @property-read Event $event
  * @property-read Collection<int, EventTalentBookingRevision> $revisions
  */
-#[Fillable([])]
+#[Fillable('fee_minor', 'arrival_at', 'arrival_timezone', 'travel_notes')]
 #[UseFactory(EventTalentBookingFactory::class)]
 class EventTalentBooking extends Model
 {
     /** @use HasFactory<EventTalentBookingFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['status' => TalentBookingStatus::class, 'version' => 'integer', 'person_id' => 'integer',
-            'fee_minor' => 'integer', 'arrival_at' => 'datetime', 'terms_need_review' => 'boolean', 'confirmed_snapshot' => 'array'];
+        return [
+            'status' => TalentBookingStatus::class,
+            'version' => 'integer',
+            'person_id' => 'integer',
+            'fee_minor' => 'integer',
+            'arrival_at' => 'datetime',
+            'terms_need_review' => 'boolean',
+            'confirmed_snapshot' => 'array',
+        ];
     }
 
     /** @return BelongsTo<Event, $this> */

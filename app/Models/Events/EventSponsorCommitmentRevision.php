@@ -37,10 +37,13 @@ class EventSponsorCommitmentRevision extends Model
     /** @use HasFactory<EventSponsorCommitmentRevisionFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'snapshot' => 'array'];
+        return [
+            'version' => 'integer',
+            'snapshot' => 'array',
+        ];
     }
 
     /** @return BelongsTo<EventSponsorCommitment, $this> */

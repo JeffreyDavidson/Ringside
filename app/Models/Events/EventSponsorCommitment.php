@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Builders\Events\EventSponsorCommitmentBuilder;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Sponsors\Sponsor;
 use Database\Factories\Events\EventSponsorCommitmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,8 +47,9 @@ use Illuminate\Support\Carbon;
  * @property-read Event $event
  * @property-read Sponsor $sponsor
  */
-#[Fillable([])]
+#[Fillable('type', 'description', 'responsible', 'deadline_at', 'timezone', 'notes', 'agreement_reference', 'evidence_note', 'evidence_url', 'instruction_label', 'instruction', 'instruction_owner')]
 #[UseFactory(EventSponsorCommitmentFactory::class)]
+#[UseEloquentBuilder(EventSponsorCommitmentBuilder::class)]
 class EventSponsorCommitment extends Model
 {
     use BelongsToPromotion;
@@ -54,11 +57,17 @@ class EventSponsorCommitment extends Model
     /** @use HasFactory<EventSponsorCommitmentFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'type' => SponsorCommitmentType::class, 'status' => SponsorCommitmentStatus::class,
-            'deadline_at' => 'datetime', 'completed_at' => 'datetime', 'event_context' => 'array'];
+        return [
+            'version' => 'integer',
+            'type' => SponsorCommitmentType::class,
+            'status' => SponsorCommitmentStatus::class,
+            'deadline_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'event_context' => 'array',
+        ];
     }
 
     /** @return BelongsTo<Event, $this> */

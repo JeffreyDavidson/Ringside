@@ -25,8 +25,8 @@ class PrepareLiveShowAction
         return DB::transaction(function () use ($event, $version, $packVersion, $fingerprint): EventLiveRun {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
-            $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->first();
             if ($run !== null || $version !== 0) {
                 throw RecordChangedException::changed();
             }
