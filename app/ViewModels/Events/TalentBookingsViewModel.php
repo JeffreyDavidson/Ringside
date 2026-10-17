@@ -123,7 +123,7 @@ class TalentBookingsViewModel
                 $result[] = ['key' => $key, 'type' => $type, 'id' => $id,
                     'name' => $person instanceof Wrestler ? $person->name : ($person->full_name ?? $row['name']),
                     'role' => $row['role'], 'matches' => $row['matches'], 'on_card' => in_array($key, array_column($card['roster'], 'key'), true),
-                    'unavailable' => ! in_array($id, $available, true),
+                    'unavailable' => $person === null || ! in_array($id, $available, true),
                     'booking' => $bookings->first(fn (EventTalentBooking $booking): bool => $booking->person_type === $type && $booking->person_id === $id)];
             }
         }

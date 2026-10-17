@@ -13,6 +13,7 @@ use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\TalentBookingFingerprintService;
@@ -188,6 +189,36 @@ test('the roster lists everyone on the card and everyone booked, sorted by name,
         ->and($rowOf($bookedOnly)['on_card'])->toBeFalse()
         ->and($rowOf($bookedOnly)['booking']?->is($booking))->toBeTrue()
         ->and($data['card_warning'])->toBeTrue();
+});
+
+test('a bookable wrestler of another promotion on the card is unavailable even without an enforced promotion context', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $promotion = Promotion::factory()
+        ->create();
+    $event = Event::factory()
+        ->for($promotion)
+        ->create(['date' => now()->addDay()]);
+    $foreign = Wrestler::factory()
+        ->bookable()
+        ->for(Promotion::factory())
+        ->create();
+    $own = Wrestler::factory()
+        ->bookable()
+        ->for($promotion)
+        ->create();
+    EventMatch::factory()
+        ->for($event)
+        ->withCompetitors([$foreign, $own])
+        ->create();
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($event);
+
+    // Assert
+    $rowOf = fn (Wrestler $wrestler): array => collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$wrestler->id}");
+    expect($rowOf($foreign)['unavailable'])->toBeTrue()
+        ->and($rowOf($own)['unavailable'])->toBeFalse();
 });
 
 test('the roster reads the same statements for a bigger card', function (): void {
