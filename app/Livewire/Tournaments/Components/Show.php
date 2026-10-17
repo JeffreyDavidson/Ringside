@@ -370,20 +370,14 @@ class Show extends Component
      */
     private function nextBout(SupportCollection $bouts, array $availableIds): ?TournamentBoutData
     {
-        return $bouts->first(function (TournamentBoutData $bout) use ($availableIds): bool {
-            if ($bout->complete || ! $bout->inputsResolved) {
-                return false;
-            }
-            if (! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry) {
-                return false;
-            }
-            if ($bout->first->withdrawn || $bout->second->withdrawn) {
-                return false;
-            }
-
-            return in_array($bout->first->competitor_id, $availableIds, true)
-                && in_array($bout->second->competitor_id, $availableIds, true);
-        });
+        return $bouts->first(fn (TournamentBoutData $bout): bool => ! $bout->complete
+            && $bout->inputsResolved
+            && $bout->first instanceof TournamentEntry
+            && $bout->second instanceof TournamentEntry
+            && ! $bout->first->withdrawn
+            && ! $bout->second->withdrawn
+            && in_array($bout->first->competitor_id, $availableIds, true)
+            && in_array($bout->second->competitor_id, $availableIds, true));
     }
 
     /** @param Closure(): mixed $operation */
