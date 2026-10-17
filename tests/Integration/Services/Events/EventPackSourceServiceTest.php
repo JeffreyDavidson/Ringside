@@ -81,10 +81,10 @@ test('places segments around the matches they follow and keeps notes for matches
 
     // Assert
     expect(array_column($source['running'], 'key'))->toBe(['segment:seg-open', "match:{$fixture['first']->id}", 'segment:seg-mid', "match:{$fixture['second']->id}"])
-        ->and($source['running'][0])->toBe(['key' => 'segment:seg-open', 'label' => 'Opening video', 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $opening])
-        ->and($source['running'][3]['timing'])->toBe($timing)
-        ->and($source['removed'])->toBe([$removed])
-        ->and($source['unplaced'])->toBe([$orphan])
+        ->and($source['running'][0])->toEqual(['key' => 'segment:seg-open', 'label' => 'Opening video', 'details' => '', 'referees' => '', 'warning' => false, 'timing' => $opening])
+        ->and($source['running'][3]['timing'])->toEqual($timing)
+        ->and($source['removed'])->toEqual([$removed])
+        ->and($source['unplaced'])->toEqual([$orphan])
         ->and($source['needsReview'])->toBeFalse();
 });
 
