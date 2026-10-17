@@ -14,13 +14,21 @@ trait DescribesUpcomingBookings
 {
     private const int BOOKING_SUMMARY_LIMIT = 5;
 
+    private UpcomingBookings $upcomingBookings;
+
+    /** Livewire calls this trait boot hook with the container-injected collaborator on every request. */
+    public function bootDescribesUpcomingBookings(UpcomingBookings $upcomingBookings): void
+    {
+        $this->upcomingBookings = $upcomingBookings;
+    }
+
     /**
      * The upcoming or unresulted events a roster member is booked in (the first five, then a count of the rest) as a
      * comma-separated list, or an empty string.
      */
     protected function upcomingBookingSummary(Wrestler|Referee|TagTeam $rosterMember): string
     {
-        $events = app(UpcomingBookings::class)->events($rosterMember);
+        $events = $this->upcomingBookings->events($rosterMember);
 
         $summary = $events
             ->take(self::BOOKING_SUMMARY_LIMIT)

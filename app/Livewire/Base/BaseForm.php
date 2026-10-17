@@ -85,6 +85,8 @@ abstract class BaseForm extends Form
             return $this->modelPromotionId;
         }
 
+        // A form object has a single boot() hook whose signature subclasses already vary (stables, matches), so a base
+        // class cannot inject this collaborator without breaking them; resolve it here, at the one point it is read.
         $context = app(PromotionContextService::class);
 
         return $context->isEnforced() ? $context->current()?->id : null;
