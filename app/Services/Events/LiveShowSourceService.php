@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Queries\Events;
+namespace App\Services\Events;
 
 use App\Enums\Crew\CrewRole;
 use App\Models\Events\Event;
@@ -11,13 +11,13 @@ use App\Models\Events\EventPack;
 
 /**
  * @phpstan-import-type Content from EventLiveRun
- * @phpstan-import-type PackSource from EventPackSourceQuery
+ * @phpstan-import-type PackSource from EventPackSourceService
  *
  * @phpstan-type Source array{pack: EventPack, fingerprint: string, content: Content}
  */
-class LiveShowSourceQuery
+class LiveShowSourceService
 {
-    public function __construct(private readonly EventPackSourceQuery $pack) {}
+    public function __construct(private readonly EventPackSourceService $pack) {}
 
     /**
      * The live show's source, or null while the event has no date, no saved pack, a pack that no longer matches

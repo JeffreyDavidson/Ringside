@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../../../Fixtures/live-show.php';
 
-use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveRunSourceService;
+use App\Services\Events\LiveShowSourceService;
 
 test('a run still matches the pack and card it was prepared from', function (): void {
     // Arrange
     $fixture = liveShowFixture();
-    $source = resolve(LiveShowSourceQuery::class)->get($fixture['event']);
+    $source = resolve(LiveShowSourceService::class)->get($fixture['event']);
     assert($source !== null);
 
     // Act
@@ -24,7 +24,7 @@ test('a run has moved on when the pack is gone, its version changed or the card 
     // Arrange
     $fixture = liveShowFixture();
     $run = $fixture['run'];
-    $source = resolve(LiveShowSourceQuery::class)->get($fixture['event']);
+    $source = resolve(LiveShowSourceService::class)->get($fixture['event']);
     assert($source !== null);
     $newerPack = clone $source['pack'];
     $newerPack->version = $run->pack_version + 1;

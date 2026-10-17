@@ -8,21 +8,21 @@ use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
-use App\Queries\Events\EventPackSourceQuery;
-use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\EventPackSourceService;
 use App\Services\Events\LiveRunSourceService;
+use App\Services\Events\LiveShowSourceService;
 
 /**
  * @phpstan-import-type Assignment from EventPack
  * @phpstan-import-type Cue from EventPack
- * @phpstan-import-type RunningRow from EventPackSourceQuery
+ * @phpstan-import-type RunningRow from EventPackSourceService
  *
  * @phpstan-type SheetRow array{key: string, label: string, timing: array{planned_at?: ?string, revised_at?: ?string}, cues: list<Cue>}
  * @phpstan-type Sheet array{event: Event, source: string, hasLive: bool, version: int, eventName: string, eventDate: ?string, venue: ?string, timezone: string, needsReview: bool, assignments: list<Assignment>, allAssignments: list<Assignment>, rows: list<SheetRow>, revision: ?string, person: ?int, role: ?string}
  */
 class EventProductionViewModel
 {
-    public function __construct(private readonly EventPackSourceQuery $pack, private readonly LiveShowSourceQuery $live, private readonly LiveRunSourceService $comparison) {}
+    public function __construct(private readonly EventPackSourceService $pack, private readonly LiveShowSourceService $live, private readonly LiveRunSourceService $comparison) {}
 
     /**
      * The production sheet of an event the caller has already authorized for viewProduction.

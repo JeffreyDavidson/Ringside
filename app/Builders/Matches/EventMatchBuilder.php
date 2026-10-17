@@ -11,7 +11,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
@@ -200,6 +202,26 @@ class EventMatchBuilder extends Builder
             'competitors.side',
             'winningSide.competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
             'winningSide.competitors.competitor',
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Eager load the current members of every tag team competing in the matches, in the same read as the competitors,
+     * so the people on a card come from one result set. Pass a constraint to change how the members are read; by default
+     * they come in id order.
+     *
+     * @param  (Closure(Relation<*, *, *>): mixed)|null  $members
+     */
+    public function withTagTeamMembers(?Closure $members = null): static
+    {
+        $this->with([
+            'competitors' => fn (Relation $competitors): Relation => $competitors->orderBy('events_matches_competitors.id'),
+            // The eager load hands the competitor relation (a MorphTo) to this constraint.
+            'competitors.competitor' => fn (Relation $competitor): Relation => $competitor instanceof MorphTo
+                ? $competitor->morphWith([TagTeam::class => ['currentWrestlers' => $members ?? fn (Relation $wrestlers): Relation => $wrestlers->orderBy('wrestlers.id')]])
+                : $competitor,
         ]);
 
         return $this;

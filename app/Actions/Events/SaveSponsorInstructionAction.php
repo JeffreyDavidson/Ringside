@@ -12,16 +12,16 @@ use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\EventPackCardQuery;
-use App\Queries\Events\EventPackSourceQuery;
+use App\Services\Events\EventPackCardService;
+use App\Services\Events\EventPackSourceService;
 use App\Services\Events\SponsorInstructionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SaveSponsorInstructionAction
 {
-    public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardQuery $card,
-        private readonly EventPackSourceQuery $source, private readonly SaveEventPackAction $save,
+    public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardService $card,
+        private readonly EventPackSourceService $source, private readonly SaveEventPackAction $save,
         private readonly PersistSponsorCommitmentAction $persist) {}
 
     public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, string $mode,

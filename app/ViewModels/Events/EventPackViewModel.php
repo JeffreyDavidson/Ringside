@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\ViewModels\Events;
 
 use App\Models\Events\Event;
-use App\Queries\Events\EventPackSourceQuery;
+use App\Services\Events\EventPackSourceService;
 use Illuminate\Support\Facades\Gate;
 
-/** @phpstan-import-type PackSource from EventPackSourceQuery */
+/** @phpstan-import-type PackSource from EventPackSourceService */
 class EventPackViewModel
 {
-    public function __construct(private readonly EventPackSourceQuery $query) {}
+    public function __construct(private readonly EventPackSourceService $query) {}
 
     /** @return PackSource */
     public function data(Event $event): array

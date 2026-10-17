@@ -7,8 +7,8 @@ namespace App\ViewModels\Events;
 use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
-use App\Queries\Events\LiveShowSourceQuery;
 use App\Services\Events\LiveRunSourceService;
+use App\Services\Events\LiveShowSourceService;
 use App\Services\Events\LiveShowTimingService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Lang;
 /**
  * @phpstan-import-type Content from EventLiveRun
  * @phpstan-import-type Item from EventLiveRun
- * @phpstan-import-type Source from LiveShowSourceQuery
+ * @phpstan-import-type Source from LiveShowSourceService
  *
  * @phpstan-type Times array{start: string, finish: string}
  * @phpstan-type Attendance array{arrived: string, briefed: string}
@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Lang;
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceQuery $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison) {}
+    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison) {}
 
     /**
      * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant

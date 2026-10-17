@@ -12,14 +12,14 @@ use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Matches\EventMatch;
-use App\Queries\Events\EventPackCardQuery;
-use App\Queries\Events\EventPackSourceQuery;
+use App\Services\Events\EventPackCardService;
+use App\Services\Events\EventPackSourceService;
 use Illuminate\Support\Facades\DB;
 
 /** @phpstan-import-type Production from EventPack */
 class SaveEventProductionAction
 {
-    public function __construct(private readonly EventPackCardQuery $card, private readonly EventPackSourceQuery $source,
+    public function __construct(private readonly EventPackCardService $card, private readonly EventPackSourceService $source,
         private readonly EventProductionRequirements $requirements) {}
 
     /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */

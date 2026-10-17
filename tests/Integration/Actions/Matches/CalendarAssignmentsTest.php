@@ -21,7 +21,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Queries\Events\EventRosterAvailabilityQuery;
+use App\Services\Events\EventRosterAvailabilityService;
 
 test('a standalone assignment rejects a date-unavailable wrestler and writes nothing', function (): void {
     // Arrange
@@ -121,7 +121,7 @@ test('an undated card has no calendar conflict until a date is chosen', function
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     $match = EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
-    $query = resolve(EventRosterAvailabilityQuery::class);
+    $query = resolve(EventRosterAvailabilityService::class);
     $eligibility = resolve(EventRosterSchedulingEligibility::class);
 
     // Act

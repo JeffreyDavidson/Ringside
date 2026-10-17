@@ -7,18 +7,18 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Queries\Events\EventPackSourceQuery;
-use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\EventPackSourceService;
+use App\Services\Events\LiveShowSourceService;
 
 use function Pest\Laravel\actingAs;
 
-describe('live show source query', function (): void {
+describe('live show source service', function (): void {
     it('reads the running order, roster and production of a prepared card', function (): void {
         // Arrange
         $fixture = liveShowFixture(segment: true);
 
         // Act
-        $source = resolve(LiveShowSourceQuery::class)->get($fixture['event']);
+        $source = resolve(LiveShowSourceService::class)->get($fixture['event']);
 
         // Assert
         assert($source !== null);
@@ -32,8 +32,8 @@ describe('live show source query', function (): void {
     it('reuses a pack source the caller already read instead of reading the pack again', function (): void {
         // Arrange
         $fixture = liveShowFixture();
-        $packSource = resolve(EventPackSourceQuery::class)->get($fixture['event']);
-        $query = resolve(LiveShowSourceQuery::class);
+        $packSource = resolve(EventPackSourceService::class)->get($fixture['event']);
+        $query = resolve(LiveShowSourceService::class);
 
         // Act
         $statements = recordStatements(fn () => $query->get($fixture['event'], $packSource));
@@ -50,7 +50,7 @@ describe('live show source query', function (): void {
         EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
 
         // Act
-        $source = resolve(LiveShowSourceQuery::class)->get($event);
+        $source = resolve(LiveShowSourceService::class)->get($event);
 
         // Assert
         expect($source)->toBeNull();
@@ -62,7 +62,7 @@ describe('live show source query', function (): void {
         $fixture['event']->forceFill(['date' => null])->save();
 
         // Act
-        $source = resolve(LiveShowSourceQuery::class)->get($fixture['event']);
+        $source = resolve(LiveShowSourceService::class)->get($fixture['event']);
 
         // Assert
         expect($source)->toBeNull();
@@ -74,7 +74,7 @@ describe('live show source query', function (): void {
         EventMatch::query()->where('event_id', $fixture['event']->id)->firstOrFail()->delete();
 
         // Act
-        $source = resolve(LiveShowSourceQuery::class)->get($fixture['event']);
+        $source = resolve(LiveShowSourceService::class)->get($fixture['event']);
 
         // Assert
         expect($source)->toBeNull();

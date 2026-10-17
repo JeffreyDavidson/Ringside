@@ -8,6 +8,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventTalentBooking;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Events\EventPackCardService;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class TalentBookingRosterQuery
 {
-    public function __construct(private readonly EventPackCardQuery $card) {}
+    public function __construct(private readonly EventPackCardService $card) {}
 
     /** @return Roster */
     public function get(Event $event): array

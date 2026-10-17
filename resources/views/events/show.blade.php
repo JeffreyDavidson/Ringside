@@ -62,9 +62,6 @@
         </section>
     @endif
 
-    @php
-        $calendarUnavailable = app(\App\Queries\Events\EventRosterAvailabilityQuery::class)->get($event);
-    @endphp
     @if ($event->date === null)
         <p class="text-muted-foreground mb-5">{{ __('availability.not_checked') }}</p>
     @elseif ($calendarUnavailable->isNotEmpty() && ($event->date >= now() || $event->matches()->whereNull('match_finish')->exists()))

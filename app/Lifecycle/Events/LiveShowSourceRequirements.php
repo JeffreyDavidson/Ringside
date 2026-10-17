@@ -7,18 +7,18 @@ namespace App\Lifecycle\Events;
 use App\Exceptions\Events\LiveShowException;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
-use App\Queries\Events\EventPackSourceQuery;
-use App\Queries\Events\LiveShowSourceQuery;
+use App\Services\Events\EventPackSourceService;
 use App\Services\Events\LiveRunSourceService;
+use App\Services\Events\LiveShowSourceService;
 
 /**
  * A live show can only be prepared, reviewed or run from a dated event whose saved pack matches its card.
  *
- * @phpstan-import-type Source from LiveShowSourceQuery
+ * @phpstan-import-type Source from LiveShowSourceService
  */
 final readonly class LiveShowSourceRequirements
 {
-    public function __construct(private LiveShowSourceQuery $source, private EventPackSourceQuery $pack, private LiveRunSourceService $comparison) {}
+    public function __construct(private LiveShowSourceService $source, private EventPackSourceService $pack, private LiveRunSourceService $comparison) {}
 
     /** @return Source */
     public function ensureSource(Event $event): array

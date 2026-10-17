@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Actions\Roster\Availability\CreateAction;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Tables\Main;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineStep;
@@ -101,6 +104,81 @@ describe('show', function (): void {
             ->assertSee('Status')
             ->assertSeeHtml('data-test="relationship-table-loading-placeholder"')
             ->assertSeeLivewire(MatchesTable::class);
+    });
+
+    test('warns about booked people who are unavailable on the event day and names them', function (): void {
+        // Arrange
+        $actor = administrator();
+        $promotion = Promotion::factory()
+            ->create();
+        $event = Event::factory()
+            ->for($promotion)
+            ->create(['date' => now()->addWeek()]);
+        [$blocked, $free] = Wrestler::factory()
+            ->count(2)
+            ->sequence(['name' => 'Blocked Bruiser'], ['name' => 'Free Fighter'])
+            ->bookable()
+            ->for($promotion)
+            ->create()
+            ->all();
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$blocked, $free])
+            ->create();
+        $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
+        resolve(CreateAction::class)->handle($blocked, $day, $day, null, $actor);
+        actingAs($actor);
+
+        // Act
+        $response = get(route('events.show', $event));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertSee(__('availability.card_warning'))
+            ->assertSeeHtml("Blocked Bruiser · {$day}")
+            ->assertDontSeeHtml('Free Fighter ·');
+    });
+
+    test('shows no availability warning when everyone booked is available', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $event = Event::factory()
+            ->for($promotion)
+            ->create(['date' => now()->addWeek()]);
+        $wrestler = Wrestler::factory()
+            ->bookable()
+            ->for($promotion)
+            ->create();
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$wrestler])
+            ->create();
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('events.show', $event));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertDontSee(__('availability.card_warning'));
+    });
+
+    test('says availability is not checked while the event has no date', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => null]);
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('events.show', $event));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertSee(__('availability.not_checked'));
     });
 
     test('a user without a promotion membership cannot view an event profile', function () {
