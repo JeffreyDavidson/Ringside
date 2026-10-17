@@ -12,8 +12,8 @@ use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
 use App\Models\Promotions\Promotion;
 use App\Models\Tournaments\Tournament;
+use App\Queries\Tournaments\TournamentIndexQuery;
 use App\Services\Promotions\PromotionContextService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -70,23 +70,27 @@ class Index extends Component
 
     /** @return array<int, array{id:int|string,name:string}> */
     #[Renderless]
-    public function searchRoster(string $kind, string $term): array
+    public function searchRoster(PromotionContextService $context, BookableRosterSearch $search, string $kind, string $term): array
     {
         Gate::authorize('create', Tournament::class);
         $rosterKind = BookableRosterKind::tryFrom($kind);
         if (! in_array($rosterKind, [BookableRosterKind::Wrestlers, BookableRosterKind::TagTeams], true)) {
             return [];
         }
-        $promotion = app(PromotionContextService::class)->current();
+        $promotion = $context->current();
 
-        return $promotion === null ? [] : app(BookableRosterSearch::class)->search($rosterKind, $term, $promotion->id);
+        return $promotion instanceof Promotion ? $search->search($rosterKind, $term, $promotion->id) : [];
     }
 
-    public function render(): View
+    public function render(TournamentIndexQuery $read, BookableRosterSearch $search): View
     {
         Gate::authorize('viewAny', Tournament::class);
         $kind = $this->form->kind === 'tag_team' ? BookableRosterKind::TagTeams : BookableRosterKind::Wrestlers;
 
-        return view('livewire.tournaments.components.index', ['tournaments' => Tournament::query()->withCount(['entries', 'links as recorded_results_count' => fn (Builder $query) => $query->whereHas('match', fn (Builder $match) => $match->whereNotNull('match_finish'))])->orderByDesc('id')->paginate(20), 'labels' => app(BookableRosterSearch::class)->labels($kind, $this->form->entrants), 'kind' => $kind]);
+        return view('livewire.tournaments.components.index', [
+            'tournaments' => $read->get(),
+            'labels' => $search->labels($kind, $this->form->entrants),
+            'kind' => $kind,
+        ]);
     }
 }
