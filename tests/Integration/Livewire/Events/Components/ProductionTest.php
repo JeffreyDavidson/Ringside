@@ -14,7 +14,7 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

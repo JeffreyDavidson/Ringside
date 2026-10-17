@@ -12,7 +12,7 @@ use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\TalentBookingFingerprintService;
-use App\ViewModels\TalentBookingsViewModel;
+use App\ViewModels\Events\TalentBookingsViewModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;

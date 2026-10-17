@@ -20,7 +20,7 @@ use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Laravel\actingAs;

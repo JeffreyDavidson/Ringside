@@ -13,8 +13,8 @@ use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
-use App\ViewModels\EventPackViewModel;
-use App\ViewModels\EventProductionViewModel;
+use App\ViewModels\Events\EventPackViewModel;
+use App\ViewModels\Events\EventProductionViewModel;
 use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;

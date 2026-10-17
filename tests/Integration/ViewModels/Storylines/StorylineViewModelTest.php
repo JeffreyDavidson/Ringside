@@ -7,7 +7,7 @@ use App\Data\Storylines\StepData;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
-use App\ViewModels\StorylineViewModel;
+use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;

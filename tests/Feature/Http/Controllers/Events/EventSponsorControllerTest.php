@@ -14,7 +14,7 @@ use App\Models\Promotions\Promotion;
 use App\Queries\Events\PublicEventSourceQuery;
 use App\Services\Events\SponsorInstructionService;
 use App\Services\Promotions\PromotionContextService;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\View\View;
 use PHPUnit\Framework\Assert;
 

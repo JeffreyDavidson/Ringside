@@ -9,11 +9,11 @@ use App\Models\Events\EventBudgetMovement;
 use App\Models\Events\EventBudgetRevision;
 use App\Models\Promotions\Promotion;
 use App\Models\Users\User;
-use App\ViewModels\EventBudgetViewModel;
+use App\ViewModels\Events\EventBudgetViewModel;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Models\Activity;
 
-require_once __DIR__.'/../../Fixtures/budget.php';
+require_once __DIR__.'/../../../Fixtures/budget.php';
 
 test('ticket refunds show net confirmed income and cash without crossing counterparties', function (): void {
     // Arrange

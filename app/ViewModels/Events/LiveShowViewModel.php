@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ViewModels;
+namespace App\ViewModels\Events;
 
 use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;

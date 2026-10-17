@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\ViewModels\DashboardViewModel;
+use App\ViewModels\Dashboard\DashboardViewModel;
 use Illuminate\Contracts\View\View;
 
 /**

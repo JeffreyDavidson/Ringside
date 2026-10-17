@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../../Fixtures/sponsor-commitment.php';
+require_once __DIR__.'/../../../Fixtures/sponsor-commitment.php';
 
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
@@ -15,8 +15,8 @@ use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Services\Events\SponsorInstructionService;
-use App\ViewModels\EventPackViewModel;
-use App\ViewModels\SponsorCommitmentsViewModel;
+use App\ViewModels\Events\EventPackViewModel;
+use App\ViewModels\Events\SponsorCommitmentsViewModel;
 
 test('overdue completed late and unknown deadlines use recorded facts', function (): void {
     // Arrange

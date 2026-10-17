@@ -11,7 +11,7 @@ use App\Models\Events\EventBudgetLine;
 use App\Models\Events\EventBudgetMovement;
 use App\Models\Promotions\Promotion;
 use App\Services\Events\BudgetSettlementService;
-use App\ViewModels\EventBudgetViewModel;
+use App\ViewModels\Events\EventBudgetViewModel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;

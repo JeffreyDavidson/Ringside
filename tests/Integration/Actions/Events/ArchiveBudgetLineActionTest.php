@@ -4,7 +4,7 @@ declare(strict_types=1);
 use App\Actions\Events\ArchiveBudgetLineAction;
 use App\Exceptions\Events\BudgetException;
 use App\Models\Events\EventBudgetMovement;
-use App\ViewModels\EventBudgetViewModel;
+use App\ViewModels\Events\EventBudgetViewModel;
 
 require_once __DIR__.'/../../../Fixtures/budget.php';
 

@@ -13,7 +13,7 @@ use App\Http\Requests\Events\SaveEventPublicationRequest;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use App\Queries\Events\PublicEventSourceQuery;
-use App\ViewModels\PublicEventViewModel;
+use App\ViewModels\Events\PublicEventViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;

@@ -13,7 +13,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Events\EventPackCardQuery;
 use App\Queries\Events\EventRosterAvailabilityQuery;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 

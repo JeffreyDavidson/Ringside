@@ -9,13 +9,13 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
-use App\ViewModels\EventPackViewModel;
-use App\ViewModels\LiveShowViewModel;
+use App\ViewModels\Events\EventPackViewModel;
+use App\ViewModels\Events\LiveShowViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 
-require_once __DIR__.'/../../Fixtures/live-show.php';
+require_once __DIR__.'/../../../Fixtures/live-show.php';
 
 test('the screen reports revised planned starts and actual delay without inventing missing times', function (): void {
     // Arrange
@@ -81,7 +81,7 @@ test('a show that was never prepared has no times or comparisons to label', func
 
 test('the live screen data a member receives leaves out crew production content', function (): void {
     // Arrange
-    require_once __DIR__.'/../../Fixtures/production.php';
+    require_once __DIR__.'/../../../Fixtures/production.php';
     $event = productionFixture()['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);

@@ -10,7 +10,7 @@ use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
 use App\Http\Requests\Events\UpdateEventPackRequest;
 use App\Models\Events\Event;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

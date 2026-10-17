@@ -25,6 +25,11 @@ $viewModels = array_map(
     glob(__DIR__.'/../../../app/ViewModels/{,*/}*.php', GLOB_BRACE) ?: [],
 );
 
+// ViewModels live in a domain folder (.ai/rules/view-models.md), never directly in app/ViewModels.
+test('every view model sits in a domain folder', function () use ($viewModels): void {
+    expect(array_filter($viewModels, fn (string $viewModel): bool => ! str_contains($viewModel, '\\')))->toBeEmpty();
+});
+
 foreach ($viewModels as $viewModel) {
     arch("{$viewModel} does not depend on another view model")
         ->expect("App\\ViewModels\\{$viewModel}")

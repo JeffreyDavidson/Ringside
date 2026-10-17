@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ViewModels;
+namespace App\ViewModels\Events;
 
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;

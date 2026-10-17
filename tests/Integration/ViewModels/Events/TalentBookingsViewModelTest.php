@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.'/../../Fixtures/talent-booking.php';
+require_once __DIR__.'/../../../Fixtures/talent-booking.php';
 
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Data\Events\TalentBookingData;
@@ -15,7 +15,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\TalentBookingFingerprintService;
-use App\ViewModels\TalentBookingsViewModel;
+use App\ViewModels\Events\TalentBookingsViewModel;
 
 use function Pest\Laravel\actingAs;
 

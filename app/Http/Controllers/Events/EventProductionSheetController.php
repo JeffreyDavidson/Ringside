@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Http\Requests\Events\EventProductionSheetRequest;
 use App\Models\Events\Event;
-use App\ViewModels\EventProductionViewModel;
+use App\ViewModels\Events\EventProductionViewModel;
 use Illuminate\Contracts\View\View;
 
 class EventProductionSheetController

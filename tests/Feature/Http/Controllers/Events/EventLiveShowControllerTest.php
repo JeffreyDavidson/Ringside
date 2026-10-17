@@ -8,7 +8,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Promotions\Promotion;
-use App\ViewModels\EventPackViewModel;
+use App\ViewModels\Events\EventPackViewModel;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

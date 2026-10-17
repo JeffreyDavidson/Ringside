@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ViewModels;
+namespace App\ViewModels\Dashboard;
 
 use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Models\Events\Event;
