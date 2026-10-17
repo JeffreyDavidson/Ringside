@@ -12,7 +12,7 @@ test('budget mutation locks the owning event budget and line before the write', 
     // Arrange
     $f = budgetFixture();
     // Act
-    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineInput(['description' => 'Updated fee'])));
+    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['description' => 'Updated fee'])));
     // Assert
     $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
     $budgetLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "event_budgets"'));
@@ -33,4 +33,17 @@ test('a failed financial mutation rolls back both its state and retained history
         throw new RuntimeException('Caller failed');
     }))->toThrow(RuntimeException::class);
     expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->refresh()->version)->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);
+});
+
+test('a budget write without an authenticated actor is refused and leaves no history', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    auth()->logout();
+
+    // Act
+    $write = fn () => resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): null => null);
+
+    // Assert
+    expect($write)->toThrow(LogicException::class);
+    expect($f['budget']->revisions()->count())->toBe(0);
 });

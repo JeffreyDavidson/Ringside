@@ -95,6 +95,7 @@ return [
     'refund_source' => 'Choose an active original payment on this line; a refund cannot precede it.',
     'refund_cap' => 'The refund exceeds the amount still refundable from that payment.',
     'cannot_archive' => 'A line with recorded money or a nonzero confirmed obligation cannot be archived.',
+    'movement_missing' => 'That movement is not on this line. Reload to see the latest version.',
     'already_voided' => 'This movement was already voided. Review its history.',
     'dependent_refunds' => 'Correct or void this payment’s active refunds first.',
     'draft_required' => 'Open a line or movement before saving.',

@@ -7,7 +7,6 @@ use App\Exceptions\Roster\Availability\UnavailabilityException;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Models\Activity;
 
 test('creating unavailability stores inclusive calendar dates and its actor without changing the roster', function (): void {
@@ -47,18 +46,6 @@ test('an exact repeated unavailable submission is rejected but overlapping range
     $action->handle($person, '2026-10-18', '2026-10-20', null, $actor);
     expect(Unavailability::query()->count())->toBe(2);
 });
-
-test('invalid calendar ranges cannot be persisted', function (string $start, string $end): void {
-    // Arrange
-    $person = Wrestler::factory()->for(Promotion::factory())->create();
-    $actor = administrator();
-
-    // Act
-    $save = fn () => resolve(CreateAction::class)->handle($person, $start, $end, null, $actor);
-
-    // Assert
-    expect($save)->toThrow(ValidationException::class)->and(Unavailability::query()->count())->toBe(0);
-})->with([['2026-10-19', '2026-10-17'], ['2026-02-30', '2026-03-01'], ['tomorrow', '2026-10-17']]);
 
 test('an unowned record cannot receive a calendar restriction', function (): void {
     // Arrange

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use App\Actions\Events\RecordBudgetMovementAction;
+use App\Data\Events\BudgetMovementData;
 use App\Exceptions\Events\BudgetException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
@@ -114,7 +115,7 @@ test('native payment and refund races keep one financial write per version or re
             expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
         if ($case === 'refund') {
-            expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, $input))->toThrow(BudgetException::class);
+            expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input)))->toThrow(BudgetException::class);
         }
     });
 })->with(['retry', 'distinct', 'refund'])->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)->group('concurrency', 'postgres-concurrency');

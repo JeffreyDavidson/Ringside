@@ -4,48 +4,30 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
-use App\Enums\Events\BudgetCategory;
-use App\Enums\Events\BudgetDirection;
+use App\Data\Events\BudgetLineData;
 use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
 use App\Services\Events\BudgetSettlementService;
-use App\ValueObjects\UsdAmount;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class SaveBudgetLineAction
 {
     public function __construct(private readonly MutateBudgetAction $mutate, private readonly BudgetSettlementService $settlement) {}
 
-    /** @param array<string, mixed> $input */
-    public function handle(Event $event, int $version, string $key, ?int $lineId, array $input): EventBudget
+    public function handle(Event $event, int $version, string $key, ?int $lineId, BudgetLineData $data): EventBudget
     {
-        /** @var array{direction: string, category: string, description: string, counterparty: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, acknowledge?: bool} $data */
-        $data = Validator::make($input, [
-            'direction' => ['required', Rule::enum(BudgetDirection::class)],
-            'category' => ['required', Rule::enum(BudgetCategory::class)],
-            'description' => ['required', 'string', 'max:255'], 'counterparty' => ['required', 'string', 'max:255'],
-            'planned' => ['nullable', 'string', 'regex:/\A[0-9]{1,7}(?:\.[0-9]{1,2})?\z/'],
-            'confirmed' => ['nullable', 'string', 'regex:/\A[0-9]{1,7}(?:\.[0-9]{1,2})?\z/'],
-            'due_date' => ['nullable', 'date_format:Y-m-d'], 'notes' => ['nullable', 'string', 'max:2000'],
-            'reason' => ['nullable', 'string', 'max:1000'], 'acknowledge' => ['sometimes', 'boolean'],
-        ])->validate();
-        $direction = BudgetDirection::from($data['direction']);
-        $category = BudgetCategory::from($data['category']);
-        if (! $category->accepts($direction)) {
+        if (! $data->category->accepts($data->direction)) {
             throw BudgetException::categoryDirection();
         }
-        $attributes = ['direction' => $direction, 'category' => $category,
-            'description' => trim($data['description']), 'counterparty' => trim($data['counterparty']),
-            'planned_cents' => filled($data['planned'] ?? null) ? UsdAmount::parse($data['planned']) : null,
-            'confirmed_cents' => filled($data['confirmed'] ?? null) ? UsdAmount::parse($data['confirmed']) : null,
-            'due_date' => filled($data['due_date'] ?? null) ? $data['due_date'] : null, 'notes' => $data['notes'] ?? null];
-        $reason = filled($data['reason'] ?? null) ? trim($data['reason']) : null;
+        $attributes = ['direction' => $data->direction, 'category' => $data->category,
+            'description' => $data->description, 'counterparty' => $data->counterparty,
+            'planned_cents' => $data->plannedCents, 'confirmed_cents' => $data->confirmedCents,
+            'due_date' => $data->dueDate, 'notes' => $data->notes];
+        $reason = $data->reason;
 
-        return $this->mutate->handle($event, $version, $key, BudgetOperation::SaveLine, ['line_id' => $lineId, ...$attributes, 'acknowledge' => (bool) ($data['acknowledge'] ?? false)], function (EventBudget $budget) use ($lineId, $attributes, $reason, $data): ?array {
+        return $this->mutate->handle($event, $version, $key, BudgetOperation::SaveLine, ['line_id' => $lineId, ...$attributes, 'acknowledge' => $data->acknowledge], function (EventBudget $budget) use ($lineId, $attributes, $reason, $data): ?array {
             $line = $lineId === null ? new EventBudgetLine : $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
             if ($line->archived_at !== null) {
                 throw BudgetException::archived();
@@ -62,7 +44,7 @@ class SaveBudgetLineAction
             if ($confirmedChanged && $reason === null) {
                 throw BudgetException::reasonRequired();
             }
-            if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! ($data['acknowledge'] ?? false)) {
+            if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! $data->acknowledge) {
                 throw BudgetException::excess();
             }
             $line->forceFill($attributes);
