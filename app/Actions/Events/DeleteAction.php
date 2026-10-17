@@ -52,7 +52,7 @@ class DeleteAction
 
             $this->tournamentRequirements->ensureEventDeletable($lockedEvent);
             Tournament::query()->whereKey($tournamentIds)->increment('version');
-            EventPublication::query()->where('event_id', $lockedEvent->id)->update([
+            EventPublication::query()->forEventId($lockedEvent->id)->update([
                 'published_at' => null, 'results_published_at' => null, 'unpublished_at' => now(),
                 'version' => DB::raw('version + 1'),
             ]);

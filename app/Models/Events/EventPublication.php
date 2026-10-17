@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Builders\Events\EventPublicationBuilder;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Users\User;
 use Database\Factories\Events\EventPublicationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,8 +47,9 @@ use Illuminate\Support\Carbon;
  * @property-read User|null $publisher
  * @property-read User|null $resultsPublisher
  */
-#[Fillable([])]
+#[Fillable('draft')]
 #[UseFactory(EventPublicationFactory::class)]
+#[UseEloquentBuilder(EventPublicationBuilder::class)]
 class EventPublication extends Model
 {
     use BelongsToPromotion;
@@ -54,12 +57,20 @@ class EventPublication extends Model
     /** @use HasFactory<EventPublicationFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer', 'draft' => 'array', 'card' => 'array', 'results' => 'array',
-            'card_source' => 'array', 'results_source' => 'array', 'published_at' => 'datetime',
-            'results_published_at' => 'datetime', 'unpublished_at' => 'datetime'];
+        return [
+            'version' => 'integer',
+            'draft' => 'array',
+            'card' => 'array',
+            'results' => 'array',
+            'card_source' => 'array',
+            'results_source' => 'array',
+            'published_at' => 'datetime',
+            'results_published_at' => 'datetime',
+            'unpublished_at' => 'datetime',
+        ];
     }
 
     /** @return BelongsTo<User, $this> */

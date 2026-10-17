@@ -115,7 +115,7 @@ class LiveShow extends Component
         $event = $this->event();
         Gate::authorize('update', $event);
         Validator::make(['operation' => $operation], ['operation' => [Rule::in(['skip', 'correct', 'reopen'])]])->validate();
-        $run = EventLiveRun::query()->where('event_id', $event->id)->firstOrFail();
+        $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
         $item = collect($run->content['items'])->firstWhere('key', $key);
         if ($item === null) {
             $this->addError('run', __('live-show.unknown_item'));
@@ -151,7 +151,7 @@ class LiveShow extends Component
         Validator::make(['draftOperation' => $this->draftOperation, 'reason' => $this->reason, 'actualStart' => $this->actualStart, 'actualFinish' => $this->actualFinish,
             'startOffset' => $this->startOffset, 'finishOffset' => $this->finishOffset], $rules)->validate();
         $this->perform(function (Event $event): void {
-            $run = EventLiveRun::query()->where('event_id', $event->id)->firstOrFail();
+            $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
             $timing = app(LiveShowTimingService::class);
             $start = $this->draftOperation === 'correct' ? $timing->wallTime($this->actualStart, $run->content['timezone'], $this->startOffset) : null;
             $finish = $this->actualFinish === '' ? null : $timing->wallTime($this->actualFinish, $run->content['timezone'], $this->finishOffset);

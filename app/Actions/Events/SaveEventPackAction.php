@@ -23,7 +23,7 @@ class SaveEventPackAction
             // Card assignment actions also lock the owning event before changing its matches.
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
@@ -54,7 +54,7 @@ class SaveEventPackAction
             $pack->event_id = $event->id;
             $pack->version = $version + 1;
             $pack->card_fingerprint = $fingerprint;
-            $pack->content = $content;
+            $pack->fill(['content' => $content]);
             $pack->save();
         }, attempts: 3);
     }

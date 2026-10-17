@@ -28,7 +28,7 @@ class SaveEventProductionAction
         DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            $pack = EventPack::query()->where('event_id', $event->id)->lockForUpdate()->first();
+            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
@@ -47,7 +47,7 @@ class SaveEventProductionAction
             $pack->event_id = $event->id;
             $pack->version = $version + 1;
             $pack->card_fingerprint = $fingerprint;
-            $pack->content = $content;
+            $pack->fill(['content' => $content]);
             $pack->save();
             activity('production')->performedOn($event)->withProperties(['operation' => 'pack-save', 'version' => $pack->version])->log('pack-save');
         }, attempts: 3);

@@ -254,6 +254,6 @@ class SponsorCommitments extends Component
 
     private function commitment(int $id): EventSponsorCommitment
     {
-        return EventSponsorCommitment::query()->where('event_id', $this->eventId)->findOrFail($id);
+        return EventSponsorCommitment::query()->forEventId($this->eventId)->findOrFail($id);
     }
 }

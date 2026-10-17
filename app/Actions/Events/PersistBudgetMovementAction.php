@@ -57,12 +57,14 @@ class PersistBudgetMovementAction
         }
         $movement = new EventBudgetMovement;
         $movement->event_budget_line_id = $line->id;
-        $movement->kind = $data->kind;
-        $movement->amount_cents = $data->amount;
-        $movement->effective_date = Carbon::parse($data->date);
-        $movement->method = $data->method;
-        $movement->reference = $data->reference;
-        $movement->notes = $data->notes;
+        $movement->fill([
+            'kind' => $data->kind,
+            'amount_cents' => $data->amount,
+            'effective_date' => Carbon::parse($data->date),
+            'method' => $data->method,
+            'reference' => $data->reference,
+            'notes' => $data->notes,
+        ]);
         $movement->source_id = $data->sourceId;
         $movement->replaces_id = $replaces;
         $movement->actor_id = $user->id;

@@ -34,7 +34,7 @@ class LiveShowViewModel
     public function data(Event $event, string $refreshedAt = ''): array
     {
         $event->load(['promotion', 'venue']);
-        $run = EventLiveRun::query()->where('event_id', $event->id)->first();
+        $run = EventLiveRun::query()->forEventId($event->id)->first();
         $source = null;
         $sourceError = null;
         $complete = $run?->status === LiveShowStatus::Completed;

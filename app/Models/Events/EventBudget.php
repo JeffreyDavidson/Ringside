@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Builders\Events\EventBudgetBuilder;
 use Database\Factories\Events\EventBudgetFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,15 +30,18 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([])]
 #[UseFactory(EventBudgetFactory::class)]
+#[UseEloquentBuilder(EventBudgetBuilder::class)]
 class EventBudget extends Model
 {
     /** @use HasFactory<EventBudgetFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['version' => 'integer'];
+        return [
+            'version' => 'integer',
+        ];
     }
 
     /** @return BelongsTo<Event, $this> */

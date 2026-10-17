@@ -32,10 +32,10 @@ class EventProductionViewModel
     public function data(Event $event, ?string $source = null, ?int $person = null, ?string $role = null): array
     {
         $data = $this->pack->get($event);
-        $run = EventLiveRun::query()->where('event_id', $event->id)->first();
+        $run = EventLiveRun::query()->forEventId($event->id)->first();
         $source ??= $run === null ? 'plan' : 'live';
         if ($source === 'live') {
-            $run ??= EventLiveRun::query()->where('event_id', $event->id)->firstOrFail();
+            $run ??= EventLiveRun::query()->forEventId($event->id)->firstOrFail();
             $assignments = $run->content['production']['assignments'] ?? [];
             $rows = array_map(fn (array $item): array => ['key' => $item['key'], 'label' => $item['label'], 'timing' => $item['timing'], 'cues' => $item['cues'] ?? []], $run->content['items']);
             $name = $run->content['event_name'];

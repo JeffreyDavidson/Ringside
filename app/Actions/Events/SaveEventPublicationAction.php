@@ -18,7 +18,7 @@ class SaveEventPublicationAction
         return DB::transaction(function () use ($event, $version, $fingerprint, $draft): EventPublication {
             $locked = $this->lock->handle($event, $version, $fingerprint);
             $publication = $locked['publication'];
-            $publication->draft = [
+            $publication->fill(['draft' => [
                 'announcement' => $draft->announcement,
                 'summary' => $draft->summary,
                 'notice' => $draft->notice,
@@ -29,7 +29,7 @@ class SaveEventPublicationAction
                 'poster' => $draft->poster,
                 'matches' => $draft->matches,
                 'results' => $draft->results,
-            ];
+            ]]);
             $publication->version++;
             $publication->save();
 

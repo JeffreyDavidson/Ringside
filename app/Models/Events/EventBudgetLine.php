@@ -33,17 +33,24 @@ use Illuminate\Support\Carbon;
  * @property-read EventBudget $budget
  * @property-read Collection<int, EventBudgetMovement> $movements
  */
-#[Fillable([])]
+#[Fillable('direction', 'category', 'description', 'counterparty', 'planned_cents', 'confirmed_cents', 'due_date', 'notes')]
 #[UseFactory(EventBudgetLineFactory::class)]
 class EventBudgetLine extends Model
 {
     /** @use HasFactory<EventBudgetLineFactory> */
     use HasFactory;
 
-    /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
-        return ['direction' => BudgetDirection::class, 'category' => BudgetCategory::class, 'planned_cents' => 'integer', 'confirmed_cents' => 'integer', 'due_date' => 'date', 'archived_at' => 'datetime'];
+        return [
+            'direction' => BudgetDirection::class,
+            'category' => BudgetCategory::class,
+            'planned_cents' => 'integer',
+            'confirmed_cents' => 'integer',
+            'due_date' => 'date',
+            'archived_at' => 'datetime',
+        ];
     }
 
     /** @return BelongsTo<EventBudget, $this> */

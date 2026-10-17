@@ -69,11 +69,13 @@ class SaveTalentBookingAction
             $booking->person_name = $person instanceof Wrestler ? $person->name : ($person->full_name ?? $booking->person_name);
             $booking->person_role = $personType === (new Wrestler)->getMorphClass() ? __('event-pack.wrestler') : __('event-pack.referee');
             $booking->status = $data->status;
-            $booking->fee_minor = $terms['fee_minor'];
             $booking->currency = 'USD';
-            $booking->arrival_at = $terms['arrival_at'] === null ? null : Carbon::parse($terms['arrival_at']);
-            $booking->arrival_timezone = $terms['arrival_timezone'];
-            $booking->travel_notes = $terms['travel_notes'];
+            $booking->fill([
+                'fee_minor' => $terms['fee_minor'],
+                'arrival_at' => $terms['arrival_at'] === null ? null : Carbon::parse($terms['arrival_at']),
+                'arrival_timezone' => $terms['arrival_timezone'],
+                'travel_notes' => $terms['travel_notes'],
+            ]);
             $booking->terms_need_review = $booking->terms_need_review || ($data->status === TalentBookingStatus::Confirmed && $previousTerms !== $terms);
             if ($data->status === TalentBookingStatus::Confirmed && $data->attest) {
                 $booking->confirmed_snapshot = ['context' => $this->context->get($event), 'on_card' => $this->fingerprints->onCard($event, $key),

@@ -47,7 +47,7 @@ class SaveBudgetLineAction
             if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! $data->acknowledge) {
                 throw BudgetException::excess();
             }
-            $line->forceFill($attributes);
+            $line->fill($attributes);
             if ($line->exists && ! $line->isDirty()) {
                 return null;
             }

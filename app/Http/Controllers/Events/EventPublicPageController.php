@@ -25,7 +25,7 @@ class EventPublicPageController
     public function edit(Event $event, PublicEventSourceQuery $query): View
     {
         $source = $query->get($event);
-        $publication = EventPublication::query()->where('event_id', $event->id)->with(['publisher', 'resultsPublisher'])->first();
+        $publication = EventPublication::query()->forEventId($event->id)->with(['publisher', 'resultsPublisher'])->first();
         $draft = $publication->draft ?? ['announcement' => 'scheduled', 'summary' => null, 'notice' => null, 'address' => false, 'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => null, 'matches' => [], 'results' => []];
         $needsReview = $publication?->card !== null && ($publication->schedule_fingerprint !== $source['schedule'] || $publication->card_fingerprint !== $query->cardFingerprint($source, $publication->card_source ?? []));
         $needsReview = $needsReview || ($publication?->results_published_at !== null
@@ -36,7 +36,7 @@ class EventPublicPageController
 
     public function show(Event $event, PublicEventViewModel $page): Response
     {
-        $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
+        $publication = EventPublication::query()->forEventId($event->id)->firstOrFail();
 
         return response()->view('public-events.show', ['page' => $page->preview($event, $publication)])
             ->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');

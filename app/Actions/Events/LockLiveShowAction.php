@@ -17,7 +17,7 @@ class LockLiveShowAction
     {
         $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
         $event->load('promotion');
-        $run = EventLiveRun::query()->where('event_id', $event->id)->lockForUpdate()->firstOrFail();
+        $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->firstOrFail();
         if ($run->version !== $version) {
             throw RecordChangedException::changed();
         }

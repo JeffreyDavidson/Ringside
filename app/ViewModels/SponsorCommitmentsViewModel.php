@@ -29,7 +29,7 @@ class SponsorCommitmentsViewModel
      */
     public function data(Event $event, string $filter): array
     {
-        $query = EventSponsorCommitment::query()->where('event_id', $event->id)
+        $query = EventSponsorCommitment::query()->forEventId($event->id)
             ->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'sponsor']);
         if (in_array($filter, ['pending', 'completed', 'cancelled'], true)) {
             $query->where(function (Builder $query) use ($filter): void {
