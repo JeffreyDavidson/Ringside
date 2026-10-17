@@ -33,7 +33,7 @@ class Wrestler extends Model
 ## Casts and value objects
 
 - Enum-backed columns are cast to their enum (`'role' => MembershipRole::class`).
-- A value with its own rules is a value object in `app/ValueObjects` with a cast in `app/Casts` (`Height`, `Weight`, `Address`, `PhoneNumber`). `UsdAmount` formats money in ViewModels.
+- A value with its own rules is a value object in `app/ValueObjects` with a cast in `app/Casts` (`Height`, `Weight`, `Address`, `PhoneNumber`). `UsdAmount` parses and formats money (Data objects, Livewire and ViewModels).
 - Status is computed, not stored, on wrestlers, managers, referees, tag teams, stables and titles (see [Core Patterns](core-patterns.md)).
 
 ## Privileged fields are not fillable
