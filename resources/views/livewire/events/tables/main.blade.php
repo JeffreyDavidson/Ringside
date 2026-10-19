@@ -103,7 +103,7 @@
                                 </p>
                                 <p class="text-muted-foreground m-0 mt-1 text-xs leading-5 lg:hidden">
                                     @if ($row->venue)
-                                        @can('view', $row->venue)
+                                        @if (! $row->venue->trashed() && auth()->user()?->can('view', $row->venue))
                                             <a
                                                 href="{{ route('venues.show', $row->venue) }}"
                                                 class="text-foreground underline-offset-4 hover:underline"
@@ -112,7 +112,7 @@
                                             </a>
                                         @else
                                             {{ $row->venue->name }}
-                                        @endcan
+                                        @endif
                                     @else
                                         {{ __('events.no_venue') }}
                                     @endif
@@ -124,7 +124,7 @@
                             </td>
                             <td class="hidden px-4 py-4 align-top text-xs leading-5 lg:table-cell">
                                 @if ($row->venue)
-                                    @can('view', $row->venue)
+                                    @if (! $row->venue->trashed() && auth()->user()?->can('view', $row->venue))
                                         <a
                                             href="{{ route('venues.show', $row->venue) }}"
                                             class="text-foreground underline-offset-4 hover:underline"
@@ -133,7 +133,7 @@
                                         </a>
                                     @else
                                         {{ $row->venue->name }}
-                                    @endcan
+                                    @endif
                                 @else
                                     <span class="text-muted-foreground">{{ __('events.no_venue') }}</span>
                                 @endif

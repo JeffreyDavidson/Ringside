@@ -78,6 +78,24 @@ describe('events table', function (): void {
             ->assertDontSeeHtml(route('venues.show', $venue));
     });
 
+    it('shows a deleted venue as plain text even to an administrator, while a live venue stays a link', function (): void {
+        // Arrange
+        $deletedVenue = Venue::factory()->create(['name' => 'Old Arena']);
+        $liveVenue = Venue::factory()->create(['name' => 'Live Arena']);
+        Event::factory()->past()->atVenue($deletedVenue)->create(['name' => 'Farewell Show']);
+        Event::factory()->scheduled()->atVenue($liveVenue)->create(['name' => 'Linked Show']);
+        $deletedVenue->delete();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSee('Old Arena')
+            ->assertDontSeeHtml('href="'.route('venues.show', $deletedVenue).'"')
+            ->assertSeeHtml('href="'.route('venues.show', $liveVenue).'"');
+    });
+
     it('links a live venue only for a viewer who may open venue pages', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
