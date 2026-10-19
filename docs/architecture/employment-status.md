@@ -20,6 +20,13 @@ Employment status tracks the working relationship between entities and the promo
 - **Exception**: Throw `CannotBeEmployedException` for retired entities
 - **Rationale**: Retired entities cannot be employed
 
+**Rule**: Unretiring restores the state before retirement
+- **Employed when retired**: A wrestler, manager or referee who was employed at the moment they retired (an employment period ended by the retirement) comes back employed, with a new employment period starting on the unretirement date.
+- **Released before retiring**: One who was already released (their employment ended earlier, or through a release) comes back released, with no new employment period.
+- **Re-hiring**: Putting a released person back to work stays the explicit Employ action.
+- **Tag teams**: A tag team can only be retired while employed, so it always comes back employed (when it has current wrestlers).
+- **Explicit callers**: `Wrestlers\UnretireAction` and `Managers\UnretireAction` take an optional `$employImmediately`; `null` (the default) applies this rule, `true` or `false` overrides it (the tag team cascade passes `false` and employs the members itself).
+
 ## Employment Management
 
 ### Employment Lifecycle

@@ -28,6 +28,7 @@ Core capabilities define what each entity type can do within the wrestling promo
 **Rule**: All active entities can be retired
 - **Eligible**: Wrestlers, Managers, Referees, TagTeams, Titles, Stables
 - **Rationale**: Any entity can cease active participation
+- **Unretiring wrestlers, managers and referees** returns them to the state they had before retiring: employed people come back employed, released people come back released (see [Employment Status](employment-status.md)).
 
 ### Tag Team Retirement and Unretirement
 
