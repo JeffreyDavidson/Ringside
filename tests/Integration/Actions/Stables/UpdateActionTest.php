@@ -167,7 +167,7 @@ test('it does not touch the end of an earlier period when a later period is open
 test('it can still move the end date of a disbanded stable with a single period', function () {
     $stable = Stable::factory()->inactive()->create();
     $period = $stable->firstActivityPeriod()->firstOrFail();
-    $newEnd = $period->ended_at?->copy()->addHour()->startOfSecond();
+    $newEnd = $period->started_at->copy()->addDays(2)->startOfSecond();
 
     resolve(UpdateAction::class)->handle($stable, new StableData(
         name: $stable->name,
@@ -398,7 +398,7 @@ describe('moving the period of a stable with memberships', function () {
         // Assert
         expect($update)->toThrow(CannotBeUpdatedException::class, 'cannot start after a member joined')
             ->and($stable->refresh()->name)->toBe('Original Name')
-            ->and($stable->activityPeriods()->sole()->started_at?->toDateString())->toBe('2026-01-01')
+            ->and($stable->activityPeriods()->sole()->started_at->toDateString())->toBe('2026-01-01')
             ->and(DB::table($stable->wrestlers()->getTable())->value('joined_at'))->toStartWith('2026-01-05');
     });
 
@@ -443,7 +443,7 @@ describe('moving the period of a stable with memberships', function () {
 
         // Assert
         $period = $stable->activityPeriods()->sole();
-        expect($period->started_at?->toDateString())->toBe('2026-01-05')
+        expect($period->started_at->toDateString())->toBe('2026-01-05')
             ->and($period->ended_at?->toDateString())->toBe('2026-02-01');
     });
 
@@ -463,7 +463,7 @@ describe('moving the period of a stable with memberships', function () {
 
         // Assert
         $period = $stable->activityPeriods()->sole();
-        expect($period->started_at?->toDateString())->toBe('2026-01-10')
+        expect($period->started_at->toDateString())->toBe('2026-01-10')
             ->and($period->ended_at?->toDateString())->toBe('2026-01-10');
     });
 
