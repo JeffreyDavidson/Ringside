@@ -54,13 +54,8 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
 
     private function hasSideWithMultipleCompetitors(): bool
     {
-        $competitorSides = $this->data['competitors'] ?? null;
-
-        if (! is_array($competitorSides)) {
-            return false;
-        }
-
-        foreach ($competitorSides as $competitorSide) {
+        // Only called once hasCompetitors() has confirmed `competitors` is an array.
+        foreach ((array) $this->data['competitors'] as $competitorSide) {
             if (! is_array($competitorSide)) {
                 continue;
             }
