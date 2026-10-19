@@ -67,6 +67,10 @@ An event whose matches have created or closed a non-deleted reign cannot be move
 
 Deleting is refused the same way, until the result is corrected or cleared: `Matches\DeleteAction` calls `MatchDeletionEligibility::ensureCanBeDeleted()` and `Events\DeleteAction` calls `EventDeletionEligibility::ensureCanBeDeleted()` (which reuses `EventSchedulingEligibility::hasTitleReigns()`), both inside the Action's transaction after its locks. Each throws its `CannotBeDeletedException::hasTitleChange()`, shown as the table's error toast; nothing is written. Both read through `TitleChampionshipBuilder::wonOrLostAtMatches()`, so a deleted reign no longer blocks.
 
+### Tag team champions losing a member
+
+A tag team that loses a current member vacates its titles: every current reign of the team ends on the day the member leaves, through `ChampionshipReignManager::endCurrentReignsForChampion()` (clamped to the reign's start like any other end). This covers a member released, retired or deleted (`Wrestlers\EndCurrentRelationshipsAction`, for every team the wrestler leaves except a team that is itself retiring with them, whose own retirement already ended its reigns) and a member removed or replaced through the tag team form (`TagTeams\SynchronizeMembershipAction`, dated with the update). Adding a member, or saving the form with the same members, never vacates. The wrestler Release, Retire and Delete Actions first lock the teams the wrestler belongs to (`Wrestlers\LockCurrentTagTeamsAction`, ascending id), then the wrestler, then the reigns, so the order stays tag team, wrestler, titles' reigns.
+
 ### Title type
 
 A title's type (singles or tag team) is locked once it has any championship reign or is booked in a non-deleted match (`TitleTypeEligibility`, enforced by `Titles\UpdateAction` with `CannotChangeTypeException`). The title form modal renders the type select disabled with an explanatory note in that case.

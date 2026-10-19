@@ -94,6 +94,8 @@ Enforcement has three layers:
 
 Lock order follows [Lifecycle Operation Boundaries](lifecycle-operation-boundaries.md): tag team before wrestlers, ascending id within the kind.
 
+**Losing a member vacates the titles**: when a wrestler leaves a tag team's current membership (released, retired, deleted, or removed through the tag team form), the team's current title reigns end on that date and the titles become vacant. A team keeping its members, or gaining one, is unaffected. See [Championship System](championship-system.md).
+
 **Migration pre-flight**: `2026_10_01_162139_enforce_single_current_tag_team_membership_for_wrestlers` first looks for wrestlers with more than one current membership. It never edits data; if any exist it aborts before any schema change, naming each wrestler and the tag teams involved. Operators must end the extra memberships (set `left_at` on the `tag_teams_wrestlers` rows that should no longer be current) and re-run `php artisan migrate`.
 
 Wrestler and Tag Team define their current and historical manager relationships directly so each model visibly owns its persistence mapping. The `Manageable` contract remains the type boundary for application code that operates on either model.
