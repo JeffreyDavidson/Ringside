@@ -23,7 +23,9 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Carbon;
 use JMac\Testing\Double;
 use Livewire\Features\SupportTesting\Testable;
 use LivewireUI\Modal\Modal;
@@ -645,6 +647,85 @@ describe('authorized match form interactions', function (): void {
             'form.matchStipulationId' => 'exists',
             'form.titles.0',
         ]);
+    });
+
+    it('checks a title against the booked show date instead of today', function (): void {
+        actingAs(administrator());
+
+        // Arrange
+        $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+        $championThen = Wrestler::factory()->bookable()->create();
+        $championNow = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()
+            ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-06-01 00:00:00'))
+            ->singles()
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championThen)
+            ->wonOn('2026-02-01 00:00:00')
+            ->lostOn('2026-05-01 00:00:00')
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championNow)
+            ->wonOn('2026-05-01 00:00:00')
+            ->current()
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$championNow->id], 'tag_teams' => []],
+                ['wrestlers' => [Wrestler::factory()->bookable()->create()->id], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.titles.0']);
+        expect($modal->instance()->getErrorBag()->first('form.titles.0'))
+            ->toBe(__('titles.validation.champion_must_compete'));
+    });
+
+    it('accepts a title that was active and held by a competing champion on the booked show date', function (): void {
+        actingAs(administrator());
+
+        // Arrange
+        $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+        $championThen = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()
+            ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-06-01 00:00:00'))
+            ->singles()
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championThen)
+            ->wonOn('2026-02-01 00:00:00')
+            ->lostOn('2026-05-01 00:00:00')
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$championThen->id], 'tag_teams' => []],
+                ['wrestlers' => [Wrestler::factory()->bookable()->create()->id], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors(['form.titles.0']);
     });
 
     it('rejects a competitor selected on multiple sides', function (): void {

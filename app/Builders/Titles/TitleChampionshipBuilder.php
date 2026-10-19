@@ -8,6 +8,7 @@ use App\Builders\Concerns\OrdersByKeyForLocking;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -31,6 +32,25 @@ class TitleChampionshipBuilder extends Builder
         $this->whereNull('lost_at');
 
         return $this;
+    }
+
+    /**
+     * The reign that held the title at the given moment (`won_at <= date`, and not lost or lost after it).
+     * Without a date (an unscheduled event) it is the current reign.
+     */
+    public function heldOn(?DateTimeInterface $date): static
+    {
+        if ($date === null) {
+            return $this->current();
+        }
+
+        return $this
+            ->where('won_at', '<=', $date)
+            ->where(function (Builder $query) use ($date): void {
+                $query
+                    ->whereNull('lost_at')
+                    ->orWhere('lost_at', '>', $date);
+            });
     }
 
     public function previous(): static

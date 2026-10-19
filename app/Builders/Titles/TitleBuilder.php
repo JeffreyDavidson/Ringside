@@ -10,9 +10,11 @@ use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstActivityPeriod;
 use App\Builders\Concerns\ProjectsActivityStatus;
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -33,6 +35,20 @@ class TitleBuilder extends Builder
     public function withCurrentChampion(): static
     {
         return $this->with('currentChampionship.champion');
+    }
+
+    /**
+     * Titles with an activity period covering the given moment, in UTC. Without a date (an unscheduled
+     * event) a title must be active now.
+     */
+    public function activeOn(?DateTimeInterface $date): static
+    {
+        return $this->whereHas(
+            'activityPeriods',
+            fn (Builder $periods) => $date === null
+                ? LifecyclePeriodBuilder::constrainToCurrent($periods)
+                : LifecyclePeriodBuilder::constrainToActiveOn($periods, $date),
+        );
     }
 
     public function whereType(TitleType $type): static

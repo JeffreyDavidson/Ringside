@@ -58,14 +58,20 @@ final class MatchTitleRequirements
         throw InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide($titles->firstOrFail());
     }
 
-    /** @param Collection<int, Title> $titles */
+    /**
+     * The champion that must compete is whoever held the title on the event's date, not today's
+     * champion; an unscheduled event has no date and keeps the current champion.
+     *
+     * @param  Collection<int, Title>  $titles
+     */
     private function ensureCurrentChampionsCompete(EventMatch $match, Collection $titles): void
     {
         /** @var MatchCompetitorsCollection<int, MatchCompetitor> $assignedCompetitors */
         $assignedCompetitors = $match->competitors()->get(['competitor_type', 'competitor_id']);
+        $eventDate = $match->event()->firstOrFail()->date?->copy()->utc();
         $currentChampionships = TitleChampionship::query()
             ->whereIn('title_id', $titles->pluck('id'))
-            ->current()
+            ->heldOn($eventDate)
             ->orderBy('id')
             ->lockForUpdate()
             ->get(['id', 'title_id', 'champion_type', 'champion_id']);
