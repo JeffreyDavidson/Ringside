@@ -46,6 +46,48 @@ describe('unretiring an individual', function () {
         'given date' => true,
     ]);
 
+    test('it brings back an individual who was employed when retired as employed', function (string $modelClass, string $releaseClass, string $retireClass, string $unretireClass) {
+        // Arrange
+        $individual = $modelClass::factory()->employed()->create();
+        resolve($retireClass)->handle($individual, now()->subHours(2));
+
+        // Act
+        resolve($unretireClass)->handle($individual->refresh());
+
+        // Assert
+        expect($individual->refresh()->status)->toBe(EmploymentStatus::Employed)
+            ->and($individual->currentEmployment()->exists())->toBeTrue();
+    })->with('individual release retire unretire actions');
+
+    test('it brings back an individual who was released before retiring as released', function (string $modelClass, string $releaseClass, string $retireClass, string $unretireClass) {
+        // Arrange
+        $individual = $modelClass::factory()->employed()->create();
+        resolve($releaseClass)->handle($individual, now()->subHours(3));
+        resolve($retireClass)->handle($individual->refresh(), now()->subHours(2));
+
+        // Act
+        resolve($unretireClass)->handle($individual->refresh());
+
+        // Assert
+        expect($individual->refresh()->status)->toBe(EmploymentStatus::Released)
+            ->and($individual->currentEmployment()->exists())->toBeFalse()
+            ->and($individual->employments()->count())->toBe(1);
+    })->with('individual release retire unretire actions');
+
+    test('it brings back an individual released and retired on the same date as released', function (string $modelClass, string $releaseClass, string $retireClass, string $unretireClass) {
+        // Arrange
+        $individual = $modelClass::factory()->employed()->create();
+        resolve($releaseClass)->handle($individual, now()->subHours(2));
+        resolve($retireClass)->handle($individual->refresh(), now()->subHours(2));
+
+        // Act
+        resolve($unretireClass)->handle($individual->refresh());
+
+        // Assert
+        expect($individual->refresh()->status)->toBe(EmploymentStatus::Released)
+            ->and($individual->currentEmployment()->exists())->toBeFalse();
+    })->with('individual release retire unretire actions');
+
     test('it ends the retirement without employing the individual when told not to', function (string $modelClass, string $actionClass) {
         // Arrange
         $individual = $modelClass::factory()->retired()->create();
@@ -80,7 +122,7 @@ describe('unretiring an individual', function () {
         ]);
         $earlierEmployment = $individual->employments()->create([
             'started_at' => now()->subDays(300),
-            'ended_at' => now()->subDays(200),
+            'ended_at' => now()->subDays(20),
         ]);
 
         // Act
@@ -94,7 +136,7 @@ describe('unretiring an individual', function () {
             ->and($currentRetirement->refresh()->started_at?->toDateTimeString())->toBe(now()->subDays(20)->toDateTimeString())
             ->and($currentRetirement->ended_at?->toDateTimeString())->toBe(now()->toDateTimeString())
             ->and($individual->employments()->count())->toBe(2)
-            ->and($earlierEmployment->refresh()->ended_at?->toDateTimeString())->toBe(now()->subDays(200)->toDateTimeString())
+            ->and($earlierEmployment->refresh()->ended_at?->toDateTimeString())->toBe(now()->subDays(20)->toDateTimeString())
             ->and($individual->currentEmployment()->exists())->toBeTrue();
     })->with('individual unretire actions');
 

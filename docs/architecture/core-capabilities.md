@@ -28,6 +28,7 @@ Core capabilities define what each entity type can do within the wrestling promo
 **Rule**: All active entities can be retired
 - **Eligible**: Wrestlers, Managers, Referees, TagTeams, Titles, Stables
 - **Rationale**: Any entity can cease active participation
+- **Unretiring wrestlers, managers and referees** returns them to the state they had before retiring: employed people come back employed, released people come back released (see [Employment Status](employment-status.md)).
 
 ### Tag Team Retirement and Unretirement
 
@@ -356,6 +357,12 @@ enforced promotion context, the same promotion the creating hook assigns; an eve
 promotion uses the application time zone. The reschedule validation rule (`DateCanBeChanged`)
 converts the entered value the same way, so it compares real instants.
 
+A past event's date stays editable until results are recorded: `EventSchedulingEligibility::ensureDateCanChange()`
+refuses a date change on a Past event only once one of its non-deleted matches has a result
+(`match_finish` set), with `CannotBeRescheduledException::hasRecordedResults()`. A title that changed hands at one of
+its matches (a reign won or lost there) locks the date of any event, past or future. Until then a past event can move
+to a past or future date. The venue-day, roster-availability and scheduling-slot checks still apply to every change.
+
 Because the stored value is the true instant, comparisons such as the "event not held" gate
 in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
 Event dates shown on the dashboard, events table and event page use `local_date`, and the
@@ -376,7 +383,7 @@ clocks move forward (for example `2026-03-08T02:30` in America/New_York) is reje
 hour when clocks move back, a typed time reads as the first occurrence, but an edit that
 leaves the date as prefilled keeps the event's stored instant (`PromotionTimeZoneService::parseEventLocalDate()`), so
 renaming an event in the second occurrence neither moves it an hour nor trips the
-"already occurred" check.
+"results are recorded" check.
 
 Roster and title start dates work the same way, but as whole days. The date typed into the
 wrestler, tag team, manager, referee, title and stable forms (employment, debut or start date) means

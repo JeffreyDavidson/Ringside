@@ -30,18 +30,18 @@ class UnretireAction
      * - Validates the wrestler can come out of retirement (business rule compliance)
      * - Ends the current retirement period through RetirementPeriodManager
      * - Ends membership of a retired tag team, since the wrestler leaves it by coming back alone
-     * - Optionally employs the wrestler immediately or leaves unemployed for manual employment
+     * - Employs the wrestler again only if they were employed when they retired; a released wrestler comes back released
      * - Restores the wrestler to available status for match bookings
      * - Makes the wrestler available for new career opportunities
      * - Preserves all historical retirement records
      *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
-     * @param  bool  $employImmediately  Whether to employ the wrestler immediately (default: true)
+     * @param  bool|null  $employImmediately  Force employing (true) or not employing (false); null restores the state before retirement
      *
      * @throws CannotBeUnretiredException When wrestler cannot be unretired due to business rules
      */
-    public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
+    public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, ?bool $employImmediately = null): void
     {
         $effectiveDate = $unretirementDate ?? now();
 
@@ -49,6 +49,7 @@ class UnretireAction
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedWrestler);
+            $employ = $employImmediately ?? $this->retirementPeriods->wasEmployedWhenRetired($lockedWrestler);
             $this->retirementPeriods->end($lockedWrestler, $effectiveDate, LifecycleTransitionType::Unretired);
 
             OpenPeriodEnder::end(
@@ -60,7 +61,7 @@ class UnretireAction
                 $effectiveDate,
             );
 
-            if ($employImmediately) {
+            if ($employ) {
                 $this->employ->handle($lockedWrestler, $effectiveDate);
             }
         });
