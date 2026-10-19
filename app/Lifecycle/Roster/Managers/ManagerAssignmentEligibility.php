@@ -28,6 +28,10 @@ final class ManagerAssignmentEligibility
     /** @throws CannotBeAssignedException */
     public function ensureCanBeAssigned(Manager $manager): void
     {
+        if ($manager->trashed()) {
+            throw CannotBeAssignedException::deleted($manager);
+        }
+
         if ($manager->hasCurrentRetirement()) {
             throw CannotBeAssignedException::retired($manager);
         }

@@ -152,6 +152,21 @@ it('locks the incoming managers in ascending id order before attaching them', fu
         ->and($lockPosition)->toBeLessThan($attachPosition);
 });
 
+it('refuses a manager who was deleted after the form validated and attaches nothing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+    $managers = Manager::query()->whereKey($manager->id)->get();
+    $manager->delete();
+
+    // Act
+    $assign = fn () => resolve(AssignManagersAction::class)->handle($wrestler, $managers, now());
+
+    // Assert
+    expect($assign)->toThrow(CannotBeAssignedException::class, 'Manager Bobby Heenan has been deleted and cannot be assigned.')
+        ->and($wrestler->managers()->exists())->toBeFalse();
+});
+
 it('refuses a newly added manager who is not available when synchronizing', function () {
     // Arrange
     $tagTeam = TagTeam::factory()->create();

@@ -36,6 +36,7 @@ class AssignManagersAction
         }
 
         $lockedManagers = Manager::query()
+            ->withTrashed()
             ->whereKey($managers->modelKeys())
             ->inLockOrder()
             ->lockForUpdate()

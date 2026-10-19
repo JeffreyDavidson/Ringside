@@ -10,6 +10,13 @@ use App\Models\Roster\Managers\Manager;
 
 final class CannotBeAssignedException extends BaseBusinessException
 {
+    public static function deleted(Manager $manager): static
+    {
+        return self::forReason(BusinessRuleReason::General, __('managers.validation.not_assignable.deleted', [
+            'name' => "{$manager->first_name} {$manager->last_name}",
+        ]));
+    }
+
     public static function unemployed(Manager $manager): static
     {
         return self::forReason(BusinessRuleReason::Unemployed, __('managers.validation.not_assignable.unemployed', [
