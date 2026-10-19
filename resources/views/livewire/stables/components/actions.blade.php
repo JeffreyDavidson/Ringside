@@ -21,7 +21,7 @@
     @if ($this->canPerform(StableLifecycleAction::Retire))
         <x-buttons.warning
             wire:click="retire"
-            :wire:confirm="__('core.lifecycle_confirmations.retire', ['name' => $this->stable->name])"
+            :wire:confirm="__('core.lifecycle_confirmations.retire_stable', ['name' => $this->stable->name])"
             wire:loading.attr="disabled"
             wire:target="retire"
         >

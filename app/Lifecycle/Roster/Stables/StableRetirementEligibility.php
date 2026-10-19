@@ -7,8 +7,6 @@ namespace App\Lifecycle\Roster\Stables;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 
 final readonly class StableRetirementEligibility
 {
@@ -61,32 +59,13 @@ final readonly class StableRetirementEligibility
             throw CannotBeUnretiredException::notRetired($stable);
         }
 
-        $availableFormerMembers = $this->formerMemberEligibility->availableMembersFor($stable);
-
-        if ($availableFormerMembers->isEmpty()) {
-            throw CannotBeUnretiredException::noAvailableFormerMembers($stable);
-        }
-
-        $availableHeadcount = $availableFormerMembers->getTotalMemberCount();
+        $availableHeadcount = $this->formerMemberEligibility->availableMembersAtRetirementFor($stable)->getTotalMemberCount();
 
         if (! StableMembershipRequirements::hasMinimumHeadcount($availableHeadcount)) {
             throw CannotBeUnretiredException::insufficientFormerMembers(
                 $stable,
                 $availableHeadcount,
                 StableMembershipRequirements::MINIMUM_MEMBER_COUNT,
-            );
-        }
-
-        $unavailableKeyMembers = $this->formerMemberEligibility->unavailableKeyMembersFor($stable);
-
-        if ($unavailableKeyMembers->isNotEmpty()) {
-            $unavailableMemberNames = $unavailableKeyMembers
-                ->map(fn (Wrestler|TagTeam $member): string => $member->name)
-                ->implode(', ');
-
-            throw CannotBeUnretiredException::keyMembersUnavailable(
-                $stable,
-                $unavailableMemberNames,
             );
         }
     }
