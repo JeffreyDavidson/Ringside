@@ -6,7 +6,7 @@ namespace App\Actions\Promotions;
 
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\PromotionInvitationOutcome;
-use App\Mail\Promotions\PromotionInvitationMail;
+use App\Mail\Promotions\InvitedToPromotion;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
@@ -26,7 +26,7 @@ final class InvitePromotionMemberAction
      * are an invitation that is already pending (an expired one is replaced) and an email that already has a membership of this promotion
      * (active or suspended, including a soft-deleted account that still has its membership row), both things the owner can already see.
      *
-     * A new invitation is announced by email (PromotionInvitationMail) once the transaction has committed. It is sent
+     * A new invitation is announced by email (InvitedToPromotion) once the transaction has committed. It is sent
      * synchronously and a delivery failure is reported, never thrown: the saved invitation stays and the outcome is still Invited.
      */
     public function handle(Promotion $promotion, string $email, MembershipRole $role, User $invitedBy): PromotionInvitationOutcome
@@ -72,7 +72,7 @@ final class InvitePromotionMemberAction
     private function sendInvitationMail(PromotionInvitation $invitation, User $invitedBy): void
     {
         try {
-            Mail::to($invitation->email)->send(new PromotionInvitationMail($invitation, $invitedBy));
+            Mail::to($invitation->email)->send(new InvitedToPromotion($invitation, $invitedBy));
         } catch (TransportExceptionInterface $exception) {
             report($exception);
         }

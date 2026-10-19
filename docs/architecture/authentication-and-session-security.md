@@ -48,7 +48,7 @@ above and the authentication log key on `request()->ip()`, which is only the rea
   `https://host:8443/...`). The port comes from the `Host` header, defaulting to 443 for HTTPS.
 - Forwarded headers from any peer outside the trusted list are ignored.
 - Refresh the default ranges from https://www.cloudflare.com/ips-v4 and https://www.cloudflare.com/ips-v6 when
-  Cloudflare announces a change. `tests/Feature/Http/Middleware/TrustedProxiesTest.php` covers the behaviour.
+  Cloudflare announces a change. `tests/Feature/Http/TrustedProxiesTest.php` covers the behaviour.
 
 ## Security headers
 
@@ -91,7 +91,7 @@ password in the user form, `Users\Modals\FormModal::updateForm()` puts the updat
 that made the change stores the new hash and stays signed in while every other session still ends. A "remember me"
 cookie issued before the change still carries the old hash, so once this session expires the administrator signs in
 again with the new password.
-`tests/Feature/Http/Middleware/AuthenticateSessionTest.php` drives the real Livewire update request through the
+`tests/Feature/Http/AuthenticateSessionTest.php` drives the real Livewire update request through the
 middleware.
 
 The middleware priority list from the promotion context work is unchanged: `AuthenticatesSessions`, then

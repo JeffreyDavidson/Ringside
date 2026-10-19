@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\Promotions\MembershipRole;
-use App\Mail\Promotions\PromotionInvitationMail;
+use App\Mail\Promotions\InvitedToPromotion;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
-function invitationMail(string $timezone = 'UTC', ?Carbon $expiresAt = null): PromotionInvitationMail
+function invitationMail(string $timezone = 'UTC', ?Carbon $expiresAt = null): InvitedToPromotion
 {
     $promotion = Promotion::factory()->create(['name' => 'Ironclad Wrestling', 'timezone' => $timezone]);
     $invitation = PromotionInvitation::factory()
@@ -20,7 +20,7 @@ function invitationMail(string $timezone = 'UTC', ?Carbon $expiresAt = null): Pr
     $inviter = User::factory()->create(['first_name' => 'Dana', 'last_name' => 'Rivers']);
     $inviter = User::query()->findOrFail($inviter->id);
 
-    return new PromotionInvitationMail($invitation, $inviter);
+    return new InvitedToPromotion($invitation, $inviter);
 }
 
 test('it has a subject naming the promotion', function () {

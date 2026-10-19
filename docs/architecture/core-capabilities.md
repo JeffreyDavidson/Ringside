@@ -212,7 +212,7 @@ only.
 
 A new invitation (`PromotionInvitationOutcome::Invited`, including one that replaces
 an expired invitation) is announced by email: after its transaction commits,
-`InvitePromotionMemberAction` sends `Mail\Promotions\PromotionInvitationMail`
+`InvitePromotionMemberAction` sends `Mail\Promotions\InvitedToPromotion`
 (markdown, with a plain-text alternative) to the stored email, taking the inviting
 user from the caller. `AlreadyInvited` and `AlreadyMember` send nothing. The email
 names the inviter, promotion and role, shows the expiry date in the promotion's
