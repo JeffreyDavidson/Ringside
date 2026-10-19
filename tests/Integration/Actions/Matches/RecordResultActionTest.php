@@ -1025,6 +1025,32 @@ it('crowns a corrected winner who was not the previous champion even when the pr
         ->and($title->championships()->where('won_match_id', $firstMatch->id)->sole()->lost_match_id)->toBe($secondMatch->id);
 });
 
+it('crowns a new reign for the corrected winner whose only departure was before the event day', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $firstChampion = Wrestler::factory()->bookable()->create();
+    [$firstMatch, $firstSide] = titleMatchOn(now()->subDays(20), $title, $firstChampion);
+    [$secondMatch, $secondSide] = titleMatchOn(now()->subDays(10), $title, Wrestler::factory()->bookable()->create(), $firstChampion);
+    $otherSide = $secondMatch->sides()->whereKeyNot($secondSide->id)->sole();
+    resolve(RecordResultAction::class)->handle($firstMatch, matchResult(MatchFinish::Pinfall, $firstSide));
+    resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $secondSide));
+    $firstChampion->employments()->sole()->update([
+        'started_at' => now()->subDays(60),
+        'ended_at' => now()->subDays(40),
+    ]);
+
+    // Act
+    resolve(RecordResultAction::class)->handle($secondMatch, matchResult(MatchFinish::Pinfall, $otherSide));
+
+    // Assert
+    $correctedReign = $title->championships()->where('won_match_id', $secondMatch->id)->sole();
+
+    expect($correctedReign->champion_id)->toBe($firstChampion->id)
+        ->and($correctedReign->lost_at)->toBeNull()
+        ->and($title->championships()->where('won_match_id', $firstMatch->id)->sole()->lost_match_id)->toBe($secondMatch->id);
+});
+
 it('keeps the previous champion reign closed by the corrected match when the title is no longer active', function (): void {
     // Arrange
     travelTo(Carbon::parse('2026-10-11 12:00:00'));
