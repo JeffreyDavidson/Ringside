@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -25,6 +27,7 @@ class RecordResultAction
         private readonly ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentOutcomeManager $tournaments,
+        private readonly MatchRosterLock $rosterLock,
     ) {}
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
@@ -50,6 +53,11 @@ class RecordResultAction
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get();
+
+            if ($lockedWinningSide instanceof MatchSide) {
+                $this->lockWinners($lockedCompetitors->where('match_side_id', $lockedWinningSide->id));
+            }
+
             $lockedResult = new MatchResultData(
                 finish: $result->finish,
                 winningSide: $lockedWinningSide,
@@ -88,5 +96,18 @@ class RecordResultAction
 
             return $lockedMatch->refresh();
         });
+    }
+
+    /**
+     * Lock the winners' roster rows (tag teams before their members, ascending ids) before any title or reign lock, so a
+     * release or retirement of a winner cannot slip between the eligibility read and the reign write. The winners are
+     * then reloaded so eligibility and back-fill checks read the locked state.
+     *
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $winners
+     */
+    private function lockWinners(MatchCompetitorsCollection $winners): void
+    {
+        $this->rosterLock->lock(collect(), $winners->wrestlers(), $winners->tagTeams());
+        $winners->load('competitor');
     }
 }
