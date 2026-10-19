@@ -258,8 +258,9 @@ test('it books a wrestler hired for a later event', function () {
 
 test('it refuses a wrestler on an event dated before their future employment starts', function () {
     // Arrange
-    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->addHours(2)]))->create();
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->addDays(5)]))->create();
     $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    $wrestler->employments()->update(['started_at' => now()->addDays(10)]);
 
     // Act
     $book = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
