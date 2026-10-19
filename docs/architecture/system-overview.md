@@ -256,6 +256,8 @@ A venue with upcoming events cannot be deleted: `Venues\DeleteAction` locks the 
 
 An event may therefore sit at a deleted venue. Editing such an event and leaving the venue unchanged saves normally and keeps the venue (the form's venue rule and the venue select both admit the event's own stored venue, and the select shows its name). A deleted venue cannot be newly chosen: the form rule refuses it, and `Events\CreateAction` and `Events\UpdateAction` re-check after the venue row lock, throwing `Events\VenueDeletedException` (shown on the venue field) unless the venue is the event's existing one.
 
+Changing a venue's time zone moves its local calendar days, so `Venues\UpdateAction` locks the venue row and, only when the zone actually changes, has `VenueDeletionEligibility::ensureTimezoneKeepsEventsApart()` (the same shared-day check venue restore uses) look at the venue's live events of every promotion in the new zone. If two would fall on one day it throws `Venues\CannotBeUpdatedException` and writes nothing.
+
 Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
 Restoring a soft-deleted title locks the title row and verifies that no active title has claimed its name. Restoration preserves the title's historical state without bypassing active-name uniqueness.
 
