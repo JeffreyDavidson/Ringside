@@ -9,6 +9,7 @@ enum LifecycleTransitionType: string
     case Debuted = 'debuted';
     case Deleted = 'deleted';
     case Disbanded = 'disbanded';
+    case EmploymentCancelled = 'employment_cancelled';
     case Employed = 'employed';
     case Established = 'established';
     case ClearedFromInjury = 'cleared_from_injury';

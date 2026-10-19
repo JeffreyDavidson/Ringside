@@ -97,3 +97,41 @@ test('it updates manager without affecting existing employment', function () {
         'last_name' => 'Employed',
     ]);
 });
+
+test('it moves the start date of a manager who has not started yet', function () {
+    // Arrange
+    $manager = Manager::factory()->withFutureEmployment()->create();
+    $newDate = now()->addDays(20)->startOfDay();
+    $data = new ManagerData(first_name: $manager->first_name, last_name: $manager->last_name, employment_date: $newDate);
+
+    // Act
+    resolve(UpdateAction::class)->handle($manager, $data);
+
+    // Assert
+    expect($manager->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels the hire of a manager who has not started yet when the date is cleared', function () {
+    // Arrange
+    $manager = Manager::factory()->withFutureEmployment()->create();
+    $data = new ManagerData(first_name: $manager->first_name, last_name: $manager->last_name, employment_date: null);
+
+    // Act
+    resolve(UpdateAction::class)->handle($manager, $data);
+
+    // Assert
+    expect($manager->employments()->exists())->toBeFalse();
+});
+
+test('it keeps the start date of a manager who has already started when the date is cleared', function () {
+    // Arrange
+    $manager = Manager::factory()->employed()->create();
+    $startedAt = $manager->employments()->sole()->started_at->toDateTimeString();
+    $data = new ManagerData(first_name: $manager->first_name, last_name: $manager->last_name, employment_date: null);
+
+    // Act
+    resolve(UpdateAction::class)->handle($manager, $data);
+
+    // Assert
+    expect($manager->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});

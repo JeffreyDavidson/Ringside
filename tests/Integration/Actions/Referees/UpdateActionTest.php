@@ -255,3 +255,41 @@ test('it uses EmployAction for consistent employment handling', function () {
     expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString())
         ->and($employment->ended_at)->toBeNull();
 });
+
+test('it moves the start date of a referee who has not started yet', function () {
+    // Arrange
+    $referee = Referee::factory()->withFutureEmployment()->create();
+    $newDate = now()->addDays(20)->startOfDay();
+    $data = new RefereeData(first_name: $referee->first_name, last_name: $referee->last_name, employment_date: $newDate);
+
+    // Act
+    resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($referee->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels the hire of a referee who has not started yet when the date is cleared', function () {
+    // Arrange
+    $referee = Referee::factory()->withFutureEmployment()->create();
+    $data = new RefereeData(first_name: $referee->first_name, last_name: $referee->last_name, employment_date: null);
+
+    // Act
+    resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($referee->employments()->exists())->toBeFalse();
+});
+
+test('it keeps the start date of a referee who has already started when the date is cleared', function () {
+    // Arrange
+    $referee = Referee::factory()->employed()->create();
+    $startedAt = $referee->employments()->sole()->started_at->toDateTimeString();
+    $data = new RefereeData(first_name: $referee->first_name, last_name: $referee->last_name, employment_date: null);
+
+    // Act
+    resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});

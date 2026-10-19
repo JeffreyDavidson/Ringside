@@ -369,6 +369,43 @@ function renamingWrestlerData(string $name, ?string $signatureMove): WrestlerDat
     );
 }
 
+test('it moves the start date of a wrestler who has not started yet', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    $newDate = now()->addDays(20)->startOfDay();
+    $data = renamingWrestlerData($wrestler->name, $wrestler->signature_move);
+    $data = new WrestlerData($data->name, $data->height, $data->weight, $data->hometown, $data->signature_move, $newDate);
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels the hire of a wrestler who has not started yet when the date is cleared', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData($wrestler->name, $wrestler->signature_move));
+
+    // Assert
+    expect($wrestler->employments()->exists())->toBeFalse();
+});
+
+test('it keeps the start date of a wrestler who has already started when the date is cleared', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create();
+    $startedAt = $wrestler->employments()->sole()->started_at->toDateTimeString();
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, renamingWrestlerData($wrestler->name, $wrestler->signature_move));
+
+    // Assert
+    expect($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
 describe('wrestler name guard', function (): void {
     test('it locks the new name and signature move of the promotion before the wrestler row', function () {
         // Arrange

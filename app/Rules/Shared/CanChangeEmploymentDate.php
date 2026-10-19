@@ -6,6 +6,7 @@ namespace App\Rules\Shared;
 
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
+use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
@@ -47,6 +48,14 @@ class CanChangeEmploymentDate implements ValidationRule
         $currentEmployment = $this->model->currentEmployment()->first();
 
         if ($currentEmployment === null) {
+            // A scheduled employment can move to today or later; an earlier day would start it retroactively.
+            $isBeforeToday = $this->model->soleScheduledEmployment() instanceof Employment
+                && PromotionTimeZoneService::toLocalTime($promotion, $targetDate)->lt(PromotionTimeZoneService::toLocalTime($promotion, now())->startOfDay());
+
+            if ($isBeforeToday) {
+                $fail(__('core.validation.employment_date_scheduled_past'));
+            }
+
             return;
         }
 

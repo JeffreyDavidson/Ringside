@@ -264,11 +264,86 @@ describe('Referee form employment history', function () {
     })->with([
         'released' => ['released', null],
         'retired' => ['retired', null],
-        'future-employed' => ['future', null],
         'released with a submitted date' => ['released', '2024-04-01'],
         'retired with a submitted date' => ['retired', '2024-04-01'],
-        'future-employed with a submitted date' => ['future', '2024-04-01'],
     ]);
+
+    it('offers the start date of a referee who has not started yet, prefilled', function () {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, 'future');
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', false)
+            ->assertSet('form.employment_date', '2024-09-01')
+            ->assertSeeHtml('wire:model="form.employment_date"');
+    });
+
+    it('moves the start date of a referee who has not started yet', function () {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-10-15');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($referee->employments()->sole()->started_at->toDateString())->toBe('2024-10-15')
+            ->and($referee->refresh()->status)->toBe(EmploymentStatus::FutureEmployment);
+    });
+
+    it('employs a referee who has not started yet when the start date is moved to today', function () {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-06-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($referee->refresh()->status)->toBe(EmploymentStatus::Employed);
+    });
+
+    it('cancels the hire of a referee who has not started yet when the start date is cleared', function () {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
+
+        // Act
+        $modal->set('form.employment_date', null);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($referee->employments()->exists())->toBeFalse()
+            ->and($referee->refresh()->status)->toBe(EmploymentStatus::Unemployed);
+    });
+
+    it('rejects moving the start date of a referee who has not started yet to a past day', function () {
+        // Arrange
+        $referee = Referee::factory()->create();
+        giveEmploymentHistory($referee, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $referee->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-05-31');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.employment_date']);
+        expect($referee->employments()->sole()->started_at->toDateString())->toBe('2024-09-01');
+    });
 
     it('does not offer the employment date once the referee has an employment history', function (string $state) {
         // Arrange
@@ -283,7 +358,7 @@ describe('Referee form employment history', function () {
             ->assertSet('form.hasEmploymentHistory', true)
             ->assertSet('form.employment_date', null)
             ->assertDontSeeHtml('wire:model="form.employment_date"');
-    })->with(['released', 'retired', 'future']);
+    })->with(['released', 'retired']);
 
     it('still employs a never-employed referee from the submitted date', function () {
         // Arrange

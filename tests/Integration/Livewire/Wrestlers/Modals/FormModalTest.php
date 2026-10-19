@@ -333,11 +333,86 @@ describe('FormModal employment history', function () {
     })->with([
         'released' => ['released', null],
         'retired' => ['retired', null],
-        'future-employed' => ['future', null],
         'released with a submitted date' => ['released', '2024-04-01'],
         'retired with a submitted date' => ['retired', '2024-04-01'],
-        'future-employed with a submitted date' => ['future', '2024-04-01'],
     ]);
+
+    it('offers the start date of a wrestler who has not started yet, prefilled', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', false)
+            ->assertSet('form.employment_date', '2024-09-01')
+            ->assertSeeHtml('wire:model="form.employment_date"');
+    });
+
+    it('moves the start date of a wrestler who has not started yet', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-10-15');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->employments()->sole()->started_at->toDateString())->toBe('2024-10-15')
+            ->and($wrestler->refresh()->status)->toBe(EmploymentStatus::FutureEmployment);
+    });
+
+    it('employs a wrestler who has not started yet when the start date is moved to today', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-06-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->refresh()->status)->toBe(EmploymentStatus::Employed);
+    });
+
+    it('cancels the hire of a wrestler who has not started yet when the start date is cleared', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->employments()->exists())->toBeFalse()
+            ->and($wrestler->refresh()->status)->toBe(EmploymentStatus::Unemployed);
+    });
+
+    it('rejects moving the start date of a wrestler who has not started yet to a past day', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-05-31');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.employment_date']);
+        expect($wrestler->employments()->sole()->started_at->toDateString())->toBe('2024-09-01');
+    });
 
     it('does not offer the employment date once the wrestler has an employment history', function (string $state) {
         // Arrange
@@ -352,7 +427,7 @@ describe('FormModal employment history', function () {
             ->assertSet('form.hasEmploymentHistory', true)
             ->assertSet('form.employment_date', '')
             ->assertDontSeeHtml('wire:model="form.employment_date"');
-    })->with(['released', 'retired', 'future']);
+    })->with(['released', 'retired']);
 
     it('still employs a never-employed wrestler from the submitted date', function () {
         // Arrange

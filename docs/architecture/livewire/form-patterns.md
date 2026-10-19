@@ -130,8 +130,10 @@ protected function loadModelData(Model $model): void
         return;
     }
 
-    $this->hasEmploymentHistory = $model->employments()->exists();
-    $this->employment_date = null;
+    $scheduledEmployment = $model->soleScheduledEmployment();
+
+    $this->hasEmploymentHistory = $scheduledEmployment === null && $model->employments()->exists();
+    $this->employment_date = $this->localDateString($scheduledEmployment?->started_at);
 }
 ```
 
