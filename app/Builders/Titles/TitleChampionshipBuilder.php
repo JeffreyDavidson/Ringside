@@ -10,6 +10,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @template TModel of TitleChampionship
@@ -19,6 +20,20 @@ use Illuminate\Database\Eloquent\Builder;
 class TitleChampionshipBuilder extends Builder
 {
     use OrdersByKeyForLocking;
+
+    /**
+     * Reigns that were won or lost at one of the given matches.
+     *
+     * @param  array<int, int>|Builder<*>|Relation<*, *, *>  $matchIds
+     */
+    public function wonOrLostAtMatches(array|Builder|Relation $matchIds): static
+    {
+        $this->where(fn (Builder $query): Builder => $query
+            ->whereIn('won_match_id', $matchIds)
+            ->orWhereIn('lost_match_id', $matchIds));
+
+        return $this;
+    }
 
     public function forTitleId(int $titleId): static
     {
