@@ -7,7 +7,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Promotions\PromotionInvitationOutcome;
 use App\Enums\Users\UserStatus;
-use App\Mail\Promotions\PromotionInvitationMail;
+use App\Mail\Promotions\InvitedToPromotion;
 use App\Models\Promotions\Promotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
@@ -261,7 +261,7 @@ test('it sends one invitation email to the normalized address after saving a new
     expect($outcome)->toBe(PromotionInvitationOutcome::Invited);
 
     Mail::assertSentCount(1);
-    Mail::assertSent(PromotionInvitationMail::class, fn (PromotionInvitationMail $mail): bool => $mail->hasTo('nobody.yet@example.test')
+    Mail::assertSent(InvitedToPromotion::class, fn (InvitedToPromotion $mail): bool => $mail->hasTo('nobody.yet@example.test')
         && $mail->invitedBy->is($inviter)
         && $mail->invitation->is($promotion->invitations()->sole()));
 });
@@ -278,7 +278,7 @@ test('it sends a new invitation email when it replaces an expired invitation', f
     // Assert
     expect($outcome)->toBe(PromotionInvitationOutcome::Invited);
 
-    Mail::assertSent(PromotionInvitationMail::class, 1);
+    Mail::assertSent(InvitedToPromotion::class, 1);
 });
 
 test('it sends no email when the invitation was not created', function (string $case) {
