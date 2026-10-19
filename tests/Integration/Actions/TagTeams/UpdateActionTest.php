@@ -11,10 +11,14 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\travel;
+use function Pest\Laravel\travelTo;
 
 /**
  * @return array{
@@ -318,6 +322,39 @@ test('it does not employ a tag team when no employment date is given', function 
     expect($updatedTagTeam->name)->toBe('Renamed Team')
         ->and($updatedTagTeam->employments()->exists())->toBeFalse()
         ->and($wrestlerA->employments()->exists())->toBeFalse();
+});
+
+test('it vacates the tag team title when the form removes a member and keeps it when the members are unchanged', function () {
+    // Arrange
+    travelTo(Carbon::parse('2026-03-10 09:00:00'));
+    ['tagTeam' => $tagTeam, 'wrestlerA' => $wrestlerA, 'wrestlerB' => $wrestlerB] = tagTeamsUpdateActionFixtures();
+    $reign = TitleChampionship::factory()
+        ->for(Title::factory()->tagTeam(), 'title')
+        ->forTagTeam($tagTeam)
+        ->current()
+        ->create();
+    $newWrestler = Wrestler::factory()->create();
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: $tagTeam->name,
+        signature_move: $tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+    $lostAtWhenUnchanged = $reign->refresh()->lost_at;
+    resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: $tagTeam->name,
+        signature_move: $tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $newWrestler,
+    ));
+
+    // Assert
+    expect($lostAtWhenUnchanged)->toBeNull()
+        ->and($reign->refresh()->lost_at?->toDateTimeString())->toBe('2026-03-10 09:00:00');
 });
 
 function renamingTagTeamData(TagTeam $tagTeam, string $name, ?string $signatureMove): TagTeamData

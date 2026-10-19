@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Lifecycle\Periods\OpenPeriodEnder;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,7 @@ class SynchronizeMembershipAction
     public function __construct(
         protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
         protected LockIncomingWrestlersAction $lockIncomingWrestlersAction,
+        protected ChampionshipReignManager $championshipReigns,
     ) {}
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
@@ -23,13 +25,20 @@ class SynchronizeMembershipAction
         if ($members->wrestlers instanceof Collection) {
             $currentWrestlers = $tagTeam->currentWrestlers()->inLockOrder()->get();
 
-            foreach ($currentWrestlers->diff($members->wrestlers) as $wrestler) {
+            $removedWrestlers = $currentWrestlers->diff($members->wrestlers);
+
+            foreach ($removedWrestlers as $wrestler) {
                 OpenPeriodEnder::end(
                     $tagTeam->wrestlers()->newPivotStatementForId($wrestler->getKey()),
                     'joined_at',
                     'left_at',
                     $date,
                 );
+            }
+
+            if ($removedWrestlers->isNotEmpty()) {
+                // The team lost a member, so its titles become vacant on the day the member leaves.
+                $this->championshipReigns->endCurrentReignsForChampion($tagTeam, $date);
             }
 
             $newWrestlers = $members->wrestlers->diff($currentWrestlers);
