@@ -78,7 +78,7 @@ describe('lifecycle action buttons', function (): void {
         'tag team suspend' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'suspend', "Suspend The D'Arcys?"],
         'tag team retire' => [TagTeamActions::class, 'tagTeam', fn (): Model => TagTeam::factory()->bookable()->create(['name' => "The D'Arcys"]), 'retire', "Retire The D'Arcys?"],
         'stable disband' => [StableActions::class, 'stable', fn (): Model => Stable::factory()->active()->create(['name' => "D'Arcy & Co"]), 'disband', "Disband D'Arcy & Co?"],
-        'stable retire' => [StableActions::class, 'stable', fn (): Model => Stable::factory()->active()->create(['name' => "D'Arcy & Co"]), 'retire', "Retire D'Arcy & Co?"],
+        'stable retire' => [StableActions::class, 'stable', fn (): Model => Stable::factory()->active()->create(['name' => "D'Arcy & Co"]), 'retire', "Retire D'Arcy & Co? Its members leave the stable but stay on the roster."],
         'title retire' => [TitleActions::class, 'title', fn (): Model => Title::factory()->active()->create(['name' => "D'Arcy Title"]), 'retire', "Retire D'Arcy Title?"],
         'title deactivate' => [TitleActions::class, 'title', fn (): Model => Title::factory()->active()->create(['name' => "D'Arcy Title"]), 'deactivate', "Deactivate D'Arcy Title?"],
     ]);
