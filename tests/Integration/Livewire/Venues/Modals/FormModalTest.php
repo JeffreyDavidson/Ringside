@@ -45,6 +45,7 @@ describe('authorized venue form interactions', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
         app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
 
         // Act
         $modal = livewire(FormModal::class);
@@ -70,6 +71,7 @@ describe('authorized venue form interactions', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/Denver']);
         app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
         $modal = livewire(FormModal::class);
         $modal->set('form.timezone', 'Europe/London');
 
@@ -102,6 +104,7 @@ describe('authorized venue form interactions', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
         app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
         $venue = Venue::factory()->create(['timezone' => 'Asia/Tokyo']);
 
         // Act

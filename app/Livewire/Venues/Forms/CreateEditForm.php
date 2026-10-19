@@ -8,7 +8,6 @@ use App\Data\Events\VenueData;
 use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
-use App\Services\Promotions\PromotionContextService;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -45,8 +44,7 @@ class CreateEditForm extends BaseForm
             return;
         }
 
-        // A Form is not container-built, so the component cannot pass the context in (see BaseForm::formPromotionId()).
-        $this->timezone = PromotionTimeZoneService::zoneOf(app(PromotionContextService::class)->current());
+        $this->timezone = PromotionTimeZoneService::zoneOf($this->formPromotion());
     }
 
     public function toData(): VenueData
