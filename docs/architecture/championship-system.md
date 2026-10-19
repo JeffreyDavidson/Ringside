@@ -57,6 +57,10 @@ A back-filled win is recorded even when its winner has since been released or re
 
 A reign never ends before it began, and the database enforces it for every row including soft-deleted reigns (`titles_championships_dates_ordered` CHECK, SQLite triggers; see `lifecycle-operation-boundaries.md`): `endCurrentReign()` and `endCurrentReignsForChampion()` clamp `lost_at` to `max(effective date, won_at)`. Reign length reporting (`TitleReignService::lengthInDays()`) is clamped at zero days. Tag-team retirement ends the team's current reigns in the same locked transaction, like release and deletion do; wrestler retirement already did so.
 
+### Tag team champions losing a member
+
+A tag team that loses a current member vacates its titles: every current reign of the team ends on the day the member leaves, through `ChampionshipReignManager::endCurrentReignsForChampion()` (clamped to the reign's start like any other end). This covers a member released, retired or deleted (`Wrestlers\EndCurrentRelationshipsAction`, for every team the wrestler leaves except a team that is itself retiring with them, whose own retirement already ended its reigns) and a member removed or replaced through the tag team form (`TagTeams\SynchronizeMembershipAction`, dated with the update). Adding a member, or saving the form with the same members, never vacates. The wrestler Release, Retire and Delete Actions first lock the teams the wrestler belongs to (`Wrestlers\LockCurrentTagTeamsAction`, ascending id), then the wrestler, then the reigns, so the order stays tag team, wrestler, titles' reigns.
+
 An event whose matches have created or closed a non-deleted reign cannot be moved or unscheduled (`CannotBeRescheduledException::hasTitleReigns()`, enforced in `EventSchedulingEligibility::ensureDateCanChange()` for both the Livewire rule and `Events\UpdateAction`), because reigns store the event date.
 
 ### Title type
