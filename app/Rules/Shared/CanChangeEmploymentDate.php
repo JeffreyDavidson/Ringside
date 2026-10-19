@@ -36,14 +36,24 @@ class CanChangeEmploymentDate implements ValidationRule
             return;
         }
 
-        $promotion = $this->model->getRelationValue('promotion');
+        $relatedPromotion = $this->model->getRelationValue('promotion');
+        $promotion = $relatedPromotion instanceof Promotion ? $relatedPromotion : null;
 
         // A typed date means that day in the model's promotion (the application time zone without one), the way the form reads it; other values are instants.
         $targetDate = is_string($value)
-            ? PromotionTimeZoneService::parseLocalTime($promotion instanceof Promotion ? $promotion : null, $value)
+            ? PromotionTimeZoneService::parseLocalTime($promotion, $value)
             : Carbon::parse($value);
 
-        if (! $this->model->currentEmployment()->exists()) {
+        $currentEmployment = $this->model->currentEmployment()->first();
+
+        if ($currentEmployment === null) {
+            return;
+        }
+
+        // The form only holds the day, so the day employment started stays valid whatever time of day it started.
+        $startDay = PromotionTimeZoneService::toLocalTime($promotion, $currentEmployment->started_at);
+
+        if ($startDay->isSameDay(PromotionTimeZoneService::toLocalTime($promotion, $targetDate))) {
             return;
         }
 
