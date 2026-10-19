@@ -24,5 +24,6 @@ enum BusinessRuleReason: string
     case Retired = 'retired';
     case SignatureMoveTaken = 'signature_move_taken';
     case Suspended = 'suspended';
+    case TitleRequiresOneCompetitorPerSide = 'title_requires_one_competitor_per_side';
     case Unemployed = 'unemployed';
 }

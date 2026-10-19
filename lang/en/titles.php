@@ -100,6 +100,7 @@ return [
         'champion_must_compete' => 'The current champion must be included in title matches.',
         'competitor_type' => 'The :title may only be contested by :competitors.',
         'inactive' => 'This title is not active and cannot be used in matches.',
+        'one_competitor_per_side' => 'The :title needs exactly one competitor of its type on each side.',
         'invalid' => 'The selected title is invalid.',
     ],
 ];

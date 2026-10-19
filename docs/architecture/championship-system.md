@@ -18,6 +18,7 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 - **Singles Titles**: Can only be held by individual wrestlers
 - **Tag Team Titles**: Can only be held by tag teams
 - **Match Validation**: Title matches must use compatible competitor types
+- **One Competitor Per Side**: A title can be attached only when every populated side holds exactly one competitor of the title's type (one wrestler for a singles title, one tag team for a tag team title). A result applies the title change to the single competitor on the winning side, so a handicap, a multi-man tag of wrestlers, or a tag match with two teams per side could otherwise be booked but never have its winner recorded. `MatchTitleRequirements` is the authority (`InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide()`, reason `BusinessRuleReason::TitleRequiresOneCompetitorPerSide`, shown on the match form's titles field); the form's `MatchesCompetitorType` rule gives early feedback with the same rule. Triple threats and fatal four-ways (one competitor per side) keep working.
 - **Champion Defense**: Current champions can defend against appropriate challengers
 
 ## Persistence Boundaries

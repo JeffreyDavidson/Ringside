@@ -94,6 +94,14 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
         );
     }
 
+    public static function titleRequiresOneCompetitorPerSide(Title $title): static
+    {
+        return self::forReason(
+            BusinessRuleReason::TitleRequiresOneCompetitorPerSide,
+            __('matches.errors.configuration.title_requires_one_competitor_per_side', ['title' => $title->name]),
+        );
+    }
+
     public static function titleCompetitorTypeMismatch(Title $title): static
     {
         return new self(__('matches.errors.configuration.title_competitor_type_mismatch', ['title' => $title->name]));

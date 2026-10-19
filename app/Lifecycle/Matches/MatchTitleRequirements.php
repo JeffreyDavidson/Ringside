@@ -18,6 +18,7 @@ final class MatchTitleRequirements
     public function ensureSatisfied(EventMatch $match, Collection $titles): void
     {
         $this->ensureTitleTypesMatchCompetitors($match, $titles);
+        $this->ensureOneCompetitorPerSide($match, $titles);
         $this->ensureCurrentChampionsCompete($match, $titles);
     }
 
@@ -36,6 +37,25 @@ final class MatchTitleRequirements
 
             throw InvalidMatchConfigurationException::titleCompetitorTypeMismatch($title);
         }
+    }
+
+    /**
+     * A title change is applied to the single winning competitor of the winning side, so every
+     * populated side must hold exactly one competitor (already known to be of the title's type).
+     *
+     * @param  Collection<int, Title>  $titles
+     */
+    private function ensureOneCompetitorPerSide(EventMatch $match, Collection $titles): void
+    {
+        $competitorsPerSide = $match->competitors()
+            ->pluck('match_side_id')
+            ->countBy();
+
+        if ($competitorsPerSide->every(fn (int $count): bool => $count === 1)) {
+            return;
+        }
+
+        throw InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide($titles->firstOrFail());
     }
 
     /** @param Collection<int, Title> $titles */
