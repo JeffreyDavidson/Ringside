@@ -77,7 +77,7 @@ describe('a member leaving a tag team that holds a title', function (): void {
             ->employed()
             ->create();
         $leaver = $tagTeam->currentWrestlers()->inLockOrder()->firstOrFail();
-        $partner = $tagTeam->currentWrestlers()->inLockOrder()->get()->last();
+        $partner = $tagTeam->currentWrestlers()->inLockOrder()->whereKeyNot($leaver->id)->firstOrFail();
         $reign = TitleChampionship::factory()
             ->for(Title::factory()->tagTeam(), 'title')
             ->forTagTeam($tagTeam)

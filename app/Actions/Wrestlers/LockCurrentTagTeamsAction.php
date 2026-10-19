@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -23,17 +24,17 @@ class LockCurrentTagTeamsAction
      */
     public function handle(Wrestler $wrestler, ?TagTeam $retainedTagTeam = null): Collection
     {
-        $tagTeamIds = TagTeamWrestler::query()
+        $memberships = TagTeamWrestler::query()
             ->forWrestlerId($wrestler->id)
             ->current()
-            ->when($retainedTagTeam, fn ($query, TagTeam $tagTeam) => $query->excludingTagTeamId($tagTeam->id))
+            ->when($retainedTagTeam, fn (TagTeamMembershipBuilder $query, TagTeam $tagTeam): TagTeamMembershipBuilder => $query->excludingTagTeamId($tagTeam->id))
             ->orderBy('tag_team_id')
-            ->pluck('tag_team_id');
+            ->get();
 
-        return $tagTeamIds
-            ->map(fn (int $tagTeamId): ?TagTeam => TagTeam::query()
+        return $memberships
+            ->map(fn (TagTeamWrestler $membership): ?TagTeam => TagTeam::query()
                 ->withoutGlobalScope(PromotionContextScope::class)
-                ->whereKey($tagTeamId)
+                ->whereKey($membership->tag_team_id)
                 ->lockForUpdate()
                 ->first())
             ->filter()
