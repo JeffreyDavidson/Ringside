@@ -33,7 +33,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Livewire,Actions,Lifecycle}/Matches/** | .ai/rules/livewire-actions-lifecycle-matches.md |
 | app/{Livewire,Actions}/Matches/** | .ai/rules/livewire-actions-matches.md |
 | app/Livewire/** | .ai/rules/livewire.md |
-| app/Livewire/{Concerns,Support}/** | .ai/rules/livewire-concerns-support.md |
+| app/Livewire/{Concerns,Support,Matches/Support}/** | .ai/rules/livewire-concerns-support.md |
 | app/Mail/** | .ai/rules/mail.md |
 | app/{Enums/Matches/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/Matches/MatchCompetitorRequirements.php} | .ai/rules/matches-matches.md |
 | app/Exceptions/{Matches,Scheduling}/** | .ai/rules/matches-scheduling.md |

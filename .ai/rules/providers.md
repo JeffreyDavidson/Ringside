@@ -15,4 +15,4 @@ The morph map has ten aliases: wrestler, manager, match, title, tag_team, refere
 The `class_alias` calls for the former top-level roster model names exist because merged migrations import them and are never edited. Do not remove them until those migrations are gone.
 
 ## Register once, in the right place
-Register observers with `#[ObservedBy]`, global scopes in the model or `BelongsToPromotion`, and middleware in `bootstrap/app.php`; do not register them in a provider.
+Register observers with `#[ObservedBy]`, global scopes in the model or `BelongsToPromotion`, and HTTP middleware stacks, aliases and priorities in `bootstrap/app.php`; do not register those in a provider. The one exception is `Livewire::addPersistentMiddleware()` in `AppServiceProvider::boot()`, which Livewire requires there (see app.md).
