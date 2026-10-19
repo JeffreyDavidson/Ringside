@@ -141,9 +141,41 @@ class UpdateAction
             throw InvalidDateRangeException::endBeforeStart($startDate, $endedAt, 'stable activity');
         }
 
+        $this->ensureMembershipsStayWithinPeriod($stable, $firstPeriod, $startDate, $endedAt);
+
         $firstPeriod->update([
             'started_at' => $startDate,
             'ended_at' => $endedAt,
         ]);
+    }
+
+    /**
+     * Refuse to move a period edge past a membership, because membership history is never rewritten silently.
+     * Only an edge that actually moves is checked, so a stable whose history already predates its period can still be saved.
+     */
+    private function ensureMembershipsStayWithinPeriod(Stable $stable, ActivityPeriod $period, Carbon $startDate, ?Carbon $endedAt): void
+    {
+        $memberships = $stable->wrestlers()->get()
+            ->concat($stable->tagTeams()->get())
+            ->pluck('pivot');
+
+        $startMoves = ! $period->started_at->isSameDay($startDate);
+        $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon && ! $period->ended_at->isSameDay($endedAt);
+
+        $startsTooLate = $startMoves && $memberships->contains(
+            fn ($membership): bool => $membership->joined_at->copy()->startOfDay()->lt($startDate->copy()->startOfDay()),
+        );
+        $endsTooEarly = $endMoves && $memberships->contains(
+            fn ($membership): bool => $membership->left_at !== null
+                && $membership->left_at->copy()->startOfDay()->gt($endedAt->copy()->startOfDay()),
+        );
+
+        if ($startsTooLate) {
+            throw CannotBeUpdatedException::startsAfterMembership($stable);
+        }
+
+        if ($endsTooEarly) {
+            throw CannotBeUpdatedException::endsBeforeMembership($stable);
+        }
     }
 }

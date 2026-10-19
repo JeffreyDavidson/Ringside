@@ -12,6 +12,7 @@ use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
@@ -166,7 +167,7 @@ test('it does not touch the end of an earlier period when a later period is open
 test('it can still move the end date of a disbanded stable with a single period', function () {
     $stable = Stable::factory()->inactive()->create();
     $period = $stable->firstActivityPeriod()->firstOrFail();
-    $newEnd = $period->started_at->copy()->addHour()->startOfSecond();
+    $newEnd = $period->ended_at->copy()->addHour()->startOfSecond();
 
     resolve(UpdateAction::class)->handle($stable, new StableData(
         name: $stable->name,
@@ -275,7 +276,7 @@ test('it rejects giving a disbanded stable members', function () {
     $addMembers = fn () => resolve(UpdateAction::class)->handle($stable, new StableData(
         name: $stable->name,
         start_date: $period->started_at,
-        members: new StableMembershipData(wrestlers: collect([$wrestler])),
+        members: new StableMembershipData(wrestlers: Wrestler::query()->whereKey($wrestler->getKey())->get()),
     ));
 
     // Assert
@@ -376,4 +377,112 @@ test('it reports a name taken when a concurrent rename wins the promotion name b
     // Assert
     expect($update)->toThrow(CannotBeUpdatedException::class, "an active stable named 'The Alliance' already exists")
         ->and($stable->refresh()->name)->toBe('Old Name');
+});
+
+describe('moving the period of a stable with memberships', function () {
+    test('it refuses a start date after a membership began and writes nothing', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Original Name']);
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01']);
+        $wrestler = Wrestler::factory()->bookable()->create();
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-05']);
+        $data = new StableData(
+            name: 'Updated Name',
+            start_date: Date::parse('2026-01-10'),
+            members: new StableMembershipData(wrestlers: Wrestler::query()->whereKey($wrestler->getKey())->get()),
+        );
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($update)->toThrow(CannotBeUpdatedException::class, 'cannot start after a member joined')
+            ->and($stable->refresh()->name)->toBe('Original Name')
+            ->and($stable->activityPeriods()->sole()->started_at->toDateString())->toBe('2026-01-01')
+            ->and($stable->wrestlers()->sole()->pivot->joined_at->toDateString())->toBe('2026-01-05');
+    });
+
+    test('it refuses an end date before a membership ended and writes nothing', function () {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Original Name']);
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01', 'ended_at' => '2026-02-01']);
+        $tagTeam = TagTeam::factory()->create();
+        $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2026-01-02', 'left_at' => '2026-02-01']);
+        $data = new StableData(
+            name: 'Updated Name',
+            start_date: Date::parse('2026-01-01'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2026-01-20'),
+        );
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($update)->toThrow(CannotBeUpdatedException::class, 'cannot end before a member left')
+            ->and($stable->refresh()->name)->toBe('Original Name')
+            ->and($stable->activityPeriods()->sole()->ended_at->toDateString())->toBe('2026-02-01')
+            ->and($stable->tagTeams()->sole()->pivot->left_at->toDateString())->toBe('2026-02-01');
+    });
+
+    test('it accepts dates that still cover every membership, including the same day', function () {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01', 'ended_at' => '2026-02-01']);
+        $wrestler = Wrestler::factory()->create();
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-05 15:00:00', 'left_at' => '2026-02-01 09:00:00']);
+        $data = new StableData(
+            name: 'Updated Name',
+            start_date: Date::parse('2026-01-05'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2026-02-01'),
+        );
+
+        // Act
+        resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($stable->activityPeriods()->sole())
+            ->started_at->toDateString()->toBe('2026-01-05')
+            ->ended_at->toDateString()->toBe('2026-02-01');
+    });
+
+    test('it accepts a period that starts and ends on the same day', function () {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01', 'ended_at' => '2026-02-01']);
+        $data = new StableData(
+            name: 'Updated Name',
+            start_date: Date::parse('2026-01-10'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2026-01-10'),
+        );
+
+        // Act
+        resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($stable->activityPeriods()->sole())
+            ->started_at->toDateString()->toBe('2026-01-10')
+            ->ended_at->toDateString()->toBe('2026-01-10');
+    });
+
+    test('it leaves memberships alone when the dates are unchanged', function () {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => '2026-01-10']);
+        $wrestler = Wrestler::factory()->create();
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-05']);
+        $data = new StableData(
+            name: 'Renamed',
+            start_date: Date::parse('2026-01-10'),
+            members: new StableMembershipData(wrestlers: Wrestler::query()->whereKey($wrestler->getKey())->get()),
+        );
+
+        // Act
+        $updated = resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($updated->name)->toBe('Renamed');
+    });
 });

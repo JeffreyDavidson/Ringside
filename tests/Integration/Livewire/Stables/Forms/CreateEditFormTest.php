@@ -252,3 +252,103 @@ describe('stable form member join date', function (): void {
         expect($errorKeys)->toBeEmpty();
     });
 });
+
+describe('stable form minimum members', function (): void {
+    it('lets an established stable below the minimum be renamed without touching its members', function (): void {
+        // Arrange
+        $stable = Stable::factory()->create(['name' => 'Old Name']);
+        $stable->activityPeriods()->create(['started_at' => now()->subWeek()]);
+        $stable->wrestlers()->attach(Wrestler::factory()->bookable()->create(), ['joined_at' => now()->subWeek()]);
+        $form = bootedStableForm();
+        $form->setModel($stable);
+        $form->name = 'New Name';
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBeEmpty();
+    });
+
+    it('still applies the minimum when the member list of an established stable is changed', function (): void {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => now()->subWeek()]);
+        $stable->wrestlers()->attach(Wrestler::factory()->bookable()->create(), ['joined_at' => now()->subWeek()]);
+        $form = bootedStableForm();
+        $form->setModel($stable);
+        $form->wrestlers = [...$form->wrestlers, Wrestler::factory()->bookable()->create()->id];
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBe(['form.started_at']);
+    });
+
+    it('still applies the minimum when a stable is being established', function (): void {
+        // Arrange
+        $form = bootedStableForm();
+        $form->name = 'Two Man Faction';
+        $form->started_at = now()->toDateString();
+        $form->wrestlers = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBe(['form.started_at']);
+    });
+
+    it('still applies the minimum when an unformed stable is given a start date', function (): void {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $form = bootedStableForm();
+        $form->setModel($stable);
+        $form->started_at = now()->subWeek()->toDateString();
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBe(['form.started_at']);
+    });
+});
+
+describe('stable form same-day period', function (): void {
+    it('accepts a disbanded stable that ended on the day it started', function (): void {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create([
+            'started_at' => '2026-01-10',
+            'ended_at' => '2026-01-10',
+        ]);
+        $form = bootedStableForm();
+        $form->setModel($stable);
+        $form->name = 'Renamed One Night Stand';
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBeEmpty();
+    });
+
+    it('refuses an end date before the start date', function (): void {
+        // Arrange
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create([
+            'started_at' => '2026-01-10',
+            'ended_at' => '2026-01-11',
+        ]);
+        $form = bootedStableForm();
+        $form->setModel($stable);
+        $form->ended_at = '2026-01-09';
+
+        // Act
+        $errorKeys = validationErrorKeys(fn () => $form->validate());
+
+        // Assert
+        expect($errorKeys)->toBe(['form.ended_at']);
+    });
+});

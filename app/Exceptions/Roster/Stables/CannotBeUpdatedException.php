@@ -24,6 +24,20 @@ final class CannotBeUpdatedException extends BaseBusinessException
         return new self(__('stables.errors.updated.ends_open_period', ['context' => $context]));
     }
 
+    public static function startsAfterMembership(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self(__('stables.errors.updated.starts_after_membership', ['context' => $context]));
+    }
+
+    public static function endsBeforeMembership(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self(__('stables.errors.updated.ends_before_membership', ['context' => $context]));
+    }
+
     public static function inactiveWithMembers(Stable $stable): static
     {
         $context = self::formatModelContext($stable);

@@ -433,7 +433,7 @@ describe('authorized stable form interactions', function () {
             'long name' => ['form.name', str_repeat('a', 256), 'form.name', 'max'],
             'invalid start date' => ['form.started_at', 'not-a-date', 'form.started_at', 'date'],
             'invalid end date' => ['form.ended_at', 'not-a-date', 'form.ended_at', 'date'],
-            'end before start' => ['form.ended_at', '2023-12-31', 'form.ended_at', 'after'],
+            'end before start' => ['form.ended_at', '2023-12-31', 'form.ended_at', 'after_or_equal'],
             'missing wrestler' => ['form.wrestlers', [PHP_INT_MAX], 'form.wrestlers.0', 'exists'],
             'missing tag team' => ['form.tag_teams', [PHP_INT_MAX], 'form.tag_teams.0', 'exists'],
             default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
