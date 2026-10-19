@@ -8,13 +8,14 @@ use App\Lifecycle\Roster\Booking\RosterBookingStrategyResolver;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Carbon;
 
 final readonly class RosterBookingEligibility
 {
     public function __construct(private RosterBookingStrategyResolver $strategyResolver) {}
 
-    public function allows(Wrestler|Referee|TagTeam $rosterMember): bool
+    public function allows(Wrestler|Referee|TagTeam $rosterMember, ?Carbon $on = null): bool
     {
-        return $this->strategyResolver->resolve($rosterMember)->allows();
+        return $this->strategyResolver->resolve($rosterMember)->allows($on);
     }
 }

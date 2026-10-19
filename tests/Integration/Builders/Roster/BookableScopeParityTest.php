@@ -6,6 +6,7 @@ use App\Actions\Roster\Availability\CancelAction;
 use App\Actions\Roster\Availability\CreateAction;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
+use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
@@ -131,4 +132,53 @@ test('the bookable scope agrees with roster booking eligibility for tag teams', 
     'member with a past injury' => ['memberFormerlyInjured', true],
     'fewer than two members' => ['fewerThanTwoMembers', false],
     'no members' => ['noMembers', false],
+]);
+
+test('the date-aware bookable scope agrees with roster booking eligibility for individuals employed on the event date', function (string $modelClass, int $startedDaysAgo, ?int $endedDaysAgo, int $eventDaysAhead, bool $expected): void {
+    // Arrange
+    $employment = Employment::factory()->started(now()->subDays($startedDaysAgo));
+    if ($endedDaysAgo !== null) {
+        $employment = $employment->ended(now()->subDays($endedDaysAgo));
+    }
+    $rosterMember = $modelClass::factory()->has($employment, 'employments')->create();
+    $eventDate = now()->addDays($eventDaysAhead);
+
+    // Act
+    $scopeAllows = $modelClass::query()->bookableOn($eventDate->toDateString(), $eventDate)->whereKey($rosterMember)->exists();
+    $eligibilityAllows = resolve(RosterBookingEligibility::class)->allows($rosterMember, $eventDate);
+
+    // Assert
+    expect($scopeAllows)->toBe($eligibilityAllows)
+        ->and($scopeAllows)->toBe($expected);
+})->with([
+    'wrestler back-filled while employed' => [Wrestler::class, 10, null, -5, true],
+    'wrestler before the start date' => [Wrestler::class, 10, null, -20, false],
+    'wrestler hired for a later event' => [Wrestler::class, -3, null, 5, true],
+    'wrestler released before the event' => [Wrestler::class, 20, 10, -5, false],
+    'wrestler released after the event' => [Wrestler::class, 20, 10, -15, true],
+    'referee back-filled while employed' => [Referee::class, 10, null, -5, true],
+    'referee before the start date' => [Referee::class, 10, null, -20, false],
+    'referee hired for a later event' => [Referee::class, -3, null, 5, true],
+]);
+
+test('the date-aware bookable scope agrees with roster booking eligibility for tag teams employed on the event date', function (int $teamStartedDaysAgo, int $memberStartedDaysAgo, int $eventDaysAhead, bool $expected): void {
+    // Arrange
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    $tagTeam->employments()->update(['started_at' => now()->subDays($teamStartedDaysAgo)]);
+    $tagTeam->currentWrestlers->each(fn (Wrestler $member): int => $member->employments()->update(['started_at' => now()->subDays(60)]));
+    $tagTeam->currentWrestlers->firstOrFail()->employments()->update(['started_at' => now()->subDays($memberStartedDaysAgo)]);
+    $tagTeam->refresh();
+    $eventDate = now()->addDays($eventDaysAhead);
+
+    // Act
+    $scopeAllows = TagTeam::query()->bookableOn($eventDate->toDateString(), $eventDate)->whereKey($tagTeam)->exists();
+    $eligibilityAllows = resolve(RosterBookingEligibility::class)->allows($tagTeam, $eventDate);
+
+    // Assert
+    expect($scopeAllows)->toBe($eligibilityAllows)
+        ->and($scopeAllows)->toBe($expected);
+})->with([
+    'everyone employed before the event' => [10, 10, -5, true],
+    'team not yet employed' => [10, 10, -20, false],
+    'member started after the event' => [30, 5, -10, false],
 ]);

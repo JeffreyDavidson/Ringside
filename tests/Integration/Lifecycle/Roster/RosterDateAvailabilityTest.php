@@ -80,6 +80,10 @@ test('event-aware validation permits only stored date-unavailable assignments to
     // Arrange
     $promotion = Promotion::factory()->create();
     $person = $model::factory()->bookable()->for($promotion)->create();
+    $person->employments()->update(['started_at' => '2026-01-01']);
+    if ($person instanceof TagTeam) {
+        $person->currentWrestlers->each(fn (Wrestler $member): int => $member->employments()->update(['started_at' => '2026-01-01']));
+    }
     $event = Event::factory()->for($promotion)->create(['date' => '2026-10-17 18:00:00']);
     $match = EventMatch::factory()->forEvent($event)->create();
     $individual = $person instanceof TagTeam ? $person->currentWrestlers()->firstOrFail() : $person;

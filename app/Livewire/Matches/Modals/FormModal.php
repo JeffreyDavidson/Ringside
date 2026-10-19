@@ -191,7 +191,7 @@ class FormModal extends BaseFormModal
         $event = $this->bookedEvent();
         $event->loadMissing('promotion');
 
-        return $this->rosterSearch->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString());
+        return $this->rosterSearch->search($rosterKind, $term, $event->promotion_id, $event->local_date?->toDateString(), $event->date);
     }
 
     /**

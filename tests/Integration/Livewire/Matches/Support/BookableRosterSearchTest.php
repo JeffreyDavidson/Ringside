@@ -35,6 +35,19 @@ function bookableWrestlersOutOfOrder(): array
 }
 
 describe('search', function (): void {
+    it('offers only records employed at the event date when one is given', function (): void {
+        // Arrange
+        $earlier = Wrestler::factory()->bookable()->create(['name' => 'Hired Early']);
+        $earlier->employments()->update(['started_at' => now()->subDays(30)]);
+        Wrestler::factory()->bookable()->create(['name' => 'Hired Late']);
+
+        // Act
+        $options = resolve(BookableRosterSearch::class)->search(BookableRosterKind::Wrestlers, '', null, now()->subDays(10)->toDateString(), now()->subDays(10));
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Hired Early']);
+    });
+
     it('offers at most twenty bookable records ordered by name when the term is empty', function (): void {
         // Arrange
         foreach (range(1, 25) as $number) {
