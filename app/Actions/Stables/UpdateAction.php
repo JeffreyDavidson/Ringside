@@ -13,6 +13,7 @@ use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
+use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -155,17 +156,26 @@ class UpdateAction
      */
     private function ensureMembershipsStayWithinPeriod(Stable $stable, ActivityPeriod $period, Carbon $startDate, ?Carbon $endedAt): void
     {
-        $startMoves = ! $period->started_at->isSameDay($startDate);
-        $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon && ! $period->ended_at->isSameDay($endedAt);
+        // Days are the stable's promotion days (the application time zone without a promotion), as the form reads them.
+        $local = fn (Carbon $date): Carbon => PromotionTimeZoneService::toLocalTime($stable->promotion, $date);
 
-        $startsTooLate = $startMoves && (
-            $stable->wrestlers()->wherePivot('joined_at', '<', $startDate->copy()->startOfDay())->exists()
-            || $stable->tagTeams()->wherePivot('joined_at', '<', $startDate->copy()->startOfDay())->exists()
-        );
-        $endsTooEarly = $endMoves && (
-            $stable->wrestlers()->wherePivot('left_at', '>', $endedAt->copy()->endOfDay())->exists()
-            || $stable->tagTeams()->wherePivot('left_at', '>', $endedAt->copy()->endOfDay())->exists()
-        );
+        $startMoves = ! $local($period->started_at)->isSameDay($local($startDate));
+        $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon
+            && ! $local($period->ended_at)->isSameDay($local($endedAt));
+
+        $startsTooLate = false;
+        if ($startMoves) {
+            $firstLocalMoment = $local($startDate)->startOfDay()->utc();
+            $startsTooLate = $stable->wrestlers()->wherePivot('joined_at', '<', $firstLocalMoment)->exists()
+                || $stable->tagTeams()->wherePivot('joined_at', '<', $firstLocalMoment)->exists();
+        }
+
+        $endsTooEarly = false;
+        if ($endMoves) {
+            $lastLocalMoment = $local($endedAt)->endOfDay()->utc();
+            $endsTooEarly = $stable->wrestlers()->wherePivot('left_at', '>', $lastLocalMoment)->exists()
+                || $stable->tagTeams()->wherePivot('left_at', '>', $lastLocalMoment)->exists();
+        }
 
         if ($startsTooLate) {
             throw CannotBeUpdatedException::startsAfterMembership($stable);

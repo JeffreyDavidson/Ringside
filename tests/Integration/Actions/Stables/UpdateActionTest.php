@@ -486,3 +486,49 @@ describe('moving the period of a stable with memberships', function () {
         expect($updated->name)->toBe('Renamed');
     });
 });
+
+describe('membership dates are compared as promotion days', function () {
+    test('it refuses a start day that is after the day a member joined in the promotion time zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->for($promotion, 'promotion')->create(['name' => 'Original Name']);
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01 08:00:00']);
+        $wrestler = Wrestler::factory()->create();
+        // 2026-01-10 19:00 in Los Angeles, which is already the 11th in UTC.
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2026-01-11 03:00:00']);
+        $data = new StableData(
+            name: 'Updated Name',
+            // The start of 2026-01-11 in Los Angeles.
+            start_date: Date::parse('2026-01-11 08:00:00', 'UTC'),
+            members: new StableMembershipData(wrestlers: Wrestler::query()->whereKey($wrestler->getKey())->get()),
+        );
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($update)->toThrow(CannotBeUpdatedException::class, 'cannot start after a member joined');
+    });
+
+    test('it accepts an end day that is the day a member left in the promotion time zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->for($promotion, 'promotion')->create();
+        $stable->activityPeriods()->create(['started_at' => '2026-01-01 08:00:00', 'ended_at' => '2026-02-01 08:00:00']);
+        $tagTeam = TagTeam::factory()->create();
+        // 2026-01-10 21:00 in Los Angeles, which is already the 11th in UTC.
+        $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2026-01-02 08:00:00', 'left_at' => '2026-01-11 05:00:00']);
+        $data = new StableData(
+            name: 'Updated Name',
+            start_date: Date::parse('2026-01-01 08:00:00', 'UTC'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2026-01-10 08:00:00', 'UTC'),
+        );
+
+        // Act
+        resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($stable->activityPeriods()->sole()->ended_at?->toDateTimeString())->toBe('2026-01-10 08:00:00');
+    });
+});
