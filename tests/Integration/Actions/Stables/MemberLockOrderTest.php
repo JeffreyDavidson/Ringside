@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\SynchronizeStableMembersAction;
+use App\Actions\Stables\UnretireAction;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -54,25 +55,21 @@ function stableWithMembersAttachedOutOfOrder(): Stable
     return Stable::query()->findOrFail($stable->id);
 }
 
-test('it retires the members of a stable in ascending id order', function () {
+test('it ends the memberships of a retiring stable in ascending id order', function () {
     // Arrange
     $stable = stableWithMembersAttachedOutOfOrder();
-    $directWrestlerIds = $stable->wrestlers()->pluck('wrestlers.id')->all();
 
     // Act
     $statements = recordStatements(fn () => resolve(RetireAction::class)->handle($stable));
 
     // Assert
-    $lockedWrestlerIds = lockedRowIds($statements, 'wrestlers');
-    $lockedTagTeamWrestlerIds = array_values(array_filter($lockedWrestlerIds, fn ($id) => ! in_array($id, $directWrestlerIds)));
-    $lockedDirectWrestlerIds = array_values(array_filter($lockedWrestlerIds, fn ($id) => in_array($id, $directWrestlerIds)));
-    $lockedTagTeamIds = lockedRowIds($statements, 'tag_teams');
+    $endedWrestlerIds = updatedRowIds($statements, 'stables_wrestlers', bindingFromEnd: 2);
+    $endedTagTeamIds = updatedRowIds($statements, 'stables_tag_teams', bindingFromEnd: 2);
 
-    expect($lockedWrestlerIds)->not->toBeEmpty()
-        ->and($lockedTagTeamIds)->not->toBeEmpty()
-        ->and($lockedDirectWrestlerIds)->toBe(collect($lockedDirectWrestlerIds)->sort()->values()->all())
-        ->and($lockedTagTeamWrestlerIds)->toBe(collect($lockedTagTeamWrestlerIds)->sort()->values()->all())
-        ->and($lockedTagTeamIds)->toBe(collect($lockedTagTeamIds)->sort()->values()->all())
+    expect($endedWrestlerIds)->toHaveCount(3)->toBe(collect($endedWrestlerIds)->sort()->values()->all())
+        ->and($endedTagTeamIds)->toHaveCount(3)->toBe(collect($endedTagTeamIds)->sort()->values()->all())
+        ->and(lockedRowIds($statements, 'wrestlers'))->toBeEmpty()
+        ->and(lockedRowIds($statements, 'tag_teams'))->toBeEmpty()
         ->and(memberSelectsWithoutOrdering($statements, 'wrestlers', 'stables_wrestlers'))->toBeEmpty()
         ->and(memberSelectsWithoutOrdering($statements, 'tag_teams', 'stables_tag_teams'))->toBeEmpty();
 });
@@ -91,6 +88,20 @@ test('it removes replaced stable members in ascending id order', function () {
 
     expect($removedWrestlerIds)->toHaveCount(3)->toBe(collect($removedWrestlerIds)->sort()->values()->all())
         ->and($removedTagTeamIds)->toHaveCount(3)->toBe(collect($removedTagTeamIds)->sort()->values()->all())
+        ->and(memberSelectsWithoutOrdering($statements, 'wrestlers', 'stables_wrestlers'))->toBeEmpty()
+        ->and(memberSelectsWithoutOrdering($statements, 'tag_teams', 'stables_tag_teams'))->toBeEmpty();
+});
+
+test('it reads the returning members of an unretiring stable in ascending id order', function () {
+    // Arrange
+    $stable = stableWithMembersAttachedOutOfOrder();
+    resolve(RetireAction::class)->handle($stable);
+
+    // Act
+    $statements = recordStatements(fn () => resolve(UnretireAction::class)->handle($stable));
+
+    // Assert
+    expect(lockedRowIds($statements, 'stables'))->not->toBeEmpty()
         ->and(memberSelectsWithoutOrdering($statements, 'wrestlers', 'stables_wrestlers'))->toBeEmpty()
         ->and(memberSelectsWithoutOrdering($statements, 'tag_teams', 'stables_tag_teams'))->toBeEmpty();
 });

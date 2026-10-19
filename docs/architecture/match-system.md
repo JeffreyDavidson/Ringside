@@ -87,6 +87,8 @@ Profile availability sections provide a review of affected bookings before save,
 
 ## Match Assignment Failures
 
+Titles follow the same date rule as employment: when the event has a date, `AddTitlesToMatchAction` and `MatchTitleRequirements` (and the form's `IsActive` and `CurrentChampionIsCompeting` rules) read the title's activity and its champion on the event's date, not the current ones; an unscheduled event keeps the active-now and current-champion checks. See [Championship System](championship-system.md) and [decision 0002](../decisions/0002-booking-employment-is-read-on-the-event-date.md).
+
 Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
 
 Match assignment actions lock the complete scheduling event set, then the match, and only then reload and lock selected wrestlers, tag teams, referees, or titles. Availability and conflict checks use those locked rows, so stale caller models cannot bypass current booking rules and concurrent assignments serialize across the same event window.
