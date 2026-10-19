@@ -20,6 +20,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
@@ -38,6 +39,8 @@ class MatchesTable extends DataTableComponent
     protected array $unbookable = [];
 
     protected ?string $bookingDay = null;
+
+    protected ?Carbon $bookingAt = null;
 
     protected string $databaseTableName = 'events_matches';
 
@@ -124,6 +127,7 @@ class MatchesTable extends DataTableComponent
     {
         $event = Event::query()->with('promotion')->findOrFail($this->eventId);
         $this->bookingDay = $event->local_date?->toDateString();
+        $this->bookingAt = $event->date;
         $booked = $rows->toBase()
             ->filter(fn (EventMatch $match): bool => $match->match_finish === null || $match->event->date >= now())
             ->flatMap(fn (EventMatch $match): Collection => $match->competitors->toBase()
@@ -159,7 +163,7 @@ class MatchesTable extends DataTableComponent
 
         return $type::query()
             ->whereKey($members->map->getKey())
-            ->bookableOn($this->bookingDay)
+            ->bookableOn($this->bookingDay, $this->bookingAt)
             ->get()
             ->toBase()
             ->map(MatchTableFormatter::unbookableKey(...));

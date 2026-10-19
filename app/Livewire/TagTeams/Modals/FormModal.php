@@ -9,6 +9,7 @@ use App\Actions\TagTeams\UpdateAction;
 use App\Enums\Roster\RosterMemberKind;
 use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\SearchesRosterMembers;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
@@ -61,10 +62,17 @@ class FormModal extends BaseFormModal
         $this->form->wrestlerB = $wrestlers->get(1)?->id;
     }
 
-    /** A name or signature move taken since validation shows on its own field; any other failure on the first wrestler. */
+    /**
+     * A name or signature move taken since validation shows on its own field, and so does a manager who stopped
+     * being available; any other failure on the first wrestler.
+     */
     #[\Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
+        if ($exception instanceof CannotBeAssignedException) {
+            return 'form.managers';
+        }
+
         return match ($exception->reason()) {
             BusinessRuleReason::NameTaken => 'form.name',
             BusinessRuleReason::SignatureMoveTaken => 'form.signature_move',

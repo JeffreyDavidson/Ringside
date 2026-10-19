@@ -18,6 +18,7 @@ final class MatchTitleRequirements
     public function ensureSatisfied(EventMatch $match, Collection $titles): void
     {
         $this->ensureTitleTypesMatchCompetitors($match, $titles);
+        $this->ensureOneCompetitorPerSide($match, $titles);
         $this->ensureCurrentChampionsCompete($match, $titles);
     }
 
@@ -38,14 +39,39 @@ final class MatchTitleRequirements
         }
     }
 
-    /** @param Collection<int, Title> $titles */
+    /**
+     * A title change is applied to the single winning competitor of the winning side, so every
+     * populated side must hold exactly one competitor (already known to be of the title's type).
+     *
+     * @param  Collection<int, Title>  $titles
+     */
+    private function ensureOneCompetitorPerSide(EventMatch $match, Collection $titles): void
+    {
+        $competitorsPerSide = $match->competitors()
+            ->pluck('match_side_id')
+            ->countBy();
+
+        if ($competitorsPerSide->every(fn (int $count): bool => $count === 1)) {
+            return;
+        }
+
+        throw InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide($titles->firstOrFail());
+    }
+
+    /**
+     * The champion that must compete is whoever held the title on the event's date, not today's
+     * champion; an unscheduled event has no date and keeps the current champion.
+     *
+     * @param  Collection<int, Title>  $titles
+     */
     private function ensureCurrentChampionsCompete(EventMatch $match, Collection $titles): void
     {
         /** @var MatchCompetitorsCollection<int, MatchCompetitor> $assignedCompetitors */
         $assignedCompetitors = $match->competitors()->get(['competitor_type', 'competitor_id']);
+        $eventDate = $match->event()->firstOrFail()->date?->copy()->utc();
         $currentChampionships = TitleChampionship::query()
             ->whereIn('title_id', $titles->pluck('id'))
-            ->current()
+            ->heldOn($eventDate)
             ->orderBy('id')
             ->lockForUpdate()
             ->get(['id', 'title_id', 'champion_type', 'champion_id']);

@@ -37,4 +37,6 @@ interface Employable
     public function hasFutureEmployment(): bool;
 
     public function hasEmploymentHistory(): bool;
+
+    public function soleScheduledEmployment(): ?Employment;
 }

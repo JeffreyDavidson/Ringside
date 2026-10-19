@@ -182,7 +182,7 @@ test('it creates partnerships with correct timestamps', function () {
 test('it employs the tag team and its founding members', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $employmentDate = now()->subDay();
 
     $tagTeam = resolve(CreateAction::class)->handle(new TagTeamData(

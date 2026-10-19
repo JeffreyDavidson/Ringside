@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\DB;
 class UpdateAction
 {
     public function __construct(
-        private readonly EmployAction $employAction
+        private readonly EmployAction $employAction,
+        private readonly ChangeScheduledEmploymentAction $changeScheduledEmployment,
     ) {}
 
     /**
@@ -41,8 +43,14 @@ class UpdateAction
                 'last_name' => $refereeData->last_name,
             ]);
 
+            // A referee whose only employment has not started yet has it moved to the form date, or cancelled when the
+            // date is cleared.
+            if ($this->changeScheduledEmployment->handle($lockedReferee, $refereeData->employment_date)) {
+                return $lockedReferee;
+            }
+
             // Only a referee with no employment history is employed from the form date; a released, retired or
-            // future-employed referee keeps their history (employing again would overlap or be rejected).
+            // started referee keeps their history (employing again would overlap or be rejected).
             if ($refereeData->employment_date instanceof Carbon && ! $lockedReferee->employments()->exists()) {
                 $this->employAction->handle($lockedReferee, $refereeData->employment_date);
             }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\Events\EventDeletionEligibility;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentMatchRequirements;
@@ -23,7 +24,8 @@ class DeleteAction
      * This handles the complete deletion workflow with business impact:
      *
      * MATCH IMPACT:
-     * - Cascades to associated matches and booking records
+     * - Refuses to delete an event whose matches created or closed a title reign; the result must be corrected first
+     * - Does not delete or change the matches or booking records; only the event is soft deleted
      * - Preserves match history for reporting and statistics
      * - No impact on wrestler/manager employment or career records
      *
@@ -51,6 +53,7 @@ class DeleteAction
             $lockedEvent = $event->refreshForUpdate();
 
             $this->tournamentRequirements->ensureEventDeletable($lockedEvent);
+            EventDeletionEligibility::ensureCanBeDeleted($lockedEvent);
             Tournament::query()->whereKey($tournamentIds)->increment('version');
             EventPublication::query()->forEventId($lockedEvent->id)->update([
                 'published_at' => null, 'results_published_at' => null, 'unpublished_at' => now(),

@@ -47,6 +47,12 @@ dataset('individual retire actions', [
     'referee' => [Referee::class, RetireReferee::class],
 ]);
 
+dataset('individual release retire unretire actions', [
+    'wrestler' => [Wrestler::class, ReleaseWrestler::class, RetireWrestler::class, UnretireWrestler::class],
+    'manager' => [Manager::class, ReleaseManager::class, RetireManager::class, UnretireManager::class],
+    'referee' => [Referee::class, ReleaseReferee::class, RetireReferee::class, UnretireReferee::class],
+]);
+
 dataset('individual unretire actions', [
     'wrestler' => [Wrestler::class, UnretireWrestler::class],
     'manager' => [Manager::class, UnretireManager::class],
@@ -68,7 +74,7 @@ dataset('individual reinstate actions', [
 /*
  * Only the wrestler and manager UnretireAction take the $employImmediately
  * flag (TagTeams\UnretireCurrentMembersAction passes false); the referee
- * action always employs.
+ * action always follows the state before retirement.
  */
 dataset('individual unretire actions with optional employment', [
     'wrestler' => [Wrestler::class, UnretireWrestler::class],

@@ -20,6 +20,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -254,6 +255,24 @@ describe('unbookable booked members', function (): void {
         $component->assertSeeHtml('Retired Wrestler</a>'.MatchCompetitorRouteResolver::unbookableMarker());
     });
 
+    it('marks a wrestler booked on an event dated before they were employed', function (): void {
+        // Arrange
+        $event = Event::factory()->create(['date' => now()->subDays(10)]);
+        $early = Wrestler::factory()->bookable()->create(['name' => 'Hired Early']);
+        $early->employments()->update(['started_at' => now()->subDays(30)]);
+        $late = Wrestler::factory()->bookable()->create(['name' => 'Hired Late']);
+        EventMatch::factory()->forEvent($event)->withCompetitors([$early, $late])->create();
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Hired Late</a>{$marker}")
+            ->assertDontSeeHtml("Hired Early</a>{$marker}");
+    });
+
     it('does not mark members of past matches that already have a result', function (): void {
         // Arrange
         $event = Event::factory()->past()->create();
@@ -413,6 +432,22 @@ describe('deleting matches', function (): void {
         $component
             ->assertSuccessful()
             ->assertSeeHtml('data-test="match-delete-action"');
+    });
+
+    it('refuses to delete a match that changed a title and shows the reason', function (): void {
+        // Arrange
+        $event = Event::factory()->past()->create();
+        $match = EventMatch::factory()->forEvent($event)->complete()->create();
+        TitleChampionship::factory()->wonAtEventMatch($match)->create();
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $match);
+
+        // Assert
+        $component->assertDispatched('flash-message', type: 'error', message: __('matches.errors.deleted.has_title_change'));
+
+        expect($match->refresh()->trashed())->toBeFalse();
     });
 
     it('soft deletes a match and dispatches success feedback', function (): void {

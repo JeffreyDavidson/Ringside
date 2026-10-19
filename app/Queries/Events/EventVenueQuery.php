@@ -12,6 +12,10 @@ class EventVenueQuery
 {
     public function get(Event $event): ?Venue
     {
+        if ($event->venue_id === null) {
+            return null;
+        }
+
         return $event->venue()->withTrashed()->first();
     }
 }

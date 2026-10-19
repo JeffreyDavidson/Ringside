@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
+use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\DB;
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
  * - Uses EmployAction for consistent employment handling when employment_date is provided and the wrestler has no employment history
+ * - Synchronizes the managers when WrestlerData carries them (null leaves them alone); newly added managers must be available
  * - Automatically employs managers through EmployAction's typed collaborator
  * - Maintains employment history through proper action coordination
  * - Rejects a name or signature move another wrestler of the promotion already uses (deleted ones count, as they do for
@@ -34,7 +37,9 @@ class UpdateAction
      */
     public function __construct(
         protected EmployAction $employAction,
+        protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
         protected RecordNameLock $nameLock,
+        protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
     ) {}
 
     /**
@@ -71,8 +76,16 @@ class UpdateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
+            $this->synchronizeManagerAssignmentsAction->handle($lockedWrestler, $wrestlerData->managers, now());
+
+            // A wrestler whose only employment has not started yet has it moved to the form date, or cancelled when the
+            // date is cleared.
+            if ($this->changeScheduledEmployment->handle($lockedWrestler, $wrestlerData->employment_date)) {
+                return $lockedWrestler;
+            }
+
             // Only a wrestler with no employment history is employed from the form date; a released, retired or
-            // future-employed wrestler keeps their history (employing again would overlap or be rejected).
+            // started wrestler keeps their history (employing again would overlap or be rejected).
             if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->employments()->exists()) {
                 $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }

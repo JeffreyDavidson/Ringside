@@ -17,7 +17,7 @@ use Illuminate\Mail\Mailables\Envelope;
  * exists for the address, carries no token, and grants nothing: the invitation is accepted in the application after
  * signing in with the invited email (AcceptPromotionInvitationAction).
  */
-final class PromotionInvitationMail extends Mailable
+final class InvitedToPromotion extends Mailable
 {
     public function __construct(
         public readonly PromotionInvitation $invitation,

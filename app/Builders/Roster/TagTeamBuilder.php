@@ -10,9 +10,11 @@ use App\Builders\Concerns\FiltersByNameInPromotion;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstEmployment;
 use App\Builders\Concerns\OrdersByKeyForLocking;
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 /**
  * @template TModel of TagTeam
@@ -65,9 +67,27 @@ class TagTeamBuilder extends Builder
             );
     }
 
-    public function bookableOn(?string $date): static
+    /**
+     * Compose calendar restrictions with lifecycle eligibility for one promotion-local day. With
+     * `$at` (the event's date) the team and every current wrestler must have been employed at that
+     * moment; retirement, suspension and injury still count as they stand now.
+     */
+    public function bookableOn(?string $date, ?Carbon $at = null): static
     {
-        $this->bookable();
+        if ($at instanceof Carbon) {
+            $this->whereHas('employments', fn (Builder $employments) => LifecyclePeriodBuilder::constrainToActiveOn($employments, $at->copy()->utc()))
+                ->whereDoesntHave('currentRetirement')
+                ->whereDoesntHave('currentSuspension')
+                ->has('currentWrestlers', '>=', TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS)
+                ->whereDoesntHave(
+                    'currentWrestlers',
+                    fn (WrestlerBuilder $wrestlers): WrestlerBuilder => $wrestlers->whereNot(
+                        fn (WrestlerBuilder $wrestler): WrestlerBuilder => $wrestler->bookableOn(null, $at),
+                    ),
+                );
+        } else {
+            $this->bookable();
+        }
         if ($date === null) {
             return $this;
         }

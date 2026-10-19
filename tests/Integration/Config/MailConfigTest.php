@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Mail\Promotions\PromotionInvitationMail;
+use App\Mail\Promotions\InvitedToPromotion;
 use App\Models\Promotions\PromotionInvitation;
 use App\Models\Users\User;
 use Illuminate\Mail\Transport\ResendTransport;
@@ -59,7 +59,7 @@ test('outgoing mail carries the configured reply-to address', function (?string 
     // Act
     $sent = Mail::mailer('array')
         ->to($invitation->email)
-        ->send(new PromotionInvitationMail($invitation, User::factory()->create()));
+        ->send(new InvitedToPromotion($invitation, User::factory()->create()));
 
     // Assert
     $message = $sent?->getSymfonySentMessage()->getOriginalMessage();

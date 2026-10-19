@@ -16,6 +16,7 @@ class ReleaseAction
         private readonly CareerPeriodCloser $careerPeriods,
         private readonly IndividualEmploymentEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -26,6 +27,7 @@ class ReleaseAction
         $effectiveDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $this->lockCurrentTagTeams->handle($wrestler);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedWrestler);

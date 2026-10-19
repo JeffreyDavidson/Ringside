@@ -8,6 +8,9 @@ use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it retires an active stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
@@ -110,41 +113,34 @@ test('it retires an inactive stable at a specific datetime', function () {
         ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
-test('it retires the current tag teams and current wrestlers of a stable', function () {
-    $stable = Stable::factory()->active()->create();
+test('it ends only the stable and leaves its members employed and unretired', function () {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $retiredAt = now();
 
-    // Verify stable has current members before retirement
-    expect($stable->currentWrestlers()->count())->toBeGreaterThan(0);
-    expect($stable->currentTagTeams()->count())->toBeGreaterThan(0);
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    $wrestlers = $stable->currentWrestlers()->get();
+    $tagTeams = $stable->currentTagTeams()->get();
+    $tagTeamWrestlers = $tagTeams->flatMap(fn (TagTeam $tagTeam) => $tagTeam->currentWrestlers()->get());
 
-    // Get the current members before retirement
-    $currentWrestlers = $stable->currentWrestlers;
-    $currentTagTeams = $stable->currentTagTeams;
+    // Act
+    resolve(RetireAction::class)->handle($stable, $retiredAt);
 
-    // Verify they are not retired before action
-    foreach ($currentWrestlers as $wrestler) {
-        expect($wrestler->currentRetirement()->exists())->toBeFalse();
-    }
-    foreach ($currentTagTeams as $tagTeam) {
-        expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    }
+    // Assert
+    $memberships = StableWrestler::query()->whereBelongsTo($stable)->get()
+        ->concat(StableTagTeam::query()->whereBelongsTo($stable)->get());
 
-    // Call the action
-    resolve(RetireAction::class)->handle($stable);
-
-    // Verify stable is retired
-    $stable->refresh();
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-
-    // Verify current members were retired
-    foreach ($currentWrestlers as $wrestler) {
-        $wrestler->refresh();
-        expect($wrestler->currentRetirement()->exists())->toBeTrue();
-    }
-    foreach ($currentTagTeams as $tagTeam) {
-        $tagTeam->refresh();
-        expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-    }
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentWrestlers()->count())->toBe(0)
+        ->and($stable->currentTagTeams()->count())->toBe(0)
+        ->and($memberships)->toHaveCount(3)
+        ->and($memberships->map(fn ($membership): string => requiredDate($membership->left_at)->toDateTimeString())->unique()->all())
+        ->toBe([$retiredAt->toDateTimeString()])
+        ->and($wrestlers->concat($tagTeamWrestlers)->every(fn (Wrestler $wrestler): bool => $wrestler->currentEmployment()->exists() && ! $wrestler->retirements()->exists()))->toBeTrue()
+        ->and($tagTeams->every(fn (TagTeam $tagTeam): bool => $tagTeam->currentEmployment()->exists() && ! $tagTeam->retirements()->exists()))->toBeTrue()
+        ->and(TagTeamWrestler::query()->whereIn('tag_team_id', $tagTeams->modelKeys())->whereNotNull('left_at')->exists())->toBeFalse();
 });
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {

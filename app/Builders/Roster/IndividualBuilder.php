@@ -8,8 +8,10 @@ use App\Builders\Concerns\FiltersByEmploymentStatus;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\LoadsFirstEmployment;
 use App\Builders\Concerns\OrdersByKeyForLocking;
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @template TModel of Model
@@ -44,10 +46,21 @@ abstract class IndividualBuilder extends Builder
             ->whereDoesntHave('currentInjury');
     }
 
-    /** Compose calendar restrictions with lifecycle eligibility for one promotion-local day. */
-    public function bookableOn(?string $date): static
+    /**
+     * Compose calendar restrictions with lifecycle eligibility for one promotion-local day. With
+     * `$at` (the event's date) employment is read at that moment instead of now; retirement,
+     * suspension and injury still count as they stand now.
+     */
+    public function bookableOn(?string $date, ?Carbon $at = null): static
     {
-        $this->bookable();
+        if ($at instanceof Carbon) {
+            $this->whereHas('employments', fn (Builder $employments) => LifecyclePeriodBuilder::constrainToActiveOn($employments, $at->copy()->utc()))
+                ->whereDoesntHave('currentRetirement')
+                ->whereDoesntHave('currentSuspension')
+                ->whereDoesntHave('currentInjury');
+        } else {
+            $this->bookable();
+        }
         if ($date === null) {
             return $this;
         }

@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\UpdateAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
+use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Date;
 use JMac\Testing\Double;
@@ -333,11 +335,86 @@ describe('FormModal employment history', function () {
     })->with([
         'released' => ['released', null],
         'retired' => ['retired', null],
-        'future-employed' => ['future', null],
         'released with a submitted date' => ['released', '2024-04-01'],
         'retired with a submitted date' => ['retired', '2024-04-01'],
-        'future-employed with a submitted date' => ['future', '2024-04-01'],
     ]);
+
+    it('offers the start date of a wrestler who has not started yet, prefilled', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Assert
+        $modal
+            ->assertSet('form.hasEmploymentHistory', false)
+            ->assertSet('form.employment_date', '2024-09-01')
+            ->assertSeeHtml('wire:model="form.employment_date"');
+    });
+
+    it('moves the start date of a wrestler who has not started yet', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-10-15');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->employments()->sole()->started_at->toDateString())->toBe('2024-10-15')
+            ->and($wrestler->refresh()->status)->toBe(EmploymentStatus::FutureEmployment);
+    });
+
+    it('employs a wrestler who has not started yet when the start date is moved to today', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-06-01');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->refresh()->status)->toBe(EmploymentStatus::Employed);
+    });
+
+    it('cancels the hire of a wrestler who has not started yet when the start date is cleared', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->employments()->exists())->toBeFalse()
+            ->and($wrestler->refresh()->status)->toBe(EmploymentStatus::Unemployed);
+    });
+
+    it('rejects moving the start date of a wrestler who has not started yet to a past day', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        giveEmploymentHistory($wrestler, 'future');
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->set('form.employment_date', '2024-05-31');
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.employment_date']);
+        expect($wrestler->employments()->sole()->started_at->toDateString())->toBe('2024-09-01');
+    });
 
     it('does not offer the employment date once the wrestler has an employment history', function (string $state) {
         // Arrange
@@ -352,7 +429,7 @@ describe('FormModal employment history', function () {
             ->assertSet('form.hasEmploymentHistory', true)
             ->assertSet('form.employment_date', '')
             ->assertDontSeeHtml('wire:model="form.employment_date"');
-    })->with(['released', 'retired', 'future']);
+    })->with(['released', 'retired']);
 
     it('still employs a never-employed wrestler from the submitted date', function () {
         // Arrange
@@ -438,6 +515,194 @@ describe('wrestler name races past the form rule', function () {
         $modal
             ->assertHasErrors(['form.signature_move'])
             ->assertSee("A wrestler with the signature move 'Rock Bottom' already exists in this promotion.")
+            ->assertNotDispatched('closeModal');
+        $action->verify();
+    });
+});
+
+describe('wrestler managers', function () {
+    it('renders the managers field as a searchable select without embedding the roster', function () {
+        // Arrange
+        Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+
+        // Act
+        $modal = livewire(FormModal::class);
+
+        // Assert
+        $modal
+            ->assertSeeHtml('data-roster-combobox="form.managers"')
+            ->assertSeeHtml('data-test="managers-field"')
+            ->assertDontSee('Bobby Heenan')
+            ->assertDontSeeHtml('<option');
+    });
+
+    it('shows the current managers of an edited wrestler as selected labels', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        Manager::factory()->employed()->create(['first_name' => 'Unrelated', 'last_name' => 'Manager']);
+        $wrestler->managers()->attach($manager, ['hired_at' => now()->subYear()]);
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Assert
+        $modal
+            ->assertSet('form.managers', [$manager->id])
+            ->assertSee('Bobby Heenan')
+            ->assertDontSee('Unrelated Manager');
+    });
+
+    it('only offers employed managers who are not retired, suspended or injured', function () {
+        // Arrange
+        Manager::factory()->employed()->create(['first_name' => 'Available', 'last_name' => 'Manager']);
+        Manager::factory()->unemployed()->create(['first_name' => 'Unsigned', 'last_name' => 'Manager']);
+        Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager']);
+        Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
+        Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
+        Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $options = $modal->instance()->searchRoster('managers', 'Manager');
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Available Manager']);
+    });
+
+    it('does not search kinds the wrestler form does not offer', function () {
+        // Arrange
+        Wrestler::factory()->create(['name' => 'Ricky Morton']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $options = $modal->instance()->searchRoster('wrestlers', '');
+
+        // Assert
+        expect($options)->toBe([]);
+    });
+
+    it('creates a wrestler with the managers chosen', function () {
+        // Arrange
+        $manager = Manager::factory()->employed()->create();
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal
+            ->set('form.name', 'Managed Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 6)
+            ->set('form.height_inches', 2)
+            ->set('form.weight', 220)
+            ->set('form.managers', [$manager->id])
+            ->call('save');
+
+        // Assert
+        $wrestler = Wrestler::query()->whereName('Managed Wrestler')->firstOrFail();
+        $modal->assertHasNoErrors();
+        expect($wrestler->currentManagers()->pluck('managers.id')->all())->toBe([$manager->id]);
+    });
+
+    it('refuses a manager who is not available and creates nothing', function (string $state, string $message) {
+        // Arrange
+        $manager = Manager::factory()->{$state}()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal
+            ->set('form.name', 'Managed Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 6)
+            ->set('form.height_inches', 2)
+            ->set('form.weight', 220)
+            ->set('form.managers', [$manager->id])
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.managers.0'])
+            ->assertSee($message)
+            ->assertNotDispatched('closeModal');
+        expect(Wrestler::query()->whereName('Managed Wrestler')->exists())->toBeFalse();
+    })->with([
+        'never employed' => ['unemployed', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+        'released' => ['released', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+        'retired' => ['retired', 'Manager Bobby Heenan is retired and cannot be assigned.'],
+        'suspended' => ['suspended', 'Manager Bobby Heenan is suspended and cannot be assigned.'],
+        'injured' => ['injured', 'Manager Bobby Heenan is injured and cannot be assigned.'],
+    ]);
+
+    it('gains and loses managers through the form while keeping the history', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $keptManager = Manager::factory()->employed()->create();
+        $removedManager = Manager::factory()->employed()->create();
+        $addedManager = Manager::factory()->employed()->create();
+        $wrestler->managers()->attach([$keptManager->id, $removedManager->id], ['hired_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal
+            ->set('form.managers', [$keptManager->id, $addedManager->id])
+            ->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->currentManagers()->pluck('managers.id')->all())->toEqualCanonicalizing([$keptManager->id, $addedManager->id])
+            ->and($wrestler->previousManagers()->pluck('managers.id')->all())->toBe([$removedManager->id]);
+    });
+
+    it('removes every manager when the field is cleared', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $manager = Manager::factory()->employed()->create();
+        $wrestler->managers()->attach($manager, ['hired_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal
+            ->set('form.managers', [])
+            ->call('save');
+
+        // Assert
+        expect($wrestler->currentManagers()->exists())->toBeFalse()
+            ->and($wrestler->previousManagers()->pluck('managers.id')->all())->toBe([$manager->id]);
+    });
+
+    it('keeps an assigned manager who is no longer available when the wrestler is renamed', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $wrestler->managers()->attach($suspendedManager, ['hired_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal
+            ->set('form.name', 'Renamed Wrestler')
+            ->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($wrestler->refresh()->name)->toBe('Renamed Wrestler')
+            ->and($wrestler->currentManagers()->pluck('managers.id')->all())->toBe([$suspendedManager->id]);
+    });
+
+    it('shows a manager who became unavailable after validation on the managers field', function () {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $action = Double::for(UpdateAction::class);
+        $action->expects('handle')->throws(CannotBeAssignedException::suspended($manager));
+        app()->instance(UpdateAction::class, $action);
+        $modal = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.managers'])
+            ->assertSee('Manager Bobby Heenan is suspended and cannot be assigned.')
             ->assertNotDispatched('closeModal');
         $action->verify();
     });

@@ -6,14 +6,19 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Venues\CannotBeUpdatedException;
 use App\Exceptions\Venues\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Models\Events\Venue;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
-    public function __construct(private readonly RecordNameLock $nameLock) {}
+    public function __construct(
+        private readonly RecordNameLock $nameLock,
+        private readonly VenueDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Update a venue.
@@ -22,6 +27,7 @@ class UpdateAction
      * - Rejects a name another venue already uses (deleted ones count, as they do for the form rule); venue names are
      *   unique across all promotions, and nothing in the database keeps them unique, so it first takes the name lock,
      *   before the venue's own row lock
+     * - Rejects a time zone change that would put two live events on one venue day, checked under the venue row lock
      * - Updates venue location and facility information
      * - Maintains data integrity for existing event bookings
      * - Preserves venue history and event associations
@@ -31,6 +37,7 @@ class UpdateAction
      * @return Venue The updated venue instance
      *
      * @throws NameTakenException When another venue already has the name
+     * @throws CannotBeUpdatedException When the new time zone would double-book a venue day
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {
@@ -49,6 +56,10 @@ class UpdateAction
 
             if ($nameTaken) {
                 throw NameTakenException::name($name);
+            }
+
+            if ($lockedVenue->timezone !== $venueData->timezone) {
+                $this->eligibility->ensureTimezoneKeepsEventsApart($lockedVenue, $venueData->timezone);
             }
 
             $lockedVenue->update([

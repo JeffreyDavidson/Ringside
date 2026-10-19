@@ -13,7 +13,7 @@ IndividualBuilder::bookable() and TagTeamBuilder::bookable() are SQL projections
 
 ## Compose event-day restrictions without changing result eligibility
 
-Keep context-free `RosterBookingEligibility::allows()` and `bookable()` lifecycle-only. `RosterDateAvailability` owns unavailable promotion-local days, and `bookableOn()` must stay in parity with composed lifecycle/date evaluation. Keep unavailable dates independent of injury/employment and out of result/title eligibility. During a match repair, only the locked existing assignment snapshot may retain a calendar restriction; client input never supplies a bypass.
+Keep context-free `RosterBookingEligibility::allows()` and `bookable()` lifecycle-only. Given an event date, `allows($member, $on)` and `bookableOn($day, $at)` read employment on that date (tag teams: the team and every current wrestler) while retirement, suspension and injury stay as they stand now; keep the two in parity and pass the event's date from every booking caller. `RosterDateAvailability` owns unavailable promotion-local days, and `bookableOn()` must stay in parity with composed lifecycle/date evaluation. Keep unavailable dates independent of injury/employment and out of result/title eligibility. During a match repair, only the locked existing assignment snapshot may retain a calendar restriction; client input never supplies a bypass.
 
 ## Lock represented team members for calendar checks
 

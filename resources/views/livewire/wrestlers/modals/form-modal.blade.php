@@ -1,3 +1,5 @@
+@use('App\Enums\Roster\RosterMemberKind')
+
 <x-form-modal>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="wrestler-profile-grid">
         <x-form-modal.modal-input>
@@ -43,5 +45,17 @@
                 <x-form.inputs.date :label="__('employments.started_at')" wire:model="form.employment_date" />
             </x-form-modal.modal-input>
         @endunless
+    </div>
+
+    <div data-test="managers-field">
+        <x-form-modal.modal-input>
+            <x-form.inputs.roster-combobox
+                :label="__('core.managers')"
+                wire:model="form.managers"
+                :kind="RosterMemberKind::Managers"
+                :labels="$this->selectedRosterLabels['managers']"
+                multiple
+            />
+        </x-form-modal.modal-input>
     </div>
 </x-form-modal>

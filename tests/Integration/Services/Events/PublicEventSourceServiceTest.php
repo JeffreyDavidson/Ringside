@@ -112,6 +112,22 @@ describe('public event source service', function (): void {
             ->and($source['matches'][0]['finish'])->toBe('Pinfall');
     });
 
+    it('publishes a deleted venue with the same name, address and time zone as before its deletion', function (): void {
+        // Arrange
+        ['event' => $event, 'venue' => $venue] = publicSourceWorld();
+        $before = resolve(PublicEventSourceService::class)->get($event);
+        $venue->delete();
+
+        // Act
+        $after = resolve(PublicEventSourceService::class)->get(Event::query()->findOrFail($event->id));
+
+        // Assert
+        expect($after)->toBe($before)
+            ->and($after['venue'])->toBe('Harbor Arena')
+            ->and($after['address'])->toBe('1 Dock Road, Portland, ME, 04101')
+            ->and($after['timezone'])->toBe('America/Chicago');
+    });
+
     it('describes an unscheduled event without a venue', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Harbor Wrestling', 'timezone' => 'America/New_York']);

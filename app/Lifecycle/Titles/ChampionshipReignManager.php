@@ -159,11 +159,16 @@ final class ChampionshipReignManager
         if ($reignWonAtMatch !== null) {
             $reignWonAtMatch->delete();
 
-            $currentReign = $this->reopenablePredecessor($title, $activeReigns->firstWhere('lost_match_id', $match->id));
+            $predecessor = $activeReigns->firstWhere('lost_match_id', $match->id);
+            $currentReign = $this->reopenablePredecessor($title, $predecessor);
             $currentReign?->update([
                 'lost_match_id' => null,
                 'lost_at' => null,
             ]);
+
+            if (! $currentReign instanceof TitleChampionship && $this->reopenDepartedChampionsReign($match, $title, $predecessor, $desiredChampion)) {
+                return;
+            }
         }
 
         if ($desiredChampion === null || $this->reignBelongsTo($currentReign, $desiredChampion)) {
@@ -194,6 +199,41 @@ final class ChampionshipReignManager
         }
     }
 
+    /**
+     * A correction back to the champion this match dethroned reopens that champion's original reign even though they
+     * have since been released or retired, ending it on their release or retirement date so it stays one continuous
+     * reign. Without a recorded departure, or on a title that is no longer active, nothing is reopened.
+     */
+    private function reopenDepartedChampionsReign(
+        EventMatch $match,
+        Title $title,
+        ?TitleChampionship $predecessor,
+        Wrestler|TagTeam|null $desiredChampion,
+    ): bool {
+        $eventDate = $match->event->date;
+
+        if (! $predecessor instanceof TitleChampionship
+            || ! $desiredChampion instanceof Model
+            || ! $eventDate instanceof Carbon
+            || ! $this->reignBelongsTo($predecessor, $desiredChampion)
+            || ! $title->currentActivityPeriod()->exists()) {
+            return false;
+        }
+
+        $leftAt = $this->firstLeaveOnOrAfterEventDay($match, $eventDate, $desiredChampion);
+
+        if (! $leftAt instanceof Carbon) {
+            return false;
+        }
+
+        $predecessor->update([
+            'lost_match_id' => null,
+            'lost_at' => $this->reignEnd($predecessor, $leftAt),
+        ]);
+
+        return true;
+    }
+
     /** An event from an earlier day in its promotion's time zone is being back-filled rather than recorded live. */
     public function isBackFill(EventMatch $match): bool
     {
@@ -212,21 +252,55 @@ final class ChampionshipReignManager
      */
     private function endReignIfChampionHasSinceLeft(TitleChampionship $reign, EventMatch $match, Wrestler|TagTeam $champion): void
     {
-        $promotion = $match->event->promotion;
-        $eventDay = PromotionTimeZoneService::toLocalTime($promotion, $reign->won_at)->startOfDay();
-
-        $leftAt = $champion->employments()->whereNotNull('ended_at')->get()
-            ->map(fn (Employment $employment): ?Carbon => $employment->ended_at)
-            ->merge($champion->retirements()->get()->map(fn (Retirement $retirement): Carbon => $retirement->started_at))
-            ->filter(fn (?Carbon $date): bool => $date instanceof Carbon
-                && PromotionTimeZoneService::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
-            ->min();
+        $leftAt = $this->firstLeaveOnOrAfterEventDay($match, $reign->won_at, $champion);
 
         if (! $leftAt instanceof Carbon) {
             return;
         }
 
         $reign->update(['lost_at' => $this->reignEnd($reign, $leftAt)]);
+    }
+
+    /**
+     * The earliest release or retirement of the champion that falls on or after the event's local day in the
+     * promotion's time zone, ignoring earlier departures and later returns.
+     */
+    private function firstLeaveOnOrAfterEventDay(EventMatch $match, Carbon $eventDate, Wrestler|TagTeam $champion): ?Carbon
+    {
+        $promotion = $match->event->promotion;
+        $eventDay = PromotionTimeZoneService::toLocalTime($promotion, $eventDate)->startOfDay();
+
+        return $champion->employments()->whereNotNull('ended_at')->get()
+            ->map(fn (Employment $employment): ?Carbon => $employment->ended_at)
+            ->merge($champion->retirements()->get()->map(fn (Retirement $retirement): Carbon => $retirement->started_at))
+            ->filter(fn (?Carbon $date): bool => $date instanceof Carbon
+                && PromotionTimeZoneService::toLocalTime($promotion, $date)->startOfDay()->greaterThanOrEqualTo($eventDay))
+            ->min();
+    }
+
+    /**
+     * A back-filled winner who was released or retired on the show's day, at or before the show started, cannot take
+     * the title: the result is recorded but the title does not change hands. A reign this match already created for
+     * the winner is left alone so re-recording the same result never removes it.
+     *
+     * @param  Collection<int, TitleChampionship>  $reigns
+     */
+    public function winnerLeftBeforeShow(EventMatch $match, Title $title, Wrestler|TagTeam $winner, Collection $reigns): bool
+    {
+        if (! $this->isBackFill($match)) {
+            return false;
+        }
+
+        $reignWonAtMatch = $this->activeReignsForTitle($title, $reigns)->firstWhere('won_match_id', $match->id);
+
+        if ($this->reignBelongsTo($reignWonAtMatch, $winner)) {
+            return false;
+        }
+
+        $eventDate = $match->event->date;
+        $leftAt = $eventDate instanceof Carbon ? $this->firstLeaveOnOrAfterEventDay($match, $eventDate, $winner) : null;
+
+        return $leftAt instanceof Carbon && $leftAt->lessThanOrEqualTo($eventDate);
     }
 
     public function endCurrentReign(Title $title, Carbon $endedAt): void

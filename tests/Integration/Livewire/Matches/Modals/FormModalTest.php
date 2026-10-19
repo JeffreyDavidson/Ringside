@@ -23,12 +23,15 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
+use Illuminate\Support\Carbon;
 use JMac\Testing\Double;
 use Livewire\Features\SupportTesting\Testable;
 use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 /**
@@ -433,6 +436,39 @@ describe('authorized match form interactions', function (): void {
         $action->verify();
     });
 
+    it('attaches a one-competitor-per-side title failure found while saving to the titles field', function (): void {
+        ['event' => $event] = livewireMatchesModalsFormModalEventFixtures();
+
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()->active()->singles()->create(['name' => 'World Heavyweight Title']);
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')->throws(InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide($title));
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.titles'])
+            ->assertHasNoErrors(['form.configuration']);
+        expect($modal->instance()->getErrorBag()->first('form.titles'))
+            ->toBe('The [World Heavyweight Title] needs exactly one competitor of its type on each side.');
+        $action->verify();
+    });
+
     it('shows a scheduling conflict found while saving on the configuration field', function (): void {
         ['event' => $event] = livewireMatchesModalsFormModalEventFixtures();
 
@@ -612,6 +648,85 @@ describe('authorized match form interactions', function (): void {
             'form.matchStipulationId' => 'exists',
             'form.titles.0',
         ]);
+    });
+
+    it('checks a title against the booked show date instead of today', function (): void {
+        actingAs(administrator());
+
+        // Arrange
+        $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+        $championThen = Wrestler::factory()->bookable()->create();
+        $championNow = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()
+            ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-06-01 00:00:00'))
+            ->singles()
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championThen)
+            ->wonOn('2026-02-01 00:00:00')
+            ->lostOn('2026-05-01 00:00:00')
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championNow)
+            ->wonOn('2026-05-01 00:00:00')
+            ->current()
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$championNow->id], 'tag_teams' => []],
+                ['wrestlers' => [Wrestler::factory()->bookable()->create()->id], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors(['form.titles.0']);
+        expect($modal->instance()->getErrorBag()->first('form.titles.0'))
+            ->toBe(__('titles.validation.champion_must_compete'));
+    });
+
+    it('accepts a title that was active and held by a competing champion on the booked show date', function (): void {
+        actingAs(administrator());
+
+        // Arrange
+        $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+        $championThen = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()
+            ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-06-01 00:00:00'))
+            ->singles()
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($championThen)
+            ->wonOn('2026-02-01 00:00:00')
+            ->lostOn('2026-05-01 00:00:00')
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$championThen->id], 'tag_teams' => []],
+                ['wrestlers' => [Wrestler::factory()->bookable()->create()->id], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors(['form.titles.0']);
     });
 
     it('rejects a competitor selected on multiple sides', function (): void {
@@ -943,3 +1058,280 @@ it('forbids :dataset from opening the match form', function (bool $authenticated
     'a guest editing' => [false, true, 403],
     'a basic user editing' => [true, true, 404],
 ]);
+
+describe('same-day booking warning', function (): void {
+    beforeEach(function (): void {
+        travelTo('2026-10-01 12:00:00');
+        actingAs(administrator());
+    });
+
+    it('warns that a chosen wrestler is on another show that day and still saves', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $otherShow = Event::factory()
+            ->create(['name' => 'Afternoon Spectacular', 'date' => '2026-10-20 14:00:00']);
+        $wrestler = Wrestler::factory()
+            ->bookable()
+            ->create(['name' => 'Ricky Steamboat']);
+        [$opponent, $third] = Wrestler::factory()
+            ->bookable()
+            ->count(2)
+            ->create()
+            ->all();
+        $referee = Referee::factory()
+            ->bookable()
+            ->create();
+        EventMatch::factory()
+            ->for($otherShow)
+            ->withCompetitors([$wrestler, $third])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::Singles);
+
+        // Act
+        $modal->set('form.competitors.0.wrestlers.0', $wrestler->id);
+        $modal->set('form.competitors.1.wrestlers.0', $opponent->id);
+        $modal->set('form.referees', [$referee->id]);
+
+        // Assert
+        $modal->assertSeeText('Ricky Steamboat is also booked on Afternoon Spectacular that day.');
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect(EventMatch::query()->whereBelongsTo($event)->count())->toBe(1);
+    });
+
+    it('does not warn about a show on another day', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $otherDay = Event::factory()
+            ->create(['name' => 'Next Day Show', 'date' => '2026-10-21 14:00:00']);
+        $wrestler = Wrestler::factory()
+            ->bookable()
+            ->create();
+        $opponent = Wrestler::factory()
+            ->bookable()
+            ->create();
+        EventMatch::factory()
+            ->for($otherDay)
+            ->withCompetitors([$wrestler, $opponent])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::Singles);
+
+        // Act
+        $modal->set('form.competitors.0.wrestlers.0', $wrestler->id);
+
+        // Assert
+        $modal
+            ->assertDontSeeHtml('data-test="same-day-warnings"')
+            ->assertDontSee('is also booked on');
+    });
+
+    it('reads the day in the booked promotion time zone', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create(['timezone' => 'America/Los_Angeles']);
+        $event = Event::factory()
+            ->for($promotion, 'promotion')
+            ->create(['date' => '2026-10-21 03:00:00']);
+        $sameLocalDay = Event::factory()
+            ->for($promotion, 'promotion')
+            ->create(['name' => 'Matinee', 'date' => '2026-10-20 17:00:00']);
+        $nextLocalDay = Event::factory()
+            ->for($promotion, 'promotion')
+            ->create(['name' => 'Late Night', 'date' => '2026-10-21 18:00:00']);
+        $early = Wrestler::factory()
+            ->bookable()
+            ->for($promotion)
+            ->create(['name' => 'Early Bird']);
+        $late = Wrestler::factory()
+            ->bookable()
+            ->for($promotion)
+            ->create(['name' => 'Night Owl']);
+        $opponent = Wrestler::factory()
+            ->bookable()
+            ->for($promotion)
+            ->create();
+        EventMatch::factory()
+            ->for($sameLocalDay)
+            ->withCompetitors([$early, $opponent])
+            ->create();
+        EventMatch::factory()
+            ->for($nextLocalDay)
+            ->withCompetitors([$late, $opponent])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::Singles);
+
+        // Act
+        $modal->set('form.competitors.0.wrestlers.0', $early->id);
+        $modal->set('form.competitors.1.wrestlers.0', $late->id);
+
+        // Assert
+        $modal
+            ->assertSeeText('Early Bird is also booked on Matinee that day.')
+            ->assertDontSeeText('Night Owl is also booked');
+    });
+
+    it('warns about a current tag team member booked elsewhere that day', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $otherShow = Event::factory()
+            ->create(['name' => 'Afternoon Spectacular', 'date' => '2026-10-20 14:00:00']);
+        $member = Wrestler::factory()
+            ->bookable()
+            ->create(['name' => 'Bret Hart']);
+        $partner = Wrestler::factory()
+            ->bookable()
+            ->create();
+        $tagTeam = TagTeam::factory()
+            ->bookable()
+            ->withCurrentWrestlers([$member, $partner])
+            ->create();
+        $opponent = Wrestler::factory()
+            ->bookable()
+            ->create();
+        EventMatch::factory()
+            ->for($otherShow)
+            ->withCompetitors([$member, $opponent])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::TagTeam);
+
+        // Act
+        $modal->set('form.competitors.0.tag_teams', [$tagTeam->id]);
+
+        // Assert
+        $modal->assertSeeText('Bret Hart is also booked on Afternoon Spectacular that day.');
+    });
+
+    it('warns about a chosen referee booked elsewhere that day', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $otherShow = Event::factory()
+            ->create(['name' => 'Afternoon Spectacular', 'date' => '2026-10-20 14:00:00']);
+        $referee = Referee::factory()
+            ->bookable()
+            ->create(['first_name' => 'Earl', 'last_name' => 'Hebner']);
+        [$first, $second] = Wrestler::factory()
+            ->bookable()
+            ->count(2)
+            ->create()
+            ->all();
+        EventMatch::factory()
+            ->for($otherShow)
+            ->withCompetitors([$first, $second])
+            ->create()
+            ->referees()
+            ->attach($referee);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.referees', [$referee->id]);
+
+        // Assert
+        $modal->assertSeeText('Earl Hebner is also booked on Afternoon Spectacular that day.');
+    });
+
+    it('does not warn about the match being edited or its own show', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        [$first, $second] = Wrestler::factory()
+            ->bookable()
+            ->count(2)
+            ->create()
+            ->all();
+        $match = EventMatch::factory()
+            ->for($event)
+            ->withCompetitors([$first, $second])
+            ->create(['match_type' => MatchType::Singles]);
+
+        // Act
+        $modal = livewire(FormModal::class, ['eventId' => $event->id, 'modelId' => $match->id]);
+
+        // Assert
+        $modal->assertDontSee('is also booked on');
+    });
+
+    it('still refuses a wrestler booked on another show at the same time', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $sameTime = Event::factory()
+            ->create(['name' => 'Simultaneous Show', 'date' => '2026-10-20 23:00:00']);
+        $wrestler = Wrestler::factory()
+            ->bookable()
+            ->create();
+        [$opponent, $third] = Wrestler::factory()
+            ->bookable()
+            ->count(2)
+            ->create()
+            ->all();
+        $referee = Referee::factory()
+            ->bookable()
+            ->create();
+        EventMatch::factory()
+            ->for($sameTime)
+            ->withCompetitors([$wrestler, $third])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set('form.competitors.0.wrestlers.0', $wrestler->id);
+        $modal->set('form.competitors.1.wrestlers.0', $opponent->id);
+        $modal->set('form.referees', [$referee->id]);
+
+        // Act
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasErrors('form.configuration');
+        expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+    });
+
+    it('reads the warnings with the same number of statements however many people are chosen', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->create(['date' => '2026-10-20 23:00:00']);
+        $otherShow = Event::factory()
+            ->create(['name' => 'Afternoon Spectacular', 'date' => '2026-10-20 14:00:00']);
+        $wrestlers = Wrestler::factory()
+            ->bookable()
+            ->count(7)
+            ->create();
+        $lastWrestler = Wrestler::factory()
+            ->bookable()
+            ->create(['name' => 'Last Booked']);
+        $firstReferee = Referee::factory()
+            ->bookable()
+            ->create();
+        $otherReferees = Referee::factory()
+            ->bookable()
+            ->count(2)
+            ->create();
+        EventMatch::factory()
+            ->for($otherShow)
+            ->withCompetitors([...$wrestlers->all(), $lastWrestler])
+            ->create();
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+        $modal->set('form.matchType', MatchType::BattleRoyal);
+        $modal->set('form.competitors.0.wrestlers', [$lastWrestler->id]);
+
+        // Act
+        $few = recordStatements(fn () => $modal->set('form.referees', [$firstReferee->id]));
+        $modal->set('form.competitors.0.wrestlers', [...$wrestlers->modelKeys(), $lastWrestler->id]);
+        $many = recordStatements(fn () => $modal->set('form.referees', [$firstReferee->id, ...$otherReferees->modelKeys()]));
+
+        // Assert
+        expect($many)->toHaveSameSize($few);
+        $modal->assertSeeText('Last Booked is also booked on Afternoon Spectacular that day.');
+    });
+});

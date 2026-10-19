@@ -54,6 +54,8 @@ return [
             'height_in_inches' => 'height in inches',
             'signature_move' => 'signature move',
             'employment_date' => 'employment date',
+            'managers' => 'managers',
+            'manager' => 'manager',
         ],
         'already_in_tag_team' => 'This wrestler is already a member of another tag team.',
         'cannot_join_tag_team' => 'This wrestler cannot join the tag team.',

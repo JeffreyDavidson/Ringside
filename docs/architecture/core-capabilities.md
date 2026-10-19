@@ -28,6 +28,7 @@ Core capabilities define what each entity type can do within the wrestling promo
 **Rule**: All active entities can be retired
 - **Eligible**: Wrestlers, Managers, Referees, TagTeams, Titles, Stables
 - **Rationale**: Any entity can cease active participation
+- **Unretiring wrestlers, managers and referees** returns them to the state they had before retiring: employed people come back employed, released people come back released (see [Employment Status](employment-status.md)).
 
 ### Tag Team Retirement and Unretirement
 
@@ -93,9 +94,13 @@ Enforcement has three layers:
 
 Lock order follows [Lifecycle Operation Boundaries](lifecycle-operation-boundaries.md): tag team before wrestlers, ascending id within the kind.
 
+**Losing a member vacates the titles**: when a wrestler leaves a tag team's current membership (released, retired, deleted, or removed through the tag team form), the team's current title reigns end on that date and the titles become vacant. A team keeping its members, or gaining one, is unaffected. See [Championship System](championship-system.md).
+
 **Migration pre-flight**: `2026_10_01_162139_enforce_single_current_tag_team_membership_for_wrestlers` first looks for wrestlers with more than one current membership. It never edits data; if any exist it aborts before any schema change, naming each wrestler and the tag teams involved. Operators must end the extra memberships (set `left_at` on the `tag_teams_wrestlers` rows that should no longer be current) and re-run `php artisan migrate`.
 
 Wrestler and Tag Team define their current and historical manager relationships directly so each model visibly owns its persistence mapping. The `Manageable` contract remains the type boundary for application code that operates on either model.
+
+Only employed, available managers can be newly attached. A manager must be employed now and not retired, suspended or injured (`ManagerAssignmentEligibility`); a released, never-employed or future-employed manager is refused. The wrestler and tag team forms both carry a managers field, which offers only such managers of the form's promotion and validates every chosen id with `App\Rules\Managers\IsAssignable`. `AssignManagersAction` enforces the same rule again for the managers it is given, locking them in ascending id order after the wrestler or tag team row, and throws `CannotBeAssignedException`, which the forms show on the managers field. Managers who are already assigned stay when they later become unavailable: the form rule skips them and `SynchronizeManagerAssignmentsAction` only checks the managers it adds, so renaming a wrestler or tag team never drops them. Because assignment needs an employed manager, employing a wrestler or tag team no longer employs new managers; the employment cascade only reaches current managers who are unemployed.
 
 ## User and Roster Separation
 
@@ -212,7 +217,7 @@ only.
 
 A new invitation (`PromotionInvitationOutcome::Invited`, including one that replaces
 an expired invitation) is announced by email: after its transaction commits,
-`InvitePromotionMemberAction` sends `Mail\Promotions\PromotionInvitationMail`
+`InvitePromotionMemberAction` sends `Mail\Promotions\InvitedToPromotion`
 (markdown, with a plain-text alternative) to the stored email, taking the inviting
 user from the caller. `AlreadyInvited` and `AlreadyMember` send nothing. The email
 names the inviter, promotion and role, shows the expiry date in the promotion's
@@ -356,6 +361,12 @@ enforced promotion context, the same promotion the creating hook assigns; an eve
 promotion uses the application time zone. The reschedule validation rule (`DateCanBeChanged`)
 converts the entered value the same way, so it compares real instants.
 
+A past event's date stays editable until results are recorded: `EventSchedulingEligibility::ensureDateCanChange()`
+refuses a date change on a Past event only once one of its non-deleted matches has a result
+(`match_finish` set), with `CannotBeRescheduledException::hasRecordedResults()`. A title that changed hands at one of
+its matches (a reign won or lost there) locks the date of any event, past or future. Until then a past event can move
+to a past or future date. The venue-day, roster-availability and scheduling-slot checks still apply to every change.
+
 Because the stored value is the true instant, comparisons such as the "event not held" gate
 in `RecordResultAction` (`$event->date->isFuture()`) open at the event's local start time.
 Event dates shown on the dashboard, events table and event page use `local_date`, and the
@@ -376,7 +387,7 @@ clocks move forward (for example `2026-03-08T02:30` in America/New_York) is reje
 hour when clocks move back, a typed time reads as the first occurrence, but an edit that
 leaves the date as prefilled keeps the event's stored instant (`PromotionTimeZoneService::parseEventLocalDate()`), so
 renaming an event in the second occurrence neither moves it an hour nor trips the
-"already occurred" check.
+"results are recorded" check.
 
 Roster and title start dates work the same way, but as whole days. The date typed into the
 wrestler, tag team, manager, referee, title and stable forms (employment, debut or start date) means

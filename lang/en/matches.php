@@ -91,6 +91,8 @@ return [
         'referees' => 'Referees',
         'select_match_type_helper' => 'Select a match type to configure competitors',
         'standard_match' => 'Standard match',
+        'same_day_booking' => ':name is also booked on :event that day.',
+        'same_day_bookings_title' => 'Also booked that day',
         'side' => 'Side :number',
         'team' => 'Team :team',
         'wrestlers' => 'Wrestlers',
@@ -150,7 +152,13 @@ return [
         'winning_side' => 'Winning Side',
     ],
 
+    'notices' => [
+        'title_winner_left_before_show' => 'The result was recorded, but the winner had left before the show, so the title did not change hands: :titles.',
+    ],
     'errors' => [
+        'deleted' => [
+            'has_title_change' => 'This match cannot be deleted because its result created or ended a title reign. Correct or clear the result first.',
+        ],
         'configuration' => [
             'incorrect_side_count' => 'This match requires exactly :sides competitor sides.',
             'competitor_count_between' => 'This match requires between :minimum and :maximum competitors.',
@@ -167,6 +175,7 @@ return [
             'outside_event_promotion' => 'Selected :entity_type must all belong to the event\'s promotion.',
             'result_already_recorded' => 'A match cannot be reconfigured after its result has been recorded.',
             'current_champion_missing' => 'The current champion of [:title] must compete in the title match.',
+            'title_requires_one_competitor_per_side' => 'The [:title] needs exactly one competitor of its type on each side.',
             'title_competitor_type_mismatch' => 'The [:title] cannot be contested by this match\'s competitor type.',
         ],
         'outcome' => [

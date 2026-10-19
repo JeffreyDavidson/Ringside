@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Matches\RecordedMatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
+use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Tournaments\TournamentMatchLink;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -25,11 +29,12 @@ class RecordResultAction
         private readonly ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentOutcomeManager $tournaments,
+        private readonly MatchRosterLock $rosterLock,
     ) {}
 
-    public function handle(EventMatch $match, MatchResultData $result): EventMatch
+    public function handle(EventMatch $match, MatchResultData $result): RecordedMatchResultData
     {
-        return DB::transaction(function () use ($match, $result): EventMatch {
+        return DB::transaction(function () use ($match, $result): RecordedMatchResultData {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
             $this->tournaments->ensureResultCanChange($lockedMatch, $result);
             $changed = $lockedMatch->match_finish !== $result->finish || $lockedMatch->winning_side_id !== $result->winningSide?->id;
@@ -50,6 +55,11 @@ class RecordResultAction
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get();
+
+            if ($lockedWinningSide instanceof MatchSide) {
+                $this->lockWinners($lockedCompetitors->where('match_side_id', $lockedWinningSide->id));
+            }
+
             $lockedResult = new MatchResultData(
                 finish: $result->finish,
                 winningSide: $lockedWinningSide,
@@ -59,9 +69,9 @@ class RecordResultAction
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
             if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
-                return $lockedMatch;
+                return new RecordedMatchResultData($lockedMatch, new Collection);
             }
-            $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
+            $titlesLeftUnchanged = $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([
                 'match_finish' => $result->finish,
@@ -86,7 +96,20 @@ class RecordResultAction
 
             $this->tournaments->resultRecorded($lockedMatch);
 
-            return $lockedMatch->refresh();
+            return new RecordedMatchResultData($lockedMatch->refresh(), $titlesLeftUnchanged);
         });
+    }
+
+    /**
+     * Lock the winners' roster rows (tag teams before their members, ascending ids) before any title or reign lock, so a
+     * release or retirement of a winner cannot slip between the eligibility read and the reign write. The winners are
+     * then reloaded so eligibility and back-fill checks read the locked state.
+     *
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $winners
+     */
+    private function lockWinners(MatchCompetitorsCollection $winners): void
+    {
+        $this->rosterLock->lock(collect(), $winners->wrestlers(), $winners->tagTeams());
+        $winners->load('competitor');
     }
 }

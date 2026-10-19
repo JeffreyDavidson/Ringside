@@ -222,11 +222,12 @@ For full usage — backend examples, browser testing, screenshots, responsive ch
 - Treat the architecture documentation in `docs/architecture/` as the source of truth for wrestling business rules and update it when architecture or domain behavior changes.
 - Use plain conventional branch names in the `<type>/<short-description>` format, such as `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, or `chore/`; do not add a `codex/` prefix.
 - Use the Composer scripts defined by this repository for verification. Run `composer test:push` before pushing a completed change unless a narrower check is explicitly requested.
+- The concurrency tests in `tests/Integration/Concurrency/` and their `*-worker.php` scripts are skipped locally and run only in CI's MySQL and PostgreSQL jobs (`RUN_CONCURRENCY_TESTS=1`). They name exception classes and call actions directly, so `composer test:push` cannot catch a mismatch. When a change renames or reshapes an exception, an action signature or a locking or version-check path, grep that folder (tests and workers) and update it, and say in the PR that only CI proves them.
 - Laravel Pint must always run with Blade formatting enabled. Use `composer lint` to fix formatting or `composer test:lint` to check it; never invoke Pint without the `--blade` option.
 
 ## Meta Repo
 
-Plans, the status list, and brand work for Ringside live in the private `ringside-meta` repository, checked out at `~/Projects/ringside-meta`, not in this repository. This replaces the global `tasks/todo.md`, `_plans/status.md`, and `branding/` locations for this project.
+Plans, the status list, and brand work for Ringside live in the private `ringside-meta` repository, checked out at `~/Projects/infinity-digital-llc/ringside/ringside-meta`, not in this repository. This replaces the global `tasks/todo.md`, `_plans/status.md`, and `branding/` locations for this project.
 
 - Write the plan for a piece of work to `cycles/YYYY-MM-DD-short-name/summary.md` there, keep its progress notes current, and finish with the review section in the same file.
 - Keep the status list at `status.md` there.
@@ -246,6 +247,7 @@ This repository holds only what describes the application as it is today.
 - The release profile and checklist are in [docs/workflows/releases.md](docs/workflows/releases.md); follow it for every release.
 - After a release PR merges into `main` and is tagged, fast-forward `develop` to `main` (`git merge --ff-only origin/main`, then push `develop`). Never create a sync merge commit or a merge-back pull request. If the fast-forward isn't possible, stop, change nothing, and explain which commits are on `develop` but not on `main` and how they got there.
 - Before merging, verify the pull request's head branch, base branch, and merge method.
+- Commits are signed (an SSH signing key is configured in git), and `main` requires signed commits on GitHub.
 - Every new commit must follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/): `type: description`, with an optional scope (`type(scope): description`) and optional breaking-change marker (`type(scope)!: description`).
 - Use lowercase types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `feat` for new features and `fix` for bug fixes; `hotfix/` and `release/` are branch prefixes, not commit types, and `feature` is not a commit type (use `feat`).
 - Write a concise, imperative description. Mark breaking changes with `!` before the colon or a `BREAKING CHANGE: description` footer.

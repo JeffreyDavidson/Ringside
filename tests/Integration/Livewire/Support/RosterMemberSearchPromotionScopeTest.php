@@ -25,8 +25,8 @@ describe('scoping the roster search to the form promotion', function (): void {
         $otherPromotion = Promotion::factory()->create();
         Wrestler::factory()->create(['name' => 'Ours Wrestler', 'promotion_id' => $promotion->id]);
         Wrestler::factory()->create(['name' => 'Theirs Wrestler', 'promotion_id' => $otherPromotion->id]);
-        Manager::factory()->create(['first_name' => 'Ours', 'last_name' => 'Manager', 'promotion_id' => $promotion->id]);
-        Manager::factory()->create(['first_name' => 'Theirs', 'last_name' => 'Manager', 'promotion_id' => $otherPromotion->id]);
+        Manager::factory()->employed()->create(['first_name' => 'Ours', 'last_name' => 'Manager', 'promotion_id' => $promotion->id]);
+        Manager::factory()->employed()->create(['first_name' => 'Theirs', 'last_name' => 'Manager', 'promotion_id' => $otherPromotion->id]);
         $tagTeam = TagTeam::factory()->create(['promotion_id' => $promotion->id]);
         $modal = livewire(TagTeamFormModal::class, ['modelId' => $tagTeam->id]);
 

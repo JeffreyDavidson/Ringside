@@ -45,6 +45,20 @@ describe('searching the roster from the match form', function (): void {
         'referees' => ['referees', 'HEBNER', 'Earl Hebner'],
     ]);
 
+    it('offers only wrestlers employed on the date of a back-dated event', function (): void {
+        // Arrange
+        $event = Event::factory()->create(['date' => now()->subDays(10)]);
+        Wrestler::factory()->bookable()->create(['name' => 'Hired Early'])->employments()->update(['started_at' => now()->subDays(30)]);
+        Wrestler::factory()->bookable()->create(['name' => 'Hired Late']);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $options = $modal->instance()->searchRoster('wrestlers', '');
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Hired Early']);
+    });
+
     it('returns nothing for an unknown kind', function (): void {
         // Arrange
         $event = Event::factory()->create();

@@ -7,6 +7,8 @@ require_once __DIR__.'/../../../Fixtures/live-show.php';
 use App\Actions\Events\SaveEventPackAction;
 use App\Data\Events\EventPackData;
 use App\Enums\Promotions\MembershipRole;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\Events\EventPackViewModel;
 use App\ViewModels\Events\EventProductionViewModel;
@@ -71,4 +73,19 @@ test('the sheet leaves the permission check to its caller', function (): void {
     // Assert
     expect($sheet['source'])->toBe('plan')
         ->and($sheet['allAssignments'])->toHaveCount(1);
+});
+
+test('the plan sheet still names the venue after the venue was deleted', function (): void {
+    // Arrange
+    $venue = Venue::factory()
+        ->create(['name' => 'Old Arena']);
+    $fixture = liveShowFixture(venueId: $venue->id);
+    $venue->delete();
+    $viewModel = resolve(EventProductionViewModel::class);
+
+    // Act
+    $sheet = $viewModel->data(Event::query()->findOrFail($fixture['event']->id), 'plan');
+
+    // Assert
+    expect($sheet['venue'])->toBe('Old Arena');
 });

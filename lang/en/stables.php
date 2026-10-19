@@ -102,13 +102,13 @@ return [
         'unretired' => [
             'deleted' => ':context cannot be unretired because it is deleted. Restore the stable first.',
             'not_retired' => ':context is not retired and cannot be unretired.',
-            'no_available_former_members' => ':context cannot be unretired: no former members are currently available.',
             'insufficient_former_members' => ':context cannot be unretired: only :available_count former members available, but :minimum_required required.',
-            'key_members_unavailable' => ':context cannot be unretired: key former members unavailable: :unavailable_members.',
         ],
         'updated' => [
             'start_date_locked' => ':context has been active in more than one period, so its start date cannot be changed.',
             'ends_open_period' => ':context is active, so it cannot be given an end date here. Disband it instead.',
+            'starts_after_membership' => ':context cannot start after a member joined. Change the member dates first, or choose an earlier start date.',
+            'ends_before_membership' => ':context cannot end before a member left. Change the member dates first, or choose a later end date.',
             'inactive_with_members' => ':context is disbanded and cannot have members. Reunite it instead.',
             'name_taken' => 'Cannot rename stable: an active stable named \':name\' already exists in this promotion.',
         ],

@@ -6,6 +6,7 @@ namespace App\Lifecycle\Venues;
 
 use App\Exceptions\Venues\CannotBeDeletedException;
 use App\Exceptions\Venues\CannotBeRestoredException;
+use App\Exceptions\Venues\CannotBeUpdatedException;
 use App\Models\Events\Venue;
 use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Carbon;
@@ -45,14 +46,31 @@ final class VenueDeletionEligibility
             throw CannotBeRestoredException::nameConflict($venue, $conflictingVenue->name);
         }
 
-        $this->ensureNoSharedDay($venue);
+        $sharedDay = $this->sharedDay($venue, $venue->timezone);
+
+        if ($sharedDay !== null) {
+            throw CannotBeRestoredException::venueDoubleBooked($venue, $sharedDay);
+        }
+    }
+
+    /**
+     * Changing the time zone moves the venue-local calendar days, so two live events on different days in the old zone
+     * can land on one day in the new zone. Refuse the change before it double-books the venue.
+     */
+    public function ensureTimezoneKeepsEventsApart(Venue $venue, string $timezone): void
+    {
+        $sharedDay = $this->sharedDay($venue, $timezone);
+
+        if ($sharedDay !== null) {
+            throw CannotBeUpdatedException::timezoneDoubleBooks($venue, $timezone, $sharedDay);
+        }
     }
 
     /**
      * A venue hosts one event per calendar day (in its time zone). Events restored or created by another route can
-     * leave two live events on one day, and restoring the venue would make that visible and bookable again.
+     * leave two live events on one day. Returns the first such day in the given zone, or null when there is none.
      */
-    private function ensureNoSharedDay(Venue $venue): void
+    private function sharedDay(Venue $venue, string $timezone): ?string
     {
         $seenDays = [];
 
@@ -63,13 +81,15 @@ final class VenueDeletionEligibility
             ->pluck('date');
 
         foreach ($dates as $date) {
-            $day = $date->copy()->setTimezone($venue->timezone)->format('M j, Y');
+            $day = $date->copy()->setTimezone($timezone)->format('M j, Y');
 
             if (isset($seenDays[$day])) {
-                throw CannotBeRestoredException::venueDoubleBooked($venue, $day);
+                return $day;
             }
 
             $seenDays[$day] = true;
         }
+
+        return null;
     }
 }

@@ -8,7 +8,7 @@ use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 final class StableFormerMemberEligibility
@@ -42,28 +42,36 @@ final class StableFormerMemberEligibility
         return new StableMembershipData($wrestlers, $tagTeams);
     }
 
-    /** @return Collection<int, Wrestler|TagTeam> */
-    public function unavailableKeyMembersFor(Stable $stable): Collection
+    /**
+     * Members available to return when a retired stable is unretired: only those whose membership ended when the
+     * stable retired count (earlier leavers never come back), and each must be employed, not injured, suspended or
+     * retired, and not a current member of another stable. Unavailable ones are skipped.
+     */
+    public function availableMembersAtRetirementFor(Stable $stable): StableMembershipData
     {
+        $retirement = $stable->currentRetirement()->firstOrFail();
+
+        // A retirement dated in the future ends the stable's operations (and memberships) when it is recorded.
+        $membersLeftAt = $retirement->created_at instanceof Carbon && $retirement->started_at->greaterThan($retirement->created_at)
+            ? $stable->activityPeriods()->whereNotNull('ended_at')->latest('ended_at')->firstOrFail()->ended_at
+            : $retirement->started_at;
+
         $wrestlers = $stable->previousWrestlers()
-            ->where(function (Builder $wrestlerQuery) use ($stable): void {
-                $wrestlerQuery
-                    ->whereHas('currentRetirement')
-                    ->orWhereHas('currentInjury')
-                    ->orWhereHas('currentSuspension')
-                    ->orWhereHas('currentStable', fn (Builder $stableQuery): Builder => $stableQuery->whereKeyNot($stable->getKey()));
-            })
-            ->get();
+            ->wherePivot('left_at', $membersLeftAt)
+            ->joinableToStable()
+            ->inLockOrder()
+            ->get()
+            ->unique('id')
+            ->values();
 
         $tagTeams = $stable->previousTagTeams()
-            ->where(function (Builder $tagTeamQuery) use ($stable): void {
-                $tagTeamQuery
-                    ->whereHas('currentRetirement')
-                    ->orWhereHas('currentSuspension')
-                    ->orWhereHas('currentStable', fn (Builder $stableQuery): Builder => $stableQuery->whereKeyNot($stable->getKey()));
-            })
-            ->get();
+            ->wherePivot('left_at', $membersLeftAt)
+            ->joinableToStable()
+            ->inLockOrder()
+            ->get()
+            ->unique('id')
+            ->values();
 
-        return $wrestlers->concat($tagTeams);
+        return new StableMembershipData($wrestlers, $tagTeams);
     }
 }

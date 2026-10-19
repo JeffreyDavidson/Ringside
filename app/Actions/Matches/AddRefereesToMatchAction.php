@@ -87,6 +87,7 @@ class AddRefereesToMatchAction
         }
 
         $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
+        $event = $lockedMatch->event()->firstOrFail();
         $lockedReferees = Referee::query()
             ->whereKey($requestedReferees->pluck('id'))
             ->orderBy('id')
@@ -94,14 +95,13 @@ class AddRefereesToMatchAction
             ->get();
 
         if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
-            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee)
+            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee, $event->date)
         )) {
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
         $this->assignmentEligibility->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
 
-        $event = $lockedMatch->event()->firstOrFail();
         foreach ($lockedReferees as $person) {
             if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
                 $this->dateAvailability->ensureForEvent($person, $event);

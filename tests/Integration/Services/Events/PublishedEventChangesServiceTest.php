@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Matches\MatchFinish;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
@@ -43,6 +44,22 @@ describe('published event changes service', function (): void {
 
         // Act
         $changes = resolve(PublishedEventChangesService::class)->get($publication);
+
+        // Assert
+        expect($changes)->toBe(['scheduleChanged' => false, 'cardChanged' => false, 'resultsChanged' => false]);
+    });
+
+    it('reports no change when the venue of the released publication is deleted afterwards', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $venue = Venue::factory()
+            ->create(['name' => 'Harbor Arena']);
+        $fixture['event']->update(['venue_id' => $venue->id]);
+        $publication = releasedPublication($fixture);
+        $venue->delete();
+
+        // Act
+        $changes = resolve(PublishedEventChangesService::class)->get($publication->refresh());
 
         // Assert
         expect($changes)->toBe(['scheduleChanged' => false, 'cardChanged' => false, 'resultsChanged' => false]);
