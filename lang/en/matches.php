@@ -151,6 +151,9 @@ return [
     ],
 
     'errors' => [
+        'deleted' => [
+            'has_title_change' => 'This match cannot be deleted because its result created or ended a title reign. Correct or clear the result first.',
+        ],
         'configuration' => [
             'incorrect_side_count' => 'This match requires exactly :sides competitor sides.',
             'competitor_count_between' => 'This match requires between :minimum and :maximum competitors.',

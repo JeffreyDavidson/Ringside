@@ -59,6 +59,8 @@ A reign never ends before it began, and the database enforces it for every row i
 
 An event whose matches have created or closed a non-deleted reign cannot be moved or unscheduled (`CannotBeRescheduledException::hasTitleReigns()`, enforced in `EventSchedulingEligibility::ensureDateCanChange()` for both the Livewire rule and `Events\UpdateAction`), because reigns store the event date.
 
+Deleting is refused the same way, until the result is corrected or cleared: `Matches\DeleteAction` calls `MatchDeletionEligibility::ensureCanBeDeleted()` and `Events\DeleteAction` calls `EventDeletionEligibility::ensureCanBeDeleted()` (which reuses `EventSchedulingEligibility::hasTitleReigns()`), both inside the Action's transaction after its locks. Each throws its `CannotBeDeletedException::hasTitleChange()`, shown as the table's error toast; nothing is written. Both read through `TitleChampionshipBuilder::wonOrLostAtMatches()`, so a deleted reign no longer blocks.
+
 ### Title type
 
 A title's type (singles or tag team) is locked once it has any championship reign or is booked in a non-deleted match (`TitleTypeEligibility`, enforced by `Titles\UpdateAction` with `CannotChangeTypeException`). The title form modal renders the type select disabled with an explanatory note in that case.
