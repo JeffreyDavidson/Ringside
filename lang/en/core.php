@@ -64,6 +64,7 @@ return [
         'restore' => 'Restore :name?',
         'retire' => 'Retire :name?',
         'retire_booked' => 'Retire :name? Booked in upcoming or unresulted events: :events.',
+        'retire_stable' => 'Retire :name? Its members leave the stable but stay on the roster.',
         'suspend' => 'Suspend :name?',
     ],
     'form' => [

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Events\Event;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -132,4 +133,108 @@ it('finds the champion on a later side after skipping malformed sides', function
     $passes = $validator->passes();
 
     expect($passes)->toBeTrue();
+});
+
+test('it requires the champion on the show date to compete, not the current champion', function () {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    $championThen = Wrestler::factory()->create();
+    $championNow = Wrestler::factory()->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championThen)
+        ->wonOn('2026-02-01 00:00:00')
+        ->lostOn('2026-05-01 00:00:00')
+        ->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championNow)
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+    $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+
+    // Act
+    $currentChampionOnly = Validator::make([
+        'competitors' => [['wrestlers' => [$championNow->id]]],
+        'titles' => [$title->id],
+    ], ['titles.*' => [new CurrentChampionIsCompeting($event)]]);
+    $championOnShowDate = Validator::make([
+        'competitors' => [['wrestlers' => [$championThen->id]]],
+        'titles' => [$title->id],
+    ], ['titles.*' => [new CurrentChampionIsCompeting($event)]]);
+
+    // Assert
+    expect($currentChampionOnly->errors()->get('titles.0'))->toBe([__('titles.validation.champion_must_compete')])
+        ->and($championOnShowDate->passes())->toBeTrue();
+});
+
+test('it ignores a reign that had already ended before the show date', function () {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    $formerChampion = Wrestler::factory()->create();
+    $championOnShowDate = Wrestler::factory()->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($formerChampion)
+        ->wonOn('2026-02-01 00:00:00')
+        ->lostOn('2026-05-01 00:00:00')
+        ->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championOnShowDate)
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+    $event = Event::factory()->create(['date' => '2026-06-01 19:00:00']);
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [$championOnShowDate->id]]],
+        'titles' => [$title->id],
+    ], ['titles.*' => [new CurrentChampionIsCompeting($event)]]);
+
+    // Assert
+    expect($validator->passes())->toBeTrue();
+});
+
+test('it asks for no champion when the title had none on the show date', function () {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->create())
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+    $event = Event::factory()->create(['date' => '2026-03-10 19:00:00']);
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [Wrestler::factory()->create()->id]]],
+        'titles' => [$title->id],
+    ], ['titles.*' => [new CurrentChampionIsCompeting($event)]]);
+
+    // Assert
+    expect($validator->passes())->toBeTrue();
+});
+
+test('it keeps the current champion for an unscheduled event', function () {
+    // Arrange
+    $title = Title::factory()->active()->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->create())
+        ->current()
+        ->create();
+    $event = Event::factory()->unscheduled()->create();
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [Wrestler::factory()->create()->id]]],
+        'titles' => [$title->id],
+    ], ['titles.*' => [new CurrentChampionIsCompeting($event)]]);
+
+    // Assert
+    expect($validator->errors()->has('titles.0'))->toBeTrue();
 });
