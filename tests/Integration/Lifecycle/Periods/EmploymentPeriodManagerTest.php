@@ -99,13 +99,19 @@ test('it moves a scheduled employment and its employed transition to the new dat
 
     // Assert
     $employment = $wrestler->employments()->sole();
-    $transition = $wrestler->lifecycleTransitions()->sole();
+    $transitions = $wrestler->lifecycleTransitions()->get();
     expect($employment->started_at->toDateTimeString())->toBe($newDate->toDateTimeString())
         ->and($employment->ended_at)->toBeNull()
-        ->and($transition->effective_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+        ->and($transitions)->toHaveCount(2)
+        ->and($transitions->pluck('transition')->all())->toBe([LifecycleTransitionType::Employed, LifecycleTransitionType::Employed])
+        ->and($transitions->pluck('effective_at')->map->toDateTimeString()->sort()->values()->all())->toBe([
+            $newDate->toDateTimeString(),
+            now()->addDays(10)->toDateTimeString(),
+        ])
+        ->and($transitions->first(fn ($transition): bool => $transition->effective_at->toDateTimeString() === $newDate->toDateTimeString())?->context)->toBe(['rescheduled_from' => now()->addDays(10)->toIso8601String()]);
 });
 
-test('it cancels a scheduled employment and removes its employed transition', function () {
+test('it cancels a scheduled employment and records the cancellation', function () {
     // Arrange
     $wrestler = Wrestler::factory()->unemployed()->create();
     $manager = resolve(EmploymentPeriodManager::class);
@@ -115,8 +121,11 @@ test('it cancels a scheduled employment and removes its employed transition', fu
     $manager->cancel($wrestler);
 
     // Assert
+    $transitions = $wrestler->lifecycleTransitions()->get();
     expect($wrestler->employments()->exists())->toBeFalse()
-        ->and($wrestler->lifecycleTransitions()->exists())->toBeFalse();
+        ->and($transitions->pluck('transition')->all())->toContain(LifecycleTransitionType::Employed, LifecycleTransitionType::EmploymentCancelled)
+        ->and($transitions)->toHaveCount(2)
+        ->and($transitions->firstWhere('transition', LifecycleTransitionType::EmploymentCancelled)?->context)->toBe(['scheduled_for' => now()->addDays(10)->toIso8601String()]);
 });
 
 test('it refuses to move or cancel an employment that has started', function (string $method) {

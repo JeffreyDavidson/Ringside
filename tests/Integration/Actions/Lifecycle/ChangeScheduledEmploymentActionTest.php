@@ -48,7 +48,7 @@ test('it moves a scheduled employment to another future date', function (string 
     // Assert
     expect($handled)->toBeTrue()
         ->and($record->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString())
-        ->and($record->lifecycleTransitions()->sole()->effective_at->toDateTimeString())->toBe($newDate->toDateTimeString())
+        ->and($record->lifecycleTransitions()->count())->toBe(2)
         ->and($record->refresh()->hasFutureEmployment())->toBeTrue();
 })->with($types);
 
@@ -74,7 +74,7 @@ test('it cancels the scheduled employment when the date is cleared', function (s
     // Assert
     expect($handled)->toBeTrue()
         ->and($record->employments()->exists())->toBeFalse()
-        ->and($record->lifecycleTransitions()->exists())->toBeFalse()
+        ->and($record->lifecycleTransitions()->where('transition', LifecycleTransitionType::EmploymentCancelled)->exists())->toBeTrue()
         ->and($record->refresh()->hasEmploymentHistory())->toBeFalse();
 })->with($types);
 

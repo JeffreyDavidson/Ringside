@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Periods;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
-use App\Models\Lifecycle\LifecycleTransition;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +16,10 @@ use LogicException;
 
 final readonly class EmploymentPeriodManager
 {
-    public function __construct(private LifecyclePeriodWriter $periodWriter) {}
+    public function __construct(
+        private LifecyclePeriodWriter $periodWriter,
+        private RecordLifecycleTransitionAction $recordTransition,
+    ) {}
 
     /**
      * @param  Model&Employable<*>  $employable
@@ -56,8 +58,8 @@ final readonly class EmploymentPeriodManager
     }
 
     /**
-     * Move the not-yet-started employment to a new start date, with its employed transition, the way a title's
-     * scheduled debut moves.
+     * Move the not-yet-started employment to a new start date and record a new employed transition at it, the way a
+     * title's scheduled debut moves. The earlier transition stays.
      *
      * @param  Model&Employable<*>  $employable
      *
@@ -70,13 +72,21 @@ final readonly class EmploymentPeriodManager
             $scheduledFor = $employment->started_at;
 
             $employment->update(['started_at' => $date]);
-            $this->scheduledTransition($employable, $scheduledFor)->update(['effective_at' => $date]);
+
+            // Transitions are an immutable trail, so the move is recorded as a new one, as a title's reschedule is.
+            $this->recordTransition->handle(
+                $employable,
+                LifecycleDimension::Employment,
+                LifecycleTransitionType::Employed,
+                $date,
+                ['rescheduled_from' => $scheduledFor->toIso8601String()],
+            );
         });
     }
 
     /**
-     * Cancel the not-yet-started employment: the period and its employed transition are removed, leaving the
-     * record as if it had never been hired.
+     * Cancel the not-yet-started employment: the period is deleted and an employment-cancelled transition is
+     * recorded. The earlier employed transition stays.
      *
      * @param  Model&Employable<*>  $employable
      *
@@ -87,8 +97,16 @@ final readonly class EmploymentPeriodManager
         DB::transaction(function () use ($employable): void {
             $employment = $this->lockScheduled($employable);
 
-            $this->scheduledTransition($employable, $employment->started_at)->delete();
+            $scheduledFor = $employment->started_at;
+
             $employment->delete();
+            $this->recordTransition->handle(
+                $employable,
+                LifecycleDimension::Employment,
+                LifecycleTransitionType::EmploymentCancelled,
+                now(),
+                ['scheduled_for' => $scheduledFor->toIso8601String()],
+            );
         });
     }
 
@@ -104,19 +122,5 @@ final readonly class EmploymentPeriodManager
         }
 
         return Employment::query()->whereKey($employment->getKey())->lockForUpdate()->firstOrFail();
-    }
-
-    /**
-     * @param  Model&Employable<*>  $employable
-     * @return Builder<LifecycleTransition>
-     */
-    private function scheduledTransition(Model&Employable $employable, Carbon $scheduledFor): Builder
-    {
-        return LifecycleTransition::query()
-            ->where('subject_type', $employable->getMorphClass())
-            ->where('subject_id', $employable->getKey())
-            ->where('dimension', LifecycleDimension::Employment)
-            ->where('transition', LifecycleTransitionType::Employed)
-            ->where('effective_at', $scheduledFor);
     }
 }
