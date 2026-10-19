@@ -53,6 +53,10 @@ The date-order check also rejects a result that would create a reign when the ev
 
 A back-filled win is recorded even when its winner has since been released or retired, but the new reign does not stay open: `ChampionshipReignManager::reconcileMatchOutcome()` ends it the way a release while champion would have (`lost_at` set, `lost_match_id` null, clamped by the same `reignEnd()` rule so it never ends before it began). The end date is the earliest employment end or retirement start of the winner (the tag team itself for a tag team title) that falls on or after the event's local day in the promotion's time zone, even if the winner was re-employed or unretired afterwards. The win stays in the title history and the title is vacant from that date, so a later title match sees no champion to check. A winner who has not left keeps an open reign. Live recordings are unaffected, since the winner must be bookable today. Re-recording the same result is a no-op (the reign already belongs to the winner) and never reopens the reign.
 
+### Title lifecycle and reigns
+
+Pulling, retiring, or deleting a title vacates it: each Action locks the title, then ends its current reign through `ChampionshipReignManager::endCurrentReign()` on the effective date inside the same transaction. Reinstating a pulled title and restoring a deleted one never reopen a reign, so the title comes back vacant and the next title-changing result crowns a new champion.
+
 ### Reign dates
 
 A reign never ends before it began, and the database enforces it for every row including soft-deleted reigns (`titles_championships_dates_ordered` CHECK, SQLite triggers; see `lifecycle-operation-boundaries.md`): `endCurrentReign()` and `endCurrentReignsForChampion()` clamp `lost_at` to `max(effective date, won_at)`. Reign length reporting (`TitleReignService::lengthInDays()`) is clamped at zero days. Tag-team retirement ends the team's current reigns in the same locked transaction, like release and deletion do; wrestler retirement already did so.
