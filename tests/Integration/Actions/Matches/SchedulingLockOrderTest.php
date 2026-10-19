@@ -113,7 +113,7 @@ dataset('scheduling lock scenarios', [
         return [$event, function () use ($match, $result): EventMatch {
             travel(2)->weeks();
 
-            return resolve(RecordResultAction::class)->handle($match, $result);
+            return resolve(RecordResultAction::class)->handle($match, $result)->match;
         }];
     }],
 ]);

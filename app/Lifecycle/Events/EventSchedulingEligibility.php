@@ -19,8 +19,8 @@ final class EventSchedulingEligibility
             return;
         }
 
-        if ($event->status === EventStatus::Past) {
-            throw CannotBeRescheduledException::alreadyOccurred($event);
+        if ($event->status === EventStatus::Past && $event->matches()->whereNotNull('match_finish')->exists()) {
+            throw CannotBeRescheduledException::hasRecordedResults($event);
         }
 
         if (self::hasTitleReigns($event)) {

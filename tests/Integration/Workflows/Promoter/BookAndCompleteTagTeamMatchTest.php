@@ -38,7 +38,7 @@ test('a promoter can book and complete a tag team match', function (): void {
     $completedMatch = resolve(RecordResultAction::class)->handle(
         $match,
         new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
-    );
+    )->match;
 
     // Assert
     expect($completedMatch->refresh()->match_type)->toBe(MatchType::TagTeam)

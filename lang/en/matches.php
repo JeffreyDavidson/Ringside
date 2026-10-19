@@ -150,6 +150,9 @@ return [
         'winning_side' => 'Winning Side',
     ],
 
+    'notices' => [
+        'title_winner_left_before_show' => 'The result was recorded, but the winner had left before the show, so the title did not change hands: :titles.',
+    ],
     'errors' => [
         'deleted' => [
             'has_title_change' => 'This match cannot be deleted because its result created or ended a title reign. Correct or clear the result first.',

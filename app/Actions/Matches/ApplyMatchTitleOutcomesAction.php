@@ -26,13 +26,16 @@ class ApplyMatchTitleOutcomesAction
         private readonly RosterBookingEligibility $bookingEligibility,
     ) {}
 
-    /** @param MatchCompetitorsCollection<int, MatchCompetitor> $competitors */
-    public function handle(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): void
+    /**
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors
+     * @return Collection<int, Title> The titles left unchanged because the winner had left before the show started.
+     */
+    public function handle(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): Collection
     {
         $titleIds = $match->titles()->withTrashed()->pluck((new Title)->qualifyColumn('id'));
 
         if ($titleIds->isEmpty()) {
-            return;
+            return new Collection;
         }
 
         $titles = Title::query()
@@ -51,6 +54,7 @@ class ApplyMatchTitleOutcomesAction
 
         /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
         $desiredChampions = [];
+        $unchangedTitles = new Collection;
 
         $this->ensureDeletedTitlesKeepTheirChampion($match, $result, $titles, $winningCompetitors, $reigns);
 
@@ -60,6 +64,12 @@ class ApplyMatchTitleOutcomesAction
             $desiredChampion = $result->finish->allowsTitleChange()
                 ? $this->championForTitle($title, $winningCompetitors)
                 : null;
+
+            if ($desiredChampion !== null && $this->championshipReigns->winnerLeftBeforeShow($match, $title, $desiredChampion, $reigns)) {
+                $unchangedTitles->push($title);
+                $desiredChampion = null;
+            }
+
             $desiredChampions[$title->id] = $desiredChampion;
 
             if ($desiredChampion !== null && $this->championshipReigns->changesChampion($match, $title, $desiredChampion, $reigns)) {
@@ -78,6 +88,8 @@ class ApplyMatchTitleOutcomesAction
                 $reigns,
             );
         }
+
+        return $unchangedTitles;
     }
 
     /**

@@ -27,8 +27,7 @@ class UnretireAction
      * This handles the complete referee unretirement workflow:
      * - Validates the referee can be unretired (currently retired)
      * - Ends the current retirement period through RetirementPeriodManager
-     * - Starts a new employment period from the unretirement date
-     * - Restores the referee to available status for match assignments
+     * - Starts a new employment period from the unretirement date only if the referee was employed when they retired; a released referee comes back released
      * - Preserves all historical retirement and employment records
      *
      * @param  Referee  $referee  The referee to unretire
@@ -44,8 +43,12 @@ class UnretireAction
             $lockedReferee = $referee->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedReferee);
+            $wasEmployed = $this->retirementPeriods->wasEmployedWhenRetired($lockedReferee);
             $this->retirementPeriods->end($lockedReferee, $effectiveDate, LifecycleTransitionType::Unretired);
-            $this->employmentPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Employed);
+
+            if ($wasEmployed) {
+                $this->employmentPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Employed);
+            }
         });
     }
 }

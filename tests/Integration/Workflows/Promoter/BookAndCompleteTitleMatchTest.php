@@ -42,7 +42,7 @@ test('a promoter can book and complete a title match', function (): void {
     $completedMatch = resolve(RecordResultAction::class)->handle(
         $match,
         new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
-    );
+    )->match;
 
     // Assert
     expect($completedMatch->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
