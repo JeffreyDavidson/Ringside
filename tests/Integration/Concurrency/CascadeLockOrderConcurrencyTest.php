@@ -198,6 +198,53 @@ test('retiring a champion of two titles while a multi-title result is recorded n
     ->skip(fn (): bool => ! runsOnDriver('pgsql'), POSTGRES_PLANNER_ORDER)
     ->group('concurrency', 'postgres-concurrency');
 
+test('releasing the winner of a title match while the result is recorded never leaves an open reign', function () {
+    withCommittedData(function (): void {
+        foreach (range(1, 3) as $run) {
+            // Arrange
+            $champion = Wrestler::factory()->bookable()->create();
+            $challenger = Wrestler::factory()->bookable()->create();
+            $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+            $reign = TitleChampionship::factory()
+                ->for($title)
+                ->forWrestler($champion)
+                ->current()
+                ->create(['won_at' => now()->subMonths(2)]);
+
+            $match = EventMatch::factory()
+                ->forEvent(Event::factory()->create(['date' => now()->subWeeks($run)]))
+                ->create(['match_type' => MatchType::Singles]);
+            $championSide = MatchSide::factory()->create(['match_id' => $match->id, 'position' => 1]);
+            $challengerSide = MatchSide::factory()->create(['match_id' => $match->id, 'position' => 2]);
+            $match->competitors()->create(['competitor_id' => $champion->id, 'competitor_type' => 'wrestler', 'match_side_id' => $championSide->id]);
+            $match->competitors()->create(['competitor_id' => $challenger->id, 'competitor_type' => 'wrestler', 'match_side_id' => $challengerSide->id]);
+            $match->referees()->attach(Referee::factory()->bookable()->create());
+            $match->titles()->attach($title);
+
+            $deadlocksBefore = resolvedDeadlocks();
+
+            // Act: the gate holds the winner's row, so the result and the release both queue on it, the result first.
+            $results = runBehindGate(
+                'select id from wrestlers where id = ? for update',
+                [$challenger->id],
+                [
+                    ['action' => 'record_result', 'id' => $match->id, 'winning_position' => 2],
+                    ['action' => 'release_wrestler', 'id' => $challenger->id],
+                ],
+            );
+
+            // Assert
+            expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
+                ->and(collect($results)->pluck('deadlock')->contains(true))->toBeFalse()
+                ->and(collect($results)->where('ok', true))->toHaveCount(2)
+                ->and(TitleChampionship::query()->forChampion($challenger)->count())->toBe(1)
+                ->and(TitleChampionship::query()->forChampion($challenger)->current()->exists())->toBeFalse()
+                ->and($reign->refresh()->lost_match_id)->toBe($match->id);
+        }
+    });
+})->skip(fn (): bool => ! concurrencyTestsEnabled(), CONCURRENCY_TESTS_SKIPPED)
+    ->group('concurrency', 'postgres-concurrency');
+
 /*
  * Membership writers race for the same wrestler. The gate holds the wrestler's row lock, so both writers queue behind it
  * (on the old code, which takes no wrestler lock, they never block and the helper simply stops waiting). Whoever is

@@ -16,6 +16,7 @@ use App\Actions\Matches\RecordResultAction;
 use App\Actions\TagTeams\CreateAction as CreateTagTeamAction;
 use App\Actions\TagTeams\RetireAction as RetireTagTeamAction;
 use App\Actions\TagTeams\UpdateAction as UpdateTagTeamAction;
+use App\Actions\Wrestlers\ReleaseAction as ReleaseWrestlerAction;
 use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
 use App\Data\Matches\MatchResultData;
 use App\Data\TagTeams\TagTeamData;
@@ -74,6 +75,7 @@ try {
         'create_tag_team' => resolve(CreateTagTeamAction::class)->handle($tagTeamData()),
         'update_tag_team' => resolve(UpdateTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id']), $tagTeamData()),
         'retire_tag_team' => resolve(RetireTagTeamAction::class)->handle(TagTeam::query()->findOrFail($spec['id'])),
+        'release_wrestler' => resolve(ReleaseWrestlerAction::class)->handle(Wrestler::query()->findOrFail($spec['id'])),
         'retire_wrestler' => resolve(RetireWrestlerAction::class)->handle(Wrestler::query()->findOrFail($spec['id'])),
         'record_result' => resolve(RecordResultAction::class)->handle(
             EventMatch::query()->findOrFail($spec['id']),
