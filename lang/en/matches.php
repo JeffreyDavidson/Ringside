@@ -167,6 +167,7 @@ return [
             'outside_event_promotion' => 'Selected :entity_type must all belong to the event\'s promotion.',
             'result_already_recorded' => 'A match cannot be reconfigured after its result has been recorded.',
             'current_champion_missing' => 'The current champion of [:title] must compete in the title match.',
+            'title_requires_one_competitor_per_side' => 'The [:title] needs exactly one competitor of its type on each side.',
             'title_competitor_type_mismatch' => 'The [:title] cannot be contested by this match\'s competitor type.',
         ],
         'outcome' => [

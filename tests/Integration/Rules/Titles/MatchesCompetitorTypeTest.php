@@ -150,3 +150,40 @@ it('accepts the expected competitors on a later side after skipping malformed si
 
     expect($passes)->toBeTrue();
 });
+
+it('rejects a title when any side holds more than one competitor of its type', function (TitleType $type, array $competitors) {
+    // Arrange
+    $title = Title::factory()->create(['type' => $type]);
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => $competitors,
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    // Assert
+    expect($validator->errors()->first('titles.0'))
+        ->toBe("The {$title->name} needs exactly one competitor of its type on each side.");
+})->with([
+    'handicap with a singles title' => [TitleType::Singles, [['wrestlers' => [1, 2]], ['wrestlers' => [3]]]],
+    'six-man tag with a singles title' => [TitleType::Singles, [['wrestlers' => [1, 2, 3]], ['wrestlers' => [4, 5, 6]]]],
+    'eight-man tag with a tag title' => [TitleType::TagTeam, [['tag_teams' => [1, 2]], ['tag_teams' => [3, 4]]]],
+]);
+
+it('ignores empty sides when checking one competitor per side', function () {
+    // Arrange
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+
+    // Act
+    $validator = Validator::make([
+        'competitors' => [['wrestlers' => [1]], ['wrestlers' => []], ['wrestlers' => [2]]],
+        'titles' => [$title->id],
+    ], [
+        'titles.*' => [new MatchesCompetitorType],
+    ]);
+
+    // Assert
+    expect($validator->passes())->toBeTrue();
+});
