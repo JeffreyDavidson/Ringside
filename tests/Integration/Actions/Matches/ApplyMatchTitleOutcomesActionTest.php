@@ -568,26 +568,12 @@ test('it records a back-filled result without a title change when the winner was
         ->and($unchangedTitles->pluck('id')->all())->toBe([$title->id]);
 });
 
-test('it records a back-filled result without a title change when the winner left before the show', function (TitleType $type, bool $retired, string $leftAt): void {
+test('it records a back-filled result without a title change when the winner left before the show', function (TitleType $type, Closure $makeWinner, Closure $makeLoser): void {
     // Arrange
     travelTo(Carbon::parse('2026-10-11 12:00:00'));
     $title = Title::factory()->active()->create(['type' => $type]);
-    $employment = Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse($leftAt));
-    $retirement = Retirement::factory()->started(Carbon::parse($leftAt));
-
-    if ($type === TitleType::TagTeam) {
-        $winner = $retired
-            ? TagTeam::factory()->has($employment, 'employments')->has($retirement, 'retirements')->create()
-            : TagTeam::factory()->has($employment, 'employments')->create();
-        $loser = TagTeam::factory()->bookable()->create();
-    } else {
-        $winner = $retired
-            ? Wrestler::factory()->has($employment, 'employments')->has($retirement, 'retirements')->create()
-            : Wrestler::factory()->has($employment, 'employments')->create();
-        $loser = Wrestler::factory()->bookable()->create();
-    }
-
-    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06 18:00:00', $winner, $loser);
+    $winner = $makeWinner();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06 18:00:00', $winner, $makeLoser());
 
     // Act
     $unchangedTitles = recordTitleMatchResult($match, $winningSide);
@@ -596,11 +582,31 @@ test('it records a back-filled result without a title change when the winner lef
     expect(TitleChampionship::withTrashed()->where('title_id', $title->id)->exists())->toBeFalse()
         ->and($unchangedTitles->pluck('id')->all())->toBe([$title->id]);
 })->with([
-    'singles released earlier that day' => [TitleType::Singles, false, '2026-10-06 09:00:00'],
-    'singles retired earlier that day' => [TitleType::Singles, true, '2026-10-06 09:00:00'],
-    'singles released at the start of the show' => [TitleType::Singles, false, '2026-10-06 18:00:00'],
-    'tag team released earlier that day' => [TitleType::TagTeam, false, '2026-10-06 09:00:00'],
-    'tag team retired earlier that day' => [TitleType::TagTeam, true, '2026-10-06 09:00:00'],
+    'singles released earlier that day' => [
+        TitleType::Singles,
+        fn () => Wrestler::factory()->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 09:00:00')), 'employments')->create(),
+        fn () => Wrestler::factory()->bookable()->create(),
+    ],
+    'singles retired earlier that day' => [
+        TitleType::Singles,
+        fn () => Wrestler::factory()->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 09:00:00')), 'employments')->has(Retirement::factory()->started(Carbon::parse('2026-10-06 09:00:00')), 'retirements')->create(),
+        fn () => Wrestler::factory()->bookable()->create(),
+    ],
+    'singles released at the start of the show' => [
+        TitleType::Singles,
+        fn () => Wrestler::factory()->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 18:00:00')), 'employments')->create(),
+        fn () => Wrestler::factory()->bookable()->create(),
+    ],
+    'tag team released earlier that day' => [
+        TitleType::TagTeam,
+        fn () => TagTeam::factory()->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 09:00:00')), 'employments')->create(),
+        fn () => TagTeam::factory()->bookable()->create(),
+    ],
+    'tag team retired earlier that day' => [
+        TitleType::TagTeam,
+        fn () => TagTeam::factory()->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 09:00:00')), 'employments')->has(Retirement::factory()->started(Carbon::parse('2026-10-06 09:00:00')), 'retirements')->create(),
+        fn () => TagTeam::factory()->bookable()->create(),
+    ],
 ]);
 
 test('it still crowns and ends the reign of a winner who left after the show started on the event day', function (): void {
