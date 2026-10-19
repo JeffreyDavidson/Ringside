@@ -59,15 +59,13 @@ final readonly class RetirementPeriodManager
      * employment that ended on or after that date was ended by the retirement. One that ended earlier,
      * or on the same date but through a release, means the subject was already released.
      *
+     * A subject with no current retirement matches no employment, so it is never reported as employed.
+     *
      * @param  Model&Retirable<*>&Employable<*>  $subject
      */
     public function wasEmployedWhenRetired(Model&Retirable&Employable $subject): bool
     {
         $retiredAt = $subject->currentRetirement()->value('started_at');
-
-        if (! $retiredAt instanceof Carbon) {
-            return false;
-        }
 
         return $subject->employments()
             ->where('ended_at', '>=', $retiredAt)
