@@ -40,7 +40,7 @@ class TitleChampionshipBuilder extends Builder
      */
     public function heldOn(?DateTimeInterface $date): static
     {
-        if ($date === null) {
+        if (! $date instanceof DateTimeInterface) {
             return $this->current();
         }
 

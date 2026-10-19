@@ -45,9 +45,9 @@ class TitleBuilder extends Builder
     {
         return $this->whereHas(
             'activityPeriods',
-            fn (Builder $periods) => $date === null
-                ? LifecyclePeriodBuilder::constrainToCurrent($periods)
-                : LifecyclePeriodBuilder::constrainToActiveOn($periods, $date),
+            fn (Builder $periods) => $date instanceof DateTimeInterface
+                ? LifecyclePeriodBuilder::constrainToActiveOn($periods, $date)
+                : LifecyclePeriodBuilder::constrainToCurrent($periods),
         );
     }
 
