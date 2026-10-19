@@ -12,6 +12,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Queries\Events\BookableIdsQuery;
 use App\Queries\Events\EventPackCardMatchesQuery;
+use App\Queries\Events\EventVenueQuery;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\Eloquent\Collection as ModelCollection;
 use Illuminate\Support\Collection;
@@ -32,12 +33,15 @@ class EventPackCardService
         private readonly BookableIdsQuery $bookable,
         private readonly EventRosterService $roster,
         private readonly EventRosterAvailabilityService $availability,
+        private readonly EventVenueQuery $venues,
     ) {}
 
     /** @return Card */
     public function get(Event $event): array
     {
-        $event->load(['promotion', 'venue']);
+        // A deleted venue still names the event it hosted, so the fingerprint stays the same when the venue is deleted.
+        $event->load('promotion');
+        $event->setRelation('venue', $this->venues->get($event));
         $matches = $this->matches->get($event);
         $teams = $matches->flatMap(fn (EventMatch $match): Collection => $match->competitors->tagTeams())->unique('id');
         $wrestlers = $matches->flatMap(fn (EventMatch $match): Collection => $match->competitors->wrestlers())

@@ -23,7 +23,7 @@ class DeleteAction
      * This handles the complete deletion workflow with business impact:
      *
      * MATCH IMPACT:
-     * - Cascades to associated matches and booking records
+     * - Does not delete or change the matches or booking records; only the event is soft deleted
      * - Preserves match history for reporting and statistics
      * - No impact on wrestler/manager employment or career records
      *

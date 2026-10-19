@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Events\EventStatus;
+use App\Enums\Promotions\MembershipRole;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -57,6 +58,81 @@ describe('events table', function (): void {
             ->assertSee($venue->name)
             ->assertSee(__('events.no_venue'))
             ->assertDontSee('Deleted Showcase');
+    });
+
+    it('shows the name of a deleted venue as plain text for a promotion manager', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $venue = Venue::factory()
+            ->create(['name' => 'Old Arena']);
+        Event::factory()
+            ->past()
+            ->for($promotion, 'promotion')
+            ->atVenue($venue)
+            ->create(['name' => 'Farewell Show']);
+        $venue->delete();
+        actingAsPromotionMember($promotion, MembershipRole::Owner);
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSee('Old Arena')
+            ->assertDontSee(__('events.no_venue'))
+            ->assertDontSeeHtml(route('venues.show', $venue));
+    });
+
+    it('shows a deleted venue as plain text even to an administrator, while a live venue stays a link', function (): void {
+        // Arrange
+        $deletedVenue = Venue::factory()
+            ->create(['name' => 'Old Arena']);
+        $liveVenue = Venue::factory()
+            ->create(['name' => 'Live Arena']);
+        Event::factory()
+            ->past()
+            ->atVenue($deletedVenue)
+            ->create(['name' => 'Farewell Show']);
+        Event::factory()
+            ->scheduled()
+            ->atVenue($liveVenue)
+            ->create(['name' => 'Linked Show']);
+        $deletedVenue->delete();
+
+        // Act
+        $component = livewire(Main::class);
+
+        // Assert
+        $component
+            ->assertSee('Old Arena')
+            ->assertDontSeeHtml('href="'.route('venues.show', $deletedVenue).'"')
+            ->assertSeeHtml('href="'.route('venues.show', $liveVenue).'"');
+    });
+
+    it('links a live venue only for a viewer who may open venue pages', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()
+            ->create();
+        $venue = Venue::factory()
+            ->create(['name' => 'Live Arena']);
+        Event::factory()
+            ->scheduled()
+            ->for($promotion, 'promotion')
+            ->atVenue($venue)
+            ->create(['name' => 'Linked Show']);
+        $link = 'href="'.route('venues.show', $venue).'"';
+
+        // Act
+        $asAdministrator = livewire(Main::class);
+        actingAsPromotionMember($promotion, MembershipRole::Owner);
+        $asManager = livewire(Main::class);
+
+        // Assert
+        $asAdministrator->assertSeeHtml($link);
+        $asManager
+            ->assertSee('Live Arena')
+            ->assertDontSeeHtml($link);
     });
 
     it('renders the shared empty state when there are no events', function (): void {
@@ -114,7 +190,8 @@ describe('events table', function (): void {
 
     it('lists only the venues this promotion\'s events use in the venue filter', function (): void {
         // Arrange
-        $promotion = Promotion::factory()->create();
+        $promotion = Promotion::factory()
+            ->create();
         $otherPromotion = Promotion::factory()->create();
         $sharedVenue = Venue::factory()->create(['name' => 'Shared Arena']);
         $ownVenue = Venue::factory()->create(['name' => 'Own Arena']);

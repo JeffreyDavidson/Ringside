@@ -6,6 +6,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
@@ -21,6 +22,26 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\put;
 
 describe('show', function (): void {
+    test('an event pack still names the venue after the venue was deleted', function () {
+        // Arrange
+        $venue = Venue::factory()
+            ->create(['name' => 'Old Arena']);
+        $event = Event::factory()
+            ->atVenue($venue)
+            ->create();
+        $venue->delete();
+
+        actingAs(administrator());
+
+        // Act
+        $response = get(route('events.pack.show', $event));
+
+        // Assert
+        $response
+            ->assertOk()
+            ->assertSee('Old Arena');
+    });
+
     test('an event pack opens from the saved event without creating data', function () {
         // Arrange
         $event = Event::factory()

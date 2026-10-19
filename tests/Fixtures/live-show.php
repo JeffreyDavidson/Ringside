@@ -14,10 +14,14 @@ use App\ViewModels\Events\EventPackViewModel;
 use function Pest\Laravel\actingAs;
 
 /** @return array{event: Event, run: EventLiveRun, key: string, person: string} */
-function liveShowFixture(bool $segment = false, ?string $date = null): array
+function liveShowFixture(bool $segment = false, ?string $date = null, ?int $venueId = null): array
 {
     actingAs(administrator());
-    $event = Event::factory()->create(['name' => 'Harbor Showcase', 'date' => $date ?? now()]);
+    $event = Event::factory()->create([
+        'name' => 'Harbor Showcase',
+        'date' => $date ?? now(),
+        ...($venueId === null ? [] : ['venue_id' => $venueId]),
+    ]);
     $wrestlers = Wrestler::factory()->count(2)->sequence(
         ['name' => 'Prof. Russ Kihn'],
         ['name' => 'Yasmine Nolan'],

@@ -12,6 +12,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Events\EventPublication;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -656,6 +657,24 @@ describe('update', function (): void {
             ->assertSessionHasErrors(['matches.0.id', 'results.0']);
 
         expect(freshModel($publication)->draft)->toBe($publication->draft);
+    });
+
+    test('doors times are checked in the time zone of a venue that was deleted after booking', function (): void {
+        // Arrange
+        $fixture = publicEventFixture();
+        $event = $fixture['event'];
+        $venue = Venue::factory()
+            ->create(['timezone' => 'America/Chicago']);
+        $event->update(['venue_id' => $venue->id]);
+        $source = app(PublicEventSourceService::class)->get($event);
+        $venue->delete();
+        $requestData = ['complete' => 1, 'version' => 0, 'fingerprint' => $source['fingerprint'], 'announcement' => 'scheduled', 'doors_at' => '2026-10-10T19:00', 'doors_offset' => '-05:00'];
+
+        // Act
+        $response = put(route('events.public-pages.update', $event), $requestData);
+
+        // Assert
+        $response->assertSessionDoesntHaveErrors(['doors_at']);
     });
 
     test('a malformed offset payload receives validation errors rather than a server error', function (): void {
