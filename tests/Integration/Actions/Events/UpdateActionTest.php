@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Events\UpdateAction;
 use App\Data\Events\EventData;
+use App\Enums\Matches\MatchFinish;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\CannotBeRescheduledException;
 use App\Exceptions\Events\NameTakenException;
@@ -18,14 +19,34 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
-test('it rejects changing the date of an event that already occurred', function () {
+test('it rejects changing the date of a past event once a result is recorded', function () {
+    // Arrange
     $originalDate = now()->subWeek();
     $event = Event::factory()->create(['date' => $originalDate]);
+    EventMatch::factory()
+        ->forEvent($event)
+        ->create(['match_finish' => MatchFinish::NoDecision]);
     $data = new EventData($event->name, now()->addWeek(), $event->venue, $event->preview);
 
-    expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(CannotBeRescheduledException::class)
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($event, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeRescheduledException::class)
         ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+});
+
+test('it moves a past event that has no recorded results', function () {
+    // Arrange
+    $event = Event::factory()->create(['date' => now()->subWeek()]);
+    EventMatch::factory()->forEvent($event)->create();
+    $targetDate = now()->subDays(2);
+
+    // Act
+    $updated = resolve(UpdateAction::class)->handle($event, new EventData($event->name, $targetDate, $event->venue, $event->preview));
+
+    // Assert
+    expect($updated->date?->toDateTimeString())->toBe($targetDate->toDateTimeString());
 });
 
 test('it permits updating a past event when its date is unchanged', function () {

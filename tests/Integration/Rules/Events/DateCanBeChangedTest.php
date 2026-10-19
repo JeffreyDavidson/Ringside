@@ -2,12 +2,25 @@
 
 declare(strict_types=1);
 
+use App\Enums\Matches\MatchFinish;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Rules\Events\DateCanBeChanged;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Validator;
+
+function pastEventWithRecordedResult(): Event
+{
+    $event = Event::factory()
+        ->create(['date' => now()->subWeek()]);
+    EventMatch::factory()
+        ->forEvent($event)
+        ->create(['match_finish' => MatchFinish::NoDecision]);
+
+    return $event;
+}
 
 describe('DateCanBeChanged Validation Rule Integration Tests', function () {
     describe('rule logic with event instances', function () {
@@ -30,7 +43,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
         test('validation fails when event has past date', function () {
             // Arrange
-            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $pastEvent = pastEventWithRecordedResult();
 
             $rule = new DateCanBeChanged($pastEvent);
             $failCalled = false;
@@ -45,7 +58,23 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($failCalled)->toBeTrue();
-            expect($failMessage)->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
+            expect($failMessage)->toBe("Event [{$pastEvent->name}] cannot be rescheduled because results are recorded.");
+        });
+
+        test('validation passes when a past event has no recorded results', function () {
+            // Arrange
+            $pastEvent = Event::factory()
+                ->create(['date' => now()->subWeek()]);
+            $validator = Validator::make(
+                ['date' => now()->addWeek()->toDateTimeString()],
+                ['date' => [new DateCanBeChanged($pastEvent)]],
+            );
+
+            // Act
+            $passes = $validator->passes();
+
+            // Assert
+            expect($passes)->toBeTrue();
         });
 
         test('validation passes when no event provided', function () {
@@ -159,7 +188,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
         test('the same rule rejects a past event date change submitted as a string', function () {
             // Arrange
-            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $pastEvent = pastEventWithRecordedResult();
             $validator = Validator::make(
                 ['date' => now()->addWeek()->toDateTimeString()],
                 ['date' => [new DateCanBeChanged($pastEvent)]],
@@ -171,7 +200,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
             // Assert
             expect($fails)->toBeTrue()
                 ->and($validator->errors()->first('date'))
-                ->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
+                ->toBe("Event [{$pastEvent->name}] cannot be rescheduled because results are recorded.");
         });
     });
 
@@ -200,7 +229,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
     describe('error message consistency', function () {
         test('error message is consistent across calls', function () {
             // Arrange
-            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $pastEvent = pastEventWithRecordedResult();
             $rule = new DateCanBeChanged($pastEvent);
 
             $messages = [];
@@ -214,12 +243,12 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($messages)->toHaveCount(2);
-            expect($messages)->toMatchArray([0 => $messages[1], 1 => "Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred."]);
+            expect($messages)->toMatchArray([0 => $messages[1], 1 => "Event [{$pastEvent->name}] cannot be rescheduled because results are recorded."]);
         });
 
         test('attribute name does not affect validation logic', function () {
             // Arrange
-            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
+            $pastEvent = pastEventWithRecordedResult();
             $rule = new DateCanBeChanged($pastEvent);
 
             $failCallCount = 0;
