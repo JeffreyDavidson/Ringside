@@ -16,7 +16,9 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Titles\Title;
 use App\Models\Tournaments\TournamentMatchLink;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -28,10 +30,21 @@ class RecordResultAction
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentOutcomeManager $tournaments,
         private readonly MatchRosterLock $rosterLock,
-    ) {}
+    ) {
+        $this->titlesLeftUnchanged = new Collection;
+    }
+
+    /**
+     * The titles the last result left unchanged because the winner had left before the show started.
+     *
+     * @var Collection<int, Title>
+     */
+    public Collection $titlesLeftUnchanged;
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
+        $this->titlesLeftUnchanged = new Collection;
+
         return DB::transaction(function () use ($match, $result): EventMatch {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
             $this->tournaments->ensureResultCanChange($lockedMatch, $result);
@@ -69,7 +82,7 @@ class RecordResultAction
             if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
                 return $lockedMatch;
             }
-            $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
+            $this->titlesLeftUnchanged = $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([
                 'match_finish' => $result->finish,

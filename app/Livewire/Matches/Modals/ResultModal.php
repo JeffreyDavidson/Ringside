@@ -7,6 +7,7 @@ namespace App\Livewire\Matches\Modals;
 use App\Actions\Matches\RecordResultAction;
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\DispatchesActionFeedback;
 use App\Livewire\Matches\Forms\MatchResultForm;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -25,6 +26,8 @@ use LivewireUI\Modal\ModalComponent;
  */
 class ResultModal extends ModalComponent
 {
+    use DispatchesActionFeedback;
+
     #[Locked]
     public int $matchId;
 
@@ -58,6 +61,12 @@ class ResultModal extends ModalComponent
         } finally {
             // The action refreshes the match, which drops its nested competitor relations; reload them on the next read.
             unset($this->match);
+        }
+
+        if ($recordResultAction->titlesLeftUnchanged->isNotEmpty()) {
+            $this->dispatchActionWarning(__('matches.notices.title_winner_left_before_show', [
+                'titles' => $recordResultAction->titlesLeftUnchanged->pluck('name')->implode(', '),
+            ]));
         }
 
         $this->form->fillFrom($this->match);

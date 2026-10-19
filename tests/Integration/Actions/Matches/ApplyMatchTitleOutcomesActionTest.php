@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\ApplyMatchTitleOutcomesAction;
 use App\Data\Matches\MatchResultData;
 use App\Enums\Matches\MatchFinish;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Events\Event;
 use App\Models\Lifecycle\Employment;
@@ -69,9 +70,10 @@ function titleMatchBetween(Title $title, string $eventDate, Wrestler|TagTeam $fi
     return [$match, $firstSide, $secondSide];
 }
 
-function recordTitleMatchResult(EventMatch $match, MatchSide $winningSide): void
+/** @return Collection<int, Title> The titles whose champion was left unchanged because the winner had left. */
+function recordTitleMatchResult(EventMatch $match, MatchSide $winningSide): Collection
 {
-    resolve(ApplyMatchTitleOutcomesAction::class)->handle(
+    return resolve(ApplyMatchTitleOutcomesAction::class)->handle(
         $match,
         new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
         $match->competitors()->with('competitor')->get(),
@@ -539,7 +541,7 @@ test('it ignores a release that happened before the event day when ending a back
     expect(TitleChampionship::query()->where('title_id', $title->id)->current()->sole()->champion_id)->toBe($winner->id);
 });
 
-test('it ends a back-filled reign at once when the winner was released on the event day in the promotion time zone', function (): void {
+test('it records a back-filled result without a title change when the winner was released before the show on the event day', function (): void {
     // Arrange
     travelTo(Carbon::parse('2026-10-11 12:00:00'));
     $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
@@ -559,11 +561,86 @@ test('it ends a back-filled reign at once when the winner was released on the ev
     ]);
 
     // Act
-    recordTitleMatchResult($match, $winningSide);
+    $unchangedTitles = recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::withTrashed()->where('title_id', $title->id)->exists())->toBeFalse()
+        ->and($unchangedTitles->pluck('id')->all())->toBe([$title->id]);
+});
+
+test('it records a back-filled result without a title change when the winner left before the show', function (TitleType $type, bool $retired, string $leftAt): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->active()->create(['type' => $type]);
+    $employment = Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse($leftAt));
+    $retirement = Retirement::factory()->started(Carbon::parse($leftAt));
+
+    if ($type === TitleType::TagTeam) {
+        $winner = $retired
+            ? TagTeam::factory()->has($employment, 'employments')->has($retirement, 'retirements')->create()
+            : TagTeam::factory()->has($employment, 'employments')->create();
+        $loser = TagTeam::factory()->bookable()->create();
+    } else {
+        $winner = $retired
+            ? Wrestler::factory()->has($employment, 'employments')->has($retirement, 'retirements')->create()
+            : Wrestler::factory()->has($employment, 'employments')->create();
+        $loser = Wrestler::factory()->bookable()->create();
+    }
+
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06 18:00:00', $winner, $loser);
+
+    // Act
+    $unchangedTitles = recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::withTrashed()->where('title_id', $title->id)->exists())->toBeFalse()
+        ->and($unchangedTitles->pluck('id')->all())->toBe([$title->id]);
+})->with([
+    'singles released earlier that day' => [TitleType::Singles, false, '2026-10-06 09:00:00'],
+    'singles retired earlier that day' => [TitleType::Singles, true, '2026-10-06 09:00:00'],
+    'singles released at the start of the show' => [TitleType::Singles, false, '2026-10-06 18:00:00'],
+    'tag team released earlier that day' => [TitleType::TagTeam, false, '2026-10-06 09:00:00'],
+    'tag team retired earlier that day' => [TitleType::TagTeam, true, '2026-10-06 09:00:00'],
+]);
+
+test('it still crowns and ends the reign of a winner who left after the show started on the event day', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01'))->ended(Carbon::parse('2026-10-06 20:00:00')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06 18:00:00', $winner, $loser);
+
+    // Act
+    $unchangedTitles = recordTitleMatchResult($match, $winningSide);
 
     // Assert
     $reign = TitleChampionship::query()->where('title_id', $title->id)->sole();
-    expect($reign->lost_at?->toIso8601String())->toBe($event->date?->toIso8601String());
+    expect($reign->champion_id)->toBe($winner->id)
+        ->and($reign->lost_at?->toDateTimeString())->toBe('2026-10-06 20:00:00')
+        ->and($unchangedTitles)->toBeEmpty();
+});
+
+test('it keeps the reign a result already created when the same result is recorded again after the winner left before the show', function (): void {
+    // Arrange
+    travelTo(Carbon::parse('2026-10-11 12:00:00'));
+    $title = Title::factory()->singles()->active()->create();
+    $winner = Wrestler::factory()
+        ->has(Employment::factory()->started(Carbon::parse('2026-09-01')), 'employments')
+        ->create();
+    $loser = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchBetween($title, '2026-10-06 18:00:00', $winner, $loser);
+    recordTitleMatchResult($match, $winningSide);
+    $winner->employments()->sole()->update(['ended_at' => Carbon::parse('2026-10-06 09:00:00')]);
+
+    // Act
+    $unchangedTitles = recordTitleMatchResult($match, $winningSide);
+
+    // Assert
+    expect(TitleChampionship::query()->where('title_id', $title->id)->where('champion_id', $winner->id)->count())->toBe(1)
+        ->and($unchangedTitles)->toBeEmpty();
 });
 
 test('it leaves a back-filled reign open for a winner who is still employed', function (): void {

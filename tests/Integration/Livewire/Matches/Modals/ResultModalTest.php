@@ -9,6 +9,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Matches\Modals\ResultModal;
 use App\Models\Events\Event;
+use App\Models\Lifecycle\Employment;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
@@ -16,6 +17,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Carbon;
 use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
@@ -211,6 +213,34 @@ describe('authorized result recording', function (): void {
             ->assertNotDispatched('closeModal');
         expect($match->refresh()->match_finish)->toBeNull()
             ->and($title->championships()->count())->toBe(1);
+    });
+
+    it('records a result and warns when the winner left before the show so the title did not change hands', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
+        $match->event->update(['date' => Carbon::parse('2026-10-06 18:00:00')]);
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+        $match->titles()->attach($title);
+        $competitors[0]->competitor->employments()->delete();
+        Employment::factory()
+            ->for($competitors[0]->competitor, 'employable')
+            ->started(Carbon::parse('2026-09-01'))
+            ->ended(Carbon::parse('2026-10-06 09:00:00'))
+            ->create();
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
+
+        // Act
+        $modal->set('form.finish', MatchFinish::Pinfall->value);
+        $modal->set('form.winningSideId', $competitors[0]->match_side_id);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('flash-message', type: 'warning', message: "The result was recorded, but the winner had left before the show, so the title did not change hands: {$title->name}.")
+            ->assertDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+            ->and(TitleChampionship::withTrashed()->where('title_id', $title->id)->exists())->toBeFalse();
     });
 
     it('hides elimination inputs for ordinary matches', function (): void {

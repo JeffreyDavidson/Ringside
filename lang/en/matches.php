@@ -150,6 +150,9 @@ return [
         'winning_side' => 'Winning Side',
     ],
 
+    'notices' => [
+        'title_winner_left_before_show' => 'The result was recorded, but the winner had left before the show, so the title did not change hands: :titles.',
+    ],
     'errors' => [
         'configuration' => [
             'incorrect_side_count' => 'This match requires exactly :sides competitor sides.',
