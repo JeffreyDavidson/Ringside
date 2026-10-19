@@ -13,6 +13,7 @@ use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -163,10 +164,10 @@ class UpdateAction
         $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon && ! $period->ended_at->isSameDay($endedAt);
 
         $startsTooLate = $startMoves && $memberships->contains(
-            fn ($membership): bool => $membership->joined_at->copy()->startOfDay()->lt($startDate->copy()->startOfDay()),
+            fn (Pivot $membership): bool => $membership->joined_at->copy()->startOfDay()->lt($startDate->copy()->startOfDay()),
         );
         $endsTooEarly = $endMoves && $memberships->contains(
-            fn ($membership): bool => $membership->left_at !== null
+            fn (Pivot $membership): bool => $membership->left_at !== null
                 && $membership->left_at->copy()->startOfDay()->gt($endedAt->copy()->startOfDay()),
         );
 
