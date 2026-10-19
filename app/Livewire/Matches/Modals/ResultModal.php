@@ -50,7 +50,7 @@ class ResultModal extends ModalComponent
         $this->form->validateFor($match);
 
         try {
-            $recordResultAction->handle(
+            $recorded = $recordResultAction->handle(
                 $match,
                 $this->form->toData($match),
             );
@@ -63,9 +63,9 @@ class ResultModal extends ModalComponent
             unset($this->match);
         }
 
-        if ($recordResultAction->titlesLeftUnchanged->isNotEmpty()) {
+        if ($recorded->titlesLeftUnchanged->isNotEmpty()) {
             $this->dispatchActionWarning(__('matches.notices.title_winner_left_before_show', [
-                'titles' => $recordResultAction->titlesLeftUnchanged->pluck('name')->implode(', '),
+                'titles' => $recorded->titlesLeftUnchanged->pluck('name')->implode(', '),
             ]));
         }
 

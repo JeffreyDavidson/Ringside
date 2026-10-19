@@ -7,6 +7,7 @@ namespace App\Actions\Matches;
 use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Matches\RecordedMatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
@@ -16,7 +17,6 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
-use App\Models\Titles\Title;
 use App\Models\Tournaments\TournamentMatchLink;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -30,22 +30,11 @@ class RecordResultAction
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentOutcomeManager $tournaments,
         private readonly MatchRosterLock $rosterLock,
-    ) {
-        $this->titlesLeftUnchanged = new Collection;
-    }
+    ) {}
 
-    /**
-     * The titles the last result left unchanged because the winner had left before the show started.
-     *
-     * @var Collection<int, Title>
-     */
-    public Collection $titlesLeftUnchanged;
-
-    public function handle(EventMatch $match, MatchResultData $result): EventMatch
+    public function handle(EventMatch $match, MatchResultData $result): RecordedMatchResultData
     {
-        $this->titlesLeftUnchanged = new Collection;
-
-        return DB::transaction(function () use ($match, $result): EventMatch {
+        return DB::transaction(function () use ($match, $result): RecordedMatchResultData {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
             $this->tournaments->ensureResultCanChange($lockedMatch, $result);
             $changed = $lockedMatch->match_finish !== $result->finish || $lockedMatch->winning_side_id !== $result->winningSide?->id;
@@ -80,9 +69,9 @@ class RecordResultAction
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
             if (! $changed && TournamentMatchLink::query()->forMatchId($lockedMatch->id)->exists()) {
-                return $lockedMatch;
+                return new RecordedMatchResultData($lockedMatch, new Collection);
             }
-            $this->titlesLeftUnchanged = $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
+            $titlesLeftUnchanged = $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([
                 'match_finish' => $result->finish,
@@ -107,7 +96,7 @@ class RecordResultAction
 
             $this->tournaments->resultRecorded($lockedMatch);
 
-            return $lockedMatch->refresh();
+            return new RecordedMatchResultData($lockedMatch->refresh(), $titlesLeftUnchanged);
         });
     }
 

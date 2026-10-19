@@ -97,7 +97,7 @@ it('records an ordinary finish and winning side', function () {
     $resultedMatch = resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::Pinfall, $winningSide),
-    );
+    )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::Pinfall)
         ->and($resultedMatch->winningSide?->is($winningSide))->toBeTrue();
@@ -109,7 +109,7 @@ it('records a draw without a winning side', function () {
     $resultedMatch = resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::TimeLimitDraw, null),
-    );
+    )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::TimeLimitDraw)
         ->and($resultedMatch->winningSide)->toBeNull();
@@ -161,7 +161,7 @@ it('records a partial elimination history for a no-outcome elimination match', f
         matchResult(MatchFinish::NoDecision, null, [
             new MatchEliminationData($competitors[0], 1, $competitors[2]),
         ]),
-    );
+    )->match;
 
     expect($resultedMatch->match_finish)->toBe(MatchFinish::NoDecision)
         ->and($resultedMatch->winning_side_id)->toBeNull()
@@ -188,7 +188,7 @@ it('replaces a previously recorded outcome atomically', function () {
             new MatchEliminationData($firstWinner, 1),
             new MatchEliminationData($competitors[0], 2, $correctedWinner),
         ]),
-    );
+    )->match;
 
     expect($correctedMatch->match_finish)->toBe(MatchFinish::Forfeit)
         ->and($correctedMatch->winning_side_id)->toBe($correctedWinner->match_side_id)
@@ -1044,6 +1044,25 @@ it('keeps the previous champion reign closed by the corrected match when the tit
     // Assert
     expect($title->championships()->where('won_match_id', $firstMatch->id)->sole()->lost_match_id)->toBe($secondMatch->id)
         ->and($title->championships()->where('won_match_id', $secondMatch->id)->sole()->champion_id)->toBe($firstChampion->id);
+});
+
+it('returns the titles left unchanged because the winner left before the show', function (): void {
+    // Arrange
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $winner = Wrestler::factory()->bookable()->create();
+    [$match, $winningSide] = titleMatchOn(now()->subDays(5), $title, $winner);
+    $winner->employments()->sole()->update([
+        'started_at' => now()->subDays(30),
+        'ended_at' => now()->subDays(5)->subHour(),
+    ]);
+
+    // Act
+    $recorded = resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $winningSide));
+
+    // Assert
+    expect($recorded->titlesLeftUnchanged->pluck('id')->all())->toBe([$title->id])
+        ->and($recorded->match->match_finish)->toBe(MatchFinish::Pinfall)
+        ->and($title->championships()->count())->toBe(0);
 });
 
 it('rejects a title change dated inside a reign that was vacated later', function (): void {
