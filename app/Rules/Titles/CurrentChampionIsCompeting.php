@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Titles;
 
 use App\Enums\Titles\TitleType;
+use App\Models\Events\Event;
 use App\Models\Titles\TitleChampionship;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
@@ -14,6 +15,9 @@ class CurrentChampionIsCompeting implements DataAwareRule, ValidationRule
 {
     /** @var array<string, mixed> */
     private array $data = [];
+
+    /** The champion that must compete held the title on the booked event's date; without a date it is the current one. */
+    public function __construct(private readonly ?Event $event = null) {}
 
     /** @param array<string, mixed> $data */
     public function setData(array $data): self
@@ -31,7 +35,7 @@ class CurrentChampionIsCompeting implements DataAwareRule, ValidationRule
 
         $currentChampionship = TitleChampionship::query()
             ->forTitleId((int) $value)
-            ->current()
+            ->heldOn($this->event?->date?->copy()->utc())
             ->first(['champion_type', 'champion_id']);
 
         if (! $currentChampionship instanceof TitleChampionship) {
