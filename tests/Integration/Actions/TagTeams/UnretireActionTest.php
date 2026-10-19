@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\UnretireAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
@@ -355,4 +357,19 @@ test('it rejects unretiring a tag team whose name is used by an employed tag tea
         ->toThrow(CannotBeUnretiredException::class, "an existing tag team is already named '{$conflictingTagTeam->name}'")
         ->and($tagTeam->currentRetirement()->exists())->toBeTrue()
         ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
+});
+
+// A released tag team cannot be retired (TagTeamRetirementEligibility needs a current employment),
+// so a retired tag team was always employed when it retired and comes back employed.
+test('it brings back a tag team that was employed when retired as employed', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->employed()->create();
+    resolve(RetireAction::class)->handle($tagTeam, now()->subHours(2));
+
+    // Act
+    resolve(UnretireAction::class)->handle($tagTeam->refresh());
+
+    // Assert
+    expect($tagTeam->refresh()->status)->toBe(EmploymentStatus::Employed)
+        ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 });

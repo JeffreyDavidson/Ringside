@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
@@ -36,6 +37,7 @@ class UpdateAction
      */
     public function __construct(
         protected EmployAction $employAction,
+        protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
         protected RecordNameLock $nameLock,
         protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
     ) {}
@@ -76,8 +78,14 @@ class UpdateAction
 
             $this->synchronizeManagerAssignmentsAction->handle($lockedWrestler, $wrestlerData->managers, now());
 
+            // A wrestler whose only employment has not started yet has it moved to the form date, or cancelled when the
+            // date is cleared.
+            if ($this->changeScheduledEmployment->handle($lockedWrestler, $wrestlerData->employment_date)) {
+                return $lockedWrestler;
+            }
+
             // Only a wrestler with no employment history is employed from the form date; a released, retired or
-            // future-employed wrestler keeps their history (employing again would overlap or be rejected).
+            // started wrestler keeps their history (employing again would overlap or be rejected).
             if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->employments()->exists()) {
                 $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }

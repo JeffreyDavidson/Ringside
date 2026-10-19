@@ -107,7 +107,8 @@ abstract class BaseForm extends Form
         return $date instanceof Carbon ? PromotionTimeZoneService::toLocalTime($this->formPromotion(), $date)->toDateString() : null;
     }
 
-    private function formPromotion(): ?Promotion
+    /** The form promotion (see formPromotionId()) as a model, or null for the application time zone. */
+    protected function formPromotion(): ?Promotion
     {
         $promotionId = $this->formPromotionId();
 

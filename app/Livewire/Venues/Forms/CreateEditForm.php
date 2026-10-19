@@ -8,6 +8,8 @@ use App\Data\Events\VenueData;
 use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
+use App\Services\Promotions\PromotionTimeZoneService;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Venue> */
@@ -24,6 +26,26 @@ class CreateEditForm extends BaseForm
     public int|string|null $zipcode = '';
 
     public string $timezone = 'UTC';
+
+    /**
+     * A blank (new venue) form starts in the current promotion's time zone, or the application's without one; the
+     * field stays editable and an edited venue keeps its stored zone (see setModel()).
+     *
+     * @param  string|array<int, string>  ...$properties
+     */
+    #[\Override]
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
+
+        $properties = Arr::flatten($properties);
+
+        if ($properties !== [] && ! in_array('timezone', $properties, true)) {
+            return;
+        }
+
+        $this->timezone = PromotionTimeZoneService::zoneOf($this->formPromotion());
+    }
 
     public function toData(): VenueData
     {

@@ -18,6 +18,7 @@ class DeleteAction
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -45,6 +46,7 @@ class DeleteAction
         $effectiveDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $this->lockCurrentTagTeams->handle($wrestler);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedWrestler);

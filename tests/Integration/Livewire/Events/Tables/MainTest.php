@@ -7,7 +7,9 @@ use App\Enums\Promotions\MembershipRole;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
+use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 
@@ -108,6 +110,28 @@ describe('events table', function (): void {
             ->assertSee('Old Arena')
             ->assertDontSeeHtml('href="'.route('venues.show', $deletedVenue).'"')
             ->assertSeeHtml('href="'.route('venues.show', $liveVenue).'"');
+    });
+
+    it('refuses to delete an event whose match changed a title and shows the reason', function (): void {
+        // Arrange
+        $event = Event::factory()
+            ->past()
+            ->create();
+        $match = EventMatch::factory()
+            ->forEvent($event)
+            ->create();
+        TitleChampionship::factory()
+            ->wonAtEventMatch($match)
+            ->create();
+        $component = livewire(Main::class);
+
+        // Act
+        $component->call('delete', $event);
+
+        // Assert
+        $component->assertDispatched('flash-message', type: 'error', message: __('events.errors.deleted.has_title_change', ['name' => $event->name]));
+
+        expect($event->refresh()->trashed())->toBeFalse();
     });
 
     it('links a live venue only for a viewer who may open venue pages', function (): void {

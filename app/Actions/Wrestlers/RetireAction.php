@@ -21,6 +21,7 @@ class RetireAction
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly IndividualRetirementEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -45,6 +46,7 @@ class RetireAction
         $effectiveDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate, $retainedTagTeam): void {
+            $this->lockCurrentTagTeams->handle($wrestler, $retainedTagTeam);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedWrestler);

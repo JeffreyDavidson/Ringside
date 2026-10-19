@@ -36,14 +36,19 @@ class CreateEditForm extends BaseForm
 
     public Carbon|string|null $employment_date = '';
 
-    /** Set when editing someone who has been employed before: their history is kept, so the date field is not offered. */
+    /**
+     * Set when editing someone whose employment history is kept, so the date field is not offered. The one
+     * exception is an only employment that has not started yet: its date is offered and can be moved or cleared.
+     */
     #[Locked]
     public bool $hasEmploymentHistory = false;
 
     protected function loadModelData(Model $model): void
     {
-        $this->hasEmploymentHistory = $model->employments()->exists();
-        $this->employment_date = '';
+        $scheduledEmployment = $model->soleScheduledEmployment();
+
+        $this->hasEmploymentHistory = $scheduledEmployment === null && $model->employments()->exists();
+        $this->employment_date = $this->localDateString($scheduledEmployment?->started_at) ?? '';
 
         $height = $model->height;
         $this->height_feet = (int) floor($height->toInches() / 12);

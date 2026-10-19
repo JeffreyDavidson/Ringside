@@ -11,10 +11,14 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\travel;
+use function Pest\Laravel\travelTo;
 
 /**
  * @return array{
@@ -320,6 +324,39 @@ test('it does not employ a tag team when no employment date is given', function 
         ->and($wrestlerA->employments()->exists())->toBeFalse();
 });
 
+test('it vacates the tag team title when the form removes a member and keeps it when the members are unchanged', function () {
+    // Arrange
+    travelTo(Carbon::parse('2026-03-10 09:00:00'));
+    ['tagTeam' => $tagTeam, 'wrestlerA' => $wrestlerA, 'wrestlerB' => $wrestlerB] = tagTeamsUpdateActionFixtures();
+    $reign = TitleChampionship::factory()
+        ->for(Title::factory()->tagTeam(), 'title')
+        ->forTagTeam($tagTeam)
+        ->current()
+        ->create();
+    $newWrestler = Wrestler::factory()->create();
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: $tagTeam->name,
+        signature_move: $tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    ));
+    $lostAtWhenUnchanged = $reign->refresh()->lost_at;
+    resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
+        name: $tagTeam->name,
+        signature_move: $tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $newWrestler,
+    ));
+
+    // Assert
+    expect($lostAtWhenUnchanged)->toBeNull()
+        ->and($reign->refresh()->lost_at?->toDateTimeString())->toBe('2026-03-10 09:00:00');
+});
+
 function renamingTagTeamData(TagTeam $tagTeam, string $name, ?string $signatureMove): TagTeamData
 {
     return new TagTeamData(
@@ -330,6 +367,31 @@ function renamingTagTeamData(TagTeam $tagTeam, string $name, ?string $signatureM
         wrestlerB: $tagTeam->wrestlers->skip(1)->firstOrFail(),
     );
 }
+
+test('it moves the start date of a tag team that has not started yet', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+    $newDate = now()->addDays(20)->startOfDay();
+    $data = renamingTagTeamData($tagTeam, $tagTeam->name, $tagTeam->signature_move);
+    $data = new TagTeamData($data->name, $data->signature_move, $newDate, $data->wrestlerA, $data->wrestlerB);
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, $data);
+
+    // Assert
+    expect($tagTeam->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels the hire of a tag team that has not started yet when the date is cleared', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, $tagTeam->name, $tagTeam->signature_move));
+
+    // Assert
+    expect($tagTeam->employments()->exists())->toBeFalse();
+});
 
 describe('tag team name guard', function (): void {
     test('it locks the new name and signature move of the promotion before the tag team row', function () {

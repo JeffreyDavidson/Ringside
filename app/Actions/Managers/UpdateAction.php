@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 class UpdateAction
 {
     public function __construct(
-        private readonly EmployAction $employAction
+        private readonly EmployAction $employAction,
+        private readonly ChangeScheduledEmploymentAction $changeScheduledEmployment,
     ) {}
 
     /**
@@ -40,8 +42,14 @@ class UpdateAction
                 'last_name' => $managerData->last_name,
             ]);
 
+            // A manager whose only employment has not started yet has it moved to the form date, or cancelled when the
+            // date is cleared.
+            if ($this->changeScheduledEmployment->handle($lockedManager, $managerData->employment_date)) {
+                return $lockedManager;
+            }
+
             // Only a manager with no employment history is employed from the form date; a released, retired or
-            // future-employed manager keeps their history (employing again would overlap or be rejected).
+            // started manager keeps their history (employing again would overlap or be rejected).
             if (! is_null($managerData->employment_date) && ! $lockedManager->employments()->exists()) {
                 $this->employAction->handle($lockedManager, $managerData->employment_date);
             }

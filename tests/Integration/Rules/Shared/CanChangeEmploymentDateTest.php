@@ -258,6 +258,32 @@ describe('CanChangeEmploymentDate validation rule', function () {
         expect($failed)->toBeFalse();
     })->with(['tag team', 'wrestler']);
 
+    test('lets a scheduled employment move to today in the promotions time zone but not to an earlier day', function (string $day, bool $fails): void {
+        // Arrange
+        Date::setTestNow('2026-10-12 03:00:00');
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $wrestler = Wrestler::factory()
+            ->for($promotion)
+            ->has(Employment::factory()->started(Date::parse('2026-11-01')), 'employments')
+            ->create();
+        $failed = false;
+
+        // Act
+        new CanChangeEmploymentDate($wrestler)->validate(
+            'employment_date',
+            $day,
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
+
+        // Assert
+        expect($failed)->toBe($fails);
+    })->with([
+        'the promotions today' => ['2026-10-11', false],
+        'the promotions yesterday' => ['2026-10-10', true],
+    ]);
+
     test('rejects the day before employment started when it started later in the day', function (string $model): void {
         // Arrange
         Date::setTestNow('2026-10-12 18:00:00');

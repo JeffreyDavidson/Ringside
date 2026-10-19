@@ -27,16 +27,16 @@ class UnretireAction
      * This handles the complete manager unretirement workflow:
      * - Validates the manager can be unretired (currently retired)
      * - Ends the current retirement period through RetirementPeriodManager
-     * - Optionally starts a new employment period from the unretirement date
+     * - Starts a new employment period from the unretirement date only if the manager was employed when they retired
      * - Preserves all historical retirement and employment records
      *
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     * @param  bool  $employImmediately  Whether to employ the manager immediately
+     * @param  bool|null  $employImmediately  Force employing (true) or not employing (false); null restores the state before retirement
      *
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
      */
-    public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void
+    public function handle(Manager $manager, ?Carbon $unretiredDate = null, ?bool $employImmediately = null): void
     {
         $effectiveDate = $unretiredDate ?? now();
 
@@ -44,9 +44,10 @@ class UnretireAction
             $lockedManager = $manager->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedManager);
+            $employ = $employImmediately ?? $this->retirementPeriods->wasEmployedWhenRetired($lockedManager);
             $this->retirementPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::Unretired);
 
-            if ($employImmediately) {
+            if ($employ) {
                 $this->employmentPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Employed);
             }
         });
