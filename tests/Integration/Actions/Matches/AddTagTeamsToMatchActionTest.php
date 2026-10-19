@@ -114,3 +114,27 @@ test('it rejects a side number below one', function (int $sideNumber) {
     'zero' => 0,
     'negative' => -1,
 ]);
+
+test('it books a tag team on a past event dated while it was employed and refuses one dated before it started', function (int $employedDaysAgo, bool $booked): void {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->subDays(10)]))->create();
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    $tagTeam->employments()->update(['started_at' => now()->subDays($employedDaysAgo)]);
+    $tagTeam->currentWrestlers->each(fn ($wrestler): int => $wrestler->employments()->update(['started_at' => now()->subDays($employedDaysAgo)]));
+
+    // Act
+    $book = fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), 1);
+
+    // Assert
+    if ($booked) {
+        $book();
+        expect($match->competitors()->count())->toBe(1);
+
+        return;
+    }
+    expect($book)->toThrow(EntityNotAvailableException::class)
+        ->and($match->competitors()->count())->toBe(0);
+})->with([
+    'employed before the event' => [30, true],
+    'employed after the event' => [1, false],
+]);

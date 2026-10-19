@@ -254,6 +254,24 @@ describe('unbookable booked members', function (): void {
         $component->assertSeeHtml('Retired Wrestler</a>'.MatchCompetitorRouteResolver::unbookableMarker());
     });
 
+    it('marks a wrestler booked on an event dated before they were employed', function (): void {
+        // Arrange
+        $event = Event::factory()->create(['date' => now()->subDays(10)]);
+        $early = Wrestler::factory()->bookable()->create(['name' => 'Hired Early']);
+        $early->employments()->update(['started_at' => now()->subDays(30)]);
+        $late = Wrestler::factory()->bookable()->create(['name' => 'Hired Late']);
+        EventMatch::factory()->forEvent($event)->withCompetitors([$early, $late])->create();
+        $marker = MatchCompetitorRouteResolver::unbookableMarker();
+
+        // Act
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Assert
+        $component
+            ->assertSeeHtml("Hired Late</a>{$marker}")
+            ->assertDontSeeHtml("Hired Early</a>{$marker}");
+    });
+
     it('does not mark members of past matches that already have a result', function (): void {
         // Arrange
         $event = Event::factory()->past()->create();

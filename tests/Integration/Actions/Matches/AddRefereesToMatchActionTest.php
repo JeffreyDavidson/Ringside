@@ -106,3 +106,26 @@ test('it rejects an empty referee list without assigning anyone', function (Clos
         ),
     ],
 ]);
+
+test('it books a referee on a past event dated while they were employed and refuses one dated before they started', function (int $employedDaysAgo, bool $booked): void {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->subDays(10)]))->create();
+    $referee = Referee::factory()->employed()->create();
+    $referee->employments()->update(['started_at' => now()->subDays($employedDaysAgo)]);
+
+    // Act
+    $book = fn () => resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+
+    // Assert
+    if ($booked) {
+        $book();
+        expect($match->referees()->count())->toBe(1);
+
+        return;
+    }
+    expect($book)->toThrow(EntityNotAvailableException::class)
+        ->and($match->referees()->count())->toBe(0);
+})->with([
+    'employed before the event' => [30, true],
+    'employed after the event' => [1, false],
+]);
