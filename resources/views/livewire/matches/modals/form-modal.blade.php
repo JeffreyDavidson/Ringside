@@ -229,6 +229,26 @@
         </x-form-modal.modal-input>
     @endif
 
+    @if ($this->sameDayBookings !== [])
+        <div
+            role="status"
+            data-test="same-day-warnings"
+            class="border-warning text-foreground flex items-start gap-2 border px-3 py-3 text-sm"
+        >
+            <x-heroicon-o-exclamation-triangle class="text-warning size-5 shrink-0" aria-hidden="true" />
+            <div class="space-y-1">
+                <p class="font-semibold">{{ __('matches.form.same_day_bookings_title') }}</p>
+                <ul class="space-y-1">
+                    @foreach ($this->sameDayBookings as $booking)
+                        <li>
+                            {{ __('matches.form.same_day_booking', ['name' => $booking['person'], 'event' => $booking['event']]) }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
     <x-matches.booking-history />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-test="match-officials-grid">

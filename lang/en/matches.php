@@ -91,6 +91,8 @@ return [
         'referees' => 'Referees',
         'select_match_type_helper' => 'Select a match type to configure competitors',
         'standard_match' => 'Standard match',
+        'same_day_booking' => ':name is also booked on :event that day.',
+        'same_day_bookings_title' => 'Also booked that day',
         'side' => 'Side :number',
         'team' => 'Team :team',
         'wrestlers' => 'Wrestlers',
