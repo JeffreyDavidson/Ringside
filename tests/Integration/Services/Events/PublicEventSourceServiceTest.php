@@ -112,6 +112,20 @@ describe('public event source service', function (): void {
             ->and($source['matches'][0]['finish'])->toBe('Pinfall');
     });
 
+    it('names a deleted venue but publishes nothing else about it', function (): void {
+        // Arrange
+        ['event' => $event, 'venue' => $venue] = publicSourceWorld();
+        $venue->delete();
+
+        // Act
+        $source = resolve(PublicEventSourceService::class)->get(Event::query()->findOrFail($event->id));
+
+        // Assert
+        expect($source['venue'])->toBe('Harbor Arena')
+            ->and($source['address'])->toBeNull()
+            ->and($source['timezone'])->toBe('America/New_York');
+    });
+
     it('describes an unscheduled event without a venue', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create(['name' => 'Harbor Wrestling', 'timezone' => 'America/New_York']);

@@ -11,6 +11,7 @@ use App\Models\Matches\MatchSide;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Queries\Events\EventVenueQuery;
 use App\Queries\Events\PublicEventMatchesQuery;
 use App\Queries\Events\PublicEventPeopleQuery;
 use Illuminate\Support\Collection;
@@ -28,6 +29,7 @@ class PublicEventSourceService
         private readonly PublicEventMatchesQuery $matches,
         private readonly PublicEventPeopleQuery $people,
         private readonly PublicEventCardService $cards,
+        private readonly EventVenueQuery $venues,
     ) {}
 
     /**
@@ -37,7 +39,8 @@ class PublicEventSourceService
      */
     public function get(Event $event): array
     {
-        $event->load(['promotion', 'venue']);
+        $event->load('promotion');
+        $event->setRelation('venue', $this->venues->get($event));
         $matches = $this->matches->get($event);
         $assignments = $matches->flatMap(fn (EventMatch $match) => $match->sides->flatMap(fn (MatchSide $side) => $side->competitors));
         $people = $this->names($event, Wrestler::class, $assignments->where('competitor_type', 'wrestler'))
@@ -56,10 +59,12 @@ class PublicEventSourceService
                 'stipulation' => $match->matchStipulation?->name, 'titles' => $match->titles->map(fn (Title $title): string => $title->name)->join(', '),
                 'finish' => $match->match_finish?->label(), 'winner' => $winner];
         }
-        $zone = $event->venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');
+        // A deleted venue keeps its name on the page, but its address and time zone are no longer published.
+        $venue = $event->venue?->trashed() ? null : $event->venue;
+        $zone = $venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');
         $data = ['title' => $event->name, 'promotion' => $event->promotion->name ?? '', 'date' => $event->date?->toIso8601String(),
-            'timezone' => $zone, 'venue' => $event->venue?->name, 'address' => $event->venue === null ? null : implode(', ', array_filter([
-                $event->venue->street_address, $event->venue->city, $event->venue->state, $event->venue->zipcode])), 'matches' => $rows];
+            'timezone' => $zone, 'venue' => $event->venue?->name, 'address' => $venue === null ? null : implode(', ', array_filter([
+                $venue->street_address, $venue->city, $venue->state, $venue->zipcode])), 'matches' => $rows];
 
         return [...$data, 'fingerprint' => $this->cards->fingerprint($data), 'schedule' => $this->cards->fingerprint([
             $event->date?->toIso8601String(), $event->venue_id, $event->venue?->name, $zone, $data['address']])];

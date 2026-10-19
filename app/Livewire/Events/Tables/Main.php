@@ -22,6 +22,8 @@ use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use App\Services\Promotions\PromotionTimeZoneService;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 
 /**
@@ -67,7 +69,13 @@ class Main extends BaseTable
         return Event::query()
             ->latestDatedFirst()
             ->orderBy('events.id')
-            ->with(['venue', 'promotion']);
+            ->with([
+                'venue' => function (Relation $venues): void {
+                    /** @var BelongsTo<Venue, Event> $venues */
+                    $venues->withTrashed();
+                },
+                'promotion',
+            ]);
     }
 
     /**

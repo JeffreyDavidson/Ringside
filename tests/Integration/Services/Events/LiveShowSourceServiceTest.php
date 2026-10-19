@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/../../../Fixtures/live-show.php';
 
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\EventPackSourceService;
@@ -13,6 +14,20 @@ use App\Services\Events\LiveShowSourceService;
 use function Pest\Laravel\actingAs;
 
 describe('live show source service', function (): void {
+    it('keeps the name of a venue deleted after the show was prepared', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Old Arena']);
+        $fixture = liveShowFixture(venueId: $venue->id);
+        $venue->delete();
+
+        // Act
+        $source = resolve(LiveShowSourceService::class)->get(Event::query()->findOrFail($fixture['event']->id));
+
+        // Assert
+        assert($source !== null);
+        expect($source['content']['venue'])->toBe('Old Arena');
+    });
+
     it('reads the running order, roster and production of a prepared card', function (): void {
         // Arrange
         $fixture = liveShowFixture(segment: true);

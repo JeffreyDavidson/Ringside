@@ -237,3 +237,20 @@ test('an event with no matches has an empty card but still a fingerprint', funct
         ->and($card['roster'])->toBeEmpty()
         ->and($card['fingerprint'])->toBe($expected);
 });
+
+test('the card fingerprint does not change when the venue is deleted afterwards', function (): void {
+    // Arrange
+    $venue = Venue::factory()
+        ->create(['name' => 'Harbor Hall']);
+    $event = Event::factory()
+        ->for(Promotion::factory())
+        ->create(['date' => now()->addWeek(), 'venue_id' => $venue->id]);
+    $before = resolve(EventPackCardService::class)->get($event)['fingerprint'];
+    $venue->delete();
+
+    // Act
+    $after = resolve(EventPackCardService::class)->get(Event::query()->findOrFail($event->id))['fingerprint'];
+
+    // Assert
+    expect($after)->toBe($before);
+});
