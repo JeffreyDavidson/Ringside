@@ -112,18 +112,20 @@ describe('public event source service', function (): void {
             ->and($source['matches'][0]['finish'])->toBe('Pinfall');
     });
 
-    it('names a deleted venue but publishes nothing else about it', function (): void {
+    it('publishes a deleted venue with the same name, address and time zone as before its deletion', function (): void {
         // Arrange
         ['event' => $event, 'venue' => $venue] = publicSourceWorld();
+        $before = resolve(PublicEventSourceService::class)->get($event);
         $venue->delete();
 
         // Act
-        $source = resolve(PublicEventSourceService::class)->get(Event::query()->findOrFail($event->id));
+        $after = resolve(PublicEventSourceService::class)->get(Event::query()->findOrFail($event->id));
 
         // Assert
-        expect($source['venue'])->toBe('Harbor Arena')
-            ->and($source['address'])->toBeNull()
-            ->and($source['timezone'])->toBe('America/New_York');
+        expect($after)->toBe($before)
+            ->and($after['venue'])->toBe('Harbor Arena')
+            ->and($after['address'])->toBe('1 Dock Road, Portland, ME, 04101')
+            ->and($after['timezone'])->toBe('America/Chicago');
     });
 
     it('describes an unscheduled event without a venue', function (): void {

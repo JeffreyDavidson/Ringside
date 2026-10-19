@@ -59,8 +59,8 @@ class PublicEventSourceService
                 'stipulation' => $match->matchStipulation?->name, 'titles' => $match->titles->map(fn (Title $title): string => $title->name)->join(', '),
                 'finish' => $match->match_finish?->label(), 'winner' => $winner];
         }
-        // A deleted venue keeps its name on the page, but its address and time zone are no longer published.
-        $venue = $event->venue?->trashed() ? null : $event->venue;
+        // A deleted venue still publishes its name, address and time zone, so a page released before the deletion keeps its card.
+        $venue = $event->venue;
         $zone = $venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');
         $data = ['title' => $event->name, 'promotion' => $event->promotion->name ?? '', 'date' => $event->date?->toIso8601String(),
             'timezone' => $zone, 'venue' => $event->venue?->name, 'address' => $venue === null ? null : implode(', ', array_filter([

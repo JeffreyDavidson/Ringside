@@ -16,6 +16,7 @@ use App\Enums\Promotions\MembershipRole;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\EventPack;
 use App\Models\Events\EventPublication;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -53,6 +54,38 @@ test('a released card omits outcomes until results are separately reviewed', fun
         ->assertSee('Robin North vs Casey Shore')
         ->assertDontSee('Pinfall')
         ->assertDontSee('View results');
+});
+
+test('a released page keeps showing its card with the venue name and address after the venue is deleted', function (): void {
+    // Arrange
+    $fixture = publicEventFixture();
+    $event = $fixture['event'];
+    $venue = Venue::factory()
+        ->create(['name' => 'Harbor Arena', 'street_address' => '1 Dock Road', 'city' => 'Portland', 'state' => 'ME', 'zipcode' => '04101']);
+    $event->update(['venue_id' => $venue->id]);
+    $publication = EventPublication::factory()
+        ->for($event)
+        ->create(['draft' => [
+            'announcement' => 'scheduled', 'summary' => 'Welcome to Harbor Night.', 'notice' => null, 'address' => true,
+            'doors_at' => null, 'doors_offset' => null, 'tickets' => null, 'poster' => null,
+            'matches' => [['id' => $fixture['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]],
+            'results' => [],
+        ]]);
+    $source = app(PublicEventSourceService::class)->get($event);
+    app(ReleaseEventPublicationAction::class)->handle($event, $fixture['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+    $publication->refresh();
+    $venue->delete();
+
+    // Act
+    $response = get(publicShowUrl($publication));
+
+    // Assert
+    $response
+        ->assertOk()
+        ->assertSee('Harbor Arena')
+        ->assertSee('1 Dock Road, Portland, ME, 04101')
+        ->assertSee('Robin North vs Casey Shore')
+        ->assertDontSee(__('public-events.updating'));
 });
 
 test('unreleased results have no public page', function (): void {
