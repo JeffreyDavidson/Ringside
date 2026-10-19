@@ -45,7 +45,7 @@ test('it ends the wrestlers current professional relationships', function () {
         ->and($championship->lost_at?->toDateTimeString())->toBe($effectiveDate->toDateTimeString());
 });
 
-test('it locks the tag team before the wrestler and the wrestler before the tag team reigns', function () {
+test('it locks the tag team before the wrestler and the wrestler before the tag team reigns', function (string $actionClass) {
     // Arrange
     $tagTeam = TagTeam::factory()
         ->employed()
@@ -58,7 +58,7 @@ test('it locks the tag team before the wrestler and the wrestler before the tag 
         ->create();
 
     // Act
-    $statements = recordStatements(fn () => resolve(ReleaseAction::class)->handle($wrestler, now()));
+    $statements = recordStatements(fn () => resolve($actionClass)->handle($wrestler, now()));
 
     // Assert
     $tagTeamLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "tag_teams"'));
@@ -67,7 +67,11 @@ test('it locks the tag team before the wrestler and the wrestler before the tag 
 
     expect($tagTeamLock)->toBeLessThan($wrestlerLock)
         ->and($wrestlerLock)->toBeLessThan($reignLock);
-});
+})->with([
+    'release' => ReleaseAction::class,
+    'retire' => RetireAction::class,
+    'delete' => DeleteAction::class,
+]);
 
 describe('a member leaving a tag team that holds a title', function (): void {
     test('it vacates the tag team title on the day the wrestler is released, retired or deleted', function (string $actionClass) {
