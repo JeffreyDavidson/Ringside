@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
+use App\Models\Promotions\Promotion;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
@@ -37,6 +39,81 @@ describe('authorized venue form interactions', function () {
             ->assertSet('form.city', '')
             ->assertSet('form.state', '')
             ->assertSet('form.zipcode', '');
+    });
+
+    it('starts a new venue in the current promotion time zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
+
+        // Act
+        $modal = livewire(FormModal::class);
+
+        // Assert
+        $modal->assertSet('form.timezone', 'America/New_York');
+
+        app(PromotionContextService::class)->clear();
+    });
+
+    it('starts a new venue in the application time zone without a promotion', function () {
+        // Arrange
+        config()->set('app.timezone', 'America/Chicago');
+
+        // Act
+        $modal = livewire(FormModal::class);
+
+        // Assert
+        $modal->assertSet('form.timezone', 'America/Chicago');
+    });
+
+    it('returns a cleared new venue form to the promotion time zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Denver']);
+        app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
+        $modal = livewire(FormModal::class);
+        $modal->set('form.timezone', 'Europe/London');
+
+        // Act
+        $modal->call('clear');
+
+        // Assert
+        $modal->assertSet('form.timezone', 'America/Denver');
+
+        app(PromotionContextService::class)->clear();
+    });
+
+    it('leaves the time zone alone when only other fields are reset', function () {
+        // Arrange
+        $modal = livewire(FormModal::class);
+        $modal->set([
+            'form.name' => 'Temporary Arena',
+            'form.timezone' => 'Europe/London',
+        ]);
+
+        // Act
+        $modal->instance()->form->reset('name');
+
+        // Assert
+        expect($modal->instance()->form->name)->toBe('')
+            ->and($modal->instance()->form->timezone)->toBe('Europe/London');
+    });
+
+    it('keeps the stored time zone when editing under another promotion zone', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
+        app(PromotionContextService::class)->set($promotion);
+        app(PromotionContextService::class)->enforce();
+        $venue = Venue::factory()->create(['timezone' => 'Asia/Tokyo']);
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $venue->id]);
+
+        // Assert
+        $modal->assertSet('form.timezone', 'Asia/Tokyo');
+
+        app(PromotionContextService::class)->clear();
     });
 
     it('loads an existing venue for editing', function () {
