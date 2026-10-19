@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 test('ending assignments dates current relationships', function () {
     $wrestler = Wrestler::factory()->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     resolve(AssignManagersAction::class)->handle($wrestler, new Collection([$manager]), now()->subDay());
     resolve(EndManagerAssignmentsAction::class)->handle($wrestler, now());
     expect($wrestler->currentManagers()->exists())->toBeFalse();

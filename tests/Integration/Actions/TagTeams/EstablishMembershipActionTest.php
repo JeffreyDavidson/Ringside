@@ -36,7 +36,7 @@ it('establishes wrestler and manager memberships with the same date', function (
     $membershipDate = now()->subDay();
 
     $wrestlers = Wrestler::factory()->count(2)->create();
-    $managers = Manager::factory()->count(2)->create();
+    $managers = Manager::factory()->employed()->count(2)->create();
 
     $establishMembership->handle(
         $tagTeam,
@@ -78,8 +78,8 @@ it('synchronizes memberships while preserving relationship history', function ()
     $retainedWrestler = Wrestler::factory()->create();
     $removedWrestler = Wrestler::factory()->create();
     $addedWrestler = Wrestler::factory()->create();
-    $removedManager = Manager::factory()->create();
-    $addedManager = Manager::factory()->create();
+    $removedManager = Manager::factory()->employed()->create();
+    $addedManager = Manager::factory()->employed()->create();
     $establishMembership->handle(
         $tagTeam,
         new TagTeamMembershipData(
@@ -124,7 +124,7 @@ it('leaves an omitted membership group unchanged', function () {
     $membershipDate = now()->subDay();
 
     $wrestlers = Wrestler::factory()->count(2)->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $establishMembership->handle(
         $tagTeam,
         new TagTeamMembershipData($wrestlers, new Collection([$manager])),

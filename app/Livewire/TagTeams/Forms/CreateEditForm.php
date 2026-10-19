@@ -9,6 +9,7 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Rules\Managers\IsAssignable;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;
@@ -72,9 +73,19 @@ class CreateEditForm extends BaseForm
             'wrestlerA' => ['bail', 'required', 'integer', $this->existsInPromotion('wrestlers'), new CanJoinTagTeam($this->modelId)],
             'wrestlerB' => ['bail', 'required', 'integer', $this->existsInPromotion('wrestlers'), 'different:wrestlerA', new CanJoinTagTeam($this->modelId)],
             'managers' => ['array'],
-            'managers.*' => ['integer', $this->existsInPromotion('managers')],
+            'managers.*' => ['bail', 'integer', $this->existsInPromotion('managers'), new IsAssignable($this->currentManagerIds($tagTeam))],
             'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($tagTeam)],
         ];
+    }
+
+    /**
+     * The managers the edited tag team already has: they stay on it even if they are no longer available.
+     *
+     * @return array<int, int>
+     */
+    private function currentManagerIds(?TagTeam $tagTeam): array
+    {
+        return $tagTeam?->currentManagers()->get()->map(fn (Manager $manager): int => $manager->id)->all() ?? [];
     }
 
     #[\Override]

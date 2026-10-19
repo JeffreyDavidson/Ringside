@@ -20,6 +20,15 @@ class ManagerBuilder extends IndividualBuilder
     use ChecksStableManagerAssociations;
     use HasNameSearch;
 
+    /**
+     * Managers ManagerAssignmentEligibility would let a wrestler or tag team newly take on: employed now, and not
+     * retired, suspended or injured.
+     */
+    public function assignable(): static
+    {
+        return $this->bookable();
+    }
+
     /** Managers who managed a wrestler or tag team while it was in the stable, but no longer do. */
     public function whereFormerManagerOfStable(int $stableId): static
     {
