@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\Matches\MatchFinish;
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Matches\EventMatch;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -230,17 +232,38 @@ describe('authorized event form interactions', function () {
         expect($event->refresh()->name)->toBe('Editable Event');
     });
 
-    it('keeps the date of an occurred event immutable', function () {
+    it('keeps the date of a past event with a recorded result immutable', function () {
+        // Arrange
         $event = Event::factory()->past()->create();
+        EventMatch::factory()
+            ->forEvent($event)
+            ->create(['match_finish' => MatchFinish::NoDecision]);
         $originalDate = $event->date;
         $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
+        // Act
         $modal->set('form.date', today()->addMonth()->toDateString());
         $modal->call('save');
 
+        // Assert
         $modal->assertHasErrors(['form.date']);
         expect($event->refresh()->date?->toDateTimeString())
             ->toBe($originalDate?->toDateTimeString());
+    });
+
+    it('moves a past event that has no recorded results', function () {
+        // Arrange
+        $event = Event::factory()->past()->create();
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+        $newDate = today()->addMonth();
+
+        // Act
+        $modal->set('form.date', $newDate->toDateString());
+        $modal->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($event->refresh()->date?->toDateString())->toBe($newDate->toDateString());
     });
 
     it('generates valid dummy data that can create an event', function () {
