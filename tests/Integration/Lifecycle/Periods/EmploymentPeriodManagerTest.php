@@ -86,3 +86,65 @@ test('it records employment transitions for every employable owner', function (L
     LifecycleOwnerType::TagTeam,
     LifecycleOwnerType::Wrestler,
 ]);
+
+test('it moves a scheduled employment and its employed transition to the new date', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->unemployed()->create();
+    $manager = resolve(EmploymentPeriodManager::class);
+    $manager->start($wrestler, now()->addDays(10), LifecycleTransitionType::Employed);
+    $newDate = now()->addDays(3);
+
+    // Act
+    $manager->reschedule($wrestler, $newDate);
+
+    // Assert
+    $employment = $wrestler->employments()->sole();
+    $transition = $wrestler->lifecycleTransitions()->sole();
+    expect($employment->started_at->toDateTimeString())->toBe($newDate->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull()
+        ->and($transition->effective_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels a scheduled employment and removes its employed transition', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->unemployed()->create();
+    $manager = resolve(EmploymentPeriodManager::class);
+    $manager->start($wrestler, now()->addDays(10), LifecycleTransitionType::Employed);
+
+    // Act
+    $manager->cancel($wrestler);
+
+    // Assert
+    expect($wrestler->employments()->exists())->toBeFalse()
+        ->and($wrestler->lifecycleTransitions()->exists())->toBeFalse();
+});
+
+test('it refuses to move or cancel an employment that has started', function (string $method) {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create();
+    $startedAt = $wrestler->currentEmployment()->firstOrFail()->started_at;
+
+    // Act
+    $attempt = fn () => $method === 'cancel'
+        ? resolve(EmploymentPeriodManager::class)->cancel($wrestler)
+        : resolve(EmploymentPeriodManager::class)->reschedule($wrestler, now()->addDay());
+
+    // Assert
+    expect($attempt)->toThrow(LogicException::class)
+        ->and($wrestler->employments()->sole()->started_at->equalTo($startedAt))->toBeTrue();
+})->with(['reschedule', 'cancel']);
+
+test('it only offers a scheduled employment that is the sole employment', function () {
+    // Arrange
+    $sole = Wrestler::factory()->withFutureEmployment()->create();
+    $started = Wrestler::factory()->employed()->create();
+    $rehired = Wrestler::factory()->released()->withFutureEmployment()->create();
+
+    // Act
+    $found = [$sole->soleScheduledEmployment(), $started->soleScheduledEmployment(), $rehired->soleScheduledEmployment()];
+
+    // Assert
+    expect($found[0]?->is($sole->employments()->sole()))->toBeTrue()
+        ->and($found[1])->toBeNull()
+        ->and($found[2])->toBeNull();
+});

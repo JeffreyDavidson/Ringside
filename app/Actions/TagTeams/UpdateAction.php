@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Data\TagTeams\TagTeamMembershipData;
@@ -26,6 +27,7 @@ class UpdateAction
         protected EmployCurrentWrestlersAction $employCurrentWrestlersAction,
         protected EmployCurrentManagersAction $employCurrentManagersAction,
         protected RecordNameLock $nameLock,
+        protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
     ) {}
 
     /**
@@ -67,6 +69,12 @@ class UpdateAction
                 $membershipData,
                 $updateDate,
             );
+
+            // A team whose only employment has not started yet has it moved to the form date, or cancelled when the
+            // date is cleared. Its members' own employments are left as they are.
+            if ($this->changeScheduledEmployment->handle($lockedTagTeam, $tagTeamData->employment_date)) {
+                return $lockedTagTeam;
+            }
 
             if ($tagTeamData->employment_date instanceof Carbon) {
                 if ($lockedTagTeam->currentEmployment()->exists()) {

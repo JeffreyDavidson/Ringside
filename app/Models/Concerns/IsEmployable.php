@@ -51,6 +51,19 @@ trait IsEmployable
     }
 
     /**
+     * The employment that has not started yet when it is the record's only employment: the one whose date can still
+     * be moved or cancelled. A record with earlier employments, or whose employment has started, has none.
+     */
+    public function soleScheduledEmployment(): ?Employment
+    {
+        if ($this->employments()->count() !== 1) {
+            return null;
+        }
+
+        return $this->futureEmployment()->first();
+    }
+
+    /**
      * Determine whether a current employment exists, reusing the `withEmploymentStatusState`
      * projection when the model was loaded with it.
      */

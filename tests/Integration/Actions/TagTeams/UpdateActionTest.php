@@ -331,6 +331,31 @@ function renamingTagTeamData(TagTeam $tagTeam, string $name, ?string $signatureM
     );
 }
 
+test('it moves the start date of a tag team that has not started yet', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+    $newDate = now()->addDays(20)->startOfDay();
+    $data = renamingTagTeamData($tagTeam, $tagTeam->name, $tagTeam->signature_move);
+    $data = new TagTeamData($data->name, $data->signature_move, $newDate, $data->wrestlerA, $data->wrestlerB);
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, $data);
+
+    // Assert
+    expect($tagTeam->employments()->sole()->started_at->toDateTimeString())->toBe($newDate->toDateTimeString());
+});
+
+test('it cancels the hire of a tag team that has not started yet when the date is cleared', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+
+    // Act
+    resolve(UpdateAction::class)->handle($tagTeam, renamingTagTeamData($tagTeam, $tagTeam->name, $tagTeam->signature_move));
+
+    // Assert
+    expect($tagTeam->employments()->exists())->toBeFalse();
+});
+
 describe('tag team name guard', function (): void {
     test('it locks the new name and signature move of the promotion before the tag team row', function () {
         // Arrange
