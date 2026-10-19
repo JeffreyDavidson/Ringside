@@ -23,7 +23,11 @@ use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
+use App\Queries\Matches\SameDayBookingsQuery;
+use App\Services\Promotions\PromotionTimeZoneService;
 use App\ViewModels\Matches\BookingHistoryViewModel;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -40,6 +44,7 @@ use Livewire\Attributes\Renderless;
  * @property-read array<int|string,string|null> $getTitles
  * @property-read array<int, string> $getMatchStipulations
  * @property-read array<string, array<int, array{id: int|string, name: string}>> $selectedRosterLabels
+ * @property-read list<array{person: string, event: string}> $sameDayBookings
  * @property-read bool $matchTypeAllowsTagTeams
  * @property-read CompetitorSelectionLayout|null $competitorSelectionLayout
  */
@@ -64,6 +69,8 @@ class FormModal extends BaseFormModal
 
     private BookableRosterSearch $rosterSearch;
 
+    private SameDayBookingsQuery $sameDayBookingsQuery;
+
     #[\Override]
     public function mount(int|string|null $modelId = null, ?int $eventId = null): void
     {
@@ -79,11 +86,13 @@ class FormModal extends BaseFormModal
         AddMatchForEventAction $addMatchForEventAction,
         UpdateMatchAction $updateMatchAction,
         BookableRosterSearch $rosterSearch,
+        SameDayBookingsQuery $sameDayBookingsQuery,
     ): void {
         $this->dummyData = $dummyData;
         $this->addMatchForEventAction = $addMatchForEventAction;
         $this->updateMatchAction = $updateMatchAction;
         $this->rosterSearch = $rosterSearch;
+        $this->sameDayBookingsQuery = $sameDayBookingsQuery;
     }
 
     protected function getModelClass(): string
@@ -245,6 +254,49 @@ class FormModal extends BaseFormModal
                 $this->form->referees,
             ),
         ];
+    }
+
+    /**
+     * Who among the chosen wrestlers, tag teams (and their current wrestlers) and referees is also booked on
+     * another show of the same promotion-local day. A warning only: saving is not blocked, and a show at the
+     * exact same time is still refused by the booking actions.
+     *
+     * @return list<array{person: string, event: string}>
+     */
+    #[Computed]
+    public function sameDayBookings(): array
+    {
+        $sides = collect($this->form->competitors);
+        $selection = [
+            BookableRosterKind::Wrestlers->value => $this->selectedIds($sides->pluck('wrestlers')->flatten()->all()),
+            BookableRosterKind::TagTeams->value => $this->selectedIds($sides->pluck('tag_teams')->flatten()->all()),
+            BookableRosterKind::Referees->value => $this->selectedIds($this->form->referees),
+        ];
+        $event = $this->form->isEditing() ? $this->bookedEvent() : Event::query()->find($this->eventId);
+        $date = $event?->date;
+
+        if (! $event instanceof Event || ! $date instanceof Carbon || collect($selection)->flatten()->isEmpty()) {
+            return [];
+        }
+
+        $event->loadMissing('promotion');
+        $from = PromotionTimeZoneService::toLocalTime($event->promotion, $date)->startOfDay();
+
+        return array_values(collect($selection)
+            ->flatMap(fn (Collection $ids, string $kind): Collection => $this->sameDayBookingsQuery->get(
+                BookableRosterKind::from($kind), $ids, $from, $from->copy()->addDay()->startOfDay(), $event->id, $event->promotion_id,
+            ))
+            ->unique()
+            ->all());
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $values
+     * @return Collection<int, int>
+     */
+    private function selectedIds(array $values): Collection
+    {
+        return collect($values)->filter(fn (mixed $id): bool => is_numeric($id))->map(fn (mixed $id): int => (int) $id)->unique()->values();
     }
 
     protected function populateDummyData(): void
