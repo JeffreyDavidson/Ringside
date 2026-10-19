@@ -16,8 +16,8 @@ use stdClass;
 
 /**
  * The other shows of a day that the chosen wrestlers, tag teams or referees are already booked on, read in
- * one statement for the whole selection. Matches and events that are deleted are ignored, and the promotion
- * does not matter: a person booked on another promotion's show that day is still busy.
+ * one statement for the whole selection. Matches and events that are deleted are ignored, and only shows of
+ * the booked show's promotion are named.
  */
 class SameDayBookingsQuery
 {
@@ -29,9 +29,10 @@ class SameDayBookingsQuery
      * @param  Carbon  $from  the start of the day (inclusive)
      * @param  Carbon  $until  the start of the next day (exclusive)
      * @param  int  $exceptEventId  the show being booked, which is never "another" show
+     * @param  int|null  $promotionId  the booked show's promotion; shows of any other promotion are never named
      * @return Collection<int, array{person: string, event: string}>
      */
-    public function get(BookableRosterKind $kind, Collection $ids, Carbon $from, Carbon $until, int $exceptEventId): Collection
+    public function get(BookableRosterKind $kind, Collection $ids, Carbon $from, Carbon $until, int $exceptEventId, ?int $promotionId): Collection
     {
         if ($ids->isEmpty()) {
             return new Collection;
@@ -50,6 +51,7 @@ class SameDayBookingsQuery
                 $join->on('e.id', '=', 'm.event_id')->whereNull('e.deleted_at');
             })
             ->where('e.id', '!=', $exceptEventId)
+            ->where('e.promotion_id', $promotionId)
             ->where('e.date', '>=', $from->copy()->utc())
             ->where('e.date', '<', $until->copy()->utc())
             ->addSelect(['e.name as event', 'e.date as event_date', 'e.id as event_id'])

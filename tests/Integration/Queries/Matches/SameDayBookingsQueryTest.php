@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Roster\BookableRosterKind;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -70,9 +71,9 @@ test('lists the other shows of the day for the chosen wrestlers, in one statemen
     $ids = collect([$busy, $onNextDay, $onOwnShow, $onDeleted])->map(fn (Wrestler $wrestler): int => $wrestler->id);
 
     // Act
-    $rows = $query->get(BookableRosterKind::Wrestlers, $ids, $from, $until, $own->id);
-    $smallerStatements = recordStatements(fn () => $query->get(BookableRosterKind::Wrestlers, $ids->take(1), $from, $until, $own->id));
-    $largerStatements = recordStatements(fn () => $query->get(BookableRosterKind::Wrestlers, $ids, $from, $until, $own->id));
+    $rows = $query->get(BookableRosterKind::Wrestlers, $ids, $from, $until, $own->id, null);
+    $smallerStatements = recordStatements(fn () => $query->get(BookableRosterKind::Wrestlers, $ids->take(1), $from, $until, $own->id, null));
+    $largerStatements = recordStatements(fn () => $query->get(BookableRosterKind::Wrestlers, $ids, $from, $until, $own->id, null));
 
     // Assert
     expect($rows->map(fn (array $row): array => [$row['person'], $row['event']])->all())->toBe([
@@ -116,7 +117,7 @@ test('names the tag team and each current member booked individually on another 
     sameDayBookingsBook($other, [$bookedTeam, $opponent]);
 
     // Act
-    $rows = resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::TagTeams, collect([$teamed->id, $bookedTeam->id]), $from, $until, $own->id);
+    $rows = resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::TagTeams, collect([$teamed->id, $bookedTeam->id]), $from, $until, $own->id, null);
 
     // Assert
     expect($rows->map(fn (array $row): array => [$row['person'], $row['event']])->all())->toEqualCanonicalizing([
@@ -148,7 +149,7 @@ test('lists the other shows of the day for the chosen referees', function (): vo
     sameDayBookingsBook($other, [$first, $second], $referee);
 
     // Act
-    $rows = resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::Referees, collect([$referee->id, $free->id]), $from, $until, $own->id);
+    $rows = resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::Referees, collect([$referee->id, $free->id]), $from, $until, $own->id, null);
 
     // Assert
     expect($rows->map(fn (array $row): array => [$row['person'], $row['event']])->all())->toBe([
@@ -161,8 +162,43 @@ test('reads nothing when no one is chosen', function (): void {
     $from = Carbon::parse('2026-10-19 00:00:00', 'UTC');
 
     // Act
-    $statements = recordStatements(fn () => resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::Wrestlers, collect(), $from, $from->copy()->addDay(), 0));
+    $statements = recordStatements(fn () => resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::Wrestlers, collect(), $from, $from->copy()->addDay(), 0, null));
 
     // Assert
     expect($statements)->toBeEmpty();
+});
+
+test('never names a show of another promotion than the booked one', function (): void {
+    // Arrange
+    $from = Carbon::parse('2026-10-19 00:00:00', 'UTC');
+    $until = Carbon::parse('2026-10-20 00:00:00', 'UTC');
+    $promotion = Promotion::factory()
+        ->create();
+    $otherPromotion = Promotion::factory()
+        ->create();
+    $own = Event::factory()
+        ->for($promotion, 'promotion')
+        ->create(['date' => '2026-10-19 20:00:00']);
+    $sameSide = Event::factory()
+        ->for($promotion, 'promotion')
+        ->create(['name' => 'Home Show', 'date' => '2026-10-19 14:00:00']);
+    $foreign = Event::factory()
+        ->for($otherPromotion, 'promotion')
+        ->create(['name' => 'Foreign Show', 'date' => '2026-10-19 15:00:00']);
+    $wrestler = Wrestler::factory()
+        ->bookable()
+        ->for($promotion)
+        ->create();
+    $opponent = Wrestler::factory()
+        ->bookable()
+        ->for($promotion)
+        ->create();
+    sameDayBookingsBook($sameSide, [$wrestler, $opponent]);
+    sameDayBookingsBook($foreign, [$wrestler, $opponent]);
+
+    // Act
+    $rows = resolve(SameDayBookingsQuery::class)->get(BookableRosterKind::Wrestlers, collect([$wrestler->id]), $from, $until, $own->id, $promotion->id);
+
+    // Assert
+    expect($rows->pluck('event')->all())->toBe(['Home Show']);
 });
