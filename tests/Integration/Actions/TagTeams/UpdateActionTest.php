@@ -267,7 +267,7 @@ test('it employs newly assigned members when the tag team is employed', function
     ['tagTeam' => $tagTeam, 'wrestlerA' => $wrestlerA, 'wrestlerB' => $wrestlerB] = tagTeamsUpdateActionFixtures();
 
     $newWrestler = Wrestler::factory()->create();
-    $newManager = Manager::factory()->create();
+    $newManager = Manager::factory()->employed()->create();
 
     resolve(UpdateAction::class)->handle($tagTeam, new TagTeamData(
         name: $tagTeam->name,

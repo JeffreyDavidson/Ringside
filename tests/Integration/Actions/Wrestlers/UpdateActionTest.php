@@ -5,11 +5,13 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
@@ -50,6 +52,76 @@ test('it updates wrestler basic information', function () {
         'hometown' => 'Updated Town',
         'signature_move' => 'Updated Move',
     ]);
+});
+
+test('it synchronizes the managers through the shared assignment path', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $keptManager = Manager::factory()->employed()->create();
+    $removedManager = Manager::factory()->employed()->create();
+    $addedManager = Manager::factory()->employed()->create();
+    $wrestler->managers()->attach([$keptManager->id, $removedManager->id], ['hired_at' => now()->subYear()]);
+    $data = new WrestlerData(
+        name: $wrestler->name,
+        height: 70,
+        weight: 200,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: null,
+        managers: new Collection([$keptManager, $addedManager]),
+    );
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())->toEqualCanonicalizing([$keptManager->id, $addedManager->id])
+        ->and($wrestler->previousManagers()->pluck('managers.id')->all())->toBe([$removedManager->id]);
+});
+
+test('it leaves the managers alone when none are given', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->employed()->create();
+    $wrestler->managers()->attach($manager, ['hired_at' => now()->subYear()]);
+    $data = new WrestlerData(
+        name: $wrestler->name,
+        height: 70,
+        weight: 200,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: null,
+        managers: null,
+    );
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())->toBe([$manager->id]);
+});
+
+test('it refuses a newly added manager who is not available and changes nothing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create(['name' => 'Original Name']);
+    $injuredManager = Manager::factory()->injured()->create();
+    $data = new WrestlerData(
+        name: 'Updated Name',
+        height: 70,
+        weight: 200,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: null,
+        managers: new Collection([$injuredManager]),
+    );
+
+    // Act
+    $update = fn () => resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($update)->toThrow(CannotBeAssignedException::class)
+        ->and($wrestler->refresh()->name)->toBe('Original Name')
+        ->and($wrestler->managers()->exists())->toBeFalse();
 });
 
 test('it updates using the current persisted wrestler state', function () {
@@ -393,6 +465,31 @@ test('it cancels the hire of a wrestler who has not started yet when the date is
     // Assert
     expect($wrestler->employments()->exists())->toBeFalse();
 });
+
+test('it synchronizes the managers of a wrestler who has not started yet, whether the date moves or is cleared', function (bool $moveDate) {
+    // Arrange
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    $manager = Manager::factory()->employed()->create();
+    $base = renamingWrestlerData($wrestler->name, $wrestler->signature_move);
+    $data = new WrestlerData(
+        $base->name,
+        $base->height,
+        $base->weight,
+        $base->hometown,
+        $base->signature_move,
+        $moveDate ? now()->addDays(20)->startOfDay() : null,
+        new Collection([$manager]),
+    );
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())->toBe([$manager->id]);
+})->with([
+    'date moved' => [true],
+    'date cleared' => [false],
+]);
 
 test('it keeps the start date of a wrestler who has already started when the date is cleared', function () {
     // Arrange

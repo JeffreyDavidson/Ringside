@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Managers\AssignManagersAction;
 use App\Actions\Managers\EndManagerAssignmentsForManagerAction;
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
+use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
@@ -14,16 +15,16 @@ use Illuminate\Database\Eloquent\Collection;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('assigns managers to a wrestler without employing them', function () {
+it('assigns employed managers to a wrestler without changing their employment', function () {
     $wrestler = Wrestler::factory()->create();
-    $managers = Manager::factory()->count(2)->create();
+    $managers = Manager::factory()->employed()->count(2)->create();
     $assignmentDate = now()->subDay();
 
     resolve(AssignManagersAction::class)->handle($wrestler, $managers, $assignmentDate);
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
-        ->and($managers->every(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists()))
+        ->and($managers->every(fn (Manager $manager): bool => $manager->currentEmployment()->exists()))
         ->toBeTrue();
 
     foreach ($managers as $manager) {
@@ -38,7 +39,7 @@ it('assigns managers to a wrestler without employing them', function () {
 
 it('assigns managers to a tag team through the same boundary', function () {
     $tagTeam = TagTeam::factory()->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $assignmentDate = now()->subDay();
 
     resolve(AssignManagersAction::class)->handle(
@@ -59,9 +60,9 @@ it('assigns managers to a tag team through the same boundary', function () {
 
 it('synchronizes current managers while preserving relationship history', function () {
     $wrestler = Wrestler::factory()->create();
-    $retainedManager = Manager::factory()->create();
-    $removedManager = Manager::factory()->create();
-    $addedManager = Manager::factory()->create();
+    $retainedManager = Manager::factory()->employed()->create();
+    $removedManager = Manager::factory()->employed()->create();
+    $addedManager = Manager::factory()->employed()->create();
     $assignManagers = resolve(AssignManagersAction::class);
     $synchronizeAssignments = resolve(SynchronizeManagerAssignmentsAction::class);
     $assignManagers->handle(
@@ -91,7 +92,7 @@ it('synchronizes current managers while preserving relationship history', functi
 
 it('leaves manager assignments unchanged when synchronization is omitted', function () {
     $tagTeam = TagTeam::factory()->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $assignManagers = resolve(AssignManagersAction::class);
     $synchronizeAssignments = resolve(SynchronizeManagerAssignmentsAction::class);
     $assignManagers->handle($tagTeam, new Collection([$manager]), now()->subDay());
@@ -113,9 +114,100 @@ it('accepts an empty manager collection', function () {
     expect($wrestler->managers()->exists())->toBeFalse();
 });
 
+it('refuses a manager who is not available and attaches none of the batch', function (string $state, string $message) {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $eligibleManager = Manager::factory()->employed()->create();
+    $unavailableManager = Manager::factory()->{$state}()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+    $managers = Manager::query()->whereKey([$eligibleManager->id, $unavailableManager->id])->get();
+
+    // Act
+    $assign = fn () => resolve(AssignManagersAction::class)->handle($wrestler, $managers, now());
+
+    // Assert
+    expect($assign)->toThrow(CannotBeAssignedException::class, $message)
+        ->and($wrestler->managers()->exists())->toBeFalse();
+})->with([
+    'never employed' => ['unemployed', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+    'released' => ['released', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+    'retired' => ['retired', 'Manager Bobby Heenan is retired and cannot be assigned.'],
+    'suspended' => ['suspended', 'Manager Bobby Heenan is suspended and cannot be assigned.'],
+    'injured' => ['injured', 'Manager Bobby Heenan is injured and cannot be assigned.'],
+]);
+
+it('locks the incoming managers in ascending id order before attaching them', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    Manager::factory()->employed()->count(2)->create();
+    $managers = Manager::query()->latest('id')->get();
+
+    // Act
+    $statements = recordStatements(fn () => resolve(AssignManagersAction::class)->handle($wrestler, $managers, now()));
+
+    // Assert
+    $lockPosition = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "managers"'));
+    $attachPosition = statementPosition($statements, fn (array $statement): bool => str_contains($statement['sql'], 'insert into "wrestlers_managers"'));
+
+    expect($statements[$lockPosition]['sql'])->toContain('order by "managers"."id" asc')
+        ->and($lockPosition)->toBeLessThan($attachPosition);
+});
+
+it('refuses a manager who was deleted after the form validated and attaches nothing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+    $managers = Manager::query()->whereKey($manager->id)->get();
+    $manager->delete();
+
+    // Act
+    $assign = fn () => resolve(AssignManagersAction::class)->handle($wrestler, $managers, now());
+
+    // Assert
+    expect($assign)->toThrow(CannotBeAssignedException::class, 'Manager Bobby Heenan has been deleted and cannot be assigned.')
+        ->and($wrestler->managers()->exists())->toBeFalse();
+});
+
+it('refuses a newly added manager who is not available when synchronizing', function () {
+    // Arrange
+    $tagTeam = TagTeam::factory()->create();
+    $retainedManager = Manager::factory()->employed()->create();
+    $releasedManager = Manager::factory()->released()->create();
+    resolve(AssignManagersAction::class)->handle($tagTeam, new Collection([$retainedManager]), now()->subDay());
+
+    // Act
+    $synchronize = fn () => resolve(SynchronizeManagerAssignmentsAction::class)->handle(
+        $tagTeam,
+        new Collection([$retainedManager, $releasedManager]),
+        now(),
+    );
+
+    // Assert
+    expect($synchronize)->toThrow(CannotBeAssignedException::class)
+        ->and($tagTeam->currentManagers()->pluck('managers.id')->all())->toBe([$retainedManager->id]);
+});
+
+it('keeps a manager who was assigned and is no longer available when synchronizing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $assignedManager = Manager::factory()->suspended()->create();
+    $addedManager = Manager::factory()->employed()->create();
+    $wrestler->managers()->attach($assignedManager, ['hired_at' => now()->subMonth()]);
+
+    // Act
+    resolve(SynchronizeManagerAssignmentsAction::class)->handle(
+        $wrestler,
+        new Collection([$assignedManager, $addedManager]),
+        now(),
+    );
+
+    // Assert
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())
+        ->toEqualCanonicalizing([$assignedManager->id, $addedManager->id]);
+});
+
 it('preserves each manager assignment when a manager is reassigned', function () {
     $wrestler = Wrestler::factory()->create();
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $managers = new Collection([$manager]);
     $noManagers = new Collection;
     $firstHiredAt = now()->subDays(4)->startOfSecond();
@@ -147,7 +239,7 @@ it('preserves each manager assignment when a manager is reassigned', function ()
 });
 
 it("ends only a manager's current wrestler and tag team assignments", function () {
-    $manager = Manager::factory()->create();
+    $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create();
     $historicalEnd = now()->subDays(2)->startOfSecond();

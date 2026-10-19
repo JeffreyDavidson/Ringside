@@ -105,7 +105,7 @@ describe('tag team managers', function () {
 
     it('accepts a manager of the active promotion', function () {
         $promotionA = Promotion::factory()->create();
-        $manager = Manager::factory()->for($promotionA, 'promotion')->create();
+        $manager = Manager::factory()->employed()->for($promotionA, 'promotion')->create();
         actInPromotion($promotionA);
 
         $component = livewire(TagTeamFormModal::class)

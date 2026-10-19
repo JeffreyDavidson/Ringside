@@ -138,8 +138,8 @@ test('it handles height conversion correctly', function () {
         ->and($result->height->toInches())->toBe(71); // 5'11" = 71 inches
 });
 
-test('it assigns managers without employing them when the wrestler is not employed', function () {
-    $managers = Manager::factory()->count(2)->create();
+test('it assigns employed managers when the wrestler is not employed', function () {
+    $managers = Manager::factory()->employed()->count(2)->create();
 
     $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
         name: 'Managed Wrestler',
@@ -153,12 +153,12 @@ test('it assigns managers without employing them when the wrestler is not employ
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
-        ->and($managers->every(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists()))
+        ->and($managers->every(fn (Manager $manager): bool => $manager->currentEmployment()->exists()))
         ->toBeTrue();
 });
 
-test('it employs assigned managers through the wrestler employment cascade', function () {
-    $manager = Manager::factory()->create();
+test('it keeps an assigned employed manager employed when the wrestler is employed', function () {
+    $manager = Manager::factory()->employed()->create();
     $employmentDate = now()->subDay();
 
     $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
@@ -172,13 +172,7 @@ test('it employs assigned managers through the wrestler employment cascade', fun
     ));
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue()
-        ->and($manager->currentEmployment()->exists())->toBeTrue();
-
-    assertDatabaseHas('employments', [
-        'employable_id' => $manager->id,
-        'started_at' => $employmentDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+        ->and($manager->employments()->count())->toBe(1);
 });
 
 function namedWrestlerData(string $name, ?string $signatureMove = null): WrestlerData

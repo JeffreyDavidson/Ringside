@@ -75,7 +75,7 @@ final class RosterMemberSearch
         return match ($kind) {
             RosterMemberKind::Wrestlers => Wrestler::query(),
             RosterMemberKind::TagTeams => TagTeam::query(),
-            RosterMemberKind::Managers => Manager::query(),
+            RosterMemberKind::Managers => Manager::query()->assignable(),
         };
     }
 

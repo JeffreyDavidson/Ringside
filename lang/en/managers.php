@@ -93,6 +93,14 @@ return [
     ],
 
     'validation' => [
+        'invalid' => 'The selected manager is invalid.',
+        'not_assignable' => [
+            'deleted' => 'Manager :name has been deleted and cannot be assigned.',
+            'unemployed' => 'Manager :name is not currently employed and cannot be assigned.',
+            'retired' => 'Manager :name is retired and cannot be assigned.',
+            'suspended' => 'Manager :name is suspended and cannot be assigned.',
+            'injured' => 'Manager :name is injured and cannot be assigned.',
+        ],
         'attributes' => [
             'first_name' => 'first name',
             'last_name' => 'last name',

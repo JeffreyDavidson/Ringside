@@ -7,6 +7,7 @@ use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\EstablishMembershipAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -16,6 +17,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
@@ -69,7 +71,7 @@ describe('authorized tag team form interactions', function () {
     it('searches wrestlers and managers for the tag team form', function (string $kind, string $term, string $expected) {
         Wrestler::factory()->create(['name' => 'Ricky Morton']);
         Wrestler::factory()->create(['name' => 'Robert Gibson']);
-        Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
         $modal = livewire(FormModal::class);
 
         $options = $modal->instance()->searchRoster($kind, $term);
@@ -101,7 +103,7 @@ describe('authorized tag team form interactions', function () {
 
     it('creates a tag team from wrestlers and managers chosen through search', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
-        $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
         $modal = livewire(FormModal::class);
         $searched = $modal->instance()->searchRoster('wrestlers', $wrestlers->firstOrFail()->name);
 
@@ -177,7 +179,7 @@ describe('authorized tag team form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $wrestlerA = $wrestlers->firstOrFail();
         $wrestlerB = $wrestlers->skip(1)->firstOrFail();
-        $manager = Manager::factory()->create();
+        $manager = Manager::factory()->employed()->create();
         $modal = livewire(FormModal::class);
 
         $modal->set([
@@ -265,7 +267,7 @@ describe('authorized tag team form interactions', function () {
         $newWrestlerA = $newWrestlers->firstOrFail();
         $newWrestlerB = $newWrestlers->skip(1)->firstOrFail();
         $originalManager = Manager::factory()->create();
-        $newManager = Manager::factory()->create();
+        $newManager = Manager::factory()->employed()->create();
         $tagTeam = TagTeam::factory()->create(['name' => 'Original Team', 'signature_move' => 'Original Move']);
         $tagTeam->wrestlers()->attach($originalWrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
         $tagTeam->managers()->attach($originalManager, ['hired_at' => now()->subYear()]);
@@ -293,6 +295,97 @@ describe('authorized tag team form interactions', function () {
             ->assertHasNoErrors()
             ->assertDispatched('refreshDatatable')
             ->assertDispatched('closeModal');
+    });
+
+    it('only offers employed managers who are not retired, suspended or injured', function () {
+        // Arrange
+        Manager::factory()->employed()->create(['first_name' => 'Available', 'last_name' => 'Manager']);
+        Manager::factory()->unemployed()->create(['first_name' => 'Unsigned', 'last_name' => 'Manager']);
+        Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager']);
+        Manager::factory()->withFutureEmployment()->create(['first_name' => 'Future', 'last_name' => 'Manager']);
+        Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
+        Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
+        Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $options = $modal->instance()->searchRoster('managers', 'Manager');
+
+        // Assert
+        expect(array_column($options, 'name'))->toBe(['Available Manager']);
+    });
+
+    it('refuses a manager who is not available and creates nothing', function (string $state, string $message) {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $manager = Manager::factory()->{$state}()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal
+            ->set('form.name', 'The Managed Team')
+            ->set('form.wrestlerA', $wrestlers->firstOrFail()->id)
+            ->set('form.wrestlerB', $wrestlers->skip(1)->firstOrFail()->id)
+            ->set('form.managers', [$manager->id])
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.managers.0'])
+            ->assertSee($message)
+            ->assertNotDispatched('closeModal');
+        expect(TagTeam::query()->doesntExist())->toBeTrue();
+    })->with([
+        'never employed' => ['unemployed', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+        'released' => ['released', 'Manager Bobby Heenan is not currently employed and cannot be assigned.'],
+        'retired' => ['retired', 'Manager Bobby Heenan is retired and cannot be assigned.'],
+        'suspended' => ['suspended', 'Manager Bobby Heenan is suspended and cannot be assigned.'],
+        'injured' => ['injured', 'Manager Bobby Heenan is injured and cannot be assigned.'],
+    ]);
+
+    it('keeps an assigned manager who is no longer available when the tag team is renamed', function () {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $tagTeam = TagTeam::factory()->create(['name' => 'Original Team']);
+        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
+        $tagTeam->managers()->attach($suspendedManager, ['hired_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class, ['modelId' => $tagTeam->id]);
+
+        // Act
+        $modal
+            ->set('form.name', 'Renamed Team')
+            ->call('save');
+
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($tagTeam->refresh()->name)->toBe('Renamed Team')
+            ->and($tagTeam->currentManagers()->pluck('managers.id')->all())->toBe([$suspendedManager->id]);
+    });
+
+    it('shows a manager who became unavailable after validation on the managers field', function () {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $manager = Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        $action = Double::for(CreateAction::class);
+        $action->expects('handle')->throws(CannotBeAssignedException::injured($manager));
+        app()->instance(CreateAction::class, $action);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal
+            ->set('form.name', 'The Managed Team')
+            ->set('form.wrestlerA', $wrestlers->firstOrFail()->id)
+            ->set('form.wrestlerB', $wrestlers->skip(1)->firstOrFail()->id)
+            ->set('form.managers', [$manager->id])
+            ->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.managers'])
+            ->assertSee('Manager Bobby Heenan is injured and cannot be assigned.')
+            ->assertNotDispatched('closeModal');
+        $action->verify();
     });
 
     it('rejects changing an active tag team employment date', function () {

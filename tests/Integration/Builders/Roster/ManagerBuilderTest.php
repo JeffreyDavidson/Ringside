@@ -21,6 +21,23 @@ use App\Models\Roster\Managers\Manager;
  * @see ManagerBuilder
  */
 describe('ManagerQueryBuilder Integration Tests', function () {
+    test('assignable managers are employed and neither retired, suspended nor injured', function () {
+        // Arrange
+        $assignableManager = Manager::factory()->employed()->create();
+        Manager::factory()->unemployed()->create();
+        Manager::factory()->withFutureEmployment()->create();
+        Manager::factory()->released()->create();
+        Manager::factory()->retired()->create();
+        Manager::factory()->suspended()->create();
+        Manager::factory()->injured()->create();
+
+        // Act
+        $managerIds = Manager::query()->assignable()->pluck('id')->all();
+
+        // Assert
+        expect($managerIds)->toBe([$assignableManager->id]);
+    });
+
     describe('employment status scopes', function () {
         test('future employed managers can be retrieved', function () {
             $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();

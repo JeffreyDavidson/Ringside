@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Data\Wrestlers\WrestlerData;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use App\ValueObjects\Weight;
@@ -35,6 +36,30 @@ describe('wrestler create and edit form', function (): void {
             ->and($data->weight)->toEqual(new Weight(235))
             ->and($data->signature_move)->toBe('Sharpshooter')
             ->and($data->employment_date?->equalTo($employmentDate))->toBeTrue();
+    });
+
+    it('maps the selected manager ids to manager models', function (): void {
+        // Arrange
+        $managers = Manager::factory()
+            ->employed()
+            ->count(2)
+            ->create();
+        Manager::factory()
+            ->employed()
+            ->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->name = 'Bret Hart';
+        $form->hometown = 'Calgary, Alberta';
+        $form->height_feet = 6;
+        $form->height_inches = 0;
+        $form->weight = 235;
+        $form->managers = $managers->modelKeys();
+
+        // Act
+        $data = $form->toData();
+
+        // Assert
+        expect($data->managers?->modelKeys())->toEqualCanonicalizing($managers->modelKeys());
     });
 
     it('maps blank optional fields to null', function (): void {

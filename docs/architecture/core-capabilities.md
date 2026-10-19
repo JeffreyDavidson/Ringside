@@ -100,6 +100,8 @@ Lock order follows [Lifecycle Operation Boundaries](lifecycle-operation-boundari
 
 Wrestler and Tag Team define their current and historical manager relationships directly so each model visibly owns its persistence mapping. The `Manageable` contract remains the type boundary for application code that operates on either model.
 
+Only employed, available managers can be newly attached. A manager must be employed now and not retired, suspended or injured (`ManagerAssignmentEligibility`); a released, never-employed or future-employed manager is refused. The wrestler and tag team forms both carry a managers field, which offers only such managers of the form's promotion and validates every chosen id with `App\Rules\Managers\IsAssignable`. `AssignManagersAction` enforces the same rule again for the managers it is given, locking them in ascending id order after the wrestler or tag team row, and throws `CannotBeAssignedException`, which the forms show on the managers field. Managers who are already assigned stay when they later become unavailable: the form rule skips them and `SynchronizeManagerAssignmentsAction` only checks the managers it adds, so renaming a wrestler or tag team never drops them. Because assignment needs an employed manager, employing a wrestler or tag team no longer employs new managers; the employment cascade only reaches current managers who are unemployed.
+
 ## User and Roster Separation
 
 Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.

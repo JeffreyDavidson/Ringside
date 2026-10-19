@@ -57,7 +57,7 @@ describe('searching roster members', function (): void {
 
     it('searches managers by full name and tag teams by name', function (): void {
         // Arrange
-        Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
+        Manager::factory()->employed()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
         TagTeam::factory()->create(['name' => 'The Rockers']);
         $search = resolve(RosterMemberSearch::class);
 
