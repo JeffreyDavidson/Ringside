@@ -5,9 +5,14 @@ declare(strict_types=1);
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
+use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it retires an active stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
@@ -145,6 +150,44 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
         $tagTeam->refresh();
         expect($tagTeam->currentRetirement()->exists())->toBeTrue();
     }
+});
+
+test('it retires a tag team with its members intact when a member is also a direct stable member', function () {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $joinedAt = now()->subWeek();
+
+    $stable = Stable::factory()
+        ->withNoMembers()
+        ->has(ActivityPeriod::factory()->started($joinedAt), 'activityPeriods')
+        ->create();
+    $wrestlerA = Wrestler::factory()
+        ->has(Employment::factory()->started($joinedAt), 'employments')
+        ->create();
+    $wrestlerB = Wrestler::factory()
+        ->has(Employment::factory()->started($joinedAt), 'employments')
+        ->create();
+    $tagTeam = TagTeam::factory()
+        ->has(Employment::factory()->started($joinedAt), 'employments')
+        ->create();
+    $tagTeam->wrestlers()->attach([$wrestlerA->id, $wrestlerB->id], ['joined_at' => $joinedAt]);
+    $stable->tagTeams()->attach($tagTeam, ['joined_at' => $joinedAt]);
+    $stable->wrestlers()->attach($wrestlerA, ['joined_at' => $joinedAt]);
+
+    // Act
+    resolve(RetireAction::class)->handle($stable);
+
+    // Assert
+    $memberships = TagTeamWrestler::query()
+        ->whereBelongsTo($tagTeam, 'tagTeam')
+        ->get();
+
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and($memberships)->toHaveCount(2)
+        ->and($memberships->whereNotNull('left_at'))->toBeEmpty()
+        ->and($tagTeam->currentWrestlers()->count())->toBe(2)
+        ->and($wrestlerA->retirements()->count())->toBe(1)
+        ->and($wrestlerB->retirements()->count())->toBe(1);
 });
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
