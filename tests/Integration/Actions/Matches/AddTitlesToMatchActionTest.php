@@ -15,6 +15,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -80,7 +81,7 @@ test('it adds multiple titles to a match', function () {
 test('it rejects the entire assignment when any title is inactive', function () {
     $match = EventMatch::factory()->create();
     $activeTitle = Title::factory()->active()->create();
-    $inactiveTitle = Title::factory()->inactive()->create();
+    $inactiveTitle = Title::factory()->withActivationPeriod(now()->subDays(30), now()->subDays(10))->create();
 
     $titles = collect([$activeTitle, $inactiveTitle]);
 
@@ -91,7 +92,7 @@ test('it rejects the entire assignment when any title is inactive', function () 
 
 test('it throws exception when no eligible titles provided', function () {
     $match = EventMatch::factory()->create();
-    $inactiveTitle = Title::factory()->inactive()->create();
+    $inactiveTitle = Title::factory()->withActivationPeriod(now()->subDays(30), now()->subDays(10))->create();
 
     $titles = collect([$inactiveTitle]);
 
@@ -285,3 +286,187 @@ test('it rejects an empty title list without attaching anything', function (Clos
         ),
     ],
 ]);
+
+/**
+ * A singles match on an event held on the given date, contested by the given wrestlers.
+ *
+ * @param  array<int, Wrestler>  $wrestlers
+ */
+function singlesMatchOn(?string $eventDate, array $wrestlers): EventMatch
+{
+    $event = Event::factory()->create(['date' => $eventDate]);
+
+    return EventMatch::factory()
+        ->forEvent($event)
+        ->withCompetitors($wrestlers)
+        ->create();
+}
+
+test('it accepts a title that was active on a back-filled show but is inactive now', function () {
+    // Arrange
+    $match = singlesMatchOn('2026-03-10 19:00:00', Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-06-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+
+    // Act
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it refuses a title that had not debuted on the show date', function () {
+    // Arrange
+    $match = singlesMatchOn('2026-03-10 19:00:00', Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-05-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.')
+        ->and($match->titles()->exists())->toBeFalse();
+});
+
+test('it refuses a title that had already ended its activity before the show date', function () {
+    // Arrange
+    $match = singlesMatchOn('2026-03-10 19:00:00', Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'), Carbon::parse('2026-02-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)->toThrow(EntityNotAvailableException::class);
+});
+
+test('it requires the champion on the show date to compete even after the title changed hands', function () {
+    // Arrange
+    $championThen = Wrestler::factory()->bookable()->create();
+    $championNow = Wrestler::factory()->bookable()->create();
+    $match = singlesMatchOn('2026-03-10 19:00:00', [$championNow, Wrestler::factory()->bookable()->create()]);
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championThen)
+        ->wonOn('2026-02-01 00:00:00')
+        ->lostOn('2026-05-01 00:00:00')
+        ->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championNow)
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)
+        ->toThrow(InvalidMatchConfigurationException::class, "The current champion of [{$title->name}] must compete in the title match.")
+        ->and($match->titles()->exists())->toBeFalse();
+});
+
+test('it accepts the champion on the show date even when a later champion is not competing', function () {
+    // Arrange
+    $championThen = Wrestler::factory()->bookable()->create();
+    $match = singlesMatchOn('2026-03-10 19:00:00', [$championThen, Wrestler::factory()->bookable()->create()]);
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($championThen)
+        ->wonOn('2026-02-01 00:00:00')
+        ->lostOn('2026-05-01 00:00:00')
+        ->create();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->bookable()->create())
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+
+    // Act
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it does not require a champion who had not won the title yet on the show date', function () {
+    // Arrange
+    $match = singlesMatchOn('2026-03-10 19:00:00', Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->withActivationPeriod(Carbon::parse('2026-01-01 00:00:00'))
+        ->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler(Wrestler::factory()->bookable()->create())
+        ->wonOn('2026-05-01 00:00:00')
+        ->current()
+        ->create();
+
+    // Act
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it still requires the current champion for a show in the future', function () {
+    // Arrange
+    $champion = Wrestler::factory()->bookable()->create();
+    $match = singlesMatchOn(now()->addDays(10)->toDateTimeString(), Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->active()
+        ->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($champion)
+        ->current()
+        ->create();
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)->toThrow(InvalidMatchConfigurationException::class, 'must compete in the title match');
+});
+
+test('it refuses a title that is inactive now for a show in the future', function () {
+    // Arrange
+    $match = singlesMatchOn(now()->addDays(10)->toDateTimeString(), Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->inactive()
+        ->create(['type' => TitleType::Singles]);
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)->toThrow(EntityNotAvailableException::class);
+});
+
+test('it keeps the active-now check for an unscheduled event', function () {
+    // Arrange
+    $match = singlesMatchOn(null, Wrestler::factory()->bookable()->count(2)->create()->all());
+    $title = Title::factory()
+        ->inactive()
+        ->create(['type' => TitleType::Singles]);
+
+    // Act
+    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    // Assert
+    expect($attempt)->toThrow(EntityNotAvailableException::class);
+});

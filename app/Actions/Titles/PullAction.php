@@ -7,6 +7,7 @@ namespace App\Actions\Titles;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,7 @@ class PullAction
     public function __construct(
         private readonly TitleLifecycleEligibility $eligibility,
         private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly ChampionshipReignManager $championshipReigns,
     ) {}
 
     /**
@@ -27,8 +29,9 @@ class PullAction
      * - Ends the current active status period
      * - Creates new inactive status period
      * - Updates the title status to inactive
+     * - Ends any current championship reign on the pull date, leaving the title vacant
      * - Makes the title unavailable for new championship matches
-     * - Preserves championship history and allows for future reinstatement
+     * - Preserves championship history; reinstatement brings the title back vacant
      * - Different from retirement - this is temporary deactivation, not permanent
      *
      * @param  Title  $title  The title to pull
@@ -48,6 +51,7 @@ class PullAction
                 LifecycleTransitionType::Pulled,
                 array_filter(['notes' => $notes]),
             );
+            $this->championshipReigns->endCurrentReign($lockedTitle, $date);
         });
     }
 }

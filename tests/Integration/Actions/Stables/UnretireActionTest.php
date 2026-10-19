@@ -6,6 +6,7 @@ use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it unretires a retired stable and establishes it by default', function (): void {
@@ -74,17 +75,72 @@ test('it reports the weighted headcount when a tag team alone is too few', funct
     expect($unretire)->toThrow(CannotBeUnretiredException::class, 'only 2 former members available, but 3 required');
 });
 
-test('it rejects unretiring a stable when a key former member is unavailable', function (Closure $makeMemberUnavailable): void {
-    $stable = Stable::factory()->retired()->create();
-    $spareWrestler = Wrestler::factory()->employed()->create();
+test('it brings back only the members it had when it retired', function (): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->retired()
+        ->create();
+    $earlierMember = Wrestler::factory()
+        ->employed()
+        ->create();
+    $stable->wrestlers()->attach($earlierMember, [
+        'joined_at' => now()->subYears(3),
+        'left_at' => now()->subYears(2),
+    ]);
+    $unretiredAt = now();
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable, $unretiredAt);
+
+    // Assert
+    expect($stable->currentWrestlers()->count())->toBe(2)
+        ->and($stable->currentTagTeams()->count())->toBe(1)
+        ->and($stable->currentWrestlers()->whereKey($earlierMember->getKey())->exists())->toBeFalse()
+        ->and(StableWrestler::query()->whereBelongsTo($stable)->whereNull('left_at')->get()->every(fn (StableWrestler $membership): bool => requiredDate($membership->joined_at)->equalTo($unretiredAt)))->toBeTrue();
+});
+
+test('it is not blocked by a member who left years before the retirement', function (): void {
+    // Arrange
+    $stable = Stable::factory()
+        ->retired()
+        ->create();
+    $earlierMember = Wrestler::factory()
+        ->injured()
+        ->create();
+    $stable->wrestlers()->attach($earlierMember, [
+        'joined_at' => now()->subYears(3),
+        'left_at' => now()->subYears(2),
+    ]);
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active);
+});
+
+test('it skips an unavailable member and returns the available ones', function (Closure $makeMemberUnavailable): void {
+    // Arrange
+    $stable = Stable::factory()
+        ->retired()
+        ->create();
+    $spareWrestler = Wrestler::factory()
+        ->employed()
+        ->create();
     $stable->wrestlers()->attach($spareWrestler, [
         'joined_at' => now()->subDays(3),
-        'left_at' => now()->subDay(),
+        'left_at' => $stable->currentRetirement()->firstOrFail()->started_at,
     ]);
     $unavailableMember = $makeMemberUnavailable($stable);
 
-    expect(fn () => resolve(UnretireAction::class)->handle($stable))
-        ->toThrow(CannotBeUnretiredException::class, "key former members unavailable: {$unavailableMember->name}")
-        ->and($stable->currentRetirement()->exists())->toBeTrue()
-        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    $currentMembers = $stable->currentWrestlers()->get()->concat($stable->currentTagTeams()->get());
+
+    expect($stable->refresh()->status)->toBe(StableStatus::Active)
+        ->and($currentMembers->contains(fn ($member): bool => $member->is($unavailableMember)))->toBeFalse()
+        ->and($currentMembers)->not->toBeEmpty();
 })->with('unavailable stable former members');

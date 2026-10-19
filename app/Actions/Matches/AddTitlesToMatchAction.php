@@ -37,8 +37,8 @@ class AddTitlesToMatchAction
      * - Validates current champions are participating in the title match
      *
      * BUSINESS RULES:
-     * - Titles must be active and not retired or suspended
-     * - Championship matches require current title holders to be competing
+     * - Titles must be active on the event's date (active now for an unscheduled event)
+     * - Championship matches require the champion on the event's date to be competing
      * - Titles cannot be defended in multiple matches on the same event
      * - Title matches must have proper championship match designation
      * - Vacant titles can be competed for in tournament or special matches
@@ -93,9 +93,13 @@ class AddTitlesToMatchAction
             ->lockForUpdate()
             ->get();
 
-        if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
-            fn (Title $title): bool => ! $title->currentActivityPeriod()->exists()
-        )) {
+        $eventDate = $lockedMatch->event()->firstOrFail()->date?->copy()->utc();
+        $activeTitleCount = Title::query()
+            ->whereKey($lockedTitles->pluck('id'))
+            ->activeOn($eventDate)
+            ->count();
+
+        if ($lockedTitles->count() !== $requestedTitles->count() || $activeTitleCount !== $lockedTitles->count()) {
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
