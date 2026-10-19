@@ -5,9 +5,12 @@ declare(strict_types=1);
 use App\Actions\Venues\UpdateAction;
 use App\Data\Events\VenueData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Venues\CannotBeUpdatedException;
 use App\Exceptions\Venues\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use Illuminate\Support\Carbon;
 
 test('it updates a venue while preserving its identity', function (): void {
     $venue = Venue::factory()->create();
@@ -72,5 +75,52 @@ describe('venue name guard', function (): void {
 
         // Assert
         expect($venue->refresh()->city)->toBe('Austin');
+    });
+});
+
+describe('venue time zone guard', function (): void {
+    test('it rejects a time zone that puts two live events on one venue day, writing nothing', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Original Arena', 'timezone' => 'America/New_York']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 02:00:00', 'UTC')]);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 20:00:00', 'UTC')]);
+        $data = new VenueData('Renamed Arena', '100 New Street', 'Austin', 'Texas', '78701', 'UTC');
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($venue, $data);
+
+        // Assert
+        expect($update)->toThrow(CannotBeUpdatedException::class, "Venue '{$venue->name}' cannot change to the UTC time zone because it would host more than one event on Nov 20, 2026. Move or delete the extra events first.")
+            ->and($venue->refresh()->timezone)->toBe('America/New_York')
+            ->and($venue->name)->toBe('Original Arena');
+    });
+
+    test('it changes the time zone when live events stay on separate days and ignores deleted events', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'America/New_York']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 02:00:00', 'UTC')]);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-21 20:00:00', 'UTC')]);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 20:00:00', 'UTC')])->delete();
+        $data = new VenueData('Updated Arena', '100 New Street', 'Austin', 'Texas', '78701', 'UTC');
+
+        // Act
+        resolve(UpdateAction::class)->handle($venue, $data);
+
+        // Assert
+        expect($venue->refresh()->timezone)->toBe('UTC');
+    });
+
+    test('it skips the check when the time zone is unchanged', function (): void {
+        // Arrange
+        $venue = Venue::factory()->create(['timezone' => 'UTC']);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 02:00:00', 'UTC')]);
+        Event::factory()->for($venue)->create(['date' => Carbon::parse('2026-11-20 20:00:00', 'UTC')]);
+        $data = new VenueData('Updated Arena', '100 New Street', 'Austin', 'Texas', '78701', 'UTC');
+
+        // Act
+        resolve(UpdateAction::class)->handle($venue, $data);
+
+        // Assert
+        expect($venue->refresh()->name)->toBe('Updated Arena');
     });
 });

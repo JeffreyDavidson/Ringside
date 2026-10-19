@@ -38,5 +38,8 @@ return [
             'name_conflict' => ':context cannot be restored because the name conflicts with existing venue \':conflicting_name\'. Resolve the conflict before restoration.',
             'not_deleted' => ':context cannot be restored because it is not deleted.',
         ],
+        'updated' => [
+            'timezone_double_books' => ':context cannot change to the :timezone time zone because it would host more than one event on :date. Move or delete the extra events first.',
+        ],
     ],
 ];
