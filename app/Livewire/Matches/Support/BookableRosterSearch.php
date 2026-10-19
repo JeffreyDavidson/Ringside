@@ -10,6 +10,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * Backs the match form's searchable selects.
@@ -26,16 +27,16 @@ final class BookableRosterSearch
      *
      * @return array<int, array{id: int|string, name: string}>
      */
-    public function search(BookableRosterKind $kind, string $term, ?int $promotionId, ?string $date = null): array
+    public function search(BookableRosterKind $kind, string $term, ?int $promotionId, ?string $date = null, ?Carbon $at = null): array
     {
         $column = $this->nameColumn($kind);
         // Names never contain LIKE wildcards, so drop them rather than depend on database-specific escaping.
         $needle = mb_trim(str_replace(['%', '_', '\\'], '', $term));
 
         $query = match ($kind) {
-            BookableRosterKind::Wrestlers => Wrestler::query()->bookableOn($date),
-            BookableRosterKind::TagTeams => TagTeam::query()->bookableOn($date),
-            BookableRosterKind::Referees => Referee::query()->bookableOn($date),
+            BookableRosterKind::Wrestlers => Wrestler::query()->bookableOn($date, $at),
+            BookableRosterKind::TagTeams => TagTeam::query()->bookableOn($date, $at),
+            BookableRosterKind::Referees => Referee::query()->bookableOn($date, $at),
         };
 
         return $this->options(

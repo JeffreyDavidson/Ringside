@@ -29,6 +29,7 @@ test('a standalone assignment rejects a date-unavailable wrestler and writes not
     $event = Event::factory()->for($promotion)->create(['date' => '2026-10-17 22:00:00']);
     $match = EventMatch::factory()->forEvent($event)->create();
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
+    $person->employments()->update(['started_at' => '2026-01-01']);
     resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
 
     // Act

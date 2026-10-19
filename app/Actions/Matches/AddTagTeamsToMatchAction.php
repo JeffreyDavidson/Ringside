@@ -95,6 +95,7 @@ class AddTagTeamsToMatchAction
         $requestedTagTeams = $tagTeams->unique('id')->values();
         $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
         $this->rosterLock->lock(collect(), collect(), $requestedTagTeams);
+        $event = $lockedMatch->event()->firstOrFail();
         $lockedTagTeams = TagTeam::query()
             ->whereKey($requestedTagTeams->pluck('id'))
             ->with('currentWrestlers')
@@ -103,7 +104,7 @@ class AddTagTeamsToMatchAction
             ->get();
 
         if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
-            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam)
+            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam, $event->date)
         )) {
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
@@ -113,7 +114,6 @@ class AddTagTeamsToMatchAction
             $lockedTagTeams,
             $lockedMatch,
         );
-        $event = $lockedMatch->event()->firstOrFail();
         foreach ($lockedTagTeams as $person) {
             if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
                 $this->dateAvailability->ensureForEvent($person, $event);

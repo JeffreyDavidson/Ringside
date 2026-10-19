@@ -20,7 +20,7 @@ class IsBookable implements ValidationRule
     {
         $referee = Referee::query()->find($value);
 
-        if (! $referee instanceof Referee || ! resolve(RosterBookingEligibility::class)->allows($referee)) {
+        if (! $referee instanceof Referee || ! resolve(RosterBookingEligibility::class)->allows($referee, $this->event?->date)) {
             $fail(__('referees.validation.not_bookable'));
 
             return;

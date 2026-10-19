@@ -217,3 +217,53 @@ test('it rejects an empty wrestler list without creating a side', function () {
         ->and($match->sides()->exists())->toBeFalse()
         ->and($match->competitors()->exists())->toBeFalse();
 });
+
+test('it books a wrestler on a past event dated while they were employed', function () {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->subDays(10)]))->create();
+    $wrestler = Wrestler::factory()->employed()->create();
+    $wrestler->employments()->update(['started_at' => now()->subDays(30)]);
+
+    // Act
+    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+
+    // Assert
+    expect($match->refresh()->competitors()->count())->toBe(1);
+});
+
+test('it refuses a wrestler on an event dated before their employment started', function () {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->subDays(10)]))->create();
+    $wrestler = Wrestler::factory()->employed()->create();
+
+    // Act
+    $book = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+
+    // Assert
+    expect($book)->toThrow(EntityNotAvailableException::class)
+        ->and($match->refresh()->competitors()->count())->toBe(0);
+});
+
+test('it books a wrestler hired for a later event', function () {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->addDays(10)]))->create();
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+    // Act
+    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+
+    // Assert
+    expect($match->refresh()->competitors()->count())->toBe(1);
+});
+
+test('it refuses a wrestler on an event dated before their future employment starts', function () {
+    // Arrange
+    $match = EventMatch::factory()->forEvent(Event::factory()->create(['date' => now()->addHours(2)]))->create();
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+    // Act
+    $book = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+
+    // Assert
+    expect($book)->toThrow(EntityNotAvailableException::class);
+});
