@@ -13,7 +13,6 @@ use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -156,19 +155,16 @@ class UpdateAction
      */
     private function ensureMembershipsStayWithinPeriod(Stable $stable, ActivityPeriod $period, Carbon $startDate, ?Carbon $endedAt): void
     {
-        $memberships = $stable->wrestlers()->get()
-            ->concat($stable->tagTeams()->get())
-            ->pluck('pivot');
-
         $startMoves = ! $period->started_at->isSameDay($startDate);
         $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon && ! $period->ended_at->isSameDay($endedAt);
 
-        $startsTooLate = $startMoves && $memberships->contains(
-            fn (Pivot $membership): bool => $membership->joined_at->copy()->startOfDay()->lt($startDate->copy()->startOfDay()),
+        $startsTooLate = $startMoves && (
+            $stable->wrestlers()->wherePivot('joined_at', '<', $startDate->copy()->startOfDay())->exists()
+            || $stable->tagTeams()->wherePivot('joined_at', '<', $startDate->copy()->startOfDay())->exists()
         );
-        $endsTooEarly = $endMoves && $memberships->contains(
-            fn (Pivot $membership): bool => $membership->left_at !== null
-                && $membership->left_at->copy()->startOfDay()->gt($endedAt->copy()->startOfDay()),
+        $endsTooEarly = $endMoves && (
+            $stable->wrestlers()->wherePivot('left_at', '>', $endedAt->copy()->endOfDay())->exists()
+            || $stable->tagTeams()->wherePivot('left_at', '>', $endedAt->copy()->endOfDay())->exists()
         );
 
         if ($startsTooLate) {
