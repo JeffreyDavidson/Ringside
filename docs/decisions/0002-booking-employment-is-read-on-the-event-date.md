@@ -10,6 +10,8 @@ Status: accepted (2026-10-18)
 
 When a booking check is given the event's date, employment is read on that date. The person (and each current wrestler of a tag team) needs an employment period that covers the event's date. Retirement, suspension and injury keep their current-state meaning. Without a date (unscheduled events, title results, tournaments) the old employed-now rule applies.
 
+Titles follow the same rule (decision of 2026-10-19, "Use the show's date"): when a title is added to a dated event's match, the title needs an activity period covering the event's date and the champion who must compete is whoever held the title on that date, not today's champion. An unscheduled event keeps the active-now and current-champion checks.
+
 ## Why
 
 - It matches how the record of a card is read afterwards: a match belongs to the person's career on the event date.

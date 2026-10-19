@@ -20,6 +20,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -431,6 +432,22 @@ describe('deleting matches', function (): void {
         $component
             ->assertSuccessful()
             ->assertSeeHtml('data-test="match-delete-action"');
+    });
+
+    it('refuses to delete a match that changed a title and shows the reason', function (): void {
+        // Arrange
+        $event = Event::factory()->past()->create();
+        $match = EventMatch::factory()->forEvent($event)->complete()->create();
+        TitleChampionship::factory()->wonAtEventMatch($match)->create();
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
+
+        // Act
+        $component->call('delete', $match);
+
+        // Assert
+        $component->assertDispatched('flash-message', type: 'error', message: __('matches.errors.deleted.has_title_change'));
+
+        expect($match->refresh()->trashed())->toBeFalse();
     });
 
     it('soft deletes a match and dispatches success feedback', function (): void {

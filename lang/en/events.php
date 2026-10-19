@@ -43,11 +43,14 @@ return [
     'page' => ':current / :last',
 
     'errors' => [
+        'deleted' => [
+            'has_title_change' => 'Event [:name] cannot be deleted because its matches have created or ended title reigns. Correct or clear those results first.',
+        ],
         'restored' => [
             'venue_deleted' => ':context cannot be restored because its venue \':venue\' is deleted. Restore the venue first.',
         ],
         'reschedule' => [
-            'already_occurred' => 'Event [:name] cannot be rescheduled because it has already occurred.',
+            'has_recorded_results' => 'Event [:name] cannot be rescheduled because results are recorded.',
             'has_title_reigns' => 'Event [:name] cannot be rescheduled because its matches have created or ended title reigns.',
         ],
     ],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Lifecycle\Matches\MatchDeletionEligibility;
 use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Tournaments\TournamentMatchRequirements;
@@ -20,6 +21,7 @@ class DeleteAction
         DB::transaction(function () use ($eventMatch, $deletedAt): void {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
             $this->tournamentRequirements->ensureDeletable($lockedMatch);
+            MatchDeletionEligibility::ensureCanBeDeleted($lockedMatch);
 
             $this->deletionState->delete($lockedMatch, $deletedAt ?? now());
         });

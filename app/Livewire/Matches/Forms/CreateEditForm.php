@@ -161,9 +161,9 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 $this->existsInPromotion('titles'),
-                new IsActive,
+                new IsActive($this->bookingEvent),
                 new MatchesCompetitorType,
-                new CurrentChampionIsCompeting,
+                new CurrentChampionIsCompeting($this->bookingEvent),
             ],
         ];
 
