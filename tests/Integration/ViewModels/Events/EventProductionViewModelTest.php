@@ -77,7 +77,8 @@ test('the sheet leaves the permission check to its caller', function (): void {
 
 test('the plan sheet still names the venue after the venue was deleted', function (): void {
     // Arrange
-    $venue = Venue::factory()->create(['name' => 'Old Arena']);
+    $venue = Venue::factory()
+        ->create(['name' => 'Old Arena']);
     $fixture = liveShowFixture(venueId: $venue->id);
     $venue->delete();
     $viewModel = resolve(EventProductionViewModel::class);

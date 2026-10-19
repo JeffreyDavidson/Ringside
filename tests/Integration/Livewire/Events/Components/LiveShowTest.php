@@ -13,6 +13,7 @@ use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Components\LiveShow;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
+use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -279,3 +280,34 @@ test('a downgraded editor is refused every live show write and the run is unchan
     $component->assertForbidden();
     expect(EventLiveRun::query()->sole()->getAttributes())->toBe($before);
 })->with(['prepare', 'attendance', 'item', 'saveCorrection', 'acceptReview', 'complete']);
+
+test('a completed live show still names the venue after the venue is deleted', function (): void {
+    // Arrange
+    $venue = Venue::factory()
+        ->create(['name' => 'Old Arena']);
+    $fixture = liveShowFixture(venueId: $venue->id);
+    $fixture['run']->forceFill(['status' => LiveShowStatus::Completed, 'completed_at' => now()])->save();
+    $venue->delete();
+
+    // Act
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Assert
+    $component
+        ->assertSee('Show completed')
+        ->assertSee('Old Arena');
+});
+
+test('a running live show still names the venue after the venue is deleted', function (): void {
+    // Arrange
+    $venue = Venue::factory()
+        ->create(['name' => 'Old Arena']);
+    $fixture = liveShowFixture(venueId: $venue->id);
+    $venue->delete();
+
+    // Act
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Assert
+    $component->assertSee('Old Arena');
+});

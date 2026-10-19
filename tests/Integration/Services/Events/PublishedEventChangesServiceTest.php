@@ -52,7 +52,8 @@ describe('published event changes service', function (): void {
     it('reports no change when the venue of the released publication is deleted afterwards', function (): void {
         // Arrange
         $fixture = publicEventFixture();
-        $venue = Venue::factory()->create(['name' => 'Harbor Arena']);
+        $venue = Venue::factory()
+            ->create(['name' => 'Harbor Arena']);
         $fixture['event']->update(['venue_id' => $venue->id]);
         $publication = releasedPublication($fixture);
         $venue->delete();

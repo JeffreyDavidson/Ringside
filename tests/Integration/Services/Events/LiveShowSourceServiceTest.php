@@ -16,7 +16,8 @@ use function Pest\Laravel\actingAs;
 describe('live show source service', function (): void {
     it('keeps the name of a venue deleted after the show was prepared', function (): void {
         // Arrange
-        $venue = Venue::factory()->create(['name' => 'Old Arena']);
+        $venue = Venue::factory()
+            ->create(['name' => 'Old Arena']);
         $fixture = liveShowFixture(venueId: $venue->id);
         $venue->delete();
 

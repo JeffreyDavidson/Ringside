@@ -7,6 +7,7 @@ namespace App\ViewModels\Events;
 use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
+use App\Queries\Events\EventVenueQuery;
 use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowSourceService;
 use App\Services\Events\LiveShowTimingService;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Lang;
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison) {}
+    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison, private readonly EventVenueQuery $venues) {}
 
     /**
      * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant
@@ -33,7 +34,8 @@ class LiveShowViewModel
      */
     public function data(Event $event, string $refreshedAt = ''): array
     {
-        $event->load(['promotion', 'venue']);
+        $event->load('promotion');
+        $event->setRelation('venue', $this->venues->get($event));
         $run = EventLiveRun::query()->forEventId($event->id)->first();
         $source = null;
         $sourceError = null;

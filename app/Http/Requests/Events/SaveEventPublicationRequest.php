@@ -7,6 +7,7 @@ namespace App\Http\Requests\Events;
 use App\Enums\Events\PublicAnnouncement;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
+use App\Queries\Events\EventVenueQuery;
 use App\Rules\Events\PublicDoorsTime;
 use App\Rules\Events\PublicTicketUrl;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,13 +29,13 @@ class SaveEventPublicationRequest extends FormRequest
     }
 
     /** @return array<string, mixed> */
-    public function rules(): array
+    public function rules(EventVenueQuery $venues): array
     {
         /** @var Event $event */
         $event = $this->route('event');
-        $event->load(['promotion', 'venue']);
+        $event->load('promotion');
 
-        $timezone = $event->venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');
+        $timezone = $venues->get($event)->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');
         $ownedMatch = Rule::exists('events_matches', 'id')
             ->where('event_id', $event->id)
             ->whereNull('deleted_at');
