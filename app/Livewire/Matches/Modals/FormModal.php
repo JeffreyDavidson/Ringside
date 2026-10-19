@@ -114,7 +114,7 @@ class FormModal extends BaseFormModal
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         return $exception instanceof InvalidMatchConfigurationException
-            && $exception->reason() === BusinessRuleReason::CurrentChampionMissing
+            && in_array($exception->reason(), [BusinessRuleReason::CurrentChampionMissing, BusinessRuleReason::TitleRequiresOneCompetitorPerSide], true)
                 ? 'form.titles'
                 : 'form.configuration';
     }

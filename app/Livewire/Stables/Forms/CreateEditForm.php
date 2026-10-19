@@ -108,10 +108,12 @@ class CreateEditForm extends BaseForm
         ];
 
         if ($canHaveMembers) {
-            $rules['started_at'][] = new HasMinimumMembers(
-                $members->wrestlers ?? collect(),
-                $members->tagTeams ?? collect(),
-            );
+            if ($this->mustMeetMinimumMembers($stable)) {
+                $rules['started_at'][] = new HasMinimumMembers(
+                    $members->wrestlers ?? collect(),
+                    $members->tagTeams ?? collect(),
+                );
+            }
         } else {
             $rules['wrestlers'][] = 'prohibited';
             $rules['tag_teams'][] = 'prohibited';
@@ -122,10 +124,36 @@ class CreateEditForm extends BaseForm
         }
 
         if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
-            $rules['ended_at'][] = 'after:started_at';
+            $rules['ended_at'][] = 'after_or_equal:started_at';
         }
 
         return $rules;
+    }
+
+    /**
+     * The minimum applies when a stable is created or established and whenever the member list is changed; an
+     * established stable that already fell below it (members left, see the membership docs) can still be renamed.
+     */
+    private function mustMeetMinimumMembers(?Stable $stable): bool
+    {
+        if (! $stable instanceof Stable || $stable->firstActivityPeriod === null) {
+            return true;
+        }
+
+        return $this->sortedKeys($this->wrestlers) !== $this->sortedKeys($stable->currentWrestlers->modelKeys())
+            || $this->sortedKeys($this->tag_teams) !== $this->sortedKeys($stable->currentTagTeams->modelKeys());
+    }
+
+    /**
+     * @param  array<int|string>  $keys
+     * @return array<int>
+     */
+    private function sortedKeys(array $keys): array
+    {
+        $keys = array_map(intval(...), $keys);
+        sort($keys);
+
+        return $keys;
     }
 
     /**

@@ -55,18 +55,20 @@ class RetireAction
             $currentMembers = $this->membershipService->currentMembers($lockedStable);
             $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $operationalDate);
 
-            if ($currentMembers->wrestlers instanceof Collection) {
-                foreach ($currentMembers->wrestlers as $wrestler) {
-                    if ($this->individualRetirementEligibility->canRetire($wrestler)) {
-                        $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
-                    }
-                }
-            }
-
+            // Tag teams go first so a wrestler who is also a direct member is retired by the team's cascade and keeps
+            // the team membership; retiring the wrestler first would end that membership and leave the team empty.
             if ($currentMembers->tagTeams instanceof Collection) {
                 foreach ($currentMembers->tagTeams as $tagTeam) {
                     if ($this->tagTeamRetirementEligibility->canRetire($tagTeam)) {
                         $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);
+                    }
+                }
+            }
+
+            if ($currentMembers->wrestlers instanceof Collection) {
+                foreach ($currentMembers->wrestlers as $wrestler) {
+                    if ($this->individualRetirementEligibility->canRetire($wrestler)) {
+                        $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
                     }
                 }
             }

@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\EmployAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
 use Livewire\Component;
 
@@ -88,5 +90,28 @@ describe('tag team create and edit form', function (): void {
             ->and($form->managers)->toBe([$manager->id])
             ->and($form->employment_date)->toBe('2024-01-15')
             ->and($selectedTagTeam->is($tagTeam))->toBeTrue();
+    });
+
+    it('lets an employed tag team be renamed without changing its employment date', function (): void {
+        // Arrange
+        Date::setTestNow('2026-10-12 15:30:00');
+        $wrestlers = Wrestler::factory()->employed()->count(2)->create();
+        $tagTeam = TagTeam::factory()->withCurrentWrestlers($wrestlers)->create();
+        resolve(EmployAction::class)->handle($tagTeam);
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->setModel($tagTeam->refresh());
+        $form->name = 'The Renamed Team';
+        $errorKeys = [];
+
+        // Act
+        try {
+            $form->validate();
+        } catch (ValidationException $exception) {
+            $errorKeys = array_keys($exception->errors());
+        }
+
+        // Assert
+        expect($form->employment_date)->toBe('2026-10-12')
+            ->and($errorKeys)->toBeEmpty();
     });
 });

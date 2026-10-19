@@ -11,6 +11,7 @@ use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Exceptions\Venues\CannotBeRestoredException as VenueCannotBeRestoredException;
+use App\Exceptions\Venues\CannotBeUpdatedException as VenueCannotBeUpdatedException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -102,4 +103,5 @@ it('renders the original English text', function (Closure $factory, string $expe
     'venue name conflict' => [fn () => VenueCannotBeRestoredException::nameConflict(Venue::factory()->make(['name' => 'Garden']), 'Arena'), "Venue 'Garden' cannot be restored because the name conflicts with existing venue 'Arena'. Resolve the conflict before restoration."],
     'event venue deleted' => [fn () => VenueCannotBeRestoredException::venueDeleted(Event::factory()->make(['name' => 'Summer Slam']), Venue::factory()->make(['name' => 'Garden'])), "Event 'Summer Slam' cannot be restored because its venue 'Garden' is deleted. Restore the venue first."],
     'venue double booked' => [fn () => VenueCannotBeRestoredException::venueDoubleBooked(Venue::factory()->make(['name' => 'Garden']), 'Jan 1, 2026'), "Venue 'Garden' cannot be restored because it hosts more than one event on Jan 1, 2026. Move or delete the extra events first."],
+    'venue time zone double books' => [fn () => VenueCannotBeUpdatedException::timezoneDoubleBooks(Venue::factory()->make(['name' => 'Garden']), 'UTC', 'Jan 1, 2026'), "Venue 'Garden' cannot change to the UTC time zone because it would host more than one event on Jan 1, 2026. Move or delete the extra events first."],
 ]);
