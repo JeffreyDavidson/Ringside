@@ -42,10 +42,32 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
         $unexpectedCompetitorKey = $title->type->opposingCompetitorInputKey();
 
         if ($this->hasCompetitors($expectedCompetitorKey) && ! $this->hasCompetitors($unexpectedCompetitorKey)) {
+            if ($this->hasSideWithMultipleCompetitors()) {
+                $fail(__('titles.validation.one_competitor_per_side', ['title' => $title->name]));
+            }
+
             return;
         }
 
         $fail(__('titles.validation.competitor_type', ['title' => $title->name, 'competitors' => $title->type->competitorLabel()]));
+    }
+
+    private function hasSideWithMultipleCompetitors(): bool
+    {
+        // Only called once hasCompetitors() has confirmed `competitors` is an array.
+        foreach ((array) $this->data['competitors'] as $competitorSide) {
+            if (! is_array($competitorSide)) {
+                continue;
+            }
+
+            $count = count((array) ($competitorSide['wrestlers'] ?? [])) + count((array) ($competitorSide['tag_teams'] ?? []));
+
+            if ($count > 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function hasCompetitors(string $competitorKey): bool

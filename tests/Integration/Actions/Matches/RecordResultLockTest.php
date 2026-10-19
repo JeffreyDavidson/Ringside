@@ -5,10 +5,13 @@ declare(strict_types=1);
 use App\Actions\Matches\RecordResultAction;
 use App\Data\Matches\MatchResultData;
 use App\Enums\Matches\MatchFinish;
+use App\Enums\Titles\TitleType;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Titles\Title;
 
 /**
  * Record a pinfall for the given side and return the statements it issued.
@@ -21,6 +24,18 @@ function recordResultStatements(EventMatch $match, MatchSide $winningSide): arra
         $match,
         new MatchResultData(MatchFinish::Pinfall, $winningSide, collect()),
     ));
+}
+
+/**
+ * The keys a whereKey() lock statement selects, as the comma-separated list in its SQL.
+ *
+ * @param  array{sql: string, bindings: array<int, mixed>, locked: bool}  $statement
+ */
+function lockedKeyList(array $statement): string
+{
+    preg_match('/ in \(([\d, ]+)\)/', $statement['sql'], $keys);
+
+    return str_replace(' ', '', $keys[1] ?? '');
 }
 
 /**
@@ -83,5 +98,61 @@ describe('result recording locks', function (): void {
         expect($statements[$competitorLock]['sql'])->toContain('order by "id" asc')
             ->and($statements[$competitorLock]['bindings'])->toBe([$match->id])
             ->and($competitorLock)->toBeLessThan(resultWritePosition($statements));
+    });
+
+    it('locks the winning tag team, then its members, ahead of the title and reign locks', function (): void {
+        // Arrange
+        $match = EventMatch::factory()->create();
+        $title = Title::factory()->active()->create(['type' => TitleType::TagTeam]);
+        $match->titles()->attach($title);
+        $winningTeam = TagTeam::factory()->bookable()->create();
+        $losingTeam = TagTeam::factory()->bookable()->create();
+        $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+        $losingSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+        MatchCompetitor::factory()->for($match, 'eventMatch')->for($winningSide, 'side')->for($winningTeam, 'competitor')->create();
+        MatchCompetitor::factory()->for($match, 'eventMatch')->for($losingSide, 'side')->for($losingTeam, 'competitor')->create();
+
+        // Act
+        $statements = recordResultStatements($match, $winningSide);
+
+        // Assert
+        $isLockOn = fn (string $table): Closure => fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], "from \"{$table}\"");
+        $teamLock = statementPosition($statements, $isLockOn('tag_teams'));
+        $memberLock = statementPosition($statements, $isLockOn('wrestlers'));
+        $titleLock = statementPosition($statements, $isLockOn('titles'));
+        $reignLock = statementPosition($statements, $isLockOn('titles_championships'));
+
+        expect(lockedKeyList($statements[$teamLock]))->toBe((string) $winningTeam->id)
+            ->and($teamLock)->toBeLessThan($memberLock)
+            ->and($memberLock)->toBeLessThan($titleLock)
+            ->and($memberLock)->toBeLessThan($reignLock)
+            ->and(lockedKeyList($statements[$memberLock]))->toBe($winningTeam->currentWrestlers()->orderBy('wrestlers.id')->pluck('wrestlers.id')->implode(','))
+            ->and($statements[$memberLock]['sql'])->toContain('order by "id" asc');
+    });
+
+    it('locks only the winning wrestlers, in ascending id order, before writing the result', function (): void {
+        // Arrange
+        $match = EventMatch::factory()->create();
+        $winningSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+        $losingSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+        [$first, $second] = Wrestler::factory()->bookable()->count(2)->create()->all();
+        $loser = Wrestler::factory()->bookable()->create();
+        foreach ([$second, $first] as $wrestler) {
+            MatchCompetitor::factory()->for($match, 'eventMatch')->for($winningSide, 'side')->for($wrestler, 'competitor')->create();
+        }
+        MatchCompetitor::factory()->for($match, 'eventMatch')->for($losingSide, 'side')->for($loser, 'competitor')->create();
+
+        // Act
+        $statements = recordResultStatements($match, $winningSide);
+
+        // Assert
+        $wrestlerLock = statementPosition(
+            $statements,
+            fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "wrestlers"'),
+        );
+
+        expect(explode(',', lockedKeyList($statements[$wrestlerLock])))->toEqualCanonicalizing([(string) $first->id, (string) $second->id])
+            ->and($statements[$wrestlerLock]['sql'])->toContain('order by "id" asc')
+            ->and($wrestlerLock)->toBeLessThan(resultWritePosition($statements));
     });
 });

@@ -57,17 +57,21 @@ function stableWithMembersAttachedOutOfOrder(): Stable
 test('it retires the members of a stable in ascending id order', function () {
     // Arrange
     $stable = stableWithMembersAttachedOutOfOrder();
+    $directWrestlerIds = $stable->wrestlers()->pluck('wrestlers.id')->all();
 
     // Act
     $statements = recordStatements(fn () => resolve(RetireAction::class)->handle($stable));
 
     // Assert
     $lockedWrestlerIds = lockedRowIds($statements, 'wrestlers');
+    $lockedTagTeamWrestlerIds = array_values(array_filter($lockedWrestlerIds, fn ($id) => ! in_array($id, $directWrestlerIds)));
+    $lockedDirectWrestlerIds = array_values(array_filter($lockedWrestlerIds, fn ($id) => in_array($id, $directWrestlerIds)));
     $lockedTagTeamIds = lockedRowIds($statements, 'tag_teams');
 
     expect($lockedWrestlerIds)->not->toBeEmpty()
         ->and($lockedTagTeamIds)->not->toBeEmpty()
-        ->and($lockedWrestlerIds)->toBe(collect($lockedWrestlerIds)->sort()->values()->all())
+        ->and($lockedDirectWrestlerIds)->toBe(collect($lockedDirectWrestlerIds)->sort()->values()->all())
+        ->and($lockedTagTeamWrestlerIds)->toBe(collect($lockedTagTeamWrestlerIds)->sort()->values()->all())
         ->and($lockedTagTeamIds)->toBe(collect($lockedTagTeamIds)->sort()->values()->all())
         ->and(memberSelectsWithoutOrdering($statements, 'wrestlers', 'stables_wrestlers'))->toBeEmpty()
         ->and(memberSelectsWithoutOrdering($statements, 'tag_teams', 'stables_tag_teams'))->toBeEmpty();

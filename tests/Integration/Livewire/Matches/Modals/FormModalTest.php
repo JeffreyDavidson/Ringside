@@ -433,6 +433,39 @@ describe('authorized match form interactions', function (): void {
         $action->verify();
     });
 
+    it('attaches a one-competitor-per-side title failure found while saving to the titles field', function (): void {
+        ['event' => $event] = livewireMatchesModalsFormModalEventFixtures();
+
+        // Arrange
+        $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
+        $referee = Referee::factory()->bookable()->create();
+        $title = Title::factory()->active()->singles()->create(['name' => 'World Heavyweight Title']);
+        $action = Double::for(AddMatchForEventAction::class);
+        $action->expects('handle')->throws(InvalidMatchConfigurationException::titleRequiresOneCompetitorPerSide($title));
+        app()->instance(AddMatchForEventAction::class, $action);
+        $modal = livewire(FormModal::class, ['eventId' => $event->id]);
+
+        // Act
+        $modal->set('form.matchType', MatchType::Singles);
+        $modal->set([
+            'form.competitors' => [
+                ['wrestlers' => [$wrestlerIds[0]], 'tag_teams' => []],
+                ['wrestlers' => [$wrestlerIds[1]], 'tag_teams' => []],
+            ],
+            'form.referees' => [$referee->id],
+            'form.titles' => [$title->id],
+        ]);
+        $modal->call('save');
+
+        // Assert
+        $modal
+            ->assertHasErrors(['form.titles'])
+            ->assertHasNoErrors(['form.configuration']);
+        expect($modal->instance()->getErrorBag()->first('form.titles'))
+            ->toBe('The [World Heavyweight Title] needs exactly one competitor of its type on each side.');
+        $action->verify();
+    });
+
     it('shows a scheduling conflict found while saving on the configuration field', function (): void {
         ['event' => $event] = livewireMatchesModalsFormModalEventFixtures();
 

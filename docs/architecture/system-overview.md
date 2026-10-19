@@ -258,6 +258,8 @@ An event may therefore sit at a deleted venue. Editing such an event and leaving
 
 A deleted venue's name stays visible on the event wherever the venue is shown: the events table, event pack, production sheet, live show and public event page load it with `withTrashed()` at the eager-load site (the `Event::venue()` relation itself still excludes deleted venues, so nothing can newly select one). A deleted venue is plain text, never a link; the events table also links a live venue only when the viewer may `view` it (`VenuePolicy`, administrators only), so promotion members see the name without a link that would answer 403. The public page publishes only a deleted venue's name: its address is dropped and the time zone falls back to the promotion's. The pack and public schedule fingerprints include the venue name, so deleting a venue does not mark packs or published pages as changed.
 
+Changing a venue's time zone moves its local calendar days, so `Venues\UpdateAction` locks the venue row and, only when the zone actually changes, has `VenueDeletionEligibility::ensureTimezoneKeepsEventsApart()` (the same shared-day check venue restore uses) look at the venue's live events of every promotion in the new zone. If two would fall on one day it throws `Venues\CannotBeUpdatedException` and writes nothing.
+
 Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
 Restoring a soft-deleted title locks the title row and verifies that no active title has claimed its name. Restoration preserves the title's historical state without bypassing active-name uniqueness.
 
