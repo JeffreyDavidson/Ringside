@@ -10,3 +10,5 @@ A custom collection (`MatchCompetitorsCollection`) holds read-only helpers for a
 
 ## No queries, writes or eligibility decisions
 A collection works on what is already loaded: it does not query, lazy load, write or decide whether something is allowed. Eligibility belongs to the lifecycle and booking classes (see actions-collections-lifecycle-models-rules.md). Create a collection only when callers repeat the same filtering or grouping of loaded rows.
+
+- Example: `TitleChampionshipCollection` answers the reign lookups `ChampionshipReignManager` repeated: `forTitle()` (active reigns only), `wonAt()`, `lostAt()`, `current()`, `laterThan()`, `heldBefore()` and `covering()`. `heldBefore()` and `covering()` keep their different date bounds on purpose; do not merge them. The not-soft-deleted check runs on every call and is never cached, because a shared collection can change while an Action works through it.
