@@ -6,7 +6,6 @@ namespace App\Lifecycle\Tournaments;
 
 use App\Data\Matches\EventMatchData;
 use App\Data\Tournaments\TournamentBoutData;
-use App\Enums\Matches\MatchType;
 use App\Enums\Tournaments\EntrantKind;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
@@ -18,6 +17,7 @@ use App\Models\Scopes\PromotionContextScope;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
+use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
 use App\ValueObjects\BracketShape;
 use Illuminate\Support\Carbon;
@@ -108,15 +108,46 @@ final readonly class TournamentMatchRequirements
             throw RecordChangedException::changed();
         }
         $this->ensureCompetitors($match, $data->sides->competitors());
-        $bout = $this->bracket->bout($link->node);
-        $requested = $data->sides->competitors()->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
-        $expected = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
-        $type = $link->tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam;
-        if ($requested !== $expected || $data->matchType !== $type) {
-            throw TournamentException::entrantsChanged();
-        }
+        $this->ensureEntrantsMatch($link->tournament->entrant_kind, $this->bracket->bout($link->node), $data);
         if ($data->titles->isNotEmpty()) {
             $this->ensureFinalStakes($match);
+        }
+    }
+
+    /**
+     * Refuse booking a bout whose entrants are not both known and still in, that already has an open booking, that
+     * names other entrants, puts a title on a bout before the final, or is not later than the bouts that feed it. The
+     * Action checks the version and the tournament status before it calls this.
+     *
+     * @throws TournamentException
+     */
+    public function ensureBookable(Tournament $tournament, TournamentNode $node, TournamentBoutData $bout, Event $event, EventMatchData $data): void
+    {
+        if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->first->withdrawn || $bout->second->withdrawn || $bout->complete) {
+            throw TournamentException::unresolved();
+        }
+        if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null) {
+            throw TournamentException::alreadyBooked();
+        }
+        $this->ensureEntrantsMatch($tournament->entrant_kind, $bout, $data);
+        if ($data->titles->isNotEmpty() && ! new BracketShape($tournament->capacity)->isFinal($node->round)) {
+            throw TournamentException::finalTitlesOnly();
+        }
+        $priorBouts = $this->bracket->bouts($tournament)->only($this->bracket->ancestorNodeIds($node));
+        if ($bout->link instanceof TournamentMatchLink) {
+            $priorBouts->put($node->id, $bout);
+        }
+        foreach ($priorBouts as $prior) {
+            if ($prior->link === null) {
+                continue;
+            }
+            $priorEvent = $prior->link->match->event;
+            if ($priorEvent->id === $event->id && $tournament->repeat_appearances) {
+                continue;
+            }
+            if ($event->date === null || $priorEvent->date === null || $event->date->lessThanOrEqualTo($priorEvent->date)) {
+                throw TournamentException::chronology();
+            }
         }
     }
 
@@ -131,6 +162,16 @@ final readonly class TournamentMatchRequirements
     {
         if (TournamentMatchLink::query()->whereIn('match_id', EventMatch::query()->withoutGlobalScope(PromotionContextScope::class)->withTrashed()->where('event_id', $event->id)->select('events_matches.id'))->whereNotNull('active_node_id')->exists()) {
             throw TournamentException::linkedDelete();
+        }
+    }
+
+    /** @throws TournamentException */
+    private function ensureEntrantsMatch(EntrantKind $kind, TournamentBoutData $bout, EventMatchData $data): void
+    {
+        $requested = $data->sides->competitors()->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
+        $expected = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
+        if ($requested !== $expected || $data->matchType !== $kind->matchType()) {
+            throw TournamentException::entrantsChanged();
         }
     }
 }

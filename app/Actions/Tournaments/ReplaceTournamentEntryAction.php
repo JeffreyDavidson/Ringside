@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\EntrantKind;
-use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Tournaments\TournamentLocks;
+use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Services\Tournaments\TournamentBracketService;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReplaceTournamentEntryAction
 {
-    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly ResetTournamentBranchAction $reset, private readonly RosterBookingEligibility $eligibility) {}
+    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly ResetTournamentBranchAction $reset, private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
     public function handle(TournamentEntry $entry, int $competitorId, int $version, string $reason): void
     {
@@ -27,9 +27,7 @@ class ReplaceTournamentEntryAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
-            if ($tournament->status !== TournamentStatus::Active) {
-                throw TournamentException::closed();
-            }
+            $this->states->ensureActive($tournament);
             $entry = $tournament->entries()->findOrFail($entry->id);
             foreach ($this->bracket->bouts($tournament) as $bout) {
                 if (($bout->first?->id === $entry->id || $bout->second?->id === $entry->id) && ($bout->link?->match->match_finish !== null || $bout->node->walkover_entry_id !== null)) {
