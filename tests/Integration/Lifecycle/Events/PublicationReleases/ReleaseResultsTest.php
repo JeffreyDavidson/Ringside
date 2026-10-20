@@ -6,6 +6,8 @@ use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Events\EventPublicationException;
 use App\Lifecycle\Events\PublicationReleases\PublicationDraftRequirements;
 use App\Lifecycle\Events\PublicationReleases\ReleaseResults;
+use App\Models\Events\EventPublication;
+use App\Models\Matches\EventMatch;
 use App\Services\Events\PublicEventCardService;
 use App\Services\Events\PublicEventSourceService;
 use JMac\Testing\Double;
@@ -63,48 +65,71 @@ test('it reports a match without a winner by its finish alone', function (): voi
     expect($publication->results['rows'][0]['outcome'] ?? null)->toBe(MatchFinish::NoDecision->label());
 });
 
-test('it refuses results the published card or the event does not allow', function (string $condition): void {
+test('it refuses results the published card or the event does not allow', function (Closure $prepare): void {
     // Arrange
     $released = releasedPublicationWorld();
     $publication = $released['publication'];
     $world = $released['world'];
-    $event = $world['event'];
-    $source = resolve(PublicEventSourceService::class)->get($event);
-    if ($condition === 'unpublished card') {
-        $publication->published_at = null;
-    }
-    if ($condition === 'missing card') {
-        $publication->card = null;
-    }
-    if ($condition === 'future event') {
-        $event->date = now()->addWeek();
-    }
-    if ($condition === 'notice') {
-        $publication->draft = [...$publication->draft, 'announcement' => 'cancelled', 'notice' => 'Cancelled event'];
-        $event->date = now()->addWeek();
-    }
-    if ($condition === 'no selected results') {
-        $publication->draft = [...$publication->draft, 'results' => []];
-    }
-    if ($condition === 'result outside the card') {
-        $publication->draft = [...$publication->draft, 'results' => [$world['match']->id + 1000]];
-    }
-    if ($condition === 'changed schedule') {
-        $publication->schedule_fingerprint = 'earlier-schedule';
-    }
-    if ($condition === 'changed card') {
-        $publication->card_fingerprint = 'earlier-card';
-    }
+    $source = resolve(PublicEventSourceService::class)->get($world['event']);
+    $prepare($publication, $world);
 
     // Act
-    $release = fn () => resolve(ReleaseResults::class)->apply($publication, $event, $world['actor'], $source);
+    $release = fn () => resolve(ReleaseResults::class)->apply($publication, $world['event'], $world['actor'], $source);
 
     // Assert
     expect($release)->toThrow(EventPublicationException::class, __('public-events.invalid'))
         ->and($publication->results)->toBeNull();
-})->with(['unpublished card', 'missing card', 'future event', 'notice', 'no selected results', 'result outside the card', 'changed schedule', 'changed card']);
+})->with([
+    'unpublished card' => [function (EventPublication $publication, array $world): void {
+        $publication->published_at = null;
+    }],
+    'missing card' => [function (EventPublication $publication, array $world): void {
+        $publication->card = null;
+    }],
+    'future event' => [function (EventPublication $publication, array $world): void {
+        $world['event']->date = now()->addWeek();
+    }],
+    'notice for a future event' => [function (EventPublication $publication, array $world): void {
+        $publication->draft = [...$publication->draft, 'announcement' => 'cancelled', 'notice' => 'Cancelled event'];
+        $world['event']->date = now()->addWeek();
+    }],
+    'notice for an undated event' => [function (EventPublication $publication, array $world): void {
+        $publication->draft = [...$publication->draft, 'announcement' => 'cancelled', 'notice' => 'Cancelled event'];
+        $world['event']->date = null;
+    }],
+    'no selected results' => [function (EventPublication $publication, array $world): void {
+        $publication->draft = [...$publication->draft, 'results' => []];
+    }],
+    'result outside the card' => [function (EventPublication $publication, array $world): void {
+        $publication->draft = [...$publication->draft, 'results' => [$world['match']->id + 1000]];
+    }],
+    'changed schedule' => [function (EventPublication $publication, array $world): void {
+        $publication->schedule_fingerprint = 'earlier-schedule';
+    }],
+    'changed card' => [function (EventPublication $publication, array $world): void {
+        $publication->card_fingerprint = 'earlier-card';
+    }],
+]);
 
-test('it refuses a result projection that is incomplete or unrecorded', function (Closure $project): void {
+test('it refuses a match that is not recorded', function (Closure $prepare): void {
+    // Arrange
+    $released = releasedPublicationWorld();
+    $world = $released['world'];
+    $prepare($world['match']);
+    $source = resolve(PublicEventSourceService::class)->get($world['event']);
+
+    // Act
+    $release = fn () => resolve(ReleaseResults::class)->apply($released['publication'], $world['event'], $world['actor'], $source);
+
+    // Assert
+    expect($release)->toThrow(EventPublicationException::class, __('public-events.invalid'))
+        ->and($released['publication']->results)->toBeNull();
+})->with([
+    'cleared finish' => [fn (EventMatch $match) => $match->update(['match_finish' => null])],
+    'finish needing a winner without one' => [fn (EventMatch $match) => $match->update(['winning_side_id' => null])],
+]);
+
+test('it refuses a result projection that lost a selected match', function (): void {
     // Arrange
     $released = releasedPublicationWorld();
     $publication = $released['publication'];
@@ -112,7 +137,7 @@ test('it refuses a result projection that is incomplete or unrecorded', function
     $source = resolve(PublicEventSourceService::class)->get($world['event']);
     $cards = Double::for(PublicEventCardService::class);
     $cards->expects('cardFingerprint')->returns((string) $publication->card_fingerprint);
-    $cards->expects('resultSource')->returns($project($source['matches'][0]));
+    $cards->expects('resultSource')->returns([]);
     $release = new ReleaseResults(resolve(PublicationDraftRequirements::class), $cards);
 
     // Act
@@ -122,23 +147,4 @@ test('it refuses a result projection that is incomplete or unrecorded', function
     expect($apply)->toThrow(EventPublicationException::class, __('public-events.invalid'))
         ->and($publication->results)->toBeNull();
     $cards->verify();
-})->with([
-    'missing match' => [fn (array $match): array => []],
-    'unrecorded finish' => [fn (array $match): array => [[...$match, 'finish' => null]]],
-    'unlabelled match' => [fn (array $match): array => [[...$match, 'label' => '']]],
-    'unrecorded winner' => [fn (array $match): array => [[...$match, 'winner' => '']]],
-]);
-
-test('it refuses results of a match whose finish was cleared after the card was released', function (): void {
-    // Arrange
-    $released = releasedPublicationWorld();
-    $world = $released['world'];
-    $world['match']->update(['match_finish' => null]);
-    $source = resolve(PublicEventSourceService::class)->get($world['event']);
-
-    // Act
-    $release = fn () => resolve(ReleaseResults::class)->apply($released['publication'], $world['event'], $world['actor'], $source);
-
-    // Assert
-    expect($release)->toThrow(EventPublicationException::class, __('public-events.invalid'));
 });

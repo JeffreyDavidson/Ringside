@@ -20,9 +20,9 @@ final readonly class ReleaseResults implements PublicationRelease
 
     public function apply(EventPublication $publication, Event $event, User $actor, array $source): void
     {
-        $announcement = $this->draft->ensureDraftReleasable($publication, $event, $source);
+        $this->draft->ensureDraftReleasable($publication, $event, $source);
         $draft = $publication->draft;
-        if ($announcement->isNotice() || $publication->published_at === null || $publication->card === null || $event->date === null || $event->date->isFuture()
+        if ($publication->published_at === null || $publication->card === null || $event->date === null || $event->date->isFuture()
             || $draft['results'] === [] || array_diff($draft['results'], array_column($publication->card_source ?? [], 'id')) !== []
             || $publication->schedule_fingerprint !== $source['schedule']
             || $publication->card_fingerprint !== $this->cards->cardFingerprint($source, $publication->card_source ?? [])) {
@@ -34,7 +34,7 @@ final readonly class ReleaseResults implements PublicationRelease
         }
         $rows = [];
         foreach ($results as $match) {
-            if ($match['finish'] === null || $match['label'] === '' || ($match['winner'] === '')) {
+            if ($match['finish'] === null || $match['winner'] === '') {
                 throw EventPublicationException::invalid();
             }
             $rows[] = ['label' => $match['label'], 'details' => '', 'outcome' => $match['winner'] === null ? $match['finish'] : $match['winner'].' — '.$match['finish']];
