@@ -19,6 +19,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\ValueObjects\MatchSides;
 
 test('it atomically replaces a match configuration', function () {
     $match = EventMatch::factory()->create([
@@ -44,10 +45,10 @@ test('it atomically replaces a match configuration', function () {
         MatchType::TagTeam,
         Referee::query()->whereKey($newReferee)->get(),
         Title::query()->whereKey($newTitle)->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['tag_teams' => [$firstTagTeam]],
             2 => ['tag_teams' => [$secondTagTeam]],
-        ]),
+        ])),
         'Updated preview',
     );
 
@@ -82,10 +83,10 @@ test('it rolls back the original configuration when a replacement is unavailable
         MatchType::Singles,
         Referee::query()->whereKey($newReferee)->get(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$availableWrestler]],
             2 => ['wrestlers' => [$unavailableWrestler]],
-        ]),
+        ])),
         'Updated preview',
     );
 
@@ -122,10 +123,10 @@ test('it rolls back the original configuration when the current champion is not 
         MatchType::Singles,
         Referee::query()->whereKey($newReferee)->get(),
         Title::query()->whereKey($title)->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstChallenger]],
             2 => ['wrestlers' => [$secondChallenger]],
-        ]),
+        ])),
         'Updated preview',
     );
 
@@ -149,10 +150,10 @@ test('it rejects reconfiguring a match after its result is recorded', function (
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstWrestler]],
             2 => ['wrestlers' => [$secondWrestler]],
-        ]),
+        ])),
         null,
     );
 

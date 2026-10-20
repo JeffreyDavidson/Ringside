@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
-use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
+use App\Lifecycle\Events\LiveShowStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Services\Promotions\PromotionTimeZoneService;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class PrepareLiveShowAction
 {
-    public function __construct(private readonly LiveShowSourceRequirements $source, private readonly EventCardLock $card) {}
+    public function __construct(private readonly LiveShowSourceRequirements $source, private readonly EventCardLock $card, private readonly LiveShowStateMachine $states) {}
 
     public function handle(Event $event, int $version, int $packVersion, string $fingerprint): EventLiveRun
     {
@@ -38,7 +38,7 @@ class PrepareLiveShowAction
             $run->version = 1;
             $run->pack_version = $packVersion;
             $run->card_fingerprint = $fingerprint;
-            $run->status = LiveShowStatus::Prepared;
+            $run->status = $this->states->initial();
             $run->content = $source['content'];
             $run->prepared_at = now();
             $run->save();

@@ -60,9 +60,10 @@ describe('match create and edit form', function (): void {
 
         // Assert
         $sideWrestlerIds = $data->sides
+            ->sides()
             ->flatMap(fn (array $side): array => array_map(
                 fn (Wrestler $wrestler): int => $wrestler->id,
-                $side['wrestlers'] ?? [],
+                $side['wrestlers'],
             ))
             ->all();
 
@@ -70,9 +71,9 @@ describe('match create and edit form', function (): void {
             ->and($data->matchType)->toBe(MatchType::BattleRoyal)
             ->and($data->referees->modelKeys())->toBe($referees->modelKeys())
             ->and($data->titles->modelKeys())->toBe([$title->id])
-            ->and($data->sides)->toHaveCount(3)
+            ->and($data->sides->count())->toBe(3)
             ->and($sideWrestlerIds)->toBe($wrestlers->modelKeys())
-            ->and($data->sides->every(fn (array $side): bool => count($side['wrestlers'] ?? []) === 1))->toBeTrue()
+            ->and($data->sides->sides()->every(fn (array $side): bool => count($side['wrestlers']) === 1))->toBeTrue()
             ->and($data->preview)->toBe('Every competitor enters for themselves.')
             ->and($data->matchStipulation?->is($stipulation))->toBeTrue();
     });
@@ -95,7 +96,8 @@ describe('match form side order', function (): void {
 
         // Assert
         $sideWrestlerIds = $data->sides
-            ->map(fn (array $side): array => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers'] ?? []))
+            ->sides()
+            ->map(fn (array $side): array => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers']))
             ->all();
 
         expect($sideWrestlerIds)->toBe([

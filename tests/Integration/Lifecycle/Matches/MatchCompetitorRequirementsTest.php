@@ -8,16 +8,17 @@ use App\Lifecycle\Matches\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\MatchSides;
 
 it('rejects competitor types unsupported by the match format', function () {
     $match = EventMatch::factory()->withMatchType(MatchType::Singles)->create();
     $tagTeam = TagTeam::factory()->bookable()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['tag_teams' => [$tagTeam]],
         ['wrestlers' => [$wrestler]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'The [Singles] match does not support the selected competitor type.',
     );
@@ -28,10 +29,10 @@ it('rejects a wrestler represented directly and by a selected tag team', functio
     $tagTeam = TagTeam::factory()->bookable()->create();
     $representedWrestler = $tagTeam->currentWrestlers()->firstOrFail();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['tag_teams' => [$tagTeam]],
         ['wrestlers' => [$representedWrestler]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'A wrestler cannot compete directly and through a selected tag team in the same match.',
     );
@@ -44,10 +45,10 @@ it('accepts mixed competitors that satisfy a multi-person tag composition', func
     $firstWrestler = Wrestler::factory()->bookable()->create();
     $secondWrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['tag_teams' => [$firstTagTeam], 'wrestlers' => [$firstWrestler]],
         ['tag_teams' => [$secondTagTeam], 'wrestlers' => [$secondWrestler]],
-    ])))->not->toThrow(InvalidMatchConfigurationException::class);
+    ]))))->not->toThrow(InvalidMatchConfigurationException::class);
 });
 
 it('rejects an incorrect multi-person tag composition', function () {
@@ -55,10 +56,10 @@ it('rejects an incorrect multi-person tag composition', function () {
     $firstTagTeam = TagTeam::factory()->bookable()->create();
     $secondTagTeam = TagTeam::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['tag_teams' => [$firstTagTeam]],
         ['tag_teams' => [$secondTagTeam]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'The [6 Man Tag Team] match requires a 3-on-3 roster-member composition.',
     );
@@ -69,10 +70,10 @@ it('accepts a handicap composition in either side order', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['tag_teams' => [$tagTeam]],
         ['wrestlers' => [$wrestler]],
-    ])))->not->toThrow(InvalidMatchConfigurationException::class);
+    ]))))->not->toThrow(InvalidMatchConfigurationException::class);
 });
 
 it('rejects multiple competitor entries on an independently competing side', function () {
@@ -82,11 +83,11 @@ it('rejects multiple competitor entries on an independently competing side', fun
     $thirdWrestler = Wrestler::factory()->bookable()->create();
     $fourthWrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['wrestlers' => [$firstWrestler, $secondWrestler]],
         ['wrestlers' => [$thirdWrestler]],
         ['wrestlers' => [$fourthWrestler]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'The [Triple Threat] match requires a 1-on-1-on-1 competitor-entry composition.',
     );
@@ -98,10 +99,10 @@ it('requires an individual side for every elimination-match entrant', function (
     $secondWrestler = Wrestler::factory()->bookable()->create();
     $thirdWrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['wrestlers' => [$firstWrestler, $secondWrestler]],
         ['wrestlers' => [$thirdWrestler]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'Each [Battle Royal] entrant must compete on an individual side.',
     );
@@ -112,10 +113,10 @@ it('rejects an open-ended elimination match with too few competitors', function 
     $firstWrestler = Wrestler::factory()->bookable()->create();
     $secondWrestler = Wrestler::factory()->bookable()->create();
 
-    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, new MatchSides(collect([
         ['wrestlers' => [$firstWrestler]],
         ['wrestlers' => [$secondWrestler]],
-    ])))->toThrow(
+    ]))))->toThrow(
         InvalidMatchConfigurationException::class,
         'This match requires at least 3 competitors.',
     );

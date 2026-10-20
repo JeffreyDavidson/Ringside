@@ -876,9 +876,9 @@ function selectMatchDataInForm(Testable $modal, EventMatchData $data): void
 {
     $modal->set('form.matchType', $data->matchType);
     $modal->set([
-        'form.competitors' => $data->sides->values()->map(fn (array $side): array => array_filter([
-            'wrestlers' => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers'] ?? []),
-            'tag_teams' => array_map(fn (TagTeam $tagTeam): int => $tagTeam->id, $side['tag_teams'] ?? []),
+        'form.competitors' => $data->sides->sides()->values()->map(fn (array $side): array => array_filter([
+            'wrestlers' => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers']),
+            'tag_teams' => array_map(fn (TagTeam $tagTeam): int => $tagTeam->id, $side['tag_teams']),
         ]))->all(),
         'form.referees' => $data->referees->modelKeys(),
         'form.titles' => $data->titles->modelKeys(),

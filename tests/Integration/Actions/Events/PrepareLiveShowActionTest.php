@@ -177,3 +177,19 @@ test('a stale preparation preview cannot create a run from a different pack', fu
     expect($event->liveRun()->exists())->toBeFalse()
         ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe(0);
 })->with(['outdated pack version' => true, 'different card fingerprint' => false]);
+
+test('a prepared run starts as prepared with no completion time', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()]);
+    EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
+
+    // Act
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
+    // Assert
+    expect($run->status)->toBe(LiveShowStatus::Prepared)
+        ->and($run->completed_at)->toBeNull();
+});
