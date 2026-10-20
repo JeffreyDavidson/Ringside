@@ -1,13 +1,14 @@
 @props(['mode', 'form', 'editingId', 'story', 'participants', 'events', 'selectedEvent', 'source', 'needsReload'])
+@use('App\Enums\Storylines\StorylineFormMode')
 @php
-    $states = $mode === 'step-status' ? [\App\Enums\Storylines\StepStatus::Planned, \App\Enums\Storylines\StepStatus::Postponed, \App\Enums\Storylines\StepStatus::Cancelled] : \App\Enums\Storylines\StorylineStatus::cases();
+    $states = $mode === StorylineFormMode::StepStatus ? [\App\Enums\Storylines\StepStatus::Planned, \App\Enums\Storylines\StepStatus::Postponed, \App\Enums\Storylines\StepStatus::Cancelled] : \App\Enums\Storylines\StorylineStatus::cases();
     $statusOptions = collect($states)->mapWithKeys(fn ($state) => [$state->value => $state->label()])->all();
-    if ($mode === 'story-status' && $story->status === \App\Enums\Storylines\StorylineStatus::Archived) {
+    if ($mode === StorylineFormMode::StoryStatus && $story->status === \App\Enums\Storylines\StorylineStatus::Archived) {
         $statusOptions = [$story->previous_status->value => __('storylines.restore').' · '.$story->previous_status->label()];
     }
 @endphp
 <form wire:submit="save" id="storyline-form" class="border-border bg-surface-panel scroll-mt-6 border p-5 sm:p-7">
-    <h2 class="font-display mb-5 text-2xl">{{ __('storylines.form_titles.'.$mode) }}</h2>
+    <h2 class="font-display mb-5 text-2xl">{{ $mode->label() }}</h2>
     @if ($errors->any())
         <div role="alert" class="border-error bg-error-surface text-error mb-5 border p-4">
             <x-heroicon-o-exclamation-triangle class="mr-2 inline size-5" />
@@ -27,10 +28,10 @@
         wire:offline.attr="disabled"
         class="grid max-w-3xl gap-5"
     >
-        @if (in_array($mode, ['story', 'step', 'development'], true))
+        @if (in_array($mode, [StorylineFormMode::Story, StorylineFormMode::Step, StorylineFormMode::Development], true))
             <x-form.inputs.text
                 wire:model="form.heading"
-                :label="__('storylines.'.($mode === 'story' ? 'name' : 'heading'))"
+                :label="__('storylines.'.($mode === StorylineFormMode::Story ? 'name' : 'heading'))"
                 size="lg"
                 class="min-h-11"
                 required
@@ -38,13 +39,13 @@
             />
             <x-form.inputs.textarea
                 wire:model="form.description"
-                :label="__('storylines.'.($mode === 'story' ? 'premise' : 'description'))"
+                :label="__('storylines.'.($mode === StorylineFormMode::Story ? 'premise' : 'description'))"
                 size="lg"
                 class="min-h-11"
                 required
                 maxlength="4000"
             />
-            @if ($mode === 'story')
+            @if ($mode === StorylineFormMode::Story)
                 <x-form.inputs.textarea
                     wire:model="form.payoff"
                     :label="__('storylines.payoff')"
@@ -54,7 +55,7 @@
                 />
             @endif
         @endif
-        @if (in_array($mode, ['step', 'development'], true))
+        @if (in_array($mode, [StorylineFormMode::Step, StorylineFormMode::Development], true))
             <div class="grid gap-4 sm:grid-cols-2">
                 <x-form.input
                     type="number"
@@ -66,7 +67,7 @@
                     max="10000"
                     required
                 />
-                @if ($mode === 'development')
+                @if ($mode === StorylineFormMode::Development)
                     <x-form.input
                         type="date"
                         wire:model="form.occurredOn"
@@ -115,7 +116,7 @@
                                 class="min-h-11"
                             />
                         </div>
-                    @elseif ($mode === 'step')
+                    @elseif ($mode === StorylineFormMode::Step)
                         <x-form.input
                             type="date"
                             wire:model.live="form.targetOn"
@@ -140,7 +141,7 @@
                     >{{ __('storylines.source_review') }}</x-button>
                 </div>
             </section>
-            @if ($mode === 'development')
+            @if ($mode === StorylineFormMode::Development)
                 <fieldset class="border-border grid gap-3 border-t pt-5">
                     <legend class="font-semibold">{{ __('storylines.cast') }}</legend>
                     <p class="text-muted-foreground text-sm">{{ __('storylines.cast_hint') }}</p>
@@ -158,8 +159,8 @@
                 </fieldset>
             @endif
         @endif
-        @if (in_array($mode, ['participant', 'participant-end'], true))
-            @if ($mode === 'participant')
+        @if (in_array($mode, [StorylineFormMode::Participant, StorylineFormMode::ParticipantEnd], true))
+            @if ($mode === StorylineFormMode::Participant)
                 <x-form.inputs.select
                     wire:model.live="form.type"
                     :label="__('storylines.type')"
@@ -205,7 +206,7 @@
                 />
             @endif
         @endif
-        @if (in_array($mode, ['step-status', 'story-status'], true))
+        @if (in_array($mode, [StorylineFormMode::StepStatus, StorylineFormMode::StoryStatus], true))
             <x-form.inputs.select
                 wire:model="form.status"
                 :label="__('storylines.status')"
@@ -216,7 +217,7 @@
                 class="min-h-11"
             />
         @endif
-        @if ($mode !== 'participant' || $editingId !== null)
+        @if ($mode !== StorylineFormMode::Participant || $editingId !== null)
             <x-form.inputs.textarea
                 wire:model="form.reason"
                 :label="__('storylines.reason')"
@@ -226,7 +227,7 @@
                 maxlength="2000"
             />
         @endif
-        @if ($mode === 'retract')
+        @if ($mode === StorylineFormMode::Retract)
             <label class="flex min-h-11 items-center gap-3"
                 ><input
                     type="checkbox"
