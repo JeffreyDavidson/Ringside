@@ -7,13 +7,16 @@ require_once __DIR__.'/../../Fixtures/sponsor-commitment.php';
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
+use App\Data\Events\SponsorInstructionData;
 use App\Enums\Events\SponsorCommitmentStatus;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
 use App\Models\Users\User;
 use App\Services\Events\SponsorInstructionService;
+use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Str;
 
@@ -30,7 +33,7 @@ function sponsorWorkerSpec(array $world, string $operation): array
     return ['sponsor_event_id' => $world['event']->id, 'sponsor_id' => $world['sponsor']->id, 'promise_id' => $promise->id,
         'user_id' => User::query()->firstOrFail()->id, 'version' => $promise->version, 'submission_key' => $promise->submission_key,
         'sponsor_operation' => $operation, 'fingerprint' => $pack['card']['fingerprint'], 'pack_version' => $pack['pack']->version ?? 0,
-        'preview_hash' => app(SponsorInstructionService::class)->preview($world['event'], $promise, 'segment', $target, null)['hash'],
+        'preview_hash' => app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Segment, $target, null)['hash'],
         'target_key' => $target ?? '', 'mode' => 'segment', 'clock' => now()->toIso8601String()];
 }
 
@@ -41,8 +44,7 @@ function publishSponsorFixture(array $world): void
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key,
         sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'segment', null, null,
-        app(SponsorInstructionService::class)->preview($world['event'], $promise, 'segment', null, null)['hash']);
+    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, null)['hash']));
 }
 
 test('sponsor concurrency admits one repeated create and one atomic revision', function (): void {
@@ -132,7 +134,7 @@ test('sponsor concurrency refuses source adoption if another instruction revisio
         $first = sponsorWorkerSpec($world, 'publish');
         $run = app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $first['fingerprint']);
         $promise = $world['promise']->refresh();
-        app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 3, 1, $first['fingerprint'], 'segment', $promise->pack_key, null, $first['preview_hash']);
+        app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 3, 1, $first['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key ?? ''), null, $first['preview_hash']));
         $deadlocks = resolvedDeadlocks();
 
         // Act
