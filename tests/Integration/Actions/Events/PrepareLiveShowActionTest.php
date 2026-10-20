@@ -180,10 +180,14 @@ test('a stale preparation preview cannot create a run from a different pack', fu
 
 test('a prepared run starts as prepared with no completion time', function (): void {
     // Arrange
-    $fixture = liveShowFixture();
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()]);
+    EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
 
     // Act
-    $run = $fixture['run'];
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
 
     // Assert
     expect($run->status)->toBe(LiveShowStatus::Prepared)

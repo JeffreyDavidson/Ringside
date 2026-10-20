@@ -86,7 +86,7 @@ test('a running show with every item finished completes', function (): void {
         ->and($fixture['run']->completed_at)->not->toBeNull();
 });
 
-test('a completed show refuses to complete again and to start an item with the completed message', function (): void {
+test('a completed show refuses to complete again with the completed message', function (): void {
     // Arrange
     $fixture = liveShowFixture();
     $item = resolve(TransitionLiveItemAction::class);
@@ -96,10 +96,24 @@ test('a completed show refuses to complete again and to start an item with the c
 
     // Act
     $completeAgain = fn () => resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 4);
-    $startAgain = fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Start);
 
     // Assert
     expect($completeAgain)->toThrow(LiveShowException::class, __('live-show.completed'))
-        ->and($startAgain)->toThrow(LiveShowException::class, __('live-show.completed'))
+        ->and($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Completed);
+});
+
+test('a completed show refuses to start an item with the completed message', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $item = resolve(TransitionLiveItemAction::class);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 3);
+
+    // Act
+    $startAgain = fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Start);
+
+    // Assert
+    expect($startAgain)->toThrow(LiveShowException::class, __('live-show.completed'))
         ->and($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Completed);
 });
