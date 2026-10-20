@@ -94,14 +94,14 @@ class ReuniteModal extends ModalComponent
     #[Computed]
     public function wrestlers(): Collection
     {
-        return $this->formerMembers->wrestlers ?? collect();
+        return $this->formerMembers->wrestlers;
     }
 
     /** @return Collection<int, TagTeam> */
     #[Computed]
     public function tagTeams(): Collection
     {
-        return $this->formerMembers->tagTeams ?? collect();
+        return $this->formerMembers->tagTeams;
     }
 
     public function minimumMemberCount(): int

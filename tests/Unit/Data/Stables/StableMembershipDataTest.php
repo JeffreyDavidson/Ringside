@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Collection;
 
 it('counts individual wrestlers as one and tag teams as two', function () {
     $members = new StableMembershipData(
@@ -23,4 +24,20 @@ it('reports whether the payload contains members', function () {
         ->and($emptyMembers->isNotEmpty())->toBeFalse()
         ->and($members->isEmpty())->toBeFalse()
         ->and($members->isNotEmpty())->toBeTrue();
+});
+
+it('defaults to empty wrestler and tag team collections', function () {
+    // Arrange
+    $members = new StableMembershipData;
+
+    // Act
+    $total = $members->getTotalMemberCount();
+
+    // Assert
+    expect($members->wrestlers)->toBeInstanceOf(Collection::class)
+        ->and($members->wrestlers)->toBeEmpty()
+        ->and($members->tagTeams)->toBeInstanceOf(Collection::class)
+        ->and($members->tagTeams)->toBeEmpty()
+        ->and($members->isEmpty())->toBeTrue()
+        ->and($total)->toBe(0);
 });

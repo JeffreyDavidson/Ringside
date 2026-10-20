@@ -29,8 +29,8 @@ test('it returns only current stable members with weighted headcount', function 
 
     $members = resolve(StableMembershipService::class)->currentMembers($stable);
 
-    $wrestlerIds = $members->wrestlers?->pluck('id')->all() ?? [];
-    $tagTeamIds = $members->tagTeams?->pluck('id')->all() ?? [];
+    $wrestlerIds = $members->wrestlers->pluck('id')->all();
+    $tagTeamIds = $members->tagTeams->pluck('id')->all();
 
     expect($members)->toBeInstanceOf(StableMembershipData::class)
         ->and($wrestlerIds)->toEqualCanonicalizing($currentWrestlers->modelKeys())

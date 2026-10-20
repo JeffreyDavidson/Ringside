@@ -18,7 +18,7 @@ final class StableFormerMemberEligibility
     {
         $members = $this->availableMembersFor($stable);
 
-        return collect([...($members->wrestlers ?? []), ...($members->tagTeams ?? [])]);
+        return collect([...$members->wrestlers, ...$members->tagTeams]);
     }
 
     /**

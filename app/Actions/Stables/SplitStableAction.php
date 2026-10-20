@@ -117,13 +117,13 @@ class SplitStableAction
 
         $currentMembers = $this->membershipService->currentMembers($originalStable);
         $nonMemberWrestlerNames = $membersForNewStable->wrestlers
-            ?->diff($currentMembers->wrestlers ?? [])
+            ->diff($currentMembers->wrestlers)
             ->map(fn (Wrestler $wrestler): string => $wrestler->name)
-            ->all() ?? [];
+            ->all();
         $nonMemberTagTeamNames = $membersForNewStable->tagTeams
-            ?->diff($currentMembers->tagTeams ?? [])
+            ->diff($currentMembers->tagTeams)
             ->map(fn (TagTeam $tagTeam): string => $tagTeam->name)
-            ->all() ?? [];
+            ->all();
         $nonMemberNames = [...$nonMemberWrestlerNames, ...$nonMemberTagTeamNames];
 
         if ($nonMemberNames !== []) {
