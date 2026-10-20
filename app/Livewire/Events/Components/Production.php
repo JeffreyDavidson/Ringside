@@ -14,6 +14,7 @@ use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Queries\Crew\CrewContactSearchQuery;
 use App\Services\Events\EventPackSourceService;
+use App\ValueObjects\ProductionPlan;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -86,7 +87,7 @@ class Production extends Component
         $this->version = $data['pack']->version ?? 0;
         $this->fingerprint = $data['card']['fingerprint'];
         $this->items = $data['running'];
-        $this->assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
+        $this->assignments = ProductionPlan::fromArray($data['content']['production'] ?? null)->activeAssignments();
         $this->cues = array_values(array_filter($data['content']['production']['cues'] ?? [], fn (array $cue): bool => in_array($cue['item_key'], array_column($this->items, 'key'), true)));
         $this->notes = $data['content']['production']['notes'] ?? '';
         $this->reviewed = false;

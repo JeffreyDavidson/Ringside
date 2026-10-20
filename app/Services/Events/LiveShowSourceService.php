@@ -9,6 +9,8 @@ use App\Enums\Events\LiveItemStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
+use App\ValueObjects\ProductionPlan;
+use Illuminate\Support\Collection;
 
 /**
  * @phpstan-import-type Content from EventLiveRun
@@ -34,24 +36,21 @@ class LiveShowSourceService
             return null;
         }
 
-        $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
-        $crew = [];
-        foreach ($assignments as $assignment) {
-            $key = 'crew:'.$assignment['contact_id'];
-            $crew[$key] ??= ['key' => $key, 'name' => $assignment['name'], 'role' => '', 'matches' => [], 'warning' => false,
-                'assigned' => true, 'arrived' => null, 'briefed' => null, 'updated_by' => null, 'assignments' => []];
-            $crew[$key]['assignments'][] = $assignment;
-            $crew[$key]['role'] = implode(', ', array_unique(array_map(fn (array $entry): string => CrewRole::from($entry['role'])->label(), $crew[$key]['assignments'])));
-        }
-        $cues = $data['content']['production']['cues'] ?? [];
+        $production = ProductionPlan::fromArray($data['content']['production'] ?? null);
+        $assignments = $production->activeAssignments();
+        $crew = collect($assignments)->groupBy(fn (array $assignment): string => 'crew:'.$assignment['contact_id'])
+            ->map(fn (Collection $group, string $key): array => ['key' => $key, 'name' => $group->firstOrFail()['name'],
+                'role' => $group->map(fn (array $entry): string => CrewRole::from($entry['role'])->label())->unique()->implode(', '),
+                'matches' => [], 'warning' => false, 'assigned' => true, 'arrived' => null, 'briefed' => null, 'updated_by' => null,
+                'assignments' => array_values($group->all())]);
 
         return ['pack' => $data['pack'], 'fingerprint' => $data['card']['fingerprint'], 'content' => [
             'event_date' => $event->date->toIso8601String(), 'event_name' => $event->name,
             'venue' => $event->venue?->name, 'timezone' => $data['content']['timezone'], 'revision' => $data['content']['revision'],
             'items' => array_map(fn (array $row): array => [...$row, 'timezone' => $data['content']['timezone'], 'state' => LiveItemStatus::Pending->value, 'start' => null,
-                'finish' => null, 'reason' => null, 'updated_by' => null, 'cues' => array_values(array_filter($cues, fn (array $cue): bool => $cue['item_key'] === $row['key']))], $data['running']),
+                'finish' => null, 'reason' => null, 'updated_by' => null, 'cues' => $production->cuesFor($row['key'])], $data['running']),
             'roster' => [...array_map(fn (array $person): array => [...$person, 'assigned' => true,
-                'arrived' => null, 'briefed' => null, 'updated_by' => null], $data['card']['roster']), ...array_values($crew)],
+                'arrived' => null, 'briefed' => null, 'updated_by' => null], $data['card']['roster']), ...$crew->values()->all()],
             'production' => ['assignments' => $assignments],
         ]];
     }
