@@ -130,6 +130,7 @@ class TalentBookingsViewModel
         $confirmed = $booking?->status === TalentBookingStatus::Confirmed;
         $agreement = $booking?->confirmed_snapshot;
 
+        // Every entry is evaluated eagerly, so each one guards itself (`$confirmed &&`) instead of relying on an outer branch.
         return array_keys(array_filter([
             'unavailable' => $confirmed && $row['unavailable'],
             'reconfirmation' => $confirmed && ($agreement === null || $booking->terms_need_review

@@ -301,4 +301,6 @@ test('a person listed twice shows the first booking', function (): void {
     $row = collect($rows)->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$person->id}");
     expect($row['booking'])->toBe($first)
         ->and(collect($rows)->where('key', "wrestler:{$person->id}"))->toHaveCount(1);
+
+    $bookings->verify();
 });
