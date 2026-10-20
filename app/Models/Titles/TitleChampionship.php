@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
+use App\Collections\TitleChampionshipCollection;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Database\Factories\Titles\TitleChampionshipFactory;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -45,6 +47,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
+ * @method static TitleChampionshipCollection<int, static> all($columns = ['*'])
+ * @method static TitleChampionshipCollection<int, static> get($columns = ['*'])
  * @method static TitleChampionshipBuilder<static>|TitleChampionship current()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forPreviousHistory()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forChampion(Wrestler|TagTeam $champion)
@@ -59,6 +63,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[CollectedBy(TitleChampionshipCollection::class)]
 #[Table('titles_championships')]
 #[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
 #[UseEloquentBuilder(TitleChampionshipBuilder::class)]

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Collections\MatchCompetitorsCollection;
+use App\Collections\TitleChampionshipCollection;
 use App\Data\Matches\MatchResultData;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
@@ -97,14 +98,14 @@ class ApplyMatchTitleOutcomesAction
      *
      * @param  Collection<int, Title>  $titles
      * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $winningCompetitors
-     * @param  Collection<int, TitleChampionship>  $reigns
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $reigns
      */
     private function ensureDeletedTitlesKeepTheirChampion(
         EventMatch $match,
         MatchResultData $result,
         Collection $titles,
         MatchCompetitorsCollection $winningCompetitors,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
         if (! $result->finish->allowsTitleChange()) {
             return;

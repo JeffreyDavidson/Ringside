@@ -14,6 +14,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Facades\Date;
@@ -44,7 +45,7 @@ test('it establishes a stable that has no activity period when a start date is g
     $updatedStable = resolve(UpdateAction::class)->handle($stable, new StableData(
         name: '  Renamed Stable  ',
         start_date: $startedAt,
-        members: new StableMembershipData,
+        members: resolve(StableMembershipService::class)->currentMembers($stable),
     ));
 
     $activityPeriod = $updatedStable->activityPeriods()->sole();

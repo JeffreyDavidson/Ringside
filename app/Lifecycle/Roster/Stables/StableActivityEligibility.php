@@ -61,12 +61,12 @@ final readonly class StableActivityEligibility
     {
         $available = $this->formerMemberEligibility->availableMembersFor($stable);
 
-        $availableWrestlerIds = $available->wrestlers?->pluck('id')->all() ?? [];
-        $availableTagTeamIds = $available->tagTeams?->pluck('id')->all() ?? [];
+        $availableWrestlerIds = $available->wrestlers->pluck('id')->all();
+        $availableTagTeamIds = $available->tagTeams->pluck('id')->all();
 
         $notAvailableNames = collect([
-            ...$returningMembers->wrestlers?->reject(fn (Wrestler $wrestler): bool => in_array($wrestler->getKey(), $availableWrestlerIds, true)) ?? [],
-            ...$returningMembers->tagTeams?->reject(fn (TagTeam $tagTeam): bool => in_array($tagTeam->getKey(), $availableTagTeamIds, true)) ?? [],
+            ...$returningMembers->wrestlers->reject(fn (Wrestler $wrestler): bool => in_array($wrestler->getKey(), $availableWrestlerIds, true)),
+            ...$returningMembers->tagTeams->reject(fn (TagTeam $tagTeam): bool => in_array($tagTeam->getKey(), $availableTagTeamIds, true)),
         ])->map(fn (Wrestler|TagTeam $member): string => $member->name)->values()->all();
 
         if ($notAvailableNames !== []) {

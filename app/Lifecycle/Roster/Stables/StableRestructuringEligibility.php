@@ -125,11 +125,11 @@ final readonly class StableRestructuringEligibility
      */
     public function ensureSplitKeepsTagTeamsWithWrestlers(StableMembershipData $currentMembers, StableMembershipData $movingMembers): void
     {
-        $directWrestlerIds = $currentMembers->wrestlers?->pluck('id')->all() ?? [];
-        $movingWrestlerIds = $movingMembers->wrestlers?->pluck('id')->all() ?? [];
-        $movingTagTeamIds = $movingMembers->tagTeams?->pluck('id')->all() ?? [];
+        $directWrestlerIds = $currentMembers->wrestlers->pluck('id')->all();
+        $movingWrestlerIds = $movingMembers->wrestlers->pluck('id')->all();
+        $movingTagTeamIds = $movingMembers->tagTeams->pluck('id')->all();
 
-        foreach ($currentMembers->tagTeams ?? [] as $tagTeam) {
+        foreach ($currentMembers->tagTeams as $tagTeam) {
             $teamMoves = in_array($tagTeam->getKey(), $movingTagTeamIds, true);
 
             $separatedWrestlerNames = $tagTeam->currentWrestlers()
@@ -172,7 +172,7 @@ final readonly class StableRestructuringEligibility
     /** @return array<int, string> */
     private function unavailableMemberNames(StableMembershipData $members): array
     {
-        return collect([...($members->wrestlers ?? []), ...($members->tagTeams ?? [])])
+        return collect([...$members->wrestlers, ...$members->tagTeams])
             ->filter(fn (Wrestler|TagTeam $member): bool => $this->unavailabilityOf($member) instanceof StableMemberUnavailability)
             ->map(fn (Wrestler|TagTeam $member): string => $member->name)
             ->values()

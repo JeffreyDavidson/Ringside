@@ -49,33 +49,9 @@ class TalentBookingsViewModel
         $counts = ['not_tracked' => 0, 'proposed' => 0, 'contacted' => 0, 'confirmed' => 0, 'cancelled' => 0, 'attention' => 0, 'confirmed_clear' => 0];
         foreach ($data['rows'] as $row) {
             $booking = $row['booking'];
-            $warnings = [];
-            if ($booking?->status === TalentBookingStatus::Confirmed) {
-                $agreement = $booking->confirmed_snapshot;
-                if ($row['unavailable']) {
-                    $warnings[] = 'unavailable';
-                }
-                if ($agreement === null || $booking->terms_need_review || $this->fingerprints->signature($context) !== $this->fingerprints->signature($agreement['context'])) {
-                    $warnings[] = 'reconfirmation';
-                }
-                if (($agreement['on_card'] ?? false) && ! $row['on_card']) {
-                    $warnings[] = 'removed';
-                }
-                if ($context['venue_deleted']) {
-                    $warnings[] = 'venue_deleted';
-                }
-                if ($context['venue_id'] === null) {
-                    $warnings[] = 'venue_unset';
-                }
-                if ($warnings === []) {
-                    $counts['confirmed_clear']++;
-                }
-            }
-            if ($row['on_card'] && $booking?->status === TalentBookingStatus::Cancelled) {
-                $warnings[] = 'cancelled_card';
-            }
-            if ($row['on_card'] && $booking === null) {
-                $warnings[] = 'not_tracked';
+            $warnings = $this->warnings($row, $context);
+            if ($booking?->status === TalentBookingStatus::Confirmed && $warnings === []) {
+                $counts['confirmed_clear']++;
             }
             $counts[$booking?->status->value ?? 'not_tracked']++;
             if ($warnings !== []) {
@@ -105,8 +81,10 @@ class TalentBookingsViewModel
         $card = $this->card->get($event);
         $bookings = $this->bookings->get($event);
         $rows = collect($card['roster'])->keyBy('key');
-        foreach ($bookings as $booking) {
-            $key = $booking->person_type.':'.$booking->person_id;
+        $onCard = $rows->all();
+        // The first booking wins if a person were ever listed twice, as the lookup this replaces took the first match.
+        $booked = $bookings->unique($this->bookingKey(...))->keyBy($this->bookingKey(...));
+        foreach ($booked as $key => $booking) {
             if (! $rows->has($key)) {
                 $rows->put($key, ['key' => $key, 'name' => $booking->person_name, 'role' => $booking->person_role, 'matches' => [], 'warning' => true]);
             }
@@ -122,14 +100,47 @@ class TalentBookingsViewModel
                 $person = $people->get($id);
                 $result[] = ['key' => $key, 'type' => $type, 'id' => $id,
                     'name' => $person instanceof Wrestler ? $person->name : ($person->full_name ?? $row['name']),
-                    'role' => $row['role'], 'matches' => $row['matches'], 'on_card' => in_array($key, array_column($card['roster'], 'key'), true),
+                    'role' => $row['role'], 'matches' => $row['matches'], 'on_card' => array_key_exists($key, $onCard),
                     'unavailable' => $person === null || ! in_array($id, $available, true),
-                    'booking' => $bookings->first(fn (EventTalentBooking $booking): bool => $booking->person_type === $type && $booking->person_id === $id)];
+                    'booking' => $booked->get($key)];
             }
         }
         usort($result, fn (array $a, array $b): int => [mb_strtolower($a['name']), $a['key']] <=> [mb_strtolower($b['name']), $b['key']]);
 
         return ['rows' => $result, 'card_warning' => in_array(true, array_column($card['rows'], 'warning'), true)];
+    }
+
+    /** The key a booking's person has in the roster, such as `wrestler:12`. */
+    private function bookingKey(EventTalentBooking $booking): string
+    {
+        return "{$booking->person_type}:{$booking->person_id}";
+    }
+
+    /**
+     * Why a row needs attention, in the order the page lists them. A confirmed booking is checked against the
+     * current event; a cancelled or missing booking only matters when the person is on the card.
+     *
+     * @param  PersonRow  $row
+     * @param  Context  $context
+     * @return list<string>
+     */
+    private function warnings(array $row, array $context): array
+    {
+        $booking = $row['booking'];
+        $confirmed = $booking?->status === TalentBookingStatus::Confirmed;
+        $agreement = $booking?->confirmed_snapshot;
+
+        // Every entry is evaluated eagerly, so each one guards itself (`$confirmed &&`) instead of relying on an outer branch.
+        return array_keys(array_filter([
+            'unavailable' => $confirmed && $row['unavailable'],
+            'reconfirmation' => $confirmed && ($agreement === null || $booking->terms_need_review
+                || $this->fingerprints->signature($context) !== $this->fingerprints->signature($agreement['context'])),
+            'removed' => $confirmed && ($agreement['on_card'] ?? false) && ! $row['on_card'],
+            'venue_deleted' => $confirmed && $context['venue_deleted'],
+            'venue_unset' => $confirmed && $context['venue_id'] === null,
+            'cancelled_card' => $row['on_card'] && $booking?->status === TalentBookingStatus::Cancelled,
+            'not_tracked' => $row['on_card'] && $booking === null,
+        ]));
     }
 
     /** The fee as the page shows it: a currency prefix, thousands grouping, exact cents and a sign for negative amounts. */

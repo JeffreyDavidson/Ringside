@@ -41,7 +41,9 @@ typed coordinator.
 
 **Priority:** Medium
 **Status:** In progress; `MatchCompetitorsCollection` now owns typed wrestler and
-tag-team partitions for loaded competitor entries.
+tag-team partitions for loaded competitor entries, and `EventBudgetLineCollection` and
+`EventBudgetMovementCollection` own the archived and voided filters for budget lines
+and movements.
 
 `MatchCompetitorsCollection` is the existing custom collection. Review it and
 other model collections for repeated domain operations such as grouping by
