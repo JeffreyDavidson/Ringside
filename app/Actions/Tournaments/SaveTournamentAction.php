@@ -10,18 +10,18 @@ use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
-use App\Lifecycle\Tournaments\BracketLayout;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
+use App\ValueObjects\BracketShape;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class SaveTournamentAction
 {
-    public function __construct(private readonly BracketLayout $layout, private readonly RosterBookingEligibility $eligibility) {}
+    public function __construct(private readonly RosterBookingEligibility $eligibility) {}
 
     public function handle(Promotion $promotion, TournamentData $data, ?Tournament $tournament = null, ?int $version = null): Tournament
     {
@@ -67,11 +67,8 @@ class SaveTournamentAction
                 $competitor = $competitors->sole('id', $id);
                 (new TournamentEntry)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'seed' => $offset + 1, 'competitor_type' => $competitor->getMorphClass(), 'competitor_id' => $id])->save();
             }
-            $seeds = $this->layout->seeds($data->capacity);
-            for ($round = 1,$count = $data->capacity / 2; $count >= 1; $round++,$count /= 2) {
-                for ($position = 1; $position <= $count; $position++) {
-                    (new TournamentNode)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'round' => $round, 'position' => $position, 'first_seed' => $round === 1 ? $seeds[($position - 1) * 2] : null, 'second_seed' => $round === 1 ? $seeds[($position - 1) * 2 + 1] : null])->save();
-                }
+            foreach (new BracketShape($data->capacity)->slots() as [$round, $position, $firstSeed, $secondSeed]) {
+                (new TournamentNode)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'round' => $round, 'position' => $position, 'first_seed' => $firstSeed, 'second_seed' => $secondSeed])->save();
             }
             activity('tournaments')->withProperties(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'version' => $locked->version])->log('tournament.saved');
 
