@@ -10,6 +10,7 @@ use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Tournaments\Tournament;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 
 class SaveTournamentAction
 {
-    public function __construct(private readonly RosterBookingEligibility $eligibility) {}
+    public function __construct(private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
     public function handle(Promotion $promotion, TournamentData $data, ?Tournament $tournament = null, ?int $version = null): Tournament
     {
@@ -42,8 +43,8 @@ class SaveTournamentAction
             if ($locked->exists && ($locked->promotion_id !== $promotion->id || $locked->version !== $version)) {
                 throw RecordChangedException::changed();
             }
-            if ($locked->exists && $locked->status !== TournamentStatus::Draft) {
-                throw TournamentException::structureFrozen();
+            if ($locked->exists) {
+                $this->states->ensureStructureEditable($locked);
             }
             $competitors = $data->kind->modelClass()::query()->where('promotion_id', $promotion->id)->whereKey($data->competitorIds)->orderBy('id')->when($data->kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->lockForUpdate()->get();
             if ($competitors->count() !== count($data->competitorIds) || $competitors->contains(fn (\App\Models\Roster\Wrestlers\Wrestler|\App\Models\Roster\Referees\Referee|TagTeam $competitor): bool => ! $this->eligibility->allows($competitor))) {

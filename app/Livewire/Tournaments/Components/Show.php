@@ -17,6 +17,7 @@ use App\Data\Tournaments\TournamentBoutData;
 use App\Enums\Roster\BookableRosterKind;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentOperation;
+use App\Enums\Tournaments\TournamentOperationTarget;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Matches\Support\BookableRosterSearch;
@@ -44,21 +45,6 @@ use Livewire\Component;
 class Show extends Component
 {
     use ExplainsKeptInput;
-
-    /** Operations that act on one bracket node. */
-    private const array NODE_OPERATIONS = [
-        TournamentOperation::Book,
-        TournamentOperation::Plan,
-        TournamentOperation::Reset,
-        TournamentOperation::Unbook,
-        TournamentOperation::Walkover,
-    ];
-
-    /** Operations that act on one tournament entry. */
-    private const array ENTRY_OPERATIONS = [
-        TournamentOperation::Withdraw,
-        TournamentOperation::Replace,
-    ];
 
     #[Locked]
     public int $tournamentId;
@@ -147,10 +133,10 @@ class Show extends Component
         $this->nodeId = null;
         $this->entryId = null;
         $eventId = null;
-        if (in_array($draft, self::ENTRY_OPERATIONS, true)) {
+        if ($draft->target() === TournamentOperationTarget::Entry) {
             $this->entryId = $tournament->entries()->findOrFail($id)->id;
         }
-        if (in_array($draft, self::NODE_OPERATIONS, true)) {
+        if ($draft->target() === TournamentOperationTarget::Node) {
             $node = $tournament->nodes()->findOrFail($id);
             $this->nodeId = $node->id;
             $eventId = $node->planned_event_id;
@@ -268,7 +254,7 @@ class Show extends Component
 
             return $bouts->only($ids);
         }
-        if (in_array($operation, self::ENTRY_OPERATIONS, true) && $this->entryId !== null) {
+        if ($operation?->target() === TournamentOperationTarget::Entry && $this->entryId !== null) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->first?->id === $this->entryId || $bout->second?->id === $this->entryId);
         }
         if ($operation === TournamentOperation::Cancel) {

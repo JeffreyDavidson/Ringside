@@ -16,7 +16,7 @@ use App\Services\Tournaments\TournamentBracketService;
 
 class TournamentOutcomeManager
 {
-    public function __construct(private readonly TournamentBracketService $bracket) {}
+    public function __construct(private readonly TournamentBracketService $bracket, private readonly TournamentStateMachine $states) {}
 
     public function ensureResultCanChange(EventMatch $match, MatchResultData $result): void
     {
@@ -30,9 +30,7 @@ class TournamentOutcomeManager
         if ($result->tournamentVersion === null || ($match->match_finish !== null && $result->tournamentVersion !== $link->tournament->version)) {
             throw RecordChangedException::changed();
         }
-        if ($link->tournament->status === TournamentStatus::Cancelled) {
-            throw TournamentException::closed();
-        }
+        $this->states->ensureCanProgress($link->tournament);
         if ($link->active_node_id === null && ($match->match_finish === null || $match->winning_side_id !== $result->winningSide?->id)) {
             throw TournamentException::historicalAttempt();
         }
@@ -50,7 +48,7 @@ class TournamentOutcomeManager
 
     public function synchronize(Tournament $tournament): void
     {
-        if ($tournament->status === TournamentStatus::Cancelled) {
+        if (! $this->states->canProgress($tournament)) {
             return;
         }
         $final = $this->bracket->bouts($tournament)->last();

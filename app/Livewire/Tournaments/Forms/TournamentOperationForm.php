@@ -18,16 +18,6 @@ use Livewire\Form;
 
 class TournamentOperationForm extends Form
 {
-    /** Operations that need a written reason and an explicit confirmation. */
-    private const array REASON_OPERATIONS = [
-        TournamentOperation::Reset,
-        TournamentOperation::Unbook,
-        TournamentOperation::Withdraw,
-        TournamentOperation::Replace,
-        TournamentOperation::Walkover,
-        TournamentOperation::Cancel,
-    ];
-
     /** The drafted operation's value, or an empty string when no draft is open. */
     #[Locked]
     public string $operation = '';
@@ -97,7 +87,7 @@ class TournamentOperationForm extends Form
         $operation = TournamentOperation::tryFrom($this->operation);
         $rules = [];
 
-        if (in_array($operation, self::REASON_OPERATIONS, true)) {
+        if ($operation?->needsReason()) {
             $rules['reason'] = ['required', 'string', 'max:2000'];
             $rules['confirmed'] = ['accepted'];
         }

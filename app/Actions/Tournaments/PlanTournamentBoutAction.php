@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Tournaments;
 
-use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Tournaments\TournamentLocks;
+use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Events\Event;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class PlanTournamentBoutAction
 {
-    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket) {}
+    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentStateMachine $states) {}
 
     public function handle(TournamentNode $node, ?Event $event, int $version): void
     {
@@ -26,9 +26,7 @@ class PlanTournamentBoutAction
             if ($tournament->version !== $version || ($event !== null && ($event->trashed() || $event->promotion_id !== $tournament->promotion_id))) {
                 throw RecordChangedException::changed();
             }
-            if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
-                throw TournamentException::closed();
-            }
+            $this->states->ensureOpen($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
             if ($bout->link instanceof TournamentMatchLink && $bout->link->match->event_id !== $event?->id) {
