@@ -28,7 +28,7 @@ test('saving locks the owning event then its matches then the pack before insert
         ->and($packLock)->toBeLessThan($insert)
         ->and($statements[$eventLock]['bindings'])->toBe([$event->id])
         ->and($statements[$matchesLock]['bindings'])->toBe([$event->id])
-        ->and($statements[$matchesLock]['sql'])->toContain('order by "id" asc')
+        ->and($statements[$matchesLock]['sql'])->toContain('order by "events_matches"."id" asc')
         ->and($statements[$packLock]['bindings'])->toBe([$event->id])
         ->and($event->pack()->firstOrFail()->version)->toBe(1)
         ->and($event->pack()->with('event')->firstOrFail()->event->is($event))->toBeTrue();

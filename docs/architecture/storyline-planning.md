@@ -30,7 +30,7 @@ Opening forms captures a current source fingerprint; mutations compare it under 
 
 ## Concurrency and history
 
-Source-linked Actions lock the event, all its matches in ID order, pack and live run before the story. Other mutations lock the story. Under that lock Actions re-read the expected story version and check state; they do not authorize again, because the calling component already did. Stale/repeated transitions change nothing. New stories serialize on their promotion and use a unique form submission UUID; steps and accounts also have unique submission identities.
+Source-linked Actions lock the event card through `EventCardLock` (the event, all its matches in ID order, pack and live run) before the story. Other mutations lock the story. Under that lock Actions re-read the expected story version and check state; they do not authorize again, because the calling component already did. Stale/repeated transitions change nothing. New stories serialize on their promotion and use a unique form submission UUID; steps and accounts also have unique submission identities.
 
 RecordRevisionAction writes private before/after data with actor, timestamp and reason in the mutation transaction, then increments the story version. StorylineRevision is separate from general activity-log cleanup, so creative history is durable. Source FKs restrict hard deletion; ordinary source soft deletion retains links. There are no outward events/listeners, emails or scheduled creative transitions.
 

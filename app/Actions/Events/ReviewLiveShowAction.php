@@ -8,23 +8,20 @@ use App\Data\Events\LiveShowChangeData;
 use App\Data\Events\LiveShowReviewData;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
-use App\Models\Events\EventPack;
-use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\DB;
 
 class ReviewLiveShowAction
 {
     public function __construct(private readonly LiveShowSourceRequirements $source, private readonly LockLiveShowAction $lock,
-        private readonly PersistLiveShowAction $persist) {}
+        private readonly PersistLiveShowAction $persist, private readonly EventCardLock $card) {}
 
     public function handle(Event $event, int $version, int $packVersion, string $fingerprint, LiveShowReviewData $review): void
     {
         DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $review): void {
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            $event = $this->card->lock($event->id)['event'];
             $run = $this->lock->handle($event, $version);
             $source = $this->source->ensureSource($run->event);
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)

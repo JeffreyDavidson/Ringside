@@ -16,3 +16,6 @@ app/Lifecycle holds the rules about a record's state: `ensureCan...` and `can...
 
 ## Lifecycle may read through Services, never the reverse
 A Lifecycle class may inject a read-only Service or Query. A Service never depends on Lifecycle (see services.md), so a guard or lock that a Service would need to call belongs in Lifecycle, with the read it relies on left in the Service.
+
+## Lock an event's card through EventCardLock
+Actions that read or write an event's card under its fingerprint (event pack, production, sponsor instructions, live show, storyline sources) take EventCardLock inside their transaction instead of locking those rows by hand. It locks the event, all its matches including deleted ones in ascending id order, the pack and the live run, in that order; lock any other row of the event (a sponsor commitment) after it.

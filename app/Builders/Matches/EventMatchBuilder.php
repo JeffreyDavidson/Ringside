@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Matches;
 
+use App\Builders\Concerns\OrdersByKeyForLocking;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
@@ -27,6 +28,8 @@ use Illuminate\Support\Facades\DB;
  */
 class EventMatchBuilder extends Builder
 {
+    use OrdersByKeyForLocking;
+
     /** Earlier source bookings in one promotion; date passage alone does not prove a result. */
     public function forPromotionHistory(int $promotionId, Carbon $before, ?int $excludedMatchId = null): static
     {

@@ -222,7 +222,7 @@ test('sponsor publishing cannot exceed the existing fifty segment pack limit', f
         ->and($world['event']->pack()->firstOrFail()->content['segments'])->toHaveCount(50);
 });
 
-test('instruction adoption keeps the event match promise pack and run lock order before writes', function (): void {
+test('instruction adoption locks the event card before the promise and both before writes', function (): void {
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
@@ -233,11 +233,11 @@ test('instruction adoption keeps the event match promise pack and run lock order
     $statements = recordStatements(fn () => app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], 'setup', null, null, $preview['hash']));
 
     // Assert
-    $locks = array_map(fn (string $table): int => statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "'.$table.'"')), ['events', 'events_matches', 'event_sponsor_commitments', 'event_packs', 'event_live_runs']);
+    $locks = array_map(fn (string $table): int => statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "'.$table.'"')), ['events', 'events_matches', 'event_packs', 'event_live_runs', 'event_sponsor_commitments']);
     expect($locks[0])->toBeLessThan($locks[1])->and($locks[1])->toBeLessThan($locks[2])
         ->and($locks[2])->toBeLessThan($locks[3])->and($locks[3])->toBeLessThan($locks[4])
         ->and($locks[4])->toBeLessThan(statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "event_packs"')))
-        ->and($statements[$locks[1]]['sql'])->toContain('order by "id" asc');
+        ->and($statements[$locks[1]]['sql'])->toContain('order by "events_matches"."id" asc');
 });
 
 test('sponsor adoption and production edits preserve each others saved pack sections', function (string $mode): void {
