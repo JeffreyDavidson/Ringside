@@ -16,6 +16,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\MatchSides;
 
 class BookTournamentMatchAction
 {
@@ -35,13 +36,13 @@ class BookTournamentMatchAction
                 throw TournamentException::entrantsChanged();
             }
 
-            return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::Singles, $data->referees, $data->titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]]), null, $data->stipulation), $node, $version);
+            return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::Singles, $data->referees, $data->titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null, $data->stipulation), $node, $version);
         }
         if (! $first instanceof TagTeam || ! $second instanceof TagTeam) {
             throw TournamentException::entrantsChanged();
         }
 
-        return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::TagTeam, $data->referees, $data->titles, collect([1 => ['tag_teams' => [$first]], 2 => ['tag_teams' => [$second]]]), null, $data->stipulation), $node, $version);
+        return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::TagTeam, $data->referees, $data->titles, new MatchSides(collect([1 => ['tag_teams' => [$first]], 2 => ['tag_teams' => [$second]]])), null, $data->stipulation), $node, $version);
 
     }
 }

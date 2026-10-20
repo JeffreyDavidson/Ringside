@@ -22,6 +22,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Artisan;
@@ -40,10 +41,10 @@ $bookingScenarios = [
             MatchType::Singles,
             Referee::factory()->bookable()->count(1)->create(),
             Title::query()->whereKey([])->get(),
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
-            ]),
+            ])),
             null,
         );
 
@@ -55,10 +56,10 @@ $bookingScenarios = [
             MatchType::Singles,
             Referee::factory()->bookable()->count(1)->create(),
             Title::query()->whereKey([])->get(),
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
-            ]),
+            ])),
             null,
         );
 
@@ -93,10 +94,10 @@ $bookingScenarios = [
     }],
     'add competitors' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
-        $competitors = collect([
+        $competitors = new MatchSides(collect([
             1 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
             2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
-        ]);
+        ]));
 
         return [$event, fn () => resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors)];
     }],
@@ -255,10 +256,10 @@ test('mixed sides prelock every team parent before the complete ordered wrestler
     $direct = Wrestler::factory()->bookable()->count(2)->create();
     $teams->load('currentWrestlers');
     $memberIds = $teams->flatMap(fn (TagTeam $team): array => $team->currentWrestlers->modelKeys());
-    $sides = collect([
+    $sides = new MatchSides(collect([
         1 => ['wrestlers' => $direct->reverse()->all()],
         2 => ['tag_teams' => $teams->reverse()->all()],
-    ]);
+    ]));
 
     // Act
     $statements = recordStatements(fn () => resolve(MatchRosterLock::class)->forSides($sides));

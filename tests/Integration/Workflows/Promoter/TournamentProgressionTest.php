@@ -25,6 +25,7 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Collection;
 
 it('advances actual qualifiers and completes a four person tournament on one card', function (): void {
@@ -167,7 +168,7 @@ it('treats an identical final retry as existing state after later championship h
     resolve(RecordResultAction::class)->handle($final, $data);
     $event = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(30)]);
     $third = Wrestler::factory()->employed()->for($world['promotion'])->create();
-    $later = resolve(AddMatchForEventAction::class)->handle($event, new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$third]]]), null));
+    $later = resolve(AddMatchForEventAction::class)->handle($event, new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$third]]])), null));
     resolve(RecordResultAction::class)->handle($later, new MatchResultData(MatchFinish::Pinfall, $later->sides()->where('position', 2)->firstOrFail(), collect()));
     $version = $t->refresh()->version;
     resolve(RecordResultAction::class)->handle($final, $data);

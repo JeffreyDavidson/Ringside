@@ -106,9 +106,9 @@ final readonly class TournamentMatchRequirements
         if ($data->tournamentVersion !== $link->tournament->version) {
             throw RecordChangedException::changed();
         }
-        $this->ensureCompetitors($match, $data->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? [])));
+        $this->ensureCompetitors($match, $data->sides->competitors());
         $bout = $this->bracket->bout($link->node);
-        $requested = $data->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? []))->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
+        $requested = $data->sides->competitors()->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
         $expected = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
         $type = $link->tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam;
         if ($requested !== $expected || $data->matchType !== $type) {
