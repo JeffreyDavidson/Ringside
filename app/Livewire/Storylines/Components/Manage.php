@@ -29,6 +29,7 @@ use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineStep;
 use App\Queries\Storylines\CreativeRosterQuery;
 use App\Services\Storylines\StorylineSourceService;
+use App\Services\Storylines\StorylineTimezoneService;
 use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,10 +77,13 @@ class Manage extends Component
 
     protected CreativeRosterQuery $roster;
 
-    public function boot(StorylineSourceService $sources, CreativeRosterQuery $roster): void
+    protected StorylineTimezoneService $timezones;
+
+    public function boot(StorylineSourceService $sources, CreativeRosterQuery $roster, StorylineTimezoneService $timezones): void
     {
         $this->sources = $sources;
         $this->roster = $roster;
+        $this->timezones = $timezones;
     }
 
     public function mount(int $storylineId): void
@@ -304,7 +308,7 @@ class Manage extends Component
             'development' => [
                 ...$entry,
                 ...$planned,
-                'form.occurredOn' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($this->developmentTimezone($story))->toDateString()],
+                'form.occurredOn' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($this->timezones->forDevelopment($story, $this->editingId))->toDateString()],
                 'form.participantIds' => ['array', 'list', 'max:100'],
                 'form.participantIds.*' => ['integer', 'distinct'],
             ],
@@ -319,16 +323,6 @@ class Manage extends Component
             'step-status', 'story-status', 'retract' => ['form.reason' => ['required', ...$reason]],
             default => [],
         };
-    }
-
-    /** A new account is dated in the promotion's timezone; a correction keeps the timezone it was recorded in. */
-    private function developmentTimezone(Storyline $story): string
-    {
-        if ($this->editingId === null) {
-            return Promotion::query()->findOrFail($story->promotion_id)->timezone;
-        }
-
-        return $story->developments()->findOrFail($this->editingId)->timezone;
     }
 
     /**

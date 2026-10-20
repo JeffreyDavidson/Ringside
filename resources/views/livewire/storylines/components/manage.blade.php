@@ -121,7 +121,7 @@
                             @if ($step->match_id) ·{{ $sourceStates[$step->id]['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                         @foreach ($sourceStates[$step->id]['warnings'] as $warning)
-                            <p class="text-warning mt-2 text-sm">{{ $warning }}</p>
+                            <p class="text-warning mt-2 text-sm">{{ $warning->label() }}</p>
                         @endforeach
                     @endif
                     @if ($step->source_context['event_date'] ?? false)
