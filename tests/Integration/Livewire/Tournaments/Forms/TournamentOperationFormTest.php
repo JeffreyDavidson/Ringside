@@ -10,6 +10,7 @@ use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Tournaments\Tournament;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
@@ -18,7 +19,7 @@ use Livewire\Component;
 /**
  * A form wired like Livewire does on every request, started for the fixture tournament's draft operation.
  *
- * @param  array<string, mixed>  $world
+ * @param  array{tournament: Tournament}  $world
  */
 function startedOperationForm(array $world, TournamentOperation $operation, ?int $eventId = null): TournamentOperationForm
 {
@@ -54,9 +55,9 @@ describe('tournament operation form', function (): void {
         // Assert
         expect($form->operation)->toBe('plan')
             ->and($form->eventId)->toBeNull()
-            ->and($form->reason)->toBe('')
+            ->and($form->reason)->toBeEmpty()
             ->and($form->confirmed)->toBeFalse()
-            ->and($form->refereeIds)->toBe([])
+            ->and($form->refereeIds)->toBeEmpty()
             ->and($form->promotionId)->toBe($world['promotion']->id)
             ->and($form->entrantKind)->toBe('wrestler');
     });
@@ -82,7 +83,7 @@ describe('tournament operation form', function (): void {
         $keys = operationFormErrorKeys($form);
 
         // Assert
-        expect($keys)->toBe([]);
+        expect($keys)->toBeEmpty();
     });
 
     it('refuses to book with an event or title from another promotion, a repeated referee or an unknown stipulation', function (): void {
@@ -110,7 +111,7 @@ describe('tournament operation form', function (): void {
         $keys = operationFormErrorKeys($form);
 
         // Assert
-        expect($keys)->toBe([]);
+        expect($keys)->toBeEmpty();
     });
 
     it('refuses to plan with an event from another promotion', function (): void {
@@ -170,7 +171,7 @@ describe('tournament operation form', function (): void {
         $keys = operationFormErrorKeys($form);
 
         // Assert
-        expect($keys)->toBe([]);
+        expect($keys)->toBeEmpty();
     })->with(EntrantKind::cases());
 
     it('requires a reason and a confirmation for every reviewed operation', function (TournamentOperation $operation): void {
