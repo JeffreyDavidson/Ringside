@@ -102,7 +102,8 @@ it('returns the competitor models in entry order', function () {
 
     // Act
     $query = $match->competitors();
-    $query->with('competitor');
+    $query->with('competitor')
+        ->orderBy('id');
     $competitors = $query->get();
     $models = $competitors->competitorModels();
 
