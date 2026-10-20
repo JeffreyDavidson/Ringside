@@ -19,12 +19,12 @@ readonly class StableMembershipData
     /**
      * Create a new stable membership data instance.
      *
-     * @param  Collection<int, Wrestler>|null  $wrestlers  The wrestlers in the stable
-     * @param  Collection<int, TagTeam>|null  $tagTeams  The tag teams in the stable
+     * @param  Collection<int, Wrestler>  $wrestlers  The wrestlers in the stable; empty when none
+     * @param  Collection<int, TagTeam>  $tagTeams  The tag teams in the stable; empty when none
      */
     public function __construct(
-        public ?Collection $wrestlers = null,
-        public ?Collection $tagTeams = null,
+        public Collection $wrestlers = new Collection,
+        public Collection $tagTeams = new Collection,
     ) {}
 
     /**
@@ -32,8 +32,7 @@ readonly class StableMembershipData
      */
     public function isEmpty(): bool
     {
-        return (! $this->wrestlers instanceof Collection || $this->wrestlers->isEmpty()) &&
-               (! $this->tagTeams instanceof Collection || $this->tagTeams->isEmpty());
+        return $this->wrestlers->isEmpty() && $this->tagTeams->isEmpty();
     }
 
     /**
@@ -49,9 +48,6 @@ readonly class StableMembershipData
      */
     public function getTotalMemberCount(): int
     {
-        $wrestlerCount = $this->wrestlers?->count() ?? 0;
-        $tagTeamCount = $this->tagTeams?->count() ?? 0;
-
-        return $wrestlerCount + ($tagTeamCount * 2);
+        return $this->wrestlers->count() + ($this->tagTeams->count() * 2);
     }
 }

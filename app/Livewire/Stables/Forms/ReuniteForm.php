@@ -12,8 +12,8 @@ class ReuniteForm extends MemberSelectionForm
 {
     public function selectAll(StableMembershipData $formerMembers): void
     {
-        $this->wrestlerIds = $formerMembers->wrestlers?->map(fn (Wrestler $wrestler): int => $wrestler->id)->values()->all() ?? [];
-        $this->tagTeamIds = $formerMembers->tagTeams?->map(fn (TagTeam $tagTeam): int => $tagTeam->id)->values()->all() ?? [];
+        $this->wrestlerIds = $formerMembers->wrestlers->map(fn (Wrestler $wrestler): int => $wrestler->id)->values()->all();
+        $this->tagTeamIds = $formerMembers->tagTeams->map(fn (TagTeam $tagTeam): int => $tagTeam->id)->values()->all();
     }
 
     public function validateForSubmit(): void

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Collections\EventBudgetMovementCollection;
 use App\Enums\Events\BudgetMovementKind;
 use App\Enums\Events\BudgetPaymentMethod;
 use Database\Factories\Events\EventBudgetMovementFactory;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +36,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  * @property-read EventBudgetLine $line
  */
+#[CollectedBy(EventBudgetMovementCollection::class)]
 #[Fillable('kind', 'amount_cents', 'effective_date', 'method', 'reference', 'notes')]
 #[UseFactory(EventBudgetMovementFactory::class)]
 class EventBudgetMovement extends Model

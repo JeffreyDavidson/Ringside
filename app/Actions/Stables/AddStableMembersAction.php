@@ -33,14 +33,14 @@ class AddStableMembersAction
      * @template TPivotModel of StableWrestler|StableTagTeam
      *
      * @param  BelongsToMany<TRelatedModel, Stable, TPivotModel>  $relationship
-     * @param  Collection<int, TRelatedModel>|null  $members
+     * @param  Collection<int, TRelatedModel>  $members
      */
     private function attachMembers(
         BelongsToMany $relationship,
-        ?Collection $members,
+        Collection $members,
         Carbon $joinedAt,
     ): void {
-        if (! $members instanceof Collection || $members->isEmpty()) {
+        if ($members->isEmpty()) {
             return;
         }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Titles;
 
 use App\Collections\MatchCompetitorsCollection;
+use App\Collections\TitleChampionshipCollection;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
@@ -18,7 +19,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Promotions\PromotionTimeZoneService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -31,13 +31,13 @@ final class ChampionshipReignManager
      * match is ignored because the order of two matches at one instant is not recorded.
      *
      * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors
-     * @param  Collection<int, TitleChampionship>  $reigns
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $reigns
      */
     public function ensureChampionOnEventDateIsCompeting(
         EventMatch $match,
         Title $title,
         MatchCompetitorsCollection $competitors,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
         $eventDate = $match->event->date;
 
@@ -45,11 +45,7 @@ final class ChampionshipReignManager
             return;
         }
 
-        $reignHeldOnEventDate = $this->activeReignsForTitle($title, $reigns)->first(
-            fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
-                && $reign->won_at->lessThan($eventDate)
-                && ($reign->lost_at === null || $reign->lost_at->greaterThan($eventDate) || $reign->lost_match_id === $match->id),
-        );
+        $reignHeldOnEventDate = $reigns->forTitle($title)->heldBefore($eventDate, $match);
 
         if ($reignHeldOnEventDate instanceof TitleChampionship
             && ! $competitors->containsCompetitor($reignHeldOnEventDate->champion_type, $reignHeldOnEventDate->champion_id)) {
@@ -57,15 +53,15 @@ final class ChampionshipReignManager
         }
     }
 
-    /** @param Collection<int, TitleChampionship> $reigns */
+    /** @param TitleChampionshipCollection<int, TitleChampionship> $reigns */
     public function ensureMatchCanBeReconciled(
         EventMatch $match,
         Title $title,
         Wrestler|TagTeam|null $desiredChampion,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
-        $activeReigns = $this->activeReignsForTitle($title, $reigns);
-        $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
+        $activeReigns = $reigns->forTitle($title);
+        $reignWonAtMatch = $activeReigns->wonAt($match);
 
         if ($reignWonAtMatch?->lost_match_id !== null) {
             throw InvalidMatchOutcomeException::titleLineageHasAdvanced();
@@ -77,7 +73,7 @@ final class ChampionshipReignManager
 
         $eventDate = $match->event->date;
 
-        if (! $eventDate instanceof Carbon || ($reignWonAtMatch === null && $desiredChampion === null)) {
+        if (! $eventDate instanceof Carbon || (! $reignWonAtMatch instanceof TitleChampionship && $desiredChampion === null)) {
             return;
         }
 
@@ -85,10 +81,7 @@ final class ChampionshipReignManager
             return;
         }
 
-        $laterReignExists = $activeReigns->contains(
-            fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
-                && $reign->won_at->greaterThan($eventDate),
-        );
+        $laterReignExists = $activeReigns->laterThan($eventDate, $match)->isNotEmpty();
 
         $vacatedReignContainsDate = $desiredChampion !== null && $activeReigns->contains(
             fn (TitleChampionship $reign): bool => $reign->won_match_id !== $match->id
@@ -105,22 +98,22 @@ final class ChampionshipReignManager
     /**
      * Determine whether recording the desired champion would put someone other than the current holder on the title.
      *
-     * @param  Collection<int, TitleChampionship>  $reigns
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $reigns
      */
     public function changesChampion(
         EventMatch $match,
         Title $title,
         Wrestler|TagTeam|null $desiredChampion,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): bool {
         if ($desiredChampion === null) {
             return false;
         }
 
-        $activeReigns = $this->activeReignsForTitle($title, $reigns);
-        $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
+        $activeReigns = $reigns->forTitle($title);
+        $reignWonAtMatch = $activeReigns->wonAt($match);
 
-        if ($reignWonAtMatch !== null) {
+        if ($reignWonAtMatch instanceof TitleChampionship) {
             return ! $this->reignBelongsTo($reignWonAtMatch, $desiredChampion);
         }
 
@@ -129,26 +122,23 @@ final class ChampionshipReignManager
         }
 
         return ! $this->reignBelongsTo(
-            $activeReigns->whereNull('lost_at')->sortByDesc('won_at')->first(),
+            $activeReigns->current(),
             $desiredChampion,
         );
     }
 
-    /** @param Collection<int, TitleChampionship> $reigns */
+    /** @param TitleChampionshipCollection<int, TitleChampionship> $reigns */
     public function reconcileMatchOutcome(
         EventMatch $match,
         Title $title,
         Wrestler|TagTeam|null $desiredChampion,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
-        $activeReigns = $this->activeReignsForTitle($title, $reigns);
-        $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
-        $currentReign = $activeReigns
-            ->whereNull('lost_at')
-            ->sortByDesc('won_at')
-            ->first();
+        $activeReigns = $reigns->forTitle($title);
+        $reignWonAtMatch = $activeReigns->wonAt($match);
+        $currentReign = $activeReigns->current();
 
-        if ($reignWonAtMatch !== null && $this->reignBelongsTo($reignWonAtMatch, $desiredChampion)) {
+        if ($reignWonAtMatch instanceof TitleChampionship && $this->reignBelongsTo($reignWonAtMatch, $desiredChampion)) {
             return;
         }
 
@@ -156,10 +146,10 @@ final class ChampionshipReignManager
             return;
         }
 
-        if ($reignWonAtMatch !== null) {
+        if ($reignWonAtMatch instanceof TitleChampionship) {
             $reignWonAtMatch->delete();
 
-            $predecessor = $activeReigns->firstWhere('lost_match_id', $match->id);
+            $predecessor = $activeReigns->lostAt($match);
             $currentReign = $this->reopenablePredecessor($title, $predecessor);
             $currentReign?->update([
                 'lost_match_id' => null,
@@ -283,15 +273,15 @@ final class ChampionshipReignManager
      * the title: the result is recorded but the title does not change hands. A reign this match already created for
      * the winner is left alone so re-recording the same result never removes it.
      *
-     * @param  Collection<int, TitleChampionship>  $reigns
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $reigns
      */
-    public function winnerLeftBeforeShow(EventMatch $match, Title $title, Wrestler|TagTeam $winner, Collection $reigns): bool
+    public function winnerLeftBeforeShow(EventMatch $match, Title $title, Wrestler|TagTeam $winner, TitleChampionshipCollection $reigns): bool
     {
         if (! $this->isBackFill($match)) {
             return false;
         }
 
-        $reignWonAtMatch = $this->activeReignsForTitle($title, $reigns)->firstWhere('won_match_id', $match->id);
+        $reignWonAtMatch = $reigns->forTitle($title)->wonAt($match);
 
         if ($this->reignBelongsTo($reignWonAtMatch, $winner)) {
             return false;
@@ -327,27 +317,16 @@ final class ChampionshipReignManager
     }
 
     /**
-     * @param  Collection<int, TitleChampionship>  $reigns
-     * @return Collection<int, TitleChampionship>
-     */
-    private function activeReignsForTitle(Title $title, Collection $reigns): Collection
-    {
-        return $reigns
-            ->where('title_id', $title->id)
-            ->filter(fn (TitleChampionship $reign): bool => $reign->deleted_at === null);
-    }
-
-    /**
      * A win by the champion who held the title on the event date is a defence, even when the title has since moved on
      * or been vacated, so recording it never touches the lineage. Only matches that created no reign can be defences.
      *
-     * @param  Collection<int, TitleChampionship>  $activeReigns
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $activeReigns
      */
     private function isDefenceOfReignHeldOnEventDate(
         EventMatch $match,
         ?TitleChampionship $reignWonAtMatch,
         Wrestler|TagTeam|null $desiredChampion,
-        Collection $activeReigns,
+        TitleChampionshipCollection $activeReigns,
     ): bool {
         $eventDate = $match->event->date;
 
@@ -356,10 +335,7 @@ final class ChampionshipReignManager
         }
 
         return $this->reignBelongsTo(
-            $activeReigns->first(
-                fn (TitleChampionship $reign): bool => $reign->won_at->lessThanOrEqualTo($eventDate)
-                    && ($reign->lost_at === null || $reign->lost_at->greaterThan($eventDate)),
-            ),
+            $activeReigns->covering($eventDate),
             $desiredChampion,
         );
     }

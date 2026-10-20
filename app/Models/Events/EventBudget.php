@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\EventBudgetBuilder;
+use App\Collections\EventBudgetLineCollection;
 use Database\Factories\Events\EventBudgetFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -25,7 +26,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Event $event
- * @property-read Collection<int, EventBudgetLine> $lines
+ * @property-read EventBudgetLineCollection $lines
  * @property-read Collection<int, EventBudgetRevision> $revisions
  */
 #[Fillable([])]

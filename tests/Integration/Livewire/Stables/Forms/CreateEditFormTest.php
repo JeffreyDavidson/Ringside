@@ -58,9 +58,9 @@ describe('stable create and edit form', function (): void {
             ->and($data->name)->toBe('The Four Horsemen')
             ->and($data->start_date?->equalTo($startDate))->toBeTrue()
             ->and($data->end_date?->equalTo($endDate))->toBeTrue()
-            ->and($data->members->wrestlers?->map(fn (Wrestler $wrestler): int => $wrestler->id)->all())
+            ->and($data->members->wrestlers->map(fn (Wrestler $wrestler): int => $wrestler->id)->all())
             ->toBe($wrestlers->modelKeys())
-            ->and($data->members->tagTeams?->map(fn (TagTeam $selectedTagTeam): int => $selectedTagTeam->id)->all())
+            ->and($data->members->tagTeams->map(fn (TagTeam $selectedTagTeam): int => $selectedTagTeam->id)->all())
             ->toBe([$tagTeam->id]);
     });
 
@@ -75,8 +75,8 @@ describe('stable create and edit form', function (): void {
         // Assert
         expect($data->start_date)->toBeNull()
             ->and($data->end_date)->toBeNull()
-            ->and($data->members->wrestlers?->isEmpty())->toBeTrue()
-            ->and($data->members->tagTeams?->isEmpty())->toBeTrue();
+            ->and($data->members->wrestlers->isEmpty())->toBeTrue()
+            ->and($data->members->tagTeams->isEmpty())->toBeTrue();
     });
 
     it('hydrates and resolves the stable selected for editing', function (): void {
