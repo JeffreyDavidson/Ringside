@@ -13,10 +13,4 @@ readonly class CrewContactData
         public ?string $email,
         public ?string $notes,
     ) {}
-
-    /** @param array{name: string, phone: ?string, email: ?string, notes: ?string} $validated */
-    public static function fromValidated(array $validated): self
-    {
-        return new self($validated['name'], $validated['phone'], $validated['email'], $validated['notes']);
-    }
 }
