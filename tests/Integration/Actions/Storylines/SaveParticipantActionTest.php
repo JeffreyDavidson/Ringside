@@ -57,25 +57,25 @@ test('participants are stored under their morph alias', function (string $type, 
     'tag team' => ['tag_team', TagTeam::class],
 ]);
 
-test('a person from another promotion or an unsupported kind is refused and nothing is written', function (string $type, bool $foreign) {
+test('a person from another promotion or an unsupported kind is refused and nothing is written', function (string $type, Closure $person) {
     // Arrange
     actingAs(administrator());
     $story = Storyline::factory()->create();
-    $promotion = $foreign ? Promotion::factory()->create() : requiredModel($story->promotion);
-    $wrestler = Wrestler::factory()->for($promotion)->create();
+    $personId = $person(requiredModel($story->promotion));
 
     // Act
-    $attempt = fn () => resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $wrestler->id, null, today()->toDateString()));
+    $attempt = fn () => resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $personId, null, today()->toDateString()));
 
     // Assert
     expect($attempt)->toThrow(ModelNotFoundException::class)
         ->and($story->participants()->count())->toBe(0)
         ->and($story->refresh()->version)->toBe(1);
 })->with([
-    'wrestler of another promotion' => ['wrestler', true],
-    'a wrestler id read as a tag team' => ['tag_team', false],
-    'a kind outside the morph map' => ['nonsense', false],
-    'a mapped kind that cannot take part' => ['manager', false],
+    'wrestler of another promotion' => ['wrestler', fn (Promotion $home): int => Wrestler::factory()->for(Promotion::factory())->create()->id],
+    'a wrestler id read as a tag team' => ['tag_team', fn (Promotion $home): int => Wrestler::factory()->for($home)->create()->id],
+    // A tag team id, so the refusal can only come from the kind check and not from a missing row.
+    'a kind outside the morph map' => ['nonsense', fn (Promotion $home): int => TagTeam::factory()->for($home)->create()->id],
+    'a mapped kind that cannot take part' => ['manager', fn (Promotion $home): int => TagTeam::factory()->for($home)->create()->id],
 ]);
 
 test('closed or mismatched participation cannot be rewritten', function () {
