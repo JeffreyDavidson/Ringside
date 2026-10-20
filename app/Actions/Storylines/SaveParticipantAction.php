@@ -7,6 +7,7 @@ namespace App\Actions\Storylines;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Data\Storylines\ParticipantData;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -50,7 +51,7 @@ class SaveParticipantAction
                 throw StorylineConflictException::state();
             }
             $participant->save();
-            $this->revision->handle($story, $participant, $participantId === null ? 'participant_joined' : 'participant_left', $before, $data->reason);
+            $this->revision->handle($story, $participant, $participantId === null ? StorylineRevisionOperation::ParticipantJoined : StorylineRevisionOperation::ParticipantLeft, $before, $data->reason);
 
             return $participant;
         }, attempts: 3);

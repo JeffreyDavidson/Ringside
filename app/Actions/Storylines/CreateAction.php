@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Storylines;
 
 use App\Data\Storylines\StorylineData;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
@@ -34,7 +35,7 @@ class CreateAction
             $story->submission_id = $data->submissionId;
             $story->save();
             $story->refresh();
-            $this->revision->handle($story, $story, 'created');
+            $this->revision->handle($story, $story, StorylineRevisionOperation::Created);
 
             return $story;
         }, attempts: 3);
