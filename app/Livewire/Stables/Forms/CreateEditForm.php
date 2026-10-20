@@ -18,6 +18,7 @@ use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 /** @extends BaseForm<Stable> */
 class CreateEditForm extends BaseForm
@@ -76,7 +77,10 @@ class CreateEditForm extends BaseForm
         $stable = $this->isEditing() ? $this->stable() : null;
         $canHaveMembers = ! $stable instanceof Stable || $this->activityEligibility->canHaveMembers($stable);
 
-        $rules = [
+        $hasEnded = $stable?->firstActivityPeriod?->ended_at !== null;
+        $hasDateRange = ! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true);
+
+        return [
             'name' => [
                 'required',
                 'string',
@@ -87,9 +91,19 @@ class CreateEditForm extends BaseForm
                 'nullable',
                 'date',
                 new CanChangeDebutDate($stable),
+                Rule::when($canHaveMembers && $this->mustMeetMinimumMembers($stable), [
+                    new HasMinimumMembers($members->wrestlers, $members->tagTeams),
+                ]),
             ],
-            'ended_at' => ['nullable', 'date', 'prohibited'],
-            'wrestlers' => ['nullable', 'array'],
+            // A disbanded stable keeps its end date (clearing it would reopen the stable) and any other stable has none.
+            'ended_at' => [
+                'nullable',
+                'date',
+                Rule::requiredIf($hasEnded),
+                Rule::prohibitedIf(! $hasEnded),
+                Rule::when($hasDateRange, ['after_or_equal:started_at']),
+            ],
+            'wrestlers' => ['nullable', 'array', Rule::prohibitedIf(! $canHaveMembers)],
             'wrestlers.*' => [
                 'bail',
                 'integer',
@@ -98,7 +112,7 @@ class CreateEditForm extends BaseForm
                 new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
-            'tag_teams' => ['nullable', 'array'],
+            'tag_teams' => ['nullable', 'array', Rule::prohibitedIf(! $canHaveMembers)],
             'tag_teams.*' => [
                 'bail',
                 'integer',
@@ -106,28 +120,6 @@ class CreateEditForm extends BaseForm
                 new CanJoinStable(TagTeam::class, $this->stableId(), $memberJoinDate),
             ],
         ];
-
-        if ($canHaveMembers) {
-            if ($this->mustMeetMinimumMembers($stable)) {
-                $rules['started_at'][] = new HasMinimumMembers(
-                    $members->wrestlers,
-                    $members->tagTeams,
-                );
-            }
-        } else {
-            $rules['wrestlers'][] = 'prohibited';
-            $rules['tag_teams'][] = 'prohibited';
-        }
-
-        if ($stable?->firstActivityPeriod?->ended_at !== null) {
-            $rules['ended_at'] = ['required', 'date'];
-        }
-
-        if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
-            $rules['ended_at'][] = 'after_or_equal:started_at';
-        }
-
-        return $rules;
     }
 
     /**
