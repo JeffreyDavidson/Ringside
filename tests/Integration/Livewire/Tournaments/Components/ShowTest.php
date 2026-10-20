@@ -21,7 +21,7 @@ it('books from a reviewed node and updates the persisted bracket version', funct
     $world = tournamentFixture();
     actingAs(administrator());
     $node = $world['tournament']->nodes()->firstOrFail();
-    livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('eventId', $world['event']->id)->set('refereeIds', [$world['referees']->sole()->id])->call('confirm')->assertHasNoErrors()->assertSee('Awaiting result');
+    livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('draft.eventId', $world['event']->id)->set('draft.refereeIds', [$world['referees']->sole()->id])->call('confirm')->assertHasNoErrors()->assertSee('Awaiting result');
     expect($node->links()->count())->toBe(1)->and($world['tournament']->refresh()->version)->toBe(2);
 });
 it('blocks a view-only member from invoking a protected operation', function (): void {
@@ -40,19 +40,19 @@ it('requires review confirmation before removing an unplayed booking', function 
     actingAs(administrator());
     $node = $world['tournament']->nodes()->firstOrFail();
     $match = bookTournamentNode($world, $node);
-    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'unbook', $node->id)->set('reason', 'Rebuild this bout');
-    $page->call('confirm')->assertHasErrors('confirmed');
+    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'unbook', $node->id)->set('draft.reason', 'Rebuild this bout');
+    $page->call('confirm')->assertHasErrors('draft.confirmed');
     expect($match->refresh()->trashed())->toBeFalse();
-    $page->set('confirmed', true)->call('confirm')->assertHasNoErrors();
+    $page->set('draft.confirmed', true)->call('confirm')->assertHasNoErrors();
     expect($match->refresh()->trashed())->toBeTrue();
 });
 it('preserves the draft inputs on failure and lets the operator refresh a stale screen', function (): void {
     $world = tournamentFixture();
     actingAs(administrator());
     $node = $world['tournament']->nodes()->firstOrFail();
-    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('eventId', $world['event']->id)->set('refereeIds', [$world['referees']->sole()->id]);
+    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('draft.eventId', $world['event']->id)->set('draft.refereeIds', [$world['referees']->sole()->id]);
     resolve(RenameTournamentAction::class)->handle($world['tournament'], $world['tournament']->version, 'Revised Cup', null);
-    $page->call('confirm')->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('eventId', $world['event']->id)->call('refreshState')->assertHasNoErrors()->assertSee('Revised Cup');
+    $page->call('confirm')->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('draft.eventId', $world['event']->id)->call('refreshState')->assertHasNoErrors()->assertSee('Revised Cup');
     expect($world['event']->matches()->count())->toBe(0);
 });
 
@@ -62,8 +62,8 @@ it('keeps the draft and says so when the tournament lock finds a change', functi
     actingAs(administrator());
     $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])
         ->call('begin', 'cancel')
-        ->set('reason', 'Venue closed')
-        ->set('confirmed', true);
+        ->set('draft.reason', 'Venue closed')
+        ->set('draft.confirmed', true);
     $locks = Double::for(TournamentLocks::class);
     $locks->expects('lock')
         ->throws(RecordChangedException::changed());
@@ -74,7 +74,7 @@ it('keeps the draft and says so when the tournament lock finds a change', functi
 
     // Assert
     $page->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
-        ->assertSet('reason', 'Venue closed');
+        ->assertSet('draft.reason', 'Venue closed');
     expect($world['tournament']->refresh()->status)->not->toBe(TournamentStatus::Cancelled);
     $locks->verify();
 });
@@ -100,7 +100,7 @@ it('plans an unresolved final and closes an abandoned review', function (): void
     actingAs(administrator());
     $t = $world['tournament'];
     $node = $t->nodes()->where('round', 2)->firstOrFail();
-    livewire(Show::class, ['tournamentId' => $t->id])->call('begin', 'plan', $node->id)->set('eventId', $world['event']->id)->call('confirm')->assertHasNoErrors()->call('begin', 'plan', $node->id)->call('cancelDraft')->assertSet('draftOperation', '');
+    livewire(Show::class, ['tournamentId' => $t->id])->call('begin', 'plan', $node->id)->set('draft.eventId', $world['event']->id)->call('confirm')->assertHasNoErrors()->call('begin', 'plan', $node->id)->call('cancelDraft')->assertSet('draft.operation', '');
     expect($node->refresh()->planned_event_id)->toBe($world['event']->id)->and($world['event']->matches()->count())->toBe(0);
 });
 it('performs reviewed entry administration through the protected screen', function (string $operation): void {
@@ -114,9 +114,9 @@ it('performs reviewed entry administration through the protected screen', functi
     if ($operation === 'walkover') {
         resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable');
     }
-    $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('reason', 'Reviewed tournament change')->set('confirmed', true);
+    $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('draft.reason', 'Reviewed tournament change')->set('draft.confirmed', true);
     if ($operation === 'replace') {
-        $page->set('replacementId', $replacement->id);
+        $page->set('draft.replacementId', $replacement->id);
     }
     $page->call('confirm')->assertHasNoErrors();
     match ($operation) {
@@ -181,9 +181,9 @@ it('refuses a reason that is missing, too long or unconfirmed before any tournam
     $target = in_array($operation, ['replace', 'withdraw'], true) ? $tournament->entries()->firstOrFail()->id : $tournament->nodes()->firstOrFail()->id;
     $page = livewire(Show::class, ['tournamentId' => $tournament->id])
         ->call('begin', $operation, $target)
-        ->set('reason', $reason)
-        ->set('confirmed', $confirmed)
-        ->set('replacementId', Wrestler::factory()->employed()->for($world['promotion'])->create()->id);
+        ->set('draft.reason', $reason)
+        ->set('draft.confirmed', $confirmed)
+        ->set('draft.replacementId', Wrestler::factory()->employed()->for($world['promotion'])->create()->id);
 
     // Act
     $page->call('confirm');
@@ -194,9 +194,9 @@ it('refuses a reason that is missing, too long or unconfirmed before any tournam
         ->and($tournament->status)->not->toBe(TournamentStatus::Cancelled);
 })->with(function (): Generator {
     foreach (['reset', 'unbook', 'withdraw', 'replace', 'walkover', 'cancel'] as $operation) {
-        yield "{$operation} without a reason" => [$operation, '', true, 'reason'];
-        yield "{$operation} with a reason over 2000 characters" => [$operation, str_repeat('a', 2001), true, 'reason'];
-        yield "{$operation} unconfirmed" => [$operation, 'Because.', false, 'confirmed'];
+        yield "{$operation} without a reason" => [$operation, '', true, 'draft.reason'];
+        yield "{$operation} with a reason over 2000 characters" => [$operation, str_repeat('a', 2001), true, 'draft.reason'];
+        yield "{$operation} unconfirmed" => [$operation, 'Because.', false, 'draft.confirmed'];
     }
 });
 
@@ -240,7 +240,7 @@ it('refuses to draft an operation that does not exist and opens no draft', funct
 
     // Assert
     $page->assertHasErrors('operation')
-        ->assertSet('draftOperation', '')
+        ->assertSet('draft.operation', '')
         ->assertSet('nodeId', null);
     expect($tournament->refresh()->version)->toBe(1);
 });

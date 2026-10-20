@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\PlanTournamentBoutAction;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Enums\Titles\TitleType;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Models\Events\Event;
@@ -205,7 +206,7 @@ it('commits a final result and its championship lineage atomically under competi
         $t = $world['tournament'];
         $final = $t->nodes()->where('round', 2)->firstOrFail();
         $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
-        $match = resolve(BookTournamentMatchAction::class)->handle($final, $world['event'], $world['referees'], $t->version, new Collection([$title]));
+        $match = resolve(BookTournamentMatchAction::class)->handle($final, $t->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])));
         $base = tournamentWorkerSpec($world);
         $before = resolvedDeadlocks();
         $results = tournamentRace([[...$base, 'operation' => 'result', 'match_id' => $match->id, 'side_id' => $match->sides()->where('position', 1)->firstOrFail()->id], [...$base, 'operation' => 'result', 'match_id' => $match->id, 'side_id' => $match->sides()->where('position', 2)->firstOrFail()->id]]);

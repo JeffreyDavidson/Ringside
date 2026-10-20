@@ -21,7 +21,7 @@ Draft setup may change capacity, kind, seed order and the repeat setting. The fi
 
 ## Actual booking and outcomes
 
-`BookTournamentMatchAction` builds the existing `EventMatchData` from resolved entrants and calls `AddMatchForEventAction`. The latter locks and rechecks tournament version, entrants, format, current event state, chronology, ordinary competitor eligibility/conflicts, referees and optional final title stakes. It creates a normal `EventMatch`, then the link, and invokes the existing assignment actions in the same transaction. Identical pending booking retries return the existing match; conflicting stale reviews require a refresh.
+`BookTournamentMatchAction` takes the booking choices as `TournamentBookingData` (event, referees, titles, stipulation) and builds the existing `EventMatchData` from resolved entrants and calls `AddMatchForEventAction`. The latter locks and rechecks tournament version, entrants, format, current event state, chronology, ordinary competitor eligibility/conflicts, referees and optional final title stakes. It creates a normal `EventMatch`, then the link, and invokes the existing assignment actions in the same transaction. Identical pending booking retries return the existing match; conflicting stale reviews require a refresh.
 
 Only Singles or standard TagTeam matches are accepted for the corresponding kind. Titles are optional on the final only and retain all ordinary type, promotion, champion and once-per-card rules. Unknown qualifiers and byes cannot be booked. Advancement never automatically creates a later match.
 

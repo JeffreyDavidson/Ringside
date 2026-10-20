@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Actions\Roster\Availability\CreateAction;
 use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
@@ -29,7 +30,7 @@ it('books a resolved quarterfinal through the ordinary match flow and freezes it
     $node = $tournament->nodes()->firstOrFail();
 
     // Act
-    $match = resolve(BookTournamentMatchAction::class)->handle($node, $event, new Collection([$referee]), $tournament->version);
+    $match = resolve(BookTournamentMatchAction::class)->handle($node, $tournament->version, new TournamentBookingData($event, new Collection([$referee])));
 
     // Assert
     expect($match->wrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing([$wrestlers->pluck('id')->all()[0], $wrestlers->pluck('id')->all()[7]])
