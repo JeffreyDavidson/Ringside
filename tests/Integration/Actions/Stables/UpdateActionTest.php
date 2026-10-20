@@ -559,7 +559,7 @@ describe('start date of a stable with several periods around promotion midnight'
 
         // Assert
         expect($stable->activityPeriods()->count())->toBe(2)
-            ->and($stable->activityPeriods()->orderBy('started_at')->first()->started_at->toDateTimeString())->toBe('2020-01-01 02:00:00');
+            ->and($stable->activityPeriods()->orderBy('started_at')->pluck('started_at')->map->toDateTimeString()->all())->toBe(['2020-01-01 02:00:00', '2021-01-01 08:00:00']);
     });
 
     test('it refuses a different promotion start day when the stored instant shares its UTC day, and writes nothing', function () {
