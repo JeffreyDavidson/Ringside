@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Roster\Availability\Components\Profile;
@@ -25,9 +26,9 @@ test('an operator reviews and saves unavailable dates on a profile', function ()
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act
-    $component->set('startsOn', '2026-10-17');
-    $component->set('endsOn', '2026-10-17');
-    $component->set('reason', 'Outside commitment');
+    $component->set('form.startsOn', '2026-10-17');
+    $component->set('form.endsOn', '2026-10-17');
+    $component->set('form.reason', 'Outside commitment');
     $component->call('review');
     $component->call('save');
 
@@ -44,14 +45,14 @@ test('a referee profile saves dates and reports a repeated submission without du
 
     // Act
     foreach (range(1, 2) as $attempt) {
-        $component->set('startsOn', '2026-10-17');
-        $component->set('endsOn', '2026-10-17');
+        $component->set('form.startsOn', '2026-10-17');
+        $component->set('form.endsOn', '2026-10-17');
         $component->call('review');
         $component->call('save');
     }
 
     // Assert
-    $component->assertHasErrors('startsOn')->assertSee('already recorded');
+    $component->assertHasErrors('form.startsOn')->assertSee('already recorded');
     expect(Unavailability::query()->where('person_type', 'referee')->count())->toBe(1);
 });
 
@@ -65,16 +66,16 @@ test('changing reviewed dates requires another review before anything is saved',
     actingAs(administrator());
     $person = Wrestler::factory()->for(Promotion::factory())->create();
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
-    $component->set('startsOn', '2026-10-17');
-    $component->set('endsOn', '2026-10-17');
+    $component->set('form.startsOn', '2026-10-17');
+    $component->set('form.endsOn', '2026-10-17');
     $component->call('review');
 
     // Act
-    $component->set('endsOn', '2026-10-18');
+    $component->set('form.endsOn', '2026-10-18');
     $component->call('save');
 
     // Assert
-    $component->assertHasErrors('startsOn');
+    $component->assertHasErrors('form.startsOn');
     expect(Unavailability::query()->count())->toBe(0);
 });
 
@@ -83,7 +84,7 @@ test('a profile cancellation requires the selected entry and preserves its histo
     $actor = administrator();
     actingAs($actor);
     $person = Wrestler::factory()->for(Promotion::factory())->create();
-    $entry = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, $actor);
+    $entry = resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act
@@ -110,8 +111,8 @@ test('the review names affected dated and undated events while excluding unrelat
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act
-    $component->set('startsOn', '2026-10-17');
-    $component->set('endsOn', '2026-10-17');
+    $component->set('form.startsOn', '2026-10-17');
+    $component->set('form.endsOn', '2026-10-17');
     $component->call('review');
 
     // Assert
@@ -131,13 +132,13 @@ test('invalid calendar ranges and reasons are refused before anything is saved',
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act
-    $component->set('startsOn', $start);
-    $component->set('endsOn', $end);
-    $component->set('reason', $reason);
+    $component->set('form.startsOn', $start);
+    $component->set('form.endsOn', $end);
+    $component->set('form.reason', $reason);
     $component->call('save');
 
     // Assert
-    $component->assertHasErrors($field);
+    $component->assertHasErrors("form.$field");
     expect(Unavailability::query()->count())->toBe(0);
 })->with([
     'end before start' => ['2026-10-19', '2026-10-17', '', 'endsOn'],
@@ -151,7 +152,7 @@ test('a view-only member sees availability but cannot review save or cancel thro
     // Arrange
     $promotion = Promotion::factory()->create();
     $person = Wrestler::factory()->for($promotion)->create();
-    $entry = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
+    $entry = resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
     $member = User::factory()->create();
     $promotion->users()->attach($member, ['role' => MembershipRole::Member, 'status' => MembershipStatus::Active]);
     $context = app(PromotionContextService::class);

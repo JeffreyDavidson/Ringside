@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Events\Event;
@@ -19,7 +20,7 @@ test('SQL and authoritative eligibility use inclusive promotion-local dates with
     $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
     $person = $type::factory()->bookable()->for($promotion)->create();
     $event = Event::factory()->for($promotion)->create(['date' => $instant]);
-    resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-19', null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-19', null), administrator());
 
     // Act
     $allowed = resolve(RosterDateAvailability::class)->allowsForEvent($person, $event);
@@ -41,7 +42,7 @@ test('calendar restrictions handle clock changes and distant promotion time zone
     $promotion = Promotion::factory()->create(['timezone' => $zone]);
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     $event = Event::factory()->for($promotion)->create(['date' => $instant]);
-    resolve(CreateAction::class)->handle($person, $day, $day, null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, null), administrator());
 
     // Act
     $allowed = resolve(RosterDateAvailability::class)->allowsForEvent($person, $event);
@@ -62,7 +63,7 @@ test('promotion zone changes retain date strings and event instants but recomput
     $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
     $person = Wrestler::factory()->for($promotion)->create();
     $event = Event::factory()->for($promotion)->create(['date' => '2026-10-17 04:00:00']);
-    $entry = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
+    $entry = resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
     $dates = resolve(RosterDateAvailability::class);
     expect($dates->allowsForEvent($person, $event))->toBeFalse();
 
@@ -88,7 +89,7 @@ test('event-aware validation permits only stored date-unavailable assignments to
     $match = EventMatch::factory()->forEvent($event)->create();
     $individual = $person instanceof TagTeam ? $person->currentWrestlers()->firstOrFail() : $person;
     $individual->forceFill(['promotion_id' => $promotion->id])->save();
-    resolve(CreateAction::class)->handle($individual, '2026-10-17', '2026-10-17', null, administrator());
+    resolve(CreateAction::class)->handle($individual, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
     $fresh = Validator::make(['person' => $person->id], ['person' => [new $rule($event)]]);
     if ($person instanceof Referee) {
         $match->referees()->attach($person);

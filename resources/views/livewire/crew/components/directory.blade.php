@@ -22,27 +22,27 @@
         <form wire:submit="save" class="border-border grid gap-4 border-y py-6 sm:grid-cols-2">
             <label class="flex flex-col gap-2"
                 >{{ __('production.name') }}<input
-                    wire:model="name"
+                    wire:model="form.name"
                     required
                     maxlength="160"
                     class="border-border bg-surface min-h-11 border p-3"
             /></label>
             <label class="flex flex-col gap-2"
                 >{{ __('production.phone') }}<input
-                    wire:model="phone"
+                    wire:model="form.phone"
                     maxlength="80"
                     class="border-border bg-surface min-h-11 border p-3"
             /></label>
             <label class="flex flex-col gap-2"
                 >{{ __('production.email') }}<input
-                    wire:model="email"
+                    wire:model="form.email"
                     type="email"
                     maxlength="255"
                     class="border-border bg-surface min-h-11 border p-3"
             /></label>
             <label class="flex flex-col gap-2"
                 >{{ __('production.contact_notes') }}<textarea
-                    wire:model="notes"
+                    wire:model="form.notes"
                     maxlength="2000"
                     class="border-border bg-surface border p-3"
                 ></textarea>

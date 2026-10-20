@@ -38,7 +38,7 @@
                                 type="date"
                                 class="scheme-dark"
                                 appearance="ringside"
-                                wire:model="startsOn"
+                                wire:model="form.startsOn"
                                 aria-describedby="availability-errors"
                             />
                         </div>
@@ -52,7 +52,7 @@
                                 type="date"
                                 class="scheme-dark"
                                 appearance="ringside"
-                                wire:model="endsOn"
+                                wire:model="form.endsOn"
                                 aria-describedby="availability-errors"
                             />
                         </div>
@@ -66,7 +66,7 @@
                         <x-form.input
                             id="availability-reason"
                             appearance="ringside"
-                            wire:model="reason"
+                            wire:model="form.reason"
                             maxlength="255"
                         />
                         <p class="text-muted-foreground mt-2 text-sm">{{ __('availability.reason_hint') }}</p>

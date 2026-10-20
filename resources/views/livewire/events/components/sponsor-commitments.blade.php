@@ -275,7 +275,7 @@
                         @if ($instruction->instruction_owner)
                             <p>{{ __('sponsors.task_owner', ['name' => $instruction->instruction_owner]) }}</p>
                         @endif
-                        @if ($previewMode === 'remove')
+                        @if ($previewMode === \App\Enums\Events\SponsorInstructionMode::Remove->value)
                             <p class="text-warning mt-3">{{ __('sponsors.retract_help') }}</p>
                         @endif
                         @if ($preview !== null && hash_equals($previewHash, $preview['hash']))

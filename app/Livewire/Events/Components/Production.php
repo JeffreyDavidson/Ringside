@@ -12,6 +12,7 @@ use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Queries\Crew\CrewContactSearchQuery;
 use App\Services\Events\EventPackSourceService;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -207,13 +208,12 @@ class Production extends Component
         }
     }
 
-    public function render(): View
+    public function render(CrewContactSearchQuery $search): View
     {
         $event = $this->event();
         Gate::authorize('updateProduction', $event);
         $data = $this->packs->data($event);
-        $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)->whereNull('archived_at')
-            ->matchingName($this->search)->orderBy('name')->orderBy('id')->limit(20)->get();
+        $contacts = $search->get($this->search, $event->promotion_id);
         $selected = CrewContact::query()->where('promotion_id', $event->promotion_id)->whereKey(array_column($this->assignments, 'contact_id'))->get();
 
         return view('livewire.events.components.production', ['event' => $event, 'data' => $data,

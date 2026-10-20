@@ -26,12 +26,12 @@ test('a manager creates edits and archives a contact in the directory', function
     $page = livewire(Directory::class);
 
     // Act
-    $page->call('newContact')->set('name', 'Alex Sound')->call('save');
+    $page->call('newContact')->set('form.name', 'Alex Sound')->call('save');
 
     // Assert
     $page->assertHasNoErrors()->assertSee('Alex Sound');
     $contact = CrewContact::query()->sole();
-    $page->call('edit', $contact->id)->set('name', 'Alex Operator')->call('save')->assertHasNoErrors();
+    $page->call('edit', $contact->id)->set('form.name', 'Alex Operator')->call('save')->assertHasNoErrors();
     expect($contact->refresh()->name)->toBe('Alex Operator');
     $page->call('archive', $contact->id, $contact->version)->assertHasNoErrors();
     expect($contact->refresh()->archived_at)->not->toBeNull();
@@ -46,7 +46,7 @@ test('a membership downgrade refuses a directory save opened as manager', functi
     $context = resolve(PromotionContextService::class);
     $context->set($promotion);
     $context->enforce();
-    $page = livewire(Directory::class)->call('newContact')->set('name', 'Cannot save');
+    $page = livewire(Directory::class)->call('newContact')->set('form.name', 'Cannot save');
     $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
     $context->forgetMemberships();
 
@@ -75,7 +75,7 @@ test('directory errors preserve an edit and cancel clears private draft fields',
     // Arrange
     actingAs(administrator());
     $contact = CrewContact::factory()->create();
-    $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'My draft');
+    $page = livewire(Directory::class)->call('edit', $contact->id)->set('form.name', 'My draft');
     resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
         new CrewContactData('Other editor', null, null, null));
 
@@ -83,9 +83,9 @@ test('directory errors preserve an edit and cancel clears private draft fields',
     $page->call('save');
 
     // Assert
-    $page->assertHasErrors('contact')->assertSet('name', 'My draft');
+    $page->assertHasErrors('contact')->assertSet('form.name', 'My draft');
     $page->call('archive', $contact->id, 1)->assertHasErrors('contact');
-    $page->call('cancel')->assertSet('editing', false)->assertSet('name', '')->assertSet('notes', '');
+    $page->call('cancel')->assertSet('editing', false)->assertSet('form.name', '')->assertSet('form.notes', '');
     expect($contact->refresh()->name)->toBe('Other editor');
 });
 
@@ -93,7 +93,7 @@ test('a stale contact save and archive show the shared changed-by-someone-else m
     // Arrange
     actingAs(administrator());
     $contact = CrewContact::factory()->create();
-    $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'My draft');
+    $page = livewire(Directory::class)->call('edit', $contact->id)->set('form.name', 'My draft');
     resolve(SaveCrewContactAction::class)->handle($contact, 1, $contact->client_id,
         new CrewContactData('Other editor', null, null, null));
 
@@ -195,7 +195,7 @@ test('a membership downgrade refuses an edit opened as manager', function (): vo
     $context = resolve(PromotionContextService::class);
     $context->set($promotion);
     $context->enforce();
-    $page = livewire(Directory::class)->call('edit', $contact->id)->set('name', 'Cannot save');
+    $page = livewire(Directory::class)->call('edit', $contact->id)->set('form.name', 'Cannot save');
     $promotion->users()->updateExistingPivot($user->id, ['role' => MembershipRole::Member]);
     $context->forgetMemberships();
 
@@ -218,7 +218,7 @@ test('the directory refuses invalid contact details without writing', function (
 
     // Act
     foreach ($input as $property => $value) {
-        $page->set($property, $value);
+        $page->set("form.{$property}", $value);
     }
     $page->call('save');
 
@@ -226,11 +226,11 @@ test('the directory refuses invalid contact details without writing', function (
     $page->assertHasErrors($field);
     expect(CrewContact::query()->count())->toBe(0);
 })->with([
-    'missing name' => [['name' => ''], 'name'],
-    'overlong name' => [['name' => str_repeat('a', 161)], 'name'],
-    'overlong phone' => [['name' => 'Alex', 'phone' => str_repeat('1', 81)], 'phone'],
-    'bad email' => [['name' => 'Alex', 'email' => 'not-an-email'], 'email'],
-    'overlong notes' => [['name' => 'Alex', 'notes' => str_repeat('a', 2001)], 'notes'],
+    'missing name' => [['name' => ''], 'form.name'],
+    'overlong name' => [['name' => str_repeat('a', 161)], 'form.name'],
+    'overlong phone' => [['name' => 'Alex', 'phone' => str_repeat('1', 81)], 'form.phone'],
+    'bad email' => [['name' => 'Alex', 'email' => 'not-an-email'], 'form.email'],
+    'overlong notes' => [['name' => 'Alex', 'notes' => str_repeat('a', 2001)], 'form.notes'],
 ]);
 
 test('the directory refuses a save without a submission key', function (): void {
@@ -242,9 +242,9 @@ test('the directory refuses a save without a submission key', function (): void 
     $page = livewire(Directory::class);
 
     // Act
-    $page->set('name', 'Alex Sound')->call('save');
+    $page->set('form.name', 'Alex Sound')->call('save');
 
     // Assert
-    $page->assertHasErrors('client_id');
+    $page->assertHasErrors('form.clientId');
     expect(CrewContact::query()->count())->toBe(0);
 });

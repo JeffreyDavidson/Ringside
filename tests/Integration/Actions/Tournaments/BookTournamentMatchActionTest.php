@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Actions\Roster\Availability\CreateAction;
 use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
@@ -68,7 +69,7 @@ it('keeps calendar restrictions binding on a newly qualified same-card bout', fu
         : TagTeam::query()->findOrFail($entry->competitor_id)->currentWrestlers()->firstOrFail();
     $person->forceFill(['promotion_id' => $world['promotion']->id])->save();
     $day = $world['event']->local_date?->toDateString() ?? throw new LogicException('Expected a dated event');
-    resolve(CreateAction::class)->handle($person, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, null), $actor);
     $final = $nodes->sole(fn (TournamentNode $node): bool => $node->round === 2);
     $version = $tournament->refresh()->version;
 

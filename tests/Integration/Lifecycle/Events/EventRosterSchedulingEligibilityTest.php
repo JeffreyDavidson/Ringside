@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Events\EventRosterSchedulingEligibility;
 use App\Models\Events\Event;
@@ -45,7 +46,7 @@ describe('event roster scheduling eligibility', function (): void {
             'referee' => $referee,
             default => $member,
         };
-        resolve(CreateAction::class)->handle($unavailable, '2026-10-24', '2026-10-24', null, administrator());
+        resolve(CreateAction::class)->handle($unavailable, new UnavailabilityData('2026-10-24', '2026-10-24', null), administrator());
 
         // Act
         $ensure = fn () => resolve(EventRosterSchedulingEligibility::class)->ensureAvailableAt($event, now()->parse('2026-10-24 20:00:00'));
@@ -60,7 +61,7 @@ describe('event roster scheduling eligibility', function (): void {
         $event = Event::factory()->for($promotion)->create(['date' => '2026-10-17 20:00:00']);
         $person = Wrestler::factory()->bookable()->for($promotion)->create();
         EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
-        resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
+        resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
 
         // Act
         $statements = recordStatements(fn () => DB::transaction(

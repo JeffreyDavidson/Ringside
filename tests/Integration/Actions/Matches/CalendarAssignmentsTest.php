@@ -11,6 +11,7 @@ use App\Actions\Roster\Availability\CancelAction;
 use App\Actions\Roster\Availability\CreateAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\EventMatchData;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Matches\MatchType;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Events\EventRosterSchedulingEligibility;
@@ -30,7 +31,7 @@ test('a standalone assignment rejects a date-unavailable wrestler and writes not
     $match = EventMatch::factory()->forEvent($event)->create();
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     $person->employments()->update(['started_at' => '2026-01-01']);
-    resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
 
     // Act
     $assign = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$person]), 1);
@@ -54,12 +55,12 @@ test('a match repair retains a previously booked unavailable person while reject
     $match = resolve(AddMatchForEventAction::class)->handle($event, $original);
     $day = ($event->date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
     $actor = administrator();
-    resolve(CreateAction::class)->handle($first, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($first, new UnavailabilityData($day, $day, null), $actor);
     $data = new EventMatchData(MatchType::Singles, $referees, $titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$replacement]]]), 'Repaired');
 
     // Act
     resolve(UpdateMatchAction::class)->handle($match, $data);
-    resolve(CreateAction::class)->handle($second, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($second, new UnavailabilityData($day, $day, null), $actor);
     $forged = fn () => resolve(UpdateMatchAction::class)->handle($match, $original);
 
     // Assert
@@ -77,7 +78,7 @@ test('scheduling an undated booked event rejects an unavailable local day and ro
     EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     $date = now()->addWeek();
     $day = $date->copy()->setTimezone('America/New_York')->toDateString();
-    resolve(CreateAction::class)->handle($person, $day, $day, null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, null), administrator());
     $data = new EventData($event->name, $date, null, 'New preview');
 
     // Act
@@ -98,7 +99,7 @@ test('restoring a future event checks its retained roster while historical resto
     EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     $day = $date->copy()->setTimezone('America/New_York')->toDateString();
     $actor = administrator();
-    $entry = resolve(CreateAction::class)->handle($person, $day, $day, null, $actor);
+    $entry = resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, null), $actor);
     $event->delete();
 
     // Act
@@ -121,7 +122,7 @@ test('an undated card has no calendar conflict until a date is chosen', function
     $event = Event::factory()->for($promotion)->create(['date' => null, 'venue_id' => null]);
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     $match = EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
-    resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), administrator());
     $query = resolve(EventRosterAvailabilityService::class);
     $eligibility = resolve(EventRosterSchedulingEligibility::class);
 
