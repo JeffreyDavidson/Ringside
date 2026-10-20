@@ -5,6 +5,7 @@ use App\Actions\Tournaments\AwardTournamentWalkoverAction;
 use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Actions\Tournaments\WithdrawTournamentEntryAction;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
 use App\Models\Events\Event;
@@ -23,7 +24,7 @@ it('withdraws an entrant explicitly and advances only the opposing entry by a la
     $entry = $tournament->entries()->firstOrFail();
     $nodes = $tournament->nodes()->get();
     $node = $nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 1);
-    resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), Event::factory()->for($promotion)->create(), new Collection([Referee::factory()->employed()->for($promotion)->create()]), $tournament->version);
+    resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), $tournament->version, new TournamentBookingData(Event::factory()->for($promotion)->create(), new Collection([Referee::factory()->employed()->for($promotion)->create()])));
     $tournament->refresh();
 
     // Act

@@ -6,6 +6,7 @@ use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Data\Matches\MatchResultData;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Tournaments\EntrantKind;
@@ -28,11 +29,11 @@ it('requires a reset of unplayed dependencies before changing a qualifier and pr
     $nodes = $tournament->nodes()->get();
     $book = resolve(BookTournamentMatchAction::class);
     $result = resolve(RecordResultAction::class);
-    $first = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 1), $event, $referees, $tournament->refresh()->version);
+    $first = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 1), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $result->handle($first, new MatchResultData(MatchFinish::Pinfall, $first->sides()->firstOrFail(), collect(), $tournament->refresh()->version));
-    $second = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), $event, $referees, $tournament->refresh()->version);
+    $second = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $result->handle($second, new MatchResultData(MatchFinish::Pinfall, $second->sides()->firstOrFail(), collect(), $tournament->refresh()->version));
-    $final = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 2 && $n->position === 1), $event, $referees, $tournament->refresh()->version);
+    $final = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 2 && $n->position === 1), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $loser = $first->sides()->reorder('position', 'desc')->firstOrFail();
     expect(fn () => $result->handle($first, new MatchResultData(MatchFinish::Submission, $loser, collect(), $tournament->refresh()->version)))->toThrow(TournamentException::class);
 
