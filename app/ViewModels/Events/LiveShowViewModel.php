@@ -58,14 +58,10 @@ class LiveShowViewModel
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
         $zone = $run->content['timezone'] ?? 'UTC';
-        $itemTimes = [];
-        $attendance = [];
-        foreach ($items as $item) {
-            $itemTimes[$item['key']] = ['start' => $this->actual($item['start'], $zone), 'finish' => $this->actual($item['finish'], $zone)];
-        }
-        foreach ($run->content['roster'] ?? [] as $person) {
-            $attendance[$person['key']] = ['arrived' => $this->actual($person['arrived'], $zone), 'briefed' => $this->actual($person['briefed'], $zone)];
-        }
+        $itemTimes = $items->mapWithKeys(fn (array $item): array => [$item['key'] => ['start' => $this->actual($item['start'], $zone), 'finish' => $this->actual($item['finish'], $zone)]])->all();
+        $attendance = collect($run->content['roster'] ?? [])
+            ->mapWithKeys(fn (array $person): array => [$person['key'] => ['arrived' => $this->actual($person['arrived'], $zone), 'briefed' => $this->actual($person['briefed'], $zone)]])
+            ->all();
 
         return ['event' => $event, 'run' => $run, 'source' => $source, 'sourceError' => $sourceError,
             'needsReview' => $needsReview, 'complete' => $complete,
@@ -107,12 +103,7 @@ class LiveShowViewModel
      */
     private function comparisons(array $items): array
     {
-        $comparisons = [];
-        foreach ($items as $item) {
-            $comparisons[$item['key']] = $this->comparison($item);
-        }
-
-        return $comparisons;
+        return collect($items)->mapWithKeys(fn (array $item): array => [$item['key'] => $this->comparison($item)])->all();
     }
 
     /** @param Item $item */

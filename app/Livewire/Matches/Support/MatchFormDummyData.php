@@ -23,8 +23,7 @@ final readonly class MatchFormDummyData
             ->filter(fn (Wrestler $wrestler): bool => $this->bookingEligibility->allows($wrestler))
             ->shuffle()
             ->take(2)
-            ->map(fn (Wrestler $wrestler): int => $wrestler->id)
-            ->all();
+            ->modelKeys();
 
         $refereeIds = Referee::query()
             ->employed()
@@ -32,8 +31,7 @@ final readonly class MatchFormDummyData
             ->filter(fn (Referee $referee): bool => $this->bookingEligibility->allows($referee))
             ->shuffle()
             ->take(1)
-            ->map(fn (Referee $referee): int => $referee->id)
-            ->all();
+            ->modelKeys();
 
         $form->matchType = MatchType::Singles;
         $form->competitors = [
