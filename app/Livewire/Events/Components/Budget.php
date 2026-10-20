@@ -8,6 +8,7 @@ use App\Actions\Events\ArchiveBudgetLineAction;
 use App\Actions\Events\CorrectBudgetMovementAction;
 use App\Actions\Events\RecordBudgetMovementAction;
 use App\Actions\Events\SaveBudgetLineAction;
+use App\Data\Events\BudgetCorrectionData;
 use App\Data\Events\BudgetLineData;
 use App\Data\Events\BudgetMovementData;
 use App\Enums\Events\BudgetCategory;
@@ -22,10 +23,10 @@ use App\Livewire\Events\Forms\BudgetMovementForm;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
+use App\Queries\Events\BudgetRevisionHistoryQuery;
 use App\ValueObjects\UsdAmount;
 use App\ViewModels\Events\EventBudgetViewModel;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -193,7 +194,7 @@ class Budget extends Component
             match ($this->operation) {
                 BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput)),
                 BudgetOperation::RecordMovement => $recordMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput)),
-                BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null),
+                BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, new BudgetCorrectionData($this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null)),
                 BudgetOperation::ArchiveLine => $archiveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
             };
         } catch (BudgetException|RecordChangedException $exception) {
@@ -205,7 +206,7 @@ class Budget extends Component
         $this->dispatch('budget-saved');
     }
 
-    public function render(EventBudgetViewModel $screen): View
+    public function render(EventBudgetViewModel $screen, BudgetRevisionHistoryQuery $historyQuery): View
     {
         $event = $this->event();
         Gate::authorize('viewBudget', $event);
@@ -214,15 +215,7 @@ class Budget extends Component
         $categories = array_filter(BudgetCategory::cases(), fn (BudgetCategory $category): bool => $direction !== null && $category->accepts($direction));
         $history = null;
         if ($this->historyOpen && $data['budget'] !== null) {
-            $query = $data['budget']->revisions()->orderByDesc('version');
-            if ($this->historyLineId !== null) {
-                $lineId = $this->historyLineId;
-                $query->where(function (Builder $query) use ($lineId): void {
-                    $query->where(fn (Builder $query): Builder => $query->whereIn('operation', [BudgetOperation::SaveLine->value, BudgetOperation::ArchiveLine->value])->where('target_id', $lineId))
-                        ->orWhere('after->event_budget_line_id', $lineId)->orWhere('before->event_budget_line_id', $lineId);
-                });
-            }
-            $history = $query->paginate(20, pageName: 'history');
+            $history = $historyQuery->get($data['budget'], $this->historyLineId)->paginate(20, pageName: 'history');
         }
         $selectedLine = $this->lineId === null || $data['budget'] === null ? null : $data['budget']->lines->firstWhere('id', $this->lineId);
 

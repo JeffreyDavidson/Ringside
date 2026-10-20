@@ -6,7 +6,9 @@ require_once __DIR__.'/../../../../Fixtures/sponsor-commitment.php';
 
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
+use App\Data\Events\SponsorInstructionData;
 use App\Enums\Events\SponsorCommitmentStatus;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Exceptions\RecordChangedException;
@@ -243,4 +245,71 @@ test('a stale instruction preview is refused while the current saved wording rem
     // Assert
     $component->assertHasErrors('save')->assertSee('Destination changed. Preview again before saving.');
     expect($world['event']->pack()->exists())->toBeFalse();
+});
+
+test('an unknown instruction mode is refused before a preview is made', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)
+        ->set('mode', 'delete');
+
+    // Act
+    $component->call('previewInstruction');
+
+    // Assert
+    $component->assertHasErrors(['mode'])
+        ->assertSet('previewHash', '');
+});
+
+test('the previewed target reaches the action as a parsed pack key', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)
+        ->call('previewInstruction')
+        ->call('saveInstruction');
+    $promise->refresh();
+    $component->call('beginInstruction', $promise->id)
+        ->call('previewInstruction')
+        ->set('instructionReason', 'Moved');
+    $received = null;
+    $save = Double::for(SaveSponsorInstructionAction::class);
+    $save->expects('handle')
+        ->resolves(function (mixed ...$arguments) use (&$received): void {
+            $received = $arguments[5] instanceof SponsorInstructionData ? $arguments[5] : null;
+        });
+    app()->instance(SaveSponsorInstructionAction::class, $save);
+
+    // Act
+    $component->call('saveInstruction');
+
+    // Assert
+    expect($received)->toBeInstanceOf(SponsorInstructionData::class)
+        ->and($received?->mode)->toBe(SponsorInstructionMode::Setup)
+        ->and((string) $received?->targetKey)->toBe($promise->pack_key)
+        ->and($received?->reason)->toBe('Moved');
+});
+
+test('a malformed target key is refused on save and nothing is written', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)
+        ->set('targetKey', 'not-a-pack-key')
+        ->call('previewInstruction');
+
+    // Act
+    $component->call('saveInstruction');
+
+    // Assert
+    $component->assertHasErrors(['save' => __('sponsors.invalid_target')]);
+    expect($world['event']->pack()->exists())->toBeFalse()
+        ->and($promise->refresh()->pack_key)->toBeNull();
 });

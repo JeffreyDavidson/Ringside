@@ -6,7 +6,11 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveSponsorCommitmentAction;
 use App\Actions\Events\SaveSponsorInstructionAction;
+use App\Data\Events\SponsorInstructionData;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Exceptions\BaseBusinessException;
+use App\Exceptions\RecordChangedException;
+use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Events\Forms\SponsorCommitmentForm;
 use App\Models\Events\Event;
@@ -15,6 +19,7 @@ use App\Models\Sponsors\Sponsor;
 use App\Services\Events\LiveShowTimingService;
 use App\Services\Events\SponsorInstructionService;
 use App\Services\Promotions\PromotionTimeZoneService;
+use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
 use App\ViewModels\Events\SponsorCommitmentsViewModel;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +27,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -185,7 +191,7 @@ class SponsorCommitments extends Component
         Gate::authorize('manageSponsors', $this->event());
         $commitment = $this->commitment($id);
         $this->instructionId = $id;
-        $this->mode = $commitment->pack_key === null ? ($commitment->type->value === 'announcement' ? 'segment' : 'setup') : explode(':', $commitment->pack_key, 2)[0];
+        $this->mode = $commitment->pack_key === null ? ($commitment->type->value === 'announcement' ? 'segment' : 'setup') : PackKey::fromString($commitment->pack_key)->kind->value;
         $this->targetKey = $commitment->pack_key ?? '';
         $pack = $this->event()->pack()->first()->content ?? [];
         $target = $this->instructions->target($pack, $commitment->pack_key);
@@ -201,7 +207,7 @@ class SponsorCommitments extends Component
         $event = $this->event();
         Gate::authorize('manageSponsors', $event);
         Validator::make(['mode' => $this->mode, 'targetKey' => $this->targetKey, 'afterMatchId' => $this->afterMatchId, 'instructionReason' => $this->instructionReason],
-            ['mode' => [Rule::in(['segment', 'setup', 'remove'])], 'targetKey' => ['nullable', 'string', 'max:80'],
+            ['mode' => [Rule::enum(SponsorInstructionMode::class)], 'targetKey' => ['nullable', 'string', 'max:80'],
                 'afterMatchId' => ['nullable', 'integer'], 'instructionReason' => ['nullable', 'string', 'max:2000']])->validate();
         $commitment = $this->commitment($this->instructionId ?? 0);
         $data = $this->packs->data($event);
@@ -209,9 +215,9 @@ class SponsorCommitments extends Component
         $this->previewPackVersion = $data['pack']->version ?? 0;
         $this->previewFingerprint = $data['card']['fingerprint'];
         $this->previewMode = $this->mode;
-        $this->previewTarget = $this->mode === 'remove' ? null : ($this->targetKey ?: null);
-        $this->previewAfter = $this->mode === 'segment' && $this->afterMatchId !== '' ? (int) $this->afterMatchId : null;
-        $this->previewHash = $this->instructions->preview($event, $commitment, $this->previewMode, $this->previewTarget, $this->previewAfter)['hash'];
+        $this->previewTarget = $this->mode === SponsorInstructionMode::Remove->value ? null : ($this->targetKey ?: null);
+        $this->previewAfter = $this->mode === SponsorInstructionMode::Segment->value && $this->afterMatchId !== '' ? (int) $this->afterMatchId : null;
+        $this->previewHash = $this->instructions->preview($event, $commitment, SponsorInstructionMode::from($this->previewMode), $this->previewTarget, $this->previewAfter)['hash'];
     }
 
     public function saveInstruction(SaveSponsorInstructionAction $action): void
@@ -220,13 +226,27 @@ class SponsorCommitments extends Component
         Gate::authorize('manageSponsors', $event);
         Validator::make(['reason' => $this->instructionReason], ['reason' => ['nullable', 'string', 'max:2000']])->validate();
         try {
-            $action->handle($event, $this->instructionId ?? 0, $this->instructionVersion, $this->previewPackVersion,
-                $this->previewFingerprint, $this->previewMode, $this->previewTarget, $this->previewAfter, $this->previewHash, $this->instructionReason ?: null);
+            $action->handle($event, $this->instructionId ?? 0, $this->instructionVersion, $this->previewPackVersion, $this->previewFingerprint,
+                new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null));
             $this->instructionId = null;
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');
         } catch (BaseBusinessException $exception) {
             $this->addError('save', $this->failureMessageKeepingInput($exception));
+        }
+    }
+
+    /** @throws SponsorCommitmentException when the previewed target is not a pack key */
+    private function previewPackKey(): ?PackKey
+    {
+        if ($this->previewTarget === null) {
+            return null;
+        }
+
+        try {
+            return PackKey::fromString($this->previewTarget);
+        } catch (InvalidArgumentException) {
+            throw SponsorCommitmentException::invalidTarget();
         }
     }
 
@@ -251,7 +271,7 @@ class SponsorCommitments extends Component
         $instruction = $this->instructionId === null ? null : $this->commitment($this->instructionId);
         $history = $this->historyId === null ? null : $this->commitment($this->historyId)->revisions()->orderByDesc('version')->paginate(10, pageName: 'historyPage');
 
-        $preview = ! $instruction instanceof EventSponsorCommitment || $this->previewHash === '' ? null : $this->instructions->preview($event, $instruction, $this->previewMode, $this->previewTarget, $this->previewAfter);
+        $preview = ! $instruction instanceof EventSponsorCommitment || $this->previewHash === '' ? null : $this->instructions->preview($event, $instruction, SponsorInstructionMode::from($this->previewMode), $this->previewTarget, $this->previewAfter);
 
         return view('livewire.events.components.sponsor-commitments', ['event' => $event, ...$commitments->data($event, $filter),
             'sponsors' => $sponsors, 'selected' => $selected, 'history' => $history, 'instruction' => $instruction,
