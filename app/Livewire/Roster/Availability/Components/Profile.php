@@ -9,12 +9,14 @@ use App\Actions\Roster\Availability\CreateAction;
 use App\Enums\Roster\BookableRosterKind;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Roster\UpcomingBookings;
+use App\Livewire\Roster\Availability\Forms\UnavailabilityForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
+use App\Queries\Roster\CurrentUnavailabilitiesQuery;
+use App\Queries\Roster\UnavailabilityHistoryQuery;
 use App\Services\Promotions\PromotionTimeZoneService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -41,11 +43,7 @@ class Profile extends Component
     #[Locked]
     public ?int $savedEntryId = null;
 
-    public string $startsOn = '';
-
-    public string $endsOn = '';
-
-    public string $reason = '';
+    public UnavailabilityForm $form;
 
     public string $status = '';
 
@@ -71,55 +69,41 @@ class Profile extends Component
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['startsOn', 'endsOn', 'reason'], true)) {
+        if (str_starts_with($property, 'form.')) {
             $this->reviewSignature = null;
             $this->savedEntryId = null;
         }
     }
 
-    private function validateDates(): void
-    {
-        $this->validate([
-            'startsOn' => ['required', 'date_format:Y-m-d'],
-            'endsOn' => ['required', 'date_format:Y-m-d', 'after_or_equal:startsOn'],
-            'reason' => ['string', 'max:255'],
-        ]);
-    }
-
-    private function signature(): string
-    {
-        return hash('sha256', serialize([$this->startsOn, $this->endsOn, $this->reason]));
-    }
-
     public function review(): void
     {
         Gate::authorize('update', $this->person());
-        $this->validateDates();
+        $this->form->toData();
         $this->status = '';
-        $this->reviewSignature = $this->signature();
+        $this->reviewSignature = $this->form->signature();
     }
 
     public function save(CreateAction $create): void
     {
         $person = $this->person();
         Gate::authorize('update', $person);
-        $this->validateDates();
-        if ($this->reviewSignature !== $this->signature()) {
-            $this->addError('startsOn', __('availability.review_first'));
+        $data = $this->form->toData();
+        if ($this->reviewSignature !== $this->form->signature()) {
+            $this->addError('form.startsOn', __('availability.review_first'));
 
             return;
         }
         try {
-            $entry = $create->handle($person, $this->startsOn, $this->endsOn, $this->reason, $this->actor());
+            $entry = $create->handle($person, $data, $this->actor());
         } catch (BaseBusinessException $exception) {
-            $this->addError('startsOn', $exception->getMessage());
+            $this->addError('form.startsOn', $exception->getMessage());
 
             return;
         }
         $this->status = __('availability.saved');
         $this->savedEntryId = $entry->id;
         $this->reviewSignature = null;
-        $this->reset('startsOn', 'endsOn', 'reason');
+        $this->form->reset();
         $this->resetPage('availabilityPage');
     }
 
@@ -155,13 +139,13 @@ class Profile extends Component
     /** @return Collection<int, Event> */
     private function affected(UpcomingBookings $upcomingBookings, Wrestler|Referee $person): Collection
     {
-        $startsOn = $this->startsOn;
-        $endsOn = $this->endsOn;
+        $startsOn = $this->form->startsOn;
+        $endsOn = $this->form->endsOn;
         if ($this->savedEntryId !== null) {
             $entry = $person->unavailabilities()->where('promotion_id', $person->promotion_id)->findOrFail($this->savedEntryId);
             $startsOn = $entry->starts_on;
             $endsOn = $entry->ends_on;
-        } elseif ($this->reviewSignature !== $this->signature()) {
+        } elseif ($this->reviewSignature !== $this->form->signature()) {
             return collect();
         }
 
@@ -174,7 +158,7 @@ class Profile extends Component
             ->values();
     }
 
-    public function render(UpcomingBookings $upcomingBookings): View
+    public function render(UpcomingBookings $upcomingBookings, CurrentUnavailabilitiesQuery $currentEntries, UnavailabilityHistoryQuery $historyEntries): View
     {
         $person = $this->person();
         Gate::authorize('view', $person);
@@ -184,11 +168,8 @@ class Profile extends Component
 
         return view('livewire.roster.availability.components.profile', [
             'person' => $person, 'zone' => $zone, 'affected' => $this->affected($upcomingBookings, $person),
-            'entries' => $person->unavailabilities()->where('promotion_id', $person->promotion_id)->active()->where('ends_on', '>=', $day)
-                ->orderBy('starts_on')->orderBy('id')->paginate(10, pageName: 'availabilityPage'),
-            'history' => $person->unavailabilities()->where('promotion_id', $person->promotion_id)
-                ->where(fn (Builder $query): Builder => $query->whereNotNull('cancelled_at')->orWhere('ends_on', '<', $day))
-                ->orderByDesc('starts_on')->orderByDesc('id')->paginate(10, pageName: 'availabilityHistoryPage'),
+            'entries' => $currentEntries->get($person, $day)->paginate(10, pageName: 'availabilityPage'),
+            'history' => $historyEntries->get($person, $day)->paginate(10, pageName: 'availabilityHistoryPage'),
         ]);
     }
 }

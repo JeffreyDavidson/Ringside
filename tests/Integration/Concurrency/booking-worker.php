@@ -66,6 +66,7 @@ use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Roster\UnavailabilityData;
 use App\Data\Sponsors\SponsorData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
@@ -167,7 +168,7 @@ try {
             resolve(ReleaseEventPublicationAction::class)->handle($event, $actor, $spec['public_version'], $spec['public_fingerprint'], PublicSection::from($spec['public_operation']));
         }
     } elseif (isset($spec['unavailability_person_id'])) {
-        resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), $spec['unavailability_day'], $spec['unavailability_day'], null, User::query()->findOrFail($spec['user_id']));
+        resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), new UnavailabilityData($spec['unavailability_day'], $spec['unavailability_day'], null), User::query()->findOrFail($spec['user_id']));
     } elseif (isset($spec['team_id'])) {
         resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
             MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),

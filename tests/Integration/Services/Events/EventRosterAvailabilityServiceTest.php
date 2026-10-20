@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Matches\MatchFinish;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -42,10 +43,10 @@ test('lists the wrestlers, tag team members and referees on the card who are una
     $match->referees()->attach([$blockedReferee->id, $freeReferee->id]);
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
     $create = resolve(CreateAction::class);
-    $create->handle($blockedWrestler, $day, $day, null, $actor);
-    $create->handle($blockedMember, $day, $day, null, $actor);
-    $create->handle($blockedReferee, $day, $day, null, $actor);
-    $create->handle($otherDay, '2000-01-01', '2000-01-01', null, $actor);
+    $create->handle($blockedWrestler, new UnavailabilityData($day, $day, null), $actor);
+    $create->handle($blockedMember, new UnavailabilityData($day, $day, null), $actor);
+    $create->handle($blockedReferee, new UnavailabilityData($day, $day, null), $actor);
+    $create->handle($otherDay, new UnavailabilityData('2000-01-01', '2000-01-01', null), $actor);
 
     // Act
     $unavailable = resolve(EventRosterAvailabilityService::class)->get($event);
@@ -89,7 +90,7 @@ test('picks the unavailable ones out of people the caller already read', functio
         ->create()
         ->all();
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($blocked, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($blocked, new UnavailabilityData($day, $day, null), $actor);
     $service = resolve(EventRosterAvailabilityService::class);
 
     // Act
@@ -123,8 +124,8 @@ test('ignores a result that was already recorded once the event date has passed'
         ->withCompetitors([$open])
         ->create();
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($finished, $day, $day, null, $actor);
-    resolve(CreateAction::class)->handle($open, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($finished, new UnavailabilityData($day, $day, null), $actor);
+    resolve(CreateAction::class)->handle($open, new UnavailabilityData($day, $day, null), $actor);
 
     // Act
     $unavailable = resolve(EventRosterAvailabilityService::class)->get($event);
