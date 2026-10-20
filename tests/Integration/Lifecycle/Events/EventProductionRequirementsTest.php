@@ -52,35 +52,10 @@ test('a valid plan raises no errors', function (): void {
     expect($errors)->toBeEmpty();
 });
 
-test('each state refusal names its field and message', function (string $case, string $field, string $message): void {
+test('each state refusal names its field and message', function (Closure $setup, string $field, string $message): void {
     // Arrange
     $contact = CrewContact::factory()->create();
-    $input = ['assignments' => [productionAssignment($contact)], 'cues' => [productionCue()]];
-    $known = $contact;
-
-    if ($case === 'contact outside the promotion') {
-        $known = null;
-    }
-    if ($case === 'archived contact') {
-        $contact->archived_at = now();
-    }
-    if ($case === 'repeated hour without offset') {
-        $input['assignments'][0]['timezone'] = 'America/New_York';
-        $input['assignments'][0]['call_at'] = '2026-11-01T01:30';
-    }
-    if ($case === 'skipped hour') {
-        $input['assignments'][0]['timezone'] = 'America/New_York';
-        $input['assignments'][0]['call_at'] = '2026-03-08T02:30';
-    }
-    if ($case === 'cue on an item that is not on the card') {
-        $input['cues'][0]['item_key'] = 'match:99';
-    }
-    if ($case === 'cue owner that is not an assignment') {
-        $input['cues'][0]['owner_id'] = '4e833c54-5f60-48b8-91c5-dbf85ca51111';
-    }
-    if ($case === 'twenty-first cue on one item') {
-        $input['cues'] = array_map(productionCue(...), range(1, 21));
-    }
+    [$input, $known] = $setup($contact);
 
     // Act
     $errors = productionErrors($input, ['match:1'], $known);
@@ -88,13 +63,38 @@ test('each state refusal names its field and message', function (string $case, s
     // Assert
     expect($errors)->toBe([$field => [__($message)]]);
 })->with([
-    'contact outside the promotion' => ['contact outside the promotion', 'assignments.0.contact_id', 'production.invalid_contact'],
-    'archived contact' => ['archived contact', 'assignments.0.contact_id', 'production.invalid_contact'],
-    'repeated hour without offset' => ['repeated hour without offset', 'assignments.0.call_at', 'production.invalid_assignment'],
-    'skipped hour' => ['skipped hour', 'assignments.0.call_at', 'production.invalid_assignment'],
-    'cue on an item that is not on the card' => ['cue on an item that is not on the card', 'cues.0.item_key', 'production.invalid_cue'],
-    'cue owner that is not an assignment' => ['cue owner that is not an assignment', 'cues.0.owner_id', 'production.invalid_cue'],
-    'twenty-first cue on one item' => ['twenty-first cue on one item', 'cues.20.owner_id', 'production.invalid_cue'],
+    'contact outside the promotion' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => []], null],
+        'assignments.0.contact_id', 'production.invalid_contact',
+    ],
+    'archived contact' => [
+        function (CrewContact $contact): array {
+            $contact->archived_at = now();
+
+            return [['assignments' => [productionAssignment($contact)], 'cues' => []], $contact];
+        },
+        'assignments.0.contact_id', 'production.invalid_contact',
+    ],
+    'repeated hour without offset' => [
+        fn (CrewContact $contact): array => [['assignments' => [[...productionAssignment($contact), 'timezone' => 'America/New_York', 'call_at' => '2026-11-01T01:30']], 'cues' => []], $contact],
+        'assignments.0.call_at', 'production.invalid_assignment',
+    ],
+    'skipped hour' => [
+        fn (CrewContact $contact): array => [['assignments' => [[...productionAssignment($contact), 'timezone' => 'America/New_York', 'call_at' => '2026-03-08T02:30']], 'cues' => []], $contact],
+        'assignments.0.call_at', 'production.invalid_assignment',
+    ],
+    'cue on an item that is not on the card' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'item_key' => 'match:99']]], $contact],
+        'cues.0.item_key', 'production.invalid_cue',
+    ],
+    'cue owner that is not an assignment' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'owner_id' => '4e833c54-5f60-48b8-91c5-dbf85ca51111']]], $contact],
+        'cues.0.owner_id', 'production.invalid_cue',
+    ],
+    'twenty-first cue on one item' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => array_map(productionCue(...), range(1, 21))], $contact],
+        'cues.20.owner_id', 'production.invalid_cue',
+    ],
 ]);
 
 test('an Other role without a station is refused on the station field', function (): void {

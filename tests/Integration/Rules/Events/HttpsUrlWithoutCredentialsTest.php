@@ -3,16 +3,15 @@
 declare(strict_types=1);
 
 use App\Rules\Events\HttpsUrlWithoutCredentials;
+use Illuminate\Support\Facades\Validator;
 
 describe('HttpsUrlWithoutCredentials Validation Rule', function () {
-    test('it rejects :dataset', function (mixed $value) {
+    test('it rejects :dataset', function (string $value) {
         // Arrange
-        $messages = [];
+        $validator = Validator::make(['url' => $value], ['url' => [new HttpsUrlWithoutCredentials]]);
 
         // Act
-        new HttpsUrlWithoutCredentials()->validate('cues.0.url', $value, validationFailureCallback(function (string $message) use (&$messages): void {
-            $messages[] = $message;
-        }));
+        $messages = $validator->errors()->get('url');
 
         // Assert
         expect($messages)->toBe([__('production.invalid_cue')]);
@@ -25,15 +24,13 @@ describe('HttpsUrlWithoutCredentials Validation Rule', function () {
 
     test('it accepts :dataset', function (mixed $value) {
         // Arrange
-        $failed = false;
+        $validator = Validator::make(['url' => $value], ['url' => [new HttpsUrlWithoutCredentials]]);
 
         // Act
-        new HttpsUrlWithoutCredentials()->validate('cues.0.url', $value, validationFailureCallback(function () use (&$failed): void {
-            $failed = true;
-        }));
+        $passes = $validator->passes();
 
         // Assert
-        expect($failed)->toBeFalse();
+        expect($passes)->toBeTrue();
     })->with([
         'a plain link' => ['https://example.com/track?id=1'],
         'a link with a port' => ['https://example.com:8443/track'],

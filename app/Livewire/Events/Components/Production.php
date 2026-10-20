@@ -87,9 +87,10 @@ class Production extends Component
         $this->version = $data['pack']->version ?? 0;
         $this->fingerprint = $data['card']['fingerprint'];
         $this->items = $data['running'];
-        $this->assignments = ProductionPlan::fromArray($data['content']['production'] ?? null)->activeAssignments();
+        $production = ProductionPlan::fromArray($data['content']['production'] ?? null);
+        $this->assignments = $production->activeAssignments();
         $this->cues = array_values(array_filter($data['content']['production']['cues'] ?? [], fn (array $cue): bool => in_array($cue['item_key'], array_column($this->items, 'key'), true)));
-        $this->notes = $data['content']['production']['notes'] ?? '';
+        $this->notes = $production->notes() ?? '';
         $this->reviewed = false;
         $this->refreshNames = [];
         $this->retainedTargets = [];
