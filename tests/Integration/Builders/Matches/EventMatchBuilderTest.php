@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Enums\Matches\MatchFinish;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -10,7 +11,9 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\freezeSecond;
 
@@ -348,4 +351,33 @@ test('it orders matches in card order with the id breaking ties', function () {
 
     // Assert
     expect($matches->modelKeys())->toBe([$first->id, $tiedFirst->id, $second->id, $tiedSecond->id]);
+});
+
+test('it keeps the rows of the selected competitors of each type', function () {
+    // Arrange
+    $selection = new CompetitorSelection([
+        ['type' => 'wrestler', 'id' => 4, 'side' => 0],
+        ['type' => 'tag_team', 'id' => 9, 'side' => 1],
+        ['type' => 'wrestler', 'id' => 5, 'side' => 1],
+    ]);
+    $query = DB::table('events_matches_competitors as participant');
+
+    // Act
+    EventMatchBuilder::whereSelectedCompetitors($query, 'participant', $selection);
+
+    // Assert
+    expect(normalizedSql($query->toSql()))->toBe('select * from "events_matches_competitors" as "participant" where (("participant"."competitor_type" = ? and "participant"."competitor_id" in (?, ?)) or ("participant"."competitor_type" = ? and "participant"."competitor_id" in (?)))')
+        ->and($query->getBindings())->toBe(['wrestler', 4, 5, 'tag_team', 9]);
+});
+
+test('it keeps no competitor rows for an empty selection', function () {
+    // Arrange
+    $query = DB::table('events_matches_competitors as participant');
+
+    // Act
+    EventMatchBuilder::whereSelectedCompetitors($query, 'participant', new CompetitorSelection([]));
+
+    // Assert
+    expect(normalizedSql($query->toSql()))->toBe('select * from "events_matches_competitors" as "participant"')
+        ->and($query->getBindings())->toBeEmpty();
 });

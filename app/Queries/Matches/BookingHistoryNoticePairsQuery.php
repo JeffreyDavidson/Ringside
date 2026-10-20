@@ -6,6 +6,7 @@ namespace App\Queries\Matches;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Models\Matches\EventMatch;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 
@@ -15,10 +16,7 @@ use Illuminate\Support\Carbon;
  */
 final class BookingHistoryNoticePairsQuery
 {
-    /**
-     * @param  list<array{type: string, id: int, side: int}>  $selection
-     */
-    public function get(int $promotionId, Carbon $reference, ?int $excludedMatchId, array $selection, Carbon $from): QueryBuilder
+    public function get(int $promotionId, Carbon $reference, ?int $excludedMatchId, CompetitorSelection $selection, Carbon $from): QueryBuilder
     {
         $base = EventMatch::query()->forPromotionHistory($promotionId, $reference, $excludedMatchId);
         $latestPairMatch = (clone $base)->select('events_matches.id')
@@ -43,10 +41,10 @@ final class BookingHistoryNoticePairsQuery
                     ->whereColumn('first_entry.competitor_type', 'second_entry.competitor_type')
                     ->whereColumn('first_entry.competitor_id', '<', 'second_entry.competitor_id')))
             ->where(function (QueryBuilder $opposition) use ($selection): void {
-                foreach (array_unique(array_column($selection, 'side')) as $side) {
+                foreach ($selection->sides() as $side) {
                     $opposition->orWhere(function (QueryBuilder $pair) use ($selection, $side): void {
-                        EventMatchBuilder::whereSelectedCompetitors($pair, 'first_entry', array_values(array_filter($selection, fn (array $entry): bool => $entry['side'] === $side)));
-                        EventMatchBuilder::whereSelectedCompetitors($pair, 'second_entry', array_values(array_filter($selection, fn (array $entry): bool => $entry['side'] !== $side)));
+                        EventMatchBuilder::whereSelectedCompetitors($pair, 'first_entry', $selection->onSide($side));
+                        EventMatchBuilder::whereSelectedCompetitors($pair, 'second_entry', $selection->offSide($side));
                     });
                 }
             })

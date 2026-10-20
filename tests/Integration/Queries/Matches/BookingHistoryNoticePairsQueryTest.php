@@ -8,17 +8,17 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Matches\BookingHistoryNoticePairsQuery;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Database\Query\Builder;
 
-/** @return list<array{type: string, id: int, side: int}> */
-function noticePairsSelection(Wrestler $first, Wrestler ...$others): array
+function noticePairsSelection(Wrestler $first, Wrestler ...$others): CompetitorSelection
 {
     $selection = [['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0]];
     foreach (array_values($others) as $index => $other) {
         $selection[] = ['type' => $other->getMorphClass(), 'id' => $other->id, 'side' => $index + 1];
     }
 
-    return $selection;
+    return new CompetitorSelection($selection);
 }
 
 test('prepares one row per opposing pair with its counts, newest pair first, for the caller to page', function (): void {
