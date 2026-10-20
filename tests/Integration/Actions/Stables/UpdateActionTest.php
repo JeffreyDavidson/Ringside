@@ -535,12 +535,11 @@ describe('membership dates are compared as promotion days', function () {
 });
 
 /*
- * Characterization of today's behaviour. The several-periods check compares the stored start and the submitted
- * start as UTC days, while the form (CanChangeDebutDate) and the single-period check compare promotion days.
- * These tests pin both so any later change to that comparison is a visible, deliberate one.
+ * The several-periods check compares the stored start and the submitted start as promotion days, the way the form
+ * (CanChangeDebutDate) and the single-period check do: the same promotion day is unchanged, another one is locked.
  */
 describe('start date of a stable with several periods around promotion midnight', function () {
-    test('it refuses an unchanged promotion start day when the stored instant is the previous day in UTC', function () {
+    test('it accepts an unchanged promotion start day when the stored instant is the previous day in UTC', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
         $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create();
@@ -556,13 +555,14 @@ describe('start date of a stable with several periods around promotion midnight'
         );
 
         // Act
-        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+        resolve(UpdateAction::class)->handle($stable, $data);
 
         // Assert
-        expect($update)->toThrow(CannotBeUpdatedException::class, 'start date cannot be changed');
+        expect($stable->activityPeriods()->count())->toBe(2)
+            ->and($stable->activityPeriods()->orderBy('started_at')->first()->started_at->toDateTimeString())->toBe('2020-01-01 02:00:00');
     });
 
-    test('it accepts a different promotion start day when the stored instant shares its UTC day, and writes nothing', function () {
+    test('it refuses a different promotion start day when the stored instant shares its UTC day, and writes nothing', function () {
         // Arrange
         $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
         $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create(['name' => 'Original Name']);
@@ -577,10 +577,11 @@ describe('start date of a stable with several periods around promotion midnight'
         );
 
         // Act
-        resolve(UpdateAction::class)->handle($stable, $data);
+        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
 
         // Assert
-        expect($stable->refresh()->name)->toBe('Renamed Stable')
+        expect($update)->toThrow(CannotBeUpdatedException::class, 'start date cannot be changed')
+            ->and($stable->refresh()->name)->toBe('Original Name')
             ->and($first->refresh()->started_at->toDateTimeString())->toBe('2020-01-01 02:00:00');
     });
 
