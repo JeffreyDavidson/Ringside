@@ -8,6 +8,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Queries\Matches\BookingHistoryLatestRecordedDatesQuery;
+use App\ValueObjects\CompetitorSelection;
 
 test('reads the latest recorded earlier date of each selected competitor and skips unrecorded and unselected ones', function (): void {
     // Arrange
@@ -38,10 +39,10 @@ test('reads the latest recorded earlier date of each selected competitor and ski
         ->for($unrecordedEvent)
         ->withCompetitors([$first, $second])
         ->create();
-    $selection = [
+    $selection = new CompetitorSelection([
         ['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0],
         ['type' => $second->getMorphClass(), 'id' => $second->id, 'side' => 1],
-    ];
+    ]);
 
     // Act
     $rows = resolve(BookingHistoryLatestRecordedDatesQuery::class)->get($promotion->id, now(), null, $selection);
@@ -75,10 +76,10 @@ test('leaves out later events, the excluded match and other promotions, and retu
             ->create();
         $match->update(['match_finish' => MatchFinish::NoDecision]);
     }
-    $selection = [
+    $selection = new CompetitorSelection([
         ['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0],
         ['type' => $second->getMorphClass(), 'id' => $second->id, 'side' => 1],
-    ];
+    ]);
     $excludedId = $past->matches()->firstOrFail()->id;
     $query = resolve(BookingHistoryLatestRecordedDatesQuery::class);
 

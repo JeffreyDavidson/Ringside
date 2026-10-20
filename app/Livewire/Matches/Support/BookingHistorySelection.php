@@ -8,12 +8,14 @@ use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Validates the competitors a user chose in the match form before their booking history is read: the shape fits the
- * match type, every side has someone, and each wrestler or tag team belongs to the event's promotion.
+ * match type, every side has someone, and each wrestler or tag team belongs to the event's promotion. It returns what
+ * was chosen, read once, for the history reads.
  */
 final class BookingHistorySelection
 {
@@ -22,11 +24,11 @@ final class BookingHistorySelection
      *
      * @throws ValidationException
      */
-    public function validate(Event $event, MatchType $type, array $sides): void
+    public function validate(Event $event, MatchType $type, array $sides): CompetitorSelection
     {
         // An event without a promotion has no history to read; the history query reports it as unavailable.
         if ($event->promotion_id === null) {
-            return;
+            return new CompetitorSelection([]);
         }
 
         Validator::make(['competitors' => $sides], [
@@ -38,38 +40,26 @@ final class BookingHistorySelection
             'competitors.*.tag_teams.*' => ['integer', 'min:1', 'distinct'],
         ])->validate();
 
-        $chosen = 0;
-        $ids = [];
-        foreach ($sides as $entries) {
-            $before = $chosen;
+        $selection = CompetitorSelection::fromSides($type, $sides);
+        $ids = $selection->idsByType();
 
-            foreach (['wrestlers' => new Wrestler, 'tag_teams' => new TagTeam] as $kind => $model) {
-                foreach ($entries[$kind] ?? [] as $id) {
-                    if (! in_array($model->getMorphClass(), $type->getAllowedCompetitorTypes(), true)) {
-                        throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
-                    }
+        $hasEmptySide = array_filter($sides, fn (array $entries): bool => ($entries['wrestlers'] ?? []) === [] && ($entries['tag_teams'] ?? []) === []) !== [];
 
-                    $chosen++;
-                    $ids[$kind][] = (int) $id;
-                }
-            }
-
-            if ($chosen === $before) {
-                throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
-            }
-        }
-
-        if ($chosen < $type->getMinimumCompetitors()) {
+        if (array_diff(array_keys($ids), $type->getAllowedCompetitorTypes()) !== []
+            || $hasEmptySide
+            || count($selection->entries()) < $type->getMinimumCompetitors()) {
             throw ValidationException::withMessages(['history' => __('matches.history.selection_required')]);
         }
 
-        foreach (['wrestlers' => Wrestler::class, 'tag_teams' => TagTeam::class] as $kind => $model) {
-            $wanted = array_values(array_unique($ids[$kind] ?? []));
+        foreach ([Wrestler::class, TagTeam::class] as $model) {
+            $wanted = array_values(array_unique($ids[(new $model)->getMorphClass()] ?? []));
             $found = $model::query()->withTrashed()->where('promotion_id', $event->promotion_id)->whereKey($wanted)->count();
 
             if ($found !== count($wanted)) {
                 throw ValidationException::withMessages(['history' => __('matches.history.unavailable_selection')]);
             }
         }
+
+        return $selection;
     }
 }

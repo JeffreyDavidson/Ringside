@@ -6,6 +6,7 @@ namespace App\Queries\Matches;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Models\Matches\EventMatch;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use stdClass;
@@ -14,10 +15,9 @@ use stdClass;
 final class BookingHistoryLatestRecordedDatesQuery
 {
     /**
-     * @param  list<array{type: string, id: int, side: int}>  $selection
      * @return Collection<int, stdClass> rows of `competitor_type`, `competitor_id` and `latest_date`
      */
-    public function get(int $promotionId, Carbon $reference, ?int $excludedMatchId, array $selection): Collection
+    public function get(int $promotionId, Carbon $reference, ?int $excludedMatchId, CompetitorSelection $selection): Collection
     {
         $query = EventMatch::query()
             ->forPromotionHistory($promotionId, $reference, $excludedMatchId)

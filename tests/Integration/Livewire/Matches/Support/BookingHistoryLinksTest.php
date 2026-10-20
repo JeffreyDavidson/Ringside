@@ -10,6 +10,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\CompetitorSelection;
 use App\ViewModels\Matches\BookingHistoryViewModel;
 
 describe('booking history links', function (): void {
@@ -20,7 +21,7 @@ describe('booking history links', function (): void {
         $past = Event::factory()->for($promotion, 'promotion')->past()->create();
         EventMatch::factory()->for($past)->withCompetitors([$first, $second])->create(['match_finish' => MatchFinish::NoDecision]);
         $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
-        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]]);
+        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]]));
 
         // Act
         $linked = resolve(BookingHistoryLinks::class)->add($snapshot);
@@ -40,7 +41,7 @@ describe('booking history links', function (): void {
         $past = Event::factory()->for($promotion, 'promotion')->past()->create();
         EventMatch::factory()->for($past)->withCompetitors([$first, $second])->create(['match_type' => MatchType::TagTeam, 'match_finish' => MatchFinish::NoDecision]);
         $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
-        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::TagTeam, [['tag_teams' => [$first->id]], ['tag_teams' => [$second->id]]]);
+        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::TagTeam, CompetitorSelection::fromSides(MatchType::TagTeam, [['tag_teams' => [$first->id]], ['tag_teams' => [$second->id]]]));
 
         // Act
         $linked = resolve(BookingHistoryLinks::class)->add($snapshot);
@@ -59,7 +60,7 @@ describe('booking history links', function (): void {
         $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
         $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
         $first->delete();
-        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, $selection);
+        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection));
 
         // Act
         $linked = resolve(BookingHistoryLinks::class)->add($snapshot);
@@ -79,7 +80,7 @@ describe('booking history links', function (): void {
         $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
         $first->delete();
         $second->delete();
-        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, $selection);
+        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection));
 
         // Act
         $linked = resolve(BookingHistoryLinks::class)->add($snapshot);
@@ -92,7 +93,7 @@ describe('booking history links', function (): void {
     it('links nothing for an unavailable snapshot', function (): void {
         // Arrange
         $event = Event::factory()->unscheduled()->create();
-        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, []);
+        $snapshot = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, []));
 
         // Act
         $linked = resolve(BookingHistoryLinks::class)->add($snapshot);

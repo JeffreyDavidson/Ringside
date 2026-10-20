@@ -18,6 +18,7 @@ use App\Queries\Matches\BookingHistoryNoticeSourcesQuery;
 use App\Queries\Matches\BookingHistoryRecentMatchesQuery;
 use App\Queries\Matches\BookingHistorySubjectsQuery;
 use App\Services\Promotions\PromotionTimeZoneService;
+use App\ValueObjects\CompetitorSelection;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use stdClass;
@@ -52,10 +53,9 @@ class BookingHistoryViewModel
      * The selection must already be validated (see BookingHistorySelection): every side has competitors the match type allows,
      * and each belongs to the event's promotion.
      *
-     * @param  array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}>  $sides
      * @return Snapshot
      */
-    public function snapshot(Event $event, MatchType $type, array $sides, ?int $excludedMatchId = null, int $page = 1): array
+    public function snapshot(Event $event, MatchType $type, CompetitorSelection $selection, ?int $excludedMatchId = null, int $page = 1): array
     {
         $event->loadMissing('promotion');
         $checkedAt = now();
@@ -71,7 +71,6 @@ class BookingHistoryViewModel
             return $snapshot;
         }
 
-        $selection = $this->selection($type, $sides);
         $subjects = $this->subjects($selection, $event->promotion_id);
         $latest = $this->latestRecordedDatesQuery->get($event->promotion_id, $reference, $excludedMatchId, $selection)
             ->mapWithKeys(fn (stdClass $row): array => [$row->competitor_type.':'.$row->competitor_id => (string) $row->latest_date])
@@ -93,12 +92,15 @@ class BookingHistoryViewModel
             'recent' => array_values($withMatches[$this->key($subject)]->matches->map(fn (EventMatch $match): array => $this->row($match))->all()),
         ])->all());
 
-        if (count($selection) === 2 && $selection[0]['side'] !== $selection[1]['side']
-            && $selection[0]['type'] === $selection[1]['type'] && $this->directType($type, $selection[0]['type'])) {
-            $snapshot['direct'] = $this->directRecord(
-                $event->promotion_id, $reference, $excludedMatchId, $subjects->firstOrFail(),
-                $subjects->sole(fn (Wrestler|TagTeam $subject): bool => $this->key($subject) === $selection[1]['type'].':'.$selection[1]['id']),
-            );
+        if ($selection->isHeadToHead()) {
+            [$firstEntry, $secondEntry] = $selection->entries();
+
+            if ($this->directType($type, $firstEntry['type'])) {
+                $snapshot['direct'] = $this->directRecord(
+                    $event->promotion_id, $reference, $excludedMatchId, $subjects->firstOrFail(),
+                    $subjects->sole(fn (Wrestler|TagTeam $subject): bool => $this->key($subject) === $secondEntry['type'].':'.$secondEntry['id']),
+                );
+            }
         }
 
         $notices = $this->notices($event->promotion_id, $reference, $excludedMatchId, $selection, $from, $subjects, max(1, $page));
@@ -107,42 +109,19 @@ class BookingHistoryViewModel
     }
 
     /**
-     * @param  array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}>  $sides
-     * @return list<array{type: string, id: int, side: int}>
-     */
-    private function selection(MatchType $type, array $sides): array
-    {
-        $selection = [];
-
-        foreach ($sides as $side => $entries) {
-            foreach (['wrestlers' => (new Wrestler)->getMorphClass(), 'tag_teams' => (new TagTeam)->getMorphClass()] as $kind => $alias) {
-                foreach ($entries[$kind] ?? [] as $id) {
-                    $selection[] = ['type' => $alias, 'id' => (int) $id, 'side' => $type->usesIndividualCompetitorSides() ? count($selection) : $side];
-                }
-            }
-        }
-
-        return $selection;
-    }
-
-    /**
-     * @param  list<array{type: string, id: int, side: int}>  $selection
      * @return Collection<int, Wrestler|TagTeam>
      */
-    private function subjects(array $selection, int $promotionId): Collection
+    private function subjects(CompetitorSelection $selection, int $promotionId): Collection
     {
-        $wrestlerAlias = (new Wrestler)->getMorphClass();
-        $teamAlias = (new TagTeam)->getMorphClass();
-        $wrestlerIds = array_column(array_filter($selection, fn (array $entry): bool => $entry['type'] === $wrestlerAlias), 'id');
-        $teamIds = array_column(array_filter($selection, fn (array $entry): bool => $entry['type'] === $teamAlias), 'id');
-        $wrestlers = $this->subjectsQuery->get(new Wrestler, $wrestlerIds, $promotionId);
-        $teams = $this->subjectsQuery->get(new TagTeam, $teamIds, $promotionId);
+        $ids = $selection->idsByType();
+        $wrestlers = $this->subjectsQuery->get(new Wrestler, $ids[(new Wrestler)->getMorphClass()] ?? [], $promotionId);
+        $teams = $this->subjectsQuery->get(new TagTeam, $ids[(new TagTeam)->getMorphClass()] ?? [], $promotionId);
         // Eloquent merge keys by numeric id, which would collapse a wrestler and team with the same id.
         $keyed = collect([...$wrestlers, ...$teams])->keyBy(fn (Wrestler|TagTeam $subject): string => $this->key($subject));
 
         return new Collection(array_map(
             fn (array $entry): Wrestler|TagTeam => $keyed->firstOrFail(fn (Wrestler|TagTeam $subject, string $key): bool => $key === $entry['type'].':'.$entry['id']),
-            $selection,
+            $selection->entries(),
         ));
     }
 
@@ -160,11 +139,10 @@ class BookingHistoryViewModel
     }
 
     /**
-     * @param  list<array{type: string, id: int, side: int}>  $selection
      * @param  Collection<int, Wrestler|TagTeam>  $subjects
      * @return array{notices: list<Notice>, totalNotices: int, page: int, pages: int}
      */
-    private function notices(int $promotionId, Carbon $reference, ?int $excludedMatchId, array $selection, Carbon $from, Collection $subjects, int $page): array
+    private function notices(int $promotionId, Carbon $reference, ?int $excludedMatchId, CompetitorSelection $selection, Carbon $from, Collection $subjects, int $page): array
     {
         $pairs = $this->noticePairsQuery->get($promotionId, $reference, $excludedMatchId, $selection, $from);
         $total = $pairs->getCountForPagination();

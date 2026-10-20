@@ -167,14 +167,12 @@ class FormModal extends BaseFormModal
         }
 
         try {
-            $selection->validate($event, $this->form->matchType, $this->form->competitors);
+            $chosen = $selection->validate($event, $this->form->matchType, $this->form->competitors);
         } catch (ValidationException) {
             return ['error' => __('matches.history.unavailable_selection')];
         }
 
-        $snapshot = $history->snapshot(
-            $event, $this->form->matchType, $this->form->competitors, $editedMatch?->id, $page,
-        );
+        $snapshot = $history->snapshot($event, $this->form->matchType, $chosen, $editedMatch?->id, $page);
 
         return $historyLinks->add($snapshot);
     }
