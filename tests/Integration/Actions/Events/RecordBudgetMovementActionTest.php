@@ -86,6 +86,22 @@ test('refunds enforce same-line ownership original kind date and remaining cap',
         ->and($f['budget']->revisions()->count())->toBe(0);
 })->with(['foreign', 'voided', 'refund', 'early', 'missing', 'cap']);
 
+test('only live refunds of the same payment count against its remaining cap', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $source = EventBudgetMovement::factory()->for($f['line'], 'line')->create(['amount_cents' => 20000]);
+    $other = EventBudgetMovement::factory()->for($f['line'], 'line')->create(['amount_cents' => 20000]);
+    EventBudgetMovement::factory()->for($f['line'], 'line')->create(['kind' => 'refund', 'source_id' => $source->id, 'amount_cents' => 15000, 'voided_at' => now()]);
+    EventBudgetMovement::factory()->for($f['line'], 'line')->create(['kind' => 'refund', 'source_id' => $other->id, 'amount_cents' => 15000]);
+    $input = budgetPayment(['kind' => 'refund', 'amount' => '100.00', 'source_id' => $source->id]);
+
+    // Act
+    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input));
+
+    // Assert
+    expect($f['line']->movements()->where('source_id', $source->id)->whereNull('voided_at')->pluck('amount_cents')->all())->toBe([10000]);
+});
+
 test('payment amount date and source misuse cannot create a movement', function (array $override): void {
     // Arrange
     $f = budgetFixture();

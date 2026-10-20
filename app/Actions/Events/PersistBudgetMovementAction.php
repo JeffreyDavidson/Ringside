@@ -36,11 +36,11 @@ class PersistBudgetMovementAction
             throw BudgetException::paymentDate();
         }
         if ($data->kind === BudgetMovementKind::Refund) {
-            $source = $line->movements->firstWhere('id', $data->sourceId);
+            $source = $line->movements->find($data->sourceId);
             if ($source === null || $source->voided_at !== null || $source->kind !== BudgetMovementKind::Payment || $data->date < $source->effective_date->toDateString()) {
                 throw BudgetException::refundSource();
             }
-            $refunded = $line->movements->filter(fn (EventBudgetMovement $movement): bool => $movement->source_id === $source->id && $movement->voided_at === null)->sum(fn (EventBudgetMovement $movement): int => $movement->amount_cents);
+            $refunded = $line->movements->refundsOf($source)->unvoided()->sum(fn (EventBudgetMovement $movement): int => $movement->amount_cents);
             if ($data->amount > $source->amount_cents - $refunded) {
                 throw BudgetException::refundCap();
             }
