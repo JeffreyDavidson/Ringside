@@ -79,6 +79,36 @@ describe('a stable with several activity periods', function (): void {
     });
 });
 
+describe('a stable with several activity periods in a promotion time zone', function (): void {
+    it('lets the first period keep its promotion start day when the stored instant is the previous day in UTC', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create();
+        $stable->activityPeriods()->create(['started_at' => '2020-01-01 02:00:00', 'ended_at' => '2020-06-01 08:00:00']);
+        $stable->activityPeriods()->create(['started_at' => '2021-01-01 08:00:00']);
+
+        // Act
+        ensureStablePeriodCanMove($stable, '2019-12-31 08:00:00');
+
+        // Assert
+        expect($stable->activityPeriods()->count())->toBe(2);
+    });
+
+    it('refuses another promotion start day even when the stored instant shares its UTC day', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create();
+        $stable->activityPeriods()->create(['started_at' => '2020-01-01 02:00:00', 'ended_at' => '2020-06-01 08:00:00']);
+        $stable->activityPeriods()->create(['started_at' => '2021-01-01 08:00:00']);
+
+        // Act
+        $act = fn () => ensureStablePeriodCanMove($stable, '2020-01-01 08:00:00');
+
+        // Assert
+        expect($act)->toThrow(CannotBeUpdatedException::class, 'start date cannot be changed');
+    });
+});
+
 describe('a stable with one activity period', function (): void {
     it('refuses an end date on a period that is still open', function (): void {
         // Arrange

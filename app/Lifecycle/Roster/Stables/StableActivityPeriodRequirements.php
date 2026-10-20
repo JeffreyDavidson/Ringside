@@ -39,7 +39,7 @@ final readonly class StableActivityPeriodRequirements
         }
 
         if ($periods->count() > 1) {
-            if (! $firstPeriod->started_at->isSameDay($startDate)) {
+            if (! $this->isSamePromotionDay($stable, $firstPeriod->started_at, $startDate)) {
                 throw CannotBeUpdatedException::startDateLocked($stable);
             }
 
@@ -78,12 +78,11 @@ final readonly class StableActivityPeriodRequirements
      */
     private function ensureMembershipsStayWithinPeriod(Stable $stable, ActivityPeriod $period, Carbon $startDate, ?Carbon $endedAt): void
     {
-        // Days are the stable's promotion days (the application time zone without a promotion), as the form reads them.
         $local = fn (Carbon $date): Carbon => PromotionTimeZoneService::toLocalTime($stable->promotion, $date);
 
-        $startMoves = ! $local($period->started_at)->isSameDay($local($startDate));
+        $startMoves = ! $this->isSamePromotionDay($stable, $period->started_at, $startDate);
         $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon
-            && ! $local($period->ended_at)->isSameDay($local($endedAt));
+            && ! $this->isSamePromotionDay($stable, $period->ended_at, $endedAt);
 
         $startsTooLate = false;
         if ($startMoves) {
@@ -106,5 +105,15 @@ final readonly class StableActivityPeriodRequirements
         if ($endsTooEarly) {
             throw CannotBeUpdatedException::endsBeforeMembership($stable);
         }
+    }
+
+    /**
+     * Whether two instants fall on the same day in the stable's promotion time zone (the application time zone without
+     * a promotion), which is how the form reads and compares them.
+     */
+    private function isSamePromotionDay(Stable $stable, Carbon $first, Carbon $second): bool
+    {
+        return PromotionTimeZoneService::toLocalTime($stable->promotion, $first)
+            ->isSameDay(PromotionTimeZoneService::toLocalTime($stable->promotion, $second));
     }
 }
