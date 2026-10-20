@@ -6,7 +6,6 @@ namespace App\Services\Events;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -36,8 +35,7 @@ class EventRosterService
      */
     public function fromMatches(ModelCollection $matches, Event $event): array
     {
-        $entries = $matches->toBase()->flatMap(fn (EventMatch $match): Collection => $match->competitors->toBase()
-            ->map(fn (MatchCompetitor $entry): Wrestler|TagTeam => $entry->competitor)
+        $entries = $matches->toBase()->flatMap(fn (EventMatch $match): Collection => $match->competitors->competitorModels()
             ->merge($match->referees->toBase()))
             ->filter(fn (Wrestler|Referee|TagTeam $person): bool => $person->promotion_id === $event->promotion_id)
             ->unique(self::key(...))->values();
