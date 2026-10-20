@@ -23,6 +23,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Services\Events\EventRosterAvailabilityService;
+use App\ValueObjects\MatchSides;
 
 test('a standalone assignment rejects a date-unavailable wrestler and writes nothing', function (): void {
     // Arrange
@@ -51,12 +52,12 @@ test('a match repair retains a previously booked unavailable person while reject
     $replacement = Wrestler::factory()->bookable()->for($promotion)->create();
     $referees = Referee::factory()->bookable()->for($promotion)->count(1)->create();
     $titles = Title::query()->whereKey([])->get();
-    $original = new EventMatchData(MatchType::Singles, $referees, $titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]]), 'Original');
+    $original = new EventMatchData(MatchType::Singles, $referees, $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), 'Original');
     $match = resolve(AddMatchForEventAction::class)->handle($event, $original);
     $day = ($event->date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
     $actor = administrator();
     resolve(CreateAction::class)->handle($first, new UnavailabilityData($day, $day, null), $actor);
-    $data = new EventMatchData(MatchType::Singles, $referees, $titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$replacement]]]), 'Repaired');
+    $data = new EventMatchData(MatchType::Singles, $referees, $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$replacement]]])), 'Repaired');
 
     // Act
     resolve(UpdateMatchAction::class)->handle($match, $data);

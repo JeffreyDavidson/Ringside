@@ -8,6 +8,7 @@ use App\Data\Matches\EventMatchData;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\MatchSides;
 use Illuminate\Support\Collection;
 
 final class MatchRosterLock
@@ -24,7 +25,7 @@ final class MatchRosterLock
         Referee::query()->whereKey($referees->pluck('id'))->orderBy('id')->lockForUpdate()->get();
         $lockedTeams = TagTeam::query()->whereKey($teams->pluck('id'))->orderBy('id')->lockForUpdate()->get();
         $lockedTeams->load('currentWrestlers');
-        $memberIds = $lockedTeams->flatMap(fn (TagTeam $team): array => $team->currentWrestlers->modelKeys());
+        $memberIds = $lockedTeams->currentWrestlers()->modelKeys();
         Wrestler::query()->whereKey($wrestlers->pluck('id')->merge($memberIds)->unique())->orderBy('id')->lockForUpdate()->get();
     }
 
@@ -34,15 +35,10 @@ final class MatchRosterLock
     }
 
     /**
-     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $sides
      * @param  Collection<int, Referee>|null  $referees
      */
-    public function forSides(Collection $sides, ?Collection $referees = null): void
+    public function forSides(MatchSides $sides, ?Collection $referees = null): void
     {
-        $this->lock(
-            $referees ?? collect(),
-            $sides->flatMap(fn (array $side): array => $side['wrestlers'] ?? []),
-            $sides->flatMap(fn (array $side): array => $side['tag_teams'] ?? []),
-        );
+        $this->lock($referees ?? collect(), $sides->wrestlers(), $sides->tagTeams());
     }
 }

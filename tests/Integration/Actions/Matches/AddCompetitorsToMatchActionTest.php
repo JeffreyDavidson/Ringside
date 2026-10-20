@@ -10,6 +10,7 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\MatchSides;
 use JMac\Testing\Double;
 
 use function Pest\Laravel\instance;
@@ -18,14 +19,14 @@ test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $wrestlerA = Wrestler::factory()->bookable()->create();
     $wrestlerB = Wrestler::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         0 => [
             'wrestlers' => [$wrestlerA],
         ],
         1 => [
             'wrestlers' => [$wrestlerB],
         ],
-    ]);
+    ]));
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
@@ -44,14 +45,14 @@ test('it adds tag team competitors to a match', function () {
     $eventMatch = EventMatch::factory()->withMatchType(MatchType::TagTeam)->create();
     $tagTeamA = TagTeam::factory()->bookable()->create();
     $tagTeamB = TagTeam::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         0 => [
             'tag_teams' => [$tagTeamA],
         ],
         1 => [
             'tag_teams' => [$tagTeamB],
         ],
-    ]);
+    ]));
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
@@ -69,11 +70,11 @@ test('it adds tag team competitors to a match', function () {
 test('it rejects competitor assignments without the required populated sides', function () {
     $eventMatch = EventMatch::factory()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         1 => [
             'wrestlers' => [$wrestler],
         ],
-    ]);
+    ]));
 
     expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
         ->toThrow(InvalidMatchConfigurationException::class, 'This match requires exactly 2 competitor sides.');
@@ -82,10 +83,10 @@ test('it rejects competitor assignments without the required populated sides', f
 test('it rejects duplicate competitors across match sides', function () {
     $eventMatch = EventMatch::factory()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         ['wrestlers' => [$wrestler]],
         ['wrestlers' => [$wrestler]],
-    ]);
+    ]));
 
     expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
         ->toThrow(InvalidMatchConfigurationException::class, 'The same competitor cannot compete multiple times in a match.');
@@ -94,7 +95,7 @@ test('it rejects duplicate competitors across match sides', function () {
 test('it enforces individual entrant limits outside form validation', function () {
     $eventMatch = EventMatch::factory()->withMatchType(MatchType::RoyalRumble)->create();
     $wrestlers = Wrestler::factory()->bookable()->count(9)->create();
-    $competitors = $wrestlers->map(fn (Wrestler $wrestler): array => ['wrestlers' => [$wrestler]]);
+    $competitors = new MatchSides($wrestlers->map(fn (Wrestler $wrestler): array => ['wrestlers' => [$wrestler]]));
 
     expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
         ->toThrow(InvalidMatchConfigurationException::class, 'This match requires between 10 and 30 competitors.');

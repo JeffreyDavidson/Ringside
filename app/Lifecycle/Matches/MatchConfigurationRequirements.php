@@ -37,8 +37,8 @@ final class MatchConfigurationRequirements
         $participantsByType = [
             'referees' => $data->referees->all(),
             'titles' => $data->titles->all(),
-            'wrestlers' => $data->sides->flatMap(fn (array $side): array => $side['wrestlers'] ?? [])->all(),
-            'tag teams' => $data->sides->flatMap(fn (array $side): array => $side['tag_teams'] ?? [])->all(),
+            'wrestlers' => $data->sides->wrestlers()->all(),
+            'tag teams' => $data->sides->tagTeams()->all(),
         ];
 
         foreach ($participantsByType as $entityType => $participants) {

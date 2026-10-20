@@ -72,7 +72,7 @@ class AddMatchForEventAction
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null) {
                     throw TournamentException::alreadyBooked();
                 }
-                $requested = $eventMatchData->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? []))->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
+                $requested = $eventMatchData->sides->competitors()->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
                 $expected = collect([$bout->first, $bout->second])->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
                 if ($requested !== $expected || $eventMatchData->matchType !== ($tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam)) {
                     throw TournamentException::entrantsChanged();
@@ -142,7 +142,7 @@ class AddMatchForEventAction
         if ($match->trashed() || $match->event_id !== $event->id || $match->match_type !== $data->matchType || $match->match_stipulation_id !== $data->matchStipulation?->id || $match->preview !== $data->preview) {
             return false;
         }
-        $requested = $data->sides->flatMap(fn (array $side, int $position): array => array_map(fn (\App\Models\Roster\Wrestlers\Wrestler|TagTeam $competitor): string => $position.':'.$competitor->getMorphClass().':'.$competitor->id, array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? [])))->sort()->values()->all();
+        $requested = $data->sides->sides()->flatMap(fn (array $side, int $position): array => array_map(fn (\App\Models\Roster\Wrestlers\Wrestler|TagTeam $competitor): string => $position.':'.$competitor->getMorphClass().':'.$competitor->id, [...$side['wrestlers'], ...$side['tag_teams']]))->sort()->values()->all();
         $existing = $match->competitors()->with('side')->get()->map(fn (MatchCompetitor $competitor): string => $competitor->side->position.':'.$competitor->competitor_type.':'.$competitor->competitor_id)->sort()->values()->all();
 
         return $requested === $existing
