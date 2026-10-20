@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Services\Events;
 
 use App\Enums\Events\SponsorCommitmentStatus;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
 use App\Models\Events\EventSponsorCommitment;
+use App\ValueObjects\PackKey;
+use InvalidArgumentException;
 
 /**
  * @phpstan-import-type Content from EventPack
@@ -36,9 +39,13 @@ class SponsorInstructionService
         if ($key === null) {
             return null;
         }
-        [$kind, $id] = array_pad(explode(':', $key, 2), 2, '');
+        try {
+            $packKey = PackKey::fromString($key);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
 
-        return collect($content[$kind === 'segment' ? 'segments' : 'sponsor_tasks'] ?? [])->firstWhere('id', $id);
+        return collect($content[$packKey->kind === SponsorInstructionMode::Segment ? 'segments' : 'sponsor_tasks'] ?? [])->firstWhere('id', $packKey->uuid);
     }
 
     /** @param array<string, mixed> $value */
@@ -50,7 +57,7 @@ class SponsorInstructionService
     }
 
     /** @return array{wording: array{label: string, instruction: string, owner: ?string}, target: Segment|SponsorTask|null, linked: Segment|SponsorTask|null, hash: string} */
-    public function preview(Event $event, EventSponsorCommitment $commitment, string $mode, ?string $targetKey, ?int $afterMatchId): array
+    public function preview(Event $event, EventSponsorCommitment $commitment, SponsorInstructionMode $mode, ?string $targetKey, ?int $afterMatchId): array
     {
         $content = $event->pack()->first()->content ?? [];
         $wording = $this->wording($commitment);
@@ -58,7 +65,7 @@ class SponsorInstructionService
         $linked = $this->target($content, $commitment->pack_key);
 
         return ['wording' => $wording, 'target' => $target, 'linked' => $linked,
-            'hash' => $this->hash(['version' => $commitment->version, 'wording' => $wording, 'mode' => $mode, 'targetKey' => $targetKey,
+            'hash' => $this->hash(['version' => $commitment->version, 'wording' => $wording, 'mode' => $mode->value, 'targetKey' => $targetKey,
                 'afterMatchId' => $afterMatchId, 'target' => $target, 'linked' => $linked])];
     }
 
@@ -76,7 +83,7 @@ class SponsorInstructionService
             return true;
         }
 
-        return str_starts_with($commitment->pack_key, 'segment:')
+        return PackKey::fromString($commitment->pack_key)->kind === SponsorInstructionMode::Segment
             ? ($target['notes'] ?? null) !== $this->notes($commitment)
             : ($target['instruction'] ?? null) !== $commitment->instruction || ($target['owner'] ?? null) !== $commitment->instruction_owner;
     }

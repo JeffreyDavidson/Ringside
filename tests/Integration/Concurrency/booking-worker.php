@@ -62,6 +62,7 @@ use App\Data\Events\EventPackData;
 use App\Data\Events\EventProductionData;
 use App\Data\Events\LiveShowReviewData;
 use App\Data\Events\SponsorCommitmentData;
+use App\Data\Events\SponsorInstructionData;
 use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
@@ -77,6 +78,7 @@ use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\PublicSection;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
@@ -96,6 +98,7 @@ use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\DeadlockException;
@@ -186,7 +189,7 @@ try {
             $sponsor = Sponsor::query()->findOrFail($spec['sponsor_id']);
             resolve(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($sponsor->promotion_id), $sponsor->id, $spec['version'], $sponsor->submission_key, new SponsorData($sponsor->name, archived: true));
         } elseif ($spec['sponsor_operation'] === 'publish') {
-            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], $spec['mode'], $spec['target_key'] ?: null, null, $spec['preview_hash']);
+            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($spec['mode']), PackKey::fromString($spec['target_key']), null, $spec['preview_hash']));
         } elseif ($spec['sponsor_operation'] === 'pack') {
             $source = resolve(EventPackViewModel::class)->data($event);
             resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], EventPackData::fromValidated([...$source['content'], 'notes' => 'Reviewed ordinary pack note']), false);
