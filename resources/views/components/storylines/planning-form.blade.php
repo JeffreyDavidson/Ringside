@@ -131,7 +131,7 @@
                         </p>
                     @endif
                     @foreach ($source['warnings'] as $warning)
-                        <p class="text-warning">{{ $warning }}</p>
+                        <p class="text-warning">{{ $warning->label() }}</p>
                     @endforeach
                     <x-button
                         variant="secondary"

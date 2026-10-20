@@ -162,3 +162,129 @@ test('source context comparison retains strict scalar types and ordered lists', 
         ->and($story->developments()->count())->toBe(0)
         ->and($step->refresh()->status)->toBe(StepStatus::Planned);
 })->with(['scalar type', 'list order']);
+
+test('a step that is no longer planned is refused before a missing reason is asked for', function () {
+    // Arrange
+    $fixture = storylineSourceFixture();
+    $story = $fixture['story'];
+    $fixture['event']->date = null;
+    $fixture['event']->save();
+    $source = new SourceData($fixture['event']->id);
+    $step = plannedStorylineStep($story, $source);
+    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Cancelled, 'Cancelled.');
+    $data = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id);
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.state_error'));
+});
+
+test('a cast that cannot take part is refused before a correction that names another step', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $account = confirmedStorylineDevelopment($story, $step->id);
+    $data = new DevelopmentData('Correction', 'Different wording.', today()->toDateString(), 1, [99999], new SourceData, (string) Str::uuid(), reason: 'Correction.');
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data, $account->id);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'));
+});
+
+test('a correction that names another step is refused as a state conflict', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $account = confirmedStorylineDevelopment($story, $step->id);
+    $data = new DevelopmentData('Correction', 'Different wording.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid(), reason: 'Correction.');
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data, $account->id);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.state_error'));
+});
+
+test('replaying a submission whose cast no longer fits is a source conflict, not a record change', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $submission = (string) Str::uuid();
+    resolve(RecordDevelopmentAction::class)->handle($story, 1, new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [], new SourceData, $submission));
+    $replay = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [99999], new SourceData, $submission);
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $replay);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'));
+});
+
+test('a development stores each cast member as type, id and label in that order', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create(['name' => 'Harbor Hawk']);
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $data = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [$person->id], new SourceData, (string) Str::uuid());
+
+    // Act
+    $development = resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect(array_keys($development->refresh()->cast[0]))->toBe(['type', 'id', 'label'])
+        ->and($development->cast[0]['label'])->toBe('Harbor Hawk');
+});
+
+test('an account is refused when its date is not the local date of the linked event', function () {
+    // Arrange
+    $fixture = storylineSourceFixture();
+    $story = $fixture['story'];
+    $data = new DevelopmentData('Angle', 'It happened.', today()->subDay()->toDateString(), 1, [], new SourceData($fixture['event']->id), (string) Str::uuid());
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'))
+        ->and($story->developments()->count())->toBe(0);
+});
+
+test('an account is refused when its event has not happened yet', function () {
+    // Arrange
+    $fixture = storylineSourceFixture();
+    $story = $fixture['story'];
+    $fixture['event']->date = now()->addDay();
+    $fixture['event']->save();
+    $data = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [], new SourceData($fixture['event']->id), (string) Str::uuid());
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'))
+        ->and($story->developments()->count())->toBe(0);
+});
+
+test('a participant who left before the account date cannot be in its cast', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->subDays(5)->toDateString()));
+    resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->subDays(5)->toDateString(), today()->subDays(2)->toDateString(), 'Left.'), $person->id);
+    $data = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [$person->id], new SourceData, (string) Str::uuid());
+
+    // Act
+    $attempt = fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
+
+    // Assert
+    expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'))
+        ->and($story->developments()->count())->toBe(0);
+});
