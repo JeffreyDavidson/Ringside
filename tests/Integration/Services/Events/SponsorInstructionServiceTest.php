@@ -32,7 +32,7 @@ test('a preview hash stays byte-identical for each mode so stored review hashes 
 
 test('a malformed target key finds no target', function (string $key): void {
     // Act
-    $target = resolve(SponsorInstructionService::class)->target(['segments' => [], 'sponsor_tasks' => []], $key);
+    $target = resolve(SponsorInstructionService::class)->target([], $key);
 
     // Assert
     expect($target)->toBeNull();
