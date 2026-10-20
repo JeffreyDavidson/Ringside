@@ -226,7 +226,7 @@ test('replaying a submission whose cast no longer fits is a source conflict, not
     expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'));
 });
 
-test('a development stores each cast member as type, id and label in that order', function () {
+test('a development writes each cast member as type, id and label in that order', function () {
     // Arrange
     actingAs(administrator());
     $story = Storyline::factory()->create();
@@ -238,8 +238,8 @@ test('a development stores each cast member as type, id and label in that order'
     $development = resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data);
 
     // Assert
-    expect(array_keys($development->refresh()->cast[0]))->toBe(['type', 'id', 'label'])
-        ->and($development->cast[0]['label'])->toBe('Harbor Hawk');
+    expect(array_keys($development->cast[0]))->toBe(['type', 'id', 'label'])
+        ->and($development->refresh()->cast[0])->toEqual(['type' => 'wrestler', 'id' => $wrestler->id, 'label' => 'Harbor Hawk']);
 });
 
 test('an account is refused when its date is not the local date of the linked event', function () {
