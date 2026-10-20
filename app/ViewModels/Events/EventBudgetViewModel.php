@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Events;
 
+use App\Collections\EventBudgetLineCollection;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
 use App\Models\Events\EventBudgetRevision;
 use App\Services\Events\BudgetSettlementService;
 use App\ValueObjects\UsdAmount;
-use Illuminate\Database\Eloquent\Collection;
 
 /** @phpstan-import-type Totals from BudgetSettlementService
  * @phpstan-import-type Row from BudgetSettlementService
@@ -19,22 +19,17 @@ class EventBudgetViewModel
 {
     public function __construct(private readonly BudgetSettlementService $settlement) {}
 
-    /** @return array{event: Event, budget: ?EventBudget, rows: list<Row>, archived: Collection<int, EventBudgetLine>, totals: Totals} */
+    /** @return array{event: Event, budget: ?EventBudget, rows: list<Row>, archived: EventBudgetLineCollection, totals: Totals} */
     public function data(Event $event): array
     {
         $event = Event::query()->whereKey($event->id)->firstOrFail();
         $event->load('promotion');
         $budget = EventBudget::query()->forEventId($event->id)->with('lines.movements')->first();
-        $lines = $budget->lines ?? new Collection;
-        $rows = [];
-        foreach ($lines as $line) {
-            if ($line->archived_at === null) {
-                $rows[] = $this->settlement->row($line);
-            }
-        }
+        $lines = $budget->lines ?? new EventBudgetLineCollection;
+        $rows = array_values($lines->unarchived()->map(fn (EventBudgetLine $line): array => $this->settlement->row($line))->all());
 
         return ['event' => $event, 'budget' => $budget, 'rows' => $rows,
-            'archived' => $lines->filter(fn (EventBudgetLine $line): bool => $line->archived_at !== null),
+            'archived' => $lines->archived(),
             'totals' => $this->settlement->totals($lines)];
     }
 

@@ -184,10 +184,10 @@ class Budget extends Component
             return;
         }
         $lineInput = $this->operation === BudgetOperation::SaveLine ? $this->lineForm->validate() : [];
-        $movementInput = $this->operation === BudgetOperation::RecordMovement || ($this->operation === BudgetOperation::CorrectMovement && $this->replaceMovement)
+        $movementInput = $this->operation->needsMovementInput($this->replaceMovement)
             ? $this->movementForm->validate()
             : [];
-        if (in_array($this->operation, [BudgetOperation::ArchiveLine, BudgetOperation::CorrectMovement], true)) {
+        if ($this->operation->requiresReason()) {
             Validator::make(['reason' => $this->reason], ['reason' => ['required', 'string', 'max:1000']])->validate();
         }
         try {
@@ -217,7 +217,7 @@ class Budget extends Component
         if ($this->historyOpen && $data['budget'] !== null) {
             $history = $historyQuery->get($data['budget'], $this->historyLineId)->paginate(20, pageName: 'history');
         }
-        $selectedLine = $this->lineId === null || $data['budget'] === null ? null : $data['budget']->lines->firstWhere('id', $this->lineId);
+        $selectedLine = $this->lineId === null || $data['budget'] === null ? null : $data['budget']->lines->find($this->lineId);
 
         return view('livewire.events.components.budget', [...$data, 'categories' => $categories, 'history' => $history,
             'historyChanges' => $screen->historyChanges($history ?? []),

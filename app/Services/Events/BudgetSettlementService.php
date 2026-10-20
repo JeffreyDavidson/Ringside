@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
+use App\Collections\EventBudgetLineCollection;
 use App\Enums\Events\BudgetDirection;
 use App\Enums\Events\BudgetMovementKind;
 use App\Models\Events\EventBudgetLine;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Events\EventBudgetMovement;
+use Illuminate\Support\Collection as BaseCollection;
 
 /**
  * @phpstan-type DirectionTotals array{planned: int, confirmed: int, cash: int, missing_planned: int, missing_confirmed: int}
@@ -19,15 +21,7 @@ class BudgetSettlementService
     /** Movements must be explicitly loaded by the page query or owning locked Action. */
     public function net(EventBudgetLine $line): int
     {
-        $net = 0;
-        foreach ($line->movements as $movement) {
-            if ($movement->voided_at !== null) {
-                continue;
-            }
-            $net += $movement->kind === BudgetMovementKind::Refund ? -$movement->amount_cents : $movement->amount_cents;
-        }
-
-        return $net;
+        return $line->movements->unvoided()->sum(fn (EventBudgetMovement $movement): int => $movement->kind === BudgetMovementKind::Refund ? -$movement->amount_cents : $movement->amount_cents);
     }
 
     /** @return Row */
@@ -50,58 +44,33 @@ class BudgetSettlementService
             'variance' => $line->planned_cents === null || $line->confirmed_cents === null ? null : $line->confirmed_cents - $line->planned_cents, 'attention' => $attention];
     }
 
-    /** @param Collection<int, EventBudgetLine> $lines
-     * @return DirectionTotals
-     */
-    private function directionTotals(Collection $lines, BudgetDirection $direction): array
+    /** @return DirectionTotals */
+    private function directionTotals(EventBudgetLineCollection $lines, BudgetDirection $direction): array
     {
-        $totals = ['planned' => 0, 'confirmed' => 0, 'cash' => 0, 'missing_planned' => 0, 'missing_confirmed' => 0];
-        foreach ($lines as $line) {
-            if ($line->archived_at !== null || $line->direction !== $direction) {
-                continue;
-            }
-            $totals['planned'] += $line->planned_cents ?? 0;
-            $totals['confirmed'] += $line->confirmed_cents ?? 0;
-            $totals['cash'] += $this->net($line);
-            $totals['missing_planned'] += $line->planned_cents === null ? 1 : 0;
-            $totals['missing_confirmed'] += $line->confirmed_cents === null ? 1 : 0;
-        }
+        $directed = $lines->unarchived()->inDirection($direction);
 
-        return $totals;
+        return [
+            'planned' => $directed->sum(fn (EventBudgetLine $line): int => $line->planned_cents ?? 0),
+            'confirmed' => $directed->sum(fn (EventBudgetLine $line): int => $line->confirmed_cents ?? 0),
+            'cash' => $directed->sum(fn (EventBudgetLine $line): int => $this->net($line)),
+            'missing_planned' => $directed->whereNull('planned_cents')->count(),
+            'missing_confirmed' => $directed->whereNull('confirmed_cents')->count(),
+        ];
     }
 
-    /** @param Collection<int, EventBudgetLine> $lines
-     * @return Totals
-     */
-    public function totals(Collection $lines): array
+    /** @return Totals */
+    public function totals(EventBudgetLineCollection $lines): array
     {
         $income = $this->directionTotals($lines, BudgetDirection::Income);
         $expense = $this->directionTotals($lines, BudgetDirection::Expense);
-        $balances = ['to_pay' => 0, 'to_collect' => 0, 'refund_to_send' => 0, 'refund_to_collect' => 0];
-        $count = 0;
-        foreach ($lines as $line) {
-            if ($line->archived_at !== null) {
-                continue;
-            }
-            $count++;
-            $row = $this->row($line);
-            $balance = $row['balance'];
-            if ($balance === null || $balance === 0) {
-                continue;
-            }
-            if ($line->direction === BudgetDirection::Expense && $balance > 0) {
-                $balances['to_pay'] += $balance;
-            }
-            if ($line->direction === BudgetDirection::Income && $balance > 0) {
-                $balances['to_collect'] += $balance;
-            }
-            if ($line->direction === BudgetDirection::Expense && $balance < 0) {
-                $balances['refund_to_collect'] -= $balance;
-            }
-            if ($line->direction === BudgetDirection::Income && $balance < 0) {
-                $balances['refund_to_send'] -= $balance;
-            }
-        }
+        $rows = $lines->unarchived()->map(fn (EventBudgetLine $line): array => $this->row($line));
+        $count = $rows->count();
+        $balances = [
+            'to_pay' => $this->balanceOf($rows, 'to_pay'),
+            'to_collect' => $this->balanceOf($rows, 'to_collect'),
+            'refund_to_send' => -$this->balanceOf($rows, 'refund_to_send'),
+            'refund_to_collect' => -$this->balanceOf($rows, 'refund_to_collect'),
+        ];
         $missing = $income['missing_confirmed'] + $expense['missing_confirmed'];
 
         return ['income' => $income, 'expense' => $expense,
@@ -110,5 +79,15 @@ class BudgetSettlementService
             'cash_net' => $income['cash'] - $expense['cash'], ...$balances,
             'missing' => $missing, 'count' => $count,
             'balanced' => $count > 0 && $missing === 0 && array_sum($balances) === 0];
+    }
+
+    /**
+     * The summed signed balance of the rows labelled with the given attention.
+     *
+     * @param  BaseCollection<int, Row>  $rows
+     */
+    private function balanceOf(BaseCollection $rows, string $attention): int
+    {
+        return $rows->where('attention', $attention)->sum(fn (array $row): int => $row['balance'] ?? 0);
     }
 }
