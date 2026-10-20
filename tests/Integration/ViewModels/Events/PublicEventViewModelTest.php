@@ -81,7 +81,7 @@ test('it shows the released results rows and when they were corrected', function
 
     // Assert
     expect($page->isResults)->toBeTrue()
-        ->and($page->rows)->toBe([['label' => 'Robin North vs Casey Shore', 'details' => '', 'outcome' => 'Robin North — Pinfall']])
+        ->and($page->rows)->toEqual([['label' => 'Robin North vs Casey Shore', 'details' => '', 'outcome' => 'Robin North — Pinfall']])
         ->and($page->correctedAt)->toBe('2026-03-11T09:30:00+00:00')
         ->and($page->resultsChanged)->toBeFalse();
 });

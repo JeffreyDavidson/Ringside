@@ -135,7 +135,7 @@ test('a card release stores the same card, source and fingerprints as before the
     $released = freshModel($publication);
     $rows = [['label' => 'Robin North vs Casey Shore', 'details' => 'Singles', 'outcome' => null]];
     $selection = [['id' => $world['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]];
-    expect($released->card)->toBe([
+    expect($released->card)->toEqual([
         'title' => 'Harbor Night',
         'promotion' => 'Harbor Wrestling',
         'announcement' => 'scheduled',
@@ -150,7 +150,7 @@ test('a card release stores the same card, source and fingerprints as before the
         'poster' => null,
         'rows' => $rows,
     ])
-        ->and($released->card_source)->toBe($selection)
+        ->and($released->card_source)->toEqual($selection)
         ->and($released->card_fingerprint)->toBe(hash('sha256', serialize(['Harbor Night', 'Harbor Wrestling', $rows])))
         ->and($released->schedule_fingerprint)->toBe(hash('sha256', serialize([$event->date?->toIso8601String(), $event->venue_id, null, 'America/New_York', null])))
         ->and($released->slug)->toBe('harbor-night')
@@ -175,12 +175,12 @@ test('a results release stores the same results, source and fingerprints as befo
 
     // Assert
     $released = freshModel($publication);
-    expect($released->results)->toBe(['rows' => [['label' => 'Robin North vs Casey Shore', 'details' => '', 'outcome' => 'Robin North — Pinfall']], 'corrected_at' => null])
+    expect($released->results)->toEqual(['rows' => [['label' => 'Robin North vs Casey Shore', 'details' => '', 'outcome' => 'Robin North — Pinfall']], 'corrected_at' => null])
         ->and($released->results_source)->toBe([$world['match']->id])
         ->and($released->results_fingerprint)->toBe(hash('sha256', serialize($source['matches'])))
         ->and($released->results_published_at?->toIso8601String())->toBe('2026-03-10T12:00:00+00:00')
         ->and($released->results_published_by)->toBe($world['actor']->id)
-        ->and($released->card)->toBe($card)
+        ->and($released->card)->toEqual($card)
         ->and($released->version)->toBe($publication->version + 1);
 });
 
