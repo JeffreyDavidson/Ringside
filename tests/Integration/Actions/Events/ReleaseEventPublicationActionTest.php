@@ -1,7 +1,6 @@
 <?php
 
 declare(strict_types=1);
-use App\Actions\Events\LockEventPublicationAction;
 use App\Actions\Events\ReleaseEventPublicationAction;
 use App\Actions\Events\SaveEventPublicationAction;
 use App\Actions\Events\UnpublishEventPublicationAction;
@@ -10,13 +9,12 @@ use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Events\EventPublication;
-use App\Services\Events\PublicEventCardService;
 use App\Services\Events\PublicEventSourceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use JMac\Testing\Double;
 
 use function Pest\Laravel\get;
+use function Pest\Laravel\travelTo;
 
 test('stale copies and opposing publication operations cannot overwrite a newer release', function (string $operation): void {
     $world = publicEventFixture();
@@ -122,22 +120,106 @@ test('card release refuses missing schedule assets and removed announced competi
         ->and(freshModel($publication)->published_at)->toBeNull();
 })->with(['date', 'match', 'competitor', 'past notice', 'poster']);
 
-test('an incomplete result projection fails closed before a snapshot is saved', function (): void {
+test('a card release stores the same card, source and fingerprints as before the release classes', function (): void {
     // Arrange
+    travelTo('2026-03-10 12:00:00');
+    $world = publicEventFixture();
+    $event = $world['event'];
+    $publication = savePublicDraft($event);
+    $source = resolve(PublicEventSourceService::class)->get($event);
+
+    // Act
+    resolve(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+
+    // Assert
+    $released = freshModel($publication);
+    $rows = [['label' => 'Robin North vs Casey Shore', 'details' => 'Singles', 'outcome' => null]];
+    $selection = [['id' => $world['match']->id, 'type' => true, 'stipulation' => false, 'titles' => false]];
+    expect($released->card)->toBe([
+        'title' => 'Harbor Night',
+        'promotion' => 'Harbor Wrestling',
+        'announcement' => 'scheduled',
+        'summary' => 'Welcome to Harbor Night.',
+        'notice' => null,
+        'date' => $event->date?->toIso8601String(),
+        'timezone' => 'America/New_York',
+        'venue' => null,
+        'address' => null,
+        'doors' => null,
+        'tickets' => null,
+        'poster' => null,
+        'rows' => $rows,
+    ])
+        ->and($released->card_source)->toBe($selection)
+        ->and($released->card_fingerprint)->toBe(hash('sha256', serialize(['Harbor Night', 'Harbor Wrestling', $rows])))
+        ->and($released->schedule_fingerprint)->toBe(hash('sha256', serialize([$event->date?->toIso8601String(), $event->venue_id, null, 'America/New_York', null])))
+        ->and($released->slug)->toBe('harbor-night')
+        ->and($released->published_at?->toIso8601String())->toBe('2026-03-10T12:00:00+00:00')
+        ->and($released->published_by)->toBe($world['actor']->id)
+        ->and($released->unpublished_at)->toBeNull()
+        ->and($released->version)->toBe($publication->version + 1);
+});
+
+test('a results release stores the same results, source and fingerprints as before the release classes', function (): void {
+    // Arrange
+    travelTo('2026-03-10 12:00:00');
     $world = publicEventFixture();
     $event = $world['event'];
     savePublicDraft($event);
     $publication = releasePublicPage($event);
-    $source = app(PublicEventSourceService::class)->get($event);
-    $query = Double::for(PublicEventCardService::class);
-    $query->expects('cardFingerprint')->returns($publication->card_fingerprint);
-    $query->expects('resultSource')->returns([]);
-    $action = new ReleaseEventPublicationAction(app(LockEventPublicationAction::class), $query);
+    $source = resolve(PublicEventSourceService::class)->get($event);
+    $card = $publication->card;
 
-    // Act / Assert
-    expect(fn () => $action->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Results))
-        ->toThrow(EventPublicationException::class)
-        ->and(freshModel($publication)->results_published_at)->toBeNull()
-        ->and(freshModel($publication)->results)->toBeNull();
-    $query->verify();
+    // Act
+    resolve(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
+
+    // Assert
+    $released = freshModel($publication);
+    expect($released->results)->toBe(['rows' => [['label' => 'Robin North vs Casey Shore', 'details' => '', 'outcome' => 'Robin North — Pinfall']], 'corrected_at' => null])
+        ->and($released->results_source)->toBe([$world['match']->id])
+        ->and($released->results_fingerprint)->toBe(hash('sha256', serialize($source['matches'])))
+        ->and($released->results_published_at?->toIso8601String())->toBe('2026-03-10T12:00:00+00:00')
+        ->and($released->results_published_by)->toBe($world['actor']->id)
+        ->and($released->card)->toBe($card)
+        ->and($released->version)->toBe($publication->version + 1);
+});
+
+test('releasing results again marks them corrected at the release time', function (): void {
+    // Arrange
+    travelTo('2026-03-10 12:00:00');
+    $world = publicEventFixture();
+    $event = $world['event'];
+    savePublicDraft($event);
+    releasePublicPage($event);
+    $publication = releasePublicPage($event, 'results');
+    travelTo('2026-03-11 09:30:00');
+    $source = resolve(PublicEventSourceService::class)->get($event);
+
+    // Act
+    resolve(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Results);
+
+    // Assert
+    expect(freshModel($publication)->results['corrected_at'] ?? null)->toBe('2026-03-11T09:30:00+00:00');
+});
+
+test('releasing a notice card clears the released results time', function (): void {
+    // Arrange
+    travelTo('2026-03-10 12:00:00');
+    $world = publicEventFixture();
+    $event = $world['event'];
+    savePublicDraft($event);
+    releasePublicPage($event);
+    releasePublicPage($event, 'results');
+    $event->update(['date' => now()->addWeek()]);
+    $publication = savePublicDraft($event, ['announcement' => 'postponed', 'notice' => 'Moved']);
+    $source = resolve(PublicEventSourceService::class)->get($event);
+
+    // Act
+    resolve(ReleaseEventPublicationAction::class)->handle($event, $world['actor'], $publication->version, $source['fingerprint'], PublicSection::Card);
+
+    // Assert
+    $released = freshModel($publication);
+    expect($released->results_published_at)->toBeNull()
+        ->and($released->card['announcement'] ?? null)->toBe('postponed')
+        ->and($released->card)->toHaveKey('date', null);
 });

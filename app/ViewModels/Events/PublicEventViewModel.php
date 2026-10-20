@@ -20,6 +20,9 @@ use App\Services\Events\PublishedEventChangesService;
  */
 class PublicEventViewModel
 {
+    /** What the page shows in place of each card field once the event's schedule has changed after the release. */
+    private const array WITHHELD = ['promotion' => '', 'announcement' => '', 'summary' => null, 'notice' => null, 'date' => null, 'venue' => null, 'address' => null, 'doors' => null, 'tickets' => null];
+
     public function __construct(private readonly PublishedEventChangesService $changes, private readonly PublicEventSourceService $source, private readonly PublicEventCardService $cards) {}
 
     /**
@@ -56,10 +59,9 @@ class PublicEventViewModel
     private function project(array $card, string $cardUrl, ?string $resultsUrl, ?string $posterUrl, bool $results = false, bool $scheduleChanged = false, bool $resultsChanged = false, ?array $releasedResults = null, bool $preview = false): PublicEventData
     {
         $hidden = $scheduleChanged;
+        $details = $hidden ? self::WITHHELD : array_intersect_key($card, self::WITHHELD);
 
-        return new PublicEventData(title: $card['title'], promotion: $hidden ? '' : $card['promotion'], announcement: $hidden ? '' : $card['announcement'],
-            summary: $hidden ? null : $card['summary'], notice: $hidden ? null : $card['notice'], date: $hidden ? null : $card['date'], timezone: $card['timezone'],
-            venue: $hidden ? null : $card['venue'], address: $hidden ? null : $card['address'], doors: $hidden ? null : $card['doors'], tickets: $hidden ? null : $card['tickets'],
+        return new PublicEventData(...$details, title: $card['title'], timezone: $card['timezone'],
             posterUrl: $posterUrl, posterAlt: $card['poster']['alt'] ?? null, posterCaption: $hidden ? null : ($card['poster']['caption'] ?? null),
             rows: $hidden || ($results && $resultsChanged) ? [] : ($results ? ($releasedResults['rows'] ?? []) : $card['rows']),
             cardUrl: $cardUrl, resultsUrl: $resultsUrl, isResults: $results, isPreview: $preview, scheduleChanged: $scheduleChanged, resultsChanged: $results && $resultsChanged,
