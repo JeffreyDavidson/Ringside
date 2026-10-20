@@ -62,10 +62,7 @@ it('lists the wrestlers team by team in the collection order', function (): void
     $wrestlers = $tagTeams->currentWrestlers();
 
     // Assert
-    expect($wrestlers->modelKeys())->toBe([
-        ...$tagTeams[0]->currentWrestlers->modelKeys(),
-        ...$tagTeams[1]->currentWrestlers->modelKeys(),
-    ])
+    expect($wrestlers->modelKeys())->toBe($tagTeams->flatMap(fn (TagTeam $tagTeam): array => $tagTeam->currentWrestlers->modelKeys())->all())
         ->and($wrestlers->keys()->all())->toBe([0, 1, 2, 3]);
 });
 

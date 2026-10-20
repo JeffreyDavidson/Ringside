@@ -87,10 +87,10 @@ test('a crew attendance mark audits only the attendance fields', function (): vo
 
     // Assert
     $audit = Activity::query()->where('log_name', 'live-show')->orderByDesc('id')->firstOrFail();
-    expect(array_keys($audit->properties['before']))->toEqualCanonicalizing(['arrived', 'briefed', 'updated_by'])
-        ->and(array_keys($audit->properties['after']))->toEqualCanonicalizing(['arrived', 'briefed', 'updated_by'])
-        ->and($audit->properties['before']['arrived'])->toBeNull()
-        ->and($audit->properties['after']['arrived'])->not->toBeNull();
+    expect(data_get($audit->properties, 'before'))->toHaveCount(3)->toHaveKeys(['arrived', 'briefed', 'updated_by'])
+        ->and(data_get($audit->properties, 'after'))->toHaveCount(3)->toHaveKeys(['arrived', 'briefed', 'updated_by'])
+        ->and(data_get($audit->properties, 'before.arrived'))->toBeNull()
+        ->and(data_get($audit->properties, 'after.arrived'))->not->toBeNull();
 });
 
 test('several production roles create one crew attendance entry and completion freezes history', function (): void {
