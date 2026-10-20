@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Events;
 
+use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -73,8 +74,8 @@ class LiveShowViewModel
             'itemTimes' => $itemTimes, 'attendance' => $attendance,
             'refreshedLabel' => $run === null ? null : $this->actual($refreshedAt, $zone),
             'savedLabel' => $run === null ? null : $this->actual($run->updated_at->toIso8601String(), $zone),
-            'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true))->all()),
-            'current' => $items->firstWhere('state', 'running'), 'next' => $items->firstWhere('state', 'pending')];
+            'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === LiveItemStatus::Pending->value && ! in_array($item['key'], $sourceKeys, true))->all()),
+            'current' => $items->firstWhere('state', LiveItemStatus::Running->value), 'next' => $items->firstWhere('state', LiveItemStatus::Pending->value)];
     }
 
     /** @param Content $content

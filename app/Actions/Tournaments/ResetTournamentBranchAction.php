@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Tournaments;
 
+use App\Enums\Events\LiveItemStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Periods\DeletionStateManager;
@@ -39,7 +40,7 @@ class ResetTournamentBranchAction
                 $match = $link->match->refreshForUpdate();
                 $run = EventLiveRun::query()->forEventId($match->event_id)->lockForUpdate()->first();
                 $item = collect($run?->content['items'] ?? [])->firstWhere('key', 'match:'.$match->id);
-                if ($match->match_finish !== null || ($item !== null && $item['state'] !== 'pending')) {
+                if ($match->match_finish !== null || ($item !== null && $item['state'] !== LiveItemStatus::Pending->value)) {
                     throw TournamentException::playedDependency();
                 }
             }

@@ -38,3 +38,19 @@ function liveShowFixture(bool $segment = false, ?string $date = null, ?int $venu
 
     return ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
 }
+
+/**
+ * Overwrite fields of the run's items in memory, by position, so a transition can be applied to any item state.
+ *
+ * @param  array<int, array<string, mixed>>  $items
+ */
+function withLiveItems(EventLiveRun $run, array $items): EventLiveRun
+{
+    $content = $run->content;
+    foreach ($items as $position => $fields) {
+        $content['items'][$position] = [...$content['items'][$position], ...$fields];
+    }
+    $run->setAttribute('content', $content);
+
+    return $run;
+}

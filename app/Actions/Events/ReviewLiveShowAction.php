@@ -6,6 +6,7 @@ namespace App\Actions\Events;
 
 use App\Data\Events\LiveShowChangeData;
 use App\Data\Events\LiveShowReviewData;
+use App\Enums\Events\LiveItemStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventCardLock;
@@ -31,20 +32,20 @@ class ReviewLiveShowAction
             $content = $run->content;
             $old = collect($content['items'])->keyBy('key');
             $sourceKeys = array_column($source['content']['items'], 'key');
-            $removed = $old->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true));
+            $removed = $old->filter(fn (array $item): bool => $item['state'] === LiveItemStatus::Pending->value && ! in_array($item['key'], $sourceKeys, true));
             if (array_diff(array_keys($review->removedReasons), $removed->keys()->all()) !== []) {
                 throw LiveShowException::unknownItem();
             }
-            $protected = $old->filter(fn (array $item): bool => $item['state'] !== 'pending')->values()->all();
+            $protected = $old->filter(fn (array $item): bool => $item['state'] !== LiveItemStatus::Pending->value)->values()->all();
             foreach ($removed as $key => $item) {
                 $reason = $review->removedReasons[$key] ?? '';
                 if (mb_trim($reason) === '' || mb_strlen($reason) > 2000) {
                     throw LiveShowException::reasonRequired();
                 }
-                $protected[] = [...$item, 'state' => 'skipped', 'reason' => $reason, 'updated_by' => (int) auth()->id()];
+                $protected[] = [...$item, 'state' => LiveItemStatus::Skipped->value, 'reason' => $reason, 'updated_by' => (int) auth()->id()];
             }
-            $pending = array_values(array_filter($source['content']['items'], fn (array $item): bool => ($old->get($item['key'])['state'] ?? 'pending') === 'pending'));
-            if ($pending === [] && collect($protected)->every(fn (array $item): bool => $item['state'] === 'skipped')) {
+            $pending = array_values(array_filter($source['content']['items'], fn (array $item): bool => ($old->get($item['key'])['state'] ?? LiveItemStatus::Pending->value) === LiveItemStatus::Pending->value));
+            if ($pending === [] && collect($protected)->every(fn (array $item): bool => $item['state'] === LiveItemStatus::Skipped->value)) {
                 throw LiveShowException::prepareRequired();
             }
             $content['items'] = [...$protected, ...$pending];

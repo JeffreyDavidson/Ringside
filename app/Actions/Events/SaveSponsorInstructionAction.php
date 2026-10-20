@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\EventPackData;
+use App\Enums\Events\LiveItemStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Lifecycle\Events\EventCardLock;
@@ -54,7 +55,7 @@ class SaveSponsorInstructionAction
             }
             $protectedKeys = array_filter([$commitment->pack_key, $targetKey]);
             foreach ($run->content['items'] ?? [] as $item) {
-                if (in_array($item['key'], $protectedKeys, true) && $item['state'] !== 'pending') {
+                if (in_array($item['key'], $protectedKeys, true) && $item['state'] !== LiveItemStatus::Pending->value) {
                     throw SponsorCommitmentException::startedInstruction();
                 }
             }

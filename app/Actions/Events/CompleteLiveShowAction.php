@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\LiveShowChangeData;
+use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
@@ -22,7 +23,7 @@ class CompleteLiveShowAction
         DB::transaction(function () use ($event, $version): void {
             $run = $this->lock->handle($event, $version);
             $this->showDay->ensureShowDay($run);
-            if (collect($run->content['items'])->contains(fn (array $item): bool => in_array($item['state'], ['pending', 'running'], true))) {
+            if (collect($run->content['items'])->contains(fn (array $item): bool => in_array($item['state'], [LiveItemStatus::Pending->value, LiveItemStatus::Running->value], true))) {
                 throw LiveShowException::unfinished();
             }
             if ($this->source->hasChanged($run->event, $run)) {
