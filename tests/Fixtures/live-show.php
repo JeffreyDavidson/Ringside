@@ -50,7 +50,7 @@ function withLiveItems(EventLiveRun $run, array $items): EventLiveRun
     foreach ($items as $position => $fields) {
         $content['items'][$position] = [...$content['items'][$position], ...$fields];
     }
-    $run->content = $content;
+    $run->setAttribute('content', $content);
 
     return $run;
 }

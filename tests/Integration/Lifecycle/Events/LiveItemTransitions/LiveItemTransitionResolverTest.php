@@ -15,7 +15,7 @@ test('it picks the transition for each operation', function (LiveItemOperation $
     $resolved = resolve(LiveItemTransitionResolver::class)->resolve($operation);
 
     // Assert
-    expect($resolved)->toBeInstanceOf($transition);
+    expect($resolved::class)->toBe($transition);
 })->with([
     'start' => [LiveItemOperation::Start, StartLiveItem::class],
     'finish' => [LiveItemOperation::Finish, FinishLiveItem::class],
