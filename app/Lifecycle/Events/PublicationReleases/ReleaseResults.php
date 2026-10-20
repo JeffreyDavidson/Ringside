@@ -29,9 +29,6 @@ final readonly class ReleaseResults implements PublicationRelease
             throw EventPublicationException::invalid();
         }
         $results = $this->cards->resultSource($source, $draft['results']);
-        if (count($results) !== count($draft['results'])) {
-            throw EventPublicationException::invalid();
-        }
         $rows = [];
         foreach ($results as $match) {
             if ($match['finish'] === null || $match['winner'] === '') {

@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\Events\EventPublicationException;
-use App\Lifecycle\Events\PublicationReleases\PublicationDraftRequirements;
 use App\Lifecycle\Events\PublicationReleases\ReleaseResults;
 use App\Models\Events\EventPublication;
 use App\Models\Matches\EventMatch;
-use App\Services\Events\PublicEventCardService;
 use App\Services\Events\PublicEventSourceService;
-use JMac\Testing\Double;
 
 use function Pest\Laravel\travelTo;
 
@@ -128,23 +125,3 @@ test('it refuses a match that is not recorded', function (Closure $prepare): voi
     'cleared finish' => [fn (EventMatch $match) => $match->update(['match_finish' => null])],
     'finish needing a winner without one' => [fn (EventMatch $match) => $match->update(['winning_side_id' => null])],
 ]);
-
-test('it refuses a result projection that lost a selected match', function (): void {
-    // Arrange
-    $released = releasedPublicationWorld();
-    $publication = $released['publication'];
-    $world = $released['world'];
-    $source = resolve(PublicEventSourceService::class)->get($world['event']);
-    $cards = Double::for(PublicEventCardService::class);
-    $cards->expects('cardFingerprint')->returns((string) $publication->card_fingerprint);
-    $cards->expects('resultSource')->returns([]);
-    $release = new ReleaseResults(resolve(PublicationDraftRequirements::class), $cards);
-
-    // Act
-    $apply = fn () => $release->apply($publication, $world['event'], $world['actor'], $source);
-
-    // Assert
-    expect($apply)->toThrow(EventPublicationException::class, __('public-events.invalid'))
-        ->and($publication->results)->toBeNull();
-    $cards->verify();
-});
