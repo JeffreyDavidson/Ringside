@@ -37,6 +37,32 @@ test('overdue completed late and unknown deadlines use recorded facts', function
     expect($screen->statuses([$promise])[$promise->id])->toBe('Completed');
 });
 
+test('only a pending promise past its deadline is flagged overdue', function (SponsorCommitmentStatus $status, ?int $deadlineOffsetHours, bool $overdue, string $shown): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+    $promise->forceFill([
+        'status' => $status,
+        'deadline_at' => $deadlineOffsetHours === null ? null : now()->addHours($deadlineOffsetHours),
+        'completed_at' => $status === SponsorCommitmentStatus::Completed ? now()->subDays(2) : null,
+    ])->save();
+    $promise->load(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches']);
+
+    // Act
+    $detail = app(SponsorCommitmentsViewModel::class)->details([$promise])[$promise->id];
+
+    // Assert
+    expect($detail['overdue'])->toBe($overdue)
+        ->and($detail['status'])->toBe($shown);
+})->with([
+    'pending past its deadline' => [SponsorCommitmentStatus::Pending, -1, true, 'Overdue'],
+    'pending before its deadline' => [SponsorCommitmentStatus::Pending, 1, false, 'Pending'],
+    'pending with no deadline' => [SponsorCommitmentStatus::Pending, null, false, 'Pending'],
+    'cancelled past its deadline' => [SponsorCommitmentStatus::Cancelled, -1, false, 'Cancelled'],
+    'completed after its deadline' => [SponsorCommitmentStatus::Completed, -72, false, 'Completed late'],
+    'completed before its deadline' => [SponsorCommitmentStatus::Completed, 24, false, 'Completed'],
+]);
+
 test('source review identifies event changes and removed or edited instructions', function (): void {
     // Arrange
     $world = sponsorFixture();

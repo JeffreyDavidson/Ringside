@@ -17,6 +17,7 @@ use App\Models\Events\EventSponsorCommitment;
 use App\Models\Promotions\Promotion;
 use App\Models\Sponsors\Sponsor;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -186,4 +187,157 @@ test('promise corrections lock event sponsor and promise before their atomic wri
     expect($event)->toBeLessThan($sponsor)->and($sponsor)->toBeLessThan($commitment)->and($commitment)->toBeLessThan($write)
         ->and($statements[$event]['bindings'])->toBe([$world['event']->id])
         ->and($promise->refresh()->revisions()->count())->toBe(2);
+});
+
+test('a promise that is no longer pending needs a reason for every save, and cancelling needs one from the start', function (SponsorCommitmentStatus $savedStatus, SponsorCommitmentStatus $to, ?string $reason): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+    $promise->forceFill(['status' => $savedStatus, 'completed_at' => $savedStatus === SponsorCommitmentStatus::Completed ? now()->subMinute() : null, 'evidence_note' => 'Checked'])->save();
+    $action = app(SaveSponsorCommitmentAction::class);
+
+    // Act
+    $save = fn () => $action->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => $to, 'evidence' => 'Checked']), $reason);
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.reason_required'))
+        ->and($promise->revisions()->count())->toBe(1);
+})->with([
+    'completed to pending without a reason' => [SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Pending, null],
+    'completed to completed with a blank reason' => [SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Completed, '   '],
+    'completed to cancelled without a reason' => [SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Cancelled, null],
+    'cancelled to completed without a reason' => [SponsorCommitmentStatus::Cancelled, SponsorCommitmentStatus::Completed, ''],
+    'cancelled to cancelled without a reason' => [SponsorCommitmentStatus::Cancelled, SponsorCommitmentStatus::Cancelled, null],
+    'pending to cancelled without a reason' => [SponsorCommitmentStatus::Pending, SponsorCommitmentStatus::Cancelled, null],
+]);
+
+test('a new promise cannot start cancelled without a reason', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], null, 0, (string) Str::uuid(), sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Cancelled]));
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.reason_required'))
+        ->and(EventSponsorCommitment::query()->count())->toBe(1);
+});
+
+test('a pending promise completes with evidence and no reason, and stores its completion', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $saved = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Photo checked at doors']));
+
+    // Assert
+    expect($saved->status)->toBe(SponsorCommitmentStatus::Completed)
+        ->and($saved->evidence_note)->toBe('Photo checked at doors')
+        ->and($saved->completed_at)->not->toBeNull()
+        ->and($saved->version)->toBe(2);
+});
+
+test('a completion without real evidence or with a future completion time names the evidence rule', function (?string $evidence, ?Carbon $completedAt): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => $evidence, 'completedAt' => $completedAt]));
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.evidence_required'))
+        ->and($promise->revisions()->count())->toBe(1);
+})->with([
+    'no evidence' => [null, null],
+    'blank evidence' => ['  ', null],
+    'a future completion time' => ['Checked', Carbon::parse('2999-01-01 12:00:00')],
+]);
+
+test('the reason is asked for before the evidence', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+    $promise->forceFill(['status' => SponsorCommitmentStatus::Cancelled])->save();
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => null]));
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.reason_required'));
+});
+
+test('an event with no promotion refuses with its own message', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create();
+    $sponsor = Sponsor::factory()->create();
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($event, null, 0, (string) Str::uuid(), new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Unowned promise'));
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.event_unavailable'));
+});
+
+test('stale versions repeated keys and keys that are not uuids name the changed record', function (int $version, bool $isNew, string $key): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], $isNew ? null : $promise->id, $version, $key === 'reuse' ? $promise->submission_key : $key, sponsorPromiseData($promise));
+
+    // Assert
+    expect($save)->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
+})->with([
+    'a stale version' => [0, false, '0197c3a0-5b1e-7c0e-8a55-3f0f4f1d2b6a'],
+    'a repeated key on a new promise' => [0, true, 'reuse'],
+    'a key that is not a uuid' => [1, false, 'invalid'],
+]);
+
+test('a new promise with a key that is not a uuid is refused without looking the key up or writing anything', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $lookups = 0;
+    DB::listen(function ($query) use (&$lookups): void {
+        $lookups += str_contains($query->sql, 'submission_key') ? 1 : 0;
+    });
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], null, 0, 'invalid', sponsorPromiseData($promise));
+
+    // Assert
+    expect($save)->toThrow(RecordChangedException::class, __('core.errors.record.changed'))
+        ->and($lookups)->toBe(0)
+        ->and(EventSponsorCommitment::query()->count())->toBe(1);
+});
+
+test('an archived sponsor is refused before a missing reason', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+    app(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($world['sponsor']->promotion_id), $world['sponsor']->id, 1, $world['sponsor']->submission_key, new SponsorData('Harbor Hardware', archived: true));
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], null, 0, (string) Str::uuid(), sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Cancelled]));
+
+    // Assert
+    expect($save)->toThrow(SponsorCommitmentException::class, __('sponsors.archived'));
+});
+
+test('a stale save is refused before the archive check', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+    app(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($world['sponsor']->promotion_id), $world['sponsor']->id, 1, $world['sponsor']->submission_key, new SponsorData('Harbor Hardware', archived: true));
+
+    // Act
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], null, 5, (string) Str::uuid(), sponsorPromiseData($promise));
+
+    // Assert
+    expect($save)->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
 });
