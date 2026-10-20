@@ -17,3 +17,6 @@ app/Support holds technical building blocks that know nothing about this app, th
 
 ## Group subfolders by technical concern
 Group subfolders by technical concern, never by domain area. A Content or Newsletter folder in Support means misplaced code. Custom authentication classes live in app/Auth and enum concerns in app/Enums/Concerns.
+
+## Images
+Image handling in Support is bytes in, bytes out: `Support/Images/ImageReencoder` takes image bytes and returns a fresh PNG, and throws its own `ImageReencodingException` for anything it refuses (unreadable, too many pixels, animated, failed decode). It never reads an upload, a disk or a model. The caller owns the uploaded file, the storage write and any cleanup, and maps the technical exception to its own domain exception and message. Limits (8 million pixels, 2048 pixel longest edge) stay inside the class. Unit-test it with generated GD fixtures, not stored image files.
