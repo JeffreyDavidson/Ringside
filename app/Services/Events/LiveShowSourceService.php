@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Events;
 
 use App\Enums\Crew\CrewRole;
+use App\Enums\Events\LiveItemStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Models\Events\EventPack;
@@ -47,7 +48,7 @@ class LiveShowSourceService
         return ['pack' => $data['pack'], 'fingerprint' => $data['card']['fingerprint'], 'content' => [
             'event_date' => $event->date->toIso8601String(), 'event_name' => $event->name,
             'venue' => $event->venue?->name, 'timezone' => $data['content']['timezone'], 'revision' => $data['content']['revision'],
-            'items' => array_map(fn (array $row): array => [...$row, 'timezone' => $data['content']['timezone'], 'state' => 'pending', 'start' => null,
+            'items' => array_map(fn (array $row): array => [...$row, 'timezone' => $data['content']['timezone'], 'state' => LiveItemStatus::Pending->value, 'start' => null,
                 'finish' => null, 'reason' => null, 'updated_by' => null, 'cues' => array_values(array_filter($cues, fn (array $cue): bool => $cue['item_key'] === $row['key']))], $data['running']),
             'roster' => [...array_map(fn (array $person): array => [...$person, 'assigned' => true,
                 'arrived' => null, 'briefed' => null, 'updated_by' => null], $data['card']['roster']), ...array_values($crew)],

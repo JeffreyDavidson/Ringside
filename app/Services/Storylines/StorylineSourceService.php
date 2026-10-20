@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Storylines;
 
 use App\Data\Storylines\SourceData;
+use App\Enums\Events\LiveItemStatus;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -86,7 +87,7 @@ class StorylineSourceService
         $item = $key === null ? null : collect($event->liveRun?->content['items'] ?? [])->firstWhere('key', $key);
         $context['live_state'] = $item['state'] ?? null;
         $context['live_label'] = $item['label'] ?? null;
-        if (($item['state'] ?? null) === 'skipped') {
+        if (($item['state'] ?? null) === LiveItemStatus::Skipped->value) {
             $warnings[] = __('storylines.skipped_source');
         }
 

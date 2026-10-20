@@ -311,3 +311,24 @@ test('a running live show still names the venue after the venue is deleted', fun
     // Assert
     $component->assertSee('Old Arena');
 });
+
+test('the correction form opens only for operations that need a reason', function (string $operation, bool $opens): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('beginCorrection', $fixture['key'], $operation);
+
+    // Assert
+    $component->assertSet('draftOperation', $opens ? $operation : '');
+    if (! $opens) {
+        $component->assertHasErrors('operation');
+    }
+})->with([
+    'skip' => ['skip', true],
+    'correct' => ['correct', true],
+    'reopen' => ['reopen', true],
+    'start' => ['start', false],
+    'finish' => ['finish', false],
+]);

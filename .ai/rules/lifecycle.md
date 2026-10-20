@@ -19,3 +19,6 @@ A Lifecycle class may inject a read-only Service or Query. A Service never depen
 
 ## Lock an event's card through EventCardLock
 Actions that read or write an event's card under its fingerprint (event pack, production, sponsor instructions, live show, storyline sources) take EventCardLock inside their transaction instead of locking those rows by hand. It locks the event, all its matches including deleted ones in ascending id order, the pack and the live run, in that order; lock any other row of the event (a sponsor commitment) after it.
+
+## Keep live item rules in their transition classes
+Each live-show item operation has one class in app/Lifecycle/Events/LiveItemTransitions that checks the item and returns it updated, and LiveItemTransitionResolver picks it. Transitions never write: TransitionLiveItemAction keeps the lock, the reason check, the run status and the persist. Compare and store item states through LiveItemStatus values, never string literals.

@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -124,7 +125,7 @@ class LiveShow extends Component
     {
         $event = $this->event();
         Gate::authorize('update', $event);
-        Validator::make(['operation' => $operation], ['operation' => [Rule::in(['skip', 'correct', 'reopen'])]])->validate();
+        Validator::make(['operation' => $operation], ['operation' => [$this->correctionOperationRule()]])->validate();
         $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
         $item = collect($run->content['items'])->firstWhere('key', $key);
         if ($item === null) {
@@ -153,7 +154,7 @@ class LiveShow extends Component
     {
         $event = $this->event();
         Gate::authorize('update', $event);
-        $rules = ['reason' => ['required', 'string', 'max:2000'], 'draftOperation' => [Rule::in(['skip', 'correct', 'reopen'])]];
+        $rules = ['reason' => ['required', 'string', 'max:2000'], 'draftOperation' => [$this->correctionOperationRule()]];
         if ($this->draftOperation === 'correct') {
             $rules += ['actualStart' => ['required', 'date_format:Y-m-d\TH:i'], 'actualFinish' => ['nullable', 'date_format:Y-m-d\TH:i'],
                 'startOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/'], 'finishOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/']];
@@ -236,5 +237,11 @@ class LiveShow extends Component
     private function event(): Event
     {
         return Event::query()->findOrFail($this->eventId);
+    }
+
+    /** Only the operations that change the record of what happened go through the correction form. */
+    private function correctionOperationRule(): Enum
+    {
+        return Rule::enum(LiveItemOperation::class)->only(array_filter(LiveItemOperation::cases(), fn (LiveItemOperation $operation): bool => $operation->requiresReason()));
     }
 }
