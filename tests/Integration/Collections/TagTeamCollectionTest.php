@@ -44,6 +44,31 @@ it('flattens the loaded current wrestlers of every tag team', function (): void 
         ->and($wrestlers->count())->toBe(4);
 });
 
+it('lists the wrestlers team by team in the collection order', function (): void {
+    // Arrange
+    $first = TagTeam::factory()
+        ->bookable()
+        ->create();
+    $second = TagTeam::factory()
+        ->bookable()
+        ->create();
+    $tagTeams = TagTeam::query()
+        ->with('currentWrestlers')
+        ->whereKey([$first->id, $second->id])
+        ->orderByDesc('id')
+        ->get();
+
+    // Act
+    $wrestlers = $tagTeams->currentWrestlers();
+
+    // Assert
+    expect($wrestlers->modelKeys())->toBe([
+        ...$tagTeams[0]->currentWrestlers->modelKeys(),
+        ...$tagTeams[1]->currentWrestlers->modelKeys(),
+    ])
+        ->and($wrestlers->keys()->all())->toBe([0, 1, 2, 3]);
+});
+
 it('refuses to lazy load a relation that was not loaded', function (): void {
     // Arrange
     TagTeam::factory()

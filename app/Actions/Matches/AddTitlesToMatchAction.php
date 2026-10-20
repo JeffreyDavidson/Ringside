@@ -95,7 +95,7 @@ class AddTitlesToMatchAction
 
         $eventDate = $lockedMatch->event()->firstOrFail()->date?->copy()->utc();
         $activeTitleCount = Title::query()
-            ->whereKey($lockedTitles->pluck('id'))
+            ->whereKey($lockedTitles->modelKeys())
             ->activeOn($eventDate)
             ->count();
 

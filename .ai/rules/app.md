@@ -43,3 +43,6 @@ User emails are stored trimmed and lowercase (User::email mutator) and are uniqu
 
 ## Support every database engine
 Production runs MySQL 8; CI runs the suite on SQLite, PostgreSQL and MySQL. Every database-specific code path (raw SQL fragments, driver checks, locking, conflict or deadlock handling) must work on mysql, pgsql and sqlite, preferably through one query builder call that each grammar compiles. Never add PostgreSQL-only SQL such as count(*) filter (where ...), ilike, ::casts, RETURNING or advisory locks, and never throw for an unhandled driver at runtime. The scheduling and lifecycle locks assume READ COMMITTED, which config/database.php sets for MySQL.
+
+## Prefer named collection methods over hand loops
+Use named collection methods (map, mapWithKeys, flatMap, keyBy, groupBy, partition, values, modelKeys on an Eloquent collection) instead of hand-written loops that fill an array and array_* calls that rebuild a list (array_values around an already-list or around filter/sort output, array_column, array_unique). Keep the loop where it throws partway through naming the failing item, keeps lock order, writes, carries state between passes, or feeds a stored or compared fingerprint, hash or snapshot whose exact list and key order must not change.
