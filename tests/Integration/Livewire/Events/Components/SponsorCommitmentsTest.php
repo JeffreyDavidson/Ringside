@@ -280,8 +280,8 @@ test('the previewed target reaches the action as a parsed pack key', function ()
     $received = null;
     $save = Double::for(SaveSponsorInstructionAction::class);
     $save->expects('handle')
-        ->resolves(function (Event $event, int $id, int $version, int $packVersion, string $fingerprint, SponsorInstructionData $data) use (&$received): void {
-            $received = $data;
+        ->resolves(function (mixed ...$arguments) use (&$received): void {
+            $received = $arguments[5] instanceof SponsorInstructionData ? $arguments[5] : null;
         });
     app()->instance(SaveSponsorInstructionAction::class, $save);
 
@@ -289,7 +289,8 @@ test('the previewed target reaches the action as a parsed pack key', function ()
     $component->call('saveInstruction');
 
     // Assert
-    expect($received->mode)->toBe(SponsorInstructionMode::Setup)
-        ->and((string) $received->targetKey)->toBe($promise->pack_key)
-        ->and($received->reason)->toBe('Moved');
+    expect($received)->toBeInstanceOf(SponsorInstructionData::class)
+        ->and($received?->mode)->toBe(SponsorInstructionMode::Setup)
+        ->and((string) $received?->targetKey)->toBe($promise->pack_key)
+        ->and($received?->reason)->toBe('Moved');
 });

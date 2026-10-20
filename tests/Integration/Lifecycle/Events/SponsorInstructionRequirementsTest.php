@@ -22,7 +22,7 @@ const SPONSOR_OTHER_UUID = '0197c3a0-5b1e-7c0e-8a55-3f0f4f1d2b6b';
 /**
  * Runs the guards with a card that is in sync, then lets a test change one thing.
  *
- * @param  array{commitment?: array<string, mixed>, pack?: ?EventPack, matches?: list<int>, run?: ?EventLiveRun, preview?: array{hash: string, target: mixed}, version?: int, packVersion?: int, fingerprint?: string, current?: string}  $changes
+ * @param  array{commitment?: array<string, mixed>, pack?: ?EventPack, matches?: array<int>, run?: ?EventLiveRun, preview?: array{hash: string, target: mixed}, version?: int, packVersion?: int, fingerprint?: string, current?: string}  $changes
  */
 function ensureSponsorInstruction(SponsorInstructionData $data, array $changes = []): void
 {

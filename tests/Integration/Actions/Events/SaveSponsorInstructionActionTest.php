@@ -99,7 +99,7 @@ test('started announcements retain their text and private fulfillment never writ
     $preview = $query->preview($event, $promise, SponsorInstructionMode::Segment, $promise->pack_key, null);
 
     // Act and Assert
-    expect(fn () => $publisher->handle($event, $promise->id, 4, 1, $screen->data($event)['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key), null, $preview['hash'])))
+    expect(fn () => $publisher->handle($event, $promise->id, 4, 1, $screen->data($event)['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key ?? ''), null, $preview['hash'])))
         ->toThrow(SponsorCommitmentException::class);
     $promise = $save->handle($event, $promise->id, 4, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Announcer confirmed the wording']));
     expect($run->refresh()->content)->toBe($before);
@@ -148,7 +148,7 @@ test('an existing pack item cannot satisfy a second promise and retraction keeps
     $other = $save->handle($event, null, 0, (string) Str::uuid(), sponsorPromiseData($promise));
 
     // Act and Assert
-    expect(fn () => $publisher->handle($event, $other->id, 1, 1, $fingerprint, new SponsorInstructionData(SponsorInstructionMode::Setup, PackKey::fromString($promise->pack_key), null, $query->preview($event, $other, SponsorInstructionMode::Setup, $promise->pack_key, null)['hash'])))
+    expect(fn () => $publisher->handle($event, $other->id, 1, 1, $fingerprint, new SponsorInstructionData(SponsorInstructionMode::Setup, PackKey::fromString($promise->pack_key ?? ''), null, $query->preview($event, $other, SponsorInstructionMode::Setup, $promise->pack_key, null)['hash'])))
         ->toThrow(SponsorCommitmentException::class);
     expect(fn () => $publisher->handle($event, $promise->id, 3, 1, $fingerprint, new SponsorInstructionData(SponsorInstructionMode::Remove, null, null, $query->preview($event, $promise, SponsorInstructionMode::Remove, null, null)['hash'])))
         ->toThrow(SponsorCommitmentException::class);
