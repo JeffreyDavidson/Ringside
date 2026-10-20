@@ -13,6 +13,7 @@ use App\Livewire\Tournaments\Components\Show;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use JMac\Testing\Double;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -244,3 +245,26 @@ it('refuses to draft an operation that does not exist and opens no draft', funct
         ->assertSet('nodeId', null);
     expect($tournament->refresh()->version)->toBe(1);
 });
+
+it('refuses a client change to a locked draft property and keeps the draft unchanged', function (string $property, string $value): void {
+    // Arrange
+    $world = tournamentFixture();
+    $other = tournamentFixture();
+    actingAs(administrator());
+    $node = $world['tournament']->nodes()->firstOrFail();
+    $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])
+        ->call('begin', 'book', $node->id);
+    $original = $page->get("draft.{$property}");
+    $newValue = $property === 'promotionId' ? $other['promotion']->id : $value;
+
+    // Act
+    $change = fn () => $page->set("draft.{$property}", $newValue);
+
+    // Assert
+    expect($change)->toThrow(CannotUpdateLockedPropertyException::class);
+    $page->assertSet("draft.{$property}", $original);
+})->with([
+    'promotion id' => ['promotionId', ''],
+    'entrant kind' => ['entrantKind', 'tag_team'],
+    'operation' => ['operation', 'cancel'],
+]);
