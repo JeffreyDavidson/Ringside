@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Data\Storylines\DevelopmentData;
+use App\Data\Storylines\ParticipantData;
 use App\Data\Storylines\SourceData;
+use App\Data\Storylines\StepData;
+use App\Data\Storylines\StorylineData;
 use App\Livewire\Storylines\Forms\Planning;
 use Illuminate\Validation\ValidationException;
 use JMac\Testing\Double;
@@ -66,4 +70,51 @@ describe('planning form source', function (): void {
         'event and standalone date' => [['eventId' => 1, 'targetOn' => '2026-10-13'], 'target'],
         'malformed standalone date' => [['targetOn' => '13/10/2026'], 'target'],
     ]);
+});
+
+describe('planning form data', function (): void {
+    it('builds each Action input from the filled form', function (): void {
+        // Arrange
+        $form = new Planning(Double::for(Component::class), 'form');
+        $form->heading = 'The angle';
+        $form->description = 'The argument.';
+        $form->payoff = 'The finish.';
+        $form->occurredOn = '2026-10-13';
+        $form->sequence = 3;
+        $form->participantIds = [4, 5];
+        $form->eventId = 7;
+        $form->type = 'tag_team';
+        $form->participantId = 9;
+        $form->role = 'Allies';
+        $form->joinedOn = '2026-10-01';
+        $form->leftOn = '2026-10-12';
+        $form->reason = 'Clarified.';
+
+        // Act
+        $story = $form->storyData('submission');
+        $step = $form->stepData('fingerprint', 'submission');
+        $development = $form->developmentData('fingerprint', 'submission', 11);
+        $participant = $form->participantData();
+
+        // Assert
+        expect($story)->toEqual(new StorylineData('The angle', 'The argument.', 'The finish.', 'submission'))
+            ->and($step)->toEqual(new StepData('The angle', 'The argument.', 3, new SourceData(7, null, null, null, 'fingerprint'), 'submission', 'Clarified.'))
+            ->and($development)->toEqual(new DevelopmentData('The angle', 'The argument.', '2026-10-13', 3, [4, 5], new SourceData(7, null, null, null, 'fingerprint'), 'submission', 11, 'Clarified.'))
+            ->and($participant)->toEqual(new ParticipantData('tag_team', 9, 'Allies', '2026-10-01', '2026-10-12', 'Clarified.'));
+    });
+
+    it('sends blank optional fields as not given', function (): void {
+        // Arrange
+        $form = new Planning(Double::for(Component::class), 'form');
+
+        // Act
+        $step = $form->stepData(null, 'submission');
+        $participant = $form->participantData();
+
+        // Assert
+        expect($step->reason)->toBeNull()
+            ->and($participant->id)->toBe(0)
+            ->and($participant->role)->toBeNull()
+            ->and($participant->reason)->toBeNull();
+    });
 });

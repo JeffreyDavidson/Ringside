@@ -4,9 +4,11 @@ declare(strict_types=1);
 use App\Actions\Storylines\SaveParticipantAction;
 use App\Data\Storylines\ParticipantData;
 use App\Exceptions\Storylines\StorylineConflictException;
+use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 
@@ -37,6 +39,45 @@ test('teams participate creatively and duplicate current involvement is refused'
     resolve(SaveParticipantAction::class)->handle($story, 1, $data);
     expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(StorylineConflictException::class);
 });
+test('participants are stored under their morph alias', function (string $type, string $factory) {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $person = $factory::factory()->for(requiredModel($story->promotion))->create();
+
+    // Act
+    $participant = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $person->id, null, today()->toDateString()));
+
+    // Assert
+    expect($participant->participant_type)->toBe($type)
+        ->and($participant->participant_id)->toBe($person->id)
+        ->and($participant->label)->toBe($person->name);
+})->with([
+    'wrestler' => ['wrestler', Wrestler::class],
+    'tag team' => ['tag_team', TagTeam::class],
+]);
+
+test('a person from another promotion or an unsupported kind is refused and nothing is written', function (string $type, bool $foreign) {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $promotion = $foreign ? Promotion::factory()->create() : requiredModel($story->promotion);
+    $wrestler = Wrestler::factory()->for($promotion)->create();
+
+    // Act
+    $attempt = fn () => resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $wrestler->id, null, today()->toDateString()));
+
+    // Assert
+    expect($attempt)->toThrow(ModelNotFoundException::class)
+        ->and($story->participants()->count())->toBe(0)
+        ->and($story->refresh()->version)->toBe(1);
+})->with([
+    'wrestler of another promotion' => ['wrestler', true],
+    'a wrestler id read as a tag team' => ['tag_team', false],
+    'a kind outside the morph map' => ['nonsense', false],
+    'a mapped kind that cannot take part' => ['manager', false],
+]);
+
 test('closed or mismatched participation cannot be rewritten', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();

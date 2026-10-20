@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'form_titles' => ['story' => 'Edit premise', 'step' => 'Plan a step', 'development' => 'Record what happened', 'participant' => 'Add participant', 'participant-end' => 'End involvement', 'step-status' => 'Change planned step', 'story-status' => 'Change story status', 'retract' => 'Retract account'],
+    'form_titles' => ['story' => 'Edit premise', 'step' => 'Plan a step', 'development' => 'Record what happened', 'participant' => 'Add participant', 'participant_end' => 'End involvement', 'step_status' => 'Change planned step', 'story_status' => 'Change story status', 'retract' => 'Retract account'],
     'operations' => ['created' => 'Storyline created', 'story_revised' => 'Premise revised', 'story_status' => 'Story status changed', 'step_planned' => 'Step planned', 'step_revised' => 'Step revised', 'step_status' => 'Step status changed', 'participant_joined' => 'Participant joined', 'participant_left' => 'Participant left', 'development_recorded' => 'Development recorded', 'development_corrected' => 'Account corrected', 'development_retracted' => 'Account retracted', 'development_retracted_reopen' => 'Account retracted; step reopened'],
     'title' => 'Storylines',
     'private' => 'Private to owners and bookers',

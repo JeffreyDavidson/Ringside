@@ -5,6 +5,7 @@ use App\Actions\Storylines\SaveParticipantAction;
 use App\Data\Storylines\ParticipantData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Enums\Storylines\StorylineFormMode;
 use App\Enums\Storylines\StorylineStatus;
 use App\Livewire\Storylines\Components\Manage;
 use App\Models\Matches\EventMatch;
@@ -12,6 +13,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use App\Services\Promotions\PromotionContextService;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -42,7 +44,7 @@ test('a booker can revise a premise and manage creative involvement with bounded
     expect(array_column($result, 'id'))->toBe([$wrestler->id]);
     $page->set('form.participantId', $wrestler->id)->set('form.joinedOn', today()->toDateString())->set('form.role', 'Rival')->call('save')->assertHasNoErrors()->assertSee('Harbor Rival');
     $person = $story->participants()->firstOrFail();
-    $page->call('begin', 'participant-end', $person->id)->set('form.reason', 'Left the story.')->call('save')->assertHasNoErrors();
+    $page->call('begin', 'participant_end', $person->id)->set('form.reason', 'Left the story.')->call('save')->assertHasNoErrors();
     expect($person->refresh()->left_on)->not->toBeNull();
 });
 test('source selections change explicitly and an event can be linked to a match or segment', function () {
@@ -54,11 +56,11 @@ test('source selections change explicitly and an event can be linked to a match 
     $page->call('save')->assertHasNoErrors()->assertSee('Closing promo');
     $step = $f['story']->steps()->firstOrFail();
     $page->call('begin', 'step', $step->id)->set('form.reason', 'Refined wording.')->call('save')->assertHasNoErrors();
-    $page->call('begin', 'record-step', $step->id)->set('form.heading', 'Actual angle')->set('form.description', 'A different promo.')->call('save')->assertHasNoErrors()->assertSee('Actual angle');
+    $page->call('begin', 'record_step', $step->id)->set('form.heading', 'Actual angle')->set('form.description', 'A different promo.')->call('save')->assertHasNoErrors()->assertSee('Actual angle');
     $development = $f['story']->developments()->firstOrFail();
     $page->call('begin', 'development', $development->id)->set('form.reason', 'Clarified wording.')->call('save')->assertHasNoErrors();
     $page->call('begin', 'retract', $development->id)->set('form.reason', 'It was a rehearsal.')->set('form.reopenStep', true)->call('save')->assertHasNoErrors();
-    $page->call('begin', 'record-step', $step->id)->set('form.reason', 'Reinstating the corrected account.')->call('save')->assertHasNoErrors();
+    $page->call('begin', 'record_step', $step->id)->set('form.reason', 'Reinstating the corrected account.')->call('save')->assertHasNoErrors();
 });
 test('a confirmed cast can be corrected through the form without rewriting names', function () {
     actingAs(administrator());
@@ -81,17 +83,17 @@ test('stale forms preserve text and require deliberate reload before a second at
     expect($story->steps()->count())->toBe(1);
     $page->call('reload')->assertSet('needsReload', false)->call('save')->assertHasNoErrors();
     expect($story->steps()->count())->toBe(2);
-    $page->call('begin', 'step')->call('cancel')->assertSet('mode', '');
+    $page->call('begin', 'step')->call('cancel')->assertSet('mode', null);
 });
 test('step and story statuses are explicit forms with retained reasons', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
-    $page->call('begin', 'step-status', $step->id)->set('form.status', 'postponed')->set('form.reason', 'Wait for talent.')->call('save')->assertHasNoErrors();
-    $page->call('begin', 'story-status')->set('form.status', 'paused')->set('form.reason', 'Wait for tour.')->call('save')->assertHasNoErrors()->assertSee('Paused');
-    $page->call('begin', 'story-status')->set('form.status', 'archived')->set('form.reason', 'Save for later.')->call('save')->assertHasNoErrors();
-    $page->call('begin', 'story-status')->set('form.status', 'paused')->set('form.reason', 'Restore.')->call('save')->assertHasNoErrors();
+    $page->call('begin', 'step_status', $step->id)->set('form.status', 'postponed')->set('form.reason', 'Wait for talent.')->call('save')->assertHasNoErrors();
+    $page->call('begin', 'story_status')->set('form.status', 'paused')->set('form.reason', 'Wait for tour.')->call('save')->assertHasNoErrors()->assertSee('Paused');
+    $page->call('begin', 'story_status')->set('form.status', 'archived')->set('form.reason', 'Save for later.')->call('save')->assertHasNoErrors();
+    $page->call('begin', 'story_status')->set('form.status', 'paused')->set('form.reason', 'Restore.')->call('save')->assertHasNoErrors();
 });
 test('changing role while the form is open refuses saving and leaks no new story data', function () {
     $promotion = Promotion::factory()->create();
@@ -189,7 +191,7 @@ test('corrections, endings and status changes need a reason', function (string $
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
     $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
     $version = $story->refresh()->version;
-    $id = ['step-status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant-end' => $person->id, 'step' => $step->id][$mode] ?? null;
+    $id = ['step_status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant_end' => $person->id, 'step' => $step->id][$mode] ?? null;
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
     $page->call('begin', $mode, $id)->set('form.status', 'paused')->set('form.reason', '');
 
@@ -199,7 +201,7 @@ test('corrections, endings and status changes need a reason', function (string $
     // Assert
     $page->assertHasErrors(['form.reason']);
     expect($story->refresh()->version)->toBe($version);
-})->with(['step', 'development', 'participant-end', 'step-status', 'story-status', 'retract']);
+})->with(['step', 'development', 'participant_end', 'step_status', 'story_status', 'retract']);
 
 test('ending an involvement cannot precede its joining date', function () {
     // Arrange
@@ -208,7 +210,7 @@ test('ending an involvement cannot precede its joining date', function () {
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
     $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
-    $page->call('begin', 'participant-end', $person->id)->set('form.leftOn', today()->subDay()->toDateString())->set('form.reason', 'Backdated.');
+    $page->call('begin', 'participant_end', $person->id)->set('form.leftOn', today()->subDay()->toDateString())->set('form.reason', 'Backdated.');
 
     // Act
     $page->call('save');
@@ -233,9 +235,9 @@ test('a manager downgraded while a form is open writes nothing from any form', f
     $wrestler = Wrestler::factory()->for($promotion)->create();
     $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
     $version = $story->refresh()->version;
-    $id = ['step-status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant-end' => $person->id, 'step' => $step->id][$mode] ?? null;
+    $id = ['step_status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant_end' => $person->id, 'step' => $step->id][$mode] ?? null;
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
-    $page->call('begin', $mode, $id)->set('form.heading', 'Downgraded')->set('form.description', 'Should not save.')->set('form.reason', 'Reason.')->set('form.status', $mode === 'step-status' ? 'postponed' : 'paused')->set('form.sequence', 7);
+    $page->call('begin', $mode, $id)->set('form.heading', 'Downgraded')->set('form.description', 'Should not save.')->set('form.reason', 'Reason.')->set('form.status', $mode === 'step_status' ? 'postponed' : 'paused')->set('form.sequence', 7);
     if ($mode === 'participant') {
         $page->set('form.participantId', Wrestler::factory()->for($promotion)->create()->id);
     }
@@ -248,4 +250,134 @@ test('a manager downgraded while a form is open writes nothing from any form', f
     // Assert
     $page->assertForbidden();
     expect($story->refresh()->version)->toBe($version)->and($story->status)->toBe(StorylineStatus::Active)->and($step->refresh()->version)->toBe(1);
-})->with(['story', 'step', 'development', 'participant', 'participant-end', 'step-status', 'story-status', 'retract']);
+})->with(['story', 'step', 'development', 'participant', 'participant_end', 'step_status', 'story_status', 'retract']);
+
+test('an unknown form mode from the request is a 404 and opens nothing', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'not-a-mode');
+
+    // Assert
+    $page->assertNotFound();
+});
+
+test('saving with no form open is a 404 and writes nothing', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertNotFound();
+    expect($story->refresh()->version)->toBe(1)->and($story->revisions()->count())->toBe(0);
+});
+
+test('the open form mode cannot be changed from the client', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+    $page->call('begin', 'step');
+
+    // Act
+    $page->set('mode', 'story_status');
+})->throws(CannotUpdateLockedPropertyException::class);
+
+test('ending an involvement opens the form filled from the stored period', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+    $joined = today()->subDays(3)->toDateString();
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined));
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'participant_end', $person->id);
+
+    // Assert
+    $page->assertSet('form.participantId', $wrestler->id)
+        ->assertSet('form.type', 'wrestler')
+        ->assertSet('form.joinedOn', $joined)
+        ->assertSet('form.leftOn', today()->toDateString())
+        ->assertSet('form.role', 'Rival')
+        ->assertSet('editingId', $person->id);
+});
+
+test('editing the premise opens the form filled from the storyline', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create(['payoff' => 'The hidden finish.']);
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'story');
+
+    // Assert
+    $page->assertSet('form.heading', $story->title)
+        ->assertSet('form.description', $story->premise)
+        ->assertSet('form.payoff', 'The hidden finish.')
+        ->assertSet('editingId', null);
+});
+
+test('recording a step opens a new account filled from the step', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'record_step', $step->id);
+
+    // Assert
+    $page->assertSet('form.heading', $step->heading)
+        ->assertSet('form.description', $step->description)
+        ->assertSet('form.sequence', $step->sequence)
+        ->assertSet('stepId', $step->id)
+        ->assertSet('editingId', null)
+        ->assertSet('mode', StorylineFormMode::Development);
+});
+
+test('recording a step that already has an account opens that account for correction', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $development = confirmedStorylineDevelopment($story, $step->id);
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'record_step', $step->id);
+
+    // Assert
+    $page->assertSet('form.heading', $development->heading)
+        ->assertSet('form.occurredOn', $development->occurred_on->toDateString())
+        ->assertSet('stepId', $step->id)
+        ->assertSet('editingId', $development->id)
+        ->assertSet('mode', StorylineFormMode::Development);
+});
+
+test('correcting an account opens the form on its step', function () {
+    // Arrange
+    actingAs(administrator());
+    $story = Storyline::factory()->create();
+    $step = plannedStorylineStep($story);
+    $development = confirmedStorylineDevelopment($story, $step->id);
+    $page = livewire(Manage::class, ['storylineId' => $story->id]);
+
+    // Act
+    $page->call('begin', 'development', $development->id);
+
+    // Assert
+    $page->assertSet('form.heading', $development->heading)
+        ->assertSet('stepId', $step->id)
+        ->assertSet('editingId', $development->id);
+});
