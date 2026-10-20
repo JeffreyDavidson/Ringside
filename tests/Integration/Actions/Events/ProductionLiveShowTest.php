@@ -13,6 +13,7 @@ use App\Data\Events\LiveShowReviewData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\Events\LiveShowException;
+use App\Models\Crew\CrewContact;
 use App\ViewModels\Events\EventPackViewModel;
 use Spatie\Activitylog\Models\Activity;
 
@@ -94,4 +95,30 @@ test('several production roles create one crew attendance entry and completion f
     resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
     expect($run->refresh()->content)->toBe($before)
         ->and(fn () => resolve(MarkLiveAttendanceAction::class)->handle($event, 4, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true))->toThrow(LiveShowException::class);
+});
+
+test('preparation rolls each crew contact into one roster entry with its distinct role labels in the order first seen', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $other = CrewContact::factory()->create(['promotion_id' => $event->promotion_id, 'name' => 'Second Operator']);
+    $first = ['contact_id' => $fixture['contact']->id, 'timezone' => 'UTC'];
+    $assignments = [
+        [...$first, 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4052001', 'role' => 'camera'],
+        ['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4052002', 'contact_id' => $other->id, 'role' => 'sound', 'timezone' => 'UTC'],
+        [...$first, 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4052003', 'role' => 'announcer'],
+        [...$first, 'id' => 'eed36a82-90cb-4a79-b2cc-92e6c4052004', 'role' => 'camera'],
+    ];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated(['notes' => null, 'assignments' => $assignments, 'cues' => []]), false);
+
+    // Act
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 2, $data['card']['fingerprint']);
+
+    // Assert
+    $crew = collect($run->content['roster'])->filter(fn (array $person): bool => str_starts_with($person['key'], 'crew:'))->values();
+    expect($crew->pluck('key')->all())->toBe(['crew:'.$fixture['contact']->id, 'crew:'.$other->id])
+        ->and($crew->pluck('role')->all())->toBe(['Camera, Announcer', 'Sound'])
+        ->and(data_get($crew->firstOrFail(), 'assignments'))->toHaveCount(3)
+        ->and($crew->firstOrFail()['name'])->toBe('PRIVATE-CREW-7Q');
 });

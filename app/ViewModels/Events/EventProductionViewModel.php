@@ -11,6 +11,7 @@ use App\Models\Events\EventPack;
 use App\Services\Events\EventPackSourceService;
 use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowSourceService;
+use App\ValueObjects\ProductionPlan;
 
 /**
  * @phpstan-import-type Assignment from EventPack
@@ -48,10 +49,10 @@ class EventProductionViewModel
             $review = $run->status !== LiveShowStatus::Completed
                 && ($liveSource === null || $this->comparison->hasMovedOn($run, $liveSource['pack'], $liveSource['fingerprint']));
         } else {
-            $assignments = array_values(array_filter($data['content']['production']['assignments'] ?? [], fn (array $assignment): bool => $assignment['active']));
-            $cues = $data['content']['production']['cues'] ?? [];
+            $production = ProductionPlan::fromArray($data['content']['production'] ?? null);
+            $assignments = $production->activeAssignments();
             $rows = array_map(fn (array $item): array => ['key' => $item['key'], 'label' => $item['label'], 'timing' => $item['timing'],
-                'cues' => array_values(array_filter($cues, fn (array $cue): bool => $cue['item_key'] === $item['key']))], $data['running']);
+                'cues' => $production->cuesFor($item['key'])], $data['running']);
             $name = $event->name;
             $date = $event->date?->toIso8601String();
             $venue = $event->venue?->name;
