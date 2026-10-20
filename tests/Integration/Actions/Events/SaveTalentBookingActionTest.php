@@ -212,3 +212,60 @@ test('a referee agreement remains distinct from a wrestler with the same numeric
     expect($booking->person_type)->toBe('referee')->and($booking->person_name)->toBe($referee->refresh()->full_name)
         ->and($booking->fee_minor)->toBe(7500)->and(EventTalentBooking::query()->count())->toBe(2);
 });
+
+test('every status move is saved or refused the way the booking rules say', function (TalentBookingStatus $from, TalentBookingStatus $to, string $withoutReason, string $withReason, ?string $reason): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $booking = EventTalentBooking::factory()->create(['event_id' => $event->id, 'person_id' => $person->id, 'status' => $from]);
+    $expected = $reason === null ? $withoutReason : $withReason;
+
+    // Act
+    $outcome = 'saved';
+    try {
+        resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
+            resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+            new TalentBookingData($to, null, null, 'UTC', null, true, $reason));
+    } catch (TalentBookingException $exception) {
+        $outcome = $exception->getMessage() === __('talent-bookings.errors.reopen') ? 'reopen' : 'reason';
+    }
+
+    // Assert
+    expect($outcome)->toBe($expected)
+        ->and($booking->refresh()->status)->toBe($expected === 'saved' ? $to : $from);
+})->with([
+    'proposed to proposed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Proposed, 'saved', 'saved'],
+    'proposed to contacted' => [TalentBookingStatus::Proposed, TalentBookingStatus::Contacted, 'saved', 'saved'],
+    'proposed to confirmed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Confirmed, 'saved', 'saved'],
+    'proposed to cancelled' => [TalentBookingStatus::Proposed, TalentBookingStatus::Cancelled, 'reason', 'saved'],
+    'contacted to proposed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Proposed, 'saved', 'saved'],
+    'contacted to contacted' => [TalentBookingStatus::Contacted, TalentBookingStatus::Contacted, 'saved', 'saved'],
+    'contacted to confirmed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Confirmed, 'saved', 'saved'],
+    'contacted to cancelled' => [TalentBookingStatus::Contacted, TalentBookingStatus::Cancelled, 'reason', 'saved'],
+    'confirmed to proposed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Proposed, 'reason', 'saved'],
+    'confirmed to contacted' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Contacted, 'reason', 'saved'],
+    'confirmed to confirmed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Confirmed, 'saved', 'saved'],
+    'confirmed to cancelled' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Cancelled, 'reason', 'saved'],
+    'cancelled to proposed' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Proposed, 'saved', 'saved'],
+    'cancelled to contacted' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Contacted, 'reopen', 'reopen'],
+    'cancelled to confirmed' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Confirmed, 'reopen', 'reopen'],
+    'cancelled to cancelled' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Cancelled, 'reopen', 'reopen'],
+])->with(['no reason' => null, 'with a reason' => 'Agreed with the talent']);
+
+test('a booking is only confirmed once the agreement is recorded', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $booking = EventTalentBooking::factory()->create(['event_id' => $event->id, 'person_id' => $person->id, 'status' => TalentBookingStatus::Contacted]);
+
+    // Act
+    $confirm = fn () => resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null));
+
+    // Assert
+    expect($confirm)->toThrow(TalentBookingException::class, __('talent-bookings.errors.confirm'))
+        ->and($booking->refresh()->status)->toBe(TalentBookingStatus::Contacted);
+});

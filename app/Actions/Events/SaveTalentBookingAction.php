@@ -8,6 +8,7 @@ use App\Data\Events\TalentBookingData;
 use App\Enums\Events\TalentBookingStatus;
 use App\Exceptions\Events\TalentBookingException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\TalentBookingStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventTalentBooking;
 use App\Models\Events\EventTalentBookingRevision;
@@ -22,7 +23,11 @@ use Illuminate\Support\Facades\DB;
 /** @phpstan-import-type Terms from EventTalentBooking */
 class SaveTalentBookingAction
 {
-    public function __construct(private readonly TalentBookingContextService $context, private readonly TalentBookingFingerprintService $fingerprints) {}
+    public function __construct(
+        private readonly TalentBookingContextService $context,
+        private readonly TalentBookingFingerprintService $fingerprints,
+        private readonly TalentBookingStateMachine $states,
+    ) {}
 
     public function handle(Event $event, string $personType, int $personId, int $version, string $fingerprint, TalentBookingData $data): EventTalentBooking
     {
@@ -45,16 +50,8 @@ class SaveTalentBookingAction
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->fingerprints->fingerprint($event, $key), $fingerprint)) {
                 throw RecordChangedException::changed();
             }
-            if ($booking?->status === TalentBookingStatus::Cancelled && $data->status !== TalentBookingStatus::Proposed) {
-                throw TalentBookingException::reopen();
-            }
-            if (($data->status === TalentBookingStatus::Cancelled || ($booking?->status === TalentBookingStatus::Confirmed
-                && in_array($data->status, [TalentBookingStatus::Proposed, TalentBookingStatus::Contacted], true))) && blank($data->reason)) {
-                throw TalentBookingException::reasonRequired();
-            }
-            if ($data->status === TalentBookingStatus::Confirmed && ($event->date === null || ($booking?->status !== TalentBookingStatus::Confirmed && ! $data->attest))) {
-                throw TalentBookingException::confirm();
-            }
+            $this->states->ensureCanMove($booking, $data->status, $data->reason);
+            $this->states->ensureCanConfirm($booking, $data->status, $event->date !== null, $data->attest);
             if ($data->feeMinor !== null && $data->feeMinor < 0) {
                 throw TalentBookingException::fee();
             }

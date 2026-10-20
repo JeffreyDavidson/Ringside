@@ -16,8 +16,11 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Queries\Events\EventTalentBookingsQuery;
 use App\Services\Events\TalentBookingFingerprintService;
 use App\ViewModels\Events\TalentBookingsViewModel;
+use Illuminate\Database\Eloquent\Collection;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 
@@ -255,4 +258,47 @@ test('no booking and no history leave the fee labels empty', function (): void {
     // Assert
     expect($data['agreedFee'])->toBeNull()
         ->and($data['historyFees'])->toBeEmpty();
+});
+
+test('a row lists its warnings in the order the page shows them', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay(), 'venue_id' => Venue::factory()]);
+    $people = Wrestler::factory()->count(2)->bookable()->create();
+    $match = EventMatch::factory()->for($event)->withCompetitors($people->all())->withReferees()->create();
+    $person = $people->firstOrFail();
+    resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 0, null, 'UTC', null, true));
+    $person->delete();
+    $match->delete();
+    $event->update(['venue_id' => null]);
+
+    // Act
+    $data = resolve(TalentBookingsViewModel::class)->data($event->refresh());
+
+    // Assert
+    $row = collect($data['rows'])->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$person->id}");
+    expect($row['warnings'])->toBe(['unavailable', 'reconfirmation', 'removed', 'venue_unset'])
+        ->and($data['counts']['attention'])->toBe(1)
+        ->and($data['counts']['confirmed_clear'])->toBe(0);
+});
+
+test('a person listed twice shows the first booking', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $first = EventTalentBooking::factory()->make(['person_id' => $person->id, 'person_name' => 'First booking', 'status' => TalentBookingStatus::Proposed]);
+    $second = EventTalentBooking::factory()->make(['person_id' => $person->id, 'person_name' => 'Second booking', 'status' => TalentBookingStatus::Contacted]);
+    $bookings = Double::for(EventTalentBookingsQuery::class);
+    $bookings->expects('get')->returns(new Collection([$first, $second]));
+    app()->instance(EventTalentBookingsQuery::class, $bookings);
+
+    // Act
+    $rows = resolve(TalentBookingsViewModel::class)->data($event)['rows'];
+
+    // Assert
+    $row = collect($rows)->firstOrFail(fn (array $row): bool => $row['key'] === "wrestler:{$person->id}");
+    expect($row['booking'])->toBe($first)
+        ->and(collect($rows)->where('key', "wrestler:{$person->id}"))->toHaveCount(1);
 });
