@@ -177,3 +177,15 @@ test('a stale preparation preview cannot create a run from a different pack', fu
     expect($event->liveRun()->exists())->toBeFalse()
         ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe(0);
 })->with(['outdated pack version' => true, 'different card fingerprint' => false]);
+
+test('a prepared run starts as prepared with no completion time', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+
+    // Act
+    $run = $fixture['run'];
+
+    // Assert
+    expect($run->status)->toBe(LiveShowStatus::Prepared)
+        ->and($run->completed_at)->toBeNull();
+});
