@@ -24,6 +24,7 @@ use App\Models\Storylines\Storyline;
 use App\Queries\Storylines\CreativeRosterQuery;
 use App\Services\Storylines\StorylineSourceService;
 use App\Services\Storylines\StorylineTimezoneService;
+use App\Support\Search\LikeTerm;
 use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -270,8 +271,8 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('view', $story);
-        $needle = mb_trim(str_replace(['%', '_', '\\'], '', $this->eventSearch));
-        $events = Event::query()->where('promotion_id', $story->promotion_id)->when($needle !== '', fn (Builder $query) => $query->whereLike('name', "%{$needle}%"))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
+        $like = LikeTerm::from($this->eventSearch);
+        $events = Event::query()->where('promotion_id', $story->promotion_id)->when(! $like->isEmpty(), fn (Builder $query) => $query->whereLike('name', $like->contains()))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
         $selected = $this->form->eventId === null ? null : Event::query()->withTrashed()->where('promotion_id', $story->promotion_id)->with(['matches', 'pack', 'promotion'])->findOrFail($this->form->eventId);
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);

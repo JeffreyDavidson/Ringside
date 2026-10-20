@@ -13,7 +13,6 @@ use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
-use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -83,29 +82,21 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'), 'status')
-                ->options($this->statusOptionsWithDeleted([
+            $this->statusFilter(
+                StableStatus::class,
+                [
                     '' => 'All',
                     StableStatus::Unformed->value => StableStatus::Unformed->label(),
                     StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
                     StableStatus::Active->value => StableStatus::Active->label(),
                     StableStatus::Inactive->value => StableStatus::Inactive->label(),
                     StableStatus::Retired->value => StableStatus::Retired->label(),
-                ]))
-                ->filter(function (Builder $builder, string $value): void {
+                ],
+                function (Builder $builder, StableStatus $status): void {
                     /** @var StableBuilder<Stable> $builder */
-                    if ($this->isDeletedFilterValue($value)) {
-                        $builder->onlyTrashed();
-
-                        return;
-                    }
-
-                    $status = StableStatus::tryFrom($value);
-
-                    if ($status !== null) {
-                        $builder->whereStatus($status);
-                    }
-                }),
+                    $builder->whereStatus($status);
+                },
+            ),
             FirstActivityPeriodFilter::make(__('core.activation_date'), 'activation_date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
     }

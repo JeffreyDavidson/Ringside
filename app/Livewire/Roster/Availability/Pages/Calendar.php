@@ -12,6 +12,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\EventRosterAvailabilityService;
 use App\Services\Promotions\PromotionContextService;
 use App\Services\Promotions\PromotionTimeZoneService;
+use App\Support\Search\LikeTerm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -83,16 +84,16 @@ class Calendar extends Component
         $entries = null;
         $eventIssues = [];
         if ($promotion instanceof Promotion && $this->validDate()) {
-            $needle = mb_trim(str_replace(['%', '_', '\\'], '', $this->search));
+            $like = LikeTerm::from($this->search);
             $types = match ($this->kind) {
                 'wrestlers' => [Wrestler::class],
                 'referees' => [Referee::class],
                 default => [Wrestler::class, Referee::class],
             };
             $entries = Unavailability::query()->where('promotion_id', $promotion->id)->covering($this->date)->with('person')
-                ->whereHasMorph('person', $types, function (Builder $query, string $type) use ($needle): void {
-                    if ($needle !== '') {
-                        $query->whereLike($type === Referee::class ? 'full_name' : 'name', "%{$needle}%", caseSensitive: false);
+                ->whereHasMorph('person', $types, function (Builder $query, string $type) use ($like): void {
+                    if (! $like->isEmpty()) {
+                        $query->whereLike($type === Referee::class ? 'full_name' : 'name', $like->contains(), caseSensitive: false);
                     }
                 })->orderBy('starts_on')->orderBy('id')->paginate(20);
             $start = Carbon::parse($this->date, $promotion->timezone)->startOfDay();

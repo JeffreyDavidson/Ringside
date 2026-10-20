@@ -22,6 +22,7 @@ use App\Models\Events\Venue;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use App\Services\Promotions\PromotionTimeZoneService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
@@ -127,21 +128,14 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'), 'status')
-                ->options($this->statusOptionsWithDeleted(EventStatus::filterOptions()))
-                ->filter(function (EventBuilder $builder, string $value): void {
-                    if ($this->isDeletedFilterValue($value)) {
-                        $builder->onlyTrashed();
-
-                        return;
-                    }
-
-                    $status = EventStatus::tryFrom($value);
-
-                    if ($status !== null) {
-                        $builder->whereStatus($status);
-                    }
-                }),
+            $this->statusFilter(
+                EventStatus::class,
+                EventStatus::filterOptions(),
+                function (Builder $builder, EventStatus $status): void {
+                    /** @var EventBuilder<Event> $builder */
+                    $builder->whereStatus($status);
+                },
+            ),
             DateRangeFilter::make(__('core.event_dates'), 'event_dates')
                 ->config([
                     'allowInput' => true,   // Allow manual input of dates
