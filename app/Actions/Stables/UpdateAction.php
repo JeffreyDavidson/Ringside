@@ -9,11 +9,11 @@ use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
 use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Lifecycle\Roster\Stables\StableActivityPeriodRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +27,7 @@ class UpdateAction
         protected EstablishAction $establishAction,
         protected SynchronizeStableMembersAction $synchronizeStableMembersAction,
         protected StableActivityEligibility $eligibility,
+        protected StableActivityPeriodRequirements $periodRequirements,
         protected StableNameLock $nameLock,
     ) {}
 
@@ -110,79 +111,24 @@ class UpdateAction
             ->orderBy('id')
             ->lockForUpdate()
             ->get();
+
+        $this->periodRequirements->ensureCanMove($stable, $periods, $startDate, $endDate);
+
         $firstPeriod = $periods->first();
 
         if (! $firstPeriod instanceof ActivityPeriod) {
-            if ($endDate instanceof Carbon) {
-                throw CannotBeEstablishedException::withEndDate($stable);
-            }
-
             $this->establishAction->handle($stable, $startDate);
 
             return;
         }
 
         if ($periods->count() > 1) {
-            if (! $firstPeriod->started_at->isSameDay($startDate)) {
-                throw CannotBeUpdatedException::startDateLocked($stable);
-            }
-
             return;
         }
 
-        if ($firstPeriod->ended_at === null && $endDate instanceof Carbon) {
-            throw CannotBeUpdatedException::endsOpenPeriod($stable);
-        }
-
-        $endedAt = $firstPeriod->ended_at === null
-            ? null
-            : ($endDate ?? $firstPeriod->ended_at);
-
-        if ($endedAt instanceof Carbon && $endedAt->lt($startDate)) {
-            throw InvalidDateRangeException::endBeforeStart($startDate, $endedAt, 'stable activity');
-        }
-
-        $this->ensureMembershipsStayWithinPeriod($stable, $firstPeriod, $startDate, $endedAt);
-
         $firstPeriod->update([
             'started_at' => $startDate,
-            'ended_at' => $endedAt,
+            'ended_at' => $this->periodRequirements->endAfterMove($firstPeriod, $endDate),
         ]);
-    }
-
-    /**
-     * Refuse to move a period edge past a membership, because membership history is never rewritten silently.
-     * Only an edge that actually moves is checked, so a stable whose history already predates its period can still be saved.
-     */
-    private function ensureMembershipsStayWithinPeriod(Stable $stable, ActivityPeriod $period, Carbon $startDate, ?Carbon $endedAt): void
-    {
-        // Days are the stable's promotion days (the application time zone without a promotion), as the form reads them.
-        $local = fn (Carbon $date): Carbon => PromotionTimeZoneService::toLocalTime($stable->promotion, $date);
-
-        $startMoves = ! $local($period->started_at)->isSameDay($local($startDate));
-        $endMoves = $endedAt instanceof Carbon && $period->ended_at instanceof Carbon
-            && ! $local($period->ended_at)->isSameDay($local($endedAt));
-
-        $startsTooLate = false;
-        if ($startMoves) {
-            $firstLocalMoment = $local($startDate)->startOfDay()->utc();
-            $startsTooLate = $stable->wrestlers()->wherePivot('joined_at', '<', $firstLocalMoment)->exists()
-                || $stable->tagTeams()->wherePivot('joined_at', '<', $firstLocalMoment)->exists();
-        }
-
-        $endsTooEarly = false;
-        if ($endMoves) {
-            $lastLocalMoment = $local($endedAt)->endOfDay()->utc();
-            $endsTooEarly = $stable->wrestlers()->wherePivot('left_at', '>', $lastLocalMoment)->exists()
-                || $stable->tagTeams()->wherePivot('left_at', '>', $lastLocalMoment)->exists();
-        }
-
-        if ($startsTooLate) {
-            throw CannotBeUpdatedException::startsAfterMembership($stable);
-        }
-
-        if ($endsTooEarly) {
-            throw CannotBeUpdatedException::endsBeforeMembership($stable);
-        }
     }
 }

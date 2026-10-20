@@ -26,6 +26,7 @@ use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\BracketShape;
 use Illuminate\Support\Facades\DB;
 
 class AddMatchForEventAction
@@ -77,7 +78,7 @@ class AddMatchForEventAction
                 if ($requested !== $expected || $eventMatchData->matchType !== ($tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam)) {
                     throw TournamentException::entrantsChanged();
                 }
-                if ($eventMatchData->titles->isNotEmpty() && $node->round !== (int) log($tournament->capacity, 2)) {
+                if ($eventMatchData->titles->isNotEmpty() && ! new BracketShape($tournament->capacity)->isFinal($node->round)) {
                     throw TournamentException::finalTitlesOnly();
                 }
                 $priorBouts = $this->bracket->bouts($tournament)->only($this->bracket->ancestorNodeIds($node));
