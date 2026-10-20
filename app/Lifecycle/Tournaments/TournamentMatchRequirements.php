@@ -19,6 +19,7 @@ use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\BracketShape;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -92,7 +93,7 @@ final readonly class TournamentMatchRequirements
     public function ensureFinalStakes(EventMatch $match): void
     {
         $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
-        if ($link !== null && $link->node->round !== (int) log($link->tournament->capacity, 2)) {
+        if ($link !== null && ! new BracketShape($link->tournament->capacity)->isFinal($link->node->round)) {
             throw TournamentException::finalTitlesOnly();
         }
     }

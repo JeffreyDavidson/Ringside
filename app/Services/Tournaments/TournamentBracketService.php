@@ -9,6 +9,9 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
+use App\ValueObjects\BracketShape;
+use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
@@ -24,10 +27,17 @@ class TournamentBracketService
         $positions = collect();
         /** @var Collection<int, TournamentBoutData> $bouts */
         $bouts = collect();
+        $shape = new BracketShape($tournament->capacity);
         foreach ($nodes as $node) {
-            $first = $node->round === 1 ? $entries->get($node->first_seed) : $positions->get(($node->round - 1).':'.($node->position * 2 - 1))?->winner;
-            $second = $node->round === 1 ? $entries->get($node->second_seed) : $positions->get(($node->round - 1).':'.($node->position * 2))?->winner;
-            $resolved = $node->round === 1 || ($positions->get(($node->round - 1).':'.($node->position * 2 - 1))?->complete && $positions->get(($node->round - 1).':'.($node->position * 2))?->complete);
+            $feeders = array_map(
+                fn (array $feeder): ?TournamentBoutData => $positions->get("{$feeder[0]}:{$feeder[1]}"),
+                $shape->feeders($node->round, $node->position),
+            );
+            $firstFeeder = $feeders[0] ?? null;
+            $secondFeeder = $feeders[1] ?? null;
+            $first = $node->round === 1 ? $entries->get($node->first_seed) : $firstFeeder?->winner;
+            $second = $node->round === 1 ? $entries->get($node->second_seed) : $secondFeeder?->winner;
+            $resolved = $node->round === 1 || ($firstFeeder?->complete && $secondFeeder?->complete);
             $link = $node->links->firstWhere('active_node_id', $node->id);
             $winner = null;
             $complete = false;
@@ -62,29 +72,40 @@ class TournamentBracketService
     /** @return list<int> */
     public function ancestorNodeIds(TournamentNode $node): array
     {
-        $ids = [];
-        $positions = [$node->position];
-        for ($round = $node->round - 1; $round >= 1; $round--) {
-            $positions = array_merge(...array_map(fn (int $position): array => [$position * 2 - 1, $position * 2], $positions));
-            $ids = array_merge($ids, TournamentNode::query()->where('tournament_id', $node->tournament_id)->where('round', $round)->whereIn('position', $positions)->get()->map(fn (TournamentNode $ancestor): int => $ancestor->id)->all());
-        }
+        $ancestors = new BracketShape($node->tournament()->firstOrFail()->capacity)->ancestors($node->round, $node->position);
 
-        return $ids;
+        return $this->nodeIdsAt($node, $ancestors, fn (Builder $query) => $query->orderByDesc('round')->orderBy('position'));
     }
 
     /** @return list<int> */
     public function descendantNodeIds(TournamentNode $node): array
     {
-        $ids = [];
-        $position = $node->position;
-        for ($round = $node->round + 1; $round <= (int) log($node->tournament()->firstOrFail()->capacity, 2); $round++) {
-            $position = (int) ceil($position / 2);
-            $id = TournamentNode::query()->where('tournament_id', $node->tournament_id)->where('round', $round)->where('position', $position)->first()?->id;
-            if ($id !== null) {
-                $ids[] = $id;
-            }
+        $descendants = new BracketShape($node->tournament()->firstOrFail()->capacity)->descendants($node->round, $node->position);
+
+        return $this->nodeIdsAt($node, $descendants, fn (Builder $query) => $query->orderBy('round'));
+    }
+
+    /**
+     * The ids of the tournament's nodes at the given [round, position] pairs, in one query.
+     *
+     * @param  list<array{int, int}>  $coordinates
+     * @return list<int>
+     */
+    private function nodeIdsAt(TournamentNode $node, array $coordinates, Closure $order): array
+    {
+        if ($coordinates === []) {
+            return [];
         }
 
-        return $ids;
+        $query = TournamentNode::query()
+            ->where('tournament_id', $node->tournament_id)
+            ->where(function (Builder $where) use ($coordinates): void {
+                foreach ($coordinates as [$round, $position]) {
+                    $where->orWhere(fn (Builder $pair) => $pair->where('round', $round)->where('position', $position));
+                }
+            });
+        $order($query);
+
+        return array_values($query->get()->map(fn (TournamentNode $found): int => $found->id)->all());
     }
 }

@@ -65,3 +65,26 @@ it('refuses a conflicting retry payload for an already accepted create identifie
     expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Different Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier)))->toThrow(RecordChangedException::class)
         ->and(Tournament::query()->sole()->name)->toBe('Original Cup');
 });
+
+it('stores the seeded bracket nodes for every supported capacity', function (int $capacity, array $nodes): void {
+    // Arrange
+    $promotion = Promotion::factory()->create();
+    $wrestlers = Wrestler::factory()->employed()->for($promotion)->count($capacity)->create();
+    $data = new TournamentData('Seed Cup', null, EntrantKind::Wrestler, $capacity, false, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()));
+
+    // Act
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, $data);
+
+    // Assert
+    expect($tournament->nodes()->orderBy('id')->get()->map(fn ($node): array => [$node->round, $node->position, $node->first_seed, $node->second_seed])->all())
+        ->toBe($nodes);
+})->with([
+    'four' => [4, [[1, 1, 1, 4], [1, 2, 2, 3], [2, 1, null, null]]],
+    'eight' => [8, [[1, 1, 1, 8], [1, 2, 4, 5], [1, 3, 2, 7], [1, 4, 3, 6], [2, 1, null, null], [2, 2, null, null], [3, 1, null, null]]],
+    'sixteen' => [16, [
+        [1, 1, 1, 16], [1, 2, 8, 9], [1, 3, 4, 13], [1, 4, 5, 12], [1, 5, 2, 15], [1, 6, 7, 10], [1, 7, 3, 14], [1, 8, 6, 11],
+        [2, 1, null, null], [2, 2, null, null], [2, 3, null, null], [2, 4, null, null],
+        [3, 1, null, null], [3, 2, null, null],
+        [4, 1, null, null],
+    ]],
+]);
