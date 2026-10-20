@@ -6,44 +6,32 @@ namespace App\Actions\Events;
 
 use App\Data\Events\SponsorCommitmentData;
 use App\Enums\Events\SponsorCommitmentStatus;
-use App\Exceptions\RecordChangedException;
-use App\Exceptions\Sponsors\SponsorCommitmentException;
+use App\Lifecycle\Events\SponsorCommitmentRequirements;
+use App\Lifecycle\Events\SponsorCommitmentStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
 use App\Services\Events\SponsorCommitmentContextService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class SaveSponsorCommitmentAction
 {
-    public function __construct(private readonly SponsorCommitmentContextService $context, private readonly PersistSponsorCommitmentAction $persist) {}
+    public function __construct(private readonly SponsorCommitmentContextService $context, private readonly PersistSponsorCommitmentAction $persist,
+        private readonly SponsorCommitmentRequirements $requirements, private readonly SponsorCommitmentStateMachine $machine) {}
 
     public function handle(Event $event, ?int $id, int $version, string $submissionKey, SponsorCommitmentData $data,
         ?string $reason = null, bool $reviewed = false, bool $refreshSponsorName = false): EventSponsorCommitment
     {
         return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
             $event = Event::query()->withTrashed()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            if ($event->promotion_id === null) {
-                throw SponsorCommitmentException::eventUnavailable();
-            }
+            $this->requirements->ensureEventAvailable($event);
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
             $commitment = $id === null ? null : EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
-            if (! Str::isUuid($submissionKey)) {
-                throw RecordChangedException::changed();
-            }
-            if (($commitment->version ?? 0) !== $version || ($commitment === null && EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists())) {
-                throw RecordChangedException::changed();
-            }
-            if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
-                throw SponsorCommitmentException::archived();
-            }
-            if (($data->status === SponsorCommitmentStatus::Cancelled || ($commitment !== null && $commitment->status !== SponsorCommitmentStatus::Pending)) && mb_trim($reason ?? '') === '') {
-                throw SponsorCommitmentException::reasonRequired();
-            }
-            if ($data->status === SponsorCommitmentStatus::Completed && (mb_trim($data->evidence ?? '') === '' || $data->completedAt?->isFuture())) {
-                throw SponsorCommitmentException::evidenceRequired();
-            }
+            $this->requirements->ensureCurrentSubmission($commitment, $version, $submissionKey,
+                $commitment === null && EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists());
+            $this->requirements->ensureCanSelect($event, $sponsor, $commitment);
+            $this->machine->ensureCanMove($commitment, $data->status, $reason);
+            $this->machine->ensureCanComplete($data->status, $data->evidence, $data->completedAt);
             $commitment ??= new EventSponsorCommitment;
             $isNew = ! $commitment->exists;
             $commitment->version = $version;
