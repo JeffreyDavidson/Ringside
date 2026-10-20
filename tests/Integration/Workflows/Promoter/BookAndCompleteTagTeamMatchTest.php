@@ -12,6 +12,7 @@ use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\Title;
+use App\ValueObjects\MatchSides;
 use Illuminate\Support\Collection;
 
 test('a promoter can book and complete a tag team match', function (): void {
@@ -25,10 +26,10 @@ test('a promoter can book and complete a tag team match', function (): void {
         matchType: MatchType::TagTeam,
         referees: Referee::query()->whereKey($referee)->get(),
         titles: Title::query()->whereKey([])->get(),
-        sides: collect([
+        sides: new MatchSides(collect([
             1 => ['tag_teams' => [$firstTagTeam]],
             2 => ['tag_teams' => [$secondTagTeam]],
-        ]),
+        ])),
         preview: 'Tag team showcase',
     );
 

@@ -74,8 +74,7 @@ class SponsorCommitmentsViewModel
     {
         $details = [];
         foreach ($commitments as $commitment) {
-            $status = $this->status($commitment);
-            $details[$commitment->id] = ['status' => $status, 'overdue' => $status === __('sponsors.overdue'),
+            $details[$commitment->id] = ['status' => $this->status($commitment), 'overdue' => $this->isOverdue($commitment),
                 'eventNeedsReview' => $this->eventNeedsReview($commitment), 'instructionNeedsReview' => $this->instructionNeedsReview($commitment),
                 'liveState' => $this->liveState($commitment)];
         }
@@ -88,11 +87,17 @@ class SponsorCommitmentsViewModel
         if ($commitment->status === SponsorCommitmentStatus::Completed && $commitment->deadline_at !== null && $commitment->completed_at?->gt($commitment->deadline_at)) {
             return __('sponsors.completed_late');
         }
-        if ($commitment->status === SponsorCommitmentStatus::Pending && $commitment->deadline_at?->lt(now())) {
+        if ($this->isOverdue($commitment)) {
             return __('sponsors.overdue');
         }
 
         return $commitment->status->label();
+    }
+
+    /** A pending promise whose deadline has passed; the one condition behind both the "Overdue" label and the warning style. */
+    private function isOverdue(EventSponsorCommitment $commitment): bool
+    {
+        return $commitment->status === SponsorCommitmentStatus::Pending && $commitment->deadline_at?->lt(now()) === true;
     }
 
     private function eventNeedsReview(EventSponsorCommitment $commitment): bool

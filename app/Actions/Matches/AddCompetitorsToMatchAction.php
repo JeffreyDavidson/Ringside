@@ -10,7 +10,7 @@ use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Collection;
+use App\ValueObjects\MatchSides;
 use Illuminate\Support\Facades\DB;
 
 class AddCompetitorsToMatchAction
@@ -41,9 +41,9 @@ class AddCompetitorsToMatchAction
      * - Competitors must not have conflicting bookings on the event date
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
-     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side number and type
+     * @param  MatchSides  $competitors  Competitors organized by side number and type
      */
-    public function handle(EventMatch $eventMatch, Collection $competitors): void
+    public function handle(EventMatch $eventMatch, MatchSides $competitors): void
     {
         DB::transaction(function () use ($eventMatch, $competitors): void {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
@@ -54,15 +54,14 @@ class AddCompetitorsToMatchAction
     /**
      * Add competitors while the caller owns the match transaction and lock.
      *
-     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors
      * @param  list<string>  $retainedKeys  Server-derived retained assignments.
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $competitors, array $retainedKeys = []): void
+    public function handleWithinTransaction(EventMatch $lockedMatch, MatchSides $competitors, array $retainedKeys = []): void
     {
         $this->rosterLock->forSides($competitors);
         $this->requirements->ensureSatisfied($lockedMatch, $competitors);
 
-        foreach ($competitors as $sideNumber => $sideCompetitors) {
+        foreach ($competitors->sides() as $sideNumber => $sideCompetitors) {
             $this->addSideCompetitors($lockedMatch, (int) $sideNumber, $sideCompetitors, $retainedKeys);
         }
     }
@@ -72,13 +71,13 @@ class AddCompetitorsToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
      * @param  int  $sideNumber  The side number (1, 2, 3, etc.)
-     * @param  array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}  $sideCompetitors  Competitors for this side
+     * @param  array{wrestlers: list<Wrestler>, tag_teams: list<TagTeam>}  $sideCompetitors  Competitors for this side
      * @param  list<string>  $retainedKeys
      */
     private function addSideCompetitors(EventMatch $eventMatch, int $sideNumber, array $sideCompetitors, array $retainedKeys): void
     {
         // Add wrestlers to this side
-        $wrestlers = $sideCompetitors['wrestlers'] ?? [];
+        $wrestlers = $sideCompetitors['wrestlers'];
 
         if ($wrestlers !== []) {
             $this->addWrestlersToMatchAction->handleWithinTransaction(
@@ -90,7 +89,7 @@ class AddCompetitorsToMatchAction
         }
 
         // Add tag teams to this side
-        $tagTeams = $sideCompetitors['tag_teams'] ?? [];
+        $tagTeams = $sideCompetitors['tag_teams'];
 
         if ($tagTeams !== []) {
             $this->addTagTeamsToMatchAction->handleWithinTransaction(

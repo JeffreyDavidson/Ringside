@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Storylines;
 
 use App\Data\Storylines\StorylineData;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Models\Storylines\Storyline;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +22,7 @@ class UpdateAction
             $story->premise = $data->premise;
             $story->payoff = $data->payoff;
             $story->save();
-            $this->revision->handle($story, $story, 'story_revised', $before, $reason);
+            $this->revision->handle($story, $story, StorylineRevisionOperation::StoryRevised, $before, $reason);
         }, attempts: 3);
     }
 }

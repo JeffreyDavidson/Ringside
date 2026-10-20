@@ -22,6 +22,7 @@ use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use App\Rules\Titles\MatchesCompetitorType;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rule;
@@ -134,7 +135,7 @@ class CreateEditForm extends BaseForm
             matchType: $matchType,
             referees: Referee::query()->whereKey($this->referees)->orderBy('id')->get(),
             titles: Title::query()->whereKey($this->titles)->orderBy('id')->get(),
-            sides: $sides,
+            sides: new MatchSides($sides),
             preview: $this->preview,
             matchStipulation: $this->matchStipulationId === null
                 ? null

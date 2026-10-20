@@ -123,7 +123,7 @@ test('it ends only the stable and leaves its members employed and unretired', fu
         ->create();
     $wrestlers = $stable->currentWrestlers()->get();
     $tagTeams = $stable->currentTagTeams()->get();
-    $tagTeamWrestlers = $tagTeams->flatMap(fn (TagTeam $tagTeam) => $tagTeam->currentWrestlers()->get());
+    $tagTeamWrestlers = collect($tagTeams->all())->flatMap(fn (TagTeam $tagTeam): array => $tagTeam->currentWrestlers()->get()->all());
 
     // Act
     resolve(RetireAction::class)->handle($stable, $retiredAt);

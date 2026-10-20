@@ -38,20 +38,34 @@ class MatchCompetitorsCollection extends Collection
             && $competitor->competitor_id === $competitorId);
     }
 
-    /** @return BaseCollection<int, BaseCollection<int, Wrestler|TagTeam>> */
-    public function competitorModelsBySidePosition(): BaseCollection
+    /**
+     * The entries of each side, keyed by the side's position in ascending order. Reads each entry's loaded `side`.
+     *
+     * @return BaseCollection<int, BaseCollection<int, MatchCompetitor>>
+     */
+    public function bySidePosition(): BaseCollection
     {
         return $this->toBase()
             ->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)
-            ->sortKeys()
+            ->sortKeys();
+    }
+
+    /** @return BaseCollection<int, BaseCollection<int, Wrestler|TagTeam>> */
+    public function competitorModelsBySidePosition(): BaseCollection
+    {
+        return $this->bySidePosition()
             ->map(fn (BaseCollection $competitors): BaseCollection => $competitors
                 ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
                 ->values());
     }
 
-    /** @return BaseCollection<int, Wrestler|TagTeam> */
-    private function competitorModels(): BaseCollection
+    /**
+     * The loaded wrestler or tag team of each entry, in entry order.
+     *
+     * @return BaseCollection<int, Wrestler|TagTeam>
+     */
+    public function competitorModels(): BaseCollection
     {
-        return $this->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor);
+        return $this->toBase()->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor);
     }
 }
