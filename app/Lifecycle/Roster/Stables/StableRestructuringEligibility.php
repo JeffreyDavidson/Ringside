@@ -109,6 +109,52 @@ final readonly class StableRestructuringEligibility
         }
     }
 
+    /**
+     * Refuse a split whose selected members cannot be moved, or that would leave either stable below the minimum.
+     * The checks run in a fixed order, so the reason a caller sees does not depend on which refusals also apply.
+     *
+     * @throws CannotBeSplitException
+     */
+    public function ensureSplitMembersValid(Stable $stable, StableMembershipData $movingMembers): void
+    {
+        if ($movingMembers->isEmpty()) {
+            throw CannotBeSplitException::noMembersToMove();
+        }
+
+        $currentMembers = $this->membershipService->currentMembers($stable);
+        $nonMemberWrestlerNames = $movingMembers->wrestlers
+            ->diff($currentMembers->wrestlers)
+            ->map(fn (Wrestler $wrestler): string => $wrestler->name)
+            ->all();
+        $nonMemberTagTeamNames = $movingMembers->tagTeams
+            ->diff($currentMembers->tagTeams)
+            ->map(fn (TagTeam $tagTeam): string => $tagTeam->name)
+            ->all();
+        $nonMemberNames = [...$nonMemberWrestlerNames, ...$nonMemberTagTeamNames];
+
+        if ($nonMemberNames !== []) {
+            throw CannotBeSplitException::membersDoNotBelongToStable($nonMemberNames);
+        }
+
+        $this->ensureSplitMembersAvailable($movingMembers);
+        $this->ensureSplitKeepsTagTeamsWithWrestlers($currentMembers, $movingMembers);
+
+        $newStableMemberCount = $movingMembers->getTotalMemberCount();
+        $remainingMemberCount = $currentMembers->getTotalMemberCount() - $newStableMemberCount;
+
+        if ($remainingMemberCount === 0) {
+            throw CannotBeSplitException::allMembersMoving();
+        }
+
+        if (! StableMembershipRequirements::hasMinimumHeadcount($newStableMemberCount)) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
+        }
+
+        if (! StableMembershipRequirements::hasMinimumHeadcount($remainingMemberCount)) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
+        }
+    }
+
     public function ensureSplitMembersAvailable(StableMembershipData $members): void
     {
         $unavailableMemberNames = $this->unavailableMemberNames($members);

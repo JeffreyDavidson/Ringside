@@ -659,7 +659,6 @@ describe('SplitStableAction Integration Tests', function () {
                 ->throws(new LogicException('Stable creation failed.'));
             $action = new SplitStableAction(
                 $createAction,
-                resolve(StableMembershipService::class),
                 resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
                 resolve(StableNameLock::class),
