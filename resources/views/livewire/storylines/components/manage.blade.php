@@ -198,7 +198,7 @@
         <div class="divide-border divide-y">
             @foreach ($revisions as $revision)
                 <article class="py-4" wire:key="revision-{{ $revision->id }}">
-                    <p class="font-semibold">{{ __('storylines.operations.'.$revision->operation) }}</p>
+                    <p class="font-semibold">{{ $revision->operation->label() }}</p>
                     <p class="text-muted-foreground mt-2 text-sm">
                         {{ $revision->actor?->full_name }} · {{ $revision->created_at?->toIso8601String() }}
                     </p>

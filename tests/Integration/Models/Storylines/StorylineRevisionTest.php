@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Models\Storylines\StorylineRevision;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 
@@ -22,6 +23,19 @@ test('mass assignment is refused for every column because revisions are audit ro
         'after' => [],
     ]))
         ->toThrow(MassAssignmentException::class);
+});
+
+test('the operation is cast to its enum and the stored string is unchanged', function (): void {
+    // Arrange
+    $created = StorylineRevision::factory()
+        ->create(['operation' => StorylineRevisionOperation::DevelopmentRetractedReopen]);
+
+    // Act
+    $revision = StorylineRevision::query()->findOrFail($created->id);
+
+    // Assert
+    expect($revision->operation)->toBe(StorylineRevisionOperation::DevelopmentRetractedReopen)
+        ->and($revision->getRawOriginal('operation'))->toBe('development_retracted_reopen');
 });
 
 test('before and after snapshots survive a persisted round trip', function (): void {

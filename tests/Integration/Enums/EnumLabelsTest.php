@@ -17,6 +17,7 @@ use App\Enums\Matches\MatchType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Enums\Stables\StableStatus;
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Enums\Storylines\StorylineStatus;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
@@ -130,6 +131,18 @@ test('enum labels render the text users see', function (Closure $resolveLabel, s
     'step postponed' => [StepStatus::Postponed->label(...), 'Postponed'],
     'step cancelled' => [StepStatus::Cancelled->label(...), 'Cancelled'],
     'step happened' => [StepStatus::Happened->label(...), 'Happened'],
+    'revision created' => [StorylineRevisionOperation::Created->label(...), 'Storyline created'],
+    'revision story revised' => [StorylineRevisionOperation::StoryRevised->label(...), 'Premise revised'],
+    'revision story status' => [StorylineRevisionOperation::StoryStatus->label(...), 'Story status changed'],
+    'revision step planned' => [StorylineRevisionOperation::StepPlanned->label(...), 'Step planned'],
+    'revision step revised' => [StorylineRevisionOperation::StepRevised->label(...), 'Step revised'],
+    'revision step status' => [StorylineRevisionOperation::StepStatus->label(...), 'Step status changed'],
+    'revision participant joined' => [StorylineRevisionOperation::ParticipantJoined->label(...), 'Participant joined'],
+    'revision participant left' => [StorylineRevisionOperation::ParticipantLeft->label(...), 'Participant left'],
+    'revision development recorded' => [StorylineRevisionOperation::DevelopmentRecorded->label(...), 'Development recorded'],
+    'revision development corrected' => [StorylineRevisionOperation::DevelopmentCorrected->label(...), 'Account corrected'],
+    'revision development retracted' => [StorylineRevisionOperation::DevelopmentRetracted->label(...), 'Account retracted'],
+    'revision development retracted reopen' => [StorylineRevisionOperation::DevelopmentRetractedReopen->label(...), 'Account retracted; step reopened'],
 
     'tournament draft' => [TournamentStatus::Draft->label(...), 'Draft'],
     'tournament active' => [TournamentStatus::Active->label(...), 'In progress'],

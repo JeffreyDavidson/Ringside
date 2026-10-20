@@ -6,6 +6,7 @@ namespace App\Actions\Storylines;
 
 use App\Data\Storylines\StepData;
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Promotions\Promotion;
@@ -49,7 +50,7 @@ class SaveStepAction
             $step->submission_id = $stepId === null ? $data->submissionId : $step->submission_id;
             $step->version = $stepId === null ? 1 : $step->version + 1;
             $step->save();
-            $this->revision->handle($story, $step, $stepId === null ? 'step_planned' : 'step_revised', $before, $data->reason);
+            $this->revision->handle($story, $step, $stepId === null ? StorylineRevisionOperation::StepPlanned : StorylineRevisionOperation::StepRevised, $before, $data->reason);
 
             return $step->refresh();
         }, attempts: 3);
