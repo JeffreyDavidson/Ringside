@@ -12,6 +12,7 @@ use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Events\TalentBookingFingerprintService;
+use App\Support\Search\LikeTerm;
 use App\ViewModels\Events\TalentBookingsViewModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -162,11 +163,11 @@ class TalentBookings extends Component
             return [];
         }
         $column = $kind === 'referees' ? 'full_name' : 'name';
-        $needle = mb_substr(mb_trim(str_replace(['%', '_', '\\'], '', $term)), 0, 100);
+        $like = LikeTerm::from($term, 100);
 
         /** @var Collection<int, Wrestler|Referee> $people */
         $people = $query->where('promotion_id', $event->promotion_id)
-            ->when($needle !== '', fn (Builder $query): Builder => $query->whereLike($column, "%{$needle}%", caseSensitive: false))
+            ->when(! $like->isEmpty(), fn (Builder $query): Builder => $query->whereLike($column, $like->contains(), caseSensitive: false))
             ->orderBy($column)->orderBy('id')->limit(20)->get();
 
         return $people->map(fn (Wrestler|Referee $person): array => ['id' => $person->id,

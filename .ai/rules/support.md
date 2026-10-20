@@ -17,3 +17,6 @@ app/Support holds technical building blocks that know nothing about this app, th
 
 ## Group subfolders by technical concern
 Group subfolders by technical concern, never by domain area. A Content or Newsletter folder in Support means misplaced code. Custom authentication classes live in app/Auth and enum concerns in app/Enums/Concerns.
+
+## Search
+LikeTerm (app/Support/Search) cleans a typed term for a "contains" LIKE query: it drops the LIKE wildcards (%, _) and the backslash instead of escaping them, trims, and can cut the term to a maximum length. Build the term once with `LikeTerm::from($term, $maxLength)`, skip the filter when `isEmpty()`, and pass `contains()` to `whereLike()`. Do not repeat the `str_replace` and `mb_trim` expression inline. Terms that are only trimmed or cut, and never stripped (sponsor names, title history), are not LikeTerm searches.

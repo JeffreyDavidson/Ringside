@@ -16,8 +16,8 @@ use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
-use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /** @extends BaseTable<TagTeam> */
@@ -86,22 +86,14 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'), 'status')
-                ->options($this->statusOptionsWithDeleted(EmploymentStatus::filterOptions()))
-                ->filter(function (TagTeamBuilder $builder, string $value): void {
+            $this->statusFilter(
+                EmploymentStatus::class,
+                EmploymentStatus::filterOptions(),
+                function (Builder $builder, EmploymentStatus $status): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
-                    if ($this->isDeletedFilterValue($value)) {
-                        $builder->onlyTrashed();
-
-                        return;
-                    }
-
-                    $status = EmploymentStatus::tryFrom($value);
-
-                    if ($status !== null) {
-                        $builder->whereEmploymentStatus($status);
-                    }
-                }),
+                    $builder->whereEmploymentStatus($status);
+                },
+            ),
             FirstEmploymentFilter::make(__('core.employment_date'), 'employment_date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }

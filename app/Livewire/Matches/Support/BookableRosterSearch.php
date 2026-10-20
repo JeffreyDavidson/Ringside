@@ -8,6 +8,7 @@ use App\Enums\Roster\BookableRosterKind;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Support\Search\LikeTerm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -30,8 +31,7 @@ final class BookableRosterSearch
     public function search(BookableRosterKind $kind, string $term, ?int $promotionId, ?string $date = null, ?Carbon $at = null): array
     {
         $column = $this->nameColumn($kind);
-        // Names never contain LIKE wildcards, so drop them rather than depend on database-specific escaping.
-        $needle = mb_trim(str_replace(['%', '_', '\\'], '', $term));
+        $like = LikeTerm::from($term);
 
         $query = match ($kind) {
             BookableRosterKind::Wrestlers => Wrestler::query()->bookableOn($date, $at),
@@ -42,7 +42,7 @@ final class BookableRosterSearch
         return $this->options(
             $query
                 ->where($query->qualifyColumn('promotion_id'), $promotionId)
-                ->when($needle !== '', fn (Builder $builder): Builder => $builder->whereLike($column, "%{$needle}%", caseSensitive: false))
+                ->when(! $like->isEmpty(), fn (Builder $builder): Builder => $builder->whereLike($column, $like->contains(), caseSensitive: false))
                 ->orderBy($column)
                 ->orderBy('id')
                 ->limit(self::LIMIT),

@@ -68,6 +68,7 @@ pest()
         'Integration/Queries',
         'Integration/Rules',
         'Integration/Services',
+        'Integration/Support',
         'Integration/Validation',
         'Integration/View',
         'Integration/ViewModels',
