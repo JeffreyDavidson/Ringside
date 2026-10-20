@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CancelAction;
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Lifecycle\Employment;
@@ -60,7 +61,7 @@ test('date-aware tag-team candidates agree with the authority for current and fo
     $member = $team->currentWrestlers()->firstOrFail();
     $member->forceFill(['promotion_id' => $promotion->id])->save();
     $actor = administrator();
-    $entry = resolve(CreateAction::class)->handle($member, '2026-10-17', '2026-10-17', null, $actor);
+    $entry = resolve(CreateAction::class)->handle($member, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
     if ($cancelled) {
         resolve(CancelAction::class)->handle($member, $entry->id, $actor);
     }
