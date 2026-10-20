@@ -179,6 +179,18 @@ describe('sponsor instruction requirements', function (): void {
         expect($ensure)->toThrow(SponsorCommitmentException::class, __('sponsors.started_instruction'));
     })->with([LiveItemStatus::Running->value, LiveItemStatus::Finished->value]);
 
+    it('refuses to change a started entry the commitment is not yet linked to', function (): void {
+        // Arrange
+        $key = new PackKey(SponsorInstructionMode::Setup, SPONSOR_UUID);
+        $run = (new EventLiveRun)->forceFill(['content' => ['items' => [['key' => (string) $key, 'state' => LiveItemStatus::Running->value]]]]);
+
+        // Act
+        $ensure = fn () => ensureSponsorInstruction(sponsorInstruction(SponsorInstructionMode::Setup, $key), ['run' => $run, 'commitment' => ['pack_key' => null]]);
+
+        // Assert
+        expect($ensure)->toThrow(SponsorCommitmentException::class, __('sponsors.started_instruction'));
+    });
+
     it('allows an entry the live show has not started', function (): void {
         // Arrange
         $key = new PackKey(SponsorInstructionMode::Setup, SPONSOR_UUID);

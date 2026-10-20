@@ -294,3 +294,22 @@ test('the previewed target reaches the action as a parsed pack key', function ()
         ->and((string) $received?->targetKey)->toBe($promise->pack_key)
         ->and($received?->reason)->toBe('Moved');
 });
+
+test('a malformed target key is refused on save and nothing is written', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+    $component->call('beginInstruction', $promise->id)
+        ->set('targetKey', 'not-a-pack-key')
+        ->call('previewInstruction');
+
+    // Act
+    $component->call('saveInstruction');
+
+    // Assert
+    $component->assertHasErrors(['save' => __('sponsors.invalid_target')]);
+    expect($world['event']->pack()->exists())->toBeFalse()
+        ->and($promise->refresh()->pack_key)->toBeNull();
+});

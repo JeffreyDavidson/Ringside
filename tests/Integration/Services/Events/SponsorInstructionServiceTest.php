@@ -29,3 +29,11 @@ test('a preview hash stays byte-identical for each mode so stored review hashes 
     'setup' => ['setup', '5afdbfaf58b72e27a377976dcd0e3f3f32dd80a7d429ef3777fc31de7561220a'],
     'remove' => ['remove', '56ba8d83f63172ea0b9dc76634bb93b1b6b1851b2a052bfa37da68fc99e3f7c1'],
 ]);
+
+test('a malformed target key finds no target', function (string $key): void {
+    // Act
+    $target = resolve(SponsorInstructionService::class)->target(['segments' => [], 'sponsor_tasks' => []], $key);
+
+    // Assert
+    expect($target)->toBeNull();
+})->with(['not-a-pack-key', 'setup:not-a-uuid', 'remove:0197c3a0-5b1e-7c0e-8a55-3f0f4f1d2b6a']);
