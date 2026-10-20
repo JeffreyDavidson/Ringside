@@ -110,8 +110,8 @@ class CreateEditForm extends BaseForm
         if ($canHaveMembers) {
             if ($this->mustMeetMinimumMembers($stable)) {
                 $rules['started_at'][] = new HasMinimumMembers(
-                    $members->wrestlers ?? collect(),
-                    $members->tagTeams ?? collect(),
+                    $members->wrestlers,
+                    $members->tagTeams,
                 );
             }
         } else {

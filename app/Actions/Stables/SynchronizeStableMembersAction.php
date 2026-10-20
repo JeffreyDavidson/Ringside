@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class SynchronizeStableMembersAction
 {
@@ -21,30 +20,26 @@ class SynchronizeStableMembersAction
         $currentMembers = $stable->currentWrestlers()->inLockOrder()->get();
         $currentTagTeams = $stable->currentTagTeams()->inLockOrder()->get();
 
-        if ($desiredMembers->wrestlers instanceof Collection) {
-            $this->removeStableMembersAction->handle(
-                $stable,
-                new StableMembershipData(wrestlers: $currentMembers->diff($desiredMembers->wrestlers)),
-                $date,
-            );
-            $this->addStableMembersAction->handle(
-                $stable,
-                new StableMembershipData(wrestlers: $desiredMembers->wrestlers->diff($currentMembers)),
-                $date,
-            );
-        }
+        $this->removeStableMembersAction->handle(
+            $stable,
+            new StableMembershipData(wrestlers: $currentMembers->diff($desiredMembers->wrestlers)),
+            $date,
+        );
+        $this->addStableMembersAction->handle(
+            $stable,
+            new StableMembershipData(wrestlers: $desiredMembers->wrestlers->diff($currentMembers)),
+            $date,
+        );
 
-        if ($desiredMembers->tagTeams instanceof Collection) {
-            $this->removeStableMembersAction->handle(
-                $stable,
-                new StableMembershipData(tagTeams: $currentTagTeams->diff($desiredMembers->tagTeams)),
-                $date,
-            );
-            $this->addStableMembersAction->handle(
-                $stable,
-                new StableMembershipData(tagTeams: $desiredMembers->tagTeams->diff($currentTagTeams)),
-                $date,
-            );
-        }
+        $this->removeStableMembersAction->handle(
+            $stable,
+            new StableMembershipData(tagTeams: $currentTagTeams->diff($desiredMembers->tagTeams)),
+            $date,
+        );
+        $this->addStableMembersAction->handle(
+            $stable,
+            new StableMembershipData(tagTeams: $desiredMembers->tagTeams->diff($currentTagTeams)),
+            $date,
+        );
     }
 }

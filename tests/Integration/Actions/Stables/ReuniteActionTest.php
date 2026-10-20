@@ -63,9 +63,9 @@ test('it reunites without a former member who has become unavailable', function 
 
     // Assert
     $offeredIds = $unavailableMember instanceof Wrestler
-        ? $returningMembers->wrestlers?->pluck('id')->all()
-        : $returningMembers->tagTeams?->pluck('id')->all();
-    expect($offeredIds ?? [])->not->toContain($unavailableMember->getKey())
+        ? $returningMembers->wrestlers->pluck('id')->all()
+        : $returningMembers->tagTeams->pluck('id')->all();
+    expect($offeredIds)->not->toContain($unavailableMember->getKey())
         ->and($stable->currentActivityPeriod()->exists())->toBeTrue()
         ->and($unavailableMember->currentStable()->whereKey($stable->getKey())->exists())->toBeFalse();
 })->with('unavailable stable former members');
@@ -80,8 +80,8 @@ test('it rejects an unavailable former member chosen to return', function (Closu
     $unavailableMember = $makeMemberUnavailable($stable);
     $available = formerMembersOf($stable);
     $returningMembers = $unavailableMember instanceof Wrestler
-        ? new StableMembershipData(($available->wrestlers ?? collect())->push($unavailableMember), $available->tagTeams)
-        : new StableMembershipData($available->wrestlers, ($available->tagTeams ?? collect())->push($unavailableMember));
+        ? new StableMembershipData($available->wrestlers->push($unavailableMember), $available->tagTeams)
+        : new StableMembershipData($available->wrestlers, $available->tagTeams->push($unavailableMember));
 
     // Act & Assert
     expect(fn () => resolve(ReuniteAction::class)->handle($stable, $returningMembers))
@@ -110,11 +110,11 @@ test('it restores the returning members on the reunite date and keeps their hist
 
     resolve(ReuniteAction::class)->handle($stable, $returningMembers, $reuniteDate);
 
-    expect($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing($returningMembers->wrestlers?->pluck('id')->all())
-        ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())->toEqualCanonicalizing($returningMembers->tagTeams?->pluck('id')->all())
-        ->and($stable->currentWrestlers()->wherePivot('joined_at', $reuniteDate)->count())->toBe($returningMembers->wrestlers?->count())
-        ->and($stable->currentTagTeams()->wherePivot('joined_at', $reuniteDate)->count())->toBe($returningMembers->tagTeams?->count())
-        ->and($stable->previousWrestlers()->count())->toBe($returningMembers->wrestlers?->count())
+    expect($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing($returningMembers->wrestlers->pluck('id')->all())
+        ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())->toEqualCanonicalizing($returningMembers->tagTeams->pluck('id')->all())
+        ->and($stable->currentWrestlers()->wherePivot('joined_at', $reuniteDate)->count())->toBe($returningMembers->wrestlers->count())
+        ->and($stable->currentTagTeams()->wherePivot('joined_at', $reuniteDate)->count())->toBe($returningMembers->tagTeams->count())
+        ->and($stable->previousWrestlers()->count())->toBe($returningMembers->wrestlers->count())
         ->and($stable->wrestlers()->count() + $stable->tagTeams()->count())->toBe($originalMemberships * 2);
 });
 
@@ -160,7 +160,7 @@ test('it rejects a returning member who was never a former member without reunit
     $stable = Stable::factory()->disbanded()->create();
     $outsider = Wrestler::factory()->employed()->create();
     $returningMembers = new StableMembershipData(
-        wrestlers: formerMembersOf($stable)->wrestlers?->push($outsider),
+        wrestlers: formerMembersOf($stable)->wrestlers->push($outsider),
         tagTeams: formerMembersOf($stable)->tagTeams,
     );
 
