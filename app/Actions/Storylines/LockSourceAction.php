@@ -6,25 +6,19 @@ namespace App\Actions\Storylines;
 
 use App\Data\Storylines\SourceData;
 use App\Exceptions\Storylines\StorylineConflictException;
-use App\Models\Events\Event;
-use App\Models\Events\EventLiveRun;
-use App\Models\Events\EventPack;
-use App\Models\Matches\EventMatch;
+use App\Lifecycle\Events\EventCardLock;
 use App\Services\Storylines\StorylineSourceService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class LockSourceAction
 {
-    public function __construct(private readonly StorylineSourceService $sources) {}
+    public function __construct(private readonly StorylineSourceService $sources, private readonly EventCardLock $card) {}
 
     /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
     public function handle(SourceData $source, int $promotionId, bool $historical = false): array
     {
         if ($source->eventId !== null) {
-            Event::query()->withTrashed()->where('promotion_id', $promotionId)->whereKey($source->eventId)->lockForUpdate()->firstOrFail();
-            EventMatch::query()->withTrashed()->where('event_id', $source->eventId)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->forEventId($source->eventId)->lockForUpdate()->first();
-            EventLiveRun::query()->forEventId($source->eventId)->lockForUpdate()->first();
+            $this->card->lockIncludingDeleted($source->eventId, $promotionId);
         }
         $result = $this->sources->get($source, $promotionId) ?? throw new ModelNotFoundException;
         if ($source->fingerprint !== null && ! hash_equals($source->fingerprint, $result['fingerprint'])) {

@@ -7,9 +7,8 @@ namespace App\Actions\Events;
 use App\Data\Events\EventPackData;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
+use App\Lifecycle\Events\EventCardLock;
 use App\Models\Events\Event;
-use App\Models\Events\EventLiveRun;
-use App\Models\Events\EventPack;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Matches\EventMatch;
 use App\Services\Events\EventPackCardService;
@@ -22,17 +21,14 @@ class SaveSponsorInstructionAction
 {
     public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardService $card,
         private readonly EventPackSourceService $source, private readonly SaveEventPackAction $save,
-        private readonly PersistSponsorCommitmentAction $persist) {}
+        private readonly PersistSponsorCommitmentAction $persist, private readonly EventCardLock $lock) {}
 
     public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, string $mode,
         ?string $targetKey, ?int $afterMatchId, string $previewHash, ?string $reason = null): void
     {
         DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $mode, $targetKey, $afterMatchId, $previewHash, $reason): void {
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            $matches = EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
+            ['event' => $event, 'matches' => $matches, 'pack' => $pack, 'run' => $run] = $this->lock->lock($event->id);
             $commitment = EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
-            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
-            $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->first();
             $card = $this->card->get($event);
             $preview = $this->instructions->preview($event, $commitment, $mode, $targetKey, $afterMatchId);
             if ($commitment->version !== $version || ($pack->version ?? 0) !== $packVersion || ! hash_equals($card['fingerprint'], $fingerprint)

@@ -7,23 +7,21 @@ namespace App\Actions\Events;
 use App\Data\Events\EventPackData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\EventCardLock;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
-use App\Models\Matches\EventMatch;
 use App\Services\Events\EventPackCardService;
 use Illuminate\Support\Facades\DB;
 
 class SaveEventPackAction
 {
-    public function __construct(private readonly EventPackCardService $card) {}
+    public function __construct(private readonly EventPackCardService $card, private readonly EventCardLock $lock) {}
 
     public function handle(Event $event, int $version, string $fingerprint, EventPackData $data, bool $reviewed): void
     {
         DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
             // Card assignment actions also lock the owning event before changing its matches.
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
