@@ -7,11 +7,9 @@ namespace App\Data\Matches;
 use App\Enums\Matches\MatchType;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\Referees\Referee;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection;
 
 readonly class EventMatchData
 {
@@ -20,13 +18,12 @@ readonly class EventMatchData
      *
      * @param  EloquentCollection<int, Referee>  $referees
      * @param  EloquentCollection<int, Title>  $titles
-     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $sides
      */
     public function __construct(
         public MatchType $matchType,
         public EloquentCollection $referees,
         public EloquentCollection $titles,
-        public Collection $sides,
+        public MatchSides $sides,
         public ?string $preview,
         public ?MatchStipulation $matchStipulation = null,
         public ?int $tournamentVersion = null,

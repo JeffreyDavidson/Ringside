@@ -6,6 +6,7 @@ namespace App\Actions\Storylines;
 
 use App\Data\Storylines\DevelopmentData;
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
@@ -91,7 +92,7 @@ class RecordDevelopmentAction
                 $step->version++;
                 $step->save();
             }
-            $this->revision->handle($story, $development, $developmentId === null ? 'development_recorded' : 'development_corrected', $before, $data->reason);
+            $this->revision->handle($story, $development, $developmentId === null ? StorylineRevisionOperation::DevelopmentRecorded : StorylineRevisionOperation::DevelopmentCorrected, $before, $data->reason);
 
             return $development;
         }, attempts: 3);

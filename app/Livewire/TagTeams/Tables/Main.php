@@ -8,6 +8,7 @@ use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\RestoreAction;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\TagTeamBuilder;
+use App\Collections\TagTeamCollection;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
@@ -60,7 +61,7 @@ class Main extends BaseTable
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(TagTeamBuilder::ROSTER_STATE);
-        new Collection($rows->flatMap(fn (TagTeam $tagTeam): Collection => $tagTeam->currentWrestlers)->all())->loadExists(IndividualBuilder::AVAILABILITY_STATE);
+        new TagTeamCollection($rows->all())->currentWrestlers()->loadExists(IndividualBuilder::AVAILABILITY_STATE);
     }
 
     /**

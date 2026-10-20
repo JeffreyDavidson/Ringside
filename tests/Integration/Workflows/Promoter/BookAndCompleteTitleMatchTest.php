@@ -14,6 +14,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\ValueObjects\MatchSides;
 use Illuminate\Support\Collection;
 
 test('a promoter can book and complete a title match', function (): void {
@@ -29,10 +30,10 @@ test('a promoter can book and complete a title match', function (): void {
         matchType: MatchType::Singles,
         referees: Referee::query()->whereKey($referee)->get(),
         titles: Title::query()->whereKey($title)->get(),
-        sides: collect([
+        sides: new MatchSides(collect([
             1 => ['wrestlers' => [$champion]],
             2 => ['wrestlers' => [$challenger]],
-        ]),
+        ])),
         preview: 'Championship main event',
     );
 

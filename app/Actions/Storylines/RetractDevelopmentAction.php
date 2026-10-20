@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Storylines;
 
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Storylines\Storyline;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,7 @@ class RetractDevelopmentAction
                 $step->version++;
                 $step->save();
             }
-            $this->revision->handle($story, $development, $reopenStep ? 'development_retracted_reopen' : 'development_retracted', $before, $reason);
+            $this->revision->handle($story, $development, $reopenStep ? StorylineRevisionOperation::DevelopmentRetractedReopen : StorylineRevisionOperation::DevelopmentRetracted, $before, $reason);
         }, attempts: 3);
     }
 }

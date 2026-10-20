@@ -9,6 +9,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Collection;
 
 /*
@@ -22,10 +23,10 @@ dataset('cross promotion match bookings', [
             MatchType::Singles,
             Referee::factory()->bookable()->for($home, 'promotion')->count(1)->create(),
             new Collection,
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->for($home, 'promotion')->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->for($foreign, 'promotion')->create()]],
-            ]),
+            ])),
             null,
         ),
         'wrestlers',
@@ -36,10 +37,10 @@ dataset('cross promotion match bookings', [
             MatchType::TagTeam,
             Referee::factory()->bookable()->for($home, 'promotion')->count(1)->create(),
             new Collection,
-            collect([
+            new MatchSides(collect([
                 1 => ['tag_teams' => [TagTeam::factory()->bookable()->for($home, 'promotion')->create()]],
                 2 => ['tag_teams' => [TagTeam::factory()->bookable()->for($foreign, 'promotion')->create()]],
-            ]),
+            ])),
             null,
         ),
         'tag teams',
@@ -50,10 +51,10 @@ dataset('cross promotion match bookings', [
             MatchType::Singles,
             Referee::factory()->bookable()->for($foreign, 'promotion')->count(1)->create(),
             new Collection,
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->for($home, 'promotion')->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->for($home, 'promotion')->create()]],
-            ]),
+            ])),
             null,
         ),
         'referees',
@@ -64,10 +65,10 @@ dataset('cross promotion match bookings', [
             MatchType::Singles,
             Referee::factory()->bookable()->for($home, 'promotion')->count(1)->create(),
             Title::factory()->active()->singles()->for($foreign, 'promotion')->count(1)->create(),
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->for($home, 'promotion')->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->for($home, 'promotion')->create()]],
-            ]),
+            ])),
             null,
         ),
         'titles',

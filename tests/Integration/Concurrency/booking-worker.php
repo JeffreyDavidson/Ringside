@@ -99,6 +99,7 @@ use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\ValueObjects\MatchSides;
 use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Contracts\Console\Kernel;
@@ -175,7 +176,7 @@ try {
     } elseif (isset($spec['team_id'])) {
         resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
             MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),
-            collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]]), null,
+            new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])), null,
         ));
     } elseif (isset($spec['talent_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
@@ -303,10 +304,10 @@ try {
                 MatchType::Singles,
                 Referee::query()->whereKey($spec['referee_id'])->get(),
                 Title::query()->whereKey([])->get(),
-                collect([
+                new MatchSides(collect([
                     1 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['first_wrestler_id'])]],
                     2 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['second_wrestler_id'])]],
-                ]),
+                ])),
                 null,
             ),
         );

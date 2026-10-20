@@ -9,6 +9,7 @@ use App\Enums\Matches\MatchType;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\MatchSides;
 use Illuminate\Support\Collection;
 use JMac\Testing\Double;
 use JMac\Testing\Matching\Argument;
@@ -17,14 +18,14 @@ test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $wrestlerA = Wrestler::factory()->bookable()->create();
     $wrestlerB = Wrestler::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         0 => [
             'wrestlers' => [$wrestlerA],
         ],
         1 => [
             'wrestlers' => [$wrestlerB],
         ],
-    ]);
+    ]));
 
     $addWrestlersToMatchAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsToMatchAction = Double::for(AddTagTeamsToMatchAction::class);
@@ -45,14 +46,14 @@ test('it adds tag team competitors to a match', function () {
     $eventMatch = EventMatch::factory()->withMatchType(MatchType::TagTeam)->create();
     $tagTeamA = TagTeam::factory()->bookable()->create();
     $tagTeamB = TagTeam::factory()->bookable()->create();
-    $competitors = collect([
+    $competitors = new MatchSides(collect([
         0 => [
             'tag_teams' => [$tagTeamA],
         ],
         1 => [
             'tag_teams' => [$tagTeamB],
         ],
-    ]);
+    ]));
 
     $addWrestlersToMatchAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsToMatchAction = Double::for(AddTagTeamsToMatchAction::class);
