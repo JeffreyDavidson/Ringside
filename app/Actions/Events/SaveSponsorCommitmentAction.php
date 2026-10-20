@@ -35,7 +35,7 @@ class SaveSponsorCommitmentAction
             $commitment ??= new EventSponsorCommitment;
             $isNew = ! $commitment->exists;
             $commitment->version = $version;
-            $commitment->promotion_id = $event->promotion_id;
+            $commitment->promotion_id = $sponsor->promotion_id;
             $commitment->event_id = $event->id;
             if ($isNew || $commitment->sponsor_id !== $sponsor->id || $refreshSponsorName) {
                 $commitment->sponsor_name = $sponsor->name;

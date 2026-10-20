@@ -38,7 +38,7 @@ final readonly class SponsorCommitmentRequirements
             throw RecordChangedException::changed();
         }
 
-        if (($commitment->version ?? 0) !== $version || ($commitment === null && $keyAlreadyUsed)) {
+        if (($commitment->version ?? 0) !== $version || (! $commitment instanceof EventSponsorCommitment && $keyAlreadyUsed)) {
             throw RecordChangedException::changed();
         }
     }
@@ -50,7 +50,7 @@ final readonly class SponsorCommitmentRequirements
      */
     public function ensureCanSelect(Event $event, Sponsor $sponsor, ?EventSponsorCommitment $commitment): void
     {
-        if (($commitment === null && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
+        if ((! $commitment instanceof EventSponsorCommitment && $event->trashed()) || ($sponsor->archived_at !== null && $commitment?->sponsor_id !== $sponsor->id)) {
             throw SponsorCommitmentException::archived();
         }
     }
