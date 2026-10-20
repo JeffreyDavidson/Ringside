@@ -366,7 +366,7 @@ test('it keeps the rows of the selected competitors of each type', function () {
     EventMatchBuilder::whereSelectedCompetitors($query, 'participant', $selection);
 
     // Assert
-    expect($query->toSql())->toBe('select * from "events_matches_competitors" as "participant" where (("participant"."competitor_type" = ? and "participant"."competitor_id" in (?, ?)) or ("participant"."competitor_type" = ? and "participant"."competitor_id" in (?)))')
+    expect(normalizedSql($query->toSql()))->toBe('select * from "events_matches_competitors" as "participant" where (("participant"."competitor_type" = ? and "participant"."competitor_id" in (?, ?)) or ("participant"."competitor_type" = ? and "participant"."competitor_id" in (?)))')
         ->and($query->getBindings())->toBe(['wrestler', 4, 5, 'tag_team', 9]);
 });
 
@@ -378,6 +378,6 @@ test('it keeps no competitor rows for an empty selection', function () {
     EventMatchBuilder::whereSelectedCompetitors($query, 'participant', new CompetitorSelection([]));
 
     // Assert
-    expect($query->toSql())->toBe('select * from "events_matches_competitors" as "participant"')
+    expect(normalizedSql($query->toSql()))->toBe('select * from "events_matches_competitors" as "participant"')
         ->and($query->getBindings())->toBeEmpty();
 });
