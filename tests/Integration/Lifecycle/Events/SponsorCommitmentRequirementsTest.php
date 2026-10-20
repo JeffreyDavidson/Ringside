@@ -40,7 +40,7 @@ describe('sponsor commitment requirements', function (): void {
         $commitment = $savedVersion === null ? null : EventSponsorCommitment::factory()->make(['version' => $savedVersion]);
 
         // Act
-        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, $version, SPONSOR_REQUIREMENTS_KEY, false);
+        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, $version, SPONSOR_REQUIREMENTS_KEY, fn (): bool => false);
 
         // Assert
         expect($ensure)->not->toThrow(RecordChangedException::class);
@@ -54,7 +54,7 @@ describe('sponsor commitment requirements', function (): void {
         $commitment = $savedVersion === null ? null : EventSponsorCommitment::factory()->make(['version' => $savedVersion]);
 
         // Act
-        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, $version, $key, $keyUsed);
+        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, $version, $key, fn (): bool => $keyUsed);
 
         // Assert
         expect($ensure)->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
@@ -66,12 +66,33 @@ describe('sponsor commitment requirements', function (): void {
         'a stale version and a key that is not a uuid' => [3, 2, 'invalid', false],
     ]);
 
+    it('does not look up a key that is not a UUID or a stale version', function (?int $savedVersion, int $version, string $key): void {
+        // Arrange
+        $commitment = $savedVersion === null ? null : EventSponsorCommitment::factory()->make(['version' => $savedVersion]);
+        $lookups = 0;
+
+        // Act
+        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, $version, $key, function () use (&$lookups): bool {
+            $lookups++;
+
+            return false;
+        });
+
+        // Assert
+        expect($ensure)->toThrow(RecordChangedException::class)
+            ->and($lookups)->toBe(0);
+    })->with([
+        'a new promise with a key that is not a uuid' => [null, 0, 'invalid'],
+        'a stale version' => [3, 2, SPONSOR_REQUIREMENTS_KEY],
+        'a new promise at a later version' => [null, 1, SPONSOR_REQUIREMENTS_KEY],
+    ]);
+
     it('lets a saved promise repeat its key', function (): void {
         // Arrange
         $commitment = EventSponsorCommitment::factory()->make(['version' => 3]);
 
         // Act
-        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, 3, SPONSOR_REQUIREMENTS_KEY, true);
+        $ensure = fn () => (new SponsorCommitmentRequirements)->ensureCurrentSubmission($commitment, 3, SPONSOR_REQUIREMENTS_KEY, fn (): bool => true);
 
         // Assert
         expect($ensure)->not->toThrow(RecordChangedException::class);

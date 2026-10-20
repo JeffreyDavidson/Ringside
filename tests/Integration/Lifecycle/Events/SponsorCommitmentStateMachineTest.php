@@ -22,17 +22,6 @@ dataset('sponsor commitment moves', [
 ]);
 
 describe('sponsor commitment state machine', function (): void {
-    it('allows every move between the three statuses', function (SponsorCommitmentStatus $from, SponsorCommitmentStatus $to, bool $allowed): void {
-        // Arrange
-        $machine = new SponsorCommitmentStateMachine;
-
-        // Act
-        $canMove = $machine->canMove($from, $to);
-
-        // Assert
-        expect($canMove)->toBe($allowed);
-    })->with('sponsor commitment moves');
-
     it('asks for a reason when cancelling or changing a promise that is no longer pending', function (SponsorCommitmentStatus $from, SponsorCommitmentStatus $to, bool $allowed, bool $reason): void {
         // Arrange
         $machine = new SponsorCommitmentStateMachine;

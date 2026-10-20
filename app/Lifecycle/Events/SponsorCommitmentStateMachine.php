@@ -14,25 +14,11 @@ use Carbon\CarbonInterface;
  *
  * It reads the promise and refuses with SponsorCommitmentException; it never locks or writes.
  * SaveSponsorCommitmentAction locks the promise and saves it. A promise that does not exist yet starts from Pending.
+ * There is no moves table because every status move is allowed today (a promise may be saved again, completed, cancelled or
+ * reopened); what a move costs is a reason or evidence.
  */
 final readonly class SponsorCommitmentStateMachine
 {
-    /**
-     * The allowed moves, by the status the promise is in (the key is the status value). Anything not listed is refused.
-     * Every move is allowed: a promise may be saved again, completed, cancelled or reopened. What a move costs is a reason
-     * or evidence, which requiresReason() and ensureCanComplete() decide.
-     */
-    private const array MOVES = [
-        'pending' => [SponsorCommitmentStatus::Pending, SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Cancelled],
-        'completed' => [SponsorCommitmentStatus::Pending, SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Cancelled],
-        'cancelled' => [SponsorCommitmentStatus::Pending, SponsorCommitmentStatus::Completed, SponsorCommitmentStatus::Cancelled],
-    ];
-
-    public function canMove(SponsorCommitmentStatus $from, SponsorCommitmentStatus $to): bool
-    {
-        return in_array($to, self::MOVES[$from->value], true);
-    }
-
     /** Cancelling, and any save of a promise that is already completed or cancelled (a correction or a reopening), must say why. */
     public function requiresReason(SponsorCommitmentStatus $from, SponsorCommitmentStatus $to): bool
     {
@@ -40,7 +26,7 @@ final readonly class SponsorCommitmentStateMachine
     }
 
     /**
-     * Refuse a move that needs a reason and has none. The table allows every move, so it is not checked here.
+     * Refuse a move that needs a reason and has none.
      *
      * @throws SponsorCommitmentException
      */

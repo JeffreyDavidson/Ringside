@@ -298,6 +298,24 @@ test('stale versions repeated keys and keys that are not uuids name the changed 
     'a key that is not a uuid' => [1, false, 'invalid'],
 ]);
 
+test('a new promise with a key that is not a uuid is refused without looking the key up or writing anything', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = $world['promise'];
+
+    // Act
+    $lookups = 0;
+    DB::listen(function ($query) use (&$lookups): void {
+        $lookups += str_contains($query->sql, 'submission_key') ? 1 : 0;
+    });
+    $save = fn () => app(SaveSponsorCommitmentAction::class)->handle($world['event'], null, 0, 'invalid', sponsorPromiseData($promise));
+
+    // Assert
+    expect($save)->toThrow(RecordChangedException::class, __('core.errors.record.changed'))
+        ->and($lookups)->toBe(0)
+        ->and(EventSponsorCommitment::query()->count())->toBe(1);
+});
+
 test('an archived sponsor is refused before a missing reason', function (): void {
     // Arrange
     $world = sponsorFixture();

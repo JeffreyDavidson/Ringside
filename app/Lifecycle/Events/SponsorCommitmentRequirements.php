@@ -9,6 +9,7 @@ use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
+use Closure;
 use Illuminate\Support\Str;
 
 /**
@@ -28,17 +29,17 @@ final readonly class SponsorCommitmentRequirements
     /**
      * Refuse a submission whose key is not a UUID, whose version is no longer the saved one, or that already created a promise.
      *
-     * @param  bool  $keyAlreadyUsed  whether another promise on the event was created with this key (only read for a new promise)
+     * @param  Closure(): bool  $keyAlreadyUsed  whether another promise on the event was created with this key; only called for a new promise with a UUID key and the saved version
      *
      * @throws RecordChangedException
      */
-    public function ensureCurrentSubmission(?EventSponsorCommitment $commitment, int $version, string $submissionKey, bool $keyAlreadyUsed): void
+    public function ensureCurrentSubmission(?EventSponsorCommitment $commitment, int $version, string $submissionKey, Closure $keyAlreadyUsed): void
     {
         if (! Str::isUuid($submissionKey)) {
             throw RecordChangedException::changed();
         }
 
-        if (($commitment->version ?? 0) !== $version || (! $commitment instanceof EventSponsorCommitment && $keyAlreadyUsed)) {
+        if (($commitment->version ?? 0) !== $version || (! $commitment instanceof EventSponsorCommitment && $keyAlreadyUsed())) {
             throw RecordChangedException::changed();
         }
     }

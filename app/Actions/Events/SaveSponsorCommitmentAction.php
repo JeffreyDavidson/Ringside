@@ -28,7 +28,7 @@ class SaveSponsorCommitmentAction
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
             $commitment = $id === null ? null : EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             $this->requirements->ensureCurrentSubmission($commitment, $version, $submissionKey,
-                $commitment === null && EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists());
+                fn (): bool => EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists());
             $this->requirements->ensureCanSelect($event, $sponsor, $commitment);
             $this->machine->ensureCanMove($commitment, $data->status, $reason);
             $this->machine->ensureCanComplete($data->status, $data->evidence, $data->completedAt);
