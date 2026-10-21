@@ -76,12 +76,10 @@ class BookingHistoryViewModel
             ->mapWithKeys(fn (stdClass $row): array => [$row->competitor_type.':'.$row->competitor_id => (string) $row->latest_date])
             ->all();
 
-        $withMatches = [];
-        foreach ($subjects->groupBy(fn (Wrestler|TagTeam $subject): string => $subject->getMorphClass()) as $group) {
-            foreach ($this->recentMatchesQuery->get(new Collection($group->all()), $event->promotion_id, $reference, $excludedMatchId, self::PREVIEW_ROWS) as $loaded) {
-                $withMatches[$this->key($loaded)] = $loaded;
-            }
-        }
+        $withMatches = $subjects->groupBy(fn (Wrestler|TagTeam $subject): string => $subject->getMorphClass())
+            ->flatMap(fn (Collection $group): Collection => $this->recentMatchesQuery->get(new Collection($group->all()), $event->promotion_id, $reference, $excludedMatchId, self::PREVIEW_ROWS))
+            ->keyBy(fn (Wrestler|TagTeam $loaded): string => $this->key($loaded))
+            ->all();
 
         $snapshot['available'] = true;
         $snapshot['subjects'] = array_values($subjects->map(fn (Wrestler|TagTeam $subject): array => [
