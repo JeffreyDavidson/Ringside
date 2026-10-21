@@ -22,16 +22,14 @@ class TagTeamCollection extends Collection
      */
     public function currentWrestlers(): Collection
     {
-        $wrestlers = [];
-
-        foreach ($this->items as $tagTeam) {
+        $wrestlers = $this->flatMap(function (TagTeam $tagTeam): array {
             if (! $tagTeam->relationLoaded('currentWrestlers')) {
                 throw new LogicException('Load the currentWrestlers relation before reading it from a tag team collection.');
             }
 
-            array_push($wrestlers, ...$tagTeam->currentWrestlers->all());
-        }
+            return $tagTeam->currentWrestlers->all();
+        });
 
-        return (new Wrestler)->newCollection($wrestlers);
+        return (new Wrestler)->newCollection($wrestlers->all());
     }
 }

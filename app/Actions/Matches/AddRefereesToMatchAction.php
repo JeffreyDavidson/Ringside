@@ -108,6 +108,6 @@ class AddRefereesToMatchAction
             }
         }
 
-        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->pluck('id'));
+        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->modelKeys());
     }
 }

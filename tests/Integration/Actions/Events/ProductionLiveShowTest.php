@@ -75,6 +75,24 @@ test('live operation audit properties exclude private crew names and instruction
         ->not->toContain('PRIVATE-CUE-7Q', 'PRIVATE-CREW-7Q');
 });
 
+test('a crew attendance mark audits only the attendance fields', function (): void {
+    // Arrange
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+
+    // Act
+    resolve(MarkLiveAttendanceAction::class)->handle($event, 1, 'crew:'.$fixture['contact']->id, LiveAttendanceMark::Arrived, true);
+
+    // Assert
+    $audit = Activity::query()->where('log_name', 'live-show')->orderByDesc('id')->firstOrFail();
+    expect(data_get($audit->properties, 'before'))->toHaveCount(3)->toHaveKeys(['arrived', 'briefed', 'updated_by'])
+        ->and(data_get($audit->properties, 'after'))->toHaveCount(3)->toHaveKeys(['arrived', 'briefed', 'updated_by'])
+        ->and(data_get($audit->properties, 'before.arrived'))->toBeNull()
+        ->and(data_get($audit->properties, 'after.arrived'))->not->toBeNull();
+});
+
 test('several production roles create one crew attendance entry and completion freezes history', function (): void {
     // Arrange
     $fixture = productionFixture();
