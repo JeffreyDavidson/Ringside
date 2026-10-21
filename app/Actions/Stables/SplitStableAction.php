@@ -10,13 +10,9 @@ use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
-use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +23,6 @@ class SplitStableAction
      */
     public function __construct(
         protected CreateAction $createAction,
-        protected StableMembershipService $membershipService,
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected StableRestructuringEligibility $eligibility,
         protected StableNameLock $nameLock,
@@ -68,7 +63,7 @@ class SplitStableAction
 
             $this->eligibility->ensureCanSplit($lockedStable);
 
-            $this->validateSplitMembers($lockedStable, $membersForNewStable);
+            $this->eligibility->ensureSplitMembersValid($lockedStable, $membersForNewStable);
 
             $stableData = new StableData(
                 name: mb_trim($newStableName),
@@ -99,53 +94,5 @@ class SplitStableAction
 
             return $newStable;
         });
-    }
-
-    /**
-     * Validate that split members are feasible.
-     *
-     * @param  Stable  $originalStable  The stable being split
-     * @param  StableMembershipData  $membersForNewStable  The members being moved
-     *
-     * @throws CannotBeSplitException When split is not feasible
-     */
-    private function validateSplitMembers(Stable $originalStable, StableMembershipData $membersForNewStable): void
-    {
-        if ($membersForNewStable->isEmpty()) {
-            throw CannotBeSplitException::noMembersToMove();
-        }
-
-        $currentMembers = $this->membershipService->currentMembers($originalStable);
-        $nonMemberWrestlerNames = $membersForNewStable->wrestlers
-            ?->diff($currentMembers->wrestlers ?? [])
-            ->map(fn (Wrestler $wrestler): string => $wrestler->name)
-            ->all() ?? [];
-        $nonMemberTagTeamNames = $membersForNewStable->tagTeams
-            ?->diff($currentMembers->tagTeams ?? [])
-            ->map(fn (TagTeam $tagTeam): string => $tagTeam->name)
-            ->all() ?? [];
-        $nonMemberNames = [...$nonMemberWrestlerNames, ...$nonMemberTagTeamNames];
-
-        if ($nonMemberNames !== []) {
-            throw CannotBeSplitException::membersDoNotBelongToStable($nonMemberNames);
-        }
-
-        $this->eligibility->ensureSplitMembersAvailable($membersForNewStable);
-        $this->eligibility->ensureSplitKeepsTagTeamsWithWrestlers($currentMembers, $membersForNewStable);
-
-        $newStableMemberCount = $membersForNewStable->getTotalMemberCount();
-        $remainingMemberCount = $currentMembers->getTotalMemberCount() - $newStableMemberCount;
-
-        if ($remainingMemberCount === 0) {
-            throw CannotBeSplitException::allMembersMoving();
-        }
-
-        if (! StableMembershipRequirements::hasMinimumHeadcount($newStableMemberCount)) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
-        }
-
-        if (! StableMembershipRequirements::hasMinimumHeadcount($remainingMemberCount)) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, StableMembershipRequirements::MINIMUM_MEMBER_COUNT);
-        }
     }
 }

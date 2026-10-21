@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Lifecycle\Events\EventProductionRequirements;
+use App\Models\Crew\CrewContact;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * Run a production input through both steps of the save and return the validation errors it raised.
+ *
+ * @param  array<string, mixed>  $input
+ * @param  list<string>  $itemKeys
+ * @return array<string, list<string>>
+ */
+function productionErrors(array $input, array $itemKeys, ?CrewContact $contact): array
+{
+    $requirements = resolve(EventProductionRequirements::class);
+    $contacts = collect($contact === null ? [] : [$contact->id => $contact]);
+
+    try {
+        $requirements->ensureProduction($requirements->validatedInput($input), null, $itemKeys, $contacts);
+    } catch (ValidationException $exception) {
+        return $exception->errors();
+    }
+
+    return [];
+}
+
+/** @return array{id: string, contact_id: int, role: string, timezone: string} */
+function productionAssignment(CrewContact $contact): array
+{
+    return ['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC'];
+}
+
+/** @return array{id: string, item_key: string, subject: string, trigger: string, instruction: string} */
+function productionCue(int $number = 1): array
+{
+    return ['id' => sprintf('eed36a82-90cb-4a79-b2cc-%012d', $number), 'item_key' => 'match:1', 'subject' => 'Harbor Hero',
+        'trigger' => 'Caller signal', 'instruction' => 'Play entrance'];
+}
+
+test('a valid plan raises no errors', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'owner_id' => productionAssignment($contact)['id']]]];
+
+    // Act
+    $errors = productionErrors($input, ['match:1'], $contact);
+
+    // Assert
+    expect($errors)->toBeEmpty();
+});
+
+test('each state refusal names its field and message', function (Closure $setup, string $field, string $message): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    [$input, $known] = $setup($contact);
+
+    // Act
+    $errors = productionErrors($input, ['match:1'], $known);
+
+    // Assert
+    expect($errors)->toBe([$field => [__($message)]]);
+})->with([
+    'contact outside the promotion' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => []], null],
+        'assignments.0.contact_id', 'production.invalid_contact',
+    ],
+    'archived contact' => [
+        function (CrewContact $contact): array {
+            $contact->archived_at = now();
+
+            return [['assignments' => [productionAssignment($contact)], 'cues' => []], $contact];
+        },
+        'assignments.0.contact_id', 'production.invalid_contact',
+    ],
+    'repeated hour without offset' => [
+        fn (CrewContact $contact): array => [['assignments' => [[...productionAssignment($contact), 'timezone' => 'America/New_York', 'call_at' => '2026-11-01T01:30']], 'cues' => []], $contact],
+        'assignments.0.call_at', 'production.invalid_assignment',
+    ],
+    'skipped hour' => [
+        fn (CrewContact $contact): array => [['assignments' => [[...productionAssignment($contact), 'timezone' => 'America/New_York', 'call_at' => '2026-03-08T02:30']], 'cues' => []], $contact],
+        'assignments.0.call_at', 'production.invalid_assignment',
+    ],
+    'cue on an item that is not on the card' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'item_key' => 'match:99']]], $contact],
+        'cues.0.item_key', 'production.invalid_cue',
+    ],
+    'cue owner that is not an assignment' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'owner_id' => '4e833c54-5f60-48b8-91c5-dbf85ca51111']]], $contact],
+        'cues.0.owner_id', 'production.invalid_cue',
+    ],
+    'twenty-first cue on one item' => [
+        fn (CrewContact $contact): array => [['assignments' => [productionAssignment($contact)], 'cues' => array_map(productionCue(...), range(1, 21))], $contact],
+        'cues.20.owner_id', 'production.invalid_cue',
+    ],
+]);
+
+test('an Other role without a station is refused on the station field', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [[...productionAssignment($contact), 'role' => 'other', 'station' => '   ']], 'cues' => []];
+
+    // Act
+    $errors = productionErrors($input, [], $contact);
+
+    // Assert
+    expect($errors)->toBe(['assignments.0.station' => [__('production.invalid_assignment')]]);
+});
+
+test('an Other role with a station is accepted', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [[...productionAssignment($contact), 'role' => 'other', 'station' => 'Mixer']], 'cues' => []];
+
+    // Act
+    $errors = productionErrors($input, [], $contact);
+
+    // Assert
+    expect($errors)->toBeEmpty();
+});
+
+test('a cue link with credentials is refused on the link field', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'url' => 'https://secret:password@example.com/track']]];
+
+    // Act
+    $errors = productionErrors($input, ['match:1'], $contact);
+
+    // Assert
+    expect($errors)->toBe(['cues.0.url' => [__('production.invalid_cue')]]);
+});
+
+test('an input-shape error is raised before a state error', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [[...productionAssignment($contact), 'role' => 'other']], 'cues' => [[...productionCue(), 'item_key' => 'match:99']]];
+
+    // Act
+    $errors = productionErrors($input, ['match:1'], null);
+
+    // Assert
+    expect($errors)->toBe(['assignments.0.station' => [__('production.invalid_assignment')]]);
+});
+
+test('an assignment error wins over a cue error', function (): void {
+    // Arrange
+    $contact = CrewContact::factory()->create();
+    $input = ['assignments' => [productionAssignment($contact)], 'cues' => [[...productionCue(), 'item_key' => 'match:99']]];
+
+    // Act
+    $errors = productionErrors($input, ['match:1'], null);
+
+    // Assert
+    expect($errors)->toBe(['assignments.0.contact_id' => [__('production.invalid_contact')]]);
+});

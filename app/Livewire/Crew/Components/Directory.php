@@ -6,13 +6,12 @@ namespace App\Livewire\Crew\Components;
 
 use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Crew\SaveCrewContactAction;
-use App\Builders\Crew\CrewContactBuilder;
-use App\Data\Crew\CrewContactData;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Crew\Forms\CrewContactForm;
 use App\Models\Crew\CrewContact;
+use App\Queries\Crew\CrewContactSearchQuery;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
@@ -28,18 +27,9 @@ class Directory extends Component
     #[Locked]
     public int $version = 0;
 
-    #[Locked]
-    public string $clientId = '';
-
     public bool $editing = false;
 
-    public string $name = '';
-
-    public string $phone = '';
-
-    public string $email = '';
-
-    public string $notes = '';
+    public CrewContactForm $form;
 
     public string $search = '';
 
@@ -48,8 +38,9 @@ class Directory extends Component
     public function newContact(): void
     {
         Gate::authorize('create', CrewContact::class);
-        $this->reset('contactId', 'version', 'name', 'phone', 'email', 'notes');
-        $this->clientId = (string) Str::uuid();
+        $this->reset('contactId', 'version');
+        $this->form->reset();
+        $this->form->clientId = (string) Str::uuid();
         $this->editing = true;
         $this->resetErrorBag();
     }
@@ -60,11 +51,7 @@ class Directory extends Component
         Gate::authorize('update', $contact);
         $this->contactId = $id;
         $this->version = $contact->version;
-        $this->clientId = $contact->client_id;
-        $this->name = $contact->name;
-        $this->phone = $contact->phone ?? '';
-        $this->email = $contact->email ?? '';
-        $this->notes = $contact->notes ?? '';
+        $this->form->load($contact);
         $this->editing = true;
         $this->resetErrorBag();
     }
@@ -73,7 +60,7 @@ class Directory extends Component
     {
         Gate::authorize('viewAny', CrewContact::class);
         $this->editing = false;
-        $this->reset('name', 'phone', 'email', 'notes');
+        $this->form->reset('name', 'phone', 'email', 'notes');
         $this->resetErrorBag();
     }
 
@@ -81,19 +68,11 @@ class Directory extends Component
     {
         $contact = $this->contactId === null ? null : CrewContact::query()->findOrFail($this->contactId);
         Gate::authorize($contact === null ? 'create' : 'update', $contact ?? CrewContact::class);
-        $input = [
-            'name' => trim($this->name), 'phone' => trim($this->phone) ?: null,
-            'email' => trim($this->email) ?: null, 'notes' => trim($this->notes) ?: null, 'client_id' => $this->clientId,
-        ];
-        Validator::make($input, [
-            'name' => ['required', 'string', 'max:160'], 'phone' => ['nullable', 'string', 'max:80'],
-            'email' => ['nullable', 'email', 'max:255'], 'notes' => ['nullable', 'string', 'max:2000'],
-            'client_id' => ['required', 'uuid'],
-        ])->validate();
+        $data = $this->form->toData();
         try {
-            $action->handle($contact, $this->version, $this->clientId, CrewContactData::fromValidated($input));
+            $action->handle($contact, $this->version, $this->form->clientId, $data);
             $this->editing = false;
-            $this->reset('name', 'phone', 'email', 'notes');
+            $this->form->reset('name', 'phone', 'email', 'notes');
         } catch (BaseBusinessException $exception) {
             $this->addError('contact', $this->failureMessageKeepingInput($exception));
         }
@@ -110,12 +89,10 @@ class Directory extends Component
         }
     }
 
-    public function render(): View
+    public function render(CrewContactSearchQuery $contacts): View
     {
         Gate::authorize('viewAny', CrewContact::class);
 
-        return view('livewire.crew.components.directory', ['contacts' => CrewContact::query()
-            ->when(! $this->showArchived, fn (CrewContactBuilder $query) => $query->whereNull('archived_at'))
-            ->matchingName($this->search)->orderBy('name')->orderBy('id')->limit(20)->get()]);
+        return view('livewire.crew.components.directory', ['contacts' => $contacts->get($this->search, includeArchived: $this->showArchived)]);
     }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Livewire\Roster\Availability\Pages\Calendar;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -23,8 +24,8 @@ test('day navigation and typed search update the visible roster without interpre
     app(PromotionContextService::class)->enforce();
     $wrestler = Wrestler::factory()->for($promotion)->create(['name' => 'Harbor Talent']);
     $referee = Referee::factory()->for($promotion)->create(['first_name' => 'River', 'last_name' => 'Official']);
-    resolve(CreateAction::class)->handle($wrestler, '2026-10-17', '2026-10-17', null, $actor);
-    resolve(CreateAction::class)->handle($referee, '2026-10-17', '2026-10-17', null, $actor);
+    resolve(CreateAction::class)->handle($wrestler, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
+    resolve(CreateAction::class)->handle($referee, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
     $event = Event::factory()->for($promotion)->create(['date' => '2026-10-17 18:00:00', 'name' => 'Harbor Saturday']);
     EventMatch::factory()->forEvent($event)->withCompetitors([$wrestler])->create();
     $calendar = livewire(Calendar::class);

@@ -14,6 +14,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 use Illuminate\Support\Facades\Date;
@@ -44,7 +45,7 @@ test('it establishes a stable that has no activity period when a start date is g
     $updatedStable = resolve(UpdateAction::class)->handle($stable, new StableData(
         name: '  Renamed Stable  ',
         start_date: $startedAt,
-        members: new StableMembershipData,
+        members: resolve(StableMembershipService::class)->currentMembers($stable),
     ));
 
     $activityPeriod = $updatedStable->activityPeriods()->sole();
@@ -530,5 +531,79 @@ describe('membership dates are compared as promotion days', function () {
 
         // Assert
         expect($stable->activityPeriods()->sole()->ended_at?->toDateTimeString())->toBe('2026-01-10 08:00:00');
+    });
+});
+
+/*
+ * The several-periods check compares the stored start and the submitted start as promotion days, the way the form
+ * (CanChangeDebutDate) and the single-period check do: the same promotion day is unchanged, another one is locked.
+ */
+describe('start date of a stable with several periods around promotion midnight', function () {
+    test('it accepts an unchanged promotion start day when the stored instant is the previous day in UTC', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create();
+        // 2019-12-31 18:00 in Los Angeles, already 2020-01-01 in UTC; the form shows this period as starting 2019-12-31.
+        $stable->activityPeriods()->create(['started_at' => '2020-01-01 02:00:00', 'ended_at' => '2020-06-01 08:00:00']);
+        $stable->activityPeriods()->create(['started_at' => '2021-01-01 08:00:00', 'ended_at' => '2021-06-01 08:00:00']);
+        $data = new StableData(
+            name: 'Renamed Stable',
+            // The start of 2019-12-31 in Los Angeles: the day the form shows, resubmitted unchanged.
+            start_date: Date::parse('2019-12-31 08:00:00', 'UTC'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2020-06-01 08:00:00', 'UTC'),
+        );
+
+        // Act
+        resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($stable->activityPeriods()->count())->toBe(2)
+            ->and($stable->activityPeriods()->orderBy('started_at')->pluck('started_at')->map->toDateTimeString()->all())->toBe(['2020-01-01 02:00:00', '2021-01-01 08:00:00']);
+    });
+
+    test('it refuses a different promotion start day when the stored instant shares its UTC day, and writes nothing', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create(['name' => 'Original Name']);
+        // 2019-12-31 18:00 in Los Angeles, already 2020-01-01 in UTC.
+        $first = $stable->activityPeriods()->create(['started_at' => '2020-01-01 02:00:00', 'ended_at' => '2020-06-01 08:00:00']);
+        $stable->activityPeriods()->create(['started_at' => '2021-01-01 08:00:00', 'ended_at' => '2021-06-01 08:00:00']);
+        $data = new StableData(
+            name: 'Renamed Stable',
+            // The start of 2020-01-01 in Los Angeles: a different promotion day than the stored one.
+            start_date: Date::parse('2020-01-01 08:00:00', 'UTC'),
+            members: new StableMembershipData,
+        );
+
+        // Act
+        $update = fn () => resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($update)->toThrow(CannotBeUpdatedException::class, 'start date cannot be changed')
+            ->and($stable->refresh()->name)->toBe('Original Name')
+            ->and($first->refresh()->started_at->toDateTimeString())->toBe('2020-01-01 02:00:00');
+    });
+
+    test('it treats the same promotion day as unchanged for a stable with a single period', function () {
+        // Arrange
+        $promotion = Promotion::factory()->create(['timezone' => 'America/Los_Angeles']);
+        $stable = Stable::factory()->unactivated()->for($promotion, 'promotion')->create();
+        $stable->activityPeriods()->create(['started_at' => '2020-01-01 02:00:00', 'ended_at' => '2020-06-01 08:00:00']);
+        // A member who joined before the stored instant: moving the start to the 31st would be refused if it counted as a move.
+        $stable->wrestlers()->attach(Wrestler::factory()->create(), ['joined_at' => '2020-01-01 01:00:00']);
+        $data = new StableData(
+            name: 'Renamed Stable',
+            // The same promotion day as the stored instant (2019-12-31), resubmitted unchanged.
+            start_date: Date::parse('2019-12-31 08:00:00', 'UTC'),
+            members: new StableMembershipData,
+            end_date: Date::parse('2020-06-01 08:00:00', 'UTC'),
+        );
+
+        // Act
+        resolve(UpdateAction::class)->handle($stable, $data);
+
+        // Assert
+        expect($stable->activityPeriods()->sole()->started_at->toDateTimeString())->toBe('2019-12-31 08:00:00');
     });
 });

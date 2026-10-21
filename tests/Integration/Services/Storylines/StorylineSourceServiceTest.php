@@ -8,6 +8,7 @@ use App\Data\Storylines\DevelopmentData;
 use App\Data\Storylines\SourceData;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineSourceWarning;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 
 require_once __DIR__.'/../../../Fixtures/storylines.php';
 
-/** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<string>} */
+/** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<StorylineSourceWarning>} */
 function storylineEvidence(SourceData $source, int $promotionId): array
 {
     return resolve(StorylineSourceService::class)->get($source, $promotionId) ?? throw new LogicException('Expected the source to exist');
@@ -53,7 +54,7 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
     $pack->content = $content;
     $pack->save();
     $evidence = storylineEvidence($source, $f['story']->promotion_id);
-    expect($evidence['warnings'])->toContain(__('storylines.removed_segment'))
+    expect($evidence['warnings'])->toContain(StorylineSourceWarning::RemovedSegment)
         ->and($evidence['context']['segment_label'])->toBeNull()
         ->and($evidence['context']['live_label'])->toBe('Closing promo')
         ->and($evidence['fingerprint'])->not->toBe($old['fingerprint']);
@@ -65,9 +66,21 @@ test('deleted and unplaced sources are visible as historical evidence', function
     $match = storylineEvidence(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
     $f['event']->delete();
     $event = storylineEvidence(new SourceData($f['event']->id), $f['story']->promotion_id);
-    expect($segment['warnings'])->toContain(__('storylines.unplaced_segment'))
-        ->and($match['warnings'])->toContain(__('storylines.deleted_source'))
-        ->and($event['warnings'])->toContain(__('storylines.deleted_source'));
+    expect($segment['warnings'])->toContain(StorylineSourceWarning::UnplacedSegment)
+        ->and($match['warnings'])->toContain(StorylineSourceWarning::DeletedSource)
+        ->and($event['warnings'])->toContain(StorylineSourceWarning::DeletedSource);
+});
+test('a deleted match on a deleted event reports the deleted source once', function () {
+    // Arrange
+    $f = storylineSourceFixture();
+    $f['match']->delete();
+    $f['event']->delete();
+
+    // Act
+    $evidence = storylineEvidence(new SourceData($f['event']->id, matchId: $f['match']->id), $f['story']->promotion_id);
+
+    // Assert
+    expect($evidence['warnings'])->toBe([StorylineSourceWarning::DeletedSource]);
 });
 test('foreign events and foreign match IDs are refused with no new step', function (string $kind) {
     $f = storylineSourceFixture();

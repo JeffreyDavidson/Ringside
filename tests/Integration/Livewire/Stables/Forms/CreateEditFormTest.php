@@ -58,9 +58,9 @@ describe('stable create and edit form', function (): void {
             ->and($data->name)->toBe('The Four Horsemen')
             ->and($data->start_date?->equalTo($startDate))->toBeTrue()
             ->and($data->end_date?->equalTo($endDate))->toBeTrue()
-            ->and($data->members->wrestlers?->map(fn (Wrestler $wrestler): int => $wrestler->id)->all())
+            ->and($data->members->wrestlers->map(fn (Wrestler $wrestler): int => $wrestler->id)->all())
             ->toBe($wrestlers->modelKeys())
-            ->and($data->members->tagTeams?->map(fn (TagTeam $selectedTagTeam): int => $selectedTagTeam->id)->all())
+            ->and($data->members->tagTeams->map(fn (TagTeam $selectedTagTeam): int => $selectedTagTeam->id)->all())
             ->toBe([$tagTeam->id]);
     });
 
@@ -75,8 +75,8 @@ describe('stable create and edit form', function (): void {
         // Assert
         expect($data->start_date)->toBeNull()
             ->and($data->end_date)->toBeNull()
-            ->and($data->members->wrestlers?->isEmpty())->toBeTrue()
-            ->and($data->members->tagTeams?->isEmpty())->toBeTrue();
+            ->and($data->members->wrestlers->isEmpty())->toBeTrue()
+            ->and($data->members->tagTeams->isEmpty())->toBeTrue();
     });
 
     it('hydrates and resolves the stable selected for editing', function (): void {
@@ -351,4 +351,128 @@ describe('stable form same-day period', function (): void {
         // Assert
         expect($errorKeys)->toBe(['form.ended_at']);
     });
+});
+
+/** @return array<string, array<int, string>> */
+function validationErrorMessages(Closure $validation): array
+{
+    try {
+        $validation();
+    } catch (ValidationException $exception) {
+        return $exception->errors();
+    }
+
+    return [];
+}
+
+describe('stable form rule combinations', function (): void {
+    it('reports the same errors and messages for each combination of end date, members and minimum', function (Closure $makeForm, array $expectedErrors): void {
+        // Arrange
+        $form = $makeForm();
+
+        // Act
+        $errors = validationErrorMessages(fn () => $form->validate());
+
+        // Assert
+        expect($errors)->toBe($expectedErrors);
+    })->with([
+        'new stable with an end date' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->name = 'Fresh Faction';
+                $form->started_at = '2099-01-10';
+                $form->ended_at = '2099-01-12';
+                $form->wrestlers = Wrestler::factory()->count(3)->employed()->create()->modelKeys();
+
+                return $form;
+            },
+            ['form.ended_at' => ['An end date cannot be entered here. Establish the stable, then use disband to end it.']],
+        ],
+        'new stable with an end date before the start date' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->name = 'Fresh Faction';
+                $form->started_at = '2099-01-10';
+                $form->ended_at = '2099-01-09';
+                $form->wrestlers = Wrestler::factory()->count(3)->employed()->create()->modelKeys();
+
+                return $form;
+            },
+            ['form.ended_at' => [
+                'An end date cannot be entered here. Establish the stable, then use disband to end it.',
+                'The end date field must be a date after or equal to start date.',
+            ]],
+        ],
+        'new stable without dates and members' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->name = 'Idea Faction';
+
+                return $form;
+            },
+            [],
+        ],
+        'active stable with an end date' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->setModel(Stable::factory()->active()->create());
+                $form->ended_at = '2099-01-01';
+
+                return $form;
+            },
+            ['form.ended_at' => ['An end date cannot be entered here. Establish the stable, then use disband to end it.']],
+        ],
+        'disbanded stable with its end date cleared' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->setModel(Stable::factory()->inactive()->create());
+                $form->ended_at = '';
+
+                return $form;
+            },
+            ['form.ended_at' => ['A disbanded stable cannot be reopened by clearing its end date. Use reunite instead.']],
+        ],
+        'disbanded stable with an end date before the start date' => [
+            function (): CreateEditForm {
+                $stable = Stable::factory()->create();
+                $stable->activityPeriods()->create(['started_at' => '2026-01-10', 'ended_at' => '2026-01-11']);
+                $form = bootedStableForm();
+                $form->setModel($stable);
+                $form->ended_at = '2026-01-09';
+
+                return $form;
+            },
+            ['form.ended_at' => ['The end date field must be a date after or equal to start date.']],
+        ],
+        'disbanded stable renamed' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->setModel(Stable::factory()->inactive()->create());
+                $form->name = 'Renamed';
+
+                return $form;
+            },
+            [],
+        ],
+        'disbanded stable given a wrestler' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->setModel(Stable::factory()->inactive()->create());
+                $form->wrestlers = [Wrestler::factory()->employed()->create()->id];
+
+                return $form;
+            },
+            ['form.wrestlers' => ['A disbanded stable cannot have members. Use reunite instead.']],
+        ],
+        'disbanded stable given a tag team' => [
+            function (): CreateEditForm {
+                $form = bootedStableForm();
+                $form->setModel(Stable::factory()->inactive()->create());
+                $form->tag_teams = [TagTeam::factory()->employed()->create()->id];
+
+                return $form;
+            },
+            ['form.tag_teams' => ['A disbanded stable cannot have members. Use reunite instead.']],
+        ],
+    ]);
 });

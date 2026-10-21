@@ -4,29 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
-use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
+use App\Lifecycle\Events\LiveShowStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
-use App\Models\Events\EventPack;
-use App\Models\Matches\EventMatch;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PrepareLiveShowAction
 {
-    public function __construct(private readonly LiveShowSourceRequirements $source) {}
+    public function __construct(private readonly LiveShowSourceRequirements $source, private readonly EventCardLock $card, private readonly LiveShowStateMachine $states) {}
 
     public function handle(Event $event, int $version, int $packVersion, string $fingerprint): EventLiveRun
     {
         return DB::transaction(function () use ($event, $version, $packVersion, $fingerprint): EventLiveRun {
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
-            $run = EventLiveRun::query()->forEventId($event->id)->lockForUpdate()->first();
+            ['event' => $event, 'run' => $run] = $this->card->lock($event->id);
             if ($run !== null || $version !== 0) {
                 throw RecordChangedException::changed();
             }
@@ -42,7 +38,7 @@ class PrepareLiveShowAction
             $run->version = 1;
             $run->pack_version = $packVersion;
             $run->card_fingerprint = $fingerprint;
-            $run->status = LiveShowStatus::Prepared;
+            $run->status = $this->states->initial();
             $run->content = $source['content'];
             $run->prepared_at = now();
             $run->save();

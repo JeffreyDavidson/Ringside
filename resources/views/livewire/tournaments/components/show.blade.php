@@ -63,7 +63,7 @@
             </details>
         @endif
     @endcan
-    @if ($draftOperation !== '')
+    @if ($draft->operation !== '')
         <section
             x-ref="panel"
             tabindex="-1"
@@ -72,30 +72,30 @@
         >
             <form wire:submit="confirm" class="flex flex-col gap-4">
                 <h2 id="tournament-operation-title" class="text-xl font-semibold">
-                    {{ \App\Enums\Tournaments\TournamentOperation::tryFrom($draftOperation)?->label() ?? $draftOperation }}
+                    {{ \App\Enums\Tournaments\TournamentOperation::tryFrom($draft->operation)?->label() ?? $draft->operation }}
                 </h2>
-                @if (in_array($draftOperation, ['book', 'plan'], true))
+                @if (in_array($draft->operation, ['book', 'plan'], true))
                     <x-form.inputs.select
-                        wire:model="eventId"
+                        wire:model="draft.eventId"
                         :label="__('tournaments.event')"
                         :options="$events->mapWithKeys(fn ($event) => [$event->id => $event->name.' · '.(($event->date === null ? null : \App\Services\Promotions\PromotionTimeZoneService::toLocalTime($tournament->promotion, $event->date)->format('Y-m-d H:i T')) ?? __('tournaments.unscheduled'))])->all()"
                         :placeholder="__('tournaments.choose_event')"
                         class="min-h-11"
                     />
                 @endif
-                @if ($draftOperation === 'book')
+                @if ($draft->operation === 'book')
                     <p class="text-muted-foreground">
                         {{ $selected?->first?->competitor->name }} {{ __('tournaments.versus') }} {{ $selected?->second?->competitor->name }}
                     </p>
                     <x-form.inputs.roster-combobox
-                        wire:model="refereeIds"
+                        wire:model="draft.refereeIds"
                         :label="__('tournaments.referees')"
                         :kind="\App\Enums\Roster\BookableRosterKind::Referees"
                         :labels="$refereeLabels"
                         :multiple="true"
                     />
                     <x-form.inputs.select
-                        wire:model="stipulationId"
+                        wire:model="draft.stipulationId"
                         :label="__('tournaments.stipulation')"
                         :options="$stipulations->pluck('name', 'id')->all()"
                         :placeholder="__('tournaments.none')"
@@ -103,7 +103,7 @@
                     />
                     @if ($selected?->node->round === (int) log($tournament->capacity, 2))
                         <x-form.inputs.select
-                            wire:model="titleId"
+                            wire:model="draft.titleId"
                             :label="__('tournaments.final_title')"
                             :options="$titles->pluck('name', 'id')->all()"
                             :placeholder="__('tournaments.none')"
@@ -115,20 +115,20 @@
                 @if ($entryId !== null)
                     <p class="font-semibold">{{ $entries->sole('id', $entryId)->competitor->name }}</p>
                 @endif
-                @if ($draftOperation === 'walkover')
+                @if ($draft->operation === 'walkover')
                     <p>
                         {{ $selected?->first?->competitor->name }} {{ __('tournaments.versus') }} {{ $selected?->second?->competitor->name }}
                     </p>
                 @endif
-                @if ($draftOperation === 'replace')
+                @if ($draft->operation === 'replace')
                     <x-form.inputs.roster-combobox
-                        wire:model="replacementId"
+                        wire:model="draft.replacementId"
                         :label="__('tournaments.replacement')"
                         :kind="$kind"
                         :labels="$replacementLabels"
                     />
                 @endif
-                @if (in_array($draftOperation, ['reset', 'unbook', 'withdraw', 'replace', 'walkover', 'cancel'], true))
+                @if (in_array($draft->operation, ['reset', 'unbook', 'withdraw', 'replace', 'walkover', 'cancel'], true))
                     <p>{{ __('tournaments.review_hint') }}</p>
                     <ul class="text-muted-foreground list-inside list-disc text-sm">
                         @forelse ($affected as $affectedBout)
@@ -141,17 +141,17 @@
                             <li>{{ __('tournaments.no_bookings_affected') }}</li>
                         @endforelse
                     </ul>
-                    <x-form.inputs.textarea wire:model="reason" :label="__('tournaments.reason')" />
-                    @error('reason')
+                    <x-form.inputs.textarea wire:model="draft.reason" :label="__('tournaments.reason')" />
+                    @error('draft.reason')
                         <x-tournaments.error>{{ $message }}</x-tournaments.error>
                     @enderror
                     <label class="flex min-h-11 items-center gap-3"
                         ><input
                             type="checkbox"
-                            wire:model="confirmed"
+                            wire:model="draft.confirmed"
                             class="size-5"
                         /><span>{{ __('tournaments.confirm_review') }}</span></label>
-                    @error('confirmed')
+                    @error('draft.confirmed')
                         <x-tournaments.error>{{ $message }}</x-tournaments.error>
                     @enderror
                 @endif

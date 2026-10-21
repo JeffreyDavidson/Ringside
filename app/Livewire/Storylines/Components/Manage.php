@@ -11,24 +11,20 @@ use App\Actions\Storylines\SaveStepAction;
 use App\Actions\Storylines\TransitionStepAction;
 use App\Actions\Storylines\TransitionStorylineAction;
 use App\Actions\Storylines\UpdateAction;
-use App\Data\Storylines\DevelopmentData;
-use App\Data\Storylines\ParticipantData;
 use App\Data\Storylines\SourceData;
-use App\Data\Storylines\StepData;
-use App\Data\Storylines\StorylineData;
 use App\Enums\Roster\BookableRosterKind;
 use App\Enums\Storylines\StepStatus;
+use App\Enums\Storylines\StorylineFormMode;
 use App\Enums\Storylines\StorylineStatus;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Storylines\Forms\Planning;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
-use App\Models\Storylines\StorylineDevelopment;
-use App\Models\Storylines\StorylineParticipant;
-use App\Models\Storylines\StorylineStep;
 use App\Queries\Storylines\CreativeRosterQuery;
 use App\Services\Storylines\StorylineSourceService;
+use App\Services\Storylines\StorylineTimezoneService;
+use App\Support\Search\LikeTerm;
 use App\ViewModels\Storylines\StorylineViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,7 +53,7 @@ class Manage extends Component
     public ?int $stepId = null;
 
     #[Locked]
-    public string $mode = '';
+    public ?StorylineFormMode $mode = null;
 
     #[Locked]
     public string $submissionId;
@@ -76,10 +72,13 @@ class Manage extends Component
 
     protected CreativeRosterQuery $roster;
 
-    public function boot(StorylineSourceService $sources, CreativeRosterQuery $roster): void
+    protected StorylineTimezoneService $timezones;
+
+    public function boot(StorylineSourceService $sources, CreativeRosterQuery $roster, StorylineTimezoneService $timezones): void
     {
         $this->sources = $sources;
         $this->roster = $roster;
+        $this->timezones = $timezones;
     }
 
     public function mount(int $storylineId): void
@@ -100,80 +99,19 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('update', $story);
-        abort_unless(in_array($mode, ['story', 'step', 'development', 'record-step', 'participant', 'participant-end', 'step-status', 'story-status', 'retract'], true), 404);
+        $recordStep = $mode === 'record_step';
+        $formMode = StorylineFormMode::tryFrom($recordStep ? StorylineFormMode::Development->value : $mode) ?? abort(404);
         $this->form->reset();
         $this->resetValidation();
-        $this->mode = $mode === 'record-step' ? 'development' : $mode;
-        $this->editingId = $id;
-        $this->stepId = null;
+        $this->mode = $formMode;
         $this->version = $story->version;
         $this->needsReload = false;
         $this->submissionId = (string) Str::uuid();
         $zone = Promotion::query()->findOrFail($story->promotion_id)->timezone;
-        $this->form->occurredOn = now()->setTimezone($zone)->toDateString();
-        $this->form->joinedOn = $this->form->occurredOn;
-        $lastSequence = $story->steps()->max('sequence');
-        $this->form->sequence = is_numeric($lastSequence) ? (int) $lastSequence + 1 : 1;
-        if ($mode === 'story') {
-            $this->form->heading = $story->title;
-            $this->form->description = $story->premise;
-            $this->form->payoff = $story->payoff;
-        }
-        if (in_array($mode, ['step', 'record-step'], true) && $id !== null) {
-            $step = $story->steps()->findOrFail($id);
-            $this->fillEntry($step);
-            if ($mode === 'record-step') {
-                $this->stepId = $id;
-                $existing = $story->developments()->where('storyline_step_id', $id)->first();
-                $this->editingId = $existing?->id;
-                if ($existing !== null) {
-                    $this->fillEntry($existing);
-                }
-                $this->form->occurredOn = $step->event_id === null ? $this->form->occurredOn : Event::query()->withTrashed()->findOrFail($step->event_id)->local_date?->toDateString() ?? $this->form->occurredOn;
-            }
-        }
-        if ($mode === 'development' && $id !== null) {
-            $development = $story->developments()->findOrFail($id);
-            $this->stepId = $development->storyline_step_id;
-            $this->fillEntry($development);
-        }
-        if ($mode === 'participant-end') {
-            $person = $story->participants()->findOrFail($id);
-            $this->form->participantId = $person->participant_id;
-            $this->form->type = $person->participant_type;
-            $this->form->joinedOn = $person->joined_on->toDateString();
-            $this->form->leftOn = $this->form->occurredOn;
-            $this->form->role = $person->role ?? '';
-        }
+        ['editingId' => $this->editingId, 'stepId' => $this->stepId] = $this->form->open($formMode, $story, $id, $recordStep, now()->setTimezone($zone)->toDateString());
         $this->sourceFingerprint = null;
         $this->reviewSource();
         $this->dispatch('storyline-form-opened');
-    }
-
-    private function fillEntry(StorylineStep|StorylineDevelopment $entry): void
-    {
-        $this->form->heading = $entry->heading;
-        $this->form->description = $entry->description;
-        $this->form->sequence = $entry->sequence;
-        $this->form->eventId = $entry->event_id;
-        $this->form->matchId = $entry->match_id;
-        $this->form->segmentId = $entry->segment_id;
-        if ($entry instanceof StorylineStep) {
-            $this->form->targetOn = $entry->target_on?->toDateString();
-
-            return;
-        }
-        $this->form->occurredOn = $entry->occurred_on->toDateString();
-        if ($entry->cast === []) {
-            $this->form->participantIds = [];
-
-            return;
-        }
-        $this->form->participantIds = array_values($this->story()->participants()->where(function (Builder $query) use ($entry): void {
-            foreach ($entry->cast as $person) {
-                $query->orWhere(fn (Builder $cast) => $cast->where('participant_type', $person['type'])->where('participant_id', $person['id']));
-            }
-        })->where('joined_on', '<=', $entry->occurred_on)->where(fn (Builder $query) => $query->whereNull('left_on')->orWhere('left_on', '>=', $entry->occurred_on))->get(['id'])->map(fn (StorylineParticipant $person): int => $person->id)->values()->all());
     }
 
     public function updatedFormType(): void
@@ -227,7 +165,7 @@ class Manage extends Component
     public function cancel(): void
     {
         Gate::authorize('view', $this->story());
-        $this->mode = '';
+        $this->mode = null;
         $this->resetValidation();
     }
 
@@ -255,18 +193,18 @@ class Manage extends Component
         if ($this->needsReload) {
             return;
         }
-        $rules = ['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer'], ...$this->modeRules($story)];
+        $mode = $this->mode ?? abort(404);
+        $rules = ['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer'], ...$this->modeRules($mode, $story)];
         $this->validate($rules, attributes: $this->attributeNames($rules));
         try {
-            match ($this->mode) {
-                'story' => $updateStory->handle($story, $this->version, new StorylineData($this->form->heading, $this->form->description, $this->form->payoff, $this->submissionId), $this->form->reason),
-                'step' => $saveStep->handle($story, $this->version, new StepData($this->form->heading, $this->form->description, $this->form->sequence, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->form->reason ?: null), $this->editingId),
-                'development' => $recordDevelopment->handle($story, $this->version, new DevelopmentData($this->form->heading, $this->form->description, $this->form->occurredOn, $this->form->sequence, $this->form->participantIds, $this->form->source($this->sourceFingerprint), $this->submissionId, $this->stepId, $this->form->reason ?: null), $this->editingId),
-                'participant', 'participant-end' => $saveParticipant->handle($story, $this->version, new ParticipantData($this->form->type, $this->form->participantId ?? 0, $this->form->role ?: null, $this->form->joinedOn, $this->form->leftOn, $this->form->reason ?: null), $this->editingId),
-                'step-status' => $transitionStep->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason),
-                'story-status' => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason),
-                'retract' => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep),
-                default => abort(404),
+            match ($mode) {
+                StorylineFormMode::Story => $updateStory->handle($story, $this->version, $this->form->storyData($this->submissionId), $this->form->reason),
+                StorylineFormMode::Step => $saveStep->handle($story, $this->version, $this->form->stepData($this->sourceFingerprint, $this->submissionId), $this->editingId),
+                StorylineFormMode::Development => $recordDevelopment->handle($story, $this->version, $this->form->developmentData($this->sourceFingerprint, $this->submissionId, $this->stepId), $this->editingId),
+                StorylineFormMode::Participant, StorylineFormMode::ParticipantEnd => $saveParticipant->handle($story, $this->version, $this->form->participantData(), $this->editingId),
+                StorylineFormMode::StepStatus => $transitionStep->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason),
+                StorylineFormMode::StoryStatus => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason),
+                StorylineFormMode::Retract => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep),
             };
         } catch (BaseBusinessException $exception) {
             $this->addError('storyline', $exception->getMessage());
@@ -275,7 +213,7 @@ class Manage extends Component
             return;
         }
         $this->version = $this->story()->version;
-        $this->mode = '';
+        $this->mode = null;
         $this->dispatch('storyline-saved');
     }
 
@@ -284,7 +222,7 @@ class Manage extends Component
      *
      * @return array<string, list<mixed>>
      */
-    private function modeRules(Storyline $story): array
+    private function modeRules(StorylineFormMode $mode, Storyline $story): array
     {
         $reason = ['string', 'max:2000'];
         $changing = $this->editingId === null ? 'nullable' : 'required';
@@ -298,17 +236,17 @@ class Manage extends Component
             'form.reason' => [$changing, ...$reason],
         ];
 
-        return match ($this->mode) {
-            'story' => [...$entry, 'form.payoff' => ['nullable', 'string', 'max:4000'], 'form.reason' => ['required', ...$reason]],
-            'step' => [...$entry, ...$planned],
-            'development' => [
+        return match ($mode) {
+            StorylineFormMode::Story => [...$entry, 'form.payoff' => ['nullable', 'string', 'max:4000'], 'form.reason' => ['required', ...$reason]],
+            StorylineFormMode::Step => [...$entry, ...$planned],
+            StorylineFormMode::Development => [
                 ...$entry,
                 ...$planned,
-                'form.occurredOn' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($this->developmentTimezone($story))->toDateString()],
+                'form.occurredOn' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now()->setTimezone($this->timezones->forDevelopment($story, $this->editingId))->toDateString()],
                 'form.participantIds' => ['array', 'list', 'max:100'],
                 'form.participantIds.*' => ['integer', 'distinct'],
             ],
-            'participant', 'participant-end' => [
+            StorylineFormMode::Participant, StorylineFormMode::ParticipantEnd => [
                 'form.type' => ['required', Rule::in(['wrestler', 'tag_team'])],
                 'form.participantId' => ['required', 'integer', 'min:1'],
                 'form.role' => ['nullable', 'string', 'max:160'],
@@ -316,19 +254,8 @@ class Manage extends Component
                 'form.leftOn' => [$changing, 'date_format:Y-m-d', 'after_or_equal:form.joinedOn'],
                 'form.reason' => [$changing, ...$reason],
             ],
-            'step-status', 'story-status', 'retract' => ['form.reason' => ['required', ...$reason]],
-            default => [],
+            StorylineFormMode::StepStatus, StorylineFormMode::StoryStatus, StorylineFormMode::Retract => ['form.reason' => ['required', ...$reason]],
         };
-    }
-
-    /** A new account is dated in the promotion's timezone; a correction keeps the timezone it was recorded in. */
-    private function developmentTimezone(Storyline $story): string
-    {
-        if ($this->editingId === null) {
-            return Promotion::query()->findOrFail($story->promotion_id)->timezone;
-        }
-
-        return $story->developments()->findOrFail($this->editingId)->timezone;
     }
 
     /**
@@ -344,8 +271,8 @@ class Manage extends Component
     {
         $story = $this->story();
         Gate::authorize('view', $story);
-        $needle = mb_trim(str_replace(['%', '_', '\\'], '', $this->eventSearch));
-        $events = Event::query()->where('promotion_id', $story->promotion_id)->when($needle !== '', fn (Builder $query) => $query->whereLike('name', "%{$needle}%"))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
+        $like = LikeTerm::from($this->eventSearch);
+        $events = Event::query()->where('promotion_id', $story->promotion_id)->when(! $like->isEmpty(), fn (Builder $query) => $query->whereLike('name', $like->contains()))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
         $selected = $this->form->eventId === null ? null : Event::query()->withTrashed()->where('promotion_id', $story->promotion_id)->with(['matches', 'pack', 'promotion'])->findOrFail($this->form->eventId);
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);

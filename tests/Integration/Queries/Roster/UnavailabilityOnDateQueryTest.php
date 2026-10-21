@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -32,11 +33,11 @@ test('reads the entries that cover the day for the given people of one promotion
         ->create();
     $actor = administrator();
     $handle = resolve(CreateAction::class);
-    $wrestlerEntry = $handle->handle($wrestler, '2026-10-20', '2026-10-22', null, $actor);
-    $refereeEntry = $handle->handle($referee, '2026-10-21', '2026-10-21', null, $actor);
-    $handle->handle($wrestler, '2026-11-01', '2026-11-02', null, $actor);
-    $handle->handle($notAsked, '2026-10-21', '2026-10-21', null, $actor);
-    $handle->handle($elsewhere, '2026-10-21', '2026-10-21', null, $actor);
+    $wrestlerEntry = $handle->handle($wrestler, new UnavailabilityData('2026-10-20', '2026-10-22', null), $actor);
+    $refereeEntry = $handle->handle($referee, new UnavailabilityData('2026-10-21', '2026-10-21', null), $actor);
+    $handle->handle($wrestler, new UnavailabilityData('2026-11-01', '2026-11-02', null), $actor);
+    $handle->handle($notAsked, new UnavailabilityData('2026-10-21', '2026-10-21', null), $actor);
+    $handle->handle($elsewhere, new UnavailabilityData('2026-10-21', '2026-10-21', null), $actor);
     $query = resolve(UnavailabilityOnDateQuery::class);
 
     // Act

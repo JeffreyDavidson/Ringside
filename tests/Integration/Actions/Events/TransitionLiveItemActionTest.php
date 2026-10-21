@@ -8,6 +8,7 @@ use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Data\Events\EventPackData;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use Spatie\Activitylog\Models\Activity;
@@ -147,3 +148,20 @@ test('corrected times cannot overlap an earlier or later recorded item', functio
     expect(fn () => $action->handle($fixture['event'], 5, $key, LiveItemOperation::Correct, 'Correct bell time', $start, $finish))->toThrow(LiveShowException::class, __('live-show.invalid_times'));
     expect($fixture['run']->refresh()->version)->toBe(5)->and($fixture['run']->content)->toBe($before);
 })->with(['overlaps previous finish' => true, 'overlaps next start' => false]);
+
+test('starting the first item moves the show from prepared to running and finishing leaves it running', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $action = resolve(TransitionLiveItemAction::class);
+    $preparedStatus = $fixture['run']->status;
+
+    // Act
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $runningStatus = $fixture['run']->refresh()->status;
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+
+    // Assert
+    expect($preparedStatus)->toBe(LiveShowStatus::Prepared)
+        ->and($runningStatus)->toBe(LiveShowStatus::Running)
+        ->and($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Running);
+});

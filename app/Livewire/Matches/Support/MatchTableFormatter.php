@@ -50,8 +50,7 @@ final readonly class MatchTableFormatter
     /** Safe retained-history labels even when a legacy competitor reference is missing or foreign. */
     public function historyCompetitorLinks(EventMatch $match): string
     {
-        return $match->competitors->toBase()
-            ->groupBy(fn (MatchCompetitor $entry): int => $entry->side->position)->sortKeys()
+        return $match->competitors->bySidePosition()
             ->map(fn (Collection $entries): string => $entries
                 ->map(fn (MatchCompetitor $entry): string => $this->historyLink($entry, $match->event->promotion_id))
                 ->join(' & '))->join(' vs ');

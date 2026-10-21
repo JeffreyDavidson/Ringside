@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Enums\Tournaments\EntrantKind;
-use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
+use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class AwardTournamentWalkoverAction
 {
-    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentOutcomeManager $outcomes, private readonly RosterBookingEligibility $eligibility) {}
+    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentOutcomeManager $outcomes, private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
     public function handle(TournamentNode $node, int $version, string $reason): void
     {
@@ -29,9 +29,7 @@ class AwardTournamentWalkoverAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
-            if ($tournament->status !== TournamentStatus::Active) {
-                throw TournamentException::closed();
-            }
+            $this->states->ensureActive($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
             if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->complete || $bout->link instanceof TournamentMatchLink || $bout->first->withdrawn === $bout->second->withdrawn) {

@@ -27,6 +27,28 @@ describe('booking history selection', function (): void {
             ->and($tag)->not->toThrow(ValidationException::class);
     });
 
+    it('returns the chosen competitors with the side each was chosen on', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
+        [$first, $second, $third] = Wrestler::factory()->count(3)->for($promotion, 'promotion')->create()->all();
+
+        // Act
+        $versus = resolve(BookingHistorySelection::class)->validate($event, MatchType::Singles, [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]]);
+        $royal = resolve(BookingHistorySelection::class)->validate($event, MatchType::BattleRoyal, [['wrestlers' => [$first->id, $second->id, $third->id]]]);
+
+        // Assert
+        expect($versus->entries())->toBe([
+            ['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0],
+            ['type' => $second->getMorphClass(), 'id' => $second->id, 'side' => 1],
+        ])
+            ->and($royal->entries())->toBe([
+                ['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0],
+                ['type' => $second->getMorphClass(), 'id' => $second->id, 'side' => 1],
+                ['type' => $third->getMorphClass(), 'id' => $third->id, 'side' => 2],
+            ]);
+    });
+
     it('accepts a deleted competitor, whose history is still retained', function (): void {
         // Arrange
         $promotion = Promotion::factory()->create();
@@ -66,6 +88,49 @@ describe('booking history selection', function (): void {
         // Assert
         expect($foreignSelection)->toThrow(ValidationException::class)
             ->and($missingSelection)->toThrow(ValidationException::class);
+    });
+
+    it('asks for a new selection when the competitors are not allowed in the match type or too few', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
+        [$first, $second, $third] = Wrestler::factory()->count(3)->for($promotion, 'promotion')->create()->all();
+        $team = TagTeam::factory()->for($promotion, 'promotion')->create();
+        $errorsOf = function (MatchType $type, array $sides) use ($event): array {
+            try {
+                resolve(BookingHistorySelection::class)->validate($event, $type, $sides);
+            } catch (ValidationException $exception) {
+                return $exception->errors();
+            }
+
+            return [];
+        };
+
+        // Act
+        $teamInSingles = $errorsOf(MatchType::Singles, [['tag_teams' => [$team->id]], ['wrestlers' => [$first->id]]]);
+        $tooFewEntrants = $errorsOf(MatchType::RoyalRumble, [['wrestlers' => [$first->id, $second->id, $third->id]]]);
+
+        // Assert
+        expect($teamInSingles)->toBe(['history' => [__('matches.history.selection_required')]])
+            ->and($tooFewEntrants)->toBe(['history' => [__('matches.history.selection_required')]]);
+    });
+
+    it('rejects an empty side even when another side has enough competitors', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $event = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
+        [$first, $second] = Wrestler::factory()->count(2)->for($promotion, 'promotion')->create()->all();
+
+        // Act
+        $errors = null;
+        try {
+            resolve(BookingHistorySelection::class)->validate($event, MatchType::Singles, [['wrestlers' => [$first->id, $second->id]], ['wrestlers' => []]]);
+        } catch (ValidationException $exception) {
+            $errors = $exception->errors();
+        }
+
+        // Assert
+        expect($errors)->toBe(['history' => [__('matches.history.selection_required')]]);
     });
 
     it('rejects prohibited identity types and undersized or empty selections', function (MatchType $type, array $selection, string $field): void {

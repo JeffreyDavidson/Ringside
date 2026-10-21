@@ -6,6 +6,7 @@ use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Actions\Roster\Availability\CreateAction;
 use App\Data\Events\EventPackData;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
@@ -30,7 +31,7 @@ test('calendar restrictions flag an existing card and pack without exposing thei
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     $match = EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($person, $day, $day, 'INTERNAL-AVAILABILITY-ONLY', administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, 'INTERNAL-AVAILABILITY-ONLY'), administrator());
 
     // Act
     $card = resolve(EventPackCardService::class)->get($event);
@@ -59,7 +60,7 @@ test('adding unavailability changes review warnings without rewriting a saved pa
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
 
     // Act
-    resolve(CreateAction::class)->handle($person, $day, $day, 'PRIVATE-HISTORY-REASON', $actor);
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, 'PRIVATE-HISTORY-REASON'), $actor);
     $card = resolve(EventPackCardService::class)->get($event);
 
     // Assert
@@ -76,7 +77,7 @@ test('a completed past card is not retroactively flagged by calendar entries', f
     $person = Wrestler::factory()->bookable()->for($promotion)->create();
     EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create(['match_finish' => MatchFinish::NoDecision]);
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($person, $day, $day, null, administrator());
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData($day, $day, null), administrator());
 
     // Act
     $issues = resolve(EventRosterAvailabilityService::class)->get($event);
@@ -130,7 +131,7 @@ test('prints each match and person on the card and fingerprints exactly that car
         ->withCompetitors([$team, $alpha])
         ->create();
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($bravo, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($bravo, new UnavailabilityData($day, $day, null), $actor);
     $wrestlerRole = __('event-pack.wrestler');
     $expectedRows = [
         ['id' => $first->id, 'number' => 1, 'label' => 'Alpha vs Bravo', 'details' => implode(' · ', [MatchType::Singles->label(), 'No DQ', 'Harbor Title']), 'referees' => 'Ref One', 'warning' => true],
@@ -175,7 +176,7 @@ test('reads the matches of the card once, however many people stand on it', func
         ->withReferees()
         ->create();
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($wrestler, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($wrestler, new UnavailabilityData($day, $day, null), $actor);
     $service = resolve(EventPackCardService::class);
 
     // Act
@@ -210,7 +211,7 @@ test('flags a card when a member of a tag team on it is unavailable', function (
     $service = resolve(EventPackCardService::class);
     $clear = $service->get($event);
     $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-    resolve(CreateAction::class)->handle($blockedMember, $day, $day, null, $actor);
+    resolve(CreateAction::class)->handle($blockedMember, new UnavailabilityData($day, $day, null), $actor);
 
     // Act
     $blocked = $service->get($event);

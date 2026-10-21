@@ -10,7 +10,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
-it('synchronizes changed members while leaving omitted groups untouched', function () {
+it('synchronizes both groups and removes the members of an empty group', function () {
     $stable = Stable::factory()->create();
     $retainedWrestler = Wrestler::factory()->create();
     $removedWrestler = Wrestler::factory()->create();
@@ -37,5 +37,6 @@ it('synchronizes changed members while leaving omitted groups untouched', functi
     expect($stable->currentWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
         ->and($stable->previousWrestlers()->whereKey($removedWrestler->id)->exists())->toBeTrue()
-        ->and($stable->currentTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
+        ->and($stable->currentTagTeams()->whereKey($tagTeam->id)->exists())->toBeFalse()
+        ->and($stable->previousTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
 });

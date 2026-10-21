@@ -212,3 +212,112 @@ test('a referee agreement remains distinct from a wrestler with the same numeric
     expect($booking->person_type)->toBe('referee')->and($booking->person_name)->toBe($referee->refresh()->full_name)
         ->and($booking->fee_minor)->toBe(7500)->and(EventTalentBooking::query()->count())->toBe(2);
 });
+
+/** Save a status move on a booking that is already in `$from`. */
+function saveTalentMove(TalentBookingStatus $from, TalentBookingStatus $to, ?string $reason): Closure
+{
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    EventTalentBooking::factory()->create(['event_id' => $event->id, 'person_id' => $person->id, 'status' => $from]);
+
+    return fn (): EventTalentBooking => resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData($to, null, null, 'UTC', null, true, $reason))->refresh();
+}
+
+test('a booking moves without a reason when the rules do not ask for one', function (TalentBookingStatus $from, TalentBookingStatus $to): void {
+    // Arrange
+    $save = saveTalentMove($from, $to, null);
+
+    // Act
+    $booking = $save();
+
+    // Assert
+    expect($booking->status)->toBe($to);
+})->with([
+    'proposed to proposed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Proposed],
+    'proposed to contacted' => [TalentBookingStatus::Proposed, TalentBookingStatus::Contacted],
+    'proposed to confirmed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Confirmed],
+    'contacted to proposed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Proposed],
+    'contacted to contacted' => [TalentBookingStatus::Contacted, TalentBookingStatus::Contacted],
+    'contacted to confirmed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Confirmed],
+    'confirmed to confirmed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Confirmed],
+    'cancelled to proposed' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Proposed],
+]);
+
+test('a booking moves when it is given a reason', function (TalentBookingStatus $from, TalentBookingStatus $to): void {
+    // Arrange
+    $save = saveTalentMove($from, $to, 'Agreed with the talent');
+
+    // Act
+    $booking = $save();
+
+    // Assert
+    expect($booking->status)->toBe($to);
+})->with([
+    'proposed to proposed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Proposed],
+    'proposed to contacted' => [TalentBookingStatus::Proposed, TalentBookingStatus::Contacted],
+    'proposed to confirmed' => [TalentBookingStatus::Proposed, TalentBookingStatus::Confirmed],
+    'contacted to proposed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Proposed],
+    'contacted to contacted' => [TalentBookingStatus::Contacted, TalentBookingStatus::Contacted],
+    'contacted to confirmed' => [TalentBookingStatus::Contacted, TalentBookingStatus::Confirmed],
+    'confirmed to proposed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Proposed],
+    'confirmed to contacted' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Contacted],
+    'confirmed to confirmed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Confirmed],
+    'cancelled to proposed' => [TalentBookingStatus::Cancelled, TalentBookingStatus::Proposed],
+    'proposed to cancelled' => [TalentBookingStatus::Proposed, TalentBookingStatus::Cancelled],
+    'contacted to cancelled' => [TalentBookingStatus::Contacted, TalentBookingStatus::Cancelled],
+    'confirmed to cancelled' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Cancelled],
+]);
+
+test('a cancellation or a correction of a confirmation is refused without a reason', function (TalentBookingStatus $from, TalentBookingStatus $to): void {
+    // Arrange
+    $save = saveTalentMove($from, $to, null);
+
+    // Act
+    $attempt = $save;
+
+    // Assert
+    expect($attempt)->toThrow(TalentBookingException::class, __('talent-bookings.errors.reason'))
+        ->and(EventTalentBooking::query()->sole()->status)->toBe($from);
+})->with([
+    'proposed to cancelled' => [TalentBookingStatus::Proposed, TalentBookingStatus::Cancelled],
+    'contacted to cancelled' => [TalentBookingStatus::Contacted, TalentBookingStatus::Cancelled],
+    'confirmed to cancelled' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Cancelled],
+    'confirmed to proposed' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Proposed],
+    'confirmed to contacted' => [TalentBookingStatus::Confirmed, TalentBookingStatus::Contacted],
+]);
+
+test('a cancelled booking can only be reopened as proposed', function (TalentBookingStatus $to, ?string $reason): void {
+    // Arrange
+    $save = saveTalentMove(TalentBookingStatus::Cancelled, $to, $reason);
+
+    // Act
+    $attempt = $save;
+
+    // Assert
+    expect($attempt)->toThrow(TalentBookingException::class, __('talent-bookings.errors.reopen'))
+        ->and(EventTalentBooking::query()->sole()->status)->toBe(TalentBookingStatus::Cancelled);
+})->with([
+    'contacted' => [TalentBookingStatus::Contacted],
+    'confirmed' => [TalentBookingStatus::Confirmed],
+    'cancelled' => [TalentBookingStatus::Cancelled],
+])->with(['no reason' => null, 'with a reason' => 'Agreed with the talent']);
+
+test('a booking is only confirmed once the agreement is recorded', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $booking = EventTalentBooking::factory()->create(['event_id' => $event->id, 'person_id' => $person->id, 'status' => TalentBookingStatus::Contacted]);
+
+    // Act
+    $confirm = fn () => resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
+        resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null));
+
+    // Assert
+    expect($confirm)->toThrow(TalentBookingException::class, __('talent-bookings.errors.confirm'))
+        ->and($booking->refresh()->status)->toBe(TalentBookingStatus::Contacted);
+});

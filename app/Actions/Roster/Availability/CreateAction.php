@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Roster\Availability;
 
+use App\Data\Roster\UnavailabilityData;
 use App\Exceptions\Roster\Availability\UnavailabilityException;
 use App\Models\Roster\Availability\Unavailability;
 use App\Models\Roster\Referees\Referee;
@@ -13,14 +14,16 @@ use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    public function handle(Wrestler|Referee $person, string $startsOn, string $endsOn, ?string $reason, User $actor): Unavailability
+    public function handle(Wrestler|Referee $person, UnavailabilityData $data, User $actor): Unavailability
     {
-        return DB::transaction(function () use ($person, $startsOn, $endsOn, $reason, $actor): Unavailability {
+        return DB::transaction(function () use ($person, $data, $actor): Unavailability {
+            $startsOn = $data->startsOn;
+            $endsOn = $data->endsOn;
             $person = $person->newQuery()->whereKey($person->id)->lockForUpdate()->firstOrFail();
             if ($person->promotion_id === null) {
                 throw UnavailabilityException::unowned();
             }
-            $reason = $reason === null || mb_trim($reason) === '' ? null : mb_trim($reason);
+            $reason = $data->reason === null || mb_trim($data->reason) === '' ? null : mb_trim($data->reason);
             if (Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
                 ->active()->where('starts_on', $startsOn)->where('ends_on', $endsOn)->where('reason', $reason)->exists()) {
                 throw UnavailabilityException::duplicate();

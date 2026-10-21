@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Enums\Users\UserStatus;
@@ -36,8 +37,8 @@ test('the calendar shows only the current promotions unavailable people and reas
         ->create(['name' => 'Foreign Talent']);
 
     $actor = administrator();
-    resolve(CreateAction::class)->handle($wrestler, '2026-10-17', '2026-10-17', 'Local commitment', $actor);
-    resolve(CreateAction::class)->handle($foreignWrestler, '2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON', $actor);
+    resolve(CreateAction::class)->handle($wrestler, new UnavailabilityData('2026-10-17', '2026-10-17', 'Local commitment'), $actor);
+    resolve(CreateAction::class)->handle($foreignWrestler, new UnavailabilityData('2026-10-17', '2026-10-17', 'FOREIGN-PRIVATE-REASON'), $actor);
     $member = User::factory()
         ->create(['status' => UserStatus::Active]);
     $promotion->users()

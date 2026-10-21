@@ -16,4 +16,10 @@ enum LiveItemOperation: string
     {
         return __("live-show.{$this->value}");
     }
+
+    /** Skipping, correcting and reopening change the record of what happened, so each needs a reason. */
+    public function requiresReason(): bool
+    {
+        return in_array($this, [self::Skip, self::Correct, self::Reopen], true);
+    }
 }

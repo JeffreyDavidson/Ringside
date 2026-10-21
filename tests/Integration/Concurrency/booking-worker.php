@@ -62,10 +62,12 @@ use App\Data\Events\EventPackData;
 use App\Data\Events\EventProductionData;
 use App\Data\Events\LiveShowReviewData;
 use App\Data\Events\SponsorCommitmentData;
+use App\Data\Events\SponsorInstructionData;
 use App\Data\Events\TalentBookingData;
 use App\Data\Events\VenueData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Roster\UnavailabilityData;
 use App\Data\Sponsors\SponsorData;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
@@ -77,6 +79,7 @@ use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\PublicSection;
 use App\Enums\Events\SponsorCommitmentStatus;
 use App\Enums\Events\SponsorCommitmentType;
+use App\Enums\Events\SponsorInstructionMode;
 use App\Enums\Events\TalentBookingStatus;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
@@ -96,6 +99,8 @@ use App\Models\Sponsors\Sponsor;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
+use App\ValueObjects\MatchSides;
+use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\DeadlockException;
@@ -167,11 +172,11 @@ try {
             resolve(ReleaseEventPublicationAction::class)->handle($event, $actor, $spec['public_version'], $spec['public_fingerprint'], PublicSection::from($spec['public_operation']));
         }
     } elseif (isset($spec['unavailability_person_id'])) {
-        resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), $spec['unavailability_day'], $spec['unavailability_day'], null, User::query()->findOrFail($spec['user_id']));
+        resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), new UnavailabilityData($spec['unavailability_day'], $spec['unavailability_day'], null), User::query()->findOrFail($spec['user_id']));
     } elseif (isset($spec['team_id'])) {
         resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
             MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),
-            collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]]), null,
+            new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])), null,
         ));
     } elseif (isset($spec['talent_event_id'])) {
         auth()->login(User::query()->findOrFail($spec['user_id']));
@@ -186,7 +191,7 @@ try {
             $sponsor = Sponsor::query()->findOrFail($spec['sponsor_id']);
             resolve(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($sponsor->promotion_id), $sponsor->id, $spec['version'], $sponsor->submission_key, new SponsorData($sponsor->name, archived: true));
         } elseif ($spec['sponsor_operation'] === 'publish') {
-            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], $spec['mode'], $spec['target_key'] ?: null, null, $spec['preview_hash']);
+            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($spec['mode']), PackKey::fromString($spec['target_key']), null, $spec['preview_hash']));
         } elseif ($spec['sponsor_operation'] === 'pack') {
             $source = resolve(EventPackViewModel::class)->data($event);
             resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], EventPackData::fromValidated([...$source['content'], 'notes' => 'Reviewed ordinary pack note']), false);
@@ -299,10 +304,10 @@ try {
                 MatchType::Singles,
                 Referee::query()->whereKey($spec['referee_id'])->get(),
                 Title::query()->whereKey([])->get(),
-                collect([
+                new MatchSides(collect([
                     1 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['first_wrestler_id'])]],
                     2 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['second_wrestler_id'])]],
-                ]),
+                ])),
                 null,
             ),
         );

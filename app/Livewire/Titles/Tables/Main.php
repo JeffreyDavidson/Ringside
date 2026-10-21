@@ -16,6 +16,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /** @extends BaseTable<Title> */
@@ -81,21 +82,14 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'), 'status')
-                ->options($this->statusOptionsWithDeleted(TitleStatus::filterOptions()))
-                ->filter(function (TitleBuilder $builder, string $value): void {
-                    if ($this->isDeletedFilterValue($value)) {
-                        $builder->onlyTrashed();
-
-                        return;
-                    }
-
-                    $status = TitleStatus::tryFrom($value);
-
-                    if ($status !== null) {
-                        $builder->whereStatus($status);
-                    }
-                }),
+            $this->statusFilter(
+                TitleStatus::class,
+                TitleStatus::filterOptions(),
+                function (Builder $builder, TitleStatus $status): void {
+                    /** @var TitleBuilder<Title> $builder */
+                    $builder->whereStatus($status);
+                },
+            ),
             SelectFilter::make(__('core.type'), 'type')
                 ->options([
                     '' => 'All',

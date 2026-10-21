@@ -63,3 +63,52 @@ it('partitions competitor models by roster type', function () {
         ->and($tagTeams->first())->toBeInstanceOf(TagTeam::class)
         ->and($tagTeams->keys()->all())->toBe([0]);
 });
+
+it('groups competitor entries by ordered side position', function () {
+    // Arrange
+    $match = EventMatch::factory()->create();
+    $sides = MatchSide::factory()->for($match, 'match')->count(2)
+        ->sequence(['position' => 1], ['position' => 2])
+        ->create();
+    $firstSide = $sides->firstOrFail();
+    $secondSide = $sides->sole('position', 2);
+    $opponent = Wrestler::factory()->create();
+    $partner = Wrestler::factory()->create();
+
+    $opponentEntry = MatchCompetitor::factory()->for($match, 'eventMatch')->for($secondSide, 'side')->for($opponent, 'competitor')->create();
+    $partnerEntry = MatchCompetitor::factory()->for($match, 'eventMatch')->for($firstSide, 'side')->for($partner, 'competitor')->create();
+
+    // Act
+    $query = $match->competitors();
+    $query->with('side');
+    $competitors = $query->get();
+    $entriesBySide = $competitors->bySidePosition();
+
+    // Assert
+    expect($entriesBySide->keys()->all())->toBe([1, 2])
+        ->and($entriesBySide->get(1)?->pluck('id')->all())->toBe([$partnerEntry->id])
+        ->and($entriesBySide->get(2)?->pluck('id')->all())->toBe([$opponentEntry->id]);
+});
+
+it('returns the competitor models in entry order', function () {
+    // Arrange
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($wrestler, 'competitor')->create();
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($tagTeam, 'competitor')->create();
+
+    // Act
+    $query = $match->competitors();
+    $query->with('competitor')
+        ->orderBy('id');
+    $competitors = $query->get();
+    $models = $competitors->competitorModels();
+
+    // Assert
+    expect($models->keys()->all())->toBe([0, 1])
+        ->and($models->first())->toBeInstanceOf(Wrestler::class)
+        ->and($models->last())->toBeInstanceOf(TagTeam::class);
+});

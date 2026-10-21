@@ -57,6 +57,23 @@ function releasePublicPage(Event $event, string $section = 'card'): EventPublica
     return EventPublication::query()->where('event_id', $event->id)->firstOrFail();
 }
 
+/**
+ * An event with a released card (and released results when asked).
+ *
+ * @return array{world: array{event: Event, match: EventMatch, actor: User, left: Wrestler, right: Wrestler}, publication: EventPublication}
+ */
+function releasedPublicationWorld(bool $withResults = false): array
+{
+    $world = publicEventFixture();
+    savePublicDraft($world['event']);
+    $publication = releasePublicPage($world['event']);
+    if ($withResults) {
+        $publication = releasePublicPage($world['event'], 'results');
+    }
+
+    return ['world' => $world, 'publication' => $publication];
+}
+
 function publicShowUrl(EventPublication $publication, bool $results = false): string
 {
     return route($results ? 'shows.results' : 'shows.show', ['publicId' => $publication->public_id, 'slug' => $publication->slug]);

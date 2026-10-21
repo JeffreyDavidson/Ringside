@@ -16,3 +16,6 @@ A custom rule implements `ValidationRule`, lives in its domain folder under `app
 
 ## Test each rule beside its domain
 Test a rule at its mirrored path in `tests/Integration/Rules`: pass the value through a real validator with a valid and an invalid record, and assert the translated failure message. A rule that takes an event or match needs a case for each of its inputs.
+
+## Check input shape in a rule, not in a Lifecycle guard
+A check that only needs the submitted input (a field required when another has a value, a link that must carry no credentials) belongs in the validator: a built-in rule such as `required_if`, or a Rule object in its domain folder (`HttpsUrlWithoutCredentials`), so the error lands on the field that is wrong. Lifecycle guards keep the checks that need records or state (a usable contact, a call time that exists, a limit counted across items). A save that must be safe from any caller runs the validation again inside the Action, as `SaveEventProductionAction` does with `EventProductionRequirements::validatedInput()`.

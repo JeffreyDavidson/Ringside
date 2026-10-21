@@ -7,11 +7,11 @@ namespace App\Actions\Events;
 use App\Data\Events\EventProductionData;
 use App\Exceptions\Events\EventPackConflictException;
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\EventProductionRequirements;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
-use App\Models\Matches\EventMatch;
 use App\Services\Events\EventPackCardService;
 use App\Services\Events\EventPackSourceService;
 use Illuminate\Support\Facades\DB;
@@ -20,15 +20,13 @@ use Illuminate\Support\Facades\DB;
 class SaveEventProductionAction
 {
     public function __construct(private readonly EventPackCardService $card, private readonly EventPackSourceService $source,
-        private readonly EventProductionRequirements $requirements) {}
+        private readonly EventProductionRequirements $requirements, private readonly EventCardLock $lock) {}
 
     /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */
     public function handle(Event $event, int $version, string $fingerprint, EventProductionData $data, bool $reviewed): void
     {
         DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
-            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
-            EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-            $pack = EventPack::query()->forEventId($event->id)->lockForUpdate()->first();
+            ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();

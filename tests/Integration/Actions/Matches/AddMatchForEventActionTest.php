@@ -17,6 +17,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\ValueObjects\MatchSides;
 
 test('it rejects a match without competitors', function () {
     $event = Event::factory()->create();
@@ -24,7 +25,7 @@ test('it rejects a match without competitors', function () {
         MatchType::Singles,
         Referee::factory()->bookable()->count(1)->create(),
         Title::query()->whereKey([])->get(),
-        collect(),
+        new MatchSides(collect()),
         null,
     );
 
@@ -40,10 +41,10 @@ test('it rejects a match without referees', function () {
         MatchType::Singles,
         Referee::query()->whereKey([])->get(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstWrestler]],
             2 => ['wrestlers' => [$secondWrestler]],
-        ]),
+        ])),
         null,
     );
 
@@ -61,10 +62,10 @@ test('it creates a complete side-based match', function () {
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey($title)->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstWrestler]],
             2 => ['wrestlers' => [$secondWrestler]],
-        ]),
+        ])),
         'Opening contest',
     );
 
@@ -93,10 +94,10 @@ test('it does not reuse match numbers from soft-deleted matches', function () {
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstWrestler]],
             2 => ['wrestlers' => [$secondWrestler]],
-        ]),
+        ])),
         null,
     );
 
@@ -113,10 +114,10 @@ test('it numbers a match past the range of a tiny integer', function () {
         MatchType::Singles,
         Referee::factory()->bookable()->count(1)->create(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
             2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
-        ]),
+        ])),
         null,
     );
 
@@ -136,10 +137,10 @@ test('it rolls back the match when a side contains no eligible competitors', fun
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$bookableWrestler]],
             2 => ['wrestlers' => [$unemployedWrestler]],
-        ]),
+        ])),
         null,
     );
 
@@ -159,10 +160,10 @@ test('it creates a title match when the current champion is a competitor', funct
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey($title)->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$champion]],
             2 => ['wrestlers' => [$challenger]],
-        ]),
+        ])),
         null,
     );
 
@@ -183,10 +184,10 @@ test('it rolls back a title match when the current champion is absent', function
         MatchType::Singles,
         Referee::query()->whereKey($referee)->get(),
         Title::query()->whereKey($title)->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['wrestlers' => [$firstChallenger]],
             2 => ['wrestlers' => [$secondChallenger]],
-        ]),
+        ])),
         null,
     );
 
@@ -204,18 +205,18 @@ test('it rejects booking a tag team member individually on the same card', funct
         MatchType::TripleThreat,
         Referee::factory()->bookable()->count(1)->create(),
         Title::query()->whereKey([])->get(),
-        collect([
+        new MatchSides(collect([
             1 => ['tag_teams' => [$tagTeam]],
             2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
             3 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
-        ]),
+        ])),
         null,
     );
     $singlesMatch = new EventMatchData(
         MatchType::Singles,
         Referee::factory()->bookable()->count(1)->create(),
         Title::query()->whereKey([])->get(),
-        collect([1 => ['wrestlers' => [$member]], 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]]]),
+        new MatchSides(collect([1 => ['wrestlers' => [$member]], 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]]])),
         null,
     );
     resolve(AddMatchForEventAction::class)->handle($event, $tagTeamMatch);
@@ -251,10 +252,10 @@ describe('promotion ownership', function (): void {
             MatchType::Singles,
             Referee::factory()->bookable()->for($promotion, 'promotion')->count(1)->create(),
             Title::factory()->active()->singles()->for($promotion, 'promotion')->count(1)->create(),
-            collect([
+            new MatchSides(collect([
                 1 => ['wrestlers' => [Wrestler::factory()->bookable()->for($promotion, 'promotion')->create()]],
                 2 => ['wrestlers' => [Wrestler::factory()->bookable()->for($promotion, 'promotion')->create()]],
-            ]),
+            ])),
             null,
         );
 

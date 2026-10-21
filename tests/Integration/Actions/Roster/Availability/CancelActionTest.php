@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CancelAction;
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Lifecycle\Roster\RosterDateAvailability;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
@@ -15,8 +16,8 @@ test('cancelling retains history and repeated cancellation cannot remove an over
     // Arrange
     $person = Wrestler::factory()->for(Promotion::factory())->create();
     $actor = administrator();
-    $first = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-19', null, $actor);
-    resolve(CreateAction::class)->handle($person, '2026-10-18', '2026-10-20', null, $actor);
+    $first = resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-19', null), $actor);
+    resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-18', '2026-10-20', null), $actor);
     $action = resolve(CancelAction::class);
 
     // Act
@@ -37,7 +38,7 @@ test('a foreign entry cannot be cancelled through another person even for a glob
     $person = Wrestler::factory()->for(Promotion::factory())->create();
     $other = Wrestler::factory()->for(Promotion::factory())->create();
     $actor = administrator();
-    $entry = resolve(CreateAction::class)->handle($other, '2026-10-17', '2026-10-17', null, $actor);
+    $entry = resolve(CreateAction::class)->handle($other, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
 
     // Act
     $cancel = fn () => resolve(CancelAction::class)->handle($person, $entry->id, $actor);

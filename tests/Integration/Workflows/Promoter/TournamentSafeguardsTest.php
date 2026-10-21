@@ -23,6 +23,7 @@ use App\Data\Events\EventData;
 use App\Data\Events\EventPackData;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Enums\Events\LiveItemOperation;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
@@ -37,6 +38,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\MatchSides;
 use App\ViewModels\Events\EventPackViewModel;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -79,7 +81,7 @@ it('supports across-event advancement and refuses unscheduling the dependent boo
     $second = bookTournamentNode($world, $nodes->sole(fn ($n): bool => $n->round === 1 && $n->position === 2));
     recordTournamentWinner($second, $world['tournament']);
     $future = Event::factory()->for($world['promotion'])->create(['date' => now()->addDays(2)]);
-    $final = resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 2), $future, $world['referees'], $world['tournament']->refresh()->version);
+    $final = resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 2), $world['tournament']->refresh()->version, new TournamentBookingData($future, $world['referees']));
     expect(fn () => resolve(UpdateAction::class)->handle($future, new EventData($future->name, null, null, $future->preview)))->toThrow(TournamentException::class)
         ->and($future->refresh()->date)->not->toBeNull()
         ->and($final->refresh()->trashed())->toBeFalse();
@@ -98,7 +100,7 @@ it('allows a linked unplayed match edit without swapping its bracket entrants', 
     $world = tournamentFixture();
     $match = bookTournamentNode($world, $world['tournament']->nodes()->firstOrFail());
     $competitors = $match->wrestlers()->get();
-    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection, collect([1 => ['wrestlers' => [$competitors->sole(fn ($c): bool => $c->id === $match->sides()->where('position', 1)->firstOrFail()->competitors()->firstOrFail()->competitor_id)]], 2 => ['wrestlers' => [$competitors->sole(fn ($c): bool => $c->id === $match->sides()->where('position', 2)->firstOrFail()->competitors()->firstOrFail()->competitor_id)]]]), 'Revised preview', tournamentVersion: $world['tournament']->refresh()->version);
+    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection, new MatchSides(collect([1 => ['wrestlers' => [$competitors->sole(fn ($c): bool => $c->id === $match->sides()->where('position', 1)->firstOrFail()->competitors()->firstOrFail()->competitor_id)]], 2 => ['wrestlers' => [$competitors->sole(fn ($c): bool => $c->id === $match->sides()->where('position', 2)->firstOrFail()->competitors()->firstOrFail()->competitor_id)]]])), 'Revised preview', tournamentVersion: $world['tournament']->refresh()->version);
     resolve(UpdateMatchAction::class)->handle($match, $data);
     expect($match->refresh()->preview)->toBe('Revised preview')->and($world['tournament']->refresh()->version)->toBe(3);
 });
@@ -108,7 +110,7 @@ it('returns the existing real match for an identical booking retry', function ()
     $node = $world['tournament']->nodes()->firstOrFail();
     $version = $world['tournament']->version;
     $first = bookTournamentNode($world, $node);
-    $retry = resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], $version);
+    $retry = resolve(BookTournamentMatchAction::class)->handle($node, $version, new TournamentBookingData($world['event'], $world['referees']));
     expect($retry->id)->toBe($first->id)->and($world['event']->matches()->count())->toBe(1)->and($node->links()->count())->toBe(1);
 });
 it('refuses moving a draw rematch earlier than its retained attempt', function (): void {
@@ -117,7 +119,7 @@ it('refuses moving a draw rematch earlier than its retained attempt', function (
     $match = bookTournamentNode($world, $node);
     recordTournamentWinner($match, $world['tournament'], MatchFinish::TimeLimitDraw);
     $earlier = Event::factory()->for($world['promotion'])->create(['date' => $world['event']->date?->copy()->subDay()]);
-    expect(fn () => resolve(BookTournamentMatchAction::class)->handle($node, $earlier, $world['referees'], $world['tournament']->refresh()->version))->toThrow(TournamentException::class)
+    expect(fn () => resolve(BookTournamentMatchAction::class)->handle($node, $world['tournament']->refresh()->version, new TournamentBookingData($earlier, $world['referees'])))->toThrow(TournamentException::class)
         ->and($node->links()->count())->toBe(1)
         ->and($earlier->matches()->count())->toBe(0);
 });
@@ -213,7 +215,7 @@ it('refuses stale ordinary edits and extra bracket opponents without replacing a
     $extra = Wrestler::factory()->employed()->for($world['promotion'])->create();
     $first = $competitors->sole('id', $t->entries()->where('seed', $node->first_seed)->firstOrFail()->competitor_id);
     $second = $competitors->sole('id', $t->entries()->where('seed', $node->second_seed)->firstOrFail()->competitor_id);
-    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$stale ? $second : $first]]]), 'Changed', tournamentVersion: $stale ? 0 : $t->refresh()->version);
+    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$stale ? $second : $first]]])), 'Changed', tournamentVersion: $stale ? 0 : $t->refresh()->version);
     expect(fn () => resolve(UpdateMatchAction::class)->handle($match, $data))->toThrow(BaseBusinessException::class)
         ->and($match->refresh()->preview)->toBeNull()
         ->and($match->wrestlers()->count())->toBe(2);
@@ -225,7 +227,7 @@ it('keeps final title stakes when an ordinary match edit is valid', function ():
     $match = bookTournamentNode($world, $node);
     $entries = $t->entries()->get();
     $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
-    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), collect([1 => ['wrestlers' => [Wrestler::query()->findOrFail($entries->sole('seed', 1)->competitor_id)]], 2 => ['wrestlers' => [Wrestler::query()->findOrFail($entries->sole('seed', 2)->competitor_id)]]]), 'Title final', tournamentVersion: $t->refresh()->version);
+    $data = new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), new MatchSides(collect([1 => ['wrestlers' => [Wrestler::query()->findOrFail($entries->sole('seed', 1)->competitor_id)]], 2 => ['wrestlers' => [Wrestler::query()->findOrFail($entries->sole('seed', 2)->competitor_id)]]])), 'Title final', tournamentVersion: $t->refresh()->version);
     resolve(UpdateMatchAction::class)->handle($match, $data);
     expect($match->refresh()->titles()->sole()->id)->toBe($title->id);
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Same date final', $world['event']->date, null, null));
@@ -274,7 +276,7 @@ it('rejects forged low-level tournament booking contexts atomically', function (
         $event = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
     }
     $version = $t->refresh()->version;
-    $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]]), null);
+    $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null);
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
         ->and($event->matches()->count())->toBe(0)
         ->and($t->refresh()->version)->toBe($version);
@@ -287,7 +289,7 @@ it('refuses unscheduling a rematch while keeping its recorded draw history', fun
     $draw = bookTournamentNode($world, $node);
     recordTournamentWinner($draw, $t, MatchFinish::NoDecision);
     $later = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
-    $rematch = resolve(BookTournamentMatchAction::class)->handle($node, $later, $world['referees'], $t->refresh()->version);
+    $rematch = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($later, $world['referees']));
     expect(fn () => resolve(UpdateAction::class)->handle($later, new EventData($later->name, null, null, null)))->toThrow(TournamentException::class)
         ->and($later->refresh()->date)->not->toBeNull()
         ->and($draw->refresh()->match_finish)->toBe(MatchFinish::NoDecision)
@@ -303,7 +305,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
         $event = match ($node->round) {
             1 => $node->position <= 2 ? $world['event'] : $second,2 => $semis,3 => $final,default => throw new RuntimeException('Unexpected round')
         };
-        $match = resolve(BookTournamentMatchAction::class)->handle($node, $event, $world['referees'], $t->refresh()->version);
+        $match = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($event, $world['referees']));
         recordTournamentWinner($match, $t);
     }
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Qualification night', $world['event']->date, null, null));

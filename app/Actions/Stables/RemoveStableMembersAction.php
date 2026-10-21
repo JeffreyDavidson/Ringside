@@ -35,7 +35,7 @@ class RemoveStableMembersAction
         }
 
         if ($members->isNotEmpty()) {
-            foreach ($members->wrestlers ?? [] as $wrestler) {
+            foreach ($members->wrestlers as $wrestler) {
                 OpenPeriodEnder::end(
                     $stable->wrestlers()->newPivotStatementForId($wrestler->getKey()),
                     'joined_at',
@@ -44,7 +44,7 @@ class RemoveStableMembersAction
                 );
             }
 
-            foreach ($members->tagTeams ?? [] as $tagTeam) {
+            foreach ($members->tagTeams as $tagTeam) {
                 OpenPeriodEnder::end(
                     $stable->tagTeams()->newPivotStatementForId($tagTeam->getKey()),
                     'joined_at',

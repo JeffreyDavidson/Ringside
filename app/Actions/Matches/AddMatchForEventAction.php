@@ -5,24 +5,21 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
-use App\Enums\Matches\MatchType;
-use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
-use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Roster\Booking\MatchRosterLock;
 use App\Lifecycle\Tournaments\TournamentLocks;
+use App\Lifecycle\Tournaments\TournamentMatchRequirements;
+use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\Tournament;
-use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
@@ -38,6 +35,8 @@ class AddMatchForEventAction
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly TournamentLocks $tournamentLocks,
         private readonly TournamentBracketService $bracket,
+        private readonly TournamentStateMachine $tournamentStates,
+        private readonly TournamentMatchRequirements $tournamentRequirements,
         private readonly MatchRosterLock $rosterLock,
     ) {}
 
@@ -63,39 +62,8 @@ class AddMatchForEventAction
                 if ($tournament->version !== $version) {
                     throw RecordChangedException::changed();
                 }
-                if (in_array($tournament->status, [TournamentStatus::Completed, TournamentStatus::Cancelled], true)) {
-                    throw TournamentException::closed();
-                }
-                if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->first->withdrawn || $bout->second->withdrawn || $bout->complete) {
-                    throw TournamentException::unresolved();
-                }
-                if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null) {
-                    throw TournamentException::alreadyBooked();
-                }
-                $requested = $eventMatchData->sides->flatMap(fn (array $side): array => array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? []))->map(fn (Wrestler|TagTeam $competitor): string => $competitor->getMorphClass().':'.$competitor->id)->sort()->values()->all();
-                $expected = collect([$bout->first, $bout->second])->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->sort()->values()->all();
-                if ($requested !== $expected || $eventMatchData->matchType !== ($tournament->entrant_kind === EntrantKind::Wrestler ? MatchType::Singles : MatchType::TagTeam)) {
-                    throw TournamentException::entrantsChanged();
-                }
-                if ($eventMatchData->titles->isNotEmpty() && $node->round !== (int) log($tournament->capacity, 2)) {
-                    throw TournamentException::finalTitlesOnly();
-                }
-                $priorBouts = $this->bracket->bouts($tournament)->only($this->bracket->ancestorNodeIds($node));
-                if ($bout->link instanceof TournamentMatchLink) {
-                    $priorBouts->put($node->id, $bout);
-                }
-                foreach ($priorBouts as $prior) {
-                    if ($prior->link === null) {
-                        continue;
-                    }
-                    $priorEvent = $prior->link->match->event;
-                    if ($priorEvent->id === $event->id && $tournament->repeat_appearances) {
-                        continue;
-                    }
-                    if ($event->date === null || $priorEvent->date === null || $event->date->lessThanOrEqualTo($priorEvent->date)) {
-                        throw TournamentException::chronology();
-                    }
-                }
+                $this->tournamentStates->ensureCanMove($tournament, TournamentStatus::Active);
+                $this->tournamentRequirements->ensureBookable($tournament, $node, $bout, $event, $eventMatchData);
                 if ($bout->link instanceof TournamentMatchLink) {
                     $bout->link->forceFill(['active_node_id' => null])->save();
                 }
@@ -116,7 +84,7 @@ class AddMatchForEventAction
             ]);
 
             if ($tournament instanceof Tournament) {
-                if ($tournament->status === TournamentStatus::Draft) {
+                if ($this->tournamentStates->activates($tournament)) {
                     activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'capacity' => $tournament->capacity, 'entrant_kind' => $tournament->entrant_kind->value, 'repeat_appearances' => $tournament->repeat_appearances, 'entries' => $tournament->entries()->get(['seed', 'competitor_type', 'competitor_id'])->toArray()])->log('tournament.activated');
                 }
                 (new TournamentMatchLink)->forceFill(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'active_node_id' => $node->id, 'match_id' => $createdMatch->id, 'attempt' => ($node->links()->reorder('attempt', 'desc')->first()->attempt ?? 0) + 1])->save();
@@ -142,7 +110,7 @@ class AddMatchForEventAction
         if ($match->trashed() || $match->event_id !== $event->id || $match->match_type !== $data->matchType || $match->match_stipulation_id !== $data->matchStipulation?->id || $match->preview !== $data->preview) {
             return false;
         }
-        $requested = $data->sides->flatMap(fn (array $side, int $position): array => array_map(fn (\App\Models\Roster\Wrestlers\Wrestler|TagTeam $competitor): string => $position.':'.$competitor->getMorphClass().':'.$competitor->id, array_merge($side['wrestlers'] ?? [], $side['tag_teams'] ?? [])))->sort()->values()->all();
+        $requested = $data->sides->sides()->flatMap(fn (array $side, int $position): array => array_map(fn (\App\Models\Roster\Wrestlers\Wrestler|TagTeam $competitor): string => $position.':'.$competitor->getMorphClass().':'.$competitor->id, [...$side['wrestlers'], ...$side['tag_teams']]))->sort()->values()->all();
         $existing = $match->competitors()->with('side')->get()->map(fn (MatchCompetitor $competitor): string => $competitor->side->position.':'.$competitor->competitor_type.':'.$competitor->competitor_id)->sort()->values()->all();
 
         return $requested === $existing

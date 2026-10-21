@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Livewire\Events\Tables\Main;
@@ -127,7 +128,7 @@ describe('show', function (): void {
             ->withCompetitors([$blocked, $free])
             ->create();
         $day = ($event->local_date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
-        resolve(CreateAction::class)->handle($blocked, $day, $day, null, $actor);
+        resolve(CreateAction::class)->handle($blocked, new UnavailabilityData($day, $day, null), $actor);
         actingAs($actor);
 
         // Act

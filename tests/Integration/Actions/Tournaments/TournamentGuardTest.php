@@ -11,6 +11,7 @@ use App\Actions\Tournaments\ReplaceTournamentEntryAction;
 use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Actions\Tournaments\WithdrawTournamentEntryAction;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentStatus;
@@ -31,7 +32,7 @@ it('rejects stale tournament reviews with no partial mutations', function (strin
     $snapshot = [$t->version, $t->name, $t->entries()->pluck('competitor_id')->all(), $t->nodes()->pluck('planned_event_id')->all()];
     $call = fn () => match ($operation) {
         default => throw new InvalidArgumentException('Unknown operation'),
-        'book' => resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], 0),
+        'book' => resolve(BookTournamentMatchAction::class)->handle($node, 0, new TournamentBookingData($world['event'], $world['referees'])),
         'plan' => resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], 0),
         'reset' => resolve(ResetTournamentBranchAction::class)->handle($node, 0, 'Reviewed reset'),
         'withdraw' => resolve(WithdrawTournamentEntryAction::class)->handle($entry, 0, 'Unavailable'),
@@ -55,7 +56,7 @@ it('refuses closed tournament mutations', function (string $operation): void {
     $t->forceFill(['status' => TournamentStatus::Completed])->save();
     $call = fn () => match ($operation) {
         default => throw new InvalidArgumentException('Unknown operation'),
-        'book' => resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], $t->version),
+        'book' => resolve(BookTournamentMatchAction::class)->handle($node, $t->version, new TournamentBookingData($world['event'], $world['referees'])),
         'plan' => resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], $t->version),
         'withdraw' => resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->version, 'Unavailable'),
         'replace' => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $entry->competitor_id, $t->version, 'Unavailable'),

@@ -9,6 +9,7 @@ use App\Actions\Tournaments\ResetTournamentBranchAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Data\Events\EventData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Events\Event;
@@ -43,7 +44,7 @@ while (microtime(true) < $startAt) {
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false, 'match_id' => null];
 try {
     if ($spec['operation'] === 'book') {
-        $match = resolve(BookTournamentMatchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), Event::query()->findOrFail($spec['event_id']), Referee::query()->whereKey($spec['referee_id'])->get(), $spec['version']);
+        $match = resolve(BookTournamentMatchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), $spec['version'], new TournamentBookingData(Event::query()->findOrFail($spec['event_id']), Referee::query()->whereKey($spec['referee_id'])->get()));
         $result['match_id'] = $match->id;
     }
     if ($spec['operation'] === 'result') {

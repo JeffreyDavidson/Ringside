@@ -60,9 +60,9 @@
             >{{ __('storylines.add_participant') }}</x-button>
             <x-button variant="secondary" wire:click="begin('story')">{{ __('storylines.edit_story') }}</x-button>
         @endif
-        <x-button variant="secondary" wire:click="begin('story-status')">{{ __('storylines.story_status') }}</x-button>
+        <x-button variant="secondary" wire:click="begin('story_status')">{{ __('storylines.story_status') }}</x-button>
     </div>
-    @if ($mode !== '')
+    @if ($mode !== null)
         <x-storylines.planning-form
             :$mode
             :$form
@@ -95,7 +95,7 @@
                     @if ($person->left_on === null && in_array($story->status, [\App\Enums\Storylines\StorylineStatus::Active, \App\Enums\Storylines\StorylineStatus::Paused], true))
                         <x-button
                             variant="secondary"
-                            wire:click="begin('participant-end', {{ $person->id }})"
+                            wire:click="begin('participant_end', {{ $person->id }})"
                         >{{ __('storylines.end_participation') }}</x-button>
                     @endif
                 </div>
@@ -121,7 +121,7 @@
                             @if ($step->match_id) ·{{ $sourceStates[$step->id]['context']['match_result'] ?? __('storylines.no_result') }}@endif
                         </p>
                         @foreach ($sourceStates[$step->id]['warnings'] as $warning)
-                            <p class="text-warning mt-2 text-sm">{{ $warning }}</p>
+                            <p class="text-warning mt-2 text-sm">{{ $warning->label() }}</p>
                         @endforeach
                     @endif
                     @if ($step->source_context['event_date'] ?? false)
@@ -134,7 +134,7 @@
                             @if ($step->status === \App\Enums\Storylines\StepStatus::Planned)
                                 <x-button
                                     variant="secondary"
-                                    wire:click="begin('record-step', {{ $step->id }})"
+                                    wire:click="begin('record_step', {{ $step->id }})"
                                 >{{ __('storylines.record_step') }}</x-button>
                             @endif
                             <x-button
@@ -143,7 +143,7 @@
                             >{{ __('storylines.edit_step') }}</x-button>
                             <x-button
                                 variant="secondary"
-                                wire:click="begin('step-status', {{ $step->id }})"
+                                wire:click="begin('step_status', {{ $step->id }})"
                             >{{ __('storylines.step_status') }}</x-button>
                         </div>
                     @endif
@@ -198,7 +198,7 @@
         <div class="divide-border divide-y">
             @foreach ($revisions as $revision)
                 <article class="py-4" wire:key="revision-{{ $revision->id }}">
-                    <p class="font-semibold">{{ __('storylines.operations.'.$revision->operation) }}</p>
+                    <p class="font-semibold">{{ $revision->operation->label() }}</p>
                     <p class="text-muted-foreground mt-2 text-sm">
                         {{ $revision->actor?->full_name }} · {{ $revision->created_at?->toIso8601String() }}
                     </p>

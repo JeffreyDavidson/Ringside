@@ -17,14 +17,13 @@ use App\Data\Tournaments\TournamentBoutData;
 use App\Enums\Roster\BookableRosterKind;
 use App\Enums\Tournaments\EntrantKind;
 use App\Enums\Tournaments\TournamentOperation;
+use App\Enums\Tournaments\TournamentOperationTarget;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
+use App\Livewire\Tournaments\Forms\TournamentOperationForm;
 use App\Models\Events\Event;
-use App\Models\Matches\MatchStipulation;
-use App\Models\Roster\Referees\Referee;
-use App\Models\Titles\Title;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
@@ -47,39 +46,11 @@ class Show extends Component
 {
     use ExplainsKeptInput;
 
-    /** Operations that act on one bracket node. */
-    private const array NODE_OPERATIONS = [
-        TournamentOperation::Book,
-        TournamentOperation::Plan,
-        TournamentOperation::Reset,
-        TournamentOperation::Unbook,
-        TournamentOperation::Walkover,
-    ];
-
-    /** Operations that act on one tournament entry. */
-    private const array ENTRY_OPERATIONS = [
-        TournamentOperation::Withdraw,
-        TournamentOperation::Replace,
-    ];
-
-    /** Operations that need a written reason and an explicit confirmation. */
-    private const array REASON_OPERATIONS = [
-        TournamentOperation::Reset,
-        TournamentOperation::Unbook,
-        TournamentOperation::Withdraw,
-        TournamentOperation::Replace,
-        TournamentOperation::Walkover,
-        TournamentOperation::Cancel,
-    ];
-
     #[Locked]
     public int $tournamentId;
 
     #[Locked]
     public int $version = 0;
-
-    #[Locked]
-    public string $draftOperation = '';
 
     #[Locked]
     public ?int $nodeId = null;
@@ -92,22 +63,9 @@ class Show extends Component
 
     public CreateEdit $form;
 
+    public TournamentOperationForm $draft;
+
     public string $viewMode = 'rounds';
-
-    public ?int $eventId = null;
-
-    /** @var list<int|string> */
-    public array $refereeIds = [];
-
-    public ?int $titleId = null;
-
-    public ?int $stipulationId = null;
-
-    public ?int $replacementId = null;
-
-    public string $reason = '';
-
-    public bool $confirmed = false;
 
     public ?string $notice = null;
 
@@ -124,7 +82,7 @@ class Show extends Component
         Gate::authorize('view', $tournament);
         $this->version = $tournament->version;
         $this->form->load($tournament);
-        $this->draftOperation = '';
+        $this->draft->close();
         $this->resetErrorBag();
     }
 
@@ -174,22 +132,17 @@ class Show extends Component
         $draft = TournamentOperation::from($operation);
         $this->nodeId = null;
         $this->entryId = null;
-        if (in_array($draft, self::ENTRY_OPERATIONS, true)) {
+        $eventId = null;
+        if ($draft->target() === TournamentOperationTarget::Entry) {
             $this->entryId = $tournament->entries()->findOrFail($id)->id;
         }
-        if (in_array($draft, self::NODE_OPERATIONS, true)) {
+        if ($draft->target() === TournamentOperationTarget::Node) {
             $node = $tournament->nodes()->findOrFail($id);
             $this->nodeId = $node->id;
-            $this->eventId = $node->planned_event_id;
+            $eventId = $node->planned_event_id;
         }
-        $this->draftOperation = $operation;
+        $this->draft->start($tournament, $draft, $eventId);
         $this->draftVersion = $this->version;
-        $this->reason = '';
-        $this->confirmed = false;
-        $this->refereeIds = [];
-        $this->titleId = null;
-        $this->stipulationId = null;
-        $this->replacementId = null;
         $this->notice = null;
         $this->resetErrorBag();
         $this->dispatch('tournament-panel-opened');
@@ -198,7 +151,7 @@ class Show extends Component
     public function cancelDraft(): void
     {
         Gate::authorize('view', $this->tournament());
-        $this->draftOperation = '';
+        $this->draft->close();
         $this->resetErrorBag();
     }
 
@@ -214,38 +167,31 @@ class Show extends Component
         $tournament = $this->tournament();
         Gate::authorize('update', $tournament);
         Validator::make(
-            ['operation' => $this->draftOperation],
+            ['operation' => $this->draft->operation],
             ['operation' => [Rule::enum(TournamentOperation::class)]],
         )->validate();
 
-        $operation = TournamentOperation::from($this->draftOperation);
-        $this->validateDraft($tournament, $operation);
+        $operation = TournamentOperation::from($this->draft->operation);
+        $this->draft->validate();
         $this->perform(function () use ($tournament, $operation, $book, $plan, $reset, $withdraw, $replace, $walkover, $cancel): void {
             match ($operation) {
-                TournamentOperation::Book => $book->handle(
-                    $this->node($tournament),
-                    Event::query()->findOrFail($this->eventId),
-                    Referee::query()->whereKey($this->refereeIds)->get(),
-                    $this->draftVersion,
-                    Title::query()->whereKey($this->titleId ?? [])->get(),
-                    $this->stipulationId === null ? null : MatchStipulation::query()->findOrFail($this->stipulationId),
-                ),
+                TournamentOperation::Book => $book->handle($this->node($tournament), $this->draftVersion, $this->draft->bookingData()),
                 TournamentOperation::Plan => $plan->handle(
                     $this->node($tournament),
-                    $this->eventId === null ? null : Event::query()->findOrFail($this->eventId),
+                    $this->draft->eventId === null ? null : Event::query()->findOrFail($this->draft->eventId),
                     $this->draftVersion,
                 ),
-                TournamentOperation::Reset => $reset->handle($this->node($tournament), $this->draftVersion, $this->reason),
-                TournamentOperation::Unbook => $reset->handle($this->node($tournament), $this->draftVersion, $this->reason, true),
-                TournamentOperation::Withdraw => $withdraw->handle($this->entry($tournament), $this->draftVersion, $this->reason),
+                TournamentOperation::Reset => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason),
+                TournamentOperation::Unbook => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason, true),
+                TournamentOperation::Withdraw => $withdraw->handle($this->entry($tournament), $this->draftVersion, $this->draft->reason),
                 TournamentOperation::Replace => $replace->handle(
                     $this->entry($tournament),
-                    (int) $this->replacementId,
+                    (int) $this->draft->replacementId,
                     $this->draftVersion,
-                    $this->reason,
+                    $this->draft->reason,
                 ),
-                TournamentOperation::Walkover => $walkover->handle($this->node($tournament), $this->draftVersion, $this->reason),
-                TournamentOperation::Cancel => $cancel->handle($tournament, $this->draftVersion, $this->reason),
+                TournamentOperation::Walkover => $walkover->handle($this->node($tournament), $this->draftVersion, $this->draft->reason),
+                TournamentOperation::Cancel => $cancel->handle($tournament, $this->draftVersion, $this->draft->reason),
             };
         });
     }
@@ -281,58 +227,12 @@ class Show extends Component
             'events' => $reads['events'],
             'titles' => $reads['titles'],
             'stipulations' => $reads['stipulations'],
-            'refereeLabels' => $search->labels(BookableRosterKind::Referees, $this->refereeIds),
-            'replacementLabels' => $search->labels($kind, [$this->replacementId]),
+            'refereeLabels' => $search->labels(BookableRosterKind::Referees, $this->draft->refereeIds),
+            'replacementLabels' => $search->labels($kind, [$this->draft->replacementId]),
             'affected' => $this->affectedBouts($tournament, $bouts, $bracket),
             'selected' => $this->nodeId === null ? null : $bouts->get($this->nodeId),
             'view' => $this->viewMode === 'bracket' ? 'bracket' : 'rounds',
         ]);
-    }
-
-    /** Checks the fields the drafted operation needs before any Action runs. */
-    private function validateDraft(Tournament $tournament, TournamentOperation $operation): void
-    {
-        if (in_array($operation, self::REASON_OPERATIONS, true)) {
-            Validator::make(
-                ['reason' => $this->reason, 'confirmed' => $this->confirmed],
-                ['reason' => ['required', 'string', 'max:2000'], 'confirmed' => ['accepted']],
-            )->validate();
-        }
-        if (in_array($operation, [TournamentOperation::Book, TournamentOperation::Plan], true)) {
-            Validator::make(
-                ['eventId' => $this->eventId],
-                ['eventId' => [
-                    $operation === TournamentOperation::Book ? 'required' : 'nullable',
-                    'integer',
-                    Rule::exists('events', 'id')->where('promotion_id', $tournament->promotion_id)->whereNull('deleted_at'),
-                ]],
-            )->validate();
-        }
-        if ($operation === TournamentOperation::Book) {
-            Validator::make(
-                ['refereeIds' => $this->refereeIds, 'titleId' => $this->titleId, 'stipulationId' => $this->stipulationId],
-                [
-                    'refereeIds' => ['required', 'list', 'min:1'],
-                    'refereeIds.*' => [
-                        'integer',
-                        'distinct',
-                        Rule::exists('referees', 'id')->where('promotion_id', $tournament->promotion_id),
-                    ],
-                    'titleId' => ['nullable', 'integer', Rule::exists('titles', 'id')->where('promotion_id', $tournament->promotion_id)],
-                    'stipulationId' => ['nullable', 'integer', Rule::exists('matches_stipulations', 'id')],
-                ],
-            )->validate();
-        }
-        if ($operation === TournamentOperation::Replace) {
-            Validator::make(
-                ['replacementId' => $this->replacementId],
-                ['replacementId' => [
-                    'required',
-                    'integer',
-                    Rule::exists((new ($tournament->entrant_kind->modelClass()))->getTable(), 'id')->where('promotion_id', $tournament->promotion_id),
-                ]],
-            )->validate();
-        }
     }
 
     /**
@@ -343,7 +243,7 @@ class Show extends Component
      */
     private function affectedBouts(Tournament $tournament, SupportCollection $bouts, TournamentBracketService $bracket): SupportCollection
     {
-        $operation = TournamentOperation::tryFrom($this->draftOperation);
+        $operation = TournamentOperation::tryFrom($this->draft->operation);
 
         if (in_array($operation, [TournamentOperation::Reset, TournamentOperation::Unbook], true) && $this->nodeId !== null) {
             $node = $this->node($tournament);
@@ -354,7 +254,7 @@ class Show extends Component
 
             return $bouts->only($ids);
         }
-        if (in_array($operation, self::ENTRY_OPERATIONS, true) && $this->entryId !== null) {
+        if ($operation?->target() === TournamentOperationTarget::Entry && $this->entryId !== null) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->first?->id === $this->entryId || $bout->second?->id === $this->entryId);
         }
         if ($operation === TournamentOperation::Cancel) {

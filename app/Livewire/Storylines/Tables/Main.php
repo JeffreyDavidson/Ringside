@@ -7,6 +7,7 @@ namespace App\Livewire\Storylines\Tables;
 use App\Builders\Storylines\StorylineBuilder;
 use App\Enums\Storylines\StorylineStatus;
 use App\Models\Storylines\Storyline;
+use App\Support\Search\LikeTerm;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -31,14 +32,14 @@ class Main extends Component
     public function render(): View
     {
         Gate::authorize('viewAny', Storyline::class);
-        $needle = mb_trim(str_replace(['%', '_', '\\'], '', $this->search));
+        $like = LikeTerm::from($this->search);
         $query = Storyline::query()->withSummaries()->with(['nextStep.event.promotion', 'lastDevelopment', 'participants']);
         $status = StorylineStatus::tryFrom($this->status);
-        $query->when($needle !== '', fn (StorylineBuilder $builder) => $builder->whereLike('title', "%{$needle}%"));
+        $query->when(! $like->isEmpty(), fn (StorylineBuilder $builder) => $builder->whereLike('title', $like->contains()));
         $query->when($status !== null, fn (StorylineBuilder $builder) => $builder->where('status', $status));
         $query->when($status === null, fn (StorylineBuilder $builder): StorylineBuilder => $builder->visible());
-        $participant = mb_trim(str_replace(['%', '_', '\\'], '', $this->participant));
-        $query->when($participant !== '', fn (StorylineBuilder $builder) => $builder->whereHas('participants', fn (Builder $people) => $people->whereLike('label', "%{$participant}%")));
+        $participant = LikeTerm::from($this->participant);
+        $query->when(! $participant->isEmpty(), fn (StorylineBuilder $builder) => $builder->whereHas('participants', fn (Builder $people) => $people->whereLike('label', $participant->contains())));
 
         return view('livewire.storylines.tables.main', ['stories' => $query->orderByDesc('updated_at')->orderByDesc('id')->paginate(15)]);
     }

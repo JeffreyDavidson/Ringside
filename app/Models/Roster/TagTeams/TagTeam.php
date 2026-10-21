@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Roster\TagTeams;
 
 use App\Builders\Roster\TagTeamBuilder;
+use App\Collections\TagTeamCollection;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Concerns\HasChampionshipReigns;
@@ -33,6 +34,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use Database\Factories\Roster\TagTeams\TagTeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -108,6 +110,7 @@ use Illuminate\Support\Carbon;
 #[Fillable('name', 'signature_move')]
 #[Appends('status')]
 #[UseFactory(TagTeamFactory::class)]
+#[CollectedBy(TagTeamCollection::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
 class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {

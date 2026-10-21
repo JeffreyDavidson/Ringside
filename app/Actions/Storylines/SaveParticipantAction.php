@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Storylines;
 
-use App\Builders\Roster\TagTeamBuilder;
-use App\Builders\Roster\WrestlerBuilder;
 use App\Data\Storylines\ParticipantData;
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineParticipant;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -24,10 +25,12 @@ class SaveParticipantAction
     {
         return DB::transaction(function () use ($storyline, $version, $data, $participantId): StorylineParticipant {
             $story = $this->lock->handle($storyline, $version);
-            $person = match ($data->type) {
-                'wrestler' => Wrestler::query()->where('promotion_id', $story->promotion_id)->whereKey($data->id)->when($participantId !== null, fn (WrestlerBuilder $query) => $query->withTrashed())->lockForUpdate()->firstOrFail(),
-                default => TagTeam::query()->where('promotion_id', $story->promotion_id)->whereKey($data->id)->when($participantId !== null, fn (TagTeamBuilder $query) => $query->withTrashed())->lockForUpdate()->firstOrFail(),
-            };
+            $person = $this->participantModel($data->type)::query()
+                ->where('promotion_id', $story->promotion_id)
+                ->whereKey($data->id)
+                ->when($participantId !== null, fn (Builder $query) => $query->withTrashed())
+                ->lockForUpdate()
+                ->firstOrFail();
             $participant = $participantId === null ? new StorylineParticipant : $story->participants()->findOrFail($participantId);
             if ($participantId !== null && ($participant->participant_id !== $data->id || $participant->participant_type !== $data->type || $participant->left_on !== null)) {
                 throw StorylineConflictException::state();
@@ -50,9 +53,24 @@ class SaveParticipantAction
                 throw StorylineConflictException::state();
             }
             $participant->save();
-            $this->revision->handle($story, $participant, $participantId === null ? 'participant_joined' : 'participant_left', $before, $data->reason);
+            $this->revision->handle($story, $participant, $participantId === null ? StorylineRevisionOperation::ParticipantJoined : StorylineRevisionOperation::ParticipantLeft, $before, $data->reason);
 
             return $participant;
         }, attempts: 3);
+    }
+
+    /**
+     * The creative roster is wrestlers and tag teams; any other kind is refused before a query is built.
+     *
+     * @return class-string<Wrestler|TagTeam>
+     */
+    private function participantModel(string $type): string
+    {
+        $model = Relation::getMorphedModel($type);
+
+        return match ($model) {
+            Wrestler::class, TagTeam::class => $model,
+            default => throw new ModelNotFoundException,
+        };
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Matches;
 
+use App\Builders\Concerns\OrdersByKeyForLocking;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
 use App\Models\Events\Event;
@@ -11,6 +12,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\CompetitorSelection;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -27,6 +29,8 @@ use Illuminate\Support\Facades\DB;
  */
 class EventMatchBuilder extends Builder
 {
+    use OrdersByKeyForLocking;
+
     /** Earlier source bookings in one promotion; date passage alone does not prove a result. */
     public function forPromotionHistory(int $promotionId, Carbon $before, ?int $excludedMatchId = null): static
     {
@@ -133,14 +137,11 @@ class EventMatchBuilder extends Builder
 
     /**
      * Keep the rows whose competitor entry (joined as `$alias`) is one of the selected wrestlers or tag teams.
-     *
-     * @param  list<array{type: string, id: int, side: int}>  $selection
      */
-    public static function whereSelectedCompetitors(QueryBuilder $query, string $alias, array $selection): void
+    public static function whereSelectedCompetitors(QueryBuilder $query, string $alias, CompetitorSelection $selection): void
     {
         $query->where(function (QueryBuilder $query) use ($alias, $selection): void {
-            foreach (array_unique(array_column($selection, 'type')) as $type) {
-                $ids = array_column(array_filter($selection, fn (array $entry): bool => $entry['type'] === $type), 'id');
+            foreach ($selection->idsByType() as $type => $ids) {
                 $query->orWhere(fn (QueryBuilder $kind): QueryBuilder => $kind->where("{$alias}.competitor_type", $type)->whereIn("{$alias}.competitor_id", $ids));
             }
         });

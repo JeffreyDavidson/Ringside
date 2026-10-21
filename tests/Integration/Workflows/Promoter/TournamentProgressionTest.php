@@ -7,6 +7,7 @@ use App\Actions\Tournaments\BookTournamentMatchAction;
 use App\Actions\Tournaments\SaveTournamentAction;
 use App\Data\Matches\EventMatchData;
 use App\Data\Matches\MatchResultData;
+use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Matches\MatchFinish;
 use App\Enums\Matches\MatchType;
@@ -24,6 +25,7 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Tournaments\TournamentNode;
 use App\Services\Tournaments\TournamentBracketService;
+use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Collection;
 
 it('advances actual qualifiers and completes a four person tournament on one card', function (): void {
@@ -38,11 +40,11 @@ it('advances actual qualifiers and completes a four person tournament on one car
     $nodes = $tournament->nodes()->get();
 
     // Act
-    $first = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 1), $event, $referees, $tournament->refresh()->version);
+    $first = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 1), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $result->handle($first, new MatchResultData(MatchFinish::Pinfall, $first->sides()->firstOrFail(), collect(), $tournament->refresh()->version));
-    $second = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), $event, $referees, $tournament->refresh()->version);
+    $second = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 1 && $n->position === 2), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $result->handle($second, new MatchResultData(MatchFinish::Countout, $second->sides()->firstOrFail(), collect(), $tournament->refresh()->version));
-    $final = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 2 && $n->position === 1), $event, $referees, $tournament->refresh()->version);
+    $final = $book->handle($nodes->sole(fn (TournamentNode $n): bool => $n->round === 2 && $n->position === 1), $tournament->refresh()->version, new TournamentBookingData($event, $referees));
     $result->handle($final, new MatchResultData(MatchFinish::Disqualification, $final->sides()->firstOrFail(), collect(), $tournament->refresh()->version));
 
     // Assert
@@ -144,7 +146,7 @@ it('keeps final title reconciliation authoritative while deriving the tournament
     $challenger = Wrestler::query()->findOrFail($entries->sole('seed', 2)->competitor_id);
     $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
     $reign = TitleChampionship::factory()->for($title)->forWrestler($champion)->wonOn(now()->subMonth()->toDateTimeString())->create();
-    $final = resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], $t->version, new Collection([$title]));
+    $final = resolve(BookTournamentMatchAction::class)->handle($node, $t->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])));
     $winner = $final->sides()->where('position', 2)->firstOrFail();
     resolve(RecordResultAction::class)->handle($final, new MatchResultData($finish, $winner, collect(), $t->refresh()->version));
     $transfers = in_array($finish, [MatchFinish::Pinfall, MatchFinish::Submission], true);
@@ -161,12 +163,12 @@ it('treats an identical final retry as existing state after later championship h
     $first = Wrestler::query()->findOrFail($entries->sole('seed', 1)->competitor_id);
     $second = Wrestler::query()->findOrFail($entries->sole('seed', 2)->competitor_id);
     $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
-    $final = resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], $t->version, new Collection([$title]));
+    $final = resolve(BookTournamentMatchAction::class)->handle($node, $t->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])));
     $data = new MatchResultData(MatchFinish::Pinfall, $final->sides()->where('position', 1)->firstOrFail(), collect(), $t->refresh()->version);
     resolve(RecordResultAction::class)->handle($final, $data);
     $event = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(30)]);
     $third = Wrestler::factory()->employed()->for($world['promotion'])->create();
-    $later = resolve(AddMatchForEventAction::class)->handle($event, new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$third]]]), null));
+    $later = resolve(AddMatchForEventAction::class)->handle($event, new EventMatchData(MatchType::Singles, $world['referees'], new Collection([$title]), new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$third]]])), null));
     resolve(RecordResultAction::class)->handle($later, new MatchResultData(MatchFinish::Pinfall, $later->sides()->where('position', 2)->firstOrFail(), collect()));
     $version = $t->refresh()->version;
     resolve(RecordResultAction::class)->handle($final, $data);
@@ -178,7 +180,7 @@ it('rolls back tournament advancement when final championship reconciliation is 
     $tournament = $world['tournament'];
     $node = $tournament->nodes()->where('round', 2)->firstOrFail();
     $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
-    $final = resolve(BookTournamentMatchAction::class)->handle($node, $world['event'], $world['referees'], $tournament->version, new Collection([$title]));
+    $final = resolve(BookTournamentMatchAction::class)->handle($node, $tournament->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])));
     $version = $tournament->refresh()->version;
     $title->delete();
     expect(fn () => resolve(RecordResultAction::class)->handle($final, new MatchResultData(MatchFinish::Pinfall, $final->sides()->firstOrFail(), collect(), $version)))->toThrow(BaseBusinessException::class)

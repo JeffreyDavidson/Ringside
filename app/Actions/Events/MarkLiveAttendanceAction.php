@@ -9,6 +9,7 @@ use App\Enums\Events\LiveAttendanceMark;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
 use App\Models\Events\Event;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class MarkLiveAttendanceAction
@@ -40,8 +41,8 @@ class MarkLiveAttendanceAction
             $auditBefore = $before;
             $auditAfter = $person;
             if (str_starts_with($key, 'crew:')) {
-                $auditBefore = array_intersect_key($before, array_flip(['arrived', 'briefed', 'updated_by']));
-                $auditAfter = array_intersect_key($person, array_flip(['arrived', 'briefed', 'updated_by']));
+                $auditBefore = Arr::only($before, ['arrived', 'briefed', 'updated_by']);
+                $auditAfter = Arr::only($person, ['arrived', 'briefed', 'updated_by']);
             }
             $this->persist->handle($run, new LiveShowChangeData('attendance', $key, $auditBefore, $auditAfter));
         }, attempts: 3);

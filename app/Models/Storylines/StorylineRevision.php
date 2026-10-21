@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Storylines;
 
+use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Models\Concerns\BelongsToPromotion;
 use App\Models\Users\User;
 use Database\Factories\Storylines\StorylineRevisionFactory;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $storyline_id
  * @property int $promotion_id
  * @property int $actor_id
- * @property string $operation
+ * @property StorylineRevisionOperation $operation
  * @property string $record_type
  * @property int $record_id
  * @property ?string $reason
@@ -39,6 +40,7 @@ class StorylineRevision extends Model
     protected function casts(): array
     {
         return [
+            'operation' => StorylineRevisionOperation::class,
             'before' => 'array',
             'after' => 'array',
         ];

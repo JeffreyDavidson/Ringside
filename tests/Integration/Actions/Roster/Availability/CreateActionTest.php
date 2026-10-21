@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Roster\Availability\CreateAction;
+use App\Data\Roster\UnavailabilityData;
 use App\Exceptions\Roster\Availability\UnavailabilityException;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Availability\Unavailability;
@@ -16,7 +17,7 @@ test('creating unavailability stores inclusive calendar dates and its actor with
     $actor = administrator();
 
     // Act
-    $entry = resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-19', ' Outside commitment ', $actor);
+    $entry = resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-19', ' Outside commitment '), $actor);
 
     // Assert
     expect($entry->starts_on)->toBe('2026-10-17')
@@ -36,14 +37,14 @@ test('an exact repeated unavailable submission is rejected but overlapping range
     $person = Wrestler::factory()->for(Promotion::factory())->create();
     $actor = administrator();
     $action = resolve(CreateAction::class);
-    $action->handle($person, '2026-10-17', '2026-10-19', null, $actor);
+    $action->handle($person, new UnavailabilityData('2026-10-17', '2026-10-19', null), $actor);
 
     // Act
-    $duplicate = fn () => $action->handle($person, '2026-10-17', '2026-10-19', ' ', $actor);
+    $duplicate = fn () => $action->handle($person, new UnavailabilityData('2026-10-17', '2026-10-19', ' '), $actor);
 
     // Assert
     expect($duplicate)->toThrow(UnavailabilityException::class);
-    $action->handle($person, '2026-10-18', '2026-10-20', null, $actor);
+    $action->handle($person, new UnavailabilityData('2026-10-18', '2026-10-20', null), $actor);
     expect(Unavailability::query()->count())->toBe(2);
 });
 
@@ -53,7 +54,7 @@ test('an unowned record cannot receive a calendar restriction', function (): voi
     $actor = administrator();
 
     // Act
-    $save = fn () => resolve(CreateAction::class)->handle($person, '2026-10-17', '2026-10-17', null, $actor);
+    $save = fn () => resolve(CreateAction::class)->handle($person, new UnavailabilityData('2026-10-17', '2026-10-17', null), $actor);
 
     // Assert
     expect($save)->toThrow(UnavailabilityException::class)->and(Unavailability::query()->count())->toBe(0);

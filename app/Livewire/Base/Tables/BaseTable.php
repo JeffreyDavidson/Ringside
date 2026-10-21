@@ -11,8 +11,11 @@ use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Support\RosterErrorMessageResolver;
 use App\Livewire\Table\DataTableComponent;
+use App\Livewire\Table\Filters\SelectFilter;
+use BackedEnum;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
@@ -59,23 +62,37 @@ abstract class BaseTable extends DataTableComponent
     }
 
     /**
-     * Status filter options, with Deleted appended only for people who may restore the table's records.
+     * The Status select filter of an index table: the given options with Deleted appended for people who may restore
+     * the table's records, and one query per status value.
      *
+     * Deleted lists only soft-deleted rows. Anyone who may not restore gets no deleted rows even when they force the
+     * value into the filter: it then falls through to the status handling, where it matches no status and filters
+     * nothing, as does any other unknown value.
+     *
+     * @template TStatus of BackedEnum
+     *
+     * @param  class-string<TStatus>  $statusEnum
      * @param  array<string, string>  $options
-     * @return array<string, string>
+     * @param  Closure(Builder<*>, TStatus): mixed  $whereStatus
      */
-    protected function statusOptionsWithDeleted(array $options): array
+    protected function statusFilter(string $statusEnum, array $options, Closure $whereStatus): SelectFilter
     {
-        return $this->canRestoreRecords() ? DeletedFilter::appendTo($options) : $options;
-    }
+        return SelectFilter::make(__('core.status'), 'status')
+            ->options($this->canRestoreRecords() ? DeletedFilter::appendTo($options) : $options)
+            ->filter(function (Builder $builder, string $value) use ($statusEnum, $whereStatus): void {
+                if ($this->canRestoreRecords() && DeletedFilter::tryFrom($value) !== null) {
+                    // Every table with a Deleted option lists a soft-deleting model, which static analysis cannot see through the generic builder.
+                    $builder->onlyTrashed(); // @phpstan-ignore method.notFound
 
-    /**
-     * Whether a status filter value asks for the Deleted list. Anyone who may not restore gets no deleted rows, even
-     * when they force the value into the filter, so the closure falls through to the normal status handling.
-     */
-    protected function isDeletedFilterValue(string $value): bool
-    {
-        return $this->canRestoreRecords() && DeletedFilter::tryFrom($value) !== null;
+                    return;
+                }
+
+                $status = $statusEnum::tryFrom($value);
+
+                if ($status !== null) {
+                    $whereStatus($builder, $status);
+                }
+            });
     }
 
     private function canRestoreRecords(): bool

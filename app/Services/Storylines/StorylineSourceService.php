@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Storylines;
 
 use App\Data\Storylines\SourceData;
+use App\Enums\Events\LiveItemStatus;
+use App\Enums\Storylines\StorylineSourceWarning;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -17,7 +19,7 @@ use App\Queries\Storylines\StorylineSourcePlacementQuery;
  * fingerprint that tells a save the source has changed since it was selected. Fingerprints are compared with ones a
  * browser held earlier, so what goes into them must not change.
  *
- * @phpstan-type SourceEvidence array{context: array<string, mixed>, fingerprint: string, warnings: list<string>}
+ * @phpstan-type SourceEvidence array{context: array<string, mixed>, fingerprint: string, warnings: list<StorylineSourceWarning>}
  */
 class StorylineSourceService
 {
@@ -45,10 +47,10 @@ class StorylineSourceService
             'event_deleted' => $event->trashed(), 'event_timezone' => $event->promotion?->timezone];
         $warnings = [];
         if ($event->trashed()) {
-            $warnings[] = __('storylines.deleted_source');
+            $warnings[] = StorylineSourceWarning::DeletedSource;
         }
         if ($event->date === null) {
-            $warnings[] = __('storylines.undated_source');
+            $warnings[] = StorylineSourceWarning::UndatedSource;
         }
         $key = null;
         if ($source->matchId !== null) {
@@ -66,7 +68,7 @@ class StorylineSourceService
             $context['match_deleted'] = $match->trashed();
             $context['competitors'] = $match->competitors->sortBy('id')->map(fn (MatchCompetitor $competitor): array => [$competitor->competitor_type, $competitor->competitor_id, $competitor->match_side_id])->values()->all();
             if ($match->trashed()) {
-                $warnings[] = __('storylines.deleted_source');
+                $warnings[] = StorylineSourceWarning::DeletedSource;
             }
             $key = "match:{$match->id}";
         }
@@ -77,19 +79,19 @@ class StorylineSourceService
             $context['segment_label'] = $segment['label'] ?? null;
             $context['segment_anchor'] = $segment['after_match_id'] ?? null;
             if ($segment === null) {
-                $warnings[] = __('storylines.removed_segment');
+                $warnings[] = StorylineSourceWarning::RemovedSegment;
             }
             if ($segment !== null && $segment['after_match_id'] !== null && ! ($event->relationLoaded('matches') ? $event->matches->contains('id', $segment['after_match_id']) : $this->placements->get($event, $segment['after_match_id']))) {
-                $warnings[] = __('storylines.unplaced_segment');
+                $warnings[] = StorylineSourceWarning::UnplacedSegment;
             }
         }
         $item = $key === null ? null : collect($event->liveRun?->content['items'] ?? [])->firstWhere('key', $key);
         $context['live_state'] = $item['state'] ?? null;
         $context['live_label'] = $item['label'] ?? null;
-        if (($item['state'] ?? null) === 'skipped') {
-            $warnings[] = __('storylines.skipped_source');
+        if (($item['state'] ?? null) === LiveItemStatus::Skipped->value) {
+            $warnings[] = StorylineSourceWarning::SkippedSource;
         }
 
-        return ['context' => $context, 'fingerprint' => hash('sha256', json_encode($context, JSON_THROW_ON_ERROR)), 'warnings' => array_values(array_unique($warnings))];
+        return ['context' => $context, 'fingerprint' => hash('sha256', json_encode($context, JSON_THROW_ON_ERROR)), 'warnings' => array_values(collect($warnings)->unique()->all())];
     }
 }

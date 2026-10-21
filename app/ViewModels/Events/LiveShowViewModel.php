@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Events;
 
+use App\Enums\Events\LiveItemStatus;
 use App\Enums\Events\LiveShowStatus;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -57,14 +58,10 @@ class LiveShowViewModel
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
         $zone = $run->content['timezone'] ?? 'UTC';
-        $itemTimes = [];
-        $attendance = [];
-        foreach ($items as $item) {
-            $itemTimes[$item['key']] = ['start' => $this->actual($item['start'], $zone), 'finish' => $this->actual($item['finish'], $zone)];
-        }
-        foreach ($run->content['roster'] ?? [] as $person) {
-            $attendance[$person['key']] = ['arrived' => $this->actual($person['arrived'], $zone), 'briefed' => $this->actual($person['briefed'], $zone)];
-        }
+        $itemTimes = $items->mapWithKeys(fn (array $item): array => [$item['key'] => ['start' => $this->actual($item['start'], $zone), 'finish' => $this->actual($item['finish'], $zone)]])->all();
+        $attendance = collect($run->content['roster'] ?? [])
+            ->mapWithKeys(fn (array $person): array => [$person['key'] => ['arrived' => $this->actual($person['arrived'], $zone), 'briefed' => $this->actual($person['briefed'], $zone)]])
+            ->all();
 
         return ['event' => $event, 'run' => $run, 'source' => $source, 'sourceError' => $sourceError,
             'needsReview' => $needsReview, 'complete' => $complete,
@@ -73,8 +70,8 @@ class LiveShowViewModel
             'itemTimes' => $itemTimes, 'attendance' => $attendance,
             'refreshedLabel' => $run === null ? null : $this->actual($refreshedAt, $zone),
             'savedLabel' => $run === null ? null : $this->actual($run->updated_at->toIso8601String(), $zone),
-            'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === 'pending' && ! in_array($item['key'], $sourceKeys, true))->all()),
-            'current' => $items->firstWhere('state', 'running'), 'next' => $items->firstWhere('state', 'pending')];
+            'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === LiveItemStatus::Pending->value && ! in_array($item['key'], $sourceKeys, true))->all()),
+            'current' => $items->firstWhere('state', LiveItemStatus::Running->value), 'next' => $items->firstWhere('state', LiveItemStatus::Pending->value)];
     }
 
     /** @param Content $content
@@ -106,12 +103,7 @@ class LiveShowViewModel
      */
     private function comparisons(array $items): array
     {
-        $comparisons = [];
-        foreach ($items as $item) {
-            $comparisons[$item['key']] = $this->comparison($item);
-        }
-
-        return $comparisons;
+        return collect($items)->mapWithKeys(fn (array $item): array => [$item['key'] => $this->comparison($item)])->all();
     }
 
     /** @param Item $item */
