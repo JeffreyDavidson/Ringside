@@ -12,6 +12,7 @@ use App\Lifecycle\Events\EventProductionRequirements;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
+use App\Models\Users\User;
 use App\Services\Events\EventPackCardService;
 use App\Services\Events\EventPackSourceService;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +24,9 @@ class SaveEventProductionAction
         private readonly EventProductionRequirements $requirements, private readonly EventCardLock $lock) {}
 
     /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */
-    public function handle(Event $event, int $version, string $fingerprint, EventProductionData $data, bool $reviewed): void
+    public function handle(Event $event, int $version, string $fingerprint, EventProductionData $data, bool $reviewed, User $actor): void
     {
-        DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed): void {
+        DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed, $actor): void {
             ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
@@ -47,7 +48,7 @@ class SaveEventProductionAction
             $pack->card_fingerprint = $fingerprint;
             $pack->fill(['content' => $content]);
             $pack->save();
-            activity('production')->performedOn($event)->withProperties(['operation' => 'pack-save', 'version' => $pack->version])->log('pack-save');
+            activity('production')->causedBy($actor)->performedOn($event)->withProperties(['operation' => 'pack-save', 'version' => $pack->version])->log('pack-save');
         }, attempts: 3);
     }
 }

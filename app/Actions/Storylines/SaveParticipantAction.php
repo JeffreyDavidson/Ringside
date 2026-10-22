@@ -11,6 +11,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineParticipant;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -21,9 +22,9 @@ class SaveParticipantAction
 {
     public function __construct(private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision) {}
 
-    public function handle(Storyline $storyline, int $version, ParticipantData $data, ?int $participantId = null): StorylineParticipant
+    public function handle(Storyline $storyline, int $version, ParticipantData $data, User $actor, ?int $participantId = null): StorylineParticipant
     {
-        return DB::transaction(function () use ($storyline, $version, $data, $participantId): StorylineParticipant {
+        return DB::transaction(function () use ($storyline, $version, $data, $participantId, $actor): StorylineParticipant {
             $story = $this->lock->handle($storyline, $version);
             $person = $this->participantModel($data->type)::query()
                 ->where('promotion_id', $story->promotion_id)
@@ -53,7 +54,7 @@ class SaveParticipantAction
                 throw StorylineConflictException::state();
             }
             $participant->save();
-            $this->revision->handle($story, $participant, $participantId === null ? StorylineRevisionOperation::ParticipantJoined : StorylineRevisionOperation::ParticipantLeft, $before, $data->reason);
+            $this->revision->handle($story, $participant, $participantId === null ? StorylineRevisionOperation::ParticipantJoined : StorylineRevisionOperation::ParticipantLeft, $actor, $before, $data->reason);
 
             return $participant;
         }, attempts: 3);

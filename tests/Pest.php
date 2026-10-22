@@ -14,6 +14,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
 use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
+use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\withoutVite;
@@ -145,6 +146,39 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 function administrator(): User
 {
     return User::factory()->administrator()->create(['status' => UserStatus::Active]);
+}
+
+/** The user the test is signed in as; Actions take the actor explicitly instead of reading the session. */
+function signedInUser(): User
+{
+    $user = auth()->user();
+
+    return $user instanceof User ? $user : throw new LogicException('The test is not signed in.');
+}
+
+/** The id of the newest activity-log entry, so a test can read only the entries one operation wrote. */
+function lastActivityId(): int
+{
+    return Activity::query()->latest('id')->first()->id ?? 0;
+}
+
+/**
+ * The entries of one log written after $afterId, oldest first, as "description|causer", where the causer is `causerTag()` of whoever the log names.
+ * Model events (created, updated, deleted) go to the default log and are not the Actions' own audit, so they are left out.
+ *
+ * @return list<string>
+ */
+function activityEntriesAfter(int $afterId, string $logName): array
+{
+    $entries = Activity::query()->where('log_name', $logName)->where('id', '>', $afterId)->orderBy('id')->get();
+
+    return array_values($entries->map(fn (Activity $activity): string => "{$activity->description}|{$activity->causer_type}:{$activity->causer_id}")->all());
+}
+
+/** How `activityEntriesAfter()` writes a user as the causer of an entry. */
+function causerTag(User $user): string
+{
+    return "{$user->getMorphClass()}:{$user->id}";
 }
 
 function basicUser(): User

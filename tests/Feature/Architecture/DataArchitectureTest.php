@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Data\Stables\StableMembershipData;
 
 /*
- * Data objects carry data (.ai/rules/data.md): readonly, a promoted constructor, static named constructors (static methods
+ * Data objects carry data (laravel-conventions rule data.md): readonly, a promoted constructor, static named constructors (static methods
  * that return static, self or the class) and the named value-level checks below. No other methods, no now() and no queries.
  */
 $dataDirectory = __DIR__.'/../../../app/Data/';

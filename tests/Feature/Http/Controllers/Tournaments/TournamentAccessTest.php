@@ -23,7 +23,7 @@ it('keeps foreign tournament bindings indistinguishable from missing records', f
         ->count(4)
         ->create();
     $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
-        ->all())));
+        ->all())), administrator());
     $other = Promotion::factory()
         ->create();
 
@@ -63,7 +63,7 @@ it('owners and managers see tournament operation controls', function (Membership
         ->count(4)
         ->create();
     $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
-        ->all())));
+        ->all())), administrator());
 
     actingAsPromotionMember($promotion, $role);
 
@@ -87,7 +87,7 @@ it('members cannot see tournament operation controls', function (): void {
         ->count(4)
         ->create();
     $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
-        ->all())));
+        ->all())), administrator());
 
     actingAsPromotionMember($promotion, MembershipRole::Member);
 

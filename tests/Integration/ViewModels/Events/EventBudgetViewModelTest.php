@@ -19,10 +19,10 @@ test('ticket refunds show net confirmed income and cash without crossing counter
     // Arrange
     $f = budgetFixture(['direction' => 'income', 'category' => 'tickets', 'planned_cents' => 200000, 'confirmed_cents' => 190000]);
     $record = resolve(RecordBudgetMovementAction::class);
-    $record->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(['amount' => '2000.00', 'acknowledge' => true]));
+    $record->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(['amount' => '2000.00', 'acknowledge' => true]), signedInUser());
     $source = $f['line']->movements()->firstOrFail();
     // Act
-    $record->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['kind' => 'refund', 'amount' => '100.00', 'source_id' => $source->id]));
+    $record->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['kind' => 'refund', 'amount' => '100.00', 'source_id' => $source->id]), signedInUser());
     $data = resolve(EventBudgetViewModel::class)->data($f['event']);
     // Assert
     expect($data['totals']['income']['cash'])->toBe(190000)->and($data['totals']['confirmed_net'])->toBe(190000)->and($data['totals']['balanced'])->toBeTrue()->and($data['rows'][0]['variance'])->toBe(-10000);
@@ -36,7 +36,7 @@ test('missing amounts and zero lines never pretend to be a complete settlement',
     // Assert
     expect($data['totals']['planned_net'])->toBeNull()->and($data['totals']['confirmed_net'])->toBeNull()->and($data['totals']['missing'])->toBe(1)->and($data['totals']['balanced'])->toBeFalse();
     // Act
-    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['planned' => '0', 'confirmed' => '0', 'reason' => 'No fee owed']));
+    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['planned' => '0', 'confirmed' => '0', 'reason' => 'No fee owed']), signedInUser());
     // Assert
     expect(resolve(EventBudgetViewModel::class)->data($f['event'])['totals']['balanced'])->toBeTrue();
 });
@@ -55,7 +55,7 @@ test('financial history outlives generic activity cleanup and an actor soft dele
     // Arrange
     $f = budgetFixture();
     $actor = User::query()->findOrFail(auth()->id());
-    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['notes' => 'Private history note']));
+    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['notes' => 'Private history note']), signedInUser());
     $revision = $f['budget']->revisions()->firstOrFail();
     $revision->created_at = now()->subYears(2);
     $revision->save();
@@ -70,7 +70,7 @@ test('financial history outlives generic activity cleanup and an actor soft dele
 test('a retained revision keeps its owning budget relationship and readable changed fields', function (): void {
     // Arrange
     $f = budgetFixture();
-    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['planned' => '600.00', 'due_date' => today()->toDateString(), 'notes' => 'Private change']));
+    resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['planned' => '600.00', 'due_date' => today()->toDateString(), 'notes' => 'Private change']), signedInUser());
     $revision = $f['budget']->revisions()->firstOrFail();
     // Act
     $changes = resolve(EventBudgetViewModel::class)->historyChanges([$revision])[$revision->id];

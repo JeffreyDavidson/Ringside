@@ -14,7 +14,6 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use Illuminate\Support\Facades\DB;
-use LogicException;
 
 /** The shared transaction, retry identity and retained history boundary for budget writes. */
 class MutateBudgetAction
@@ -23,15 +22,11 @@ class MutateBudgetAction
      * @param  array<string, mixed>  $payload  The internal operation fingerprint hashed into event_budget_revisions.request_hash for retry identity, not caller input; retyping it would change stored hashes.
      * @param  Closure(EventBudget): ?array{target: int, before: array<string, mixed>, after: array<string, mixed>}  $change
      */
-    public function handle(Event $event, int $version, string $requestKey, BudgetOperation $operation, array $payload, Closure $change, ?string $reason = null): EventBudget
+    public function handle(Event $event, int $version, string $requestKey, BudgetOperation $operation, array $payload, Closure $change, User $actor, ?string $reason = null): EventBudget
     {
         $requestKey = mb_strtolower($requestKey);
-        $user = auth()->user();
-        if (! $user instanceof User) {
-            throw new LogicException('A budget write requires an actor.');
-        }
 
-        return DB::transaction(function () use ($event, $version, $requestKey, $operation, $payload, $change, $reason, $user): EventBudget {
+        return DB::transaction(function () use ($event, $version, $requestKey, $operation, $payload, $change, $actor, $reason): EventBudget {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $event->load('promotion');
             $budget = EventBudget::query()->forEventId($event->id)->lockForUpdate()->first();
@@ -71,8 +66,8 @@ class MutateBudgetAction
             $revision->before = $result['before'];
             $revision->after = $result['after'];
             $revision->reason = $reason;
-            $revision->actor_id = $user->id;
-            $revision->actor_label = "{$user->first_name} {$user->last_name}";
+            $revision->actor_id = $actor->id;
+            $revision->actor_label = "{$actor->first_name} {$actor->last_name}";
             $revision->save();
 
             return $budget;

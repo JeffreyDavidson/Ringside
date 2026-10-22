@@ -11,7 +11,7 @@ use App\Models\Users\User;
 class PersistSponsorCommitmentAction
 {
     /** Called inside the owning event transaction, after the commitment lock/version check. */
-    public function handle(EventSponsorCommitment $commitment, string $operation, ?string $reason): void
+    public function handle(EventSponsorCommitment $commitment, string $operation, ?string $reason, User $actor): void
     {
         $commitment->version++;
         $commitment->save();
@@ -19,9 +19,8 @@ class PersistSponsorCommitmentAction
         $revision->promotion_id = $commitment->promotion_id;
         $revision->commitment_id = $commitment->id;
         $revision->version = $commitment->version;
-        $actor = User::query()->findOrFail(auth()->id());
         $revision->actor_id = $actor->id;
-        $revision->actor_name = $actor->full_name;
+        $revision->actor_name = "{$actor->first_name} {$actor->last_name}";
         $revision->operation = $operation;
         $revision->reason = $reason;
         $revision->snapshot = $commitment->attributesToArray();

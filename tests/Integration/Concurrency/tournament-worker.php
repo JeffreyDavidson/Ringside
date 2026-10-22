@@ -35,6 +35,7 @@ $spec = json_decode($arguments[1], true, flags: JSON_THROW_ON_ERROR);
 if (! is_array($spec) || ! isset($spec['operation'],$spec['node_id'],$spec['event_id'],$spec['referee_id'],$spec['version'],$spec['match_id'],$spec['side_id']) || ! is_string($spec['operation']) || ! is_int($spec['node_id']) || ! is_int($spec['event_id']) || ! is_int($spec['referee_id']) || ! is_int($spec['version']) || ! is_int($spec['match_id']) || ! is_int($spec['side_id'])) {
     throw new RuntimeException('Invalid worker specification');
 }
+$defaultActor = workerActor();
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
 $startAt = (float) fgets(STDIN);
@@ -44,14 +45,14 @@ while (microtime(true) < $startAt) {
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false, 'match_id' => null];
 try {
     if ($spec['operation'] === 'book') {
-        $match = resolve(BookTournamentMatchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), $spec['version'], new TournamentBookingData(Event::query()->findOrFail($spec['event_id']), Referee::query()->whereKey($spec['referee_id'])->get()));
+        $match = resolve(BookTournamentMatchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), $spec['version'], new TournamentBookingData(Event::query()->findOrFail($spec['event_id']), Referee::query()->whereKey($spec['referee_id'])->get()), $defaultActor);
         $result['match_id'] = $match->id;
     }
     if ($spec['operation'] === 'result') {
-        resolve(RecordResultAction::class)->handle(EventMatch::query()->findOrFail($spec['match_id']), new MatchResultData(MatchFinish::Pinfall, MatchSide::query()->findOrFail($spec['side_id']), collect(), $spec['version']));
+        resolve(RecordResultAction::class)->handle(EventMatch::query()->findOrFail($spec['match_id']), new MatchResultData(MatchFinish::Pinfall, MatchSide::query()->findOrFail($spec['side_id']), collect(), $spec['version']), $defaultActor);
     }
     if ($spec['operation'] === 'reset') {
-        resolve(ResetTournamentBranchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), $spec['version'], 'Concurrency reset');
+        resolve(ResetTournamentBranchAction::class)->handle(TournamentNode::query()->findOrFail($spec['node_id']), $spec['version'], 'Concurrency reset', $defaultActor);
     }
     if ($spec['operation'] === 'ordinary') {
         resolve(AddWrestlersToMatchAction::class)->handle(EventMatch::query()->findOrFail($spec['match_id']), collect([Wrestler::query()->findOrFail($spec['side_id'])]), 1);

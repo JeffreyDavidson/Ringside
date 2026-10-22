@@ -12,6 +12,7 @@ use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 class ReviewLiveShowAction
@@ -19,9 +20,9 @@ class ReviewLiveShowAction
     public function __construct(private readonly LiveShowSourceRequirements $source, private readonly LockLiveShowAction $lock,
         private readonly PersistLiveShowAction $persist, private readonly EventCardLock $card) {}
 
-    public function handle(Event $event, int $version, int $packVersion, string $fingerprint, LiveShowReviewData $review): void
+    public function handle(Event $event, int $version, int $packVersion, string $fingerprint, LiveShowReviewData $review, User $actor): void
     {
-        DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $review): void {
+        DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $review, $actor): void {
             $event = $this->card->lock($event->id)['event'];
             $run = $this->lock->handle($event, $version);
             $source = $this->source->ensureSource($run->event);
@@ -42,7 +43,7 @@ class ReviewLiveShowAction
                 if (mb_trim($reason) === '' || mb_strlen($reason) > 2000) {
                     throw LiveShowException::reasonRequired();
                 }
-                $protected[] = [...$item, 'state' => LiveItemStatus::Skipped->value, 'reason' => $reason, 'updated_by' => (int) auth()->id()];
+                $protected[] = [...$item, 'state' => LiveItemStatus::Skipped->value, 'reason' => $reason, 'updated_by' => $actor->id];
             }
             $pending = array_values(array_filter($source['content']['items'], fn (array $item): bool => ($old->get($item['key'])['state'] ?? LiveItemStatus::Pending->value) === LiveItemStatus::Pending->value));
             if ($pending === [] && collect($protected)->every(fn (array $item): bool => $item['state'] === LiveItemStatus::Skipped->value)) {
@@ -75,7 +76,7 @@ class ReviewLiveShowAction
             $run->card_fingerprint = $fingerprint;
             $run->content = $content;
             $this->persist->handle($run, new LiveShowChangeData('review', 'show', $before,
-                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $review->removedReasons]));
+                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $review->removedReasons]), $actor);
         }, attempts: 3);
     }
 }

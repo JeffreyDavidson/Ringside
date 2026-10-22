@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Storylines\StorylineRevisionOperation;
+use App\Enums\Storylines\StorylineRevisionRecord;
 use App\Models\Storylines\StorylineRevision;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 
@@ -16,7 +17,7 @@ test('mass assignment is refused for every column because revisions are audit ro
         'promotion_id' => 98,
         'actor_id' => 97,
         'operation' => 'forged',
-        'record_type' => 'StorylineStep',
+        'record_type' => 'step',
         'record_id' => 96,
         'reason' => 'Forged',
         'before' => [],
@@ -52,4 +53,17 @@ test('before and after snapshots survive a persisted round trip', function (): v
     // Assert
     expect($revision->before)->toBe(['heading' => 'Old', 'sequence' => 1])
         ->and($revision->after)->toBe(['heading' => 'New', 'sequence' => 2]);
+});
+
+test('the record type is cast to its enum and the stored string is the short name', function (): void {
+    // Arrange
+    $created = StorylineRevision::factory()
+        ->create(['record_type' => StorylineRevisionRecord::Participant]);
+
+    // Act
+    $revision = StorylineRevision::query()->findOrFail($created->id);
+
+    // Assert
+    expect($revision->record_type)->toBe(StorylineRevisionRecord::Participant)
+        ->and($revision->getRawOriginal('record_type'))->toBe('participant');
 });

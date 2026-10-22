@@ -111,7 +111,7 @@ test('a member live response does not show crew cues or crew names', function ()
     require_once __DIR__.'/../../../../Fixtures/production.php';
     $event = productionFixture()['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
 
     $member = basicUser();
     Promotion::query()

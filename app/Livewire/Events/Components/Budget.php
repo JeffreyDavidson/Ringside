@@ -18,6 +18,7 @@ use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
 use App\Exceptions\RecordChangedException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\BudgetLineForm;
 use App\Livewire\Events\Forms\BudgetMovementForm;
 use App\Models\Events\Event;
@@ -38,6 +39,7 @@ use Livewire\WithPagination;
 class Budget extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
     use WithPagination;
 
     #[Locked]
@@ -192,10 +194,10 @@ class Budget extends Component
         }
         try {
             match ($this->operation) {
-                BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput)),
-                BudgetOperation::RecordMovement => $recordMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput)),
-                BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, new BudgetCorrectionData($this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null)),
-                BudgetOperation::ArchiveLine => $archiveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason),
+                BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput), $this->actor()),
+                BudgetOperation::RecordMovement => $recordMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, BudgetMovementData::fromValidated($movementInput), $this->actor()),
+                BudgetOperation::CorrectMovement => $correctMovement->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, new BudgetCorrectionData($this->movementId ?? 0, $this->reason, $this->replaceMovement ? BudgetMovementData::fromValidated($movementInput) : null), $this->actor()),
+                BudgetOperation::ArchiveLine => $archiveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId ?? 0, $this->reason, $this->actor()),
             };
         } catch (BudgetException|RecordChangedException $exception) {
             $this->addError('budget', $this->failureMessageKeepingInput($exception));

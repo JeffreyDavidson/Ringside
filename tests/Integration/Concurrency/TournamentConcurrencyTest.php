@@ -153,7 +153,7 @@ it('queues tournament booking with a reschedule of its reviewed future event', f
         $t = $world['tournament'];
         $world['event']->update(['date' => now()->addWeek()]);
         $node = $t->nodes()->firstOrFail();
-        resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], $t->version);
+        resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], $t->version, administrator());
         $base = tournamentWorkerSpec($world);
         $before = resolvedDeadlocks();
         $original = $world['event']->date ?? throw new RuntimeException('Expected scheduled date');
@@ -206,7 +206,7 @@ it('commits a final result and its championship lineage atomically under competi
         $t = $world['tournament'];
         $final = $t->nodes()->where('round', 2)->firstOrFail();
         $title = Title::factory()->active()->for($world['promotion'])->create(['type' => TitleType::Singles]);
-        $match = resolve(BookTournamentMatchAction::class)->handle($final, $t->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])));
+        $match = resolve(BookTournamentMatchAction::class)->handle($final, $t->version, new TournamentBookingData($world['event'], $world['referees'], new Collection([$title])), administrator());
         $base = tournamentWorkerSpec($world);
         $before = resolvedDeadlocks();
         $results = tournamentRace([[...$base, 'operation' => 'result', 'match_id' => $match->id, 'side_id' => $match->sides()->where('position', 1)->firstOrFail()->id], [...$base, 'operation' => 'result', 'match_id' => $match->id, 'side_id' => $match->sides()->where('position', 2)->firstOrFail()->id]]);

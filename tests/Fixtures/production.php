@@ -24,7 +24,7 @@ function productionFixture(): array
         'assignments' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001', 'contact_id' => $contact->id, 'role' => 'sound', 'timezone' => 'UTC']],
         'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$match->id,
             'subject' => 'PRIVATE-SUBJECT-7Q', 'trigger' => 'Caller signal', 'instruction' => 'PRIVATE-CUE-7Q', 'owner_id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001']],
-    ]), false);
+    ]), false, signedInUser());
 
     $content = $event->pack()->firstOrFail()->content;
     if (! isset($content['production'])) {

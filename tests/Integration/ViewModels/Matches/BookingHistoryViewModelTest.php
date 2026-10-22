@@ -313,7 +313,7 @@ it('reflects a corrected result on the next check without copying historical rec
     $before = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection));
     resolve(RecordResultAction::class)->handle($match, new MatchResultData(
         MatchFinish::TimeLimitDraw, null, collect(),
-    ));
+    ), administrator());
 
     // Act
     $after = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection));

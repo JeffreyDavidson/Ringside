@@ -29,11 +29,11 @@ test('overdue completed late and unknown deadlines use recorded facts', function
 
     // Act and Assert
     expect($screen->statuses([$promise])[$promise->id])->toBe('Pending');
-    $promise = $action->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['deadline' => now()->subHour()]));
+    $promise = $action->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['deadline' => now()->subHour()]), signedInUser());
     expect($screen->statuses([$promise])[$promise->id])->toBe('Overdue');
-    $promise = $action->handle($world['event'], $promise->id, 2, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Banner checked']));
+    $promise = $action->handle($world['event'], $promise->id, 2, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Banner checked']), signedInUser());
     expect($screen->statuses([$promise])[$promise->id])->toBe('Completed late');
-    $promise = $action->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise, ['deadline' => null]), 'Correct deadline');
+    $promise = $action->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise, ['deadline' => null]), signedInUser(), 'Correct deadline');
     expect($screen->statuses([$promise])[$promise->id])->toBe('Completed');
 });
 
@@ -101,13 +101,13 @@ test('a cancelled promise stays visible for review while its approved instructio
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null)['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null)['hash']), signedInUser());
     $promise->refresh();
 
     // Act
-    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Cancelled]), 'Sponsor withdrew');
+    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Cancelled]), signedInUser(), 'Sponsor withdrew');
     $rows = app(SponsorCommitmentsViewModel::class)->data($world['event'], 'pending')['rows'];
 
     // Assert
@@ -119,11 +119,11 @@ test('linked announcement review preserves its live context and flags a removed 
     // Arrange
     $world = sponsorFixture();
     $match = EventMatch::factory()->for($world['event'])->create(['match_number' => 1]);
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']), signedInUser());
     $pack = app(EventPackViewModel::class)->data($world['event']);
     $query = app(SponsorInstructionService::class);
-    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, $match->id, $query->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, $match->id)['hash']));
-    app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $pack['card']['fingerprint']);
+    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, $match->id, $query->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, $match->id)['hash']), signedInUser());
+    app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $pack['card']['fingerprint'], administrator());
     $screen = app(SponsorCommitmentsViewModel::class);
     $row = $screen->data($world['event'], 'pending')['rows']->getCollection()->firstOrFail();
 
@@ -137,16 +137,16 @@ test('linked announcement review preserves its live context and flags a removed 
 test('setup review detects unpublished private edits changed pack text and removed items', function (): void {
     // Arrange
     $world = sponsorFixture();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors', 'instructionOwner' => 'Ring crew']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors', 'instructionOwner' => 'Ring crew']), signedInUser());
     $pack = app(EventPackViewModel::class)->data($world['event']);
     $query = app(SponsorInstructionService::class);
-    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, $query->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null)['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, $query->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null)['hash']), signedInUser());
     $screen = app(SponsorCommitmentsViewModel::class);
     $row = $screen->data($world['event'], 'pending')['rows']->getCollection()->firstOrFail();
 
     // Act and Assert
     expect($screen->details([$row])[$row->id]['instructionNeedsReview'])->toBeFalse();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise->refresh(), ['instructionOwner' => 'Alex']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 3, $promise->submission_key, sponsorPromiseData($promise->refresh(), ['instructionOwner' => 'Alex']), signedInUser());
     $row = $screen->data($world['event'], 'pending')['rows']->getCollection()->firstOrFail();
     expect($screen->details([$row])[$row->id]['instructionNeedsReview'])->toBeTrue();
     $data = app(EventPackViewModel::class)->data($world['event']);

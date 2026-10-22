@@ -16,8 +16,8 @@ test('next planned follows current event or standalone dates before undated sequ
     // Arrange
     actingAs(administrator());
     $story = Storyline::factory()->create();
-    resolve(SaveStepAction::class)->handle($story, 1, new StepData('Undated', 'Wait for an event.', 1, new SourceData, (string) Str::uuid()));
-    $next = resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Payoff', 'The intended match.', 2, new SourceData(targetOn: today()->addDays(2)->toDateString()), (string) Str::uuid()));
+    resolve(SaveStepAction::class)->handle($story, 1, new StepData('Undated', 'Wait for an event.', 1, new SourceData, (string) Str::uuid()), signedInUser());
+    $next = resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Payoff', 'The intended match.', 2, new SourceData(targetOn: today()->addDays(2)->toDateString()), (string) Str::uuid()), signedInUser());
     // Act
     $summary = resolve(StorylineViewModel::class)->summary($story);
     // Assert
@@ -29,8 +29,8 @@ test('next planned compares event instants and standalone days in their actual t
     $promotion = Promotion::factory()->create(['timezone' => 'America/New_York']);
     $story = Storyline::factory()->for($promotion)->create();
     $event = Event::factory()->for($promotion)->create(['date' => '2026-11-14T03:00:00+00:00']);
-    $standalone = resolve(SaveStepAction::class)->handle($story, 1, new StepData('Local next day', 'The later payoff.', 1, new SourceData(targetOn: '2026-11-14'), (string) Str::uuid()));
-    $earlier = resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Late-night event', 'The first confrontation.', 2, new SourceData($event->id), (string) Str::uuid()));
+    $standalone = resolve(SaveStepAction::class)->handle($story, 1, new StepData('Local next day', 'The later payoff.', 1, new SourceData(targetOn: '2026-11-14'), (string) Str::uuid()), signedInUser());
+    $earlier = resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Late-night event', 'The first confrontation.', 2, new SourceData($event->id), (string) Str::uuid()), signedInUser());
     $summary = resolve(StorylineViewModel::class)->summary($story);
     expect($summary['next']?->id)->toBe($earlier->id);
 });

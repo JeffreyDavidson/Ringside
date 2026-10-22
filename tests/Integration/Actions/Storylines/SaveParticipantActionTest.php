@@ -21,9 +21,9 @@ test('ending and rejoining preserve dated creative involvement', function () {
     $left = today()->subDays(1)->toDateString();
 
     // Act
-    $participant = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined));
-    resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined, $left, 'Story moved on.'), $participant->id);
-    $rejoined = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, 'Partner', today()->toDateString()));
+    $participant = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined), signedInUser());
+    resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined, $left, 'Story moved on.'), signedInUser(), $participant->id);
+    $rejoined = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, 'Partner', today()->toDateString()), signedInUser());
 
     // Assert
     expect(requiredDate($participant->refresh()->left_on)->toDateString())->toBe($left)
@@ -36,8 +36,8 @@ test('teams participate creatively and duplicate current involvement is refused'
     $story = Storyline::factory()->create();
     $team = TagTeam::factory()->for(requiredModel($story->promotion))->create();
     $data = new ParticipantData('tag_team', $team->id, 'Allies', today()->toDateString());
-    resolve(SaveParticipantAction::class)->handle($story, 1, $data);
-    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(StorylineConflictException::class);
+    resolve(SaveParticipantAction::class)->handle($story, 1, $data, signedInUser());
+    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, $data, signedInUser()))->toThrow(StorylineConflictException::class);
 });
 test('participants are stored under their morph alias', function (string $type, string $factory) {
     // Arrange
@@ -46,7 +46,7 @@ test('participants are stored under their morph alias', function (string $type, 
     $person = $factory::factory()->for(requiredModel($story->promotion))->create();
 
     // Act
-    $participant = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $person->id, null, today()->toDateString()));
+    $participant = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $person->id, null, today()->toDateString()), signedInUser());
 
     // Assert
     expect($participant->participant_type)->toBe($type)
@@ -64,7 +64,7 @@ test('a person from another promotion or an unsupported kind is refused and noth
     $personId = $person(requiredModel($story->promotion));
 
     // Act
-    $attempt = fn () => resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $personId, null, today()->toDateString()));
+    $attempt = fn () => resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData($type, $personId, null, today()->toDateString()), signedInUser());
 
     // Assert
     expect($attempt)->toThrow(ModelNotFoundException::class)
@@ -84,17 +84,31 @@ test('closed or mismatched participation cannot be rewritten', function () {
     $one = Wrestler::factory()->for(requiredModel($story->promotion))->create();
     $two = Wrestler::factory()->for(requiredModel($story->promotion))->create();
     $date = today()->toDateString();
-    $row = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $one->id, null, $date));
-    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $two->id, null, $date, $date, 'Wrong person.'), $row->id))->toThrow(StorylineConflictException::class);
+    $row = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $one->id, null, $date), signedInUser());
+    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $two->id, null, $date, $date, 'Wrong person.'), signedInUser(), $row->id))->toThrow(StorylineConflictException::class);
     $one->delete();
-    resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $one->id, null, $date, $date, 'Retired from this story.'), $row->id);
-    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $one->id, null, $date, $date, 'Repeated.'), $row->id))->toThrow(StorylineConflictException::class);
+    resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $one->id, null, $date, $date, 'Retired from this story.'), signedInUser(), $row->id);
+    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $one->id, null, $date, $date, 'Repeated.'), signedInUser(), $row->id))->toThrow(StorylineConflictException::class);
 });
 
 test('ending participation cannot backdate the stored joining date to disguise an invalid end', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
-    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
-    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->subDays(4)->toDateString(), today()->subDay()->toDateString(), 'Backdated.'), $person->id))->toThrow(StorylineConflictException::class);
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()), signedInUser());
+    expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->subDays(4)->toDateString(), today()->subDay()->toDateString(), 'Backdated.'), signedInUser(), $person->id))->toThrow(StorylineConflictException::class);
+});
+
+test('adding a participant records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+
+    // Act
+    resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', today()->toDateString()), $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
 });

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
@@ -34,6 +35,7 @@ it('resolves every factory message to translated text', function (string $except
     }
 
     $arguments = [
+        DateRangeContext::class => DateRangeContext::StableActivity,
         MatchType::class => MatchType::Singles,
         TitleType::class => TitleType::Singles,
         Title::class => Title::factory()->make(['name' => 'World']),
@@ -98,8 +100,8 @@ it('renders the original English text', function (Closure $factory, string $expe
     'venue booked' => [fn () => SchedulingConflictException::venueAlreadyBooked('Garden', 'Jan 1, 2026'), 'Venue [Garden] is already booked on Jan 1, 2026 (venue time).'],
     'not available' => [fn () => EntityNotAvailableException::forMatchAssignment('wrestlers'), 'Selected wrestlers must all be eligible for match assignment.'],
     'range' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01')), 'Invalid date range: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
-    'range with context' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01'), 'stable'), 'Invalid date range for stable: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
-    'future' => [fn () => InvalidDateRangeException::futureNotAllowed(Carbon::parse('2026-02-01'), 'Debut'), 'Debut date (2026-02-01) cannot be in the future. Use current or past date only.'],
+    'range with context' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01'), DateRangeContext::StableActivity), 'Invalid date range for stable activity: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
+    'future' => [fn () => InvalidDateRangeException::futureNotAllowed(Carbon::parse('2026-02-01'), DateRangeContext::StableMembershipRemoval), 'Stable membership removal date (2026-02-01) cannot be in the future. Use current or past date only.'],
     'venue name conflict' => [fn () => VenueCannotBeRestoredException::nameConflict(Venue::factory()->make(['name' => 'Garden']), 'Arena'), "Venue 'Garden' cannot be restored because the name conflicts with existing venue 'Arena'. Resolve the conflict before restoration."],
     'event venue deleted' => [fn () => VenueCannotBeRestoredException::venueDeleted(Event::factory()->make(['name' => 'Summer Slam']), Venue::factory()->make(['name' => 'Garden'])), "Event 'Summer Slam' cannot be restored because its venue 'Garden' is deleted. Restore the venue first."],
     'venue double booked' => [fn () => VenueCannotBeRestoredException::venueDoubleBooked(Venue::factory()->make(['name' => 'Garden']), 'Jan 1, 2026'), "Venue 'Garden' cannot be restored because it hosts more than one event on Jan 1, 2026. Move or delete the extra events first."],

@@ -713,11 +713,11 @@ test('concurrent live show commands commit once without replacing times or dupli
         $version = 0;
         $key = '';
         if ($operation !== 'prepare') {
-            $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+            $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
             $version = 1;
             $key = $operation === 'attendance' ? $run->content['roster'][0]['key'] : $run->content['items'][0]['key'];
             if ($operation === 'finish') {
-                resolve(TransitionLiveItemAction::class)->handle($event, 1, $key, LiveItemOperation::Start);
+                resolve(TransitionLiveItemAction::class)->handle($event, 1, $key, LiveItemOperation::Start, signedInUser());
                 $version = 2;
             }
         }
@@ -796,7 +796,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
         $version = 0;
         if ($operation !== 'first create') {
             resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $context->fingerprint($event, "wrestler:{$person->id}"),
-                new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null));
+                new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null), signedInUser());
             $version = 1;
         }
         $spec = ['talent_event_id' => $event->id, 'user_id' => $user->id, 'person_id' => $person->id, 'version' => $version,

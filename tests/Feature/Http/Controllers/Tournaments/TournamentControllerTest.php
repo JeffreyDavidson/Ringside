@@ -22,7 +22,7 @@ describe('index', function (): void {
             ->count(4)
             ->create();
         $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
-            ->all())));
+            ->all())), administrator());
         actingAs(administrator());
 
         // Act
@@ -61,7 +61,7 @@ describe('show', function (): void {
             ->count(4)
             ->create();
         $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($entrants->map(fn (Wrestler $entrant): int => $entrant->id)
-            ->all())));
+            ->all())), administrator());
 
         actingAs(administrator());
 

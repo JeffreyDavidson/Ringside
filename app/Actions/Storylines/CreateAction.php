@@ -9,15 +9,16 @@ use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
     public function __construct(private readonly RecordRevisionAction $revision) {}
 
-    public function handle(Promotion $promotion, StorylineData $data): Storyline
+    public function handle(Promotion $promotion, StorylineData $data, User $actor): Storyline
     {
-        return DB::transaction(function () use ($promotion, $data): Storyline {
+        return DB::transaction(function () use ($promotion, $data, $actor): Storyline {
             Promotion::query()->whereKey($promotion->id)->lockForUpdate()->firstOrFail();
             $existing = Storyline::query()->where('submission_id', $data->submissionId)->first();
             if ($existing !== null) {
@@ -35,7 +36,7 @@ class CreateAction
             $story->submission_id = $data->submissionId;
             $story->save();
             $story->refresh();
-            $this->revision->handle($story, $story, StorylineRevisionOperation::Created);
+            $this->revision->handle($story, $story, StorylineRevisionOperation::Created, $actor);
 
             return $story;
         }, attempts: 3);

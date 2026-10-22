@@ -45,7 +45,7 @@ test('correcting evidence preserves the exact recorded completion instant', func
     $world = sponsorFixture();
     $original = now()->subMinute()->setSecond(37);
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Original check', 'completedAt' => $original]));
+        sponsorPromiseData($world['promise'], ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Original check', 'completedAt' => $original]), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('edit', $promise->id);
 
@@ -91,7 +91,7 @@ test('stale form submissions preserve input and do not add a revision', function
     $promise = $world['promise'];
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('edit', $promise->id);
-    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['description' => 'Changed by another operator']));
+    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['description' => 'Changed by another operator']), signedInUser());
 
     // Act
     $component->set('form.description', 'My unsaved draft')->call('save');
@@ -105,7 +105,7 @@ test('history and instruction previews use this event and deliberate saved wordi
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
 
     // Act
@@ -172,7 +172,7 @@ test('a role downgrade refuses an already open private form without changing the
 test('a role downgrade refuses an already previewed instruction without changing the pack', function (): void {
     // Arrange
     $world = sponsorFixture();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']), signedInUser());
     $promotion = Promotion::query()->findOrFail($promise->promotion_id);
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Owner, 'status' => MembershipStatus::Active]);
@@ -211,7 +211,7 @@ test('choosing a sponsor resolves only current active records and keeps its iden
 test('a stale instruction save keeps the reason and says so', function (): void {
     // Arrange
     $world = sponsorFixture();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('beginInstruction', $promise->id)
         ->call('previewInstruction')
@@ -234,10 +234,10 @@ test('a stale instruction save keeps the reason and says so', function (): void 
 test('a stale instruction preview is refused while the current saved wording remains visible', function (): void {
     // Arrange
     $world = sponsorFixture();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']));
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('beginInstruction', $promise->id)->call('previewInstruction');
-    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 2, $promise->submission_key, sponsorPromiseData($promise, ['instruction' => 'Updated by another operator']));
+    app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 2, $promise->submission_key, sponsorPromiseData($promise, ['instruction' => 'Updated by another operator']), signedInUser());
 
     // Act
     $component->call('saveInstruction');
@@ -251,7 +251,7 @@ test('an unknown instruction mode is refused before a preview is made', function
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('beginInstruction', $promise->id)
         ->set('mode', 'delete');
@@ -268,7 +268,7 @@ test('the previewed target reaches the action as a parsed pack key', function ()
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('beginInstruction', $promise->id)
         ->call('previewInstruction')
@@ -299,7 +299,7 @@ test('a malformed target key is refused on save and nothing is written', functio
     // Arrange
     $world = sponsorFixture();
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']));
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
     $component->call('beginInstruction', $promise->id)
         ->set('targetKey', 'not-a-pack-key')

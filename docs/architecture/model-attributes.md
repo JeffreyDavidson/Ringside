@@ -1,6 +1,6 @@
 # Model Attributes
 
-How Ringside models declare their attributes. The enforced rules are in `.ai/rules/models.md` and `.ai/rules/models-value-objects-casts.md`; this page shows the shape.
+How Ringside models declare their attributes. The rules are the shared `laravel-conventions` rules `models.md` and `value-objects.md`, with Ringside's facts in [codebase-conventions.md](codebase-conventions.md); this page shows the shape.
 
 ## Declaration
 
@@ -38,7 +38,7 @@ class Wrestler extends Model
 
 ## Privileged fields are not fillable
 
-`role`, `status`, tenant and ownership keys (`promotion_id`, `user_id`), versions and similar fields stay out of `#[Fillable]`. The code that sets one assigns it explicitly, through `forceFill()` or through the relationship that owns the key. The one exception is the `PromotionMembership` pivot, which keeps `role` and `status` fillable because `attach()` and `updateExistingPivot()` fill the pivot class. See `.ai/rules/models.md`.
+`role`, `status`, tenant and ownership keys (`promotion_id`, `user_id`), versions and similar fields stay out of `#[Fillable]`. The code that sets one assigns it explicitly, through `forceFill()` or through the relationship that owns the key. The one exception is the `PromotionMembership` pivot, which keeps `role` and `status` fillable because `attach()` and `updateExistingPivot()` fill the pivot class. See the shared `laravel-conventions` rule `models.md`.
 
 ## Related documentation
 

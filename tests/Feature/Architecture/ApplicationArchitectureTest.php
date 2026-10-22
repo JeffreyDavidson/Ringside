@@ -22,6 +22,7 @@ use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Auth;
 
 arch()->preset()->php();
 arch()->preset()->security();
@@ -94,3 +95,11 @@ arch('lifecycle eligibility policies are final')
         VenueSchedulingEligibility::class,
     ])
     ->toBeFinal();
+
+arch('actions take the actor as a parameter and never read the signed-in user')
+    ->expect('App\\Actions')
+    ->not->toUse(Auth::class);
+
+arch('actions do not call the auth helper')
+    ->expect('auth')
+    ->not->toBeUsedIn('App\\Actions');

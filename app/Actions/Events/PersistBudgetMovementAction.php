@@ -20,7 +20,7 @@ class PersistBudgetMovementAction
 {
     public function __construct(private readonly BudgetSettlementService $settlement) {}
 
-    public function handle(EventBudget $budget, EventBudgetLine $line, BudgetMovementData $data, ?int $replaces = null): EventBudgetMovement
+    public function handle(EventBudget $budget, EventBudgetLine $line, BudgetMovementData $data, User $actor, ?int $replaces = null): EventBudgetMovement
     {
         $line->setRelation('movements', $line->movements()->orderBy('id')->lockForUpdate()->get());
         if ($line->archived_at !== null) {
@@ -51,10 +51,6 @@ class PersistBudgetMovementAction
         if ($data->kind === BudgetMovementKind::Payment && $line->confirmed_cents !== null && $this->settlement->net($line) + $data->amount > $line->confirmed_cents && ! $data->acknowledge) {
             throw BudgetException::excess();
         }
-        $user = auth()->user();
-        if (! $user instanceof User) {
-            throw new \LogicException('A budget movement requires an actor.');
-        }
         $movement = new EventBudgetMovement;
         $movement->event_budget_line_id = $line->id;
         $movement->fill([
@@ -67,8 +63,8 @@ class PersistBudgetMovementAction
         ]);
         $movement->source_id = $data->sourceId;
         $movement->replaces_id = $replaces;
-        $movement->actor_id = $user->id;
-        $movement->actor_label = "{$user->first_name} {$user->last_name}";
+        $movement->actor_id = $actor->id;
+        $movement->actor_label = "{$actor->first_name} {$actor->last_name}";
         $movement->save();
 
         return $movement;

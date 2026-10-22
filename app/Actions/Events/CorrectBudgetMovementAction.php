@@ -10,18 +10,19 @@ use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
+use App\Models\Users\User;
 
 class CorrectBudgetMovementAction
 {
     public function __construct(private readonly MutateBudgetAction $mutate, private readonly PersistBudgetMovementAction $persist) {}
 
-    public function handle(Event $event, int $version, string $key, int $lineId, BudgetCorrectionData $correction): EventBudget
+    public function handle(Event $event, int $version, string $key, int $lineId, BudgetCorrectionData $correction, User $actor): EventBudget
     {
         $movementId = $correction->movementId;
         $reason = $correction->reason;
         $replacement = $correction->replacement;
 
-        return $this->mutate->handle($event, $version, $key, BudgetOperation::CorrectMovement, ['line_id' => $lineId, 'movement_id' => $movementId, 'replacement' => $replacement instanceof BudgetMovementData ? (array) $replacement : null], function (EventBudget $budget) use ($lineId, $movementId, $reason, $replacement): array {
+        return $this->mutate->handle($event, $version, $key, BudgetOperation::CorrectMovement, ['line_id' => $lineId, 'movement_id' => $movementId, 'replacement' => $replacement instanceof BudgetMovementData ? (array) $replacement : null], function (EventBudget $budget) use ($lineId, $movementId, $reason, $replacement, $actor): array {
             $line = $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
             $movements = $line->movements()->orderBy('id')->lockForUpdate()->get();
             $movement = $movements->find($movementId);
@@ -36,12 +37,12 @@ class CorrectBudgetMovementAction
             }
             $before = $movement->attributesToArray();
             $movement->voided_at = now();
-            $movement->voided_by = (int) auth()->id();
+            $movement->voided_by = $actor->id;
             $movement->void_reason = trim($reason);
             $movement->save();
-            $replaced = $replacement instanceof BudgetMovementData ? $this->persist->handle($budget, $line, $replacement, $movementId) : null;
+            $replaced = $replacement instanceof BudgetMovementData ? $this->persist->handle($budget, $line, $replacement, $actor, $movementId) : null;
 
             return ['target' => $movement->id, 'before' => $before, 'after' => ['voided' => $movement->attributesToArray(), 'replacement' => $replaced?->attributesToArray()]];
-        }, trim($reason));
+        }, $actor, trim($reason));
     }
 }

@@ -12,6 +12,7 @@ use App\Exceptions\BaseBusinessException;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\SponsorCommitmentForm;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
@@ -35,6 +36,7 @@ use Livewire\WithPagination;
 class SponsorCommitments extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
     use WithPagination;
 
     #[Locked]
@@ -160,7 +162,7 @@ class SponsorCommitments extends Component
         $data = $this->form->toData($timing);
         Validator::make(['sponsorId' => $data->sponsorId], ['sponsorId' => [Rule::exists('sponsors', 'id')->where('promotion_id', $event->promotion_id)]])->validate();
         try {
-            $action->handle($event, $this->draftId, $this->draftVersion, $this->submissionKey, $data, $this->form->reason ?: null, $this->form->reviewed, $this->form->refreshSponsorName);
+            $action->handle($event, $this->draftId, $this->draftVersion, $this->submissionKey, $data, $this->actor(), $this->form->reason ?: null, $this->form->reviewed, $this->form->refreshSponsorName);
             $this->formShown = false;
             $this->notice = __('sponsors.promise_saved');
             $this->resetPage('commitmentsPage');
@@ -227,7 +229,7 @@ class SponsorCommitments extends Component
         Validator::make(['reason' => $this->instructionReason], ['reason' => ['nullable', 'string', 'max:2000']])->validate();
         try {
             $action->handle($event, $this->instructionId ?? 0, $this->instructionVersion, $this->previewPackVersion, $this->previewFingerprint,
-                new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null));
+                new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null), $this->actor());
             $this->instructionId = null;
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');

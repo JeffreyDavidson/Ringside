@@ -29,9 +29,9 @@ class SaveTalentBookingAction
         private readonly TalentBookingStateMachine $states,
     ) {}
 
-    public function handle(Event $event, string $personType, int $personId, int $version, string $fingerprint, TalentBookingData $data): EventTalentBooking
+    public function handle(Event $event, string $personType, int $personId, int $version, string $fingerprint, TalentBookingData $data, User $actor): EventTalentBooking
     {
-        return DB::transaction(function () use ($event, $personType, $personId, $version, $fingerprint, $data): EventTalentBooking {
+        return DB::transaction(function () use ($event, $personType, $personId, $version, $fingerprint, $data, $actor): EventTalentBooking {
             // Match edits and event rescheduling also lock the event before touching child records.
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $booking = $event->talentBookings()->where('person_type', $personType)->where('person_id', $personId)->lockForUpdate()->first();
@@ -84,8 +84,6 @@ class SaveTalentBookingAction
             }
             $booking->version = $version + 1;
             $booking->save();
-            /** @var User $actor */
-            $actor = auth()->user();
             $revision = new EventTalentBookingRevision;
             $revision->booking_id = $booking->id;
             $revision->version = $booking->version;
@@ -95,7 +93,7 @@ class SaveTalentBookingAction
                 'person_type' => $personType, 'person_id' => $personId, 'person_name' => $booking->person_name, 'person_role' => $booking->person_role,
                 'context' => $this->context->get($event), 'confirmed_snapshot' => $booking->confirmed_snapshot, 'terms_need_review' => $booking->terms_need_review];
             $revision->actor_id = $actor->id;
-            $revision->actor_name = User::query()->findOrFail($actor->id)->full_name;
+            $revision->actor_name = "{$actor->first_name} {$actor->last_name}";
             $revision->save();
 
             return $booking;

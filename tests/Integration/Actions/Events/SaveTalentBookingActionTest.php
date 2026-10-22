@@ -32,7 +32,7 @@ test('confirmation stores one individual agreement and durable private history',
 
     // Act
     $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Confirmed, 125050, now(), 'UTC', 'Private travel', true));
+        new TalentBookingData(TalentBookingStatus::Confirmed, 125050, now(), 'UTC', 'Private travel', true), signedInUser());
 
     // Assert
     expect($booking->status)->toBe(TalentBookingStatus::Confirmed)
@@ -51,12 +51,12 @@ test('stale first creation and opposite transitions never overwrite or duplicate
     $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}");
     $action = resolve(SaveTalentBookingAction::class);
     $data = new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true);
-    $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data);
+    $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data, signedInUser());
 
     // Act / Assert
-    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data))->toThrow(RecordChangedException::class);
+    expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint, $data, signedInUser()))->toThrow(RecordChangedException::class);
     expect(fn () => $action->handle($event, 'wrestler', $person->id, 0, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled')))->toThrow(RecordChangedException::class)
+        new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled'), signedInUser()))->toThrow(RecordChangedException::class)
         ->and(EventTalentBooking::query()->sole()->status)->toBe(TalentBookingStatus::Confirmed)
         ->and(EventTalentBookingRevision::query()->count())->toBe(1);
 });
@@ -136,7 +136,7 @@ test('a changed event refuses a stale reconfirmation without overwriting it', fu
 
     // Act / Assert
     expect(fn () => resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'wrestler', $fixture['person']->id, 1, $fingerprint,
-        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true)))->toThrow(RecordChangedException::class);
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null, true), signedInUser()))->toThrow(RecordChangedException::class);
     expect($fixture['booking']->refresh()->version)->toBe(1);
 });
 
@@ -155,7 +155,7 @@ test('unknown people, foreign promotions and team identities cannot become indiv
 
     // Act / Assert
     expect(fn () => resolve(SaveTalentBookingAction::class)->handle($fixture['event'], $type, $id, 0, '',
-        new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null)))->toThrow(TalentBookingException::class);
+        new TalentBookingData(TalentBookingStatus::Proposed, null, null, 'UTC', null), signedInUser()))->toThrow(TalentBookingException::class);
     expect(EventTalentBooking::query()->count())->toBe(1);
 })->with(['unknown', 'foreign', 'team']);
 
@@ -206,7 +206,7 @@ test('a referee agreement remains distinct from a wrestler with the same numeric
 
     // Act
     $booking = resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'referee', $referee->id, 0,
-        $context->fingerprint($fixture['event'], "referee:{$referee->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 7500, null, 'UTC', null, true));
+        $context->fingerprint($fixture['event'], "referee:{$referee->id}"), new TalentBookingData(TalentBookingStatus::Confirmed, 7500, null, 'UTC', null, true), signedInUser());
 
     // Assert
     expect($booking->person_type)->toBe('referee')->and($booking->person_name)->toBe($referee->refresh()->full_name)
@@ -223,7 +223,7 @@ function saveTalentMove(TalentBookingStatus $from, TalentBookingStatus $to, ?str
 
     return fn (): EventTalentBooking => resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
         resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
-        new TalentBookingData($to, null, null, 'UTC', null, true, $reason))->refresh();
+        new TalentBookingData($to, null, null, 'UTC', null, true, $reason), signedInUser())->refresh();
 }
 
 test('a booking moves without a reason when the rules do not ask for one', function (TalentBookingStatus $from, TalentBookingStatus $to): void {
@@ -315,9 +315,27 @@ test('a booking is only confirmed once the agreement is recorded', function (): 
     // Act
     $confirm = fn () => resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 1,
         resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
-        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null));
+        new TalentBookingData(TalentBookingStatus::Confirmed, null, null, 'UTC', null), signedInUser());
 
     // Assert
     expect($confirm)->toThrow(TalentBookingException::class, __('talent-bookings.errors.confirm'))
         ->and($booking->refresh()->status)->toBe(TalentBookingStatus::Contacted);
+});
+
+test('a booking revision records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}");
+
+    // Act
+    $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $fingerprint,
+        new TalentBookingData(TalentBookingStatus::Confirmed, 125050, now(), 'UTC', 'Private travel', true), $actor);
+
+    // Assert
+    $revision = EventTalentBookingRevision::query()->where('booking_id', $booking->id)->sole();
+    expect($revision->actor_id)->toBe($actor->id)
+        ->and($revision->actor_name)->toBe("{$actor->first_name} {$actor->last_name}");
 });

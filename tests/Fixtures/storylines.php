@@ -36,15 +36,15 @@ function storylineSourceFixture(): array
     $content = $pack['content'];
     $content['segments'] = [['id' => $segment, 'label' => 'Closing promo', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
     resolve(SaveEventPackAction::class)->handle($event, 0, $pack['card']['fingerprint'], EventPackData::fromValidated($content), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $pack['card']['fingerprint'])->refresh();
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $pack['card']['fingerprint'], signedInUser())->refresh();
 
     return ['story' => $story, 'event' => $event, 'match' => $match, 'run' => $run, 'segment' => $segment];
 }
 function plannedStorylineStep(Storyline $story, ?SourceData $source = null): StorylineStep
 {
-    return resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Planned betrayal', 'Attack the partner.', 1, $source ?? new SourceData, (string) Str::uuid()));
+    return resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Planned betrayal', 'Attack the partner.', 1, $source ?? new SourceData, (string) Str::uuid()), signedInUser());
 }
 function confirmedStorylineDevelopment(Storyline $story, ?int $stepId = null): StorylineDevelopment
 {
-    return resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, new DevelopmentData('Actual confrontation', 'They argued without attacking.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid(), $stepId));
+    return resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, new DevelopmentData('Actual confrontation', 'They argued without attacking.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid(), $stepId), signedInUser());
 }

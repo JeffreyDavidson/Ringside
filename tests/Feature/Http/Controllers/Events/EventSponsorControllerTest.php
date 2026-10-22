@@ -80,7 +80,7 @@ test('printed packs show deliberately reviewed sponsor instructions to members',
     actingAs(administrator());
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
     $user = basicUser();
     $promotion->users()
         ->attach($user, [
@@ -127,7 +127,7 @@ test('members cannot expose event sponsor histories through reviewed instruction
     actingAs(administrator());
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
     $user = basicUser();
     $promotion->users()
         ->attach($user, [
@@ -170,7 +170,7 @@ test('members cannot expose sponsor directory records through reviewed instructi
     actingAs(administrator());
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
     $user = basicUser();
     $promotion->users()
         ->attach($user, [
@@ -213,7 +213,7 @@ test('reviewed instructions cannot carry private sponsor terms into shared event
     actingAs(administrator());
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
     $user = basicUser();
     $promotion->users()
         ->attach($user, [
@@ -345,7 +345,7 @@ test('the public card and results omit all sponsor and reviewed-instruction mark
     ]);
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
 
     $publication = EventPublication::factory()
         ->for($event)
@@ -415,7 +415,7 @@ test('the private public-page preview omits all sponsor and instruction markers'
     ]);
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
 
     $publication = EventPublication::factory()
         ->for($event)
@@ -482,7 +482,7 @@ test('reviewed sponsor instructions remain visible in the private pack positive 
     ]);
     $pack = app(EventPackViewModel::class)->data($event);
     $instructionPreview = app(SponsorInstructionService::class)->preview($event, $commitment, SponsorInstructionMode::from($mode), null, null);
-    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($event, $commitment->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($mode), null, null, $instructionPreview['hash']), signedInUser());
 
     // Act
     $response = get(route('events.pack.show', $event));

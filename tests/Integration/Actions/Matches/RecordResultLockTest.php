@@ -22,7 +22,7 @@ function recordResultStatements(EventMatch $match, MatchSide $winningSide): arra
 {
     return recordStatements(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, collect()),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, collect()), administrator(),
     ));
 }
 

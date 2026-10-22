@@ -34,7 +34,7 @@ function liveShowFixture(bool $segment = false, ?string $date = null, ?int $venu
             'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
     }
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($content), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'])->refresh();
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser())->refresh();
 
     return ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
 }
