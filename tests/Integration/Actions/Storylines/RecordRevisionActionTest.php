@@ -4,7 +4,10 @@ declare(strict_types=1);
 use App\Actions\Storylines\RecordRevisionAction;
 use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Models\Storylines\Storyline;
+use App\Models\Storylines\StorylineDevelopment;
+use App\Models\Storylines\StorylineParticipant;
 use App\Models\Storylines\StorylineRevision;
+use App\Models\Storylines\StorylineStep;
 use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\actingAs;
@@ -47,3 +50,24 @@ test('a revision can be recorded with nobody signed in', function () {
     expect(auth()->check())->toBeFalse()
         ->and(StorylineRevision::query()->sole()->actor_id)->toBe($actor->id);
 });
+
+test('a revision stores the short name of the record kind it describes', function (Closure $record, string $stored) {
+    // Arrange
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $target = $record($story);
+
+    // Act
+    resolve(RecordRevisionAction::class)->handle($story, $target, StorylineRevisionOperation::StoryRevised, $actor);
+
+    // Assert
+    $revision = StorylineRevision::query()->sole();
+
+    expect($revision->getRawOriginal('record_type'))->toBe($stored)
+        ->and($revision->record_id)->toBe($target->id);
+})->with([
+    'storyline' => [fn (Storyline $story): Storyline => $story, 'storyline'],
+    'step' => [fn (Storyline $story): StorylineStep => StorylineStep::factory()->for($story)->create(), 'step'],
+    'participant' => [fn (Storyline $story): StorylineParticipant => StorylineParticipant::factory()->for($story)->create(), 'participant'],
+    'development' => [fn (Storyline $story): StorylineDevelopment => StorylineDevelopment::factory()->for($story)->create(), 'development'],
+]);
