@@ -166,3 +166,16 @@ test('the line limit cannot leave an empty budget or partial history', function 
     expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), null, budgetLineData()))->toThrow(BudgetException::class);
     expect($f['budget']->revisions()->count())->toBe(0)->and($f['budget']->refresh()->version)->toBe(0);
 });
+
+test('saving a line records the actor passed in on its revision', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $event = Event::factory()->create();
+
+    // Act
+    $budget = resolve(SaveBudgetLineAction::class)->handle($event, 0, (string) Str::uuid(), null, budgetLineData(), $actor);
+
+    // Assert
+    expect($budget->revisions()->sole()->actor_id)->toBe($actor->id);
+});

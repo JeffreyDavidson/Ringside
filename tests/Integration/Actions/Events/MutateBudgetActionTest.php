@@ -47,3 +47,17 @@ test('a budget write without an authenticated actor is refused and leaves no his
     expect($write)->toThrow(LogicException::class);
     expect($f['budget']->revisions()->count())->toBe(0);
 });
+
+test('a budget revision records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): array => ['target' => $f['line']->id, 'before' => [], 'after' => []], $actor);
+
+    // Assert
+    $revision = $f['budget']->revisions()->sole();
+    expect($revision->actor_id)->toBe($actor->id)
+        ->and($revision->actor_label)->toBe("{$actor->first_name} {$actor->last_name}");
+});

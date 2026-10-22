@@ -341,3 +341,20 @@ test('a stale save is refused before the archive check', function (): void {
     // Assert
     expect($save)->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
 });
+
+test('a new promise records the actor passed in on its revision', function (): void {
+    // Arrange
+    $event = Event::factory()->for(Promotion::factory())->create();
+    $sponsor = Sponsor::factory()->create(['promotion_id' => $event->promotion_id]);
+    actingAs(administrator());
+    $actor = administrator();
+
+    // Act
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($event, null, 0, (string) Str::uuid(),
+        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Hang the entrance banner'), $actor);
+
+    // Assert
+    $revision = $promise->revisions()->sole();
+    expect($revision->actor_id)->toBe($actor->id)
+        ->and($revision->actor_name)->toBe($actor->full_name);
+});

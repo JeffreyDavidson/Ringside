@@ -94,3 +94,17 @@ test('a step refuses every other status move and stays as it was', function (Ste
     'happened to cancelled' => [StepStatus::Happened, StepStatus::Cancelled],
     'happened to happened' => [StepStatus::Happened, StepStatus::Happened],
 ]);
+
+test('a step status change records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $step = StorylineStep::factory()->for($story)->create(['status' => StepStatus::Planned]);
+
+    // Act
+    resolve(TransitionStepAction::class)->handle($story, 1, $step->id, StepStatus::Postponed, 'Reviewed.', $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});

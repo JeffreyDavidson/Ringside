@@ -71,3 +71,20 @@ test('review cannot discard a run when its replacement contains only already ski
     expect(fn () => resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 2, 2, $pack->card_fingerprint, LiveShowReviewData::fromValidated([])))->toThrow(LiveShowException::class, __('live-show.prepare_required'));
     expect($fixture['run']->refresh()->version)->toBe(2)->and($fixture['run']->content)->toBe($before);
 });
+
+test('a skipped removal records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    $fixture = liveShowFixture(segment: true);
+    $actor = administrator();
+    EventMatch::query()->where('event_id', $fixture['event']->id)->firstOrFail()->delete();
+    $data = resolve(EventPackViewModel::class)->data($fixture['event']);
+    $content = $data['content'];
+    $content['segments'] = array_map(fn (array $segment): array => [...$segment, 'after_match_id' => null], $content['segments']);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $data['card']['fingerprint'], EventPackData::fromValidated($content), true);
+
+    // Act
+    resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([$fixture['key'] => 'Match cancelled']), $actor);
+
+    // Assert
+    expect($fixture['run']->refresh()->content['items'][0]['updated_by'])->toBe($actor->id);
+});

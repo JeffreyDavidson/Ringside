@@ -131,3 +131,16 @@ test('a story with only resolved steps can be completed', function (StepStatus $
     // Assert
     expect($story->refresh()->status)->toBe(StorylineStatus::Completed);
 })->with([StepStatus::Cancelled, StepStatus::Happened]);
+
+test('a story status change records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+
+    // Act
+    resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Paused, 'Wait for the next tour.', $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});

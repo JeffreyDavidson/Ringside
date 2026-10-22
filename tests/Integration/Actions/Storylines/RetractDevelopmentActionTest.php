@@ -35,3 +35,17 @@ test('retracting explicitly reopens or cancels the linked step without losing it
     expect($step->refresh()->status)->toBe($reopen ? StepStatus::Planned : StepStatus::Cancelled)
         ->and(fn () => resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'Repeated.', $reopen))->toThrow(StorylineConflictException::class);
 })->with([true, false]);
+
+test('a retraction records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $development = confirmedStorylineDevelopment($story);
+
+    // Act
+    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', false, $actor);
+
+    // Assert
+    expect($story->revisions()->orderByDesc('id')->firstOrFail()->actor_id)->toBe($actor->id);
+});

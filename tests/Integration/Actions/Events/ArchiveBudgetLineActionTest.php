@@ -33,3 +33,15 @@ test('lines with an obligation or even voided movements cannot be hidden by arch
     expect(fn () => resolve(ArchiveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, 'Hide it'))->toThrow(BudgetException::class);
     expect($f['line']->refresh()->archived_at)->toBeNull()->and($f['budget']->revisions()->count())->toBe(0);
 })->with(['obligation', 'movement']);
+
+test('archiving a line records the actor passed in on its revision', function (): void {
+    // Arrange
+    $f = budgetFixture(['confirmed_cents' => null]);
+    $actor = administrator();
+
+    // Act
+    resolve(ArchiveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, 'No longer needed', $actor);
+
+    // Assert
+    expect($f['budget']->revisions()->sole()->actor_id)->toBe($actor->id);
+});

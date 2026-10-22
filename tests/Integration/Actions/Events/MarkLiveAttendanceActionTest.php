@@ -61,3 +61,15 @@ test('rescheduling a prepared event moves its attendance day guard', function ()
     expect(fn () => resolve(MarkLiveAttendanceAction::class)->handle($fixture['event'], 1, $fixture['person'], LiveAttendanceMark::Arrived, true))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->version)->toBe(1);
 });
+
+test('an attendance mark records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(MarkLiveAttendanceAction::class)->handle($fixture['event'], 1, $fixture['person'], LiveAttendanceMark::Arrived, true, $actor);
+
+    // Assert
+    expect($fixture['run']->refresh()->content['roster'][0]['updated_by'])->toBe($actor->id);
+});

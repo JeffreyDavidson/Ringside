@@ -321,3 +321,21 @@ test('a booking is only confirmed once the agreement is recorded', function (): 
     expect($confirm)->toThrow(TalentBookingException::class, __('talent-bookings.errors.confirm'))
         ->and($booking->refresh()->status)->toBe(TalentBookingStatus::Contacted);
 });
+
+test('a booking revision records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $event = Event::factory()->create(['date' => now()->addDay()]);
+    $person = Wrestler::factory()->bookable()->create();
+    $fingerprint = resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}");
+
+    // Act
+    $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0, $fingerprint,
+        new TalentBookingData(TalentBookingStatus::Confirmed, 125050, now(), 'UTC', 'Private travel', true), $actor);
+
+    // Assert
+    $revision = EventTalentBookingRevision::query()->where('booking_id', $booking->id)->sole();
+    expect($revision->actor_id)->toBe($actor->id)
+        ->and($revision->actor_name)->toBe($actor->full_name);
+});

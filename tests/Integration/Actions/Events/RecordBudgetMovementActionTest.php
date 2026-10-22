@@ -156,3 +156,16 @@ test('UUID case is normalized consistently across database engines', function ()
     // Assert
     expect($f['line']->movements()->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(1);
 });
+
+test('recording a movement records the actor passed in on the movement and its revision', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), $actor);
+
+    // Assert
+    expect($f['line']->movements()->sole()->actor_id)->toBe($actor->id)
+        ->and($f['budget']->revisions()->sole()->actor_id)->toBe($actor->id);
+});

@@ -288,3 +288,16 @@ test('a participant who left before the account date cannot be in its cast', fun
     expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'))
         ->and($story->developments()->count())->toBe(0);
 });
+
+test('recording a development records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+
+    // Act
+    resolve(RecordDevelopmentAction::class)->handle($story, 1, new DevelopmentData('A warning', 'They argued.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid()), $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});

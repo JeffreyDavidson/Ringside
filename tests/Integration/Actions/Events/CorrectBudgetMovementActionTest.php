@@ -57,3 +57,19 @@ test('movement corrections only reach a movement on the same line', function ():
     expect(fn () => resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($foreign->id, 'Wrong record')))->toThrow(BudgetException::class, __('event-budget.movement_missing'));
     expect($foreign->refresh()->voided_at)->toBeNull()->and($f['budget']->revisions()->count())->toBe(0);
 });
+
+test('a correction records the actor passed in on the void, the replacement and the revision', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $actor = administrator();
+    $movement = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
+
+    // Act
+    resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])), $actor);
+
+    // Assert
+    $replacement = $f['line']->movements()->where('replaces_id', $movement->id)->sole();
+    expect($movement->refresh()->voided_by)->toBe($actor->id)
+        ->and($replacement->actor_id)->toBe($actor->id)
+        ->and($f['budget']->revisions()->sole()->actor_id)->toBe($actor->id);
+});

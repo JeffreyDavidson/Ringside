@@ -165,3 +165,15 @@ test('starting the first item moves the show from prepared to running and finish
         ->and($runningStatus)->toBe(LiveShowStatus::Running)
         ->and($fixture['run']->refresh()->status)->toBe(LiveShowStatus::Running);
 });
+
+test('an item transition records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, $actor);
+
+    // Assert
+    expect($fixture['run']->refresh()->content['items'][0]['updated_by'])->toBe($actor->id);
+});

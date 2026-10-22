@@ -49,3 +49,16 @@ test('a reused step submission identity is refused even with a fresh story versi
     $data = new StepData('Repeated plan', 'Same submission.', 1, new SourceData, $step->submission_id);
     expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(RecordChangedException::class);
 });
+
+test('planning a step records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+
+    // Act
+    resolve(SaveStepAction::class)->handle($story, 1, new StepData('The betrayal', 'Turn on the partner.', 1, new SourceData, (string) Str::uuid()), $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});

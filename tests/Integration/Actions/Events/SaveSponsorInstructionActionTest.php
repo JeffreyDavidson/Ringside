@@ -272,3 +272,19 @@ test('sponsor adoption and production edits preserve each others saved pack sect
         ->and($mode === 'setup' ? ($updated->content['sponsor_tasks'] ?? []) : $updated->content['segments'])->toBe($instructions)
         ->and(data_get($updated->content, 'production.notes'))->toBe('Updated private crew note');
 })->with(['setup', 'segment']);
+
+test('reviewed setup wording records the actor passed in on the promise revision', function (): void {
+    // Arrange
+    $promise = EventSponsorCommitment::factory()->create(['instruction_label' => 'Entrance banner', 'instruction' => 'Hang before doors', 'instruction_owner' => 'Ring crew']);
+    $event = $promise->event;
+    actingAs(administrator());
+    $actor = administrator();
+    $pack = app(EventPackViewModel::class)->data($event);
+    $preview = app(SponsorInstructionService::class)->preview($event, $promise, SponsorInstructionMode::Setup, null, null);
+
+    // Act
+    app(SaveSponsorInstructionAction::class)->handle($event, $promise->id, 1, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, $preview['hash']), $actor);
+
+    // Assert
+    expect($promise->revisions()->sole()->actor_id)->toBe($actor->id);
+});

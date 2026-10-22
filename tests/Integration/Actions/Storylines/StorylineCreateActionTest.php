@@ -42,3 +42,16 @@ test('a submission identity already used by another promotion is refused', funct
     expect($attempt)->toThrow(RecordChangedException::class)
         ->and(Storyline::query()->count())->toBe(1);
 });
+
+test('a story records the actor passed in on its original revision', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $data = new StorylineData('The betrayal', 'Partners turn into rivals.', null, (string) Str::uuid());
+
+    // Act
+    $story = resolve(CreateAction::class)->handle(Promotion::factory()->create(), $data, $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});

@@ -98,3 +98,17 @@ test('ending participation cannot backdate the stored joining date to disguise a
     $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
     expect(fn () => resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->subDays(4)->toDateString(), today()->subDay()->toDateString(), 'Backdated.'), $person->id))->toThrow(StorylineConflictException::class);
 });
+
+test('adding a participant records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
+
+    // Act
+    resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', today()->toDateString()), $actor);
+
+    // Assert
+    expect($story->revisions()->sole()->actor_id)->toBe($actor->id);
+});
