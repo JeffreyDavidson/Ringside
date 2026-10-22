@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Storylines;
 
 use App\Enums\Storylines\StorylineRevisionOperation;
+use App\Enums\Storylines\StorylineRevisionRecord;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
 use App\Models\Storylines\StorylineParticipant;
@@ -22,7 +23,7 @@ class RecordRevisionAction
         $revision->storyline_id = $storyline->id;
         $revision->actor_id = $actor->id;
         $revision->operation = $operation;
-        $revision->record_type = class_basename($record);
+        $revision->record_type = StorylineRevisionRecord::for($record);
         $revision->record_id = $record->id;
         $revision->reason = $reason;
         $revision->before = $before;
