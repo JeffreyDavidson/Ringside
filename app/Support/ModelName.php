@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 final class ModelName
 {
     /**
-     * The name a person reads for a record: `name`, else `full_name` (referees and managers), else its key.
+     * The name a person reads for a record: `name`, else `full_name` (referees and managers), else its key (empty for a record not saved yet).
      */
     public static function of(Model $model): string
     {
@@ -21,6 +21,8 @@ final class ModelName
             }
         }
 
-        return (string) ModelKey::of($model);
+        $key = $model->getKey();
+
+        return is_int($key) || is_string($key) ? (string) $key : '';
     }
 }

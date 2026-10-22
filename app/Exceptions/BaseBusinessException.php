@@ -8,6 +8,7 @@ use App\Enums\Shared\BusinessRuleReason;
 use App\Support\ModelName;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Throwable;
 
 abstract class BaseBusinessException extends Exception
@@ -54,8 +55,10 @@ abstract class BaseBusinessException extends Exception
 
     protected static function formatModelContext(Model $model): string
     {
+        $types = (array) trans('core.model_types');
+
         return __('core.model_context', [
-            'type' => __("core.model_types.{$model->getMorphClass()}"),
+            'type' => Arr::string($types, $model->getMorphClass()),
             'name' => ModelName::of($model),
         ]);
     }

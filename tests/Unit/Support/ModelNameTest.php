@@ -20,4 +20,5 @@ test('names a record by its name, then its full name, then its key', function (a
     'full name' => [['id' => 5, 'full_name' => 'Earl Hebner'], 'Earl Hebner'],
     'name that is not text' => [['id' => 5, 'name' => 12, 'full_name' => 'Earl Hebner'], 'Earl Hebner'],
     'key' => [['id' => 5], '5'],
+    'record not saved yet' => [[], ''],
 ]);
