@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 use App\Enums\Shared\BusinessRuleReason;
-use App\Models\ModelName;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -59,7 +58,26 @@ abstract class BaseBusinessException extends Exception
 
         return __('core.model_context', [
             'type' => Arr::string($types, $model->getMorphClass()),
-            'name' => ModelName::of($model),
+            'name' => self::nameOf($model),
         ]);
+    }
+
+    /**
+     * The name a person reads for a record: `name`, else `full_name` (referees and managers), else its key
+     * (empty for a record not saved yet).
+     */
+    private static function nameOf(Model $model): string
+    {
+        foreach (['name', 'full_name'] as $attribute) {
+            $value = $model->getAttribute($attribute);
+
+            if (is_string($value)) {
+                return $value;
+            }
+        }
+
+        $key = $model->getKey();
+
+        return is_int($key) || is_string($key) ? (string) $key : '';
     }
 }

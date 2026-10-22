@@ -101,3 +101,20 @@ test('a model context falls back to the record key when the model has no name', 
     // Assert
     expect($context)->toBe("Referee '5'");
 });
+
+test('a model context leaves the name empty for a record that has neither a name nor a key', function (): void {
+    // Arrange
+    $model = new class extends Model
+    {
+        public function getMorphClass(): string
+        {
+            return 'referee';
+        }
+    };
+
+    // Act
+    $context = modelContextOf($model);
+
+    // Assert
+    expect($context)->toBe("Referee ''");
+});

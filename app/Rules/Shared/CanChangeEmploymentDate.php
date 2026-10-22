@@ -7,7 +7,6 @@ namespace App\Rules\Shared;
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
-use App\Models\ModelName;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
@@ -71,7 +70,17 @@ class CanChangeEmploymentDate implements ValidationRule
         LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
 
         if (! $query->exists()) {
-            $fail(__('core.validation.employment_date_employed', ['name' => ModelName::of($this->model)]));
+            $fail(__('core.validation.employment_date_employed', ['name' => $this->getModelName($this->model)]));
         }
+    }
+
+    /**
+     * The name a person reads for the record: `name`, else `full_name` (referees and managers).
+     */
+    private function getModelName(Model $model): string
+    {
+        $name = $model->getAttribute('name') ?? $model->getAttribute('full_name');
+
+        return is_string($name) ? $name : '';
     }
 }
