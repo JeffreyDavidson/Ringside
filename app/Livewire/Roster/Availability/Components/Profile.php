@@ -9,11 +9,11 @@ use App\Actions\Roster\Availability\CreateAction;
 use App\Enums\Roster\BookableRosterKind;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Roster\UpcomingBookings;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Roster\Availability\Forms\UnavailabilityForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use App\Queries\Roster\CurrentUnavailabilitiesQuery;
 use App\Queries\Roster\UnavailabilityHistoryQuery;
 use App\Services\Promotions\PromotionTimeZoneService;
@@ -26,6 +26,7 @@ use Livewire\WithPagination;
 
 class Profile extends Component
 {
+    use ResolvesActor;
     use WithPagination;
 
     #[Locked]
@@ -126,14 +127,6 @@ class Profile extends Component
         $this->cancelId = null;
         $this->savedEntryId = null;
         $this->status = __('availability.cancelled');
-    }
-
-    private function actor(): User
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user;
     }
 
     /** @return Collection<int, Event> */

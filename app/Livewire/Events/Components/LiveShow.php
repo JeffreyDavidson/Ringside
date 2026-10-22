@@ -206,7 +206,7 @@ class LiveShow extends Component
 
     public function complete(CompleteLiveShowAction $action): void
     {
-        $this->perform(fn (Event $event) => $action->handle($event, $this->version));
+        $this->perform(fn (Event $event) => $action->handle($event, $this->version, $this->actor()));
     }
 
     /** @param Closure(Event): mixed $operation */

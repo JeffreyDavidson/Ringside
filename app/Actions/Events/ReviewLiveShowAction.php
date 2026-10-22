@@ -76,7 +76,7 @@ class ReviewLiveShowAction
             $run->card_fingerprint = $fingerprint;
             $run->content = $content;
             $this->persist->handle($run, new LiveShowChangeData('review', 'show', $before,
-                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $review->removedReasons]));
+                ['pack_version' => $packVersion, 'fingerprint' => $fingerprint, 'skipped' => $review->removedReasons]), $actor);
         }, attempts: 3);
     }
 }

@@ -107,7 +107,7 @@ test('several production roles create one crew attendance entry and completion f
     expect(collect($run->content['roster'])->where('key', 'crew:'.$fixture['contact']->id))->toHaveCount(1);
     resolve(TransitionLiveItemAction::class)->handle($event, 1, 'match:'.$fixture['match']->id, LiveItemOperation::Start, signedInUser());
     resolve(TransitionLiveItemAction::class)->handle($event, 2, 'match:'.$fixture['match']->id, LiveItemOperation::Finish, signedInUser());
-    resolve(CompleteLiveShowAction::class)->handle($event, 3);
+    resolve(CompleteLiveShowAction::class)->handle($event, 3, signedInUser());
     $before = $run->refresh()->content;
     $input['cues'][0]['instruction'] = 'Later plan correction';
     resolve(SaveEventProductionAction::class)->handle($event, 2, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
