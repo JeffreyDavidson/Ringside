@@ -13,7 +13,7 @@ declare the templates:
 - `BaseFormModal<TForm of BaseForm, TModel of Model>`
 
 Models are never stored as component state. Forms keep a locked `modelId` and
-resolve the model when needed (see `.ai/rules/livewire.md`, "Resolve models from
+resolve the model when needed (see the shared `laravel-conventions` rule `livewire.md`, "Resolve models from
 locked identifiers").
 
 ## Concrete modals

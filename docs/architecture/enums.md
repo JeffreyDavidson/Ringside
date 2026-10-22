@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ringside uses native PHP enums for statuses, types, roles and operation names. Every enum lives in the folder of the domain that owns it under `app/Enums/`, with `Shared/` for values more than one domain stores. No enum sits directly in `App\Enums`; `ApplicationArchitectureTest` enforces this. The written rules are in `.ai/rules/enums.md`.
+Ringside uses native PHP enums for statuses, types, roles and operation names. Every enum lives in the folder of the domain that owns it under `app/Enums/`, with `Shared/` for values more than one domain stores. No enum sits directly in `App\Enums`; `ApplicationArchitectureTest` enforces this. The written rules are the shared `laravel-conventions` rule `enums.md` plus Ringside's enum facts in [codebase-conventions.md](codebase-conventions.md#enums).
 
 ## Folders
 

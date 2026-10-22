@@ -84,7 +84,7 @@ class FormModal extends BaseFormModal
 Inject Actions; never resolve them with `app()` or `resolve()` (`LivewireArchitectureTest`
 fails on it), never instantiate them manually, and do not move their mutation logic into the
 modal. A modal action method that Livewire calls with client arguments takes the Action as a
-method parameter instead (see `.ai/rules/livewire.md`).
+method parameter instead (see the shared `laravel-conventions` rule `livewire.md`).
 
 ## Authorization
 

@@ -1,6 +1,6 @@
 # Exception Writing Guide
 
-Business exceptions describe why an operation was refused. Actions and eligibility classes decide when a rule fails; the exception only carries the failure. The enforced rules live in `.ai/rules/exceptions.md` and `tests/Feature/Architecture/ExceptionArchitectureTest.php`; this page shows how to apply them.
+Business exceptions describe why an operation was refused. Actions and eligibility classes decide when a rule fails; the exception only carries the failure. The rules are the shared `laravel-conventions` rule `exceptions.md`, Ringside's exception facts in `docs/architecture/codebase-conventions.md`, and `tests/Feature/Architecture/ExceptionArchitectureTest.php`; this page shows how to apply them.
 
 ## Where it goes
 

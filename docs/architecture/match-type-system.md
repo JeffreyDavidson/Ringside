@@ -8,7 +8,7 @@ The enum answers structural questions about a format: how many sides, which comp
 
 ## Cases
 
-`MatchType` keeps its kebab-case stored values (see `.ai/rules/enums.md`).
+`MatchType` keeps its kebab-case stored values (see [codebase-conventions.md](codebase-conventions.md#enums)).
 
 | Case | Stored value | Sides | Allowed competitors | Minimum / maximum entrants | Fixed side shape |
 | --- | --- | --- | --- | --- | --- |

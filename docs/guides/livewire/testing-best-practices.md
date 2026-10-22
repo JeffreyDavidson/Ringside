@@ -2,7 +2,7 @@
 
 ## Overview
 
-Conventions that apply to every Livewire test. The suite-wide rules are in `.ai/rules/tests.md` and
+Conventions that apply to every Livewire test. The suite-wide rules are in `docs/testing/conventions.md` and
 [Testing Guidelines](../../development/testing-guidelines.md); this page lists the ones that matter most when
 writing component tests.
 

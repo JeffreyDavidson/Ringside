@@ -83,5 +83,5 @@ git ls-tree -r --name-only 82104235255ac6eb6a16b9812dd4c19590b5a772 -- .agent-os
 Product intent was consolidated here and into the two linked plans. Historical
 entity specs and task lists remain available through Git. Generic standards,
 execution templates, duplicate summaries, and the completed login-page and PRD
-consolidation plans were retired. Use `AGENTS.md`, `.ai/rules`, and current
+consolidation plans were retired. Use `AGENTS.md`, the shared `laravel-conventions` skill, and current
 project skills for development instructions.

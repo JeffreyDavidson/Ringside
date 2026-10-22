@@ -4,7 +4,7 @@
 
 Livewire components are tested with Pest and the `livewire()` helper from `pestphp/pest-plugin-livewire`.
 The general rules (Pest only, Arrange/Act/Assert, 100% coverage, no reflection tests) are in
-[Testing Guidelines](../../development/testing-guidelines.md) and `.ai/rules/tests.md`. This guide covers the
+[Testing Guidelines](../../development/testing-guidelines.md) and [Test conventions](../../testing/conventions.md). This guide covers the
 Livewire-specific parts.
 
 ## Where tests live

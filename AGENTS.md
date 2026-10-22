@@ -218,12 +218,29 @@ For full usage — backend examples, browser testing, screenshots, responsive ch
 
 # Ringside Project Overrides
 
-- Path-specific architecture and coding conventions live in `.ai/rules/index.md`; read the matching scoped rules before editing files.
 - Treat the architecture documentation in `docs/architecture/` as the source of truth for wrestling business rules and update it when architecture or domain behavior changes.
 - Use plain conventional branch names in the `<type>/<short-description>` format, such as `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, or `chore/`; do not add a `codex/` prefix.
 - Use the Composer scripts defined by this repository for verification. Run `composer test:push` before pushing a completed change unless a narrower check is explicitly requested.
 - The concurrency tests in `tests/Integration/Concurrency/` and their `*-worker.php` scripts are skipped locally and run only in CI's MySQL and PostgreSQL jobs (`RUN_CONCURRENCY_TESTS=1`). They name exception classes and call actions directly, so `composer test:push` cannot catch a mismatch. When a change renames or reshapes an exception, an action signature or a locking or version-check path, grep that folder (tests and workers) and update it, and say in the PR that only CI proves them.
 - Laravel Pint must always run with Blade formatting enabled. Use `composer lint` to fix formatting or `composer test:lint` to check it; never invoke Pint without the `--blade` option.
+
+## Code conventions
+
+- Follow the shared `laravel-conventions` skill (Jeffrey's global Laravel rules): open its `rules/index.md` and read every rule whose path matches the files in scope before planning or editing. Tests follow the shared `laravel-testing-standards` skill. This repository keeps no copy of those rules; `.ai/rules` is gone on purpose.
+- Where a global rule conflicts with a Boost skill (for example `laravel-best-practices` on local scopes, `$fillable` or `down()`), the global rule wins. The differences below win over the global rules.
+- Ringside facts the rules rely on (which architecture test enforces what, the promotion context, lock order, known exceptions, the wrestling-domain rules) are in `docs/architecture/codebase-conventions.md`; test facts are in `docs/testing/conventions.md`. Keep both current when the code changes.
+
+## Differences from the global Laravel conventions
+
+- No event/listener layer: workflows run synchronously through Actions and Services. Add events only if a workflow truly needs fan-out, as an explicit decision.
+- `PromotionGate` (`Gate::before`) decides every ability on promotion-owned models from the membership role; model policies are stubs. See `docs/decisions/0001-promotion-gate-is-the-permission-engine.md`.
+- An extra `app/Lifecycle` layer holds the state rules: eligibility guards (`…Eligibility`), requirement checks (`…Requirements`), period writers (`…PeriodManager`), row locks (`…Lock`) and state machines (`…StateMachine`). Lifecycle may read through Services and Queries; Services and Queries never depend on Lifecycle.
+- Actions inside an entity folder are named for the verb alone (`Actions/Wrestlers/RetireAction`, `Actions/Events/CreateAction`); Actions whose verb needs its object keep it (`RecordResultAction`, `EnsureAnotherActiveAdministratorAction`).
+- Migrations write enum values as their stored literals (`'singles'`), never through the enum class, so a migration never depends on a class that may move or lose a case. Older migrations that reference enums stay as merged.
+- Casts use a `…Cast` suffix (`AddressCast`).
+- Business exceptions extend `BaseBusinessException` and carry a `BusinessRuleReason` when presentation must tell failures apart.
+- Production runs MySQL 8, and CI runs the suite on SQLite, PostgreSQL and MySQL; database-specific code must work on all three.
+- Some older code does not follow the global rules yet (for example business exceptions do not implement `ShouldntReport`, and `InvitedToPromotion` is sent synchronously). Track those as refactors in the meta repo; do not copy a legacy pattern into new code.
 
 ## Meta Repo
 
