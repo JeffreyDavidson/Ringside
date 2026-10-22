@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 use App\Enums\Shared\BusinessRuleReason;
+use App\Support\ModelName;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
@@ -53,16 +54,9 @@ abstract class BaseBusinessException extends Exception
 
     protected static function formatModelContext(Model $model): string
     {
-        $name = $model->getAttribute('name');
-
-        if (! is_string($name)) {
-            $modelKey = $model->getKey();
-            $modelIdentifier = is_int($modelKey) || is_string($modelKey)
-                ? $modelKey
-                : 'unknown';
-            $name = "ID: {$modelIdentifier}";
-        }
-
-        return class_basename($model)." '{$name}'";
+        return __('core.model_context', [
+            'type' => __("core.model_types.{$model->getMorphClass()}"),
+            'name' => ModelName::of($model),
+        ]);
     }
 }

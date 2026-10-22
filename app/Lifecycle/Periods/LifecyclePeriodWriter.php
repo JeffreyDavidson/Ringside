@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Periods;
 
 use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
@@ -64,7 +65,7 @@ final readonly class LifecyclePeriodWriter
 
             if ($startedAt instanceof Carbon && $date->lt($startedAt)) {
                 if (! $clampToStart) {
-                    throw InvalidDateRangeException::endBeforeStart($startedAt, $date, "{$dimension->value} period");
+                    throw InvalidDateRangeException::endBeforeStart($startedAt, $date, DateRangeContext::forPeriod($dimension));
                 }
 
                 $endedAt = $startedAt;

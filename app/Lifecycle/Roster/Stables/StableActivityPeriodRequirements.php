@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Roster\Stables;
 
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
@@ -53,7 +54,7 @@ final readonly class StableActivityPeriodRequirements
         $endedAt = $this->endAfterMove($firstPeriod, $endDate);
 
         if ($endedAt instanceof Carbon && $endedAt->lt($startDate)) {
-            throw InvalidDateRangeException::endBeforeStart($startDate, $endedAt, 'stable activity');
+            throw InvalidDateRangeException::endBeforeStart($startDate, $endedAt, DateRangeContext::StableActivity);
         }
 
         $this->ensureMembershipsStayWithinPeriod($stable, $firstPeriod, $startDate, $endedAt);

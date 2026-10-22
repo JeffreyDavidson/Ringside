@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Lifecycle;
 
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
@@ -30,13 +31,11 @@ class EndActivityPeriodAction
         ?LifecycleTransitionType $transition = null,
         array $context = [],
     ): void {
-        $errorContext = class_basename($activeable).' activity';
-
         if ($endedAt->isFuture()) {
-            throw InvalidDateRangeException::futureNotAllowed($endedAt, $errorContext.' end');
+            throw InvalidDateRangeException::futureNotAllowed($endedAt, DateRangeContext::ActivityEnd);
         }
 
-        DB::transaction(function () use ($activeable, $endedAt, $transition, $errorContext, $context): void {
+        DB::transaction(function () use ($activeable, $endedAt, $transition, $context): void {
             $lockedActiveable = $activeable->refreshForUpdate();
 
             $currentActivityPeriod = $lockedActiveable->activityPeriods()
@@ -55,7 +54,7 @@ class EndActivityPeriodAction
                 throw InvalidDateRangeException::endBeforeStart(
                     $currentActivityPeriod->started_at,
                     $endedAt,
-                    $errorContext,
+                    DateRangeContext::ActivityPeriod,
                 );
             }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
@@ -32,7 +33,7 @@ class EstablishAction
         $effectiveActivationDate = $activationDate ?? now();
 
         if ($endDate?->lt($effectiveActivationDate)) {
-            throw InvalidDateRangeException::endBeforeStart($effectiveActivationDate, $endDate, 'stable establishment');
+            throw InvalidDateRangeException::endBeforeStart($effectiveActivationDate, $endDate, DateRangeContext::StableEstablishment);
         }
 
         return DB::transaction(function () use ($stable, $effectiveActivationDate, $endDate): ActivityPeriod {

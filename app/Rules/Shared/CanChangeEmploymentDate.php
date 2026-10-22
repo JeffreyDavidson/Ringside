@@ -9,6 +9,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionTimeZoneService;
+use App\Support\ModelName;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -70,15 +71,7 @@ class CanChangeEmploymentDate implements ValidationRule
         LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
 
         if (! $query->exists()) {
-            $modelName = $this->getModelName($this->model);
-            $fail(__('core.validation.employment_date_employed', ['name' => $modelName]));
+            $fail(__('core.validation.employment_date_employed', ['name' => ModelName::of($this->model)]));
         }
-    }
-
-    private function getModelName(Model $model): string
-    {
-        $name = $model->getAttribute('name');
-
-        return is_string($name) ? $name : class_basename($model);
     }
 }
