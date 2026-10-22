@@ -9,16 +9,18 @@ namespace App\Enums\Lifecycle;
  */
 enum DateRangeContext: string
 {
-    case ActivityEnd = 'activity_end';
     case ActivityPeriod = 'activity_period';
     case DeletionPeriod = 'deletion_period';
     case EmploymentPeriod = 'employment_period';
     case InjuryPeriod = 'injury_period';
     case RetirementPeriod = 'retirement_period';
     case StableActivity = 'stable_activity';
+    case StableActivityEnd = 'stable_activity_end';
     case StableEstablishment = 'stable_establishment';
     case StableMembershipRemoval = 'stable_membership_removal';
     case SuspensionPeriod = 'suspension_period';
+    case TitleActivity = 'title_activity';
+    case TitleActivityEnd = 'title_activity_end';
 
     public static function forPeriod(LifecycleDimension $dimension): self
     {

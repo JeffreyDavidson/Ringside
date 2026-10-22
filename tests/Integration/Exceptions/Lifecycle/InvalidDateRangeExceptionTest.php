@@ -23,7 +23,9 @@ test('each caller names its date range context through a translated label', func
         'stable_activity',
         'stable_establishment',
         'stable_membership_removal',
-        'activity_end',
+        'title_activity',
+        'title_activity_end',
+        'stable_activity_end',
         'activity_period',
         'employment_period',
     ];
@@ -96,7 +98,7 @@ test('each caller names its date range context through a translated label', func
         },
         'stable_membership_removal',
     ],
-    'future activity end' => [
+    'future title activity end' => [
         function (): void {
             resolve(EndActivityPeriodAction::class)->handle(
                 Title::factory()
@@ -105,9 +107,20 @@ test('each caller names its date range context through a translated label', func
                 now()->addDay(),
             );
         },
-        'activity_end',
+        'title_activity_end',
     ],
-    'activity end before its start' => [
+    'future stable activity end' => [
+        function (): void {
+            resolve(EndActivityPeriodAction::class)->handle(
+                Stable::factory()
+                    ->active()
+                    ->create(),
+                now()->addDay(),
+            );
+        },
+        'stable_activity_end',
+    ],
+    'title activity end before its start' => [
         function (): void {
             $title = Title::factory()
                 ->active()
@@ -118,7 +131,20 @@ test('each caller names its date range context through a translated label', func
                 $title->currentActivityPeriod()->firstOrFail()->started_at->copy()->subSecond(),
             );
         },
-        'activity_period',
+        'title_activity',
+    ],
+    'stable activity end before its start' => [
+        function (): void {
+            $stable = Stable::factory()
+                ->active()
+                ->create();
+
+            resolve(EndActivityPeriodAction::class)->handle(
+                $stable,
+                $stable->currentActivityPeriod()->firstOrFail()->started_at->copy()->subSecond(),
+            );
+        },
+        'stable_activity',
     ],
     'employment end before its start' => [
         function (): void {
