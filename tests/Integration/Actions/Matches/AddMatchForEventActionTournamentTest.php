@@ -17,6 +17,8 @@ use App\Models\Tournaments\Tournament;
 use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\actingAs;
+
 /**
  * Match data for the first-round bout of seeds 1 and 4, with the given overrides.
  *
@@ -38,7 +40,7 @@ it('applies the tournament booking checks in a fixed order', function (Closure $
     $version = $world['tournament']->refresh()->version;
 
     // Act
-    $attempt = fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $node, $version);
+    $attempt = fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, administrator(), $node, $version);
 
     // Assert
     expect($attempt)->toThrow(TournamentException::class, __($messageKey))
@@ -115,3 +117,19 @@ it('applies the tournament booking checks in a fixed order', function (Closure $
         'tournaments.errors.chronology',
     ],
 ]);
+
+test('adding a tournament match names the actor passed in as the causer of the activation and the booking', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $world = tournamentFixture();
+    $node = $world['tournament']->nodes()->where('round', 1)->where('position', 1)->firstOrFail();
+    $data = tournamentBoutData($world);
+    $since = lastActivityId();
+
+    // Act
+    resolve(AddMatchForEventAction::class)->handle($world['event'], $data, $actor, $node, $world['tournament']->version);
+
+    // Assert
+    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.activated|'.causerTag($actor), 'tournament.booked|'.causerTag($actor)]);
+});

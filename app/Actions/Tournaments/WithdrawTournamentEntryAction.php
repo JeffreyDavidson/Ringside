@@ -9,6 +9,7 @@ use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Tournaments\TournamentEntry;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
 
@@ -16,9 +17,9 @@ class WithdrawTournamentEntryAction
 {
     public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly ResetTournamentBranchAction $reset, private readonly TournamentOutcomeManager $outcomes, private readonly TournamentStateMachine $states) {}
 
-    public function handle(TournamentEntry $entry, int $version, string $reason): void
+    public function handle(TournamentEntry $entry, int $version, string $reason, User $actor): void
     {
-        DB::transaction(function () use ($entry, $version, $reason): void {
+        DB::transaction(function () use ($entry, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($entry->tournament_id);
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
@@ -33,12 +34,12 @@ class WithdrawTournamentEntryAction
                     continue;
                 }
                 if ($bout->link !== null) {
-                    $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, true);
+                    $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);
                 }
             }
             $entry->forceFill(['withdrawn' => true])->save();
-            activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'entry_id' => $entry->id, 'reason' => $reason])->log('tournament.withdrawn');
-            $this->outcomes->synchronize($tournament->refresh());
+            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'entry_id' => $entry->id, 'reason' => $reason])->log('tournament.withdrawn');
+            $this->outcomes->synchronize($tournament->refresh(), $actor);
         }, attempts: 3);
     }
 }

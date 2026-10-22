@@ -713,7 +713,7 @@ test('concurrent live show commands commit once without replacing times or dupli
         $version = 0;
         $key = '';
         if ($operation !== 'prepare') {
-            $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+            $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
             $version = 1;
             $key = $operation === 'attendance' ? $run->content['roster'][0]['key'] : $run->content['items'][0]['key'];
             if ($operation === 'finish') {

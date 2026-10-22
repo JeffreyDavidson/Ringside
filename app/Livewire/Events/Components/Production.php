@@ -9,6 +9,7 @@ use App\Data\Events\EventProductionData;
 use App\Exceptions\BaseBusinessException;
 use App\Lifecycle\Events\EventProductionRequirements;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
 use App\Models\Events\EventPack;
@@ -32,6 +33,7 @@ use Livewire\Component;
 class Production extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
 
     #[Locked]
     public int $eventId;
@@ -201,7 +203,7 @@ class Production extends Component
         $previousVersion = $this->version;
         try {
             $input = $this->validatedInput($requirements);
-            $action->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed);
+            $action->handle($event, $this->version, $this->fingerprint, EventProductionData::fromValidated($input), $this->reviewed, $this->actor());
             $this->reloadSaved();
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);

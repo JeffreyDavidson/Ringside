@@ -18,6 +18,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Tournaments\TournamentMatchLink;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -32,9 +33,9 @@ class RecordResultAction
         private readonly MatchRosterLock $rosterLock,
     ) {}
 
-    public function handle(EventMatch $match, MatchResultData $result): RecordedMatchResultData
+    public function handle(EventMatch $match, MatchResultData $result, User $actor): RecordedMatchResultData
     {
-        return DB::transaction(function () use ($match, $result): RecordedMatchResultData {
+        return DB::transaction(function () use ($match, $result, $actor): RecordedMatchResultData {
             $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($match);
             $this->tournaments->ensureResultCanChange($lockedMatch, $result);
             $changed = $lockedMatch->match_finish !== $result->finish || $lockedMatch->winning_side_id !== $result->winningSide?->id;
@@ -94,7 +95,7 @@ class RecordResultAction
                 ])->save();
             });
 
-            $this->tournaments->resultRecorded($lockedMatch);
+            $this->tournaments->resultRecorded($lockedMatch, $actor);
 
             return new RecordedMatchResultData($lockedMatch->refresh(), $titlesLeftUnchanged);
         });

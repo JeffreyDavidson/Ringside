@@ -20,6 +20,7 @@ use App\Enums\Tournaments\TournamentOperation;
 use App\Enums\Tournaments\TournamentOperationTarget;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
 use App\Livewire\Tournaments\Forms\TournamentOperationForm;
@@ -45,6 +46,7 @@ use Livewire\Component;
 class Show extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
 
     #[Locked]
     public int $tournamentId;
@@ -109,7 +111,7 @@ class Show extends Component
         $tournament = $this->tournament();
         Gate::authorize('update', $tournament);
         $data = $this->form->data();
-        $this->perform(fn (): Tournament => $save->handle($tournament->promotion()->firstOrFail(), $data, $tournament, $this->version));
+        $this->perform(fn (): Tournament => $save->handle($tournament->promotion()->firstOrFail(), $data, $this->actor(), $tournament, $this->version));
     }
 
     public function rename(RenameTournamentAction $rename): void
@@ -117,7 +119,7 @@ class Show extends Component
         $tournament = $this->tournament();
         Gate::authorize('update', $tournament);
         $this->form->validateNaming();
-        $this->perform(fn () => $rename->handle($tournament, $this->version, $this->form->name, $this->form->description));
+        $this->perform(fn () => $rename->handle($tournament, $this->version, $this->form->name, $this->form->description, $this->actor()));
     }
 
     public function begin(string $operation, int $id = 0): void
@@ -175,23 +177,25 @@ class Show extends Component
         $this->draft->validate();
         $this->perform(function () use ($tournament, $operation, $book, $plan, $reset, $withdraw, $replace, $walkover, $cancel): void {
             match ($operation) {
-                TournamentOperation::Book => $book->handle($this->node($tournament), $this->draftVersion, $this->draft->bookingData()),
+                TournamentOperation::Book => $book->handle($this->node($tournament), $this->draftVersion, $this->draft->bookingData(), $this->actor()),
                 TournamentOperation::Plan => $plan->handle(
                     $this->node($tournament),
                     $this->draft->eventId === null ? null : Event::query()->findOrFail($this->draft->eventId),
                     $this->draftVersion,
+                    $this->actor(),
                 ),
-                TournamentOperation::Reset => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason),
-                TournamentOperation::Unbook => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason, true),
-                TournamentOperation::Withdraw => $withdraw->handle($this->entry($tournament), $this->draftVersion, $this->draft->reason),
+                TournamentOperation::Reset => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason, $this->actor()),
+                TournamentOperation::Unbook => $reset->handle($this->node($tournament), $this->draftVersion, $this->draft->reason, $this->actor(), true),
+                TournamentOperation::Withdraw => $withdraw->handle($this->entry($tournament), $this->draftVersion, $this->draft->reason, $this->actor()),
                 TournamentOperation::Replace => $replace->handle(
                     $this->entry($tournament),
                     (int) $this->draft->replacementId,
                     $this->draftVersion,
                     $this->draft->reason,
+                    $this->actor(),
                 ),
-                TournamentOperation::Walkover => $walkover->handle($this->node($tournament), $this->draftVersion, $this->draft->reason),
-                TournamentOperation::Cancel => $cancel->handle($tournament, $this->draftVersion, $this->draft->reason),
+                TournamentOperation::Walkover => $walkover->handle($this->node($tournament), $this->draftVersion, $this->draft->reason, $this->actor()),
+                TournamentOperation::Cancel => $cancel->handle($tournament, $this->draftVersion, $this->draft->reason, $this->actor()),
             };
         });
     }

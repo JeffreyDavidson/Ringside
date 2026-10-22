@@ -16,6 +16,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\ValueObjects\BracketShape;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +25,9 @@ class SaveTournamentAction
 {
     public function __construct(private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
-    public function handle(Promotion $promotion, TournamentData $data, ?Tournament $tournament = null, ?int $version = null): Tournament
+    public function handle(Promotion $promotion, TournamentData $data, User $actor, ?Tournament $tournament = null, ?int $version = null): Tournament
     {
-        return DB::transaction(function () use ($promotion, $data, $tournament, $version): Tournament {
+        return DB::transaction(function () use ($promotion, $data, $actor, $tournament, $version): Tournament {
             if (! $tournament instanceof Tournament && $data->requestId !== null) {
                 Promotion::query()->whereKey($promotion->id)->lockForUpdate()->firstOrFail();
                 $existing = Tournament::query()->where('promotion_id', $promotion->id)->where('request_id', $data->requestId)->first();
@@ -71,7 +72,7 @@ class SaveTournamentAction
             foreach (new BracketShape($data->capacity)->slots() as [$round, $position, $firstSeed, $secondSeed]) {
                 (new TournamentNode)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'round' => $round, 'position' => $position, 'first_seed' => $firstSeed, 'second_seed' => $secondSeed])->save();
             }
-            activity('tournaments')->withProperties(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'version' => $locked->version])->log('tournament.saved');
+            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'version' => $locked->version])->log('tournament.saved');
 
             return $locked;
         }, attempts: 3);

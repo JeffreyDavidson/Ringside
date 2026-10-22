@@ -35,7 +35,7 @@ test('preparation saves a reviewed live snapshot without changing the event pack
     $original = $event->pack()->firstOrFail()->content;
 
     // Act
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
 
     // Assert
     expect($run->version)->toBe(1)
@@ -53,7 +53,7 @@ test('arrival and briefing persist and a stale operator cannot replace them', fu
     EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     $key = $run->content['roster'][0]['key'];
     $action = resolve(MarkLiveAttendanceAction::class);
 
@@ -77,7 +77,7 @@ test('the show runs one item at a time and completion never records a match resu
     $data = resolve(EventPackViewModel::class)->data($event);
     $content = [...$data['content'], 'segments' => [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Intermission', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => 15, 'notes' => null]]];
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($content), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     $action = resolve(TransitionLiveItemAction::class);
     $first = $run->content['items'][0]['key'];
     $second = $run->content['items'][1]['key'];
@@ -108,7 +108,7 @@ test('review adopts pending plan changes while retaining actual times and attend
     EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     resolve(MarkLiveAttendanceAction::class)->handle($event, 1, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true, signedInUser());
     resolve(TransitionLiveItemAction::class)->handle($event, 2, $run->content['items'][0]['key'], LiveItemOperation::Start, signedInUser());
     $before = $run->refresh()->content;
@@ -131,7 +131,7 @@ test('repeated preparation and outdated pack previews never replace a live recor
     $pack = $fixture['event']->pack()->firstOrFail();
 
     // Act / Assert
-    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($fixture['event'], 0, 1, $pack->card_fingerprint))->toThrow(RecordChangedException::class);
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($fixture['event'], 0, 1, $pack->card_fingerprint, administrator()))->toThrow(RecordChangedException::class);
     expect($fixture['event']->liveRun()->count())->toBe(1)
         ->and($fixture['event']->liveRun()->firstOrFail()->version)->toBe(1);
 });
@@ -158,7 +158,7 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     $version = $case === 'old' ? 2 : 1;
 
     // Act / Assert
-    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $data['card']['fingerprint']))->toThrow(LiveShowException::class);
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $data['card']['fingerprint'], signedInUser()))->toThrow(LiveShowException::class);
     expect($event->liveRun()->exists())->toBeFalse();
 })->with(['missing pack', 'undated', 'empty', 'unreviewed', 'old']);
 
@@ -173,7 +173,7 @@ test('a stale preparation preview cannot create a run from a different pack', fu
     $fingerprint = $staleVersion ? $data['card']['fingerprint'] : str_repeat('0', 64);
 
     // Act / Assert
-    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $fingerprint))->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
+    expect(fn () => resolve(PrepareLiveShowAction::class)->handle($event, 0, $version, $fingerprint, signedInUser()))->toThrow(RecordChangedException::class, __('core.errors.record.changed'));
     expect($event->liveRun()->exists())->toBeFalse()
         ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe(0);
 })->with(['outdated pack version' => true, 'different card fingerprint' => false]);
@@ -187,9 +187,26 @@ test('a prepared run starts as prepared with no completion time', function (): v
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
 
     // Act
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
 
     // Assert
     expect($run->status)->toBe(LiveShowStatus::Prepared)
         ->and($run->completed_at)->toBeNull();
+});
+
+test('preparing a live show names the actor passed in as the audit causer', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $event = Event::factory()->create(['date' => now()]);
+    EventMatch::factory()->for($event)->withCompetitors(Wrestler::factory()->count(2)->bookable()->create()->all())->withReferees()->create(['match_finish' => null]);
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
+    $since = lastActivityId();
+
+    // Act
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], $actor);
+
+    // Assert
+    expect(activityEntriesAfter($since, 'live-show'))->toBe(['prepare|'.causerTag($actor)]);
 });

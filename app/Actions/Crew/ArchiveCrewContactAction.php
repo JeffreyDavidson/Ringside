@@ -6,13 +6,14 @@ namespace App\Actions\Crew;
 
 use App\Exceptions\RecordChangedException;
 use App\Models\Crew\CrewContact;
+use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 class ArchiveCrewContactAction
 {
-    public function handle(CrewContact $contact, int $version): void
+    public function handle(CrewContact $contact, int $version, User $actor): void
     {
-        DB::transaction(function () use ($contact, $version): void {
+        DB::transaction(function () use ($contact, $version, $actor): void {
             $contact = CrewContact::query()->whereKey($contact->id)->lockForUpdate()->firstOrFail();
             if ($contact->version !== $version || $contact->archived_at !== null) {
                 throw RecordChangedException::changed();
@@ -20,7 +21,7 @@ class ArchiveCrewContactAction
             $contact->archived_at = now();
             $contact->version++;
             $contact->save();
-            activity('production')->withProperties(['contact_id' => $contact->id, 'version' => $contact->version])->log('contact-archive');
+            activity('production')->causedBy($actor)->withProperties(['contact_id' => $contact->id, 'version' => $contact->version])->log('contact-archive');
         }, attempts: 3);
     }
 }

@@ -64,7 +64,7 @@ test('repeated announcements each enter the existing order once and require expl
     $preview = $query->preview($event, $promise, SponsorInstructionMode::Segment, null, null);
     $publisher->handle($event, $promise->id, 2, 0, $screen->data($event)['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, $preview['hash']), signedInUser());
     $promise->refresh();
-    $run = app(PrepareLiveShowAction::class)->handle($event, 0, 1, $screen->data($event)['card']['fingerprint']);
+    $run = app(PrepareLiveShowAction::class)->handle($event, 0, 1, $screen->data($event)['card']['fingerprint'], administrator());
     $other = $save->handle($event, null, 0, (string) Str::uuid(), sponsorPromiseData($promise, ['description' => 'Second sponsor thanks', 'instructionLabel' => 'Closing sponsor thanks']), signedInUser());
     $preview = $query->preview($event, $other, SponsorInstructionMode::Segment, null, null);
 
@@ -91,7 +91,7 @@ test('started announcements retain their text and private fulfillment never writ
     $publisher = app(SaveSponsorInstructionAction::class);
     $publisher->handle($event, $promise->id, 2, 0, $screen->data($event)['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, $query->preview($event, $promise, SponsorInstructionMode::Segment, null, null)['hash']), signedInUser());
     $promise->refresh();
-    $run = app(PrepareLiveShowAction::class)->handle($event, 0, 1, $screen->data($event)['card']['fingerprint']);
+    $run = app(PrepareLiveShowAction::class)->handle($event, 0, 1, $screen->data($event)['card']['fingerprint'], administrator());
     $transition = app(TransitionLiveItemAction::class);
     $transition->handle($event, 1, $run->content['items'][0]['key'], LiveItemOperation::Start, signedInUser());
     $before = $run->refresh()->content;
@@ -264,7 +264,7 @@ test('sponsor adoption and production edits preserve each others saved pack sect
     expect($instructions)->toHaveCount(1);
 
     // Act
-    app(SaveEventProductionAction::class)->handle($event, 2, $screen['card']['fingerprint'], EventProductionData::fromValidated([...$fixture['production'], 'notes' => 'Updated private crew note']), false);
+    app(SaveEventProductionAction::class)->handle($event, 2, $screen['card']['fingerprint'], EventProductionData::fromValidated([...$fixture['production'], 'notes' => 'Updated private crew note']), false, administrator());
 
     // Assert
     $updated = $event->pack()->firstOrFail();

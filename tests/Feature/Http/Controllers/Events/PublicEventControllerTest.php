@@ -945,7 +945,7 @@ test('published event cards and results omit crew contacts and production cues',
         'cues' => [['id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051003', 'item_key' => 'match:'.$world['match']->id,
             'subject' => 'PRIVATE-SUBJECT-7Q', 'trigger' => 'PRIVATE-TRIGGER-7Q', 'instruction' => 'PRIVATE-CUE-7Q',
             'owner_id' => 'eed36a82-90cb-4a79-b2cc-92e6c4051001']],
-    ]), false);
+    ]), false, administrator());
 
     // Act
     savePublicDraft($event);

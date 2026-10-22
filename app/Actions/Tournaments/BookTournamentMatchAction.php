@@ -15,6 +15,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 use App\ValueObjects\MatchSides;
 
@@ -22,7 +23,7 @@ class BookTournamentMatchAction
 {
     public function __construct(private readonly AddMatchForEventAction $bookMatch, private readonly TournamentBracketService $bracket) {}
 
-    public function handle(TournamentNode $node, int $version, TournamentBookingData $data): EventMatch
+    public function handle(TournamentNode $node, int $version, TournamentBookingData $data, User $actor): EventMatch
     {
         $bout = $this->bracket->bout($node);
         if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry) {
@@ -36,13 +37,13 @@ class BookTournamentMatchAction
                 throw TournamentException::entrantsChanged();
             }
 
-            return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::Singles, $data->referees, $data->titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null, $data->stipulation), $node, $version);
+            return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::Singles, $data->referees, $data->titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null, $data->stipulation), $actor, $node, $version);
         }
         if (! $first instanceof TagTeam || ! $second instanceof TagTeam) {
             throw TournamentException::entrantsChanged();
         }
 
-        return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::TagTeam, $data->referees, $data->titles, new MatchSides(collect([1 => ['tag_teams' => [$first]], 2 => ['tag_teams' => [$second]]])), null, $data->stipulation), $node, $version);
+        return $this->bookMatch->handle($data->event, new EventMatchData(MatchType::TagTeam, $data->referees, $data->titles, new MatchSides(collect([1 => ['tag_teams' => [$first]], 2 => ['tag_teams' => [$second]]])), null, $data->stipulation), $actor, $node, $version);
 
     }
 }

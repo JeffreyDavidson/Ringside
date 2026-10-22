@@ -59,7 +59,7 @@ it('refuses played downstream resets without changing either result', function (
     recordTournamentWinner($second, $world['tournament']);
     $final = bookTournamentNode($world, $nodes->sole(fn ($n): bool => $n->round === 2));
     recordTournamentWinner($final, $world['tournament']);
-    expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 1 && $n->position === 1), $world['tournament']->refresh()->version, 'Correct the source'))->toThrow(TournamentException::class)
+    expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 1 && $n->position === 1), $world['tournament']->refresh()->version, 'Correct the source', administrator()))->toThrow(TournamentException::class)
         ->and($final->refresh()->trashed())->toBeFalse()
         ->and($first->refresh()->match_finish)->toBe(MatchFinish::Pinfall);
 });
@@ -70,7 +70,7 @@ it('does not permit changing a historical draw into a new qualifier after its re
     recordTournamentWinner($draw, $world['tournament'], MatchFinish::NoDecision);
     $rematch = bookTournamentNode($world, $node);
     recordTournamentWinner($rematch, $world['tournament']);
-    expect(fn () => resolve(RecordResultAction::class)->handle($draw, new MatchResultData(MatchFinish::Pinfall, $draw->sides()->firstOrFail(), collect(), $world['tournament']->refresh()->version)))->toThrow(TournamentException::class)
+    expect(fn () => resolve(RecordResultAction::class)->handle($draw, new MatchResultData(MatchFinish::Pinfall, $draw->sides()->firstOrFail(), collect(), $world['tournament']->refresh()->version), administrator()))->toThrow(TournamentException::class)
         ->and($draw->refresh()->match_finish)->toBe(MatchFinish::NoDecision);
 });
 it('supports across-event advancement and refuses unscheduling the dependent booking', function (): void {
@@ -81,7 +81,7 @@ it('supports across-event advancement and refuses unscheduling the dependent boo
     $second = bookTournamentNode($world, $nodes->sole(fn ($n): bool => $n->round === 1 && $n->position === 2));
     recordTournamentWinner($second, $world['tournament']);
     $future = Event::factory()->for($world['promotion'])->create(['date' => now()->addDays(2)]);
-    $final = resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 2), $world['tournament']->refresh()->version, new TournamentBookingData($future, $world['referees']));
+    $final = resolve(BookTournamentMatchAction::class)->handle($nodes->sole(fn ($n): bool => $n->round === 2), $world['tournament']->refresh()->version, new TournamentBookingData($future, $world['referees']), administrator());
     expect(fn () => resolve(UpdateAction::class)->handle($future, new EventData($future->name, null, null, $future->preview)))->toThrow(TournamentException::class)
         ->and($future->refresh()->date)->not->toBeNull()
         ->and($final->refresh()->trashed())->toBeFalse();
@@ -110,7 +110,7 @@ it('returns the existing real match for an identical booking retry', function ()
     $node = $world['tournament']->nodes()->firstOrFail();
     $version = $world['tournament']->version;
     $first = bookTournamentNode($world, $node);
-    $retry = resolve(BookTournamentMatchAction::class)->handle($node, $version, new TournamentBookingData($world['event'], $world['referees']));
+    $retry = resolve(BookTournamentMatchAction::class)->handle($node, $version, new TournamentBookingData($world['event'], $world['referees']), administrator());
     expect($retry->id)->toBe($first->id)->and($world['event']->matches()->count())->toBe(1)->and($node->links()->count())->toBe(1);
 });
 it('refuses moving a draw rematch earlier than its retained attempt', function (): void {
@@ -119,7 +119,7 @@ it('refuses moving a draw rematch earlier than its retained attempt', function (
     $match = bookTournamentNode($world, $node);
     recordTournamentWinner($match, $world['tournament'], MatchFinish::TimeLimitDraw);
     $earlier = Event::factory()->for($world['promotion'])->create(['date' => $world['event']->date?->copy()->subDay()]);
-    expect(fn () => resolve(BookTournamentMatchAction::class)->handle($node, $world['tournament']->refresh()->version, new TournamentBookingData($earlier, $world['referees'])))->toThrow(TournamentException::class)
+    expect(fn () => resolve(BookTournamentMatchAction::class)->handle($node, $world['tournament']->refresh()->version, new TournamentBookingData($earlier, $world['referees']), administrator()))->toThrow(TournamentException::class)
         ->and($node->links()->count())->toBe(1)
         ->and($earlier->matches()->count())->toBe(0);
 });
@@ -128,7 +128,7 @@ it('invalidates tournament review when a tentative event changes or is deleted a
     $event = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
     $t = $world['tournament'];
     $node = $t->nodes()->firstOrFail();
-    resolve(PlanTournamentBoutAction::class)->handle($node, $event, $t->version);
+    resolve(PlanTournamentBoutAction::class)->handle($node, $event, $t->version, administrator());
     $before = $t->refresh()->version;
     resolve(UpdateAction::class)->handle($event, new EventData($event->name, now()->addWeeks(2), null, null));
     expect($t->refresh()->version)->toBe($before + 1);
@@ -143,7 +143,7 @@ it('requires a refresh when a planned event has been deleted since it was select
     $node = $world['tournament']->nodes()->firstOrFail();
     $selected = Event::query()->findOrFail($world['event']->id);
     resolve(App\Actions\Events\DeleteAction::class)->handle($world['event']);
-    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, $selected, $world['tournament']->version))->toThrow(RecordChangedException::class)
+    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, $selected, $world['tournament']->version, administrator()))->toThrow(RecordChangedException::class)
         ->and($node->refresh()->planned_event_id)->toBeNull();
 });
 it('refuses changing a qualifier after an administrative descendant has advanced', function (): void {
@@ -157,9 +157,9 @@ it('refuses changing a qualifier after an administrative descendant has advanced
     recordTournamentWinner($second, $t);
     $final = $nodes->sole(fn ($n): bool => $n->round === 2);
     $bout = resolve(TournamentBracketService::class)->bout($final);
-    resolve(WithdrawTournamentEntryAction::class)->handle($bout->second ?? throw new RuntimeException('Expected finalist'), $t->refresh()->version, 'Cannot compete');
-    resolve(AwardTournamentWalkoverAction::class)->handle($final, $t->refresh()->version, 'Opponent withdrew');
-    expect(fn () => resolve(RecordResultAction::class)->handle($first, new MatchResultData(MatchFinish::Pinfall, $first->sides()->where('position', 2)->firstOrFail(), collect(), $t->refresh()->version)))->toThrow(TournamentException::class)
+    resolve(WithdrawTournamentEntryAction::class)->handle($bout->second ?? throw new RuntimeException('Expected finalist'), $t->refresh()->version, 'Cannot compete', administrator());
+    resolve(AwardTournamentWalkoverAction::class)->handle($final, $t->refresh()->version, 'Opponent withdrew', administrator());
+    expect(fn () => resolve(RecordResultAction::class)->handle($first, new MatchResultData(MatchFinish::Pinfall, $first->sides()->where('position', 2)->firstOrFail(), collect(), $t->refresh()->version), administrator()))->toThrow(TournamentException::class)
         ->and($final->refresh()->walkover_entry_id)->not->toBeNull();
 });
 it('preserves cancelled results against subsequent edits', function (): void {
@@ -167,8 +167,8 @@ it('preserves cancelled results against subsequent edits', function (): void {
     $t = $world['tournament'];
     $match = bookTournamentNode($world, $t->nodes()->firstOrFail());
     recordTournamentWinner($match, $t);
-    resolve(CancelTournamentAction::class)->handle($t, $t->refresh()->version, 'Cancelled remaining rounds');
-    expect(fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::NoDecision, null, collect(), $t->refresh()->version)))->toThrow(TournamentException::class)
+    resolve(CancelTournamentAction::class)->handle($t, $t->refresh()->version, 'Cancelled remaining rounds', administrator());
+    expect(fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::NoDecision, null, collect(), $t->refresh()->version), administrator()))->toThrow(TournamentException::class)
         ->and($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall);
 });
 
@@ -182,9 +182,9 @@ it('refuses resetting a bout that has already started in the live show', functio
     $match = bookTournamentNode($world, $node);
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     resolve(TransitionLiveItemAction::class)->handle($event, $run->version, 'match:'.$match->id, LiveItemOperation::Start, signedInUser());
-    expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Unbook started bout', true))->toThrow(TournamentException::class)
+    expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Unbook started bout', administrator(), true))->toThrow(TournamentException::class)
         ->and($match->refresh()->trashed())->toBeFalse()
         ->and($node->links()->firstOrFail()->active_node_id)->toBe($node->id);
 });
@@ -193,7 +193,7 @@ it('refuses moving a real tournament booking through tentative planning', functi
     $world = tournamentFixture();
     $node = $world['tournament']->nodes()->firstOrFail();
     $match = bookTournamentNode($world, $node);
-    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, null, $world['tournament']->refresh()->version))->toThrow(TournamentException::class)
+    expect(fn () => resolve(PlanTournamentBoutAction::class)->handle($node, null, $world['tournament']->refresh()->version, administrator()))->toThrow(TournamentException::class)
         ->and($node->refresh()->planned_event_id)->toBe($match->event_id);
 });
 it('rolls back a replacement reset when the replacement is not employed', function (): void {
@@ -202,7 +202,7 @@ it('rolls back a replacement reset when the replacement is not employed', functi
     $entry = $t->entries()->firstOrFail();
     $match = bookTournamentNode($world, $t->nodes()->firstOrFail());
     $replacement = Wrestler::factory()->for($world['promotion'])->create();
-    expect(fn () => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $replacement->id, $t->refresh()->version, 'Replace entry'))->toThrow(TournamentException::class)
+    expect(fn () => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $replacement->id, $t->refresh()->version, 'Replace entry', administrator()))->toThrow(TournamentException::class)
         ->and($match->refresh()->trashed())->toBeFalse()
         ->and($entry->refresh()->competitor_id)->not->toBe($replacement->id);
 });
@@ -277,7 +277,7 @@ it('rejects forged low-level tournament booking contexts atomically', function (
     }
     $version = $t->refresh()->version;
     $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null);
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, administrator(), $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
         ->and($event->matches()->count())->toBe(0)
         ->and($t->refresh()->version)->toBe($version);
 })->with(['unresolved', 'withdrawn', 'other entrants', 'nonfinal title', 'foreign tournament', 'conflicting retry']);
@@ -289,7 +289,7 @@ it('refuses unscheduling a rematch while keeping its recorded draw history', fun
     $draw = bookTournamentNode($world, $node);
     recordTournamentWinner($draw, $t, MatchFinish::NoDecision);
     $later = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
-    $rematch = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($later, $world['referees']));
+    $rematch = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($later, $world['referees']), administrator());
     expect(fn () => resolve(UpdateAction::class)->handle($later, new EventData($later->name, null, null, null)))->toThrow(TournamentException::class)
         ->and($later->refresh()->date)->not->toBeNull()
         ->and($draw->refresh()->match_finish)->toBe(MatchFinish::NoDecision)
@@ -305,7 +305,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
         $event = match ($node->round) {
             1 => $node->position <= 2 ? $world['event'] : $second,2 => $semis,3 => $final,default => throw new RuntimeException('Unexpected round')
         };
-        $match = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($event, $world['referees']));
+        $match = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($event, $world['referees']), administrator());
         recordTournamentWinner($match, $t);
     }
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Qualification night', $world['event']->date, null, null));
@@ -317,7 +317,7 @@ it('retains a removed attempt without reusing its match number or treating it as
     $t = $world['tournament'];
     $node = $t->nodes()->firstOrFail();
     $original = bookTournamentNode($world, $node);
-    resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Correct booking', true);
+    resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Correct booking', administrator(), true);
     $replacement = bookTournamentNode($world, $node);
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Revised night', $world['event']->date, null, null));
     expect($replacement->match_number)->toBe($original->match_number + 1)->and($original->refresh()->trashed())->toBeTrue()->and($node->links()->count())->toBe(2);
@@ -328,9 +328,9 @@ it('refuses a new draw result on a removed unplayed tournament attempt', functio
     $t = $world['tournament'];
     $node = $t->nodes()->firstOrFail();
     $match = bookTournamentNode($world, $node);
-    resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Remove unplayed booking', true);
+    resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Remove unplayed booking', administrator(), true);
     $version = $t->refresh()->version;
-    expect(fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::NoDecision, null, collect(), $version)))->toThrow(TournamentException::class)
+    expect(fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::NoDecision, null, collect(), $version), administrator()))->toThrow(TournamentException::class)
         ->and($match->refresh()->match_finish)->toBeNull()
         ->and($t->refresh()->version)->toBe($version);
 });

@@ -52,7 +52,7 @@ it('preserves the draft inputs on failure and lets the operator refresh a stale 
     actingAs(administrator());
     $node = $world['tournament']->nodes()->firstOrFail();
     $page = livewire(Show::class, ['tournamentId' => $world['tournament']->id])->call('begin', 'book', $node->id)->set('draft.eventId', $world['event']->id)->set('draft.refereeIds', [$world['referees']->sole()->id]);
-    resolve(RenameTournamentAction::class)->handle($world['tournament'], $world['tournament']->version, 'Revised Cup', null);
+    resolve(RenameTournamentAction::class)->handle($world['tournament'], $world['tournament']->version, 'Revised Cup', null, signedInUser());
     $page->call('confirm')->assertHasErrors(['operation' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])->assertSet('draft.eventId', $world['event']->id)->call('refreshState')->assertHasNoErrors()->assertSee('Revised Cup');
     expect($world['event']->matches()->count())->toBe(0);
 });
@@ -113,7 +113,7 @@ it('performs reviewed entry administration through the protected screen', functi
     $entry = $t->entries()->firstOrFail();
     $replacement = Wrestler::factory()->employed()->for($world['promotion'])->create();
     if ($operation === 'walkover') {
-        resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable');
+        resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable', signedInUser());
     }
     $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('draft.reason', 'Reviewed tournament change')->set('draft.confirmed', true);
     if ($operation === 'replace') {

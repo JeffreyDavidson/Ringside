@@ -132,7 +132,7 @@ test('sponsor concurrency refuses source adoption if another instruction revisio
         $world = sponsorFixture();
         publishSponsorFixture($world);
         $first = sponsorWorkerSpec($world, 'publish');
-        $run = app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $first['fingerprint']);
+        $run = app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $first['fingerprint'], administrator());
         $promise = $world['promise']->refresh();
         app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 3, 1, $first['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key ?? ''), null, $first['preview_hash']), signedInUser());
         $deadlocks = resolvedDeadlocks();

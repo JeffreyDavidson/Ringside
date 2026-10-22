@@ -154,7 +154,7 @@ it('opens the result gate at the local start time of the event', function () {
     $match = EventMatch::factory()
         ->for(Event::factory()->for($promotion, 'promotion')->create(['date' => $startsAt]))
         ->create();
-    $record = fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::TimeLimitDraw, null, collect()));
+    $record = fn () => resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::TimeLimitDraw, null, collect()), administrator());
 
     // Act
     travelTo($startsAt->copy()->subMinute());
