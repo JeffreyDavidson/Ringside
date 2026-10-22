@@ -9,6 +9,7 @@ use App\Enums\Events\LiveAttendanceMark;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
 use App\Models\Events\Event;
+use App\Models\Users\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -16,9 +17,9 @@ class MarkLiveAttendanceAction
 {
     public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist, private readonly LiveShowDayRequirements $showDay) {}
 
-    public function handle(Event $event, int $version, string $key, LiveAttendanceMark $mark, bool $value): void
+    public function handle(Event $event, int $version, string $key, LiveAttendanceMark $mark, bool $value, User $actor): void
     {
-        DB::transaction(function () use ($event, $version, $key, $mark, $value): void {
+        DB::transaction(function () use ($event, $version, $key, $mark, $value, $actor): void {
             $run = $this->lock->handle($event, $version);
             $this->showDay->ensureShowDay($run);
             $content = $run->content;
@@ -35,7 +36,7 @@ class MarkLiveAttendanceAction
             if ($mark === LiveAttendanceMark::Arrived && ! $value) {
                 $person['briefed'] = null;
             }
-            $person['updated_by'] = (int) auth()->id();
+            $person['updated_by'] = $actor->id;
             $content['roster'][$index] = $person;
             $run->content = $content;
             $auditBefore = $before;

@@ -147,6 +147,14 @@ function administrator(): User
     return User::factory()->administrator()->create(['status' => UserStatus::Active]);
 }
 
+/** The user the test is signed in as; Actions take the actor explicitly instead of reading the session. */
+function signedInUser(): User
+{
+    $user = auth()->user();
+
+    return $user instanceof User ? $user : throw new LogicException('The test is not signed in.');
+}
+
 function basicUser(): User
 {
     return User::factory()->basicUser()->create(['status' => UserStatus::Active]);

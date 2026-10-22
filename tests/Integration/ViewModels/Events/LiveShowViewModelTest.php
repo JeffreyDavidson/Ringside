@@ -21,7 +21,7 @@ test('the screen reports revised planned starts and actual delay without inventi
     // Arrange
     travelTo(now()->startOfMinute());
     $fixture = liveShowFixture();
-    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     $run = $fixture['run']->refresh();
     $item = $run->content['items'][0];
     $item['timezone'] = 'UTC';
@@ -50,7 +50,7 @@ test('the screen labels recorded times and shows missing ones as not recorded', 
     // Arrange
     travelTo(now()->startOfMinute());
     $fixture = liveShowFixture();
-    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
 
     // Act
     $screen = resolve(LiveShowViewModel::class)->data($fixture['event'], '2026-10-16T12:00:00+00:00');

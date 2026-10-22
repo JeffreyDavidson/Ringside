@@ -21,7 +21,7 @@ function talentBookingFixture(): array
     $person = Wrestler::factory()->bookable()->create(['name' => 'Talent Cedar']);
     $booking = resolve(SaveTalentBookingAction::class)->handle($event, 'wrestler', $person->id, 0,
         resolve(TalentBookingFingerprintService::class)->fingerprint($event, "wrestler:{$person->id}"),
-        new TalentBookingData(TalentBookingStatus::Confirmed, 123456, now()->utc(), 'UTC', 'LEAK-TRAVEL-7Q', true));
+        new TalentBookingData(TalentBookingStatus::Confirmed, 123456, now()->utc(), 'UTC', 'LEAK-TRAVEL-7Q', true), signedInUser());
 
     return ['event' => $event, 'person' => $person, 'booking' => $booking->refresh()];
 }
@@ -35,5 +35,5 @@ function saveTalentFixture(array $fixture, TalentBookingData $data, ?int $versio
 {
     return resolve(SaveTalentBookingAction::class)->handle($fixture['event'], 'wrestler', $fixture['person']->id,
         $version ?? $fixture['booking']->refresh()->version,
-        resolve(TalentBookingFingerprintService::class)->fingerprint($fixture['event']->refresh(), "wrestler:{$fixture['person']->id}"), $data)->refresh();
+        resolve(TalentBookingFingerprintService::class)->fingerprint($fixture['event']->refresh(), "wrestler:{$fixture['person']->id}"), $data, signedInUser())->refresh();
 }

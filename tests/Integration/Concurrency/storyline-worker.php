@@ -22,7 +22,8 @@ if (! is_string($payload)) {
 }
 /** @var array{user: int, story: int, event: int, version: int, submission: string, clock: string, operation: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-auth()->login(User::query()->findOrFail($spec['user']));
+$actor = User::query()->findOrFail($spec['user']);
+auth()->login($actor);
 Carbon::setTestNow($spec['clock']);
 $story = Storyline::query()->findOrFail($spec['story']);
 fwrite(STDOUT, "READY\n");
@@ -33,9 +34,9 @@ while (microtime(true) < $start) {
 try {
     $source = new SourceData($spec['event']);
     if ($spec['operation'] === 'development') {
-        resolve(RecordDevelopmentAction::class)->handle($story, $spec['version'], new DevelopmentData('Concurrent outcome', 'The argument happened.', today()->toDateString(), 1, [], $source, $spec['submission']));
+        resolve(RecordDevelopmentAction::class)->handle($story, $spec['version'], new DevelopmentData('Concurrent outcome', 'The argument happened.', today()->toDateString(), 1, [], $source, $spec['submission']), $actor);
     } else {
-        resolve(SaveStepAction::class)->handle($story, $spec['version'], new StepData('Concurrent plan', 'The planned argument.', 1, $source, $spec['submission']));
+        resolve(SaveStepAction::class)->handle($story, $spec['version'], new StepData('Concurrent plan', 'The planned argument.', 1, $source, $spec['submission']), $actor);
     }
     fwrite(STDOUT, 'RESULT:'.json_encode(['ok' => true], JSON_THROW_ON_ERROR)."\n");
 } catch (BaseBusinessException $exception) {

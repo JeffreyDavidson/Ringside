@@ -8,12 +8,13 @@ use App\Enums\Events\BudgetOperation;
 use App\Exceptions\Events\BudgetException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
+use App\Models\Users\User;
 
 class ArchiveBudgetLineAction
 {
     public function __construct(private readonly MutateBudgetAction $mutate) {}
 
-    public function handle(Event $event, int $version, string $key, int $lineId, string $reason): EventBudget
+    public function handle(Event $event, int $version, string $key, int $lineId, string $reason, User $actor): EventBudget
     {
         return $this->mutate->handle($event, $version, $key, BudgetOperation::ArchiveLine, ['line_id' => $lineId], function (EventBudget $budget) use ($lineId): array {
             $line = $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
@@ -25,6 +26,6 @@ class ArchiveBudgetLineAction
             $line->save();
 
             return ['target' => $line->id, 'before' => $before, 'after' => $line->attributesToArray()];
-        }, trim($reason));
+        }, $actor, trim($reason));
     }
 }

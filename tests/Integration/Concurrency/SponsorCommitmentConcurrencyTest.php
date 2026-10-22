@@ -42,9 +42,9 @@ function publishSponsorFixture(array $world): void
 {
     $promise = $world['promise'];
     $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key,
-        sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']));
+        sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']), signedInUser());
     $pack = app(EventPackViewModel::class)->data($world['event']);
-    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, null)['hash']));
+    app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, null)['hash']), signedInUser());
 }
 
 test('sponsor concurrency admits one repeated create and one atomic revision', function (): void {
@@ -134,7 +134,7 @@ test('sponsor concurrency refuses source adoption if another instruction revisio
         $first = sponsorWorkerSpec($world, 'publish');
         $run = app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $first['fingerprint']);
         $promise = $world['promise']->refresh();
-        app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 3, 1, $first['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key ?? ''), null, $first['preview_hash']));
+        app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 3, 1, $first['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, PackKey::fromString($promise->pack_key ?? ''), null, $first['preview_hash']), signedInUser());
         $deadlocks = resolvedDeadlocks();
 
         // Act
@@ -154,7 +154,7 @@ test('sponsor concurrency admits one correction when completion and reopening sh
         // Arrange
         $world = sponsorFixture();
         $promise = $world['promise'];
-        app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Checked before doors']));
+        app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Checked before doors']), signedInUser());
         $deadlocks = resolvedDeadlocks();
 
         // Act

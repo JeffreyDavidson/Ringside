@@ -8,7 +8,7 @@ These live in `tests/Feature/Architecture` unless a path is given. Keep them; a 
 
 | Test | Enforces |
 | --- | --- |
-| `ApplicationArchitectureTest` | PHP and security presets, strict types, no debug helpers, `env()` only in config, native enums, and every enum in a domain folder (never directly in `App\Enums`) |
+| `ApplicationArchitectureTest` | PHP and security presets, strict types, no debug helpers, `env()` only in config, native enums, every enum in a domain folder (never directly in `App\Enums`), and no `auth()` or `Auth` facade in `app/Actions` |
 | `ControllerArchitectureTest` | Resourceful or invokable controllers, singular resource names, named routes authorized at the route, a mirrored Feature test file with an executable test, and no `action([` URLs in controller tests |
 | `NestedResourceControllersTest` | Singular names for nested resource controllers |
 | `DataArchitectureTest` | Data objects are readonly with only a constructor, static named constructors and simple field checks; discovers classes one folder deep under `app/Data` |
@@ -28,6 +28,10 @@ These live in `tests/Feature/Architecture` unless a path is given. Keep them; a 
 | `TranslationKeysTest` | Enum labels return translated keys |
 | `ViewModelArchitectureTest` | Actions and Lifecycle never depend on a ViewModel; a ViewModel never depends on an Action or another ViewModel; ViewModels live in a domain folder |
 | `tests/Integration/Builders/Roster/BookableScopeParityTest` | The `bookable()` builder scopes stay in step with the booking strategies |
+
+## Actors
+
+- An Action that records who did something takes the actor as a `User $actor` parameter (after the required input, before optional ones) and never reads `auth()` or the `Auth` facade, so a job or command can call it with nobody signed in. Livewire components pass the signed-in user through the `ResolvesActor` concern. The actor never joins a request hash or fingerprint (`MutateBudgetAction`'s `$payload`).
 
 ## Promotion context (tenancy)
 

@@ -12,7 +12,7 @@ test('budget mutation locks the owning event budget and line before the write', 
     // Arrange
     $f = budgetFixture();
     // Act
-    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['description' => 'Updated fee'])));
+    $statements = recordStatements(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['description' => 'Updated fee']), signedInUser()));
     // Assert
     $eventLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "events"'));
     $budgetLock = statementPosition($statements, fn (array $statement): bool => $statement['locked'] && str_contains($statement['sql'], 'from "event_budgets"'));
@@ -31,19 +31,34 @@ test('a failed financial mutation rolls back both its state and retained history
         $line->description = 'Should roll back';
         $line->save();
         throw new RuntimeException('Caller failed');
-    }))->toThrow(RuntimeException::class);
+    }, signedInUser()))->toThrow(RuntimeException::class);
     expect($f['line']->refresh()->description)->toBe('Talent fee')->and($f['budget']->refresh()->version)->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);
 });
 
-test('a budget write without an authenticated actor is refused and leaves no history', function (): void {
+test('a budget write with nobody signed in records the actor passed in', function (): void {
     // Arrange
     $f = budgetFixture();
+    $actor = administrator();
     auth()->logout();
 
     // Act
-    $write = fn () => resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): null => null);
+    resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): array => ['target' => $f['line']->id, 'before' => [], 'after' => []], $actor);
 
     // Assert
-    expect($write)->toThrow(LogicException::class);
-    expect($f['budget']->revisions()->count())->toBe(0);
+    expect(auth()->check())->toBeFalse()
+        ->and($f['budget']->revisions()->sole()->actor_id)->toBe($actor->id);
+});
+
+test('a budget revision records the actor passed in, not the signed-in user', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(MutateBudgetAction::class)->handle($f['event'], 0, budgetKey(), BudgetOperation::SaveLine, [], fn (EventBudget $budget): array => ['target' => $f['line']->id, 'before' => [], 'after' => []], $actor);
+
+    // Assert
+    $revision = $f['budget']->revisions()->sole();
+    expect($revision->actor_id)->toBe($actor->id)
+        ->and($revision->actor_label)->toBe("{$actor->first_name} {$actor->last_name}");
 });

@@ -12,6 +12,7 @@ use App\Lifecycle\Storylines\StorylineDevelopmentRequirements;
 use App\Models\Events\Event;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
+use App\Models\Users\User;
 use App\Services\Storylines\StorylineTimezoneService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,11 +21,11 @@ class RecordDevelopmentAction
 {
     public function __construct(private readonly LockSourceAction $source, private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision, private readonly StorylineDevelopmentRequirements $requirements, private readonly StorylineTimezoneService $timezones) {}
 
-    public function handle(Storyline $storyline, int $version, DevelopmentData $data, ?int $developmentId = null): StorylineDevelopment
+    public function handle(Storyline $storyline, int $version, DevelopmentData $data, User $actor, ?int $developmentId = null): StorylineDevelopment
     {
         $zone = $this->timezones->forDevelopment($storyline, $developmentId);
 
-        return DB::transaction(function () use ($storyline, $version, $data, $developmentId, $zone): StorylineDevelopment {
+        return DB::transaction(function () use ($storyline, $version, $data, $developmentId, $zone, $actor): StorylineDevelopment {
             $source = $this->source->handle($data->source, $storyline->promotion_id, historical: $data->reason !== null && mb_trim($data->reason) !== '');
             $story = $this->lock->handle($storyline, $version);
             $step = $data->stepId === null ? null : $story->steps()->findOrFail($data->stepId);
@@ -66,7 +67,7 @@ class RecordDevelopmentAction
                 $step->version++;
                 $step->save();
             }
-            $this->revision->handle($story, $development, $developmentId === null ? StorylineRevisionOperation::DevelopmentRecorded : StorylineRevisionOperation::DevelopmentCorrected, $before, $data->reason);
+            $this->revision->handle($story, $development, $developmentId === null ? StorylineRevisionOperation::DevelopmentRecorded : StorylineRevisionOperation::DevelopmentCorrected, $actor, $before, $data->reason);
 
             return $development;
         }, attempts: 3);

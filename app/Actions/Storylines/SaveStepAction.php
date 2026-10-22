@@ -12,6 +12,7 @@ use App\Exceptions\Storylines\StorylineConflictException;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineStep;
+use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,9 +20,9 @@ class SaveStepAction
 {
     public function __construct(private readonly LockSourceAction $source, private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision) {}
 
-    public function handle(Storyline $storyline, int $version, StepData $data, ?int $stepId = null): StorylineStep
+    public function handle(Storyline $storyline, int $version, StepData $data, User $actor, ?int $stepId = null): StorylineStep
     {
-        return DB::transaction(function () use ($storyline, $version, $data, $stepId): StorylineStep {
+        return DB::transaction(function () use ($storyline, $version, $data, $stepId, $actor): StorylineStep {
             $source = $this->source->handle($data->source, $storyline->promotion_id);
             $story = $this->lock->handle($storyline, $version);
             $step = $stepId === null ? new StorylineStep : $story->steps()->findOrFail($stepId);
@@ -50,7 +51,7 @@ class SaveStepAction
             $step->submission_id = $stepId === null ? $data->submissionId : $step->submission_id;
             $step->version = $stepId === null ? 1 : $step->version + 1;
             $step->save();
-            $this->revision->handle($story, $step, $stepId === null ? StorylineRevisionOperation::StepPlanned : StorylineRevisionOperation::StepRevised, $before, $data->reason);
+            $this->revision->handle($story, $step, $stepId === null ? StorylineRevisionOperation::StepPlanned : StorylineRevisionOperation::StepRevised, $actor, $before, $data->reason);
 
             return $step->refresh();
         }, attempts: 3);

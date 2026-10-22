@@ -7,6 +7,7 @@ namespace App\Livewire\Events\Components;
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\TalentBookingForm;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
@@ -26,6 +27,7 @@ use Livewire\WithPagination;
 class TalentBookings extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
     use WithPagination;
 
     #[Locked]
@@ -123,7 +125,7 @@ class TalentBookings extends Component
         $data = $this->form->toData($event, $booking, $attest);
         $this->resetErrorBag();
         try {
-            $action->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data);
+            $action->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data, $this->actor());
             $this->personId = 0;
             $this->form->reset();
             $this->message = __('talent-bookings.saved');

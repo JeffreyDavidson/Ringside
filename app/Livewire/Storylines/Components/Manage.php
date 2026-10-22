@@ -17,6 +17,7 @@ use App\Enums\Storylines\StepStatus;
 use App\Enums\Storylines\StorylineFormMode;
 use App\Enums\Storylines\StorylineStatus;
 use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Storylines\Forms\Planning;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
@@ -38,6 +39,7 @@ use Livewire\WithPagination;
 
 class Manage extends Component
 {
+    use ResolvesActor;
     use WithPagination;
 
     #[Locked]
@@ -198,13 +200,13 @@ class Manage extends Component
         $this->validate($rules, attributes: $this->attributeNames($rules));
         try {
             match ($mode) {
-                StorylineFormMode::Story => $updateStory->handle($story, $this->version, $this->form->storyData($this->submissionId), $this->form->reason),
-                StorylineFormMode::Step => $saveStep->handle($story, $this->version, $this->form->stepData($this->sourceFingerprint, $this->submissionId), $this->editingId),
-                StorylineFormMode::Development => $recordDevelopment->handle($story, $this->version, $this->form->developmentData($this->sourceFingerprint, $this->submissionId, $this->stepId), $this->editingId),
-                StorylineFormMode::Participant, StorylineFormMode::ParticipantEnd => $saveParticipant->handle($story, $this->version, $this->form->participantData(), $this->editingId),
-                StorylineFormMode::StepStatus => $transitionStep->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason),
-                StorylineFormMode::StoryStatus => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason),
-                StorylineFormMode::Retract => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep),
+                StorylineFormMode::Story => $updateStory->handle($story, $this->version, $this->form->storyData($this->submissionId), $this->form->reason, $this->actor()),
+                StorylineFormMode::Step => $saveStep->handle($story, $this->version, $this->form->stepData($this->sourceFingerprint, $this->submissionId), $this->actor(), $this->editingId),
+                StorylineFormMode::Development => $recordDevelopment->handle($story, $this->version, $this->form->developmentData($this->sourceFingerprint, $this->submissionId, $this->stepId), $this->actor(), $this->editingId),
+                StorylineFormMode::Participant, StorylineFormMode::ParticipantEnd => $saveParticipant->handle($story, $this->version, $this->form->participantData(), $this->actor(), $this->editingId),
+                StorylineFormMode::StepStatus => $transitionStep->handle($story, $this->version, $this->editingId ?? 0, StepStatus::tryFrom($this->form->status) ?? StepStatus::Happened, $this->form->reason, $this->actor()),
+                StorylineFormMode::StoryStatus => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason, $this->actor()),
+                StorylineFormMode::Retract => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep, $this->actor()),
             };
         } catch (BaseBusinessException $exception) {
             $this->addError('storyline', $exception->getMessage());

@@ -6,6 +6,7 @@ namespace App\Livewire\Storylines\Components;
 
 use App\Actions\Storylines\CreateAction;
 use App\Data\Storylines\StorylineData;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
 use App\Services\Promotions\PromotionContextService;
@@ -17,6 +18,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use ResolvesActor;
+
     public string $title = '';
 
     public string $premise = '';
@@ -47,7 +50,7 @@ class Create extends Component
         Gate::authorize('create', Storyline::class);
         $this->validate(['submissionId' => ['required', 'uuid'], 'promotionId' => ['required', 'integer'], 'title' => ['required', 'string', 'max:160'], 'premise' => ['required', 'string', 'max:4000'], 'payoff' => ['nullable', 'string', 'max:4000']]);
         abort_if($this->promotionContext->isEnforced() && $this->promotionContext->current()?->id !== $this->promotionId, 403);
-        $story = $create->handle(Promotion::query()->findOrFail($this->promotionId), new StorylineData($this->title, $this->premise, $this->payoff ?: null, $this->submissionId));
+        $story = $create->handle(Promotion::query()->findOrFail($this->promotionId), new StorylineData($this->title, $this->premise, $this->payoff ?: null, $this->submissionId), $this->actor());
         $this->redirectRoute('storylines.show', ['storyline' => $story]);
     }
 

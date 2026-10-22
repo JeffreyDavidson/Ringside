@@ -114,9 +114,9 @@ test('skipped sources require an explanation and never cancel the planned story 
     $f['run']->content = $content;
     $f['run']->save();
     $data = new DevelopmentData('Backstage angle', 'The angle happened backstage.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id);
-    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $data))->toThrow(StorylineConflictException::class);
+    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $data, signedInUser()))->toThrow(StorylineConflictException::class);
     $explained = new DevelopmentData($data->heading, $data->description, $data->occurredOn, 1, [], $source, (string) Str::uuid(), $step->id, 'The ring promo was skipped; the angle happened backstage.');
-    $account = resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $explained);
+    $account = resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $explained, signedInUser());
     expect($account->source_context['live_state'])->toBe('skipped')->and($step->refresh()->status)->toBe(StepStatus::Happened);
 });
 test('an unscheduled event can be planned but cannot be reported as held', function () {
@@ -126,7 +126,7 @@ test('an unscheduled event can be planned but cannot be reported as held', funct
     $source = new SourceData($f['event']->id);
     $step = plannedStorylineStep($f['story'], $source);
     $data = new DevelopmentData('Angle', 'It happened.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id, 'Reviewed.');
-    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $data))->toThrow(StorylineConflictException::class)
+    expect(fn () => resolve(RecordDevelopmentAction::class)->handle($f['story'], $f['story']->refresh()->version, $data, signedInUser()))->toThrow(StorylineConflictException::class)
         ->and($step->refresh()->status)->toBe(StepStatus::Planned);
 });
 

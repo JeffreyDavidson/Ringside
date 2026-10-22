@@ -21,11 +21,11 @@ test('pending or running items prevent completion and a completed show is read-o
 
     // Act / Assert
     expect(fn () => $complete->handle($fixture['event'], 1))->toThrow(LiveShowException::class);
-    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     expect(fn () => $complete->handle($fixture['event'], 2))->toThrow(LiveShowException::class);
-    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     $complete->handle($fixture['event'], 3);
-    expect(fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Reopen, 'Oops'))->toThrow(LiveShowException::class)
+    expect(fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Reopen, signedInUser(), 'Oops'))->toThrow(LiveShowException::class)
         ->and($fixture['run']->refresh()->version)->toBe(4);
 });
 
@@ -33,8 +33,8 @@ test('a changed source prevents completion without writing an audit or completio
     // Arrange
     $fixture = liveShowFixture();
     $item = resolve(TransitionLiveItemAction::class);
-    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
-    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     $pack = $fixture['event']->pack()->firstOrFail();
     resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Changed before completion']), false);
     $audits = Activity::query()->where('log_name', 'live-show')->count();
@@ -61,7 +61,7 @@ test('a prepared show with a pending item is refused as unfinished and stays pre
 test('a running show with a running item is refused as unfinished and stays running', function (): void {
     // Arrange
     $fixture = liveShowFixture();
-    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
 
     // Act
     $complete = fn () => resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 2);
@@ -75,8 +75,8 @@ test('a running show with every item finished completes', function (): void {
     // Arrange
     $fixture = liveShowFixture();
     $item = resolve(TransitionLiveItemAction::class);
-    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
-    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
 
     // Act
     resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 3);
@@ -90,8 +90,8 @@ test('a completed show refuses to complete again with the completed message', fu
     // Arrange
     $fixture = liveShowFixture();
     $item = resolve(TransitionLiveItemAction::class);
-    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
-    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 3);
 
     // Act
@@ -106,12 +106,12 @@ test('a completed show refuses to start an item with the completed message', fun
     // Arrange
     $fixture = liveShowFixture();
     $item = resolve(TransitionLiveItemAction::class);
-    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
-    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $item->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
+    $item->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     resolve(CompleteLiveShowAction::class)->handle($fixture['event'], 3);
 
     // Act
-    $startAgain = fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Start);
+    $startAgain = fn () => $item->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Start, signedInUser());
 
     // Assert
     expect($startAgain)->toThrow(LiveShowException::class, __('live-show.completed'))

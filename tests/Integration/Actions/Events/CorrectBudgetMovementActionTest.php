@@ -16,8 +16,8 @@ test('a recording correction keeps the original and records a replacement atomic
     $key = budgetKey();
     $action = resolve(CorrectBudgetMovementAction::class);
     // Act
-    $action->handle($f['event'], 0, $key, $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])));
-    $action->handle($f['event'], 0, $key, $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])));
+    $action->handle($f['event'], 0, $key, $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])), signedInUser());
+    $action->handle($f['event'], 0, $key, $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])), signedInUser());
     // Assert
     expect($movement->refresh()->amount_cents)->toBe(20000)->and($movement->voided_at)->not->toBeNull()
         ->and($f['line']->movements()->where('replaces_id', $movement->id)->firstOrFail()->amount_cents)->toBe(17500)
@@ -29,7 +29,7 @@ test('a refused replacement rolls back the void and audit', function (): void {
     $f = budgetFixture();
     $movement = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
     // Act / Assert
-    expect(fn () => resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($movement->id, 'Wrong amount', budgetMovementData(['amount' => '700.00']))))->toThrow(BudgetException::class);
+    expect(fn () => resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($movement->id, 'Wrong amount', budgetMovementData(['amount' => '700.00'])), signedInUser()))->toThrow(BudgetException::class);
     expect($movement->refresh()->voided_at)->toBeNull()->and($f['line']->movements()->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(0);
 });
 
@@ -40,13 +40,13 @@ test('source payments cannot be voided until their refunds have been voided', fu
     $refund = EventBudgetMovement::factory()->for($f['line'], 'line')->create(['kind' => 'refund', 'amount_cents' => 5000, 'source_id' => $source->id]);
     $action = resolve(CorrectBudgetMovementAction::class);
     // Act / Assert
-    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Wrong source')))->toThrow(BudgetException::class);
+    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Wrong source'), signedInUser()))->toThrow(BudgetException::class);
     // Act
-    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($refund->id, 'Wrong refund'));
-    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Wrong source'));
+    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($refund->id, 'Wrong refund'), signedInUser());
+    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Wrong source'), signedInUser());
     // Assert
     expect(resolve(BudgetSettlementService::class)->net($f['line']->load('movements')))->toBe(0);
-    expect(fn () => $action->handle($f['event'], 2, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Again')))->toThrow(BudgetException::class);
+    expect(fn () => $action->handle($f['event'], 2, budgetKey(), $f['line']->id, new BudgetCorrectionData($source->id, 'Again'), signedInUser()))->toThrow(BudgetException::class);
 });
 
 test('movement corrections only reach a movement on the same line', function (): void {
@@ -54,6 +54,22 @@ test('movement corrections only reach a movement on the same line', function ():
     $f = budgetFixture();
     $foreign = EventBudgetMovement::factory()->create();
     // Act / Assert
-    expect(fn () => resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($foreign->id, 'Wrong record')))->toThrow(BudgetException::class, __('event-budget.movement_missing'));
+    expect(fn () => resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($foreign->id, 'Wrong record'), signedInUser()))->toThrow(BudgetException::class, __('event-budget.movement_missing'));
     expect($foreign->refresh()->voided_at)->toBeNull()->and($f['budget']->revisions()->count())->toBe(0);
+});
+
+test('a correction records the actor passed in on the void, the replacement and the revision', function (): void {
+    // Arrange
+    $f = budgetFixture();
+    $actor = administrator();
+    $movement = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
+
+    // Act
+    resolve(CorrectBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, new BudgetCorrectionData($movement->id, 'Entered wrong amount', budgetMovementData(['amount' => '175.00'])), $actor);
+
+    // Assert
+    $replacement = $f['line']->movements()->where('replaces_id', $movement->id)->sole();
+    expect($movement->refresh()->voided_by)->toBe($actor->id)
+        ->and($replacement->actor_id)->toBe($actor->id)
+        ->and($f['budget']->revisions()->sole()->actor_id)->toBe($actor->id);
 });

@@ -16,9 +16,9 @@ test('a retraction retains the recorded account and its reason', function () {
     // Arrange
     actingAs(administrator());
     $story = Storyline::factory()->create();
-    $development = resolve(RecordDevelopmentAction::class)->handle($story, 1, new DevelopmentData('The warning', 'A confrontation happened.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid()));
+    $development = resolve(RecordDevelopmentAction::class)->handle($story, 1, new DevelopmentData('The warning', 'A confrontation happened.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid()), signedInUser());
     // Act
-    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', false);
+    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', false, signedInUser());
     // Assert
     expect($development->refresh()->retracted_at)->not->toBeNull()
         ->and($development->description)->toBe('A confrontation happened.')
@@ -31,7 +31,21 @@ test('retracting explicitly reopens or cancels the linked step without losing it
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
     $development = confirmedStorylineDevelopment($story, $step->id);
-    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', $reopen);
+    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', $reopen, signedInUser());
     expect($step->refresh()->status)->toBe($reopen ? StepStatus::Planned : StepStatus::Cancelled)
-        ->and(fn () => resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'Repeated.', $reopen))->toThrow(StorylineConflictException::class);
+        ->and(fn () => resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'Repeated.', $reopen, signedInUser()))->toThrow(StorylineConflictException::class);
 })->with([true, false]);
+
+test('a retraction records the actor passed in', function () {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $story = Storyline::factory()->create();
+    $development = confirmedStorylineDevelopment($story);
+
+    // Act
+    resolve(RetractDevelopmentAction::class)->handle($story, $story->refresh()->version, $development->id, 'It was a rehearsal.', false, $actor);
+
+    // Assert
+    expect($story->revisions()->orderByDesc('id')->firstOrFail()->actor_id)->toBe($actor->id);
+});
