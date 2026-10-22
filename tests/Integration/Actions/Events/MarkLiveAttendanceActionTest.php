@@ -73,3 +73,17 @@ test('an attendance mark records the actor passed in, not the signed-in user', f
     // Assert
     expect($fixture['run']->refresh()->content['roster'][0]['updated_by'])->toBe($actor->id);
 });
+
+test('an attendance mark audit names the actor passed in as its causer', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(MarkLiveAttendanceAction::class)->handle($fixture['event'], 1, $fixture['person'], LiveAttendanceMark::Arrived, true, $actor);
+
+    // Assert
+    $audit = Activity::query()->where('log_name', 'live-show')->latest('id')->firstOrFail();
+    expect($audit->causer_id)->toBe($actor->id)
+        ->and($audit->causer_type)->toBe($actor->getMorphClass());
+});

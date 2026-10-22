@@ -16,6 +16,7 @@ use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Models\Matches\EventMatch;
 use App\ViewModels\Events\EventPackViewModel;
+use Spatie\Activitylog\Models\Activity;
 
 test('removed pending matches need an explicit skip and retained attendance is labelled unassigned', function (): void {
     // Arrange
@@ -87,4 +88,23 @@ test('a skipped removal records the actor passed in, not the signed-in user', fu
 
     // Assert
     expect($fixture['run']->refresh()->content['items'][0]['updated_by'])->toBe($actor->id);
+});
+
+test('a review audit names the actor passed in as its causer', function (): void {
+    // Arrange
+    $fixture = liveShowFixture(segment: true);
+    $actor = administrator();
+    EventMatch::query()->where('event_id', $fixture['event']->id)->firstOrFail()->delete();
+    $data = resolve(EventPackViewModel::class)->data($fixture['event']);
+    $content = $data['content'];
+    $content['segments'] = array_map(fn (array $segment): array => [...$segment, 'after_match_id' => null], $content['segments']);
+    resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $data['card']['fingerprint'], EventPackData::fromValidated($content), true);
+
+    // Act
+    resolve(ReviewLiveShowAction::class)->handle($fixture['event'], 1, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([$fixture['key'] => 'Match cancelled']), $actor);
+
+    // Assert
+    $audit = Activity::query()->where('log_name', 'live-show')->latest('id')->firstOrFail();
+    expect($audit->causer_id)->toBe($actor->id)
+        ->and($audit->causer_type)->toBe($actor->getMorphClass());
 });

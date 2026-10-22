@@ -40,7 +40,7 @@ class TransitionLiveItemAction
             $updated['updated_by'] = $actor->id;
             $content['items'][$index] = $updated;
             $run->content = $content;
-            $this->persist->handle($run, new LiveShowChangeData($operation->value, $key, $before, $content['items'][$index], $reason));
+            $this->persist->handle($run, new LiveShowChangeData($operation->value, $key, $before, $content['items'][$index], $reason), $actor);
         }, attempts: 3);
     }
 }

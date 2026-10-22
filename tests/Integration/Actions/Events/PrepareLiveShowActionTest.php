@@ -92,7 +92,7 @@ test('the show runs one item at a time and completion never records a match resu
     // Act
     $action->handle($event, 2, $first, LiveItemOperation::Finish, signedInUser());
     $action->handle($event, 3, $second, LiveItemOperation::Skip, signedInUser(), 'Cancelled intermission');
-    resolve(CompleteLiveShowAction::class)->handle($event, 4);
+    resolve(CompleteLiveShowAction::class)->handle($event, 4, signedInUser());
 
     // Assert
     expect($run->refresh()->status)->toBe(LiveShowStatus::Completed)

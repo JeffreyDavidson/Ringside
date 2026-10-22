@@ -45,7 +45,7 @@ class MarkLiveAttendanceAction
                 $auditBefore = Arr::only($before, ['arrived', 'briefed', 'updated_by']);
                 $auditAfter = Arr::only($person, ['arrived', 'briefed', 'updated_by']);
             }
-            $this->persist->handle($run, new LiveShowChangeData('attendance', $key, $auditBefore, $auditAfter));
+            $this->persist->handle($run, new LiveShowChangeData('attendance', $key, $auditBefore, $auditAfter), $actor);
         }, attempts: 3);
     }
 }

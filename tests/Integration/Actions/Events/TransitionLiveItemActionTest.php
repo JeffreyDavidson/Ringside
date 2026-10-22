@@ -177,3 +177,17 @@ test('an item transition records the actor passed in, not the signed-in user', f
     // Assert
     expect($fixture['run']->refresh()->content['items'][0]['updated_by'])->toBe($actor->id);
 });
+
+test('an item transition audit names the actor passed in as its causer', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $actor = administrator();
+
+    // Act
+    resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, $actor);
+
+    // Assert
+    $audit = Activity::query()->where('log_name', 'live-show')->latest('id')->firstOrFail();
+    expect($audit->causer_id)->toBe($actor->id)
+        ->and($audit->causer_type)->toBe($actor->getMorphClass());
+});

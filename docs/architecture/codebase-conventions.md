@@ -31,7 +31,7 @@ These live in `tests/Feature/Architecture` unless a path is given. Keep them; a 
 
 ## Actors
 
-- An Action that records who did something takes the actor as a `User $actor` parameter (after the required input, before optional ones) and never reads `auth()` or the `Auth` facade, so a job or command can call it with nobody signed in. Livewire components pass the signed-in user through the `ResolvesActor` concern. The actor never joins a request hash or fingerprint (`MutateBudgetAction`'s `$payload`).
+- An Action that records who did something takes the actor as a `User $actor` parameter (after the required input, before optional ones) and never reads `auth()` or the `Auth` facade, so a job or command can call it with nobody signed in. Livewire components pass the signed-in user through the `ResolvesActor` concern. The actor never joins a request hash or fingerprint (`MutateBudgetAction`'s `$payload`). The live show audit names it as the activity causer (`PersistLiveShowAction` calls `causedBy($actor)`), so the entry does not depend on the auth guard.
 
 ## Promotion context (tenancy)
 

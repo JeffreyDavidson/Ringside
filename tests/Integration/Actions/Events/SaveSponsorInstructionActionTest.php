@@ -104,7 +104,7 @@ test('started announcements retain their text and private fulfillment never writ
     $promise = $save->handle($event, $promise->id, 4, $promise->submission_key, sponsorPromiseData($promise, ['status' => SponsorCommitmentStatus::Completed, 'evidence' => 'Announcer confirmed the wording']), signedInUser());
     expect($run->refresh()->content)->toBe($before);
     $transition->handle($event, 2, $run->content['items'][0]['key'], LiveItemOperation::Finish, signedInUser());
-    app(CompleteLiveShowAction::class)->handle($event, 3);
+    app(CompleteLiveShowAction::class)->handle($event, 3, signedInUser());
     $completed = $run->refresh()->content;
     $save->handle($event, $promise->id, 5, $promise->submission_key, sponsorPromiseData($promise, ['evidence' => 'Reviewed the recording']), signedInUser(), 'Correct evidence');
     expect($run->refresh()->content)->toBe($completed);
