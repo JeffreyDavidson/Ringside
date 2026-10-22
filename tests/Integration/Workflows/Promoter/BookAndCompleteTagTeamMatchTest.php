@@ -34,11 +34,11 @@ test('a promoter can book and complete a tag team match', function (): void {
     );
 
     // Act
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator());
     $winningSide = $match->sides()->where('position', 1)->firstOrFail();
     $completedMatch = resolve(RecordResultAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection), administrator(),
     )->match;
 
     // Assert

@@ -8,6 +8,7 @@ use App\Actions\Crew\ArchiveCrewContactAction;
 use App\Actions\Crew\SaveCrewContactAction;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Crew\Forms\CrewContactForm;
 use App\Models\Crew\CrewContact;
 use App\Queries\Crew\CrewContactSearchQuery;
@@ -20,6 +21,7 @@ use Livewire\Component;
 class Directory extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
 
     #[Locked]
     public ?int $contactId = null;
@@ -70,7 +72,7 @@ class Directory extends Component
         Gate::authorize($contact === null ? 'create' : 'update', $contact ?? CrewContact::class);
         $data = $this->form->toData();
         try {
-            $action->handle($contact, $this->version, $this->form->clientId, $data);
+            $action->handle($contact, $this->version, $this->form->clientId, $data, $this->actor());
             $this->editing = false;
             $this->form->reset('name', 'phone', 'email', 'notes');
         } catch (BaseBusinessException $exception) {
@@ -83,7 +85,7 @@ class Directory extends Component
         $contact = CrewContact::query()->findOrFail($id);
         Gate::authorize('archive', $contact);
         try {
-            $action->handle($contact, $version);
+            $action->handle($contact, $version, $this->actor());
         } catch (BaseBusinessException $exception) {
             $this->addError('contact', $exception->getMessage());
         }

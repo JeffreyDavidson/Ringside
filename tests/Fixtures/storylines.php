@@ -36,7 +36,7 @@ function storylineSourceFixture(): array
     $content = $pack['content'];
     $content['segments'] = [['id' => $segment, 'label' => 'Closing promo', 'after_match_id' => $match->id, 'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
     resolve(SaveEventPackAction::class)->handle($event, 0, $pack['card']['fingerprint'], EventPackData::fromValidated($content), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $pack['card']['fingerprint'])->refresh();
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $pack['card']['fingerprint'], signedInUser())->refresh();
 
     return ['story' => $story, 'event' => $event, 'match' => $match, 'run' => $run, 'segment' => $segment];
 }

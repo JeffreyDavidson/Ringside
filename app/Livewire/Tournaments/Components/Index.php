@@ -8,6 +8,7 @@ use App\Actions\Tournaments\SaveTournamentAction;
 use App\Enums\Roster\BookableRosterKind;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
 use App\Models\Promotions\Promotion;
@@ -24,6 +25,7 @@ use Livewire\WithPagination;
 class Index extends Component
 {
     use ExplainsKeptInput;
+    use ResolvesActor;
     use WithPagination;
 
     public CreateEdit $form;
@@ -59,7 +61,7 @@ class Index extends Component
         }
         $data = $this->form->data();
         try {
-            $tournament = $save->handle($promotion, $data);
+            $tournament = $save->handle($promotion, $data, $this->actor());
         } catch (BaseBusinessException $exception) {
             $this->addError('operation', $this->failureMessageKeepingInput($exception));
 

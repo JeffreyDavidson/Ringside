@@ -109,7 +109,7 @@ class LiveShow extends Component
 
     public function prepare(PrepareLiveShowAction $action): void
     {
-        $this->perform(fn (Event $event): EventLiveRun => $action->handle($event, $this->version, $this->packVersion, $this->fingerprint));
+        $this->perform(fn (Event $event): EventLiveRun => $action->handle($event, $this->version, $this->packVersion, $this->fingerprint, $this->actor()));
     }
 
     public function attendance(MarkLiveAttendanceAction $action, string $key, string $mark, bool $value): void

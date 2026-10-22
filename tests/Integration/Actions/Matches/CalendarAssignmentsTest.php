@@ -53,7 +53,7 @@ test('a match repair retains a previously booked unavailable person while reject
     $referees = Referee::factory()->bookable()->for($promotion)->count(1)->create();
     $titles = Title::query()->whereKey([])->get();
     $original = new EventMatchData(MatchType::Singles, $referees, $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), 'Original');
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $original);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $original, administrator());
     $day = ($event->date ?? throw new LogicException('Expected a scheduled fixture'))->toDateString();
     $actor = administrator();
     resolve(CreateAction::class)->handle($first, new UnavailabilityData($day, $day, null), $actor);

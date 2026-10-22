@@ -37,13 +37,13 @@ function runTournamentOperation(array $world, string $operation, ?int $version =
 
     match ($operation) {
         default => throw new InvalidArgumentException('Unknown operation'),
-        'book' => resolve(BookTournamentMatchAction::class)->handle($node, $version, new TournamentBookingData($world['event'], $world['referees'])),
-        'plan' => resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], $version),
-        'withdraw' => resolve(WithdrawTournamentEntryAction::class)->handle($entry, $version, 'Unavailable'),
-        'replace' => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $entry->competitor_id, $version, 'Unavailable'),
-        'walkover' => resolve(AwardTournamentWalkoverAction::class)->handle($node, $version, 'Unavailable'),
-        'cancel' => resolve(CancelTournamentAction::class)->handle($t, $version, 'Cancelled show'),
-        'save' => resolve(SaveTournamentAction::class)->handle($world['promotion'], new TournamentData('Changed', null, EntrantKind::Wrestler, 4, true, array_values($t->entries()->orderBy('seed')->get()->map(fn (TournamentEntry $entry): int => $entry->competitor_id)->all())), $t, $version),
+        'book' => resolve(BookTournamentMatchAction::class)->handle($node, $version, new TournamentBookingData($world['event'], $world['referees']), administrator()),
+        'plan' => resolve(PlanTournamentBoutAction::class)->handle($node, $world['event'], $version, administrator()),
+        'withdraw' => resolve(WithdrawTournamentEntryAction::class)->handle($entry, $version, 'Unavailable', administrator()),
+        'replace' => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $entry->competitor_id, $version, 'Unavailable', administrator()),
+        'walkover' => resolve(AwardTournamentWalkoverAction::class)->handle($node, $version, 'Unavailable', administrator()),
+        'cancel' => resolve(CancelTournamentAction::class)->handle($t, $version, 'Cancelled show', administrator()),
+        'save' => resolve(SaveTournamentAction::class)->handle($world['promotion'], new TournamentData('Changed', null, EntrantKind::Wrestler, 4, true, array_values($t->entries()->orderBy('seed')->get()->map(fn (TournamentEntry $entry): int => $entry->competitor_id)->all())), administrator(), $t, $version),
     };
 }
 

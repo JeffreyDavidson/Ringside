@@ -53,7 +53,7 @@ test('adding unavailability changes review warnings without rewriting a saved pa
     EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create(['match_finish' => null]);
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     $pack = $event->pack()->firstOrFail();
     $savedPack = $pack->getAttributes();
     $savedRun = $run->refresh()->getAttributes();

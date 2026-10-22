@@ -133,10 +133,10 @@ test('an unscheduled event can be planned but cannot be reported as held', funct
 test('correcting only the winning side still changes the linked result evidence', function () {
     $f = storylineSourceFixture();
     $sides = $f['match']->sides()->orderBy('position')->get();
-    resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, $sides->firstOrFail(), collect()));
+    resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, $sides->firstOrFail(), collect()), administrator());
     $source = new SourceData($f['event']->id, $f['match']->id);
     $before = storylineEvidence($source, $f['story']->promotion_id);
-    resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, requiredModel($sides->last()), collect()));
+    resolve(RecordResultAction::class)->handle($f['match'], new MatchResultData(MatchFinish::Pinfall, requiredModel($sides->last()), collect()), administrator());
     $after = storylineEvidence($source, $f['story']->promotion_id);
     expect($after['fingerprint'])->not->toBe($before['fingerprint']);
 });

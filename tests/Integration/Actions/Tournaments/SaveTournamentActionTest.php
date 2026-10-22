@@ -14,6 +14,8 @@ use App\Models\Tournaments\Tournament;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Str;
 
+use function Pest\Laravel\actingAs;
+
 it('creates an eight entrant seeded bracket without booking fictional matches', function (): void {
     // Arrange
     $promotion = Promotion::factory()->create();
@@ -23,7 +25,7 @@ it('creates an eight entrant seeded bracket without booking fictional matches', 
     $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData(
         name: 'Autumn Cup', description: null, kind: EntrantKind::Wrestler,
         capacity: 8, repeatAppearances: false, competitorIds: array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()),
-    ));
+    ), administrator());
 
     // Assert
     expect($tournament->status)->toBe(TournamentStatus::Draft)
@@ -43,7 +45,7 @@ it('pads seeded brackets with explicit byes and never books empty nodes', functi
 it('rejects duplicate or foreign entrants without creating a bracket', function (): void {
     $promotion = Promotion::factory()->create();
     $foreign = Wrestler::factory()->employed()->count(2)->create();
-    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Foreign', null, EntrantKind::Wrestler, 4, false, array_values($foreign->map(fn ($competitor): int => $competitor->id)->all()))))->toThrow(TournamentException::class)
+    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Foreign', null, EntrantKind::Wrestler, 4, false, array_values($foreign->map(fn ($competitor): int => $competitor->id)->all())), administrator()))->toThrow(TournamentException::class)
         ->and(Tournament::query()->count())->toBe(0);
 });
 
@@ -51,8 +53,8 @@ it('returns the same tournament when a create request is retried with its client
     $promotion = Promotion::factory()->create();
     $wrestlers = Wrestler::factory()->employed()->for($promotion)->count(2)->create();
     $data = new TournamentData('Retry Cup', null, EntrantKind::Wrestler, 4, false, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()), requestId: Str::uuid()->toString());
-    $first = resolve(SaveTournamentAction::class)->handle($promotion, $data);
-    $second = resolve(SaveTournamentAction::class)->handle($promotion, $data);
+    $first = resolve(SaveTournamentAction::class)->handle($promotion, $data, administrator());
+    $second = resolve(SaveTournamentAction::class)->handle($promotion, $data, administrator());
     expect($second->id)->toBe($first->id)->and(Tournament::query()->count())->toBe(1);
 });
 
@@ -61,8 +63,8 @@ it('refuses a conflicting retry payload for an already accepted create identifie
     $entrants = Wrestler::factory()->employed()->for($promotion)->count(2)->create();
     $ids = array_values($entrants->map(fn (Wrestler $wrestler): int => $wrestler->id)->all());
     $identifier = Str::uuid()->toString();
-    resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Original Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier));
-    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Different Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier)))->toThrow(RecordChangedException::class)
+    resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Original Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier), administrator());
+    expect(fn () => resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Different Cup', null, EntrantKind::Wrestler, 4, false, $ids, $identifier), administrator()))->toThrow(RecordChangedException::class)
         ->and(Tournament::query()->sole()->name)->toBe('Original Cup');
 });
 
@@ -73,7 +75,7 @@ it('stores the seeded bracket nodes for every supported capacity', function (int
     $data = new TournamentData('Seed Cup', null, EntrantKind::Wrestler, $capacity, false, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()));
 
     // Act
-    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, $data);
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, $data, administrator());
 
     // Assert
     expect($tournament->nodes()->orderBy('id')->get()->map(fn ($node): array => [$node->round, $node->position, $node->first_seed, $node->second_seed])->all())
@@ -88,3 +90,19 @@ it('stores the seeded bracket nodes for every supported capacity', function (int
         [4, 1, null, null],
     ]],
 ]);
+
+test('saving a tournament names the actor passed in as the audit causer', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $promotion = Promotion::factory()->create();
+    $wrestlers = Wrestler::factory()->employed()->for($promotion)->count(4)->create();
+    $data = new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 4, true, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all()));
+    $since = lastActivityId();
+
+    // Act
+    resolve(SaveTournamentAction::class)->handle($promotion, $data, $actor);
+
+    // Assert
+    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.saved|'.causerTag($actor)]);
+});

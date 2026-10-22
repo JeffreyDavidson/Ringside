@@ -13,6 +13,7 @@ use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Models\Events\EventLiveRun;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
 
@@ -20,9 +21,9 @@ class ResetTournamentBranchAction
 {
     public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly DeletionStateManager $deletion, private readonly TournamentOutcomeManager $outcomes) {}
 
-    public function handle(TournamentNode $node, int $version, string $reason, bool $includeCurrent = false): void
+    public function handle(TournamentNode $node, int $version, string $reason, User $actor, bool $includeCurrent = false): void
     {
-        DB::transaction(function () use ($node, $version, $reason, $includeCurrent): void {
+        DB::transaction(function () use ($node, $version, $reason, $actor, $includeCurrent): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
@@ -49,8 +50,8 @@ class ResetTournamentBranchAction
                 $link->forceFill(['active_node_id' => null])->save();
             }
             TournamentNode::query()->whereKey($ids)->update(['walkover_entry_id' => null, 'walkover_reason' => null]);
-            activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_ids' => $ids, 'match_ids' => $links->pluck('match_id')->all(), 'reason' => $reason])->log('tournament.reset');
-            $this->outcomes->synchronize($tournament);
+            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_ids' => $ids, 'match_ids' => $links->pluck('match_id')->all(), 'reason' => $reason])->log('tournament.reset');
+            $this->outcomes->synchronize($tournament, $actor);
         }, attempts: 3);
     }
 }

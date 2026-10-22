@@ -22,6 +22,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Support\Facades\DB;
 
@@ -41,12 +42,12 @@ class AddMatchForEventAction
     ) {}
 
     /** @throws EntityNotAvailableException|InvalidMatchConfigurationException */
-    public function handle(Event $event, EventMatchData $eventMatchData, ?TournamentNode $node = null, ?int $version = null): EventMatch
+    public function handle(Event $event, EventMatchData $eventMatchData, User $actor, ?TournamentNode $node = null, ?int $version = null): EventMatch
     {
         $this->requirements->ensureComplete($eventMatchData);
         $this->requirements->ensureWithinEventPromotion($event, $eventMatchData);
 
-        return DB::transaction(function () use ($event, $eventMatchData, $node, $version): EventMatch {
+        return DB::transaction(function () use ($event, $eventMatchData, $actor, $node, $version): EventMatch {
             $tournament = null;
             if ($node instanceof TournamentNode) {
                 $tournament = $this->tournamentLocks->lock($node->tournament_id, [$event->id]);
@@ -85,11 +86,11 @@ class AddMatchForEventAction
 
             if ($tournament instanceof Tournament) {
                 if ($this->tournamentStates->activates($tournament)) {
-                    activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'capacity' => $tournament->capacity, 'entrant_kind' => $tournament->entrant_kind->value, 'repeat_appearances' => $tournament->repeat_appearances, 'entries' => $tournament->entries()->get(['seed', 'competitor_type', 'competitor_id'])->toArray()])->log('tournament.activated');
+                    activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'capacity' => $tournament->capacity, 'entrant_kind' => $tournament->entrant_kind->value, 'repeat_appearances' => $tournament->repeat_appearances, 'entries' => $tournament->entries()->get(['seed', 'competitor_type', 'competitor_id'])->toArray()])->log('tournament.activated');
                 }
                 (new TournamentMatchLink)->forceFill(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'active_node_id' => $node->id, 'match_id' => $createdMatch->id, 'attempt' => ($node->links()->reorder('attempt', 'desc')->first()->attempt ?? 0) + 1])->save();
                 $tournament->forceFill(['status' => TournamentStatus::Active, 'version' => $tournament->version + 1])->save();
-                activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'match_id' => $createdMatch->id])->log('tournament.booked');
+                activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'match_id' => $createdMatch->id])->log('tournament.booked');
             }
 
             $this->rosterLock->forData($eventMatchData);

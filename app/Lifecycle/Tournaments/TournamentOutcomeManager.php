@@ -12,6 +12,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 
 class TournamentOutcomeManager
@@ -46,21 +47,21 @@ class TournamentOutcomeManager
         }
     }
 
-    public function synchronize(Tournament $tournament): void
+    public function synchronize(Tournament $tournament, User $actor): void
     {
         if (! $this->states->canProgress($tournament)) {
             return;
         }
         $final = $this->bracket->bouts($tournament)->last();
         $tournament->forceFill(['status' => $final?->winner !== null && $final->complete ? TournamentStatus::Completed : TournamentStatus::Active, 'version' => $tournament->version + 1])->save();
-        activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'version' => $tournament->version])->log('tournament.progressed');
+        activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'version' => $tournament->version])->log('tournament.progressed');
     }
 
-    public function resultRecorded(EventMatch $match): void
+    public function resultRecorded(EventMatch $match, User $actor): void
     {
         $link = TournamentMatchLink::query()->forMatchId($match->id)->first();
         if ($link !== null) {
-            $this->synchronize($link->tournament()->firstOrFail());
+            $this->synchronize($link->tournament()->firstOrFail(), $actor);
         }
     }
 }

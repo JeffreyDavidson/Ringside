@@ -19,7 +19,7 @@ test('production crew attendance races preserve the first committed mark', funct
         $userId = auth()->id() ?? throw new LogicException('The production fixture requires an authenticated actor.');
         $event = $fixture['event'];
         $data = resolve(EventPackViewModel::class)->data($event);
-        resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+        resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
         $spec = ['live_event_id' => $event->id, 'user_id' => $userId, 'live_operation' => 'attendance', 'version' => 1,
             'pack_version' => 1, 'fingerprint' => $data['card']['fingerprint'], 'key' => 'crew:'.$fixture['contact']->id, 'clock' => now()->toIso8601String()];
         $deadlocks = resolvedDeadlocks();
@@ -46,9 +46,9 @@ test('production save races with live preparation or review without changing an 
         $input = $fixture['production'];
         $version = 1;
         if ($operation === 'review') {
-            resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+            resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
             $input['cues'][0]['instruction'] = 'Adoptable version two';
-            resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false);
+            resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false, administrator());
             $version = 2;
         }
         $input['cues'][0]['instruction'] = 'Next plan only';

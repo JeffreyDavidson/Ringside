@@ -47,8 +47,9 @@ $bookingScenarios = [
             ])),
             null,
         );
+        $actor = administrator();
 
-        return [$event, fn () => resolve(AddMatchForEventAction::class)->handle($event, $data)];
+        return [$event, fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, $actor)];
     }],
     'update match' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
@@ -110,11 +111,12 @@ dataset('scheduling lock scenarios', [
     'record result' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
         $result = new MatchResultData(finish: MatchFinish::NoDecision, winningSide: null, eliminations: collect());
+        $actor = administrator();
 
-        return [$event, function () use ($match, $result): EventMatch {
+        return [$event, function () use ($match, $result, $actor): EventMatch {
             travel(2)->weeks();
 
-            return resolve(RecordResultAction::class)->handle($match, $result)->match;
+            return resolve(RecordResultAction::class)->handle($match, $result, $actor)->match;
         }];
     }],
 ]);

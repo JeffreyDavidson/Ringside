@@ -84,7 +84,7 @@ test('the live screen data a member receives leaves out crew production content'
     require_once __DIR__.'/../../../Fixtures/production.php';
     $event = productionFixture()['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
 
     $member = basicUser();
     Promotion::query()

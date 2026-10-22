@@ -14,6 +14,7 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsTitlesList;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Support\BookableRosterSearch;
@@ -52,6 +53,7 @@ class FormModal extends BaseFormModal
 {
     use PresentsMatchTypesList;
     use PresentsTitlesList;
+    use ResolvesActor;
 
     #[\Override]
     protected bool $resetFormAfterSubmission = true;
@@ -112,7 +114,7 @@ class FormModal extends BaseFormModal
                 $match = EventMatch::query()->findOrFail($this->form->modelId);
                 $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
             } else {
-                $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+                $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData(), $this->actor());
             }
 
             $this->form->setModel($storedMatch);

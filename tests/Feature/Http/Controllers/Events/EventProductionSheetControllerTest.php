@@ -34,7 +34,7 @@ test('long cue sheets retain full manual instructions and never print contact de
         'instruction' => str_repeat('Hold the entrance until the caller gives the signal. Fade under the announcement and keep the next entrance ready. ', 12),
     ], range(1, 6));
     resolve(SaveEventProductionAction::class)->handle($event, 1, $event->pack()
-        ->firstOrFail()->card_fingerprint, EventProductionData::fromValidated($input), false);
+        ->firstOrFail()->card_fingerprint, EventProductionData::fromValidated($input), false, administrator());
 
     // Act
     $response = get(route('events.production-sheet.show', [
@@ -127,10 +127,10 @@ test('production print defaults to the adopted live snapshot', function (): void
     $fixture = productionFixture();
     $event = $fixture['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
     $production = $fixture['production'];
     $production['cues'][0]['instruction'] = 'UNADOPTED-CUE-7Q';
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false, administrator());
 
     // Act
     $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1]));
@@ -150,10 +150,10 @@ test('production print explicitly selects the unadopted plan', function (): void
     $fixture = productionFixture();
     $event = $fixture['event'];
     $data = resolve(EventPackViewModel::class)->data($event);
-    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
     $production = $fixture['production'];
     $production['cues'][0]['instruction'] = 'UNADOPTED-CUE-7Q';
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($production), false, administrator());
 
     // Act
     $response = get(route('events.production-sheet.show', ['event' => $event, 'print' => 1, 'source' => 'plan']));

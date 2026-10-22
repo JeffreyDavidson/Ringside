@@ -143,7 +143,7 @@ test('a stale production editor keeps its draft and requires reload', function (
     $event = $fixture['event'];
     $page = livewire(Production::class, ['eventId' => $event->id]);
     $pack = $event->pack()->firstOrFail();
-    resolve(SaveEventProductionAction::class)->handle($event, 1, $pack->card_fingerprint, EventProductionData::fromValidated($fixture['production']), false);
+    resolve(SaveEventProductionAction::class)->handle($event, 1, $pack->card_fingerprint, EventProductionData::fromValidated($fixture['production']), false, administrator());
 
     // Act
     $page->set('notes', 'Unsaved private draft')->call('save');

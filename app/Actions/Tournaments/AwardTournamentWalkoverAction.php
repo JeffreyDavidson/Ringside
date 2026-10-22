@@ -14,6 +14,7 @@ use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
+use App\Models\Users\User;
 use App\Services\Tournaments\TournamentBracketService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -22,9 +23,9 @@ class AwardTournamentWalkoverAction
 {
     public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentOutcomeManager $outcomes, private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
-    public function handle(TournamentNode $node, int $version, string $reason): void
+    public function handle(TournamentNode $node, int $version, string $reason, User $actor): void
     {
-        DB::transaction(function () use ($node, $version, $reason): void {
+        DB::transaction(function () use ($node, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($node->tournament_id);
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
@@ -43,8 +44,8 @@ class AwardTournamentWalkoverAction
             $node->fill(['walkover_reason' => $reason]);
             $node->walkover_entry_id = $winner->id;
             $node->save();
-            activity('tournaments')->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'winner_entry_id' => $winner->id, 'reason' => $reason])->log('tournament.walkover');
-            $this->outcomes->synchronize($tournament);
+            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'winner_entry_id' => $winner->id, 'reason' => $reason])->log('tournament.walkover');
+            $this->outcomes->synchronize($tournament, $actor);
         }, attempts: 3);
     }
 }

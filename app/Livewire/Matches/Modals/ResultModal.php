@@ -8,6 +8,7 @@ use App\Actions\Matches\RecordResultAction;
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\DispatchesActionFeedback;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Matches\Forms\MatchResultForm;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -27,6 +28,7 @@ use LivewireUI\Modal\ModalComponent;
 class ResultModal extends ModalComponent
 {
     use DispatchesActionFeedback;
+    use ResolvesActor;
 
     #[Locked]
     public int $matchId;
@@ -53,6 +55,7 @@ class ResultModal extends ModalComponent
             $recorded = $recordResultAction->handle(
                 $match,
                 $this->form->toData($match),
+                $this->actor(),
             );
         } catch (BaseBusinessException $exception) {
             $this->addError('outcome', $exception->getMessage());

@@ -63,7 +63,7 @@ test('a stale screen is refreshed without overwriting the first operator start',
     EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     $first = livewire(LiveShow::class, ['eventId' => $event->id]);
     $stale = livewire(LiveShow::class, ['eventId' => $event->id]);
     $key = $run->content['items'][0]['key'];
@@ -85,7 +85,7 @@ test('polling does not replace an open correction draft or its original version'
     EventMatch::factory()->for($event)->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     $key = $run->content['items'][0]['key'];
     $component = livewire(LiveShow::class, ['eventId' => $event->id]);
     $component->call('beginCorrection', $key, 'skip');
@@ -258,7 +258,7 @@ test('a downgraded editor is refused every live show write and the run is unchan
     actingAs(administrator());
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
-    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'])->refresh();
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser())->refresh();
     $fixture = ['event' => $event, 'run' => $run, 'key' => $run->content['items'][0]['key'], 'person' => $run->content['roster'][0]['key']];
     $user = basicUser();
     $promotion->users()->attach($user, ['role' => MembershipRole::Manager, 'status' => MembershipStatus::Active]);

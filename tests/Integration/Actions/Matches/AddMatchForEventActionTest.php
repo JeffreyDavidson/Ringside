@@ -29,7 +29,7 @@ test('it rejects a match without competitors', function () {
         null,
     );
 
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator()))
         ->toThrow(InvalidMatchConfigurationException::class, 'A match must have competitors assigned.');
 });
 
@@ -48,7 +48,7 @@ test('it rejects a match without referees', function () {
         null,
     );
 
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator()))
         ->toThrow(InvalidMatchConfigurationException::class, 'A match must have at least one referee assigned.');
 });
 
@@ -69,7 +69,7 @@ test('it creates a complete side-based match', function () {
         'Opening contest',
     );
 
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator());
 
     expect($match->event->is($event))->toBeTrue()
         ->and($match->match_number)->toBe(1)
@@ -101,7 +101,7 @@ test('it does not reuse match numbers from soft-deleted matches', function () {
         null,
     );
 
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator());
 
     expect($match->match_number)->toBe(5);
 });
@@ -122,7 +122,7 @@ test('it numbers a match past the range of a tiny integer', function () {
     );
 
     // Act
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator());
 
     // Assert
     expect($match->refresh()->match_number)->toBe(256);
@@ -144,7 +144,7 @@ test('it rolls back the match when a side contains no eligible competitors', fun
         null,
     );
 
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator()))
         ->toThrow(EntityNotAvailableException::class)
         ->and(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
 });
@@ -167,7 +167,7 @@ test('it creates a title match when the current champion is a competitor', funct
         null,
     );
 
-    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator());
 
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
 });
@@ -191,7 +191,7 @@ test('it rolls back a title match when the current champion is absent', function
         null,
     );
 
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData, administrator()))
         ->toThrow(InvalidMatchConfigurationException::class)
         ->and(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
 });
@@ -219,9 +219,9 @@ test('it rejects booking a tag team member individually on the same card', funct
         new MatchSides(collect([1 => ['wrestlers' => [$member]], 2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]]])),
         null,
     );
-    resolve(AddMatchForEventAction::class)->handle($event, $tagTeamMatch);
+    resolve(AddMatchForEventAction::class)->handle($event, $tagTeamMatch, administrator());
 
-    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $singlesMatch))
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $singlesMatch, administrator()))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$member->name}] is already booked at this event time.")
         ->and(EventMatch::query()->count())->toBe(1);
 });
@@ -234,7 +234,7 @@ describe('promotion ownership', function (): void {
         $data = $matchData($home, $foreign);
 
         // Act
-        $book = fn (): EventMatch => resolve(AddMatchForEventAction::class)->handle($event, $data);
+        $book = fn (): EventMatch => resolve(AddMatchForEventAction::class)->handle($event, $data, administrator());
 
         // Assert
         expect($book)->toThrow(
@@ -260,7 +260,7 @@ describe('promotion ownership', function (): void {
         );
 
         // Act
-        $match = resolve(AddMatchForEventAction::class)->handle($event, $data);
+        $match = resolve(AddMatchForEventAction::class)->handle($event, $data, administrator());
 
         // Assert
         expect($match->event_id)->toBe($event->id)

@@ -25,13 +25,13 @@ it('books a resolved quarterfinal through the ordinary match flow and freezes it
     // Arrange
     $promotion = Promotion::factory()->create();
     $wrestlers = Wrestler::factory()->employed()->for($promotion)->count(8)->create();
-    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 8, false, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all())));
+    $tournament = resolve(SaveTournamentAction::class)->handle($promotion, new TournamentData('Autumn Cup', null, EntrantKind::Wrestler, 8, false, array_values($wrestlers->map(fn ($competitor): int => $competitor->id)->all())), administrator());
     $event = Event::factory()->for($promotion)->create();
     $referee = Referee::factory()->employed()->for($promotion)->create();
     $node = $tournament->nodes()->firstOrFail();
 
     // Act
-    $match = resolve(BookTournamentMatchAction::class)->handle($node, $tournament->version, new TournamentBookingData($event, new Collection([$referee])));
+    $match = resolve(BookTournamentMatchAction::class)->handle($node, $tournament->version, new TournamentBookingData($event, new Collection([$referee])), administrator());
 
     // Assert
     expect($match->wrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing([$wrestlers->pluck('id')->all()[0], $wrestlers->pluck('id')->all()[7]])
@@ -79,3 +79,18 @@ it('keeps calendar restrictions binding on a newly qualified same-card bout', fu
         ->and($final->links()->count())->toBe(0)
         ->and($tournament->refresh()->version)->toBe($version);
 })->with(EntrantKind::cases());
+
+test('booking a bout names the actor passed in as the causer of the activation and the booking', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $actor = administrator();
+    $world = tournamentFixture();
+    $node = $world['tournament']->nodes()->firstOrFail();
+    $since = lastActivityId();
+
+    // Act
+    resolve(BookTournamentMatchAction::class)->handle($node, $world['tournament']->version, new TournamentBookingData($world['event'], $world['referees']), $actor);
+
+    // Assert
+    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.activated|'.causerTag($actor), 'tournament.booked|'.causerTag($actor)]);
+});

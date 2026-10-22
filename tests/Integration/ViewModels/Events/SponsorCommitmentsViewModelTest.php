@@ -123,7 +123,7 @@ test('linked announcement review preserves its live context and flags a removed 
     $pack = app(EventPackViewModel::class)->data($world['event']);
     $query = app(SponsorInstructionService::class);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, $match->id, $query->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, $match->id)['hash']), signedInUser());
-    app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $pack['card']['fingerprint']);
+    app(PrepareLiveShowAction::class)->handle($world['event'], 0, 1, $pack['card']['fingerprint'], administrator());
     $screen = app(SponsorCommitmentsViewModel::class);
     $row = $screen->data($world['event'], 'pending')['rows']->getCollection()->firstOrFail();
 

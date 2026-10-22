@@ -68,6 +68,8 @@ $tagTeamData = fn (): TagTeamData => new TagTeamData(
     wrestlerB: Wrestler::query()->findOrFail($spec['wrestler_ids'][1] ?? 0),
 );
 
+$defaultActor = workerActor();
+
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
 try {
@@ -83,7 +85,7 @@ try {
                 MatchFinish::Pinfall,
                 MatchSide::query()->where('match_id', $spec['id'])->where('position', $spec['winning_position'] ?? 1)->firstOrFail(),
                 collect(),
-            ),
+            ), $defaultActor,
         ),
         default => throw new InvalidArgumentException("Unknown cascade action {$spec['action']}."),
     };

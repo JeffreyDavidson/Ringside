@@ -126,6 +126,7 @@ if (! is_string($payload)) {
 /** @var array{sponsor_event_id: int, sponsor_id: int, promise_id: int, user_id: int, version: int, submission_key: string, sponsor_operation: string, fingerprint: string, pack_version: int, preview_hash: string, target_key: string, mode: string, clock: string}|array{talent_event_id: int, user_id: int, person_id: int, version: int, fingerprint: string, talent_status: string, clock: string}|array{production_save_event_id: int, user_id: int, version: int, fingerprint: string, production_json: string}|array{crew_archive_id: int, user_id: int, version: int}|array{live_event_id: int, user_id: int, live_operation: string, version: int, pack_version: int, fingerprint: string, key: string, clock: string}|array{create_wrestler_name: string, signature_move: string, promotion_id?: int}|array{update_wrestler_id: int, new_name: string}|array{create_event_name: string, promotion_id?: int}|array{create_venue_name: string}|array{create_tag_team_name: string, signature_move: string, wrestler_ids: string, promotion_id?: int}|array{update_tag_team_id: int, new_name: string}|array{create_title_name: string, promotion_id?: int}|array{split_stable_id: int, new_name: string, wrestler_ids: string}|array{create_stable_name: string}|array{restore_stable_id: int}|array{update_stable_id: int, new_name: string}|array{restore_event_id: int, start_delay_ms?: int}|array{event_id: int, reschedule_date: string}|array{create_event_at_venue_id: int, date: string}|array{promotion_id: int, demote_user_id: int}|array{create_owned_stable_name: string, owned_promotion_id: int}|array{event_id: int, first_wrestler_id: int, second_wrestler_id: int, referee_id: int}|array{unavailability_person_id: int, unavailability_day: string, user_id: int}|array{team_id: int, opponent_team_id: int, event_id: int, referee_id: int}|array{public_event_id: int, public_actor_id: int, public_version: int, public_fingerprint: string, public_operation: string, public_match_id: int, public_clock: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 
+$defaultActor = workerActor();
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
 // The parent sends the same absolute start time to every worker; spin until then so the actions overlap.
@@ -145,17 +146,19 @@ if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
 
 try {
     if (isset($spec['production_save_event_id'])) {
-        auth()->login(User::query()->findOrFail($spec['user_id']));
+        $actor = User::query()->findOrFail($spec['user_id']);
+        auth()->login($actor);
         $production = json_decode($spec['production_json'], true, flags: JSON_THROW_ON_ERROR);
         if (! is_array($production)) {
             throw new InvalidArgumentException('Production worker input must be a JSON object.');
         }
         resolve(SaveEventProductionAction::class)->handle(Event::query()->findOrFail($spec['production_save_event_id']), $spec['version'], $spec['fingerprint'], EventProductionData::fromValidated([
             'notes' => $production['notes'] ?? null, 'assignments' => $production['assignments'] ?? [], 'cues' => $production['cues'] ?? [],
-        ]), false);
+        ]), false, $actor);
     } elseif (isset($spec['crew_archive_id'])) {
-        auth()->login(User::query()->findOrFail($spec['user_id']));
-        resolve(ArchiveCrewContactAction::class)->handle(CrewContact::query()->findOrFail($spec['crew_archive_id']), $spec['version']);
+        $actor = User::query()->findOrFail($spec['user_id']);
+        auth()->login($actor);
+        resolve(ArchiveCrewContactAction::class)->handle(CrewContact::query()->findOrFail($spec['crew_archive_id']), $spec['version'], $actor);
     } elseif (isset($spec['public_event_id'])) {
         $actor = User::query()->findOrFail($spec['public_actor_id']);
         auth()->login($actor);
@@ -163,7 +166,7 @@ try {
         $event = Event::query()->findOrFail($spec['public_event_id']);
         if ($spec['public_operation'] === 'result') {
             $match = EventMatch::query()->findOrFail($spec['public_match_id']);
-            resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::Submission, $match->sides()->firstOrFail(), collect()));
+            resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::Submission, $match->sides()->firstOrFail(), collect()), $actor);
         } elseif ($spec['public_operation'] === 'card-edit') {
             resolve(UpdateAction::class)->handle($event, new EventData($event->name.' revised', $event->date, null, $event->preview));
         } elseif ($spec['public_operation'] === 'unpublish') {
@@ -177,7 +180,7 @@ try {
         resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
             MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),
             new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])), null,
-        ));
+        ), $defaultActor);
     } elseif (isset($spec['talent_event_id'])) {
         $actor = User::query()->findOrFail($spec['user_id']);
         auth()->login($actor);
@@ -198,7 +201,7 @@ try {
             $source = resolve(EventPackViewModel::class)->data($event);
             resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], EventPackData::fromValidated([...$source['content'], 'notes' => 'Reviewed ordinary pack note']), false);
         } elseif ($spec['sponsor_operation'] === 'prepare') {
-            resolve(PrepareLiveShowAction::class)->handle($event, 0, $spec['pack_version'], $spec['fingerprint']);
+            resolve(PrepareLiveShowAction::class)->handle($event, 0, $spec['pack_version'], $spec['fingerprint'], $actor);
         } elseif ($spec['sponsor_operation'] === 'review') {
             resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]), $actor);
         } else {
@@ -217,7 +220,7 @@ try {
         Carbon::setTestNow($spec['clock']);
         $event = Event::query()->findOrFail($spec['live_event_id']);
         match ($spec['live_operation']) {
-            'prepare' => resolve(PrepareLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint']),
+            'prepare' => resolve(PrepareLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], $actor),
             'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]), $actor),
             'attendance' => resolve(MarkLiveAttendanceAction::class)->handle($event, $spec['version'], $spec['key'], LiveAttendanceMark::Arrived, true, $actor),
             default => resolve(TransitionLiveItemAction::class)->handle($event, $spec['version'], $spec['key'], LiveItemOperation::from($spec['live_operation']), $actor),
@@ -312,7 +315,7 @@ try {
                     2 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['second_wrestler_id'])]],
                 ])),
                 null,
-            ),
+            ), $defaultActor,
         );
     }
 } catch (BaseBusinessException|ValidationException $exception) {
