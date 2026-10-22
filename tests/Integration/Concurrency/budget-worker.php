@@ -28,7 +28,8 @@ if (! is_string($payload)) {
 }
 /** @var array{event_id: int,user_id: int,operation: string,line_id?: int,version: int,key: string,input: array{direction: string, category: string, description: string, counterparty: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, kind: string, amount: string, effective_date: string, method: string, reference?: ?string, source_id?: ?int, acknowledge?: bool},clock: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-auth()->login(User::query()->findOrFail($spec['user_id']));
+$actor = User::query()->findOrFail($spec['user_id']);
+auth()->login($actor);
 Carbon::setTestNow($spec['clock']);
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
@@ -39,9 +40,9 @@ while (microtime(true) < $start) {
 try {
     $event = Event::query()->findOrFail($spec['event_id']);
     match ($spec['operation']) {
-        'line' => resolve(SaveBudgetLineAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? null, BudgetLineData::fromValidated($spec['input'])),
-        'movement' => resolve(RecordBudgetMovementAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? 0, BudgetMovementData::fromValidated($spec['input'])),
-        'archive' => resolve(ArchiveBudgetLineAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? 0, 'No longer needed'),
+        'line' => resolve(SaveBudgetLineAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? null, BudgetLineData::fromValidated($spec['input']), $actor),
+        'movement' => resolve(RecordBudgetMovementAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? 0, BudgetMovementData::fromValidated($spec['input']), $actor),
+        'archive' => resolve(ArchiveBudgetLineAction::class)->handle($event, $spec['version'], $spec['key'], $spec['line_id'] ?? 0, 'No longer needed', $actor),
         'delete' => resolve(DeleteAction::class)->handle($event),
         default => throw new InvalidArgumentException('Unknown budget worker operation'),
     };

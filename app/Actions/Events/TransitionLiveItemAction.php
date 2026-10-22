@@ -10,6 +10,7 @@ use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveItemTransitions\LiveItemTransitionResolver;
 use App\Models\Events\Event;
+use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -18,9 +19,9 @@ class TransitionLiveItemAction
     public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
         private readonly LiveItemTransitionResolver $transitions) {}
 
-    public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
+    public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, User $actor, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
     {
-        DB::transaction(function () use ($event, $version, $key, $operation, $reason, $start, $finish): void {
+        DB::transaction(function () use ($event, $version, $key, $operation, $actor, $reason, $start, $finish): void {
             $run = $this->lock->handle($event, $version);
             $content = $run->content;
             $index = array_search($key, array_column($content['items'], 'key'), true);
@@ -36,7 +37,7 @@ class TransitionLiveItemAction
                 $run->status = LiveShowStatus::Running;
             }
             $updated['reason'] = $reason;
-            $updated['updated_by'] = (int) auth()->id();
+            $updated['updated_by'] = $actor->id;
             $content['items'][$index] = $updated;
             $run->content = $content;
             $this->persist->handle($run, new LiveShowChangeData($operation->value, $key, $before, $content['items'][$index], $reason));

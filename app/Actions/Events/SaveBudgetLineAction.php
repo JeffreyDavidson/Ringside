@@ -10,13 +10,14 @@ use App\Exceptions\Events\BudgetException;
 use App\Models\Events\Event;
 use App\Models\Events\EventBudget;
 use App\Models\Events\EventBudgetLine;
+use App\Models\Users\User;
 use App\Services\Events\BudgetSettlementService;
 
 class SaveBudgetLineAction
 {
     public function __construct(private readonly MutateBudgetAction $mutate, private readonly BudgetSettlementService $settlement) {}
 
-    public function handle(Event $event, int $version, string $key, ?int $lineId, BudgetLineData $data): EventBudget
+    public function handle(Event $event, int $version, string $key, ?int $lineId, BudgetLineData $data, User $actor): EventBudget
     {
         if (! $data->category->accepts($data->direction)) {
             throw BudgetException::categoryDirection();
@@ -55,6 +56,6 @@ class SaveBudgetLineAction
             $line->save();
 
             return ['target' => $line->id, 'before' => $before, 'after' => $line->attributesToArray()];
-        }, $reason);
+        }, $actor, $reason);
     }
 }

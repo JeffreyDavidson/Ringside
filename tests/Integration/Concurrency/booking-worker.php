@@ -179,26 +179,28 @@ try {
             new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])), null,
         ));
     } elseif (isset($spec['talent_event_id'])) {
-        auth()->login(User::query()->findOrFail($spec['user_id']));
+        $actor = User::query()->findOrFail($spec['user_id']);
+        auth()->login($actor);
         Carbon::setTestNow($spec['clock']);
         resolve(SaveTalentBookingAction::class)->handle(Event::query()->findOrFail($spec['talent_event_id']), 'wrestler', $spec['person_id'],
-            $spec['version'], $spec['fingerprint'], new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'));
+            $spec['version'], $spec['fingerprint'], new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'), $actor);
     } elseif (isset($spec['sponsor_event_id'])) {
-        auth()->login(User::query()->findOrFail($spec['user_id']));
+        $actor = User::query()->findOrFail($spec['user_id']);
+        auth()->login($actor);
         Carbon::setTestNow($spec['clock']);
         $event = Event::query()->withTrashed()->findOrFail($spec['sponsor_event_id']);
         if ($spec['sponsor_operation'] === 'archive') {
             $sponsor = Sponsor::query()->findOrFail($spec['sponsor_id']);
             resolve(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($sponsor->promotion_id), $sponsor->id, $spec['version'], $sponsor->submission_key, new SponsorData($sponsor->name, archived: true));
         } elseif ($spec['sponsor_operation'] === 'publish') {
-            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($spec['mode']), PackKey::fromString($spec['target_key']), null, $spec['preview_hash']));
+            resolve(SaveSponsorInstructionAction::class)->handle($event, $spec['promise_id'], $spec['version'], $spec['pack_version'], $spec['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::from($spec['mode']), PackKey::fromString($spec['target_key']), null, $spec['preview_hash']), $actor);
         } elseif ($spec['sponsor_operation'] === 'pack') {
             $source = resolve(EventPackViewModel::class)->data($event);
             resolve(SaveEventPackAction::class)->handle($event, $spec['pack_version'], $spec['fingerprint'], EventPackData::fromValidated([...$source['content'], 'notes' => 'Reviewed ordinary pack note']), false);
         } elseif ($spec['sponsor_operation'] === 'prepare') {
             resolve(PrepareLiveShowAction::class)->handle($event, 0, $spec['pack_version'], $spec['fingerprint']);
         } elseif ($spec['sponsor_operation'] === 'review') {
-            resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]));
+            resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]), $actor);
         } else {
             $status = match ($spec['sponsor_operation']) {
                 'complete' => SponsorCommitmentStatus::Completed,
@@ -207,17 +209,18 @@ try {
             };
             resolve(SaveSponsorCommitmentAction::class)->handle($event, $spec['sponsor_operation'] === 'create' ? null : $spec['promise_id'], $spec['version'], $spec['submission_key'],
                 new SponsorCommitmentData($spec['sponsor_id'], SponsorCommitmentType::Banner, 'Concurrent banner', status: $status, evidence: $status === SponsorCommitmentStatus::Completed ? 'Checked at doors' : null),
-                'Concurrent correction');
+                $actor, 'Concurrent correction');
         }
     } elseif (isset($spec['live_event_id'])) {
-        auth()->login(User::query()->findOrFail($spec['user_id']));
+        $actor = User::query()->findOrFail($spec['user_id']);
+        auth()->login($actor);
         Carbon::setTestNow($spec['clock']);
         $event = Event::query()->findOrFail($spec['live_event_id']);
         match ($spec['live_operation']) {
             'prepare' => resolve(PrepareLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint']),
-            'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([])),
-            'attendance' => resolve(MarkLiveAttendanceAction::class)->handle($event, $spec['version'], $spec['key'], LiveAttendanceMark::Arrived, true),
-            default => resolve(TransitionLiveItemAction::class)->handle($event, $spec['version'], $spec['key'], LiveItemOperation::from($spec['live_operation'])),
+            'review' => resolve(ReviewLiveShowAction::class)->handle($event, $spec['version'], $spec['pack_version'], $spec['fingerprint'], LiveShowReviewData::fromValidated([]), $actor),
+            'attendance' => resolve(MarkLiveAttendanceAction::class)->handle($event, $spec['version'], $spec['key'], LiveAttendanceMark::Arrived, true, $actor),
+            default => resolve(TransitionLiveItemAction::class)->handle($event, $spec['version'], $spec['key'], LiveItemOperation::from($spec['live_operation']), $actor),
         };
     } elseif (isset($spec['split_stable_id'])) {
         resolve(SplitStableAction::class)->handle(

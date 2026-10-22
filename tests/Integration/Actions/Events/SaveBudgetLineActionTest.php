@@ -26,7 +26,7 @@ test('saving an expense creates a USD budget with retained history', function ()
     $payload = ['direction' => 'expense', 'category' => 'talent', 'description' => 'Main event fee', 'counterparty' => 'Casey', 'planned' => '500.00', 'confirmed' => '500.00', 'due_date' => '', 'notes' => '', 'reason' => '', 'acknowledge' => false];
 
     // Act
-    $budget = resolve(SaveBudgetLineAction::class)->handle($event, 0, (string) Str::uuid(), null, BudgetLineData::fromValidated($payload));
+    $budget = resolve(SaveBudgetLineAction::class)->handle($event, 0, (string) Str::uuid(), null, BudgetLineData::fromValidated($payload), signedInUser());
 
     // Assert
     expect($budget->currency)->toBe('USD')->and($budget->version)->toBe(1)
@@ -43,7 +43,7 @@ test('an expense deposit leaves the confirmed balance outstanding', function ():
     $line = EventBudgetLine::factory()->for($budget, 'budget')->create();
 
     // Act
-    $saved = resolve(RecordBudgetMovementAction::class)->handle($event, 0, (string) Str::uuid(), $line->id, budgetMovementData());
+    $saved = resolve(RecordBudgetMovementAction::class)->handle($event, 0, (string) Str::uuid(), $line->id, budgetMovementData(), signedInUser());
 
     // Assert
     expect($saved->version)->toBe(1)
@@ -79,13 +79,13 @@ test('a changed confirmed obligation requires a reason and acknowledges an exces
     EventBudgetMovement::factory()->for($f['line'], 'line')->create();
     $action = resolve(SaveBudgetLineAction::class);
     // Act / Assert
-    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['confirmed' => '0'])))->toThrow(BudgetException::class);
-    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['confirmed' => '0', 'reason' => 'Cancelled'])))->toThrow(BudgetException::class);
+    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['confirmed' => '0']), signedInUser()))->toThrow(BudgetException::class);
+    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetLineData(['confirmed' => '0', 'reason' => 'Cancelled']), signedInUser()))->toThrow(BudgetException::class);
     // Act
     $key = budgetKey();
     $input = budgetLineData(['confirmed' => '0', 'reason' => 'Cancelled', 'acknowledge' => true]);
-    $action->handle($f['event'], 0, $key, $f['line']->id, $input);
-    $action->handle($f['event'], 0, $key, $f['line']->id, $input);
+    $action->handle($f['event'], 0, $key, $f['line']->id, $input, signedInUser());
+    $action->handle($f['event'], 0, $key, $f['line']->id, $input, signedInUser());
     // Assert
     expect($f['line']->refresh()->confirmed_cents)->toBe(0)->and($f['budget']->revisions()->count())->toBe(1);
 });
@@ -96,9 +96,9 @@ test('unchanged line saves do not append history', function (): void {
     $action = resolve(SaveBudgetLineAction::class);
     $input = budgetLineData();
     // Act
-    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, $input);
+    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, $input, signedInUser());
     $version = $f['budget']->refresh()->version;
-    $action->handle($f['event'], $version, budgetKey(), $f['line']->id, $input);
+    $action->handle($f['event'], $version, budgetKey(), $f['line']->id, $input, signedInUser());
     // Assert
     expect($f['budget']->refresh()->version)->toBe($version);
 });
@@ -120,7 +120,7 @@ test('line direction category and archived guards protect saved money', function
         $f['line']->save();
     }
     // Act / Assert
-    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetLineData::fromValidated($input)))->toThrow(BudgetException::class);
+    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetLineData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class);
     expect($f['budget']->revisions()->count())->toBe(0);
 })->with(['direction', 'category', 'archived']);
 
@@ -129,7 +129,7 @@ test('a soft-deleted event refuses financial writes and restoration preserves it
     $f = budgetFixture();
     $f['event']->delete();
     // Act / Assert
-    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), null, budgetLineData()))->toThrow(ModelNotFoundException::class);
+    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), null, budgetLineData(), signedInUser()))->toThrow(ModelNotFoundException::class);
     $f['event']->restore();
     expect(EventBudget::query()->where('event_id', $f['event']->id)->count())->toBe(1)->and($f['line']->refresh()->confirmed_cents)->toBe(50000);
 });
@@ -142,10 +142,10 @@ test('budget creation retries do not change currency timezone or line identity',
     $key = budgetKey();
     $action = resolve(SaveBudgetLineAction::class);
     // Act
-    $budget = $action->handle($event, 0, $key, null, budgetLineData());
+    $budget = $action->handle($event, 0, $key, null, budgetLineData(), signedInUser());
     $promotion->timezone = 'America/Los_Angeles';
     $promotion->save();
-    $action->handle($event, 0, $key, null, budgetLineData());
+    $action->handle($event, 0, $key, null, budgetLineData(), signedInUser());
     // Assert
     expect($budget->refresh()->timezone)->toBe('America/New_York')->and($budget->currency)->toBe('USD')->and($budget->lines()->count())->toBe(1)->and($budget->version)->toBe(1);
 });
@@ -163,7 +163,7 @@ test('the line limit cannot leave an empty budget or partial history', function 
     $f = budgetFixture();
     EventBudgetLine::factory()->count(499)->for($f['budget'], 'budget')->create();
     // Act / Assert
-    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), null, budgetLineData()))->toThrow(BudgetException::class);
+    expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), null, budgetLineData(), signedInUser()))->toThrow(BudgetException::class);
     expect($f['budget']->revisions()->count())->toBe(0)->and($f['budget']->refresh()->version)->toBe(0);
 });
 

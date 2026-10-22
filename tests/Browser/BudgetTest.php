@@ -44,7 +44,7 @@ test('a lost payment response requires refresh and replay never duplicates recor
 test('operators select a refund source and reconcile changed terms through the browser', function (): void {
     // Arrange
     $f = budgetFixture();
-    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData());
+    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), signedInUser());
     $source = $f['line']->movements()->firstOrFail();
     $page = visit(route('events.budget.show', $f['event']));
     // Act / Assert

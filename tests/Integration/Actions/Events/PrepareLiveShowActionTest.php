@@ -58,13 +58,13 @@ test('arrival and briefing persist and a stale operator cannot replace them', fu
     $action = resolve(MarkLiveAttendanceAction::class);
 
     // Act
-    $action->handle($event, 1, $key, LiveAttendanceMark::Arrived, true);
-    $action->handle($event, 2, $key, LiveAttendanceMark::Briefed, true);
+    $action->handle($event, 1, $key, LiveAttendanceMark::Arrived, true, signedInUser());
+    $action->handle($event, 2, $key, LiveAttendanceMark::Briefed, true, signedInUser());
 
     // Assert
     expect($run->refresh()->content['roster'][0]['arrived'])->not->toBeNull()
         ->and($run->refresh()->content['roster'][0]['briefed'])->not->toBeNull();
-    expect(fn () => $action->handle($event, 1, $key, LiveAttendanceMark::Arrived, true))
+    expect(fn () => $action->handle($event, 1, $key, LiveAttendanceMark::Arrived, true, signedInUser()))
         ->toThrow(RecordChangedException::class)
         ->and($run->refresh()->version)->toBe(3);
 });
@@ -83,15 +83,15 @@ test('the show runs one item at a time and completion never records a match resu
     $second = $run->content['items'][1]['key'];
 
     // Act
-    $action->handle($event, 1, $first, LiveItemOperation::Start);
+    $action->handle($event, 1, $first, LiveItemOperation::Start, signedInUser());
 
     // Assert
-    expect(fn () => $action->handle($event, 2, $second, LiveItemOperation::Start))
+    expect(fn () => $action->handle($event, 2, $second, LiveItemOperation::Start, signedInUser()))
         ->toThrow(LiveShowException::class);
 
     // Act
-    $action->handle($event, 2, $first, LiveItemOperation::Finish);
-    $action->handle($event, 3, $second, LiveItemOperation::Skip, 'Cancelled intermission');
+    $action->handle($event, 2, $first, LiveItemOperation::Finish, signedInUser());
+    $action->handle($event, 3, $second, LiveItemOperation::Skip, signedInUser(), 'Cancelled intermission');
     resolve(CompleteLiveShowAction::class)->handle($event, 4);
 
     // Assert
@@ -109,14 +109,14 @@ test('review adopts pending plan changes while retaining actual times and attend
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
-    resolve(MarkLiveAttendanceAction::class)->handle($event, 1, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true);
-    resolve(TransitionLiveItemAction::class)->handle($event, 2, $run->content['items'][0]['key'], LiveItemOperation::Start);
+    resolve(MarkLiveAttendanceAction::class)->handle($event, 1, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true, signedInUser());
+    resolve(TransitionLiveItemAction::class)->handle($event, 2, $run->content['items'][0]['key'], LiveItemOperation::Start, signedInUser());
     $before = $run->refresh()->content;
     $segment = ['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Closing promo', 'after_match_id' => null, 'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => 'Thank the crowd'];
     resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'segments' => [$segment]]), false);
 
     // Act
-    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]));
+    resolve(ReviewLiveShowAction::class)->handle($event, 3, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]), signedInUser());
 
     // Assert
     expect($run->refresh()->content['items'][0])->toBe($before['items'][0])

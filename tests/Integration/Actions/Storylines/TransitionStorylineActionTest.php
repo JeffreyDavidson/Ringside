@@ -17,9 +17,9 @@ test('archive freezes a paused story and restores its prior state explicitly', f
     actingAs(administrator());
     $story = Storyline::factory()->create();
     // Act
-    resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Paused, 'Wait for the next tour.');
-    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Archived, 'Keep for later.');
-    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Paused, 'Resume planning.');
+    resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Paused, 'Wait for the next tour.', signedInUser());
+    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Archived, 'Keep for later.', signedInUser());
+    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Paused, 'Resume planning.', signedInUser());
     // Assert
     expect($story->refresh()->status)->toBe(StorylineStatus::Paused)
         ->and($story->revisions()->count())->toBe(3);
@@ -30,11 +30,11 @@ test('completion requires every pending or postponed plan to be resolved', funct
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
-    expect(fn () => resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Completed, 'Done.'))->toThrow(StorylineConflictException::class);
-    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Cancelled, 'Unused.');
-    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Completed, 'Finished.');
-    expect(fn () => resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Paused, 'Invalid.'))->toThrow(StorylineConflictException::class);
-    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Active, 'New chapter.');
+    expect(fn () => resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Completed, 'Done.', signedInUser()))->toThrow(StorylineConflictException::class);
+    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Cancelled, 'Unused.', signedInUser());
+    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Completed, 'Finished.', signedInUser());
+    expect(fn () => resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Paused, 'Invalid.', signedInUser()))->toThrow(StorylineConflictException::class);
+    resolve(TransitionStorylineAction::class)->handle($story, $story->refresh()->version, StorylineStatus::Active, 'New chapter.', signedInUser());
     expect($story->refresh()->status)->toBe(StorylineStatus::Active);
 });
 
@@ -45,7 +45,7 @@ test('a story makes every allowed status move and keeps the status it was archiv
         ->create(['status' => $from, 'previous_status' => $previous]);
 
     // Act
-    resolve(TransitionStorylineAction::class)->handle($story, 1, $to, 'Reviewed.');
+    resolve(TransitionStorylineAction::class)->handle($story, 1, $to, 'Reviewed.', signedInUser());
 
     // Assert
     $story->refresh();
@@ -74,7 +74,7 @@ test('a story refuses every other status move and stays as it was', function (St
         ->create(['status' => $from, 'previous_status' => $previous]);
 
     // Act
-    $transition = fn () => resolve(TransitionStorylineAction::class)->handle($story, 1, $to, 'Reviewed.');
+    $transition = fn () => resolve(TransitionStorylineAction::class)->handle($story, 1, $to, 'Reviewed.', signedInUser());
 
     // Assert
     expect($transition)->toThrow(StorylineConflictException::class, __('storylines.state_error'));
@@ -106,7 +106,7 @@ test('a story with an open step cannot be completed', function (StorylineStatus 
         ->create(['status' => $open]);
 
     // Act
-    $transition = fn () => resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Completed, 'Done.');
+    $transition = fn () => resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Completed, 'Done.', signedInUser());
 
     // Assert
     expect($transition)->toThrow(StorylineConflictException::class, __('storylines.state_error'))
@@ -126,7 +126,7 @@ test('a story with only resolved steps can be completed', function (StepStatus $
         ->create(['status' => $resolved]);
 
     // Act
-    resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Completed, 'Done.');
+    resolve(TransitionStorylineAction::class)->handle($story, 1, StorylineStatus::Completed, 'Done.', signedInUser());
 
     // Assert
     expect($story->refresh()->status)->toBe(StorylineStatus::Completed);

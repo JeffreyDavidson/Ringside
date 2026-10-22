@@ -19,14 +19,14 @@ test('repeated starts and unknown keys preserve the committed actual start and a
     // Arrange
     $fixture = liveShowFixture();
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     $before = $fixture['run']->refresh()->content;
     $audits = Activity::query()->where('log_name', 'live-show')->count();
 
     // Act / Assert
-    expect(fn () => $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start))->toThrow(RecordChangedException::class);
-    expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Start))->toThrow(LiveShowException::class)
-        ->and(fn () => $action->handle($fixture['event'], 2, 'segment:foreign', LiveItemOperation::Finish))->toThrow(LiveShowException::class)
+    expect(fn () => $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser()))->toThrow(RecordChangedException::class);
+    expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Start, signedInUser()))->toThrow(LiveShowException::class)
+        ->and(fn () => $action->handle($fixture['event'], 2, 'segment:foreign', LiveItemOperation::Finish, signedInUser()))->toThrow(LiveShowException::class)
         ->and($fixture['run']->refresh()->content)->toBe($before)
         ->and(Activity::query()->where('log_name', 'live-show')->count())->toBe($audits);
 });
@@ -36,7 +36,7 @@ test('pending and completed item transitions reject invalid state and missing re
     $fixture = liveShowFixture();
 
     // Act / Assert
-    expect(fn () => resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], $operation, $reason))->toThrow(LiveShowException::class);
+    expect(fn () => resolve(TransitionLiveItemAction::class)->handle($fixture['event'], 1, $fixture['key'], $operation, signedInUser(), $reason))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->version)->toBe(1);
 })->with([
     'finish pending' => [LiveItemOperation::Finish, null],
@@ -50,12 +50,12 @@ test('a started show may continue across midnight', function (): void {
     // Arrange
     $fixture = liveShowFixture(segment: true);
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     travel(1)->days();
 
     // Act
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
-    $action->handle($fixture['event'], 3, $fixture['run']->content['items'][1]['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
+    $action->handle($fixture['event'], 3, $fixture['run']->content['items'][1]['key'], LiveItemOperation::Start, signedInUser());
 
     // Assert
     expect($fixture['run']->refresh()->content['items'][1]['state'])->toBe('running');
@@ -65,15 +65,15 @@ test('correcting actual times records a reason and reopening retains the origina
     // Arrange
     $fixture = liveShowFixture();
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     travel(10)->minutes();
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     $start = now()->subMinutes(8);
     $finish = now()->subMinute();
 
     // Act
-    $action->handle($fixture['event'], 3, $fixture['key'], LiveItemOperation::Correct, 'Correct the missed bell', $start, $finish);
-    $action->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Reopen, 'Finished too soon');
+    $action->handle($fixture['event'], 3, $fixture['key'], LiveItemOperation::Correct, signedInUser(), 'Correct the missed bell', $start, $finish);
+    $action->handle($fixture['event'], 4, $fixture['key'], LiveItemOperation::Reopen, signedInUser(), 'Finished too soon');
 
     // Assert
     $item = $fixture['run']->refresh()->content['items'][0];
@@ -84,9 +84,9 @@ test('time corrections reject future missing and reversed actual times', functio
     // Arrange
     $fixture = liveShowFixture();
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     travel(10)->minutes();
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
     $start = match ($case) {
         'missing start' => null, 'future' => now()->addMinute(), default => now()->subMinute()
     };
@@ -95,7 +95,7 @@ test('time corrections reject future missing and reversed actual times', functio
     };
 
     // Act / Assert
-    expect(fn () => $action->handle($fixture['event'], 3, $fixture['key'], LiveItemOperation::Correct, 'Correction', $start, $finish))->toThrow(LiveShowException::class);
+    expect(fn () => $action->handle($fixture['event'], 3, $fixture['key'], LiveItemOperation::Correct, signedInUser(), 'Correction', $start, $finish))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->version)->toBe(3);
 })->with(['missing start', 'missing finish', 'future', 'reverse']);
 
@@ -103,15 +103,15 @@ test('a changed pack blocks the next start but does not block finishing the curr
     // Arrange
     $fixture = liveShowFixture(segment: true);
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     $pack = $fixture['event']->pack()->firstOrFail();
     resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Changed']), false);
 
     // Act
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
 
     // Assert
-    expect(fn () => $action->handle($fixture['event'], 3, $fixture['run']->content['items'][1]['key'], LiveItemOperation::Start))->toThrow(LiveShowException::class);
+    expect(fn () => $action->handle($fixture['event'], 3, $fixture['run']->content['items'][1]['key'], LiveItemOperation::Start, signedInUser()))->toThrow(LiveShowException::class);
     expect($fixture['run']->refresh()->content['items'][0]['state'])->toBe('finished');
 });
 
@@ -119,11 +119,11 @@ test('a running item cannot be skipped instead of finished', function (): void {
     // Arrange
     $fixture = liveShowFixture();
     $action = resolve(TransitionLiveItemAction::class);
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     $before = $fixture['run']->refresh()->content;
 
     // Act / Assert
-    expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Skip, 'Wrong item'))->toThrow(LiveShowException::class, __('live-show.transition_invalid'));
+    expect(fn () => $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Skip, signedInUser(), 'Wrong item'))->toThrow(LiveShowException::class, __('live-show.transition_invalid'));
     expect($fixture['run']->refresh()->version)->toBe(2)->and($fixture['run']->content)->toBe($before);
 });
 
@@ -133,19 +133,19 @@ test('corrected times cannot overlap an earlier or later recorded item', functio
     $action = resolve(TransitionLiveItemAction::class);
     $firstStart = now();
     $second = $fixture['run']->content['items'][1]['key'];
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     travel(10)->minutes();
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
-    $action->handle($fixture['event'], 3, $second, LiveItemOperation::Start);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
+    $action->handle($fixture['event'], 3, $second, LiveItemOperation::Start, signedInUser());
     travel(10)->minutes();
-    $action->handle($fixture['event'], 4, $second, LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 4, $second, LiveItemOperation::Finish, signedInUser());
     $before = $fixture['run']->refresh()->content;
     $key = $earlier ? $second : $fixture['key'];
     $start = $earlier ? now()->subMinutes(11) : $firstStart;
     $finish = $earlier ? now() : now()->subMinutes(9);
 
     // Act / Assert
-    expect(fn () => $action->handle($fixture['event'], 5, $key, LiveItemOperation::Correct, 'Correct bell time', $start, $finish))->toThrow(LiveShowException::class, __('live-show.invalid_times'));
+    expect(fn () => $action->handle($fixture['event'], 5, $key, LiveItemOperation::Correct, signedInUser(), 'Correct bell time', $start, $finish))->toThrow(LiveShowException::class, __('live-show.invalid_times'));
     expect($fixture['run']->refresh()->version)->toBe(5)->and($fixture['run']->content)->toBe($before);
 })->with(['overlaps previous finish' => true, 'overlaps next start' => false]);
 
@@ -156,9 +156,9 @@ test('starting the first item moves the show from prepared to running and finish
     $preparedStatus = $fixture['run']->status;
 
     // Act
-    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start);
+    $action->handle($fixture['event'], 1, $fixture['key'], LiveItemOperation::Start, signedInUser());
     $runningStatus = $fixture['run']->refresh()->status;
-    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish);
+    $action->handle($fixture['event'], 2, $fixture['key'], LiveItemOperation::Finish, signedInUser());
 
     // Assert
     expect($preparedStatus)->toBe(LiveShowStatus::Prepared)

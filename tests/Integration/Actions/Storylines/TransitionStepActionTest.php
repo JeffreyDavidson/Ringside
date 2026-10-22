@@ -18,11 +18,11 @@ test('postponement and resumption preserve the plan and their reasons', function
     // Arrange
     actingAs(administrator());
     $story = Storyline::factory()->create();
-    $step = resolve(SaveStepAction::class)->handle($story, 1, new StepData('Betrayal', 'Attack the partner.', 1, new SourceData, (string) Str::uuid()));
+    $step = resolve(SaveStepAction::class)->handle($story, 1, new StepData('Betrayal', 'Attack the partner.', 1, new SourceData, (string) Str::uuid()), signedInUser());
 
     // Act
-    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Postponed, 'Talent is unavailable.');
-    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Planned, 'Ready for the next show.');
+    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Postponed, 'Talent is unavailable.', signedInUser());
+    resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, StepStatus::Planned, 'Ready for the next show.', signedInUser());
 
     // Assert
     expect($step->refresh()->status)->toBe(StepStatus::Planned)
@@ -35,7 +35,7 @@ test('confirmed outcomes cannot be forged through a status transition', function
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
-    expect(fn () => resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, $status, 'Reviewed.'))->toThrow(StorylineConflictException::class);
+    expect(fn () => resolve(TransitionStepAction::class)->handle($story, $story->refresh()->version, $step->id, $status, 'Reviewed.', signedInUser()))->toThrow(StorylineConflictException::class);
 })->with([StepStatus::Planned, StepStatus::Happened]);
 
 test('a step makes every allowed status move', function (StepStatus $from, StepStatus $to) {
@@ -48,7 +48,7 @@ test('a step makes every allowed status move', function (StepStatus $from, StepS
         ->create(['status' => $from]);
 
     // Act
-    resolve(TransitionStepAction::class)->handle($story, 1, $step->id, $to, 'Reviewed.');
+    resolve(TransitionStepAction::class)->handle($story, 1, $step->id, $to, 'Reviewed.', signedInUser());
 
     // Assert
     $step->refresh();
@@ -75,7 +75,7 @@ test('a step refuses every other status move and stays as it was', function (Ste
         ->create(['status' => $from]);
 
     // Act
-    $transition = fn () => resolve(TransitionStepAction::class)->handle($story, 1, $step->id, $to, 'Reviewed.');
+    $transition = fn () => resolve(TransitionStepAction::class)->handle($story, 1, $step->id, $to, 'Reviewed.', signedInUser());
 
     // Assert
     expect($transition)->toThrow(StorylineConflictException::class, __('storylines.state_error'))

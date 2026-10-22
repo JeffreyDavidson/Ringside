@@ -25,7 +25,7 @@ test('participant search is scoped to the loaded story summaries', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create(['title' => 'Harbor Rivalry']);
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create(['name' => 'Harbor Rival']);
-    resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', today()->toDateString()));
+    resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', today()->toDateString()), signedInUser());
     livewire(Main::class, ['participant' => 'Harbor'])->assertSee('Harbor Rivalry');
     livewire(Main::class, ['participant' => 'Foreign'])->assertDontSee('Harbor Rivalry');
 });

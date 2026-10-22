@@ -22,7 +22,7 @@ function sponsorFixture(): array
     $event = Event::factory()->for(Promotion::factory())->create(['name' => 'Harbor Showcase', 'date' => now()]);
     $sponsor = Sponsor::factory()->create(['promotion_id' => $event->promotion_id, 'name' => 'Harbor Hardware']);
     $promise = app(SaveSponsorCommitmentAction::class)->handle($event, null, 0, (string) Str::uuid(),
-        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Entrance banner'));
+        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Entrance banner'), signedInUser());
 
     return ['event' => $event, 'sponsor' => $sponsor, 'promise' => $promise];
 }

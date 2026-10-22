@@ -15,7 +15,7 @@ test('a failed owning transaction rolls back the promise version and its private
     // Act
     $operation = fn () => DB::transaction(function () use ($promise): void {
         $promise->description = 'Changed banner';
-        app(PersistSponsorCommitmentAction::class)->handle($promise, 'save', 'Correct position');
+        app(PersistSponsorCommitmentAction::class)->handle($promise, 'save', 'Correct position', signedInUser());
         throw new RuntimeException('Reject the complete operation');
     });
 
@@ -38,5 +38,5 @@ test('a promise revision records the actor passed in, not the signed-in user', f
     // Assert
     $revision = $promise->revisions()->orderByDesc('id')->firstOrFail();
     expect($revision->actor_id)->toBe($actor->id)
-        ->and($revision->actor_name)->toBe($actor->full_name);
+        ->and($revision->actor_name)->toBe("{$actor->first_name} {$actor->last_name}");
 });

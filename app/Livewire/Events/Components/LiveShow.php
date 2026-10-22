@@ -14,6 +14,7 @@ use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Events\LiveShowException;
+use App\Livewire\Concerns\ResolvesActor;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 use App\Services\Events\LiveShowTimingService;
@@ -30,6 +31,8 @@ use Livewire\Component;
 
 class LiveShow extends Component
 {
+    use ResolvesActor;
+
     #[Locked]
     public int $eventId;
 
@@ -112,13 +115,13 @@ class LiveShow extends Component
     public function attendance(MarkLiveAttendanceAction $action, string $key, string $mark, bool $value): void
     {
         Validator::make(['mark' => $mark], ['mark' => [Rule::enum(LiveAttendanceMark::class)]])->validate();
-        $this->perform(fn (Event $event) => $action->handle($event, $this->version, $key, LiveAttendanceMark::from($mark), $value));
+        $this->perform(fn (Event $event) => $action->handle($event, $this->version, $key, LiveAttendanceMark::from($mark), $value, $this->actor()));
     }
 
     public function item(string $key, string $operation): void
     {
         Validator::make(['operation' => $operation], ['operation' => [Rule::in(['start', 'finish'])]])->validate();
-        $this->perform(fn (Event $event) => $this->transitionItem->handle($event, $this->version, $key, LiveItemOperation::from($operation)));
+        $this->perform(fn (Event $event) => $this->transitionItem->handle($event, $this->version, $key, LiveItemOperation::from($operation), $this->actor()));
     }
 
     public function beginCorrection(string $key, string $operation): void
@@ -169,7 +172,7 @@ class LiveShow extends Component
                 throw LiveShowException::invalidTimes();
             }
             $this->transitionItem->handle($event, $this->draftVersion, $this->draftKey,
-                LiveItemOperation::from($this->draftOperation), $this->reason, $start, $finish);
+                LiveItemOperation::from($this->draftOperation), $this->actor(), $this->reason, $start, $finish);
         });
     }
 
@@ -190,7 +193,7 @@ class LiveShow extends Component
     {
         Validator::make(['removedReasons' => $this->removedReasons], ['removedReasons' => ['array'], 'removedReasons.*' => ['required', 'string', 'max:2000']])->validate();
         $this->perform(fn (Event $event) => $action->handle($event, $this->draftVersion,
-            $this->reviewPackVersion, $this->reviewFingerprint, LiveShowReviewData::fromValidated($this->removedReasons)));
+            $this->reviewPackVersion, $this->reviewFingerprint, LiveShowReviewData::fromValidated($this->removedReasons), $this->actor()));
     }
 
     public function cancelDraft(): void

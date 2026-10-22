@@ -13,7 +13,7 @@ test('editing a premise retains the old creative account privately', function ()
     actingAs(administrator());
     $story = Storyline::factory()->create(['premise' => 'Former partners.', 'payoff' => 'Secret title match.']);
     // Act
-    resolve(UpdateAction::class)->handle($story, 1, new StorylineData('Reconciliation', 'They reconcile.', 'Secret title match.', (string) Str::uuid()), 'A new direction.');
+    resolve(UpdateAction::class)->handle($story, 1, new StorylineData('Reconciliation', 'They reconcile.', 'Secret title match.', (string) Str::uuid()), 'A new direction.', signedInUser());
     // Assert
     expect($story->refresh()->premise)->toBe('They reconcile.')
         ->and($story->revisions()->firstOrFail()->before['premise'])->toBe('Former partners.');

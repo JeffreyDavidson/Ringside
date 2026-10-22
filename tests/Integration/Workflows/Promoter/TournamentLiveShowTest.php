@@ -27,10 +27,10 @@ it('adopts a newly qualified final through pack and live review while preserving
     $data = $vm->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
-    resolve(MarkLiveAttendanceAction::class)->handle($event, $run->version, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true);
+    resolve(MarkLiveAttendanceAction::class)->handle($event, $run->version, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true, signedInUser());
     foreach ([$first, $second] as $match) {
-        resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Start);
-        resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Finish);
+        resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Start, signedInUser());
+        resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Finish, signedInUser());
         recordTournamentWinner($match, $t);
     }
     $before = $run->refresh()->content;
@@ -38,7 +38,7 @@ it('adopts a newly qualified final through pack and live review while preserving
     $data = $vm->data($event);
     expect($data['needsReview'])->toBeTrue()->and($run->refresh()->content['items'])->toHaveCount(2);
     resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), true);
-    resolve(ReviewLiveShowAction::class)->handle($event, $run->refresh()->version, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]));
+    resolve(ReviewLiveShowAction::class)->handle($event, $run->refresh()->version, 2, $data['card']['fingerprint'], LiveShowReviewData::fromValidated([]), signedInUser());
     $after = $run->refresh()->content;
     expect($after['items'][0])->toBe($before['items'][0])->and($after['items'][1])->toBe($before['items'][1])
         ->and($after['items'][2]['key'])->toBe('match:'.$final->id)->and($after['items'][2]['state'])->toBe('pending')

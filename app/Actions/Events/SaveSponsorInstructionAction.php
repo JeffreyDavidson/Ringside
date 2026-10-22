@@ -12,6 +12,7 @@ use App\Lifecycle\Events\EventCardLock;
 use App\Lifecycle\Events\SponsorInstructionRequirements;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
+use App\Models\Users\User;
 use App\Services\Events\EventPackCardService;
 use App\Services\Events\EventPackSourceService;
 use App\Services\Events\SponsorInstructionService;
@@ -26,9 +27,9 @@ class SaveSponsorInstructionAction
         private readonly PersistSponsorCommitmentAction $persist, private readonly EventCardLock $lock,
         private readonly SponsorInstructionRequirements $requirements) {}
 
-    public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, SponsorInstructionData $data): void
+    public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, SponsorInstructionData $data, User $actor): void
     {
-        DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $data): void {
+        DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $data, $actor): void {
             ['event' => $event, 'matches' => $matches, 'pack' => $pack, 'run' => $run] = $this->lock->lock($event->id);
             $commitment = EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
             $card = $this->card->get($event);
@@ -68,7 +69,7 @@ class SaveSponsorInstructionAction
                 $commitment->pack_instruction_hash = $this->instructions->hash($entry);
             }
             $this->save->handle($event, $packVersion, $fingerprint, EventPackData::fromValidated($content), false);
-            $this->persist->handle($commitment, $data->mode === SponsorInstructionMode::Remove ? 'retract_instruction' : 'review_instruction', $data->reason);
+            $this->persist->handle($commitment, $data->mode === SponsorInstructionMode::Remove ? 'retract_instruction' : 'review_instruction', $data->reason, $actor);
         }, attempts: 3);
     }
 }

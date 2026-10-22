@@ -21,13 +21,13 @@ test('a planned event step preserves its original target and rejects a stale sav
     $data = new StepData('The betrayal', 'Turn on the partner after the bell.', 1, new SourceData($event->id), (string) Str::uuid());
 
     // Act
-    $step = resolve(SaveStepAction::class)->handle($story, $story->version, $data);
+    $step = resolve(SaveStepAction::class)->handle($story, $story->version, $data, signedInUser());
 
     // Assert
     expect($step->status)->toBe(StepStatus::Planned)
         ->and($step->source_context['event_date'])->toBe(requiredDate($event->date)->toIso8601String())
         ->and($step->target_on)->toBeNull();
-    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->version, $data))->toThrow(RecordChangedException::class)
+    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->version, $data, signedInUser()))->toThrow(RecordChangedException::class)
         ->and($story->steps()->count())->toBe(1);
 });
 
@@ -37,17 +37,17 @@ test('revising a plan retains the first description and rejects changes to confi
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
     $revised = new StepData('New plan', 'A confrontation instead.', 3, new SourceData(targetOn: today()->addDays(3)->toDateString()), (string) Str::uuid(), 'Talent changed.');
-    resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $revised, $step->id);
+    resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $revised, signedInUser(), $step->id);
     expect($story->revisions()->orderByDesc('id')->firstOrFail()->before['description'])->toBe('Attack the partner.');
     confirmedStorylineDevelopment($story, $step->id);
-    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $revised, $step->id))->toThrow(StorylineConflictException::class);
+    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $revised, signedInUser(), $step->id))->toThrow(StorylineConflictException::class);
 });
 test('a reused step submission identity is refused even with a fresh story version', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $step = plannedStorylineStep($story);
     $data = new StepData('Repeated plan', 'Same submission.', 1, new SourceData, $step->submission_id);
-    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $data))->toThrow(RecordChangedException::class);
+    expect(fn () => resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, $data, signedInUser()))->toThrow(RecordChangedException::class);
 });
 
 test('planning a step records the actor passed in', function () {

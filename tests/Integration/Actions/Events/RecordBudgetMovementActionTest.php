@@ -19,11 +19,11 @@ test('payment retries are harmless and a changed payload cannot reuse the same k
     $key = budgetKey();
     $action = resolve(RecordBudgetMovementAction::class);
     // Act
-    $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData());
-    $retry = $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData());
+    $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData(), signedInUser());
+    $retry = $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData(), signedInUser());
     // Assert
     expect($retry->version)->toBe(1)->and($f['line']->movements()->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(1);
-    expect(fn () => $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData(['amount' => '100.00'])))->toThrow(BudgetException::class)
+    expect(fn () => $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData(['amount' => '100.00']), signedInUser()))->toThrow(BudgetException::class)
         ->and($f['line']->movements()->count())->toBe(1);
 });
 
@@ -32,11 +32,11 @@ test('new payment identities require the latest version and never overwrite cash
     $f = budgetFixture();
     $action = resolve(RecordBudgetMovementAction::class);
     // Act
-    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData());
+    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), signedInUser());
     // Assert
-    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData()))->toThrow(RecordChangedException::class);
+    expect(fn () => $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), signedInUser()))->toThrow(RecordChangedException::class);
     // Act
-    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['amount' => '300.00']));
+    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['amount' => '300.00']), signedInUser());
     // Assert
     expect(resolve(BudgetSettlementService::class)->net($f['line']->load('movements')))->toBe(50000)->and($f['line']->movements()->count())->toBe(2);
 });
@@ -45,10 +45,10 @@ test('a refund changes cash but leaves the confirmed obligation alone', function
     // Arrange
     $f = budgetFixture(['confirmed_cents' => 5000]);
     $action = resolve(RecordBudgetMovementAction::class);
-    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(['acknowledge' => true]));
+    $action->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(['acknowledge' => true]), signedInUser());
     $source = $f['line']->movements()->firstOrFail();
     // Act
-    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['kind' => 'refund', 'amount' => '150.00', 'source_id' => $source->id]));
+    $action->handle($f['event'], 1, budgetKey(), $f['line']->id, budgetMovementData(['kind' => 'refund', 'amount' => '150.00', 'source_id' => $source->id]), signedInUser());
     // Assert
     $line = $f['line']->refresh()->load('movements');
     expect(resolve(BudgetSettlementService::class)->row($line)['balance'])->toBe(0)->and($line->confirmed_cents)->toBe(5000)->and($line->movements)->toHaveCount(2);
@@ -81,7 +81,7 @@ test('refunds enforce same-line ownership original kind date and remaining cap',
     }
     // Act / Assert
     $count = EventBudgetMovement::query()->count();
-    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input)))->toThrow(BudgetException::class)
+    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class)
         ->and(EventBudgetMovement::query()->count())->toBe($count)
         ->and($f['budget']->revisions()->count())->toBe(0);
 })->with(['foreign', 'voided', 'refund', 'early', 'missing', 'cap']);
@@ -96,7 +96,7 @@ test('only live refunds of the same payment count against its remaining cap', fu
     $input = budgetPayment(['kind' => 'refund', 'amount' => '100.00', 'source_id' => $source->id]);
 
     // Act
-    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input));
+    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input), signedInUser());
 
     // Assert
     expect($f['line']->movements()->where('source_id', $source->id)->whereNull('voided_at')->pluck('amount_cents')->all())->toBe([10000]);
@@ -106,7 +106,7 @@ test('payment amount date and source misuse cannot create a movement', function 
     // Arrange
     $f = budgetFixture();
     // Act / Assert
-    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData($override)))->toThrow(BudgetException::class);
+    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData($override), signedInUser()))->toThrow(BudgetException::class);
     expect($f['line']->movements()->count())->toBe(0)->and($f['budget']->revisions()->count())->toBe(0);
 })->with([
     'zero' => [['amount' => '0']], 'future' => [['effective_date' => '2099-01-01']],
@@ -117,7 +117,7 @@ test('unknown obligations admit deposits without inventing a balance', function 
     // Arrange
     $f = budgetFixture(['confirmed_cents' => null, 'planned_cents' => null]);
     // Act
-    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData());
+    resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), signedInUser());
     // Assert
     $row = resolve(BudgetSettlementService::class)->row($f['line']->load('movements'));
     expect($row['balance'])->toBeNull()->and($row['variance'])->toBeNull()->and($row['attention'])->toBe('needs_amount');
@@ -132,7 +132,7 @@ test('an archived line refuses payments and a guessed foreign line changes nothi
         $line->save();
     }
     // Act / Assert
-    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $line->id, budgetMovementData()))->toThrow($archived ? BudgetException::class : ModelNotFoundException::class);
+    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $line->id, budgetMovementData(), signedInUser()))->toThrow($archived ? BudgetException::class : ModelNotFoundException::class);
     expect(EventBudgetMovement::query()->count())->toBe(0);
 })->with([true, false]);
 
@@ -141,7 +141,7 @@ test('the retained movement limit refuses another payment without changing histo
     $f = budgetFixture(['confirmed_cents' => null]);
     EventBudgetMovement::factory()->count(1000)->for($f['line'], 'line')->create();
     // Act / Assert
-    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData()))->toThrow(BudgetException::class);
+    expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, budgetMovementData(), signedInUser()))->toThrow(BudgetException::class);
     expect($f['line']->movements()->count())->toBe(1000)->and($f['budget']->revisions()->count())->toBe(0);
 });
 
@@ -151,8 +151,8 @@ test('UUID case is normalized consistently across database engines', function ()
     $key = 'a1111111-1111-4111-8111-111111111111';
     $action = resolve(RecordBudgetMovementAction::class);
     // Act
-    $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData());
-    $action->handle($f['event'], 1, mb_strtoupper($key), $f['line']->id, budgetMovementData());
+    $action->handle($f['event'], 0, $key, $f['line']->id, budgetMovementData(), signedInUser());
+    $action->handle($f['event'], 1, mb_strtoupper($key), $f['line']->id, budgetMovementData(), signedInUser());
     // Assert
     expect($f['line']->movements()->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(1);
 });

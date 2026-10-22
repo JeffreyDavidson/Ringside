@@ -12,7 +12,7 @@ use function Pest\Laravel\actingAs;
 test('durable revisions survive general activity log retention and retain actor and account', function () {
     actingAs($actor = administrator());
     $story = Storyline::factory()->create(['payoff' => 'Private payoff.']);
-    resolve(RecordRevisionAction::class)->handle($story, $story, StorylineRevisionOperation::StoryRevised, ['payoff' => 'Original payoff.'], 'A new direction.');
+    resolve(RecordRevisionAction::class)->handle($story, $story, StorylineRevisionOperation::StoryRevised, signedInUser(), ['payoff' => 'Original payoff.'], 'A new direction.');
     StorylineRevision::query()->update(['created_at' => now()->subYears(2)]);
     Artisan::call('activitylog:clean');
     $revision = $story->revisions()->with(['actor', 'storyline'])->firstOrFail();

@@ -11,6 +11,7 @@ use App\Lifecycle\Events\SponsorCommitmentStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventSponsorCommitment;
 use App\Models\Sponsors\Sponsor;
+use App\Models\Users\User;
 use App\Services\Events\SponsorCommitmentContextService;
 use Illuminate\Support\Facades\DB;
 
@@ -19,10 +20,10 @@ class SaveSponsorCommitmentAction
     public function __construct(private readonly SponsorCommitmentContextService $context, private readonly PersistSponsorCommitmentAction $persist,
         private readonly SponsorCommitmentRequirements $requirements, private readonly SponsorCommitmentStateMachine $machine) {}
 
-    public function handle(Event $event, ?int $id, int $version, string $submissionKey, SponsorCommitmentData $data,
+    public function handle(Event $event, ?int $id, int $version, string $submissionKey, SponsorCommitmentData $data, User $actor,
         ?string $reason = null, bool $reviewed = false, bool $refreshSponsorName = false): EventSponsorCommitment
     {
-        return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
+        return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $actor, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
             $event = Event::query()->withTrashed()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $this->requirements->ensureEventAvailable($event);
             $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
@@ -61,7 +62,7 @@ class SaveSponsorCommitmentAction
             if ($isNew || $reviewed) {
                 $commitment->event_context = $this->context->get($event);
             }
-            $this->persist->handle($commitment, $reviewed ? 'review' : 'save', $reason);
+            $this->persist->handle($commitment, $reviewed ? 'review' : 'save', $reason, $actor);
 
             return $commitment;
         }, attempts: 3);

@@ -66,7 +66,7 @@ test('a confirmed cast can be corrected through the form without rewriting names
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create(['name' => 'Harbor Rival']);
-    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()), signedInUser());
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
     $page->call('begin', 'development')->set('form.heading', 'The angle')->set('form.description', 'The argument.')->set('form.participantIds', [$person->id])->call('save')->assertHasNoErrors();
     $development = $story->developments()->firstOrFail();
@@ -189,7 +189,7 @@ test('corrections, endings and status changes need a reason', function (string $
     $step = plannedStorylineStep($story);
     $development = confirmedStorylineDevelopment($story);
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
-    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()), signedInUser());
     $version = $story->refresh()->version;
     $id = ['step_status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant_end' => $person->id, 'step' => $step->id][$mode] ?? null;
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
@@ -208,7 +208,7 @@ test('ending an involvement cannot precede its joining date', function () {
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
-    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()), signedInUser());
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
     $page->call('begin', 'participant_end', $person->id)->set('form.leftOn', today()->subDay()->toDateString())->set('form.reason', 'Backdated.');
 
@@ -233,7 +233,7 @@ test('a manager downgraded while a form is open writes nothing from any form', f
     $step = plannedStorylineStep($story);
     $development = confirmedStorylineDevelopment($story);
     $wrestler = Wrestler::factory()->for($promotion)->create();
-    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()));
+    $person = resolve(SaveParticipantAction::class)->handle($story, $story->refresh()->version, new ParticipantData('wrestler', $wrestler->id, null, today()->toDateString()), signedInUser());
     $version = $story->refresh()->version;
     $id = ['step_status' => $step->id, 'retract' => $development->id, 'development' => $development->id, 'participant_end' => $person->id, 'step' => $step->id][$mode] ?? null;
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
@@ -296,7 +296,7 @@ test('ending an involvement opens the form filled from the stored period', funct
     $story = Storyline::factory()->create();
     $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
     $joined = today()->subDays(3)->toDateString();
-    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined));
+    $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, 'Rival', $joined), signedInUser());
     $page = livewire(Manage::class, ['storylineId' => $story->id]);
 
     // Act

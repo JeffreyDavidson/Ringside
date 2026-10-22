@@ -183,7 +183,7 @@ it('refuses resetting a bout that has already started in the live show', functio
     $data = resolve(EventPackViewModel::class)->data($event);
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint']);
-    resolve(TransitionLiveItemAction::class)->handle($event, $run->version, 'match:'.$match->id, LiveItemOperation::Start);
+    resolve(TransitionLiveItemAction::class)->handle($event, $run->version, 'match:'.$match->id, LiveItemOperation::Start, signedInUser());
     expect(fn () => resolve(ResetTournamentBranchAction::class)->handle($node, $t->refresh()->version, 'Unbook started bout', true))->toThrow(TournamentException::class)
         ->and($match->refresh()->trashed())->toBeFalse()
         ->and($node->links()->firstOrFail()->active_node_id)->toBe($node->id);
