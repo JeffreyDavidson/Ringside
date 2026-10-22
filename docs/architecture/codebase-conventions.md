@@ -109,7 +109,7 @@ The three observers make audit records immutable: `LifecycleTransitionObserver`,
 
 - Concrete business exceptions extend `BaseBusinessException`. When presentation must tell failures apart, create the exception with `self::forReason()` and a stable `BusinessRuleReason` case; general failures keep `BusinessRuleReason::General`.
 - Messages use translation keys named `<domain>.errors.<operation>.<case>`.
-- A message that names a record uses `formatModelContext()`: the type word is the translation `core.model_types.<morph alias>` (every model in the morph map needs one, and a test fails without it) and the name comes from `Support/ModelName` (`name`, else `full_name` for referees and managers, else the key). A date range error names its subject with a `DateRangeContext` case, never English text built in the caller.
+- A message that names a record uses `formatModelContext()`: the type word is the translation `core.model_types.<morph alias>` (every model in the morph map needs one, and a test fails without it) and the name comes from `App\Models\ModelName::of()` (`name`, else `full_name` for referees and managers, else the key; empty for an unsaved record), which the employment date rule uses too. A date range error names its subject with a `DateRangeContext` case, never English text built in the caller.
 - Folders match a domain folder of the app (under `app/Models` or `app/Actions`). The only shared folders are `Roster/Individuals` (rules shared by wrestlers, managers and referees), `Scheduling` and `Lifecycle`. A shared "changed by someone else" exception (`RecordChangedException`) sits at the top level next to `BaseBusinessException`.
 - Two naming families: `CannotBe{Verb}edException` for disallowed state changes, with one static factory per reason, and `{Feature}Exception` for feature errors.
 - Matches and scheduling: `InvalidMatchConfigurationException` for incomplete or structurally invalid assignments, `EntityNotAvailableException` when a participant's or title's own state prevents it, `SchedulingConflictException` only for real collisions between bookings, times or resources.
@@ -155,7 +155,6 @@ Prefer named collection methods (`map`, `mapWithKeys`, `flatMap`, `keyBy`, `grou
 ## Support
 
 - `LikeTerm` (`app/Support/Search`) cleans a typed term for a "contains" LIKE query: it drops `%`, `_` and backslash, trims, and can cut to a maximum length. Build it with `LikeTerm::from($term, $maxLength)`, skip the filter when `isEmpty()`, and pass `contains()` to `whereLike()`. Terms that are only trimmed or cut (sponsor names, title history) are not LikeTerm searches.
-- `ModelName::of($model)` (`app/Support`) is the name a person reads for a record: `name`, else `full_name`, else its key. Exception messages and the employment date rule use it.
 - `Support/Images/ImageReencoder` takes image bytes and returns a fresh PNG, throwing `ImageReencodingException` for anything it refuses (unreadable, too many pixels, animated, failed decode). It never touches an upload, disk or model; limits (8 million pixels, 2048 pixel longest edge) stay inside it. Unit-test it with generated GD fixtures.
 - Enum concerns live in `app/Enums/Concerns`.
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 use App\Enums\Shared\BusinessRuleReason;
-use App\Support\ModelName;
+use App\Models\ModelName;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;

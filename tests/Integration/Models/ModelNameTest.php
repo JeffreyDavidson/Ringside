@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Support\ModelName;
+use App\Models\ModelName;
 use Illuminate\Database\Eloquent\Model;
 
 test('names a record by its name, then its full name, then its key', function (array $attributes, string $name): void {
