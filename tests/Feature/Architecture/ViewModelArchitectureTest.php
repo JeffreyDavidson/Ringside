@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * A ViewModel only builds the data of one page (.ai/rules/view-models.md). Controllers and Livewire components call
+ * A ViewModel only builds the data of one page (laravel-conventions rule view-layer.md). Controllers and Livewire components call
  * it; the layers below the view never do, and it never calls an Action or another ViewModel. Queries and Services
  * are covered by QueryArchitectureTest and ServiceArchitectureTest.
  */
@@ -25,7 +25,7 @@ $viewModels = array_map(
     glob(__DIR__.'/../../../app/ViewModels/{,*/}*.php', GLOB_BRACE) ?: [],
 );
 
-// ViewModels live in a domain folder (.ai/rules/view-models.md), never directly in app/ViewModels.
+// ViewModels live in a domain folder (laravel-conventions rule view-layer.md), never directly in app/ViewModels.
 test('every view model sits in a domain folder', function () use ($viewModels): void {
     expect(array_filter($viewModels, fn (string $viewModel): bool => ! str_contains($viewModel, '\\')))->toBeEmpty();
 });

@@ -69,7 +69,7 @@ Builders express database queries over relationships and stored lifecycle period
 - define stable ordering used by multiple callers;
 - return the concrete typed builder for fluent composition.
 
-Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`, which only read (see `.ai/rules/queries.md`).
+Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`, which only read (see the shared `laravel-conventions` rule `queries.md`).
 
 ## Usage
 
