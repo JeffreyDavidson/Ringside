@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /*
- * A Service only reads (.ai/rules/services.md): cross-record calculations and lookups, plus the request's promotion
+ * A Service only reads (laravel-conventions rule services.md): cross-record calculations and lookups, plus the request's promotion
  * context. Guards that throw, lifecycle writers, row locks and validation live in Lifecycle, Actions and the form that
  * feeds the save.
  */

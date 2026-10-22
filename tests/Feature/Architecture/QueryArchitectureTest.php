@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /*
- * A Query only reads (.ai/rules/queries.md). Locks and guards that throw live in Lifecycle, validation in the form or
+ * A Query only reads (laravel-conventions rule queries.md). Locks and guards that throw live in Lifecycle, validation in the form or
  * request that feeds the Query, 404s in controllers and URLs in controllers, components and ViewModels.
  */
 arch('queries use the query suffix')

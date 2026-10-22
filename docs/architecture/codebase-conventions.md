@@ -1,0 +1,215 @@
+# Conventions in this codebase
+
+Ringside follows Jeffrey's shared Laravel conventions (the `laravel-conventions` skill in `~/.agents`), with the differences listed in `AGENTS.md`. This page holds the Ringside facts those rules rely on: the classes that carry a convention, the known exceptions, which architecture test enforces what, and the wrestling-domain rules. Test conventions are in [docs/testing/conventions.md](../testing/conventions.md).
+
+## Architecture tests
+
+These live in `tests/Feature/Architecture` unless a path is given. Keep them; a rule that one of them enforces is not optional.
+
+| Test | Enforces |
+| --- | --- |
+| `ApplicationArchitectureTest` | PHP and security presets, strict types, no debug helpers, `env()` only in config, native enums, and every enum in a domain folder (never directly in `App\Enums`) |
+| `ControllerArchitectureTest` | Resourceful or invokable controllers, singular resource names, named routes authorized at the route, a mirrored Feature test file with an executable test, and no `action([` URLs in controller tests |
+| `NestedResourceControllersTest` | Singular names for nested resource controllers |
+| `DataArchitectureTest` | Data objects are readonly with only a constructor, static named constructors and simple field checks; discovers classes one folder deep under `app/Data` |
+| `DocblockArchitectureTest` | No orphaned docblocks |
+| `EloquentMorphMapTest` | The enforced morph map and its ten aliases |
+| `ExceptionArchitectureTest` | Business exceptions extend `BaseBusinessException`, are `final`, use the `Exception` suffix, and live in a domain folder or a named shared folder |
+| `LivewireArchitectureTest` | No inline `app()`, `resolve()`, `App::make()`, `app()->make()` or `Container::getInstance()` in `app/Livewire` or Blade, apart from the two form `rules()` exceptions below |
+| `MiddlewareArchitectureTest` | Every application middleware has an executable, non-skipped Feature test at its mirrored path |
+| `PolicyAbilityArchitectureTest` | Lifecycle action enums' `ability()` names match policy abilities |
+| `QueryArchitectureTest` | Queries use the `Query` suffix and never depend on the Validator, `ValidationException`, `App\Exceptions`, a ViewModel, Presenter or Livewire class, `App\Lifecycle\Roster\Booking`, `SchedulingSlotLock`, or HTTP helpers (`abort()`, `route()`, `redirect()`, `response()`, `url()`, `Illuminate\Http`). That Queries never use the rest of `App\Lifecycle` is a convention, checked by review |
+| `RosterModelNamespaceTest` | Roster models live in the roster namespace; legacy class names still resolve for merged migrations |
+| `RuntimeBoundaryTest` | Runtime code never creates records through factories; Livewire components never instantiate other components or write directly through Eloquent |
+| `ServiceArchitectureTest` | Services never use the Validator, `ValidationException`, `App\Exceptions`, `App\Lifecycle`, `App\Actions`, the database connection or the `DB` facade |
+| `SupportArchitectureTest` | `app/Support` imports nothing from `App\` outside `App\Support` |
+| `TestSuiteArchitectureTest` | Suite boundaries (see the testing conventions) |
+| `ThemeTokensTest` | Every semantic colour the app uses is a theme token |
+| `TranslationKeysTest` | Enum labels return translated keys |
+| `ViewModelArchitectureTest` | Actions and Lifecycle never depend on a ViewModel; a ViewModel never depends on an Action or another ViewModel; ViewModels live in a domain folder |
+| `tests/Integration/Builders/Roster/BookableScopeParityTest` | The `bookable()` builder scopes stay in step with the booking strategies |
+
+## Promotion context (tenancy)
+
+- `EstablishPromotionContext` sets the request's promotion. It must also be registered with `Livewire::addPersistentMiddleware()` (in `AppServiceProvider::boot()`, the one middleware registration outside `bootstrap/app.php`), because Livewire update requests do not run the page route's middleware.
+- `EnsureUserIsActive`, then `EstablishPromotionContext`, run ahead of `SubstituteBindings` in the priority list in `bootstrap/app.php`. Promotion scopes fail closed for non-administrators without an enforced context, so bindings resolved earlier would 404 for every member.
+- `EstablishPromotionContext` calls `PromotionContextService::clear()` first, because the scoped service is reused across requests in one test (and in long-lived workers). A remembered promotion the user can no longer use (suspended, removed, deleted) falls back to the promotion of their oldest active membership (`promotion_user.created_at`, then promotion id) and the session is rewritten; only a user with no active promotion gets the no-membership page (administrators continue globally).
+- Global scopes: `PromotionContextScope` and `EventMatchPromotionContextScope`. `BelongsToPromotion` registers `PromotionContextScope` on every promotion-owned model; a model whose ownership is reached through a relation (`EventMatch`, through its event) registers its own scope under the `PromotionContextScope` key so removing the scope works the same everywhere. With no enforced promotion a scope stays unscoped only for administrators, console, queue and guest contexts, and matches no rows for an authenticated non-administrator (`PromotionContextService::failsClosed()`). Read the context through `PromotionContextService`, never from the session or the request.
+- Scope tests: `tests/Integration/Models/Scopes/PromotionContextScopeTest.php` covers the active-promotion case and global venues; the fail-closed cases live in the `BelongsToPromotion` and `EventMatch` model tests (a convention, not an architecture test).
+- A Query bypasses `PromotionContextScope` only for public or owner reads, and always pairs that with an explicit `promotion_id` constraint.
+- Gate checks run per table row, so policies and the promotion gate never query `promotion_user`; they use `PromotionContextService::membershipRole()`, memoised per request. Code that writes `promotion_user` or `promotion_invitations` calls `forgetMemberships()` afterwards.
+- `PromotionGate` (`Gate::before`) decides every ability on promotion-owned models from the membership role, so model policies are stubs that deny what the gate leaves alone; `StorylinePolicy` is the exception and holds real rules. New role rules go in `MembershipRole` or the gate's subject tables and are proved in `tests/Integration/Policies/PromotionGateTest.php` for every role (owner, manager, member, suspended member, administrator, no membership). See [decision 0001](../decisions/0001-promotion-gate-is-the-permission-engine.md).
+- `PromotionMembership` keeps `role` and `status` in `#[Fillable]` because Laravel fills a pivot class through `attach()` and `updateExistingPivot()` to cast it. Nothing passes user input to it, and only relation methods in Actions write it.
+
+## Users and authentication
+
+- Emails are stored trimmed and lowercase (the `User::email` mutator) and are unique on `lower(email)` (on MySQL through the case-insensitive collation of `users_email_unique`). Validate with `App\Rules\Users\UniqueEmail`, not the `unique` rule, and look users up through `lower(email)`; legacy rows may still be mixed case. Email normalization lives in `App\Support\EmailAddress`.
+- `AppServiceProvider` registers the `eloquent-email` user provider, `CaseInsensitiveEmailUserProvider`. It normalizes through `EmailAddress::normalize()`, uses `whereLike` only to narrow candidates and compares the exact lowercase address in PHP, so `%` and `_` cannot match other accounts. Classes in `app/Auth` are tested in `tests/Integration/Auth` at the mirrored path.
+
+## Databases
+
+Production runs MySQL 8; CI runs the suite on SQLite, PostgreSQL and MySQL. Every database-specific path (raw SQL, driver checks, locking, conflict or deadlock handling, migrations) works on `mysql`, `pgsql` and `sqlite`, preferably through one query builder call each grammar compiles. Never add PostgreSQL-only SQL (`count(*) filter (where ...)`, `ilike`, `::` casts, `RETURNING`, advisory locks), and never throw for an unhandled driver at runtime. The scheduling and lifecycle locks assume READ COMMITTED, which `config/database.php` sets for MySQL.
+
+In migrations: MySQL has no partial or expression indexes, so use a STORED generated column with a plain unique index, never put a CASCADE or SET NULL foreign key on a base column of a stored generated column, and drop indexes with `DROP INDEX name ON table` or the schema builder. The partial unique indexes that enforce one open period only serve current rows, so history queries need their own index. Prefer plain `Schema::table` indexes: they do not rebuild SQLite tables.
+
+## Actions
+
+- Most Actions are named for the verb inside their entity folder (`Actions/Wrestlers/RetireAction`); see the differences in `AGENTS.md`.
+- Two standing exceptions to "Actions take Data objects and never validate": `SaveEventProductionAction` re-runs `EventProductionRequirements::validatedInput()` inside its save, and `MutateBudgetAction` keeps an `array $payload` because it is the operation fingerprint hashed into `event_budget_revisions.request_hash` for retry identity; retyping it would change stored hashes.
+- Lifecycle periods: lock the owning row inside a transaction before validating and changing a period. Start operations create a period only when none is open and reject an existing open one; end operations require an open period and reject an end date before its start. Record the `LifecycleTransition` audit (domain-specific type and effective date) inside the same owner-locked transaction.
+- Administrators: Users `ChangeStatusAction` (to a non-active status) and `UpdateAction` (to a non-administrator role) call `EnsureAnotherActiveAdministratorAction` first, which locks every active administrator in ascending id order, and only then lock the target user; `ChangeStatusAction` then locks the user's owned promotions (ascending id). Never lock a user row before the administrator set.
+- Cascades lock rows in ascending primary key order: order a collection before locking its members, and never lock a member before the parent that owns the cascade.
+- `OpenPeriodEnder::end()` ends open stable, tag team and manager pivot rows: started rows end on the effective date, and rows that start later close on their own start date, so `left_at`/`fired_at` never precedes `joined_at`/`hired_at`. Never write the effective date directly onto every open row.
+- Soft deletion: `deleted_at` is authoritative. Typed Delete and Restore Actions delegate only the state change plus the Deleted/Restored audit to `DeletionStateManager` in one transaction; validation, period closure and relationship cleanup stay in the Actions.
+- `ChampionshipReignManager` is the single write path for opening, closing and reconciling championship reigns. Match and title Actions keep eligibility, locking and orchestration; current-champion reads stay read-only reporting.
+- Event card: Actions that read or write an event's card under its fingerprint (event pack, production, sponsor instructions, live show, storyline sources) take `EventCardLock` inside their transaction. It locks the event, all its matches including deleted ones in ascending id, the pack and the live run, in that order; lock any other row of the event (a sponsor commitment) after it.
+- The concurrency tests in `tests/Integration/Concurrency/` and their workers call Actions directly and run only in CI's MySQL and PostgreSQL jobs (see `AGENTS.md`).
+
+## Lifecycle layer (`app/Lifecycle`)
+
+`app/Lifecycle` holds the rules about a record's state: `ensureCan…` and `can…` guards, `…Requirements` checks, lifecycle period writers (`…PeriodManager`), row locks (`…Lock`) and state machines (`…StateMachine`). A guard may take the locks it needs, inside the caller's transaction. Row locks and the business exceptions guards throw live here, not in Queries: a Query returns what it read (or null) and the Lifecycle class decides what that means. A Lifecycle class may inject a read-only Service or Query; a Service never depends on Lifecycle. See [lifecycle-operation-boundaries.md](lifecycle-operation-boundaries.md).
+
+- **Projection reads:** `LifecycleStateReader::readProjectedBoolean` reads boolean query projections before relationship fallbacks, so projected list queries stay query-free. `EmploymentStatusResolver` reads employment and retirement facts for computed status (reusing `withEmploymentStatusState` projections); `StableStatusResolver` and `TitleStatusResolver` read activity and retirement facts through `ActivityStatusStateReader` (reusing `ACTIVITY_STATUS_STATE` projections). Status classification stays out of model concerns.
+- **State machines:** a stored status that changes in more than one place gets a `final readonly …StateMachine` (`TalentBookingStateMachine`, `TournamentStateMachine`). One constant maps each status to the statuses it may move to; `canMove($from, $to)` reads only that table, and a new record starts from a new record's status. The table is needed only when some move can be refused (sponsor promises and the live show keep only their reachable rules). `requiresReason($from, $to)` depends on the two statuses alone. Moves that also depend on data are `ensure…` methods that take the record and the data as arguments. `ensureCanMove($record, $to, $reason)` checks the table, then the reason, and throws the domain exception. A state machine never locks, saves, records a revision or reads the database; the Action locks, calls it, then writes and audits. Computed shifts (a tournament completing from its bracket) stay with the class that computes them, and an operation that needs a status without moving it is an `ensure…` method (`TournamentStateMachine::ensureActive()`, `ensureOpen()`, `ensureStructureEditable()`, `ensureCanProgress()`). Test with a dataset of every from → to pair (including a status to itself) with the expected `canMove()`, `requiresReason()` and exact refusal, plus a wiring test per refused move in the Action; compute nothing in the dataset from the table under test.
+- **One class per case, picked by a resolver:** when an operation branches on an enum and each case has its own checks, each case gets its own class behind a small interface (what it checks, what it returns or fills, that it never writes), and a `…Resolver` returns the right one with a `match`. The Action keeps the shared lock, persist and audit; checks every case repeats go in one shared class (`PublicationDraftRequirements::ensureDraftReleasable()`), not an abstract parent. Examples: `LiveItemTransitions` (picked by `LiveItemTransitionResolver`; `TransitionLiveItemAction` keeps the lock, reason check, run status and persist; compare item states through `LiveItemStatus`, never string literals) and `PublicationReleases` (`ReleaseCard`, `ReleaseResults`, picked by `PublicationReleaseResolver`; `ReleaseEventPublicationAction` locks, saves and logs). Test each case class with its refusals and its allowed result, and the resolver with one case per enum value.
+- **Eligibility classes:** individual (wrestler, manager, referee) injury, suspension, employment and deletion rules live in `IndividualInjuryEligibility`, `IndividualSuspensionEligibility`, `IndividualEmploymentEligibility` and `IndividualDeletionEligibility`; tag teams keep their own membership-aware `TagTeam*Eligibility` classes; stables use focused collaborators such as `StableFormerMemberEligibility`. Typed Actions reload and lock the record inside the transaction before calling them.
+- `EventRosterSchedulingEligibility` locks the roster on an event's card and checks the new date; `LiveShowSourceRequirements` refuses a live show source that needs preparing.
+
+## Models
+
+- Lifecycle periods are stored in shared polymorphic models in `App\Models\Lifecycle`: `Employment` (wrestlers, managers, referees, tag teams), `Injury` (wrestlers, managers, referees), `Suspension` (wrestlers, managers, referees, tag teams), `Retirement` (wrestlers, managers, referees, tag teams, stables, titles) and `ActivityPeriod` (stables, titles). Do not add entity-specific period models. Wrestling-specific transitions stay in typed Actions (`DebutAction`, `PullAction`, `ReinstateAction`, `EstablishAction`, `DisbandAction`, `ReuniteAction`); the shared start/end Actions handle only persistence, locking and period integrity.
+- Period models are the authority for current and past state. `LifecycleTransition` is only an immutable audit log of named transitions, effective dates, actors and context; never derive state from it.
+- Small display facts are fine on a model (`TagTeam::hasInjuredMember()`). Time-zone conversion lives in `PromotionTimeZoneService`.
+- Lifecycle concerns stay focused on typed relationships and positive state facts; do not add predicates that only negate another relationship check.
+- Wrestler and tag team manager assignments and stable memberships are defined directly on each model, so their distinct pivot models, tables and keys stay visible. `Manageable` and `CanBeAStableMember` remain as shared type boundaries; do not reintroduce configurable relationship traits.
+- Championships: `Wrestler` and `TagTeam` implement `CanBeChampion` and share reign persistence through `HasChampionshipReigns`. A champion may hold several titles, so `currentChampionships` is authoritative and champion models have no singular `currentChampionship`. `Title` owns `championships` and a singular `currentChampionship`. Eager load a list's champions with `TitleBuilder::withCurrentChampion()`; reign length is calculated in `TitleReignService`.
+- Morph map aliases (pinned by `EloquentMorphMapTest`): event, manager, match, referee, stable, tag_team, title, user, venue, wrestler. A new polymorphic model changes the map and the test in the same commit.
+- The `class_alias` calls in `AppServiceProvider` for the former top-level roster model names exist because merged migrations import them. Keep them until those migrations are gone.
+- Stable status is computed from activity and retirement periods; there is no status column. Expose `StableStatus` only through the computed accessor.
+
+## Observers
+
+The three observers make audit records immutable: `LifecycleTransitionObserver`, `SponsorCommitmentRevisionObserver` and `TalentBookingRevisionObserver` (which guards `EventTalentBookingRevision`). They live in the model's domain folder under `app/Observers` (`Events`, `Lifecycle`). Each observer is named for the model it guards without the model's domain prefix. There is no `tests/Integration/Observers` folder: the two revision observers are tested from their models' Integration tests (`EventTalentBookingRevisionTest`, `EventSponsorCommitmentRevisionTest`), and `LifecycleTransitionObserver`'s refusal is tested in `tests/Integration/Actions/Lifecycle/RecordLifecycleTransitionActionTest.php`.
+
+## Enums
+
+- Four enums keep the kebab-case values already stored in rows: `MatchType`, `MatchFinish`, `RosterEntityType` and `TitleType`. Do not add a fifth.
+- `StableActivityTransition` and `TitleLifecycleTransition` are unbacked because they are never stored. `UnitedStatesState` stores the display name (`New York`) and has no `label()`.
+- Label keys are `<domain>.<enum>.<case value>` in the matching `lang/en` file (`titles.status.pending_debut`, `matches.type.tag-team`); where a flat key of that name already exists, use the plural group (`titles.types`, `users.roles`). Labels that already used shared flat keys keep them (`storylines.active`, `event-budget.talent`, `live-show.pending`, `sponsors.pending`, `public-events.cancelled`, and storyline source warnings such as `storylines.deleted_source`). Enums never shown to users need no label (identifiers, lifecycle vocabulary, selector kinds, invitation outcomes, code-only operation names, `BusinessRuleReason`).
+- For a value read from a stored snapshot or JSON, use `Enum::tryFrom($value)?->label() ?? $value`; use `from()` only through a model enum cast.
+- Code that tells cases apart calls a method on the enum (`StorylineSourceWarning::allowsCurrentSave()`), never compares translated text.
+- Select and filter options come from `App\Enums\Concerns\ProvidesFilterOptions` (`options()`, `filterOptions()` with an "All" row).
+- Lifecycle action enums expose `ability()` returning the policy ability name.
+
+## Exceptions
+
+- Concrete business exceptions extend `BaseBusinessException`. When presentation must tell failures apart, create the exception with `self::forReason()` and a stable `BusinessRuleReason` case; general failures keep `BusinessRuleReason::General`.
+- Messages use translation keys named `<domain>.errors.<operation>.<case>`.
+- Folders match a domain folder of the app (under `app/Models` or `app/Actions`). The only shared folders are `Roster/Individuals` (rules shared by wrestlers, managers and referees), `Scheduling` and `Lifecycle`. A shared "changed by someone else" exception (`RecordChangedException`) sits at the top level next to `BaseBusinessException`.
+- Two naming families: `CannotBe{Verb}edException` for disallowed state changes, with one static factory per reason, and `{Feature}Exception` for feature errors.
+- Matches and scheduling: `InvalidMatchConfigurationException` for incomplete or structurally invalid assignments, `EntityNotAvailableException` when a participant's or title's own state prevents it, `SchedulingConflictException` only for real collisions between bookings, times or resources.
+- Workflow explanations go in `docs/architecture`, not exception docblocks. See also [exception-writing-guide.md](../development/exception-writing-guide.md).
+
+## Collections
+
+- `MatchCompetitorsCollection::bySidePosition()` and `competitorModels()` are the one place a match's entries are grouped by side or mapped to their wrestlers and tag teams; load `side` and `competitor` first.
+- `EventBudgetLineCollection` (`unarchived()`, `archived()`, `inDirection()`) and `EventBudgetMovementCollection` (`unvoided()`, `refundsOf()`) only filter and sum loaded rows; the refund cap, excess check and dependent-refund refusal stay in the Actions. Every method returns the same collection type, re-indexed, so calls chain. `refundsOf()` keeps voided refunds on purpose.
+- `TitleChampionshipCollection` answers the reign lookups `ChampionshipReignManager` repeated (`forTitle()`, `wonAt()`, `lostAt()`, `current()`, `laterThan()`, `heldBefore()`, `covering()`). `heldBefore()` and `covering()` keep different date bounds on purpose; the not-soft-deleted check runs on every call and is never cached.
+- `TagTeamCollection::currentWrestlers()` uses only what the caller loaded and throws `LogicException` when a model lacks it.
+- Each collection is tested under `tests/Integration/Collections`, loading rows through the relation so the `#[CollectedBy]` wiring is proved too.
+
+## Code style
+
+Prefer named collection methods (`map`, `mapWithKeys`, `flatMap`, `keyBy`, `groupBy`, `partition`, `values`, `modelKeys` on an Eloquent collection) over loops that fill an array and `array_*` calls that rebuild a list. Keep the loop where it throws partway naming the failing item, keeps lock order, writes, carries state between passes, or feeds a stored or compared fingerprint, hash or snapshot whose exact order must not change. Keep `array_values()` around `Collection::all()` when the result feeds a `list<>` type (PHPStan types `all()` as `array<int, T>`). Use `modelKeys()` only on an Eloquent collection held in a variable (base collections lack it, and calling it on a query result trips `noUnnecessaryCollectionCall`).
+
+## Queries, Services and ViewModels
+
+- `EventRosterService::key()` is the one owner of the `type:id` roster key (`wrestler:12`, `tag_team:3`, `referee:7`); `RosterDateAvailability::key()` delegates to it. Older inline builders (`BookingHistoryViewModel::key()`, `FiltersMatchHistory`, `PublicEventSourceService`, `TournamentMatchRequirements`, `AddMatchForEventAction`, `MatchTableFormatter::unbookableKey()`) move to it when touched; the position-prefixed key in `AddMatchForEventAction` is a different key and stays. `EventRosterServiceTest` pins the format. Queries return models and leave the key to their caller.
+- Services are read-only and organized by responsibility (Events, Promotions, Roster/Stables, Storylines, Titles, Tournaments). Membership Services (`StableMembershipService`) read current and past membership; establishing, syncing and ending memberships (dating ended pivots rather than deleting) are Actions. Lifecycle reads through Services (`StableActivityEligibility` through `StableMembershipService`, `TournamentMatchRequirements` through `TournamentBracketService`). The Production screen also calls `EventProductionRequirements`, which the save re-runs.
+- ViewModels format money with `App\ValueObjects\UsdAmount`; a different layout builds from `UsdAmount::decimal()`. `Gate::allows()` / `Gate::denies()` are allowed in a ViewModel only to leave private fields out (production notes, crew entries). Write paths that need the same data use the underlying Query or Service (`EventPackSourceService`, `EventPackCardService`). The view receives the ViewModel's array, never the ViewModel, and anything a Blade loop needs per row is computed into the array keyed by the row's id. ViewModels are tested at their mirrored path under `tests/Integration/ViewModels/`.
+- Actions, Lifecycle classes and Services may call a Query; when they need several reads combined, split them into single-query Queries plus a Service that combines the results. "One query" is checked by the Query's own test, which counts statements where it matters.
+
+## Livewire
+
+- Components run Actions through `executeBusinessAction()` (from the `ExecutesBusinessActions` concern), which catches `BaseBusinessException` and shows its message. Concerns in `app/Livewire/Concerns` are shared by more than one component (`ExecutesBusinessActions`, `DispatchesActionFeedback`, `SearchesRosterMembers`, `ShowTableTrait`, `FiltersMatchHistory`). A concern may look up the record a component was given an id for, but never decides business rules. Plain helpers in `app/Livewire/Support` or a domain `Support` folder (`RosterMemberSearch`, `BookableRosterSearch`, the roster route and error-message resolvers) are injected and hold no Livewire state.
+- Actions throw the plain `RecordChangedException::changed()`. A screen that keeps the user's unsaved input shows it through `ExplainsKeptInput::failureMessageKeepingInput()` ("Your changes are still here."); a screen that loses any of it shows the plain message.
+- Injection examples: method injection before client parameters (`Promotions\Members\Manage::cancelInvitation(RemovePromotionInvitationAction $action, int $invitationId)`); `boot()` injection into a non-public property when several methods share it (`EventPackViewModel` in `Events\Components\SponsorCommitments`), when the method is also called by other methods (`TalentBookingFingerprintService` for `TalentBookings::edit()`), or when the framework calls the method without arguments (a table's `builder()` or `projectRowState()`, as in `Stables\Tables\PreviousManagers` and `Users\Tables\Main`).
+- A Livewire Form object is not built by the container: pass collaborators in from the component (`$this->form->toData($timing)`). Only where Livewire itself calls the form (`rules()` run by `validate()`) is one narrowly commented `app()` kept; `LivewireArchitectureTest` allow-lists exactly those two.
+- Development dummy data is assigned to the concrete form's typed properties; collaborators such as match form population accept the concrete form type.
+- `RosterResourceRouteResolver` builds Wrestler and TagTeam resource URLs shared by tables; `MatchCompetitorRouteResolver` only builds escaped match-link markup.
+- Status projection: show pages load it with their query or `loadExists()` in `render()`; tables paginate first and project through `DataTableComponent::projectRowState()` for the page rows instead of adding `with*State()` to `builder()`. Never read status, `isInjured()` or `isSuspended()` on unprojected models in a loop. A table action that changes the counts calls `forgetMetadata()`.
+- Roster pickers use `x-form.inputs.roster-combobox`, which loads at most 20 bookable matches through a `#[Renderless]` search action backed by `BookableRosterSearch`; labels for already-selected ids (including trashed and no-longer-bookable ones) resolve separately.
+
+## Validation rules (`app/Rules`)
+
+- Rules implement `ValidationRule`, live in a domain folder (`Wrestlers`, `TagTeams`, `Shared`), are named for the condition (`IsNotInjured`, `CanJoinStable`), fail with a translation key (`wrestlers.validation.*`), reject a value that is not an int or string before querying, and report missing or malformed records through the failure callback (never `findOrFail()`, `firstOrFail()` or `sole()`). Rules that depend on the booked event take it through the constructor (`IsBookable`).
+- `CanJoinStable` holds the shared stable checks (employment, suspension, current-stable exclusivity, membership dates), parameterized by member model; member-specific checks (wrestler injuries, representation through a selected tag team) are separate rules. `CanJoinTagTeam` and similar rules run at the Form Request or Livewire form before Data objects are built.
+- Checks that need only the submitted input belong in the validator (`required_if`, or a Rule such as `HttpsUrlWithoutCredentials`); Lifecycle guards keep checks that need records or state.
+- Rules are tested at their mirrored path in `tests/Integration/Rules` through a real validator, with a valid and an invalid record and the translated message.
+
+## Support
+
+- `LikeTerm` (`app/Support/Search`) cleans a typed term for a "contains" LIKE query: it drops `%`, `_` and backslash, trims, and can cut to a maximum length. Build it with `LikeTerm::from($term, $maxLength)`, skip the filter when `isEmpty()`, and pass `contains()` to `whereLike()`. Terms that are only trimmed or cut (sponsor names, title history) are not LikeTerm searches.
+- `Support/Images/ImageReencoder` takes image bytes and returns a fresh PNG, throwing `ImageReencodingException` for anything it refuses (unreadable, too many pixels, animated, failed decode). It never touches an upload, disk or model; limits (8 million pixels, 2048 pixel longest edge) stay inside it. Unit-test it with generated GD fixtures.
+- Enum concerns live in `app/Enums/Concerns`.
+
+## Value objects and casts
+
+- Casts: `AddressCast`, `HeightCast`, `PhoneNumberCast`, `WeightCast`. `Height` refuses negative feet, inches above 11 and zero.
+- Read-side value objects have no column or cast. They wrap a validated shape that is only read, replacing repeated `array_filter`/`array_column` and unpacking with named questions: `CompetitorSelection` (`fromSides()`, `idsByType()`, `onSide()`, `offSide()`, `isHeadToHead()`, `entries()`), `MatchSides` (`competitors()`, `entriesPerSide()`, carried by a Data object), `ProductionPlan` (a saved JSON section, `activeAssignments()`, `cuesFor($itemKey)`; it may skip constructor validation because the stored shape was validated on save) and `BracketShape` (from a capacity: `rounds()`, `isFinal()`, `seeds()`, `slots()`, `feeders()`, `ancestors()`, `descendants()`). Test them under `tests/Unit/ValueObjects/`, including each constructor refusal.
+
+## View layer
+
+- `PromotionSwitcherComposer` is registered in `AppServiceProvider::boot()` against explicit view names.
+- `app/View/Forms/FormFieldContext` is a `final readonly` value built with `from()` by the `input`, `select`, `textarea` and roster-combobox components. It works out a field's name, id, error state and `aria-describedby`, stays free of queries, models and validation, and throws `InvalidArgumentException` for a non-string name or id.
+- Composers are tested in `tests/Integration/View/Composers` with and without a signed-in user; the form context through the components that render it (`tests/Integration/View/Components`).
+- CSS tokens live in `resources/css/tokens.css` as Tailwind v4 `@theme` tokens, imported by each entry stylesheet; their names are in [DESIGN.md](../../DESIGN.md), and `ThemeTokensTest` checks them. Add theme overrides only for values the app uses, and keep ordinary layout variables outside `@theme`.
+
+## Mail
+
+`InvitedToPromotion` (`app/Mail/Promotions`) is `final`, takes its subject and body from `mail.*` translation keys, and is sent by `InvitePromotionMemberAction`. The invitation reads the same whether or not an account exists, carries no token and grants nothing: the recipient signs in and accepts inside the app. Mailables are tested in `tests/Integration/Mail`.
+
+## Middleware and providers
+
+- `SendSecurityHeaders` skips any header a route already set and sends Strict-Transport-Security only on secure requests.
+- Tests of Laravel's own middleware as configured here (`AuthenticateSession`, trusted proxies) live in `tests/Feature/Http` beside `ErrorPagesTest`, not in the mirrored `Middleware` folder.
+- `AppServiceProvider` wires the scoped `PromotionContextService`, the case-insensitive user provider, `Gate::before` (the promotion gate), the lazy-loading guard, password defaults, forced HTTPS, view composers, Livewire persistent middleware and the enforced morph map.
+
+## Console
+
+The data-changing commands `promotions:backfill-roster-ownership` and `promotions:backfill-event-title-ownership` take `--dry-run` and require `--force`, and reject an unknown argument record before doing anything. Each command is tested in an Integration test beside the behaviour it changes: the dry run changes nothing and reports the count, no flag refuses, `--force` applies, and a missing record fails. Console code is part of the 100% coverage gate.
+
+## Domain rules
+
+### Booking
+- Booking eligibility uses typed strategies: individual roster members share employment, suspension and injury checks; tag teams add membership requirements and recursively check current wrestlers. Type dispatch stays in `RosterBookingStrategyResolver`, and `RosterBookingEligibility` decides wrestler, referee and tag team booking. Models expose state only and do not implement a Bookable contract.
+- `IndividualBuilder::bookable()` and `TagTeamBuilder::bookable()` are SQL projections of the strategies and feed only the match form search. Change the scope in the same commit as a booking predicate and extend `BookableScopeParityTest`; when SQL cannot express a rule exactly, narrow the scope rather than widen it. The `IsBookable` rules and `RosterBookingEligibility` remain the authority.
+- Context-free `RosterBookingEligibility::allows()` and `bookable()` are lifecycle-only. With an event date, `allows($member, $on)` and `bookableOn($day, $at)` read employment on that date (tag teams: the team and every current wrestler) while retirement, suspension and injury stay as they are now; keep the two in parity and pass the event's date from every booking caller ([decision 0002](../decisions/0002-booking-employment-is-read-on-the-event-date.md)). `RosterDateAvailability` owns unavailable promotion-local days, independent of injury and employment and out of result and title eligibility. During a match repair only the locked existing assignment may keep a calendar restriction; client input never supplies a bypass.
+- After the ordered event-set and match locks, prelock referees, selected team parents, then the complete direct and represented wrestler set in ascending id, through `MatchRosterLock`. Calendar entry writes lock their person and never take event or match locks afterwards. Schedule and restore Actions validate the whole represented roster at the proposed local date.
+
+### Matches
+- A wrestler, tag team or title appears once per event card and cannot be booked into different events at the same date and time; referees may work several matches on one card but not different events at the same time; unscheduled events conflict only within their own card. `MatchSchedulingLock` takes the event-set and match locks, and `MatchAssignmentEligibility` (with the competitor, referee and title eligibility classes it composes) refuses conflicts.
+- A selected tag team is one competitor entry but represents all its current wrestlers for side sizes; selecting one of those wrestlers directly in the same match is refused. `MatchCompetitorRuleSet` gives form feedback; `MatchCompetitorRequirements` enforces side counts, entrant limits and duplicates before `AddCompetitorsToMatchAction` saves.
+- A non-vacant title's current champion must be among the selected competitors: a form rule checks it, and `AddTitlesToMatchAction` repeats it after competitors are assigned.
+- Matches are deleted by soft-deleting only the `EventMatch` through `DeletionStateManager`; competitors, assignments, results and championship references stay as history. Use `withTrashed()` only for explicit historical access.
+- Scheduling lock order: the complete same-date event set (ascending id, including the Action's own event), then the match, then competitors and resources in ascending id. Schedule changes that move an event to a date (including Events `RestoreAction`) first take the date-slot lock(s), ascending: an upsert of the slot's row in `scheduling_slot_locks`, which holds that row lock until the transaction ends on all three engines.
+
+### Results and titles
+- `RecordResultAction` applies the result and every attached title outcome in one transaction. Finishes that allow title changes transfer or establish each reign on the event date; DQ, countout, draws and no-decisions keep the champion. Corrections may void reigns this match created and restore the prior reign while the title is active and the prior champion employed; a correction back to a dethroned champion who has since been released or retired reopens their original reign and ends it on that date (never a second reign); any other corrected winner is crowned. A back-filled winner who left on the show's day at or before its start does not take the title (treated like a no-change result). Corrections are refused once a later reign depends on the lineage. Results are refused for events that have not happened, and title changes re-check that the title and winner exist, plus title activity and winner booking eligibility unless the event is from an earlier local day in its promotion's time zone (back-fill).
+- Title results are recorded in date order: a result that would create or change a reign earlier than the latest recorded reign, or inside an earlier vacated reign's interval, is refused; a correction that leaves the champion unchanged is not.
+- Restoring a title locks the soft-deleted title in its transaction and refuses an active title with the same name.
+
+### Events and venues
+- Once an event has happened its date cannot change (other details can). `EventSchedulingEligibility` enforces this in Livewire validation and in the locked Events `UpdateAction`, and also fixes the date of any event whose matches created or closed a reign.
+- A venue hosts one event per calendar day (application time zone). Event `CreateAction` and `UpdateAction` lock the venue before `VenueSchedulingEligibility` checks for a booking; unscheduled events reserve no day. `UpdateAction` re-checks only when `VenueSchedulingEligibility::isBookingChanging()` says the venue or day changes.
+- Restoring an event locks the event and venue, runs `VenueSchedulingEligibility`, takes the date-slot lock first and runs `MatchAssignmentEligibility::ensureEventCanBeRescheduled` for its own date, so a restore cannot double-book anyone booked while it was deleted.
+- Restoring a venue locks the soft-deleted venue and refuses an active venue with the same name.
+
+### Stables
+- Stable activity, retirement, deletion/restoration and restructuring eligibility live in Lifecycle collaborators; former-member rules in `StableFormerMemberEligibility`, which reunion and unretirement may use.
+- `StableMembershipService` only reads; creating, removing and syncing memberships are Actions that date ended pivots.
+
+### Tag teams
+- Employment and release eligibility live in `TagTeamEmploymentEligibility`. Employment refuses existing current or future employment, never un-retires a team, and releasing ends current partnerships; re-employment needs a newly established membership.
+- Suspension, retirement and deletion rules live in their `TagTeam*Eligibility` collaborators, with predicates and throwing guards kept aligned.
+- A wrestler belongs to at most one current tag team: Actions lock incoming wrestlers in ascending id and re-check in the transaction, a partial unique index backs it up, and the form rule is only for feedback.

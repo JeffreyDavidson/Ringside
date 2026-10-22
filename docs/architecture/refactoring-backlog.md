@@ -87,7 +87,7 @@ constraints in Rules, and authorization at the route (`->can()`) or the Livewire
 component, decided by `PromotionGate`. Livewire actions must continue to authorize
 on the server immediately before protected operations. Actions neither validate
 nor authorize: they take Data objects and enforce business and state rules
-(`.ai/rules/actions.md`).
+(the shared `laravel-conventions` rule `actions.md`).
 
 ### Actions, Services, and Lifecycle managers
 
@@ -186,7 +186,7 @@ live show, talent bookings, budget, sponsor promises and public event page,
 data and returns a typed, ready-to-render array; controllers and Livewire
 components are its only callers, and the view never receives or creates the
 object. The rules and the architecture checks that enforce them are in
-`.ai/rules/view-models.md` and `tests/Feature/Architecture/ViewModelArchitectureTest.php`.
+the shared `laravel-conventions` rule `view-layer.md` and `tests/Feature/Architecture/ViewModelArchitectureTest.php`.
 The Overview ViewModel still queries Eloquent directly (no repository layer),
 relying on the promotion global scope.
 
@@ -504,7 +504,7 @@ base would save little code and weaken the typed boundaries those rules protect.
 ### Removing the all-`false` policy methods
 
 Most policy methods return `false` because `PromotionGate` (via `Gate::before`)
-makes the real decision. They look redundant, but `.ai/rules/policies.md`
+makes the real decision. They look redundant, but the shared `laravel-conventions` rule `policies.md`
 requires conventional signatures and they document the ability surface for each
 model, and the gate is a recorded decision (see
 [Decision 0001](../decisions/0001-promotion-gate-is-the-permission-engine.md)). Related: `PromotionPolicy` instance abilities can never be reached through
