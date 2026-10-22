@@ -133,3 +133,32 @@ it('never treats a manager as booked in a match', function (): void {
     expect(fn () => $eligibility->ensureCanDelete($manager))
         ->not->toThrow(CannotBeDeletedException::class);
 });
+
+it('names a booked referee by full name when refusing the deletion', function (): void {
+    // Arrange
+    $referee = Referee::factory()
+        ->create(['first_name' => 'Earl', 'last_name' => 'Hebner'])
+        ->refresh();
+    EventMatch::factory()
+        ->forEvent(Event::factory()->scheduled()->create())
+        ->create()
+        ->referees()
+        ->attach($referee);
+    $eligibility = resolve(IndividualDeletionEligibility::class);
+
+    // Act & Assert
+    expect(fn () => $eligibility->ensureCanDelete($referee))
+        ->toThrow(CannotBeDeletedException::class, "Referee 'Earl Hebner' cannot be deleted");
+});
+
+it('names an already deleted manager by full name when refusing the deletion', function (): void {
+    // Arrange
+    $manager = Manager::factory()->create(['first_name' => 'Paul', 'last_name' => 'Heyman']);
+    $manager->delete();
+    $manager->refresh();
+    $eligibility = resolve(IndividualDeletionEligibility::class);
+
+    // Act & Assert
+    expect(fn () => $eligibility->ensureCanDelete($manager))
+        ->toThrow(CannotBeDeletedException::class, "Manager 'Paul Heyman' cannot be deleted because it is already deleted.");
+});

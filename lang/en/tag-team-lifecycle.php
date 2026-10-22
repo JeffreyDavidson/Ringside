@@ -1,7 +1,7 @@
 <?php
 
 // Messages for the tag team lifecycle exceptions. The tag-teams.errors keys hold the
-// short sentences the roster screens show; these carry :context, for example "TagTeam 'The Hart Foundation'".
+// short sentences the roster screens show; these carry :context, for example "Tag team 'The Hart Foundation'".
 return [
     'errors' => [
         'employ' => [

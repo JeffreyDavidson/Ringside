@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableMembershipData;
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Lifecycle\Periods\OpenPeriodEnder;
 use App\Models\Roster\Stables\Stable;
@@ -31,7 +32,7 @@ class RemoveStableMembersAction
     public function handle(Stable $stable, StableMembershipData $members, Carbon $removalDate): void
     {
         if ($removalDate->isFuture()) {
-            throw InvalidDateRangeException::futureNotAllowed($removalDate, 'Stable membership removal');
+            throw InvalidDateRangeException::futureNotAllowed($removalDate, DateRangeContext::StableMembershipRemoval);
         }
 
         if ($members->isNotEmpty()) {

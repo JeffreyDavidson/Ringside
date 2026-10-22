@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
+use App\Enums\Lifecycle\DateRangeContext;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUpdatedException;
@@ -58,7 +59,7 @@ class UpdateAction
             throw InvalidDateRangeException::endBeforeStart(
                 $stableData->start_date,
                 $stableData->end_date,
-                'stable activity',
+                DateRangeContext::StableActivity,
             );
         }
 

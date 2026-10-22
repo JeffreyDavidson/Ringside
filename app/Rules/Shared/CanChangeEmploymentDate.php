@@ -70,15 +70,17 @@ class CanChangeEmploymentDate implements ValidationRule
         LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
 
         if (! $query->exists()) {
-            $modelName = $this->getModelName($this->model);
-            $fail(__('core.validation.employment_date_employed', ['name' => $modelName]));
+            $fail(__('core.validation.employment_date_employed', ['name' => $this->getModelName($this->model)]));
         }
     }
 
+    /**
+     * The name a person reads for the record: `name`, else `full_name` (referees and managers).
+     */
     private function getModelName(Model $model): string
     {
-        $name = $model->getAttribute('name');
+        $name = $model->getAttribute('name') ?? $model->getAttribute('full_name');
 
-        return is_string($name) ? $name : class_basename($model);
+        return is_string($name) ? $name : '';
     }
 }

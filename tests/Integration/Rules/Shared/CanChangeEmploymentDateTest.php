@@ -23,7 +23,12 @@ function managerWithEmploymentPeriod(Carbon $startedAt, ?Carbon $endedAt = null)
         $employment = $employment->ended($endedAt);
     }
 
-    return Manager::factory()->has($employment, 'employments')->create();
+    $manager = Manager::factory()
+        ->has($employment, 'employments')
+        ->create(['first_name' => 'Paul', 'last_name' => 'Heyman']);
+
+    // full_name is a generated column, so the manager is read back the way the form loads it.
+    return $manager->refresh();
 }
 
 describe('CanChangeEmploymentDate validation rule', function () {
@@ -40,7 +45,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
             }),
         );
 
-        expect($message)->toBe('The employment date cannot be changed while Manager is currently employed.');
+        expect($message)->toBe('The employment date cannot be changed while Paul Heyman is currently employed.');
     });
 
     test('rejects an invalid employment date value', function () {
@@ -118,7 +123,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         expect($message)->toBe('The employment date cannot be changed while Test Wrestler is currently employed.');
     });
 
-    test('uses the class basename when a model has no name attribute', function () {
+    test('uses the full name when a model has no name attribute', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $message = null;
 
@@ -130,7 +135,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
             }),
         );
 
-        expect($message)->toBe('The employment date cannot be changed while Manager is currently employed.');
+        expect($message)->toBe('The employment date cannot be changed while Paul Heyman is currently employed.');
     });
 
     test('accepts string date values supported by Carbon', function (string $value) {

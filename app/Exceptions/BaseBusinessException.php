@@ -7,6 +7,7 @@ namespace App\Exceptions;
 use App\Enums\Shared\BusinessRuleReason;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Throwable;
 
 abstract class BaseBusinessException extends Exception
@@ -53,16 +54,30 @@ abstract class BaseBusinessException extends Exception
 
     protected static function formatModelContext(Model $model): string
     {
-        $name = $model->getAttribute('name');
+        $types = (array) trans('core.model_types');
 
-        if (! is_string($name)) {
-            $modelKey = $model->getKey();
-            $modelIdentifier = is_int($modelKey) || is_string($modelKey)
-                ? $modelKey
-                : 'unknown';
-            $name = "ID: {$modelIdentifier}";
+        return __('core.model_context', [
+            'type' => Arr::string($types, $model->getMorphClass()),
+            'name' => self::nameOf($model),
+        ]);
+    }
+
+    /**
+     * The name a person reads for a record: `name`, else `full_name` (referees and managers), else its key
+     * (empty for a record not saved yet).
+     */
+    private static function nameOf(Model $model): string
+    {
+        foreach (['name', 'full_name'] as $attribute) {
+            $value = $model->getAttribute($attribute);
+
+            if (is_string($value)) {
+                return $value;
+            }
         }
 
-        return class_basename($model)." '{$name}'";
+        $key = $model->getKey();
+
+        return is_int($key) || is_string($key) ? (string) $key : '';
     }
 }
