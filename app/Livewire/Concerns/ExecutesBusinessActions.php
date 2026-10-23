@@ -19,10 +19,10 @@ trait ExecutesBusinessActions
     {
         try {
             $action();
-        } catch (BaseBusinessException $exception) {
+        } catch (BaseBusinessException $baseBusinessException) {
             $message = $failureMessage instanceof Closure
-                ? $failureMessage($exception)
-                : $exception->getMessage();
+                ? $failureMessage($baseBusinessException)
+                : $baseBusinessException->getMessage();
 
             $this->dispatchActionFailure($message);
 

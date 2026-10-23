@@ -13,29 +13,30 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Venue;
+use Override;
 
 /** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Venue::class;
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.venue-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'venue';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'venues';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'venues';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'venues';
 
     /**
@@ -76,7 +77,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

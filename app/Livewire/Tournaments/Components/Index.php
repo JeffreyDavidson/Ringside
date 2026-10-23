@@ -60,15 +60,17 @@ class Index extends Component
 
             return;
         }
+
         $data = $this->form->data();
 
         try {
             $tournament = $save->handle($promotion, $data, $this->actor());
-        } catch (BaseBusinessException $exception) {
-            $this->addError('operation', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('operation', $this->failureMessageKeepingInput($baseBusinessException));
 
             return;
         }
+
         $this->redirectRoute('tournaments.show', ['tournament' => $tournament]);
     }
 
@@ -82,6 +84,7 @@ class Index extends Component
         if (! in_array($rosterKind, [BookableRosterKind::Wrestlers, BookableRosterKind::TagTeams], true)) {
             return [];
         }
+
         $promotion = $context->current();
 
         return $promotion instanceof Promotion ? $search->search($rosterKind, $term, $promotion->id) : [];

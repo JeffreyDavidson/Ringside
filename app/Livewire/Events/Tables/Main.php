@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
+use Override;
 
 /**
  * @property-read array<int|string, string|null> $getVenues
@@ -38,28 +39,28 @@ class Main extends BaseTable
 
     protected PromotionContextService $promotionContext;
 
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Event::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.events.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.event-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'event';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'events';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'events';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'events';
 
     /**
@@ -124,7 +125,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

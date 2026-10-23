@@ -73,6 +73,7 @@ test('a development refuses an unknown or not-yet-involved cast member', functio
         $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->addDay()->toDateString()), signedInUser());
         $id = $person->id;
     }
+
     $data = new DevelopmentData('Confrontation', 'An argument.', today()->toDateString(), 1, [$id], new SourceData, (string) Str::uuid());
     expect(fn () => resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, $data, signedInUser()))->toThrow(StorylineConflictException::class)
         ->and($story->developments()->count())->toBe(0);
@@ -155,8 +156,10 @@ test('source context comparison retains strict scalar types and ordered lists', 
         if (! is_array($competitors)) {
             throw new LogicException('The linked match fixture must contain a competitor list.');
         }
+
         $context['competitors'] = array_reverse($competitors);
     }
+
     $step->source_context = $context;
     $step->save();
     $data = new DevelopmentData('Actual confrontation', 'The confrontation happened.', today()->toDateString(), 1, [], $source, (string) Str::uuid(), $step->id);

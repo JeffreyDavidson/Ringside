@@ -35,6 +35,7 @@ test('stable match and segment identities show source evidence without treating 
     foreach ($content['items'] as &$item) {
         $item['state'] = 'finished';
     }
+
     $f['run']->content = $content;
     $f['run']->save();
     // Act
@@ -52,6 +53,7 @@ test('removed segment UUIDs never attach to a replacement with the same label', 
     foreach ($content['segments'] as &$segment) {
         $segment['id'] = (string) Str::uuid();
     }
+
     unset($segment);
     $pack->content = $content;
     $pack->save();
@@ -113,6 +115,7 @@ test('skipped sources require an explanation and never cancel the planned story 
             $item['state'] = 'skipped';
         }
     }
+
     unset($item);
     $f['run']->content = $content;
     $f['run']->save();

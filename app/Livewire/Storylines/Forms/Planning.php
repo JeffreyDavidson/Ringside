@@ -111,6 +111,7 @@ class Planning extends Form
             if ($existing !== null) {
                 $this->fillEntry($story, $existing);
             }
+
             $this->occurredOn = $step->event_id === null ? $this->occurredOn : Event::query()->withTrashed()->findOrFail($step->event_id)->local_date?->toDateString() ?? $this->occurredOn;
         }
 
@@ -166,6 +167,7 @@ class Planning extends Form
 
             return;
         }
+
         $this->occurredOn = $entry->occurred_on->toDateString();
 
         if ($entry->cast === []) {
@@ -173,6 +175,7 @@ class Planning extends Form
 
             return;
         }
+
         $this->participantIds = array_values($story->participants()->where(function (Builder $query) use ($entry): void {
             foreach ($entry->cast as $person) {
                 $query->orWhere(fn (Builder $cast) => $cast->where('participant_type', $person['type'])->where('participant_id', $person['id']));

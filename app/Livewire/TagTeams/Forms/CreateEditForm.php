@@ -13,6 +13,7 @@ use App\Rules\Managers\IsAssignable;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /** @extends BaseForm<TagTeam> */
 class CreateEditForm extends BaseForm
@@ -88,7 +89,7 @@ class CreateEditForm extends BaseForm
         return $tagTeam?->currentManagers()->get()->map(fn (Manager $manager): int => $manager->id)->all() ?? [];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

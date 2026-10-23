@@ -32,16 +32,19 @@ class TransitionLiveItemAction
             if (! is_int($index)) {
                 throw LiveShowException::unknownItem();
             }
+
             $before = $content['items'][$index];
 
             if ($operation->requiresReason() && ($reason === null || mb_trim($reason) === '' || mb_strlen($reason) > 2000)) {
                 throw LiveShowException::reasonRequired();
             }
+
             $updated = $this->transitions->resolve($operation)->apply($run, $index, $start, $finish);
 
             if ($operation === LiveItemOperation::Start) {
                 $run->status = LiveShowStatus::Running;
             }
+
             $updated['reason'] = $reason;
             $updated['updated_by'] = $actor->id;
             $content['items'][$index] = $updated;

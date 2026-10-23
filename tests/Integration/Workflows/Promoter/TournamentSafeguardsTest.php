@@ -241,6 +241,7 @@ it('rechecks chronology when editing the name of a same-card event', function ()
         $match = bookTournamentNode($world, $node);
         recordTournamentWinner($match, $t);
     }
+
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Tournament night', $world['event']->date, null, null));
     expect($world['event']->refresh()->name)->toBe('Tournament night')->and($t->refresh()->status)->toBe(TournamentStatus::Completed);
 });
@@ -282,6 +283,7 @@ it('rejects forged low-level tournament booking contexts atomically', function (
         bookTournamentNode($world, $node);
         $event = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
     }
+
     $version = $t->refresh()->version;
     $data = new EventMatchData(MatchType::Singles, $world['referees'], $titles, new MatchSides(collect([1 => ['wrestlers' => [$first]], 2 => ['wrestlers' => [$second]]])), null);
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $data, administrator(), $node, $version))->toThrow($case === 'foreign tournament' ? RecordChangedException::class : TournamentException::class)
@@ -316,6 +318,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
         $match = resolve(BookTournamentMatchAction::class)->handle($node, $t->refresh()->version, new TournamentBookingData($event, $world['referees']), administrator());
         recordTournamentWinner($match, $t);
     }
+
     resolve(UpdateAction::class)->handle($world['event'], new EventData('Qualification night', $world['event']->date, null, null));
     expect($world['event']->refresh()->name)->toBe('Qualification night')->and($t->refresh()->status)->toBe(TournamentStatus::Completed);
 });

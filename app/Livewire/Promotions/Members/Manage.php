@@ -134,9 +134,9 @@ class Manage extends Component
                 $user,
                 $role,
             );
-        } catch (BaseBusinessException $exception) {
+        } catch (BaseBusinessException $baseBusinessException) {
             $this->memberRoles[$userId] = $this->currentRole($promotion, $userId);
-            $this->addError('member', $exception->getMessage());
+            $this->addError('member', $baseBusinessException->getMessage());
 
             return;
         }
@@ -167,8 +167,8 @@ class Manage extends Component
                 $user,
                 $membershipStatus,
             );
-        } catch (BaseBusinessException $exception) {
-            $this->addError('member', $exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('member', $baseBusinessException->getMessage());
 
             return;
         }

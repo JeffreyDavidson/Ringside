@@ -16,6 +16,7 @@ use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Stable>
@@ -26,7 +27,7 @@ class FormModal extends BaseFormModal
 {
     use SearchesRosterMembers;
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.started_at';
 
     public CreateEditForm $form;
@@ -53,7 +54,7 @@ class FormModal extends BaseFormModal
     }
 
     /** A taken name belongs on the name field; every other business failure is about the dates. */
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         return match ($exception->reason()) {

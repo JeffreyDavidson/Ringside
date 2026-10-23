@@ -137,6 +137,7 @@ class LiveShow extends Component
 
             return;
         }
+
         $this->reviewing = false;
         $this->draftKey = $key;
         $this->draftLabel = $item['label'];
@@ -164,6 +165,7 @@ class LiveShow extends Component
             $rules += ['actualStart' => ['required', 'date_format:Y-m-d\TH:i'], 'actualFinish' => ['nullable', 'date_format:Y-m-d\TH:i'],
                 'startOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/'], 'finishOffset' => ['required', 'regex:/^[+-]\d{2}:\d{2}$/']];
         }
+
         Validator::make(['draftOperation' => $this->draftOperation, 'reason' => $this->reason, 'actualStart' => $this->actualStart, 'actualFinish' => $this->actualFinish,
             'startOffset' => $this->startOffset, 'finishOffset' => $this->finishOffset], $rules)->validate();
         $this->perform(function (Event $event) use ($timing): void {
@@ -174,6 +176,7 @@ class LiveShow extends Component
             if ($this->draftOperation === 'correct' && (! $start instanceof Carbon || ($this->actualFinish !== '' && ! $finish instanceof Carbon))) {
                 throw LiveShowException::invalidTimes();
             }
+
             $this->transitionItem->handle(
                 $event,
                 $this->draftVersion,
@@ -237,9 +240,10 @@ class LiveShow extends Component
             $operation($event);
             $this->draftKey = '';
             $this->reviewing = false;
-        } catch (BaseBusinessException $exception) {
-            $this->addError('run', $exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('run', $baseBusinessException->getMessage());
         }
+
         $this->refreshState();
     }
 

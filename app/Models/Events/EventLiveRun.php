@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @phpstan-import-type Assignment from \App\Models\Events\EventPack
@@ -44,7 +45,7 @@ class EventLiveRun extends Model
     /** @use HasFactory<EventLiveRunFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

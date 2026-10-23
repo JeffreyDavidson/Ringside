@@ -18,32 +18,33 @@ use App\Livewire\Table\Filter;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<Referee> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Referee::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.referees.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.referee-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'referee';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'referees';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'referees';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'referees';
 
     /** @return RefereeBuilder<Referee> */
@@ -55,7 +56,7 @@ class Main extends BaseTable
             ->orderBy('referees.id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(IndividualBuilder::ROSTER_STATE);
@@ -77,7 +78,7 @@ class Main extends BaseTable
     }
 
     /** @return array<int, Filter> */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

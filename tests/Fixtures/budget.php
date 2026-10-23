@@ -70,10 +70,12 @@ function budgetBusinessFingerprint(): array
         if (in_array($table, $skip, true)) {
             continue;
         }
+
         $rows = DB::table($table)->get()->map(fn (object $row): string => json_encode($row, JSON_THROW_ON_ERROR))->all();
         sort($rows);
         $fingerprints[$table] = hash('sha256', implode("\n", $rows));
     }
+
     ksort($fingerprints);
 
     return $fingerprints;
@@ -89,6 +91,7 @@ function budgetSharedSurfaces(Event $event): array
     foreach (['event' => 'events.show', 'pack' => 'events.pack.show', 'live' => 'events.live-show.show'] as $name => $routeName) {
         $surfaces[$name] = (string) \Pest\Laravel\get(route($routeName, $event))->assertOk()->getContent();
     }
+
     $surfaces['print'] = (string) \Pest\Laravel\get(route('events.pack.show', ['event' => $event, 'print' => 1]))->assertOk()->getContent();
     auth()->logout();
     app(PromotionContextService::class)->clear();

@@ -11,6 +11,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\PreviousStablesQuery;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
@@ -21,10 +22,10 @@ class PreviousStables extends BasePreviousStablesTable
     #[Locked]
     public ?int $managerId = null;
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'stables';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'stables';
 
     protected PreviousStablesQuery $previousStables;
@@ -46,7 +47,7 @@ class PreviousStables extends BasePreviousStablesTable
         return $this->previousStables->get($managerId);
     }
 
-    #[\Override]
+    #[Override]
     public function columns(): array
     {
         return [

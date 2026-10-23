@@ -10,16 +10,17 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\View\View;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Manager>
  */
 class FormModal extends BaseFormModal
 {
-    #[\Override]
+    #[Override]
     protected string $modelTitleField = 'full_name';
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.first_name';
 
     public CreateEditForm $form;

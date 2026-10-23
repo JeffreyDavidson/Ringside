@@ -31,6 +31,7 @@ class SaveEventPackAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
+
             // Retain removed-match notes and omitted entries; identity is never inferred from card position.
             $content = [
                 'timezone' => $data->timezone,
@@ -52,6 +53,7 @@ class SaveEventPackAction
             if (isset($pack?->content['production'])) {
                 $content['production'] = $pack->content['production'];
             }
+
             $pack ??= new EventPack;
             $pack->event_id = $event->id;
             $pack->version = $version + 1;

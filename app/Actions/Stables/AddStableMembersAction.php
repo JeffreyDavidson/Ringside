@@ -51,8 +51,8 @@ class AddStableMembersAction
                 'joined_at' => $joinedAt,
                 'left_at' => null,
             ]);
-        } catch (UniqueConstraintViolationException $exception) {
-            throw CannotAddStableMembersException::changedConcurrently($exception);
+        } catch (UniqueConstraintViolationException $uniqueConstraintViolationException) {
+            throw CannotAddStableMembersException::changedConcurrently($uniqueConstraintViolationException);
         }
     }
 }

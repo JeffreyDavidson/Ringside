@@ -8,23 +8,24 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Models\Promotions\Promotion;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /** @extends BaseTable<Promotion> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Promotion::class;
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'promotions';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'promotions';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'promotions';
 
     /** @return Builder<Promotion> */

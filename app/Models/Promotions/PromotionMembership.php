@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Override;
 
 /**
  * @property int $promotion_id
@@ -38,7 +39,7 @@ class PromotionMembership extends Pivot
     }
 
     /** @return array<string, string> */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -63,6 +63,7 @@ class Calendar extends Component
         if (! in_array($direction, [-1, 1], true) || ! $this->validDate()) {
             return;
         }
+
         $this->date = Carbon::parse($this->date, 'UTC')->addDays($direction)->toDateString();
         $this->resetPage();
     }
@@ -74,6 +75,7 @@ class Calendar extends Component
 
             return false;
         }
+
         $this->resetErrorBag('date');
 
         return true;

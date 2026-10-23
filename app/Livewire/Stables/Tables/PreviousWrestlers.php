@@ -9,23 +9,24 @@ use App\Livewire\Base\Tables\BasePreviousMembersTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousMembersTable<StableWrestler> */
 class PreviousWrestlers extends BasePreviousMembersTable
 {
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'stables_wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $memberRelation = 'wrestler';
 
-    #[\Override]
+    #[Override]
     protected string $memberLabelGroup = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $dateLabelGroup = 'stables';
 
     #[Locked]

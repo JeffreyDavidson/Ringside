@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -47,7 +48,7 @@ class Unavailability extends Model
         return $this->morphTo();
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -48,8 +48,8 @@ trait ExecutesRosterActions
             $this->dispatchActionSuccess($message);
 
             return true;
-        } catch (BaseBusinessException $exception) {
-            $message = RosterErrorMessageResolver::message($exception, $entityType);
+        } catch (BaseBusinessException $baseBusinessException) {
+            $message = RosterErrorMessageResolver::message($baseBusinessException, $entityType);
 
             $this->dispatchActionFailure($message);
 

@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
 use Livewire\Attributes\Locked;
+use Override;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
@@ -28,7 +29,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             ->forPreviousHistory();
     }
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

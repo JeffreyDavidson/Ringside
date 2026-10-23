@@ -85,6 +85,7 @@ it('preserves a played entrant and rejects duplicate replacements', function (bo
     if ($played) {
         recordTournamentWinner($match, $t);
     }
+
     $replacement = $t->entries()->whereKeyNot($entry->id)->firstOrFail();
     expect(fn () => resolve(ReplaceTournamentEntryAction::class)->handle($entry, $replacement->competitor_id, $t->refresh()->version, 'Replace entry', administrator()))->toThrow(TournamentException::class)
         ->and($entry->refresh()->competitor_id)->not->toBe($replacement->competitor_id)
@@ -120,6 +121,7 @@ it('refuses an unavailable opponent or two withdrawn entrants as a walkover', fu
     if (! $both) {
         $second->competitor()->firstOrFail()->delete();
     }
+
     expect(fn () => resolve(AwardTournamentWalkoverAction::class)->handle($node, $t->refresh()->version, 'Advance opponent', administrator()))->toThrow(TournamentException::class)
         ->and($node->refresh()->walkover_entry_id)->toBeNull();
 })->with([true, false]);
@@ -152,6 +154,7 @@ it('refuses a review if event membership or dates changed while obtaining its un
         if (! $pending || ! str_contains($sql, 'select "id" from "events"') || ! str_contains($sql, 'order by "id" asc')) {
             return;
         }
+
         $pending = false;
 
         if ($dateChanged) {
@@ -159,6 +162,7 @@ it('refuses a review if event membership or dates changed while obtaining its un
 
             return;
         }
+
         $node->forceFill(['planned_event_id' => $other->id])->save();
     });
     expect(fn () => DB::transaction(fn () => resolve(TournamentLocks::class)->lock($t->id)))->toThrow(RecordChangedException::class)

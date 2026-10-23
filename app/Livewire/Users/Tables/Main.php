@@ -18,23 +18,24 @@ use App\Support\EmailAddress;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Override;
 
 /** @extends BaseTable<User> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = User::class;
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'users';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'users';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'users';
 
     /** @return UserBuilder<User> */
@@ -57,7 +58,7 @@ class Main extends BaseTable
     protected array $pendingInvitationSummaries = [];
 
     /** @param Collection<int, User> $rows */
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $this->pendingInvitationSummaries = $this->pendingInvitations->forEmails(
@@ -120,8 +121,8 @@ class Main extends BaseTable
 
         try {
             $changeStatusAction->handle($user, $targetStatus);
-        } catch (BaseBusinessException $exception) {
-            $this->dispatchActionFailure($exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->dispatchActionFailure($baseBusinessException->getMessage());
 
             return;
         }
@@ -151,7 +152,7 @@ class Main extends BaseTable
     }
 
     /** @return array<int, Filter> */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

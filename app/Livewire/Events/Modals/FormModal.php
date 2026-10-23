@@ -17,6 +17,7 @@ use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Event>
@@ -27,7 +28,7 @@ class FormModal extends BaseFormModal
 {
     use PresentsVenuesList;
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.venue_id';
 
     public CreateEditForm $form;
@@ -56,11 +57,12 @@ class FormModal extends BaseFormModal
         if ($venue !== null) {
             $this->form->venue_id = $venue->id;
         }
+
         $this->form->preview = Str::of(fake()->text())->value();
     }
 
     /** A name taken since validation shows on the name field; any other failure on the venue. */
-    #[\Override]
+    #[Override]
     protected function businessErrorField(BaseBusinessException $exception): string
     {
         return match ($exception->reason()) {

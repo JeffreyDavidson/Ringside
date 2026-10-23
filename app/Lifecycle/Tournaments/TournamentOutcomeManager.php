@@ -34,6 +34,7 @@ class TournamentOutcomeManager
         if ($result->tournamentVersion === null || ($match->match_finish !== null && $result->tournamentVersion !== $link->tournament->version)) {
             throw RecordChangedException::changed();
         }
+
         $this->states->ensureCanProgress($link->tournament);
 
         if ($link->active_node_id === null && ($match->match_finish === null || $match->winning_side_id !== $result->winningSide?->id)) {
@@ -43,6 +44,7 @@ class TournamentOutcomeManager
         if ($match->winning_side_id === $result->winningSide?->id) {
             return;
         }
+
         $descendants = $this->bracket->descendantNodeIds($link->node);
 
         if (TournamentMatchLink::query()->whereIn('node_id', $descendants)->whereNotNull('active_node_id')->exists()) {
@@ -59,6 +61,7 @@ class TournamentOutcomeManager
         if (! $this->states->canProgress($tournament)) {
             return;
         }
+
         $final = $this->bracket->bouts($tournament)->last();
         $tournament->forceFill(['status' => $final?->winner !== null && $final->complete ? TournamentStatus::Completed : TournamentStatus::Active, 'version' => $tournament->version + 1])->save();
         activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'version' => $tournament->version])->log('tournament.progressed');

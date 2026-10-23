@@ -32,11 +32,13 @@ $arguments = $_SERVER['argv'];
 if (! is_array($arguments) || ! isset($arguments[1]) || ! is_string($arguments[1])) {
     throw new RuntimeException('Missing worker specification');
 }
+
 $spec = json_decode($arguments[1], true, flags: JSON_THROW_ON_ERROR);
 
 if (! is_array($spec) || ! isset($spec['operation'],$spec['node_id'],$spec['event_id'],$spec['referee_id'],$spec['version'],$spec['match_id'],$spec['side_id']) || ! is_string($spec['operation']) || ! is_int($spec['node_id']) || ! is_int($spec['event_id']) || ! is_int($spec['referee_id']) || ! is_int($spec['version']) || ! is_int($spec['match_id']) || ! is_int($spec['side_id'])) {
     throw new RuntimeException('Invalid worker specification');
 }
+
 $defaultActor = workerActor();
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
@@ -45,6 +47,7 @@ $startAt = (float) fgets(STDIN);
 while (microtime(true) < $startAt) {
     usleep(1000);
 }
+
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false, 'match_id' => null];
 
 try {
@@ -78,4 +81,5 @@ try {
 } catch (DeadlockException|QueryException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class, 'deadlock' => isDeadlock($exception), 'message' => $exception->getMessage()];
 }
+
 fwrite(STDOUT, 'RESULT:'.json_encode($result, JSON_THROW_ON_ERROR)."\n");

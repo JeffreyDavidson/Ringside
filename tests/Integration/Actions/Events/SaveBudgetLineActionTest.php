@@ -122,6 +122,7 @@ test('line direction category and archived guards protect saved money', function
         $f['line']->archived_at = now();
         $f['line']->save();
     }
+
     // Act / Assert
     expect(fn () => resolve(SaveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetLineData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class);
     expect($f['budget']->revisions()->count())->toBe(0);

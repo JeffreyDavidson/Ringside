@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
@@ -19,7 +20,7 @@ class PreviousStables extends BasePreviousStablesTable
     #[Locked]
     public ?int $wrestlerId = null;
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'stables';
 
     /**

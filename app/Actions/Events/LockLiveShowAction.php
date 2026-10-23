@@ -30,6 +30,7 @@ class LockLiveShowAction
         if ($run->version !== $version) {
             throw RecordChangedException::changed();
         }
+
         $this->states->ensureOpen($run);
 
         return $run->setRelation('event', $event);

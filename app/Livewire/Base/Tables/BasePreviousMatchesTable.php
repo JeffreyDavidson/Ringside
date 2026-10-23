@@ -16,6 +16,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /**
  * @extends DataTableComponent<EventMatch>
@@ -28,7 +29,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
 
     protected string $databaseTableName = 'events_matches';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'matches';
 
     public function boot(MatchTableFormatter $matchTableFormatter): void

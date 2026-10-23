@@ -61,6 +61,7 @@ class EventPublicPageController
                     $newPosterKey = $posters->handle($upload);
                     $draft['poster'] = ['key' => $newPosterKey, 'alt' => $request->string('poster_alt')->toString(), 'caption' => $request->filled('poster_caption') ? $request->string('poster_caption')->toString() : null];
                 }
+
                 $save->handle($event, $request->integer('version'), $request->string('fingerprint')->toString(), EventPublicationDraftData::fromValidated($draft));
                 $saved = true;
             } finally {

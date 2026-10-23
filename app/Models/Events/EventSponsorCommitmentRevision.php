@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -37,7 +38,7 @@ class EventSponsorCommitmentRevision extends Model
     /** @use HasFactory<EventSponsorCommitmentRevisionFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

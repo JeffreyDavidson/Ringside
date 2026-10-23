@@ -116,11 +116,13 @@ it('performs reviewed entry administration through the protected screen', functi
     if ($operation === 'walkover') {
         resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable', signedInUser());
     }
+
     $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('draft.reason', 'Reviewed tournament change')->set('draft.confirmed', true);
 
     if ($operation === 'replace') {
         $page->set('draft.replacementId', $replacement->id);
     }
+
     $page->call('confirm')->assertHasNoErrors();
     match ($operation) {
         default => throw new InvalidArgumentException('Unknown operation'),

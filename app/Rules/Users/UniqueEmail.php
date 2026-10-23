@@ -10,6 +10,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Override;
 
 class UniqueEmail implements ValidationRule
 {
@@ -18,7 +19,7 @@ class UniqueEmail implements ValidationRule
     /**
      * Compare ignoring case and including soft-deleted users, matching the unique index on lower(email).
      */
-    #[\Override]
+    #[Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_string($value)) {

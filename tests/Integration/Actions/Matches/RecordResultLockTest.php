@@ -144,6 +144,7 @@ describe('result recording locks', function (): void {
         foreach ([$second, $first] as $wrestler) {
             MatchCompetitor::factory()->for($match, 'eventMatch')->for($winningSide, 'side')->for($wrestler, 'competitor')->create();
         }
+
         MatchCompetitor::factory()->for($match, 'eventMatch')->for($losingSide, 'side')->for($loser, 'competitor')->create();
 
         // Act

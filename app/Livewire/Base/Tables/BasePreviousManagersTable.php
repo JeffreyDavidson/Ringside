@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * @template TModel of Model
@@ -21,7 +22,7 @@ abstract class BasePreviousManagersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'managers';
 
     protected string $databaseTableName;

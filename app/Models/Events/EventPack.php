@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @phpstan-type Assignment array{id: string, contact_id: int, name: string, role: string, station: ?string, call_at: ?string, timezone: string, offset: ?string, setup: ?string, during: ?string, strike: ?string, active: bool}
@@ -40,7 +41,7 @@ class EventPack extends Model
     /** @use HasFactory<EventPackFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

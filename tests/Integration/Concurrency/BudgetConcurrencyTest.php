@@ -39,6 +39,7 @@ function runBudgetWorkers(array $specs): array
                 if (microtime(true) > $deadline) {
                     throw new RuntimeException('Budget worker did not reach the release barrier.');
                 }
+
                 usleep(10000);
             }
 
@@ -46,6 +47,7 @@ function runBudgetWorkers(array $specs): array
                 throw new RuntimeException($process->getErrorOutput());
             }
         }
+
         $start = microtime(true) + 0.2;
 
         foreach ($inputs as $input) {
@@ -58,6 +60,7 @@ function runBudgetWorkers(array $specs): array
                 $process->isRunning();
             } usleep(10000);
         }
+
         $results = [];
 
         foreach ($processes as $process) {
@@ -68,6 +71,7 @@ function runBudgetWorkers(array $specs): array
             if (! is_array($result) || ! is_bool($result['ok'] ?? null)) {
                 throw new UnexpectedValueException('The budget worker returned an invalid result.');
             }
+
             $results[] = ['ok' => $result['ok'], 'exception' => is_string($result['exception'] ?? null) ? $result['exception'] : null];
         }
 
@@ -114,6 +118,7 @@ test('native payment and refund races keep one financial write per version or re
             $source = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
             $input = budgetPayment(['kind' => 'refund', 'source_id' => $source->id, 'amount' => '150.00']);
         }
+
         $spec = ['event_id' => $f['event']->id, 'user_id' => $user->id, 'operation' => 'movement', 'line_id' => $f['line']->id, 'version' => 0, 'key' => $key, 'input' => $input, 'clock' => now()->toIso8601String()];
         // Act
         $results = runBudgetWorkers([$spec, [...$spec, 'key' => $case === 'retry' ? $key : budgetKey()]]);
@@ -149,6 +154,7 @@ test('a payment racing an obligation change archive or deletion never writes aft
 
             return;
         }
+
         expect(collect($results)->where('ok', true)->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(1);
 
         if ($case === 'archive' && $f['line']->refresh()->archived_at !== null) {

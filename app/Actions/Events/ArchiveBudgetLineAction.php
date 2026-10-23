@@ -22,6 +22,7 @@ class ArchiveBudgetLineAction
             if ($line->archived_at !== null || ($line->confirmed_cents !== null && $line->confirmed_cents !== 0) || $line->movements()->exists()) {
                 throw BudgetException::cannotArchive();
             }
+
             $before = $line->attributesToArray();
             $line->archived_at = now();
             $line->save();

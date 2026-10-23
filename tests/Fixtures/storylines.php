@@ -40,10 +40,12 @@ function storylineSourceFixture(): array
 
     return ['story' => $story, 'event' => $event, 'match' => $match, 'run' => $run, 'segment' => $segment];
 }
+
 function plannedStorylineStep(Storyline $story, ?SourceData $source = null): StorylineStep
 {
     return resolve(SaveStepAction::class)->handle($story, $story->refresh()->version, new StepData('Planned betrayal', 'Attack the partner.', 1, $source ?? new SourceData, (string) Str::uuid()), signedInUser());
 }
+
 function confirmedStorylineDevelopment(Storyline $story, ?int $stepId = null): StorylineDevelopment
 {
     return resolve(RecordDevelopmentAction::class)->handle($story, $story->refresh()->version, new DevelopmentData('Actual confrontation', 'They argued without attacking.', today()->toDateString(), 1, [], new SourceData, (string) Str::uuid(), $stepId), signedInUser());

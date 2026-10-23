@@ -36,6 +36,7 @@ test('reads the latest recorded earlier date of each selected competitor and ski
             ->create();
         $match->update(['match_finish' => MatchFinish::Pinfall, 'winning_side_id' => $match->sides()->firstOrFail()->id]);
     }
+
     EventMatch::factory()
         ->for($unrecordedEvent)
         ->withCompetitors([$first, $second])
@@ -78,6 +79,7 @@ test('leaves out later events, the excluded match and other promotions, and retu
             ->create();
         $match->update(['match_finish' => MatchFinish::NoDecision]);
     }
+
     $selection = new CompetitorSelection([
         ['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0],
         ['type' => $second->getMorphClass(), 'id' => $second->id, 'side' => 1],

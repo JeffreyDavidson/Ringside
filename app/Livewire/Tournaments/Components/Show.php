@@ -145,6 +145,7 @@ class Show extends Component
             $this->nodeId = $node->id;
             $eventId = $node->planned_event_id;
         }
+
         $this->draft->start($tournament, $draft, $eventId);
         $this->draftVersion = $this->version;
         $this->notice = null;
@@ -298,11 +299,12 @@ class Show extends Component
 
         try {
             $operation();
-        } catch (BaseBusinessException $exception) {
-            $this->addError('operation', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('operation', $this->failureMessageKeepingInput($baseBusinessException));
 
             return;
         }
+
         $this->refreshState();
         $this->notice = __('tournaments.saved');
     }

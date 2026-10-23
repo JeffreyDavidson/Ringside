@@ -215,6 +215,7 @@ describe('store', function (): void {
                 'password' => 'wrong-password',
             ]);
         }
+
         travel(61)->seconds();
 
         $requestData = [

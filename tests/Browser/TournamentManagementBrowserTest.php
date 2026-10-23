@@ -32,6 +32,7 @@ it('keeps sixteen long tag-team names readable and the bracket contained on phon
     foreach ($t->entries()->get() as $entry) {
         $entry->competitor()->firstOrFail()->update(['name' => 'The North Atlantic Championship Alliance '.$entry->seed]);
     }
+
     bookTournamentNode($world, $t->nodes()->firstOrFail());
     actingAs(administrator());
     $page = visit(route('tournaments.show', $t))->resize(390, 844)->assertSee('The North Atlantic Championship Alliance 1')->assertSee('Round 4')->assertScript('document.documentElement.scrollWidth <= window.innerWidth')->assertNoJavaScriptErrors()->screenshot(fullPage: false, filename: 'tournament-mobile-teams');

@@ -29,6 +29,7 @@ class ReplaceTournamentEntryAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureActive($tournament);
             $entry = $tournament->entries()->findOrFail($entry->id);
 
@@ -37,11 +38,13 @@ class ReplaceTournamentEntryAction
                     throw TournamentException::entryPlayed();
                 }
             }
+
             $competitor = $tournament->entrant_kind->modelClass()::query()->where('promotion_id', $tournament->promotion_id)->whereKey($competitorId)->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->first();
 
             if ($competitor === null || $tournament->entries()->where('competitor_id', $competitorId)->whereKeyNot($entry->id)->exists()) {
                 throw TournamentException::entrantUnavailable();
             }
+
             $node = $tournament->nodes()->where('round', 1)->where(fn (Builder $query) => $query->where('first_seed', $entry->seed)->orWhere('second_seed', $entry->seed))->firstOrFail();
             $oldId = $entry->competitor_id;
             $this->reset->handle($node, $tournament->version, $reason, $actor, true);
@@ -54,6 +57,7 @@ class ReplaceTournamentEntryAction
             if (! $this->eligibility->allows($competitor)) {
                 throw TournamentException::entrantUnavailable();
             }
+
             $entry->forceFill(['competitor_id' => $competitorId, 'withdrawn' => false])->save();
             Tournament::query()->whereKey($tournament->id)->increment('version');
 

@@ -58,6 +58,7 @@ class CreateEdit extends Form
         if (! in_array($direction, [-1, 1], true) || ! isset($this->entrants[$index],$this->entrants[$index + $direction])) {
             return;
         }
+
         $entrants = $this->entrants;
         [$entrants[$index],$entrants[$index + $direction]] = [$entrants[$index + $direction], $entrants[$index]];
         $this->entrants = array_values($entrants);

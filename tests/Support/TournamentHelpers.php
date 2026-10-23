@@ -29,11 +29,13 @@ function tournamentFixture(bool $repeat = true, int $capacity = 4, ?int $count =
 
     return ['tournament' => $tournament, 'promotion' => $promotion, 'event' => Event::factory()->for($promotion)->create(['date' => now()->subHour()]), 'referees' => new Collection([Referee::factory()->employed()->for($promotion)->create()])];
 }
+
 /** @param array{tournament:Tournament,promotion:Promotion,event:Event,referees:Collection<int,Referee>} $world */
 function bookTournamentNode(array $world, TournamentNode $node, ?User $actor = null): EventMatch
 {
     return resolve(BookTournamentMatchAction::class)->handle($node, $world['tournament']->refresh()->version, new TournamentBookingData($world['event'], $world['referees']), $actor ?? administrator());
 }
+
 function recordTournamentWinner(EventMatch $match, Tournament $tournament, MatchFinish $finish = MatchFinish::Pinfall, ?User $actor = null): void
 {
     resolve(RecordResultAction::class)->handle($match, new MatchResultData($finish, $finish->requiresWinningSide() ? $match->sides()->firstOrFail() : null, collect(), $tournament->refresh()->version), $actor ?? administrator());

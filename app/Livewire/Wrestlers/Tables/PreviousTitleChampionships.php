@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use Livewire\Attributes\Locked;
+use Override;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
@@ -18,10 +19,10 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     #[Locked]
     public ?int $wrestlerId = null;
 
-    #[\Override]
+    #[Override]
     public string $databaseTableName = 'titles_championships';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'title championships';
 
     /** @return TitleChampionshipBuilder<TitleChampionship> */
@@ -34,7 +35,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             ->forPreviousHistory();
     }
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

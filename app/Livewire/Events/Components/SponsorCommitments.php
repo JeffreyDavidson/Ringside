@@ -122,6 +122,7 @@ class SponsorCommitments extends Component
 
             return;
         }
+
         $this->form->reset();
         $this->form->timezone = PromotionTimeZoneService::zoneOf($event->loadMissing('promotion')->promotion);
         $this->draftId = null;
@@ -168,8 +169,8 @@ class SponsorCommitments extends Component
             $this->formShown = false;
             $this->notice = __('sponsors.promise_saved');
             $this->resetPage('commitmentsPage');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('save', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('save', $this->failureMessageKeepingInput($baseBusinessException));
         }
     }
 
@@ -245,8 +246,8 @@ class SponsorCommitments extends Component
             $this->instructionId = null;
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('save', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('save', $this->failureMessageKeepingInput($baseBusinessException));
         }
     }
 

@@ -13,6 +13,7 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends DataTableComponent<Event> */
 class PreviousEvents extends DataTableComponent
@@ -24,7 +25,7 @@ class PreviousEvents extends DataTableComponent
 
     protected string $databaseTableName = 'events';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'events';
 
     /**

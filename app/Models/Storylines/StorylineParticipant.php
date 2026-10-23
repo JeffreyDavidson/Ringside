@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -38,7 +39,7 @@ class StorylineParticipant extends Model
     /** @use HasFactory<StorylineParticipantFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

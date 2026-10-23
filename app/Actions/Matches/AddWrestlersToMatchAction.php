@@ -115,6 +115,7 @@ class AddWrestlersToMatchAction
                 $this->dateAvailability->ensureForEvent($person, $event);
             }
         }
+
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
         $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {

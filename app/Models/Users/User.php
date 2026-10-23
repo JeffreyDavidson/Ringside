@@ -28,6 +28,7 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -92,7 +93,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected $attributes = [
         'status' => UserStatus::Unverified->value,
     ];
@@ -102,7 +103,7 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

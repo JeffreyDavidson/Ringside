@@ -46,6 +46,7 @@ describe('wrestlers table', function (): void {
         foreach (range(1, 25) as $number) {
             Wrestler::factory()->create(['name' => sprintf('Wrestler %02d', $number)]);
         }
+
         DB::enableQueryLog();
 
         // Act

@@ -37,6 +37,7 @@ final readonly class EventRosterSchedulingEligibility
                 $entries->filter(fn (Wrestler|Referee|TagTeam $person): bool => $person instanceof TagTeam)->values(),
             );
         }
+
         $proposed = clone $event;
         $proposed->date = $date;
 

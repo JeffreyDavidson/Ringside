@@ -69,8 +69,8 @@ class SplitModal extends ModalComponent
                 $this->form->members(),
                 now(),
             );
-        } catch (BaseBusinessException $exception) {
-            $this->addError('stable', $exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('stable', $baseBusinessException->getMessage());
 
             return;
         }

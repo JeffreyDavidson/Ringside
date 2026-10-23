@@ -98,11 +98,12 @@ class Profile extends Component
 
         try {
             $entry = $create->handle($person, $data, $this->actor());
-        } catch (BaseBusinessException $exception) {
-            $this->addError('form.startsOn', $exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('form.startsOn', $baseBusinessException->getMessage());
 
             return;
         }
+
         $this->status = __('availability.saved');
         $this->savedEntryId = $entry->id;
         $this->reviewSignature = null;
@@ -126,6 +127,7 @@ class Profile extends Component
         if ($this->cancelId === null) {
             return;
         }
+
         $cancel->handle($person, $this->cancelId, $this->actor());
         $this->cancelId = null;
         $this->savedEntryId = null;

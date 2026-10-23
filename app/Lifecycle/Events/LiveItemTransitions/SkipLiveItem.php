@@ -22,6 +22,7 @@ final readonly class SkipLiveItem implements LiveItemTransition
         if (LiveItemStatus::from($item['state']) !== LiveItemStatus::Pending) {
             throw LiveShowException::transitionInvalid();
         }
+
         $this->showDay->ensureShowDay($run);
 
         return [...$item, 'state' => LiveItemStatus::Skipped->value];

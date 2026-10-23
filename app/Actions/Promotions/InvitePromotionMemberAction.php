@@ -73,8 +73,8 @@ final class InvitePromotionMemberAction
     {
         try {
             Mail::to($invitation->email)->send(new InvitedToPromotion($invitation, $invitedBy));
-        } catch (TransportExceptionInterface $exception) {
-            report($exception);
+        } catch (TransportExceptionInterface $transportException) {
+            report($transportException);
         }
     }
 

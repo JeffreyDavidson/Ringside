@@ -189,6 +189,7 @@ describe('roster combobox loading state', function (): void {
         foreach (range(1, 21) as $number) {
             Wrestler::factory()->bookable()->create(['name' => sprintf('Abe Filler %02d', $number)]);
         }
+
         $target = Wrestler::factory()->bookable()->create(['name' => 'Zed Target']);
         actingAs(administrator());
         $field = 'form.competitors.0.wrestlers.0';

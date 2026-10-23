@@ -27,12 +27,14 @@ class CreateAction
             if ($person->promotion_id === null) {
                 throw UnavailabilityException::unowned();
             }
+
             $reason = $data->reason === null || mb_trim($data->reason) === '' ? null : mb_trim($data->reason);
 
             if (Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
                 ->active()->where('starts_on', $startsOn)->where('ends_on', $endsOn)->where('reason', $reason)->exists()) {
                 throw UnavailabilityException::duplicate();
             }
+
             $entry = new Unavailability;
             $entry->fill(['starts_on' => $startsOn, 'ends_on' => $endsOn, 'reason' => $reason]);
             $entry->promotion_id = $person->promotion_id;

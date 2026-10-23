@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /**
  * @property int $id
@@ -37,7 +38,7 @@ class StorylineRevision extends Model
     /** @use HasFactory<StorylineRevisionFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

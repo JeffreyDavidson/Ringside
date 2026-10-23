@@ -29,6 +29,7 @@ final readonly class ReleaseCard implements PublicationRelease
         if ($publication->card === null) {
             $publication->slug = Str::limit(Str::slug($source['title']), 120, '') ?: 'event';
         }
+
         $publication->card = $this->cards->card($source, $draft);
         $publication->card_source = $draft['matches'];
         $publication->schedule_fingerprint = $source['schedule'];

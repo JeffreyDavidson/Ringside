@@ -49,6 +49,7 @@ class PersistBudgetMovementAction
             if ($source === null || $source->voided_at !== null || $source->kind !== BudgetMovementKind::Payment || $data->date < $source->effective_date->toDateString()) {
                 throw BudgetException::refundSource();
             }
+
             $refunded = $line->movements->refundsOf($source)->unvoided()->sum(fn (EventBudgetMovement $movement): int => $movement->amount_cents);
 
             if ($data->amount > $source->amount_cents - $refunded) {
@@ -63,6 +64,7 @@ class PersistBudgetMovementAction
         if ($data->kind === BudgetMovementKind::Payment && $line->confirmed_cents !== null && $this->settlement->net($line) + $data->amount > $line->confirmed_cents && ! $data->acknowledge) {
             throw BudgetException::excess();
         }
+
         $movement = new EventBudgetMovement;
         $movement->event_budget_line_id = $line->id;
         $movement->fill([

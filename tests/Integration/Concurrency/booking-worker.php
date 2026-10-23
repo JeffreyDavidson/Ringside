@@ -153,6 +153,7 @@ try {
         if (! is_array($production)) {
             throw new InvalidArgumentException('Production worker input must be a JSON object.');
         }
+
         resolve(SaveEventProductionAction::class)->handle(Event::query()->findOrFail($spec['production_save_event_id']), $spec['version'], $spec['fingerprint'], EventProductionData::fromValidated([
             'notes' => $production['notes'] ?? null, 'assignments' => $production['assignments'] ?? [], 'cues' => $production['cues'] ?? [],
         ]), false, $actor);

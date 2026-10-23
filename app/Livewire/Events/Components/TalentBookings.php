@@ -131,8 +131,8 @@ class TalentBookings extends Component
             $this->form->reset();
             $this->message = __('talent-bookings.saved');
             $this->dispatch('talent-editor-closed');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('booking', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('booking', $this->failureMessageKeepingInput($baseBusinessException));
         }
     }
 
@@ -166,6 +166,7 @@ class TalentBookings extends Component
         if ($query === null) {
             return [];
         }
+
         $column = $kind === 'referees' ? 'full_name' : 'name';
         $like = LikeTerm::from($term, 100);
 

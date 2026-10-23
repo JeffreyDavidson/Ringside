@@ -19,6 +19,7 @@ use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Override;
 
 /** @extends BaseForm<Stable> */
 class CreateEditForm extends BaseForm
@@ -184,7 +185,7 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

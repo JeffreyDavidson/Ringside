@@ -52,6 +52,7 @@ describe('main tables', function (): void {
             $factory = $state === null ? $factory : $factory->{$state}();
             $factory->create($attributes($name));
         }
+
         $table = livewire($component);
 
         // Act

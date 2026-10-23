@@ -96,14 +96,15 @@ class Directory extends Component
         if ($this->draftId !== null) {
             Gate::authorize('manageSponsors', Sponsor::query()->where('promotion_id', $promotion->id)->findOrFail($this->draftId));
         }
+
         $data = $this->form->toData();
 
         try {
             $action->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);
             $this->formShown = false;
             $this->notice = __('sponsors.sponsor_saved');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('save', $this->failureMessageKeepingInput($exception));
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('save', $this->failureMessageKeepingInput($baseBusinessException));
         }
     }
 

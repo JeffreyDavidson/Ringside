@@ -196,6 +196,7 @@ class Manage extends Component
         if ($this->needsReload) {
             return;
         }
+
         $mode = $this->mode ?? abort(404);
         $rules = ['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer'], ...$this->modeRules($mode, $story)];
         $this->validate($rules, attributes: $this->attributeNames($rules));
@@ -210,12 +211,13 @@ class Manage extends Component
                 StorylineFormMode::StoryStatus => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason, $this->actor()),
                 StorylineFormMode::Retract => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep, $this->actor()),
             };
-        } catch (BaseBusinessException $exception) {
-            $this->addError('storyline', $exception->getMessage());
+        } catch (BaseBusinessException $baseBusinessException) {
+            $this->addError('storyline', $baseBusinessException->getMessage());
             $this->needsReload = true;
 
             return;
         }
+
         $this->version = $this->story()->version;
         $this->mode = null;
         $this->dispatch('storyline-saved');
@@ -282,6 +284,7 @@ class Manage extends Component
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);
         }
+
         $source = $this->sources->get($this->form->source(null), $story->promotion_id) ?? abort(404);
 
         $steps = $story->steps()->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'match.competitors', 'match.titles'])->orderBy('sequence')->orderBy('id')->paginate(15, pageName: 'stepsPage');

@@ -10,6 +10,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BaseForm<Referee> */
 class CreateEditForm extends BaseForm
@@ -60,7 +61,7 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

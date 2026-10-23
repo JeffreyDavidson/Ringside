@@ -11,6 +11,7 @@ use App\Models\Users\User;
 use App\Rules\Users\UniqueEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Password;
+use Override;
 
 /** @extends BaseForm<User> */
 class CreateEditForm extends BaseForm
@@ -74,7 +75,7 @@ class CreateEditForm extends BaseForm
         return $rules;
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

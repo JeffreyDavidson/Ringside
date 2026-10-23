@@ -125,6 +125,7 @@ test('invalid transitions are refused without new history', function (string $ca
     if ($case === 'cancelled') {
         saveTalentFixture($fixture, new TalentBookingData(TalentBookingStatus::Cancelled, null, null, 'UTC', null, false, 'Cancelled'));
     }
+
     $count = EventTalentBookingRevision::query()->count();
 
     // Act / Assert

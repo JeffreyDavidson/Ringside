@@ -17,6 +17,7 @@ test('poster processing honors all camera orientations and strips metadata', fun
     foreach ([[0, 0, 14, 24, 255, 0, 0], [15, 0, 29, 24, 0, 255, 0], [0, 25, 14, 49, 0, 0, 255], [15, 25, 29, 49, 255, 255, 0]] as [$x1,$y1,$x2,$y2,$r,$g,$b]) {
         imagefilledrectangle($pixels, $x1, $y1, $x2, $y2, imagecolorallocate($pixels, $r, $g, $b) ?: throw new RuntimeException('Cannot allocate test color'));
     }
+
     ob_start();
     imagejpeg($pixels, null, 100);
     $original = (string) ob_get_clean();

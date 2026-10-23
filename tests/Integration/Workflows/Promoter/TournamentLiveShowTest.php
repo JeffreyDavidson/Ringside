@@ -34,6 +34,7 @@ it('adopts a newly qualified final through pack and live review while preserving
         resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Finish, signedInUser());
         recordTournamentWinner($match, $t);
     }
+
     $before = $run->refresh()->content;
     $final = bookTournamentNode($world, $nodes->sole(fn ($n): bool => $n->round === 2));
     $data = $vm->data($event);

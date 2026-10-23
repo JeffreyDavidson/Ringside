@@ -89,6 +89,7 @@ test('keeps only pairs that met since the cut-off before the reference and not t
             ->withCompetitors([$subject, $opponent])
             ->create();
     }
+
     $excluded = EventMatch::factory()
         ->for($recent)
         ->withCompetitors([$subject, $opponent])

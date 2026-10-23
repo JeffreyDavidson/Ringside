@@ -14,6 +14,7 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\TitleChampionship;
 use App\Services\Titles\TitleReignService;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /**
  * @extends DataTableComponent<TitleChampionship>
@@ -24,7 +25,7 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 
     protected string $databaseTableName = 'titles_championships';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'title championships';
 
     protected RosterResourceRouteResolver $routeResolver;

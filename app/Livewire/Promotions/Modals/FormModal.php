@@ -13,17 +13,18 @@ use App\Models\Promotions\Promotion;
 use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Override;
 
 /** @extends BaseFormModal<CreateEditForm, Promotion> */
 class FormModal extends BaseFormModal
 {
-    #[\Override]
+    #[Override]
     protected ?string $createdEventName = 'promotion-saved';
 
-    #[\Override]
+    #[Override]
     protected ?string $updatedEventName = 'promotion-saved';
 
-    #[\Override]
+    #[Override]
     protected bool $resetFormAfterSubmission = true;
 
     public CreateEditForm $form;

@@ -78,6 +78,7 @@ class SaveSponsorCommitmentAction
             if ($isNew || $commitment->sponsor_id !== $sponsor->id || $refreshSponsorName) {
                 $commitment->sponsor_name = $sponsor->name;
             }
+
             $commitment->sponsor_id = $sponsor->id;
             $commitment->submission_key = $isNew ? $submissionKey : $commitment->submission_key;
             $commitment->fill([
@@ -100,6 +101,7 @@ class SaveSponsorCommitmentAction
             if ($isNew || $reviewed) {
                 $commitment->event_context = $this->context->get($event);
             }
+
             $this->persist->handle($commitment, $reviewed ? 'review' : 'save', $reason, $actor);
 
             return $commitment;

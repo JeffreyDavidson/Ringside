@@ -48,6 +48,7 @@ test('promotion members can view but only managers and owners operate the live s
 
         return;
     }
+
     $component->assertHasNoErrors()->assertSee('Roster checklist');
     expect(EventLiveRun::query()->where('event_id', $event->id)->count())->toBe(1);
 })->with([

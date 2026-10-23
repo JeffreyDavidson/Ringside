@@ -27,6 +27,7 @@ $payload = is_array($arguments) ? ($arguments[1] ?? null) : null;
 if (! is_string($payload)) {
     throw new InvalidArgumentException('Missing budget spec.');
 }
+
 /** @var array{event_id: int,user_id: int,operation: string,line_id?: int,version: int,key: string,input: array{direction: string, category: string, description: string, counterparty: string, planned?: ?string, confirmed?: ?string, due_date?: ?string, notes?: ?string, reason?: ?string, kind: string, amount: string, effective_date: string, method: string, reference?: ?string, source_id?: ?int, acknowledge?: bool},clock: string} $spec */
 $spec = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
 $actor = User::query()->findOrFail($spec['user_id']);
@@ -53,4 +54,5 @@ try {
 } catch (BaseBusinessException|QueryException|ModelNotFoundException|AuthorizationException $exception) {
     $result = ['ok' => false, 'exception' => $exception::class];
 }
+
 fwrite(STDOUT, 'RESULT '.json_encode($result, JSON_THROW_ON_ERROR)."\n");

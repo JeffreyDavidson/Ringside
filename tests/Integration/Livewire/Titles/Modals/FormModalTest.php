@@ -193,6 +193,7 @@ describe('authorized title form interactions', function () {
         } else {
             $modal->assertHasErrors([$field => $rule]);
         }
+
         expect(Title::query()->doesntExist())->toBeTrue();
     })->with([
         'long name',

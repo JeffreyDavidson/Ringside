@@ -64,11 +64,13 @@ class EventBudgetViewModel
             if ($old === $new) {
                 continue;
             }
+
             $key = match ($field) {
                 'planned_cents' => 'planned', 'confirmed_cents' => 'confirmed', 'amount_cents' => 'amount', 'void_reason' => 'reason', default => $field,
             };
             $changes[] = ['label' => __('event-budget.'.$key), 'before' => $this->historyValue($old, $field), 'after' => $this->historyValue($new, $field)];
         }
+
         $replacement = $revision->after['replacement'] ?? null;
 
         if (is_array($replacement) && is_int($replacement['amount_cents'] ?? null)) {

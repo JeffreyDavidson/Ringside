@@ -56,6 +56,7 @@ class RestoreAction
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $event->date);
             }
+
             $lockedEvent = $event->refreshForUpdate();
             $venue = $lockedEvent->venue()->withTrashed()->first();
 
@@ -78,6 +79,7 @@ class RestoreAction
             if ($lockedEvent->date?->isFuture()) {
                 $this->rosterAvailability->ensureAvailableAt($lockedEvent, $lockedEvent->date, lock: true);
             }
+
             $this->deletionState->restore($lockedEvent, now());
         }, attempts: 3);
     }

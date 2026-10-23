@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -44,7 +45,7 @@ class MatchStipulation extends Model
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -57,7 +58,7 @@ class MatchStipulation extends Model
      *
      * @var array<string, mixed>
      */
-    #[\Override]
+    #[Override]
     protected $attributes = [
         'is_active' => true,
     ];

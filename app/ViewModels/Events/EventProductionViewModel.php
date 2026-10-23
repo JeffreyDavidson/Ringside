@@ -62,6 +62,7 @@ class EventProductionViewModel
             $version = $data['pack']->version ?? 0;
             $review = $data['needsReview'] || $data['unplaced'] !== [];
         }
+
         $allAssignments = $assignments;
         $activeIds = array_column($assignments, 'id');
         $assignments = array_values(array_filter($assignments, fn (array $entry): bool => ($person === null || $entry['contact_id'] === $person) && ($role === null || $entry['role'] === $role)));
@@ -70,6 +71,7 @@ class EventProductionViewModel
             $row['cues'] = array_values(array_filter($row['cues'], fn (array $cue): bool => $cue['owner_id'] === null || ! in_array($cue['owner_id'], $activeIds, true)
                 || (($person === null || $cue['owner_contact_id'] === $person) && ($role === null || ($cue['role'] ?? $cue['owner_role']) === $role))));
         }
+
         unset($row);
 
         return ['event' => $event, 'source' => $source, 'hasLive' => $run !== null, 'version' => $version, 'eventName' => $name, 'eventDate' => $date, 'venue' => $venue,

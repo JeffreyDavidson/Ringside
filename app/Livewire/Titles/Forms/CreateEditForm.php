@@ -11,6 +11,7 @@ use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
+use Override;
 
 /** @extends BaseForm<Title> */
 class CreateEditForm extends BaseForm
@@ -53,7 +54,7 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

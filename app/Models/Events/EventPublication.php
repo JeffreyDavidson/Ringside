@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @phpstan-type Selection array{id: int, type: bool, stipulation: bool, titles: bool}
@@ -57,7 +58,7 @@ class EventPublication extends Model
     /** @use HasFactory<EventPublicationFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
