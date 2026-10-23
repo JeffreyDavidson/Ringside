@@ -6,6 +6,8 @@ namespace App\Actions\Referees;
 
 use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Data\Referees\RefereeData;
+use App\Exceptions\Lifecycle\EmploymentDateException;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +17,7 @@ class UpdateAction
     public function __construct(
         private readonly EmployAction $employAction,
         private readonly ChangeScheduledEmploymentAction $changeScheduledEmployment,
+        private readonly EmploymentDateRequirements $employmentDates,
     ) {}
 
     /**
@@ -32,11 +35,18 @@ class UpdateAction
      * @param  Referee  $referee  The referee to update
      * @param  RefereeData  $refereeData  The updated referee information
      * @return Referee The updated referee instance
+     *
+     * @throws EmploymentDateException When the date is another day than the one employment started, or a scheduled hire moves to a day before today
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {
         return DB::transaction(function () use ($referee, $refereeData): Referee {
             $lockedReferee = $referee->refreshForUpdate();
+
+            // A referee who is employed keeps the date employment started; another one is refused, not dropped.
+            if ($refereeData->employment_date instanceof Carbon) {
+                $this->employmentDates->ensureCurrentStartIsUnchanged($lockedReferee, $refereeData->employment_date);
+            }
 
             $lockedReferee->update([
                 'first_name' => $refereeData->first_name,

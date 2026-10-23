@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\UpdateAction;
 use App\Data\Referees\RefereeData;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Models\Roster\Referees\Referee;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -118,7 +119,7 @@ test('it does not re-employ already employed referee', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Name',
-        employment_date: now(),
+        employment_date: $originalEmployment->started_at,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -292,4 +293,33 @@ test('it keeps the start date of a referee who has already started when the date
 
     // Assert
     expect($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
+test('it refuses another start date for a referee who is employed and saves nothing', function () {
+    // Arrange
+    $referee = Referee::factory()->employed()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $startedAt = $referee->employments()->sole()->started_at;
+    $data = new RefereeData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->addDays(3));
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Referee 'Original Name' is currently employed, so the date employment started cannot be changed.")
+        ->and($referee->refresh()->first_name)->toBe('Original')
+        ->and($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a referee who is employed when the form date is the day employment started', function () {
+    // Arrange
+    $referee = Referee::factory()->employed()->create();
+    $startedAt = $referee->employments()->sole()->started_at;
+    $data = new RefereeData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->startOfDay());
+
+    // Act
+    resolve(UpdateAction::class)->handle($referee, $data);
+
+    // Assert
+    expect($referee->refresh()->first_name)->toBe('Renamed')
+        ->and($referee->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });

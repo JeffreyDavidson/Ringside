@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
@@ -223,7 +224,7 @@ test('it does not re-employ already employed wrestler', function () {
         weight: 220,
         hometown: 'Updated Town',
         signature_move: 'Updated Move',
-        employment_date: now(),
+        employment_date: $originalEmployment->started_at,
         managers: null,
     );
 
@@ -501,6 +502,37 @@ test('it keeps the start date of a wrestler who has already started when the dat
 
     // Assert
     expect($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
+test('it refuses another start date for a wrestler who is employed and saves nothing', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create(['name' => 'Original Name']);
+    $startedAt = $wrestler->employments()->sole()->started_at;
+    $data = renamingWrestlerData('Renamed Wrestler', $wrestler->signature_move);
+    $data = new WrestlerData($data->name, $data->height, $data->weight, $data->hometown, $data->signature_move, $startedAt->copy()->addDays(3));
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Wrestler 'Original Name' is currently employed, so the date employment started cannot be changed.")
+        ->and($wrestler->refresh()->name)->toBe('Original Name')
+        ->and($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a wrestler who is employed when the form date is the day employment started', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->employed()->create();
+    $startedAt = $wrestler->employments()->sole()->started_at;
+    $data = renamingWrestlerData('Renamed Wrestler', $wrestler->signature_move);
+    $data = new WrestlerData($data->name, $data->height, $data->weight, $data->hometown, $data->signature_move, $startedAt->copy()->startOfDay());
+
+    // Act
+    resolve(UpdateAction::class)->handle($wrestler, $data);
+
+    // Assert
+    expect($wrestler->refresh()->name)->toBe('Renamed Wrestler')
+        ->and($wrestler->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
 
 describe('wrestler name guard', function (): void {
