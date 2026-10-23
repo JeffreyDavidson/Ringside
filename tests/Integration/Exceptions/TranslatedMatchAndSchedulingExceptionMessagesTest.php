@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Lifecycle\DateRangeContext;
+use App\Enums\Matches\MatchParticipantKind;
 use App\Enums\Matches\MatchType;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
@@ -36,6 +37,7 @@ it('resolves every factory message to translated text', function (string $except
 
     $arguments = [
         DateRangeContext::class => DateRangeContext::StableActivity,
+        MatchParticipantKind::class => MatchParticipantKind::Wrestler,
         MatchType::class => MatchType::Singles,
         TitleType::class => TitleType::Singles,
         Title::class => Title::factory()->make(['name' => 'World']),
@@ -93,13 +95,13 @@ it('renders the original English text', function (Closure $factory, string $expe
     'competitor range' => [fn () => InvalidMatchConfigurationException::invalidCompetitorCount(2, 4), 'This match requires between 2 and 4 competitors.'],
     'competitor minimum' => [fn () => InvalidMatchConfigurationException::invalidCompetitorCount(3, null), 'This match requires at least 3 competitors.'],
     'side composition' => [fn () => InvalidMatchConfigurationException::invalidSideComposition(MatchType::Singles, [1, 1]), 'The [Singles] match requires a 1-on-1 roster-member composition.'],
-    'promotion' => [fn () => InvalidMatchConfigurationException::outsideEventPromotion('wrestlers'), "Selected wrestlers must all belong to the event's promotion."],
+    'promotion' => [fn () => InvalidMatchConfigurationException::outsideEventPromotion(MatchParticipantKind::Wrestler), "Selected wrestlers must all belong to the event's promotion."],
     'singles title winner' => [fn () => InvalidMatchOutcomeException::invalidTitleWinner(TitleType::Singles), 'The winning side must contain exactly one Singles championship competitor.'],
     'tag team title winner' => [fn () => InvalidMatchOutcomeException::invalidTitleWinner(TitleType::TagTeam), 'The winning side must contain exactly one Tag Team championship competitor.'],
     'champion not in match' => [fn () => InvalidMatchOutcomeException::titleChampionNotInMatch(Title::factory()->make(['name' => 'World Title'])), 'The champion of title [World Title] on this event date is not in the match, so no result can be recorded for it.'],
-    'competitor booked' => [fn () => SchedulingConflictException::competitorAlreadyBooked('Wrestler', 'Ric'), 'Wrestler [Ric] is already booked at this event time.'],
+    'competitor booked' => [fn () => SchedulingConflictException::competitorAlreadyBooked(MatchParticipantKind::Wrestler, 'Ric'), 'Wrestler [Ric] is already booked at this event time.'],
     'venue booked' => [fn () => SchedulingConflictException::venueAlreadyBooked('Garden', 'Jan 1, 2026'), 'Venue [Garden] is already booked on Jan 1, 2026 (venue time).'],
-    'not available' => [fn () => EntityNotAvailableException::forMatchAssignment('wrestlers'), 'Selected wrestlers must all be eligible for match assignment.'],
+    'not available' => [fn () => EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Wrestler), 'Selected wrestlers must all be eligible for match assignment.'],
     'range' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01')), 'Invalid date range: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
     'range with context' => [fn () => InvalidDateRangeException::endBeforeStart(Carbon::parse('2026-02-01'), Carbon::parse('2026-01-01'), DateRangeContext::StableActivity), 'Invalid date range for stable activity: end date (2026-01-01) cannot be before start date (2026-02-01). Ensure logical date ordering.'],
     'future' => [fn () => InvalidDateRangeException::futureNotAllowed(Carbon::parse('2026-02-01'), DateRangeContext::StableMembershipRemoval), 'Stable membership removal date (2026-02-01) cannot be in the future. Use current or past date only.'],

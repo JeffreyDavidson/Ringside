@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Matches;
 
+use App\Enums\Matches\MatchParticipantKind;
 use App\Enums\Matches\MatchType;
 use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
@@ -61,11 +62,6 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
         return new self(__('matches.errors.configuration.individual_sides_required', ['match_type' => $matchType->label()]));
     }
 
-    public static function invalidSideNumber(int $sideNumber): static
-    {
-        return new self(__('matches.errors.configuration.invalid_side_number', ['side' => $sideNumber]));
-    }
-
     public static function missingCompetitors(): static
     {
         return new self(__('matches.errors.configuration.missing_competitors'));
@@ -76,9 +72,9 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
         return new self(__('matches.errors.configuration.missing_referees'));
     }
 
-    public static function outsideEventPromotion(string $entityType): static
+    public static function outsideEventPromotion(MatchParticipantKind $kind): static
     {
-        return new self(__('matches.errors.configuration.outside_event_promotion', ['entity_type' => $entityType]));
+        return new self(__('matches.errors.configuration.outside_event_promotion', ['entity_type' => $kind->pluralLabel()]));
     }
 
     public static function resultAlreadyRecorded(): static

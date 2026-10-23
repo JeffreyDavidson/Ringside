@@ -33,6 +33,7 @@ use App\Exceptions\BaseBusinessException;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -90,9 +91,9 @@ it('rechecks standalone assignments and refuses a non-final title stake', functi
     $world = tournamentFixture();
     $match = bookTournamentNode($world, $world['tournament']->nodes()->firstOrFail());
     $third = Wrestler::factory()->employed()->for($world['promotion'])->create();
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$third]), 1))->toThrow(TournamentException::class);
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$third]), 1)))->toThrow(TournamentException::class);
     $title = Title::factory()->active()->for($world['promotion'])->create();
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))->toThrow(TournamentException::class)
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))->toThrow(TournamentException::class)
         ->and($match->competitors()->count())->toBe(2)
         ->and($match->titles()->count())->toBe(0);
 });

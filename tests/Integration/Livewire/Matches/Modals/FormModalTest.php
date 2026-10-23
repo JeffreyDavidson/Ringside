@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Data\Matches\EventMatchData;
+use App\Enums\Matches\MatchParticipantKind;
 use App\Enums\Matches\MatchType;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
@@ -476,7 +477,7 @@ describe('authorized match form interactions', function (): void {
         $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
         $referee = Referee::factory()->bookable()->create();
         $action = Double::for(AddMatchForEventAction::class);
-        $action->expects('handle')->throws(SchedulingConflictException::competitorAlreadyBooked('Wrestler', 'John Cena'));
+        $action->expects('handle')->throws(SchedulingConflictException::competitorAlreadyBooked(MatchParticipantKind::Wrestler, 'John Cena'));
         app()->instance(AddMatchForEventAction::class, $action);
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 
@@ -543,7 +544,7 @@ describe('authorized match form interactions', function (): void {
         $wrestlerIds = Wrestler::factory()->count(2)->bookable()->create()->modelKeys();
         $referee = Referee::factory()->bookable()->create();
         $action = Double::for(AddMatchForEventAction::class);
-        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment('wrestlers'));
+        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Wrestler));
         app()->instance(AddMatchForEventAction::class, $action);
         $modal = livewire(FormModal::class, ['eventId' => $event->id]);
 

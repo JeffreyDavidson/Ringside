@@ -70,19 +70,19 @@ $bookingScenarios = [
         $match = EventMatch::factory()->forEvent($event)->create();
         $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, 1))];
     }],
     'add tag teams' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create();
         $tagTeams = TagTeam::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, $tagTeams, 1))];
     }],
     'add referees' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create();
         $referees = Referee::factory()->bookable()->count(2)->create();
 
-        return [$event, fn () => resolve(AddRefereesToMatchAction::class)->handle($match, $referees)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referees))];
     }],
     'add titles' => [function (Event $event): array {
         $match = EventMatch::factory()
@@ -91,7 +91,7 @@ $bookingScenarios = [
             ->create();
         $titles = Title::factory()->active()->count(2)->create(['type' => TitleType::Singles]);
 
-        return [$event, fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles))];
     }],
     'add competitors' => [function (Event $event): array {
         $match = EventMatch::factory()->forEvent($event)->create(['match_type' => MatchType::Singles]);
@@ -100,7 +100,7 @@ $bookingScenarios = [
             2 => ['wrestlers' => [Wrestler::factory()->bookable()->create()]],
         ]));
 
-        return [$event, fn () => resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors)];
+        return [$event, fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddCompetitorsToMatchAction::class)->handle($lockedMatch, $competitors))];
     }],
 ];
 

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Promotions\CreateAction;
+use App\Enums\Matches\MatchParticipantKind;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Livewire\Promotions\Modals\FormModal;
 use App\Models\Events\Event;
@@ -155,7 +156,7 @@ describe('promotion form interactions', function () {
     it('lets a business rule failure propagate because the form names no error field', function () {
         // Arrange
         $action = Double::for(CreateAction::class);
-        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment('wrestlers'));
+        $action->expects('handle')->throws(EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Wrestler));
         app()->instance(CreateAction::class, $action);
         $modal = livewire(FormModal::class);
 

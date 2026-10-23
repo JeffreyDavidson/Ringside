@@ -57,12 +57,12 @@ class UpdateMatchAction
             $lockedMatch->competitors()->delete();
             $lockedMatch->sides()->delete();
 
-            $this->addRefereesToMatchAction->handleWithinTransaction($lockedMatch, $data->referees, $retainedKeys);
+            $this->addRefereesToMatchAction->handle($lockedMatch, $data->referees, $retainedKeys);
 
-            $this->addCompetitorsToMatchAction->handleWithinTransaction($lockedMatch, $data->sides, $retainedKeys);
+            $this->addCompetitorsToMatchAction->handle($lockedMatch, $data->sides, $retainedKeys);
 
             if ($data->titles->isNotEmpty()) {
-                $this->addTitlesToMatchAction->handleWithinTransaction($lockedMatch, $data->titles);
+                $this->addTitlesToMatchAction->handle($lockedMatch, $data->titles);
             }
 
             $link = TournamentMatchLink::query()->forMatchId($lockedMatch->id)->first();

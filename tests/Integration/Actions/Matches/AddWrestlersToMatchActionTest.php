@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddWrestlersToMatchAction;
-use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
@@ -25,7 +24,7 @@ test('it adds a single wrestler to a match', function () {
     $wrestlers = collect([$wrestler]);
     $sideNumber = 1;
 
-    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, $sideNumber));
 
     // Should create competitor record
     assertDatabaseHas('events_matches_competitors', [
@@ -48,7 +47,7 @@ test('it adds multiple wrestlers to the same side', function () {
     $wrestlers = collect([$wrestler1, $wrestler2]);
     $sideNumber = 1;
 
-    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, $sideNumber));
 
     // Should create competitor records for both wrestlers
     assertDatabaseHas('events_matches_competitors', [
@@ -75,10 +74,10 @@ test('it adds wrestlers to different sides', function () {
     $wrestler2 = Wrestler::factory()->employed()->create();
 
     // Add wrestler1 to side 1
-    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler1]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler1]), 1));
 
     // Add wrestler2 to side 2
-    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler2]), 2);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler2]), 2));
 
     // Should create competitor records with different side numbers
     assertDatabaseHas('events_matches_competitors', [
@@ -106,7 +105,7 @@ test('it rejects the entire assignment when any wrestler is ineligible', functio
     $wrestlers = collect([$eligibleWrestler, $ineligibleWrestler]);
     $sideNumber = 1;
 
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, $sideNumber)))
         ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.')
         ->and($match->competitors()->count())->toBe(0)
         ->and($match->sides()->count())->toBe(0);
@@ -119,7 +118,7 @@ test('it throws exception when no eligible wrestlers provided', function () {
     $wrestlers = collect([$ineligibleWrestler]);
     $sideNumber = 1;
 
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, $wrestlers, $sideNumber)))
         ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.');
 });
 
@@ -130,35 +129,9 @@ test('it reloads wrestlers before checking assignment eligibility', function () 
 
     $wrestler->delete();
 
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$staleWrestler]), 1))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$staleWrestler]), 1)))
         ->toThrow(EntityNotAvailableException::class)
         ->and($match->competitors()->exists())->toBeFalse();
-});
-
-test('it throws exception when side number is invalid', function () {
-    $match = EventMatch::factory()->create();
-    $wrestler = Wrestler::factory()->employed()->create();
-
-    $wrestlers = collect([$wrestler]);
-    $invalidSideNumber = 0;
-
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
-        ->toThrow(InvalidMatchConfigurationException::class, 'Match side number [0] must be positive.');
-});
-
-test('it handles transaction rollback on failure', function () {
-    $match = EventMatch::factory()->create();
-    $wrestler = Wrestler::factory()->employed()->create();
-
-    // Mock a database failure scenario by using invalid side number
-    $wrestlers = collect([$wrestler]);
-    $invalidSideNumber = -1;
-
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
-        ->toThrow(InvalidMatchConfigurationException::class);
-
-    // No competitors should be added due to transaction rollback
-    expect($match->refresh()->competitors()->count())->toBe(0);
 });
 
 test('it rejects a wrestler booked on another event at the same time', function () {
@@ -176,7 +149,7 @@ test('it rejects a wrestler booked on another event at the same time', function 
         'competitor_type' => $wrestler->getMorphClass(),
     ]);
 
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1))
+    expect(fn () => assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1)))
         ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.")
         ->and($targetMatch->competitors()->count())->toBe(0);
 });
@@ -195,7 +168,7 @@ test('it allows a wrestler booked at a different event time', function () {
         'competitor_type' => $wrestler->getMorphClass(),
     ]);
 
-    resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1);
+    assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1));
 
     expect($targetMatch->competitors()->count())->toBe(1);
 });
@@ -204,18 +177,9 @@ test('it assigns a repeated wrestler only once', function () {
     $match = EventMatch::factory()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
 
-    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler, $wrestler]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler, $wrestler]), 1));
 
     expect($match->competitors()->count())->toBe(1);
-});
-
-test('it rejects an empty wrestler list without creating a side', function () {
-    $match = EventMatch::factory()->create();
-
-    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect(), 1))
-        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.')
-        ->and($match->sides()->exists())->toBeFalse()
-        ->and($match->competitors()->exists())->toBeFalse();
 });
 
 test('it books a wrestler on a past event dated while they were employed', function () {
@@ -225,7 +189,7 @@ test('it books a wrestler on a past event dated while they were employed', funct
     $wrestler->employments()->update(['started_at' => now()->subDays(30)]);
 
     // Act
-    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1));
 
     // Assert
     expect($match->refresh()->competitors()->count())->toBe(1);
@@ -237,7 +201,7 @@ test('it refuses a wrestler on an event dated before their employment started', 
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Act
-    $book = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+    $book = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1));
 
     // Assert
     expect($book)->toThrow(EntityNotAvailableException::class)
@@ -250,7 +214,7 @@ test('it books a wrestler hired for a later event', function () {
     $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
     // Act
-    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1));
 
     // Assert
     expect($match->refresh()->competitors()->count())->toBe(1);
@@ -263,7 +227,7 @@ test('it refuses a wrestler on an event dated before their future employment sta
     $wrestler->employments()->update(['started_at' => now()->addDays(10)]);
 
     // Act
-    $book = fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler]), 1);
+    $book = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([$wrestler]), 1));
 
     // Assert
     expect($book)->toThrow(EntityNotAvailableException::class);
