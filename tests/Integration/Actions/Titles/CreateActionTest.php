@@ -16,7 +16,7 @@ use App\Services\Promotions\PromotionContextService;
 test('it creates a title', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result)->toBeInstanceOf(Title::class)
         ->and($result->name)->toBe('Example Title')
@@ -28,7 +28,7 @@ test('it activates a title if activation date is filled in request', function ()
     $datetime = now();
     $data = new TitleData('Example Title', TitleType::Singles, $datetime);
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result)->toBeInstanceOf(Title::class)
         ->and($result->name)->toBe('Example Title')
@@ -41,7 +41,7 @@ test('it records a single debuted transition when a debut date is provided', fun
     $datetime = now();
     $data = new TitleData('Example Title', TitleType::Singles, $datetime);
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     $transition = $result->lifecycleTransitions()->sole();
     expect($transition->transition)->toBe(LifecycleTransitionType::Debuted)
@@ -51,7 +51,7 @@ test('it records a single debuted transition when a debut date is provided', fun
 test('it records no lifecycle transition when no debut date is provided', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result->lifecycleTransitions()->exists())->toBeFalse();
 });
@@ -67,7 +67,7 @@ describe('title name guard', function (): void {
         $nameKey = resolve(RecordNameLock::class)->key(GuardedName::TitleName, $promotion->id, 'Example Title');
 
         // Act
-        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, $promotion->id));
 
         // Assert
         $lockPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"'));
@@ -90,7 +90,7 @@ describe('title name guard', function (): void {
         }
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null));
+        $create = fn () => resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null), $promotion->id);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "A title named 'Example Title' already exists in this promotion.")
@@ -105,7 +105,7 @@ describe('title name guard', function (): void {
         Title::factory()->create(['name' => 'Example Title']);
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null));
+        $create = fn () => resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null), null);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class)
@@ -121,9 +121,37 @@ describe('title name guard', function (): void {
         $context->enforce();
 
         // Act
-        $title = resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null));
+        $title = resolve(CreateAction::class)->handle(new TitleData('Example Title', TitleType::Singles, null), $promotion->id);
 
         // Assert
         expect($title->promotion_id)->toBe($promotion->id);
+    });
+});
+
+describe('explicit promotion', function (): void {
+    test('it creates the title in the promotion it is given, whatever the context holds', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $data = new TitleData('Example Title', TitleType::Singles, null);
+
+        // Act
+        $title = resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($title->promotion_id)->toBe($promotion->id);
+    });
+
+    test('it checks the name against the promotion it is given', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Title::factory()->for($promotion, 'promotion')->create(['name' => 'Example Title']);
+        $data = new TitleData('Example Title', TitleType::Singles, null);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class)
+            ->and(Title::query()->withoutGlobalScopes()->where('name', 'Example Title')->count())->toBe(1);
     });
 });

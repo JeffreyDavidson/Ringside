@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Crew\SaveCrewContactAction;
 use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
@@ -21,6 +22,7 @@ use App\Lifecycle\Titles\TitleDeletionEligibility;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
+use App\Services\Promotions\PromotionContextService;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
@@ -107,4 +109,18 @@ arch('actions do not read the signed-in user through the auth guard')
 
 arch('actions do not call the auth helper')
     ->expect('auth')
+    ->not->toBeUsedIn('App\\Actions');
+
+// The Promotions Actions manage the context itself (membership cache, switching). SaveCrewContactAction still reads
+// the current promotion from it and is the one known exception, until it takes the promotion as a parameter.
+arch('actions take the promotion as a parameter and never read it from the promotion context')
+    ->expect('App\\Actions')
+    ->not->toUse(PromotionContextService::class)
+    ->ignoring([
+        'App\\Actions\\Promotions',
+        SaveCrewContactAction::class,
+    ]);
+
+arch('actions receive their collaborators instead of resolving them from the container')
+    ->expect('app')
     ->not->toBeUsedIn('App\\Actions');

@@ -27,7 +27,7 @@ test('it creates a wrestler with basic information', function () {
         employment_date: null,
     );
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result)->toBeInstanceOf(Wrestler::class)
         ->and($result->name)->toBe('John Cena')
@@ -62,7 +62,7 @@ test('it creates a wrestler with employment when employment date is provided', f
         employment_date: $employmentDate,
     );
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result->name)->toBe('The Rock')
         ->and($result->currentEmployment()->exists())->toBeTrue();
@@ -94,7 +94,7 @@ test('it creates wrestler with all optional fields', function () {
         employment_date: $employmentDate,
     );
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result)->toBeInstanceOf(Wrestler::class)
         ->and($result->name)->toBe('Stone Cold Steve Austin')
@@ -130,7 +130,7 @@ test('it handles height conversion correctly', function () {
         employment_date: null,
     );
 
-    $result = resolve(CreateAction::class)->handle($data);
+    $result = resolve(CreateAction::class)->handle($data, null);
 
     expect($result->height)->toBeInstanceOf(Height::class)
         ->and($result->height->feet)->toBe(5)
@@ -141,15 +141,18 @@ test('it handles height conversion correctly', function () {
 test('it assigns employed managers when the wrestler is not employed', function () {
     $managers = Manager::factory()->employed()->count(2)->create();
 
-    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
-        name: 'Managed Wrestler',
-        height: 72,
-        weight: 225,
-        hometown: 'Test City',
-        signature_move: null,
-        employment_date: null,
-        managers: $managers,
-    ));
+    $wrestler = resolve(CreateAction::class)->handle(
+        new WrestlerData(
+            name: 'Managed Wrestler',
+            height: 72,
+            weight: 225,
+            hometown: 'Test City',
+            signature_move: null,
+            employment_date: null,
+            managers: $managers,
+        ),
+        null,
+    );
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
@@ -161,15 +164,18 @@ test('it keeps an assigned employed manager employed when the wrestler is employ
     $manager = Manager::factory()->employed()->create();
     $employmentDate = now()->subDay();
 
-    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
-        name: 'Employed Managed Wrestler',
-        height: 72,
-        weight: 225,
-        hometown: 'Test City',
-        signature_move: null,
-        employment_date: $employmentDate,
-        managers: new Collection([$manager]),
-    ));
+    $wrestler = resolve(CreateAction::class)->handle(
+        new WrestlerData(
+            name: 'Employed Managed Wrestler',
+            height: 72,
+            weight: 225,
+            hometown: 'Test City',
+            signature_move: null,
+            employment_date: $employmentDate,
+            managers: new Collection([$manager]),
+        ),
+        null,
+    );
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue()
         ->and($manager->employments()->count())->toBe(1);
@@ -196,7 +202,7 @@ describe('wrestler name guard', function (): void {
         $lock = resolve(RecordNameLock::class);
 
         // Act
-        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+        $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, $promotion->id));
 
         // Assert
         $lockPositions = array_keys(array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "record_name_locks"')));
@@ -214,7 +220,7 @@ describe('wrestler name guard', function (): void {
         $data = namedWrestlerData('The Rock');
 
         // Act
-        resolve(CreateAction::class)->handle($data);
+        resolve(CreateAction::class)->handle($data, null);
 
         // Assert
         expect(DB::table('record_name_locks')->count())->toBe(1);
@@ -225,7 +231,7 @@ describe('wrestler name guard', function (): void {
         $data = namedWrestlerData('  The Rock ');
 
         // Act
-        $wrestler = resolve(CreateAction::class)->handle($data);
+        $wrestler = resolve(CreateAction::class)->handle($data, null);
 
         // Assert
         expect($wrestler->name)->toBe('The Rock');
@@ -242,7 +248,7 @@ describe('wrestler name guard', function (): void {
         }
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData($name));
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData($name), $promotion->id);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "A wrestler named 'The Rock' already exists in this promotion.")
@@ -258,7 +264,7 @@ describe('wrestler name guard', function (): void {
         Wrestler::factory()->create(['name' => 'The Rock']);
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('The Rock'));
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('The Rock'), null);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class)
@@ -270,7 +276,7 @@ describe('wrestler name guard', function (): void {
         Wrestler::factory()->create(['name' => 'The Rock', 'signature_move' => 'Rock Bottom']);
 
         // Act
-        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('Stone Cold', 'Rock Bottom'));
+        $create = fn () => resolve(CreateAction::class)->handle(namedWrestlerData('Stone Cold', 'Rock Bottom'), null);
 
         // Assert
         expect($create)->toThrow(NameTakenException::class, "A wrestler with the signature move 'Rock Bottom' already exists in this promotion.")
@@ -284,9 +290,40 @@ describe('wrestler name guard', function (): void {
         enforcePromotionContext($promotion);
 
         // Act
-        $wrestler = resolve(CreateAction::class)->handle(namedWrestlerData('The Rock', 'Rock Bottom'));
+        $wrestler = resolve(CreateAction::class)->handle(namedWrestlerData('The Rock', 'Rock Bottom'), $promotion->id);
 
         // Assert
         expect($wrestler->promotion_id)->toBe($promotion->id);
     });
+});
+
+describe('explicit promotion', function (): void {
+    test('it creates the wrestler in the promotion it is given, whatever the context holds', function (): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        $data = namedWrestlerData('The Rock');
+
+        // Act
+        $wrestler = resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($wrestler->promotion_id)->toBe($promotion->id);
+    });
+
+    test('it checks the name and signature move against the promotion it is given', function (string $name, ?string $signatureMove): void {
+        // Arrange
+        $promotion = Promotion::factory()->create();
+        Wrestler::factory()->for($promotion, 'promotion')->create(['name' => 'The Rock', 'signature_move' => 'Rock Bottom']);
+        $data = namedWrestlerData($name, $signatureMove);
+
+        // Act
+        $create = fn () => resolve(CreateAction::class)->handle($data, $promotion->id);
+
+        // Assert
+        expect($create)->toThrow(NameTakenException::class)
+            ->and(Wrestler::query()->withoutGlobalScopes()->count())->toBe(1);
+    })->with([
+        'name' => ['The Rock', null],
+        'signature move' => ['Stone Cold', 'Rock Bottom'],
+    ]);
 });

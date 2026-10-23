@@ -25,6 +25,7 @@ use App\Rules\Titles\MatchesCompetitorType;
 use App\ValueObjects\MatchSides;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Locked;
@@ -115,14 +116,7 @@ class CreateEditForm extends BaseForm
     {
         $matchType = $this->requiredMatchType();
         $sides = $matchType->usesIndividualCompetitorSides()
-            ? collect($this->competitors[0]['wrestlers'] ?? [])
-                ->values()
-                ->mapWithKeys(fn (int $wrestlerId, int $index): array => [
-                    $index + 1 => [
-                        'wrestlers' => Wrestler::query()->whereKey($wrestlerId)->get()->all(),
-                        'tag_teams' => [],
-                    ],
-                ])
+            ? $this->individualEntrantSides()
             : collect($this->competitors)
                 ->values()
                 ->mapWithKeys(fn (array $side, int $index): array => [
@@ -143,6 +137,24 @@ class CreateEditForm extends BaseForm
                 : MatchStipulation::query()->findOrFail($this->matchStipulationId),
             tournamentVersion: $this->tournamentVersion,
         );
+    }
+
+    /**
+     * One side per picked entrant, in the order they were picked, loaded with a single query.
+     *
+     * @return Collection<int, array{wrestlers: array<int, Wrestler>, tag_teams: array{}}>
+     */
+    private function individualEntrantSides(): Collection
+    {
+        $entrantIds = collect($this->competitors[0]['wrestlers'] ?? [])->values();
+        $wrestlers = Wrestler::query()->whereKey($entrantIds)->get()->keyBy('id');
+
+        return $entrantIds->mapWithKeys(fn (int $wrestlerId, int $index): array => [
+            $index + 1 => [
+                'wrestlers' => $wrestlers->only([$wrestlerId])->values()->all(),
+                'tag_teams' => [],
+            ],
+        ]);
     }
 
     /** @return array<string, array<int, mixed>> */

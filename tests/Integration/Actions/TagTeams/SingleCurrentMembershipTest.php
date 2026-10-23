@@ -29,7 +29,7 @@ test('creating a tag team rejects a wrestler who is on another current tag team'
     $tagTeamCount = TagTeam::query()->count();
 
     // Act
-    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Duplicate Team', $sharedWrestler, $newPartner));
+    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Duplicate Team', $sharedWrestler, $newPartner), null);
 
     // Assert
     expect($create)->toThrow(
@@ -44,10 +44,10 @@ test('creating a tag team rejects a wrestler who is on another current tag team'
 test('two sequential creations sharing a wrestler reject the second', function () {
     // Arrange
     [$sharedWrestler, $firstPartner, $secondPartner] = Wrestler::factory()->count(3)->create()->all();
-    resolve(CreateAction::class)->handle(tagTeamData('First Team', $sharedWrestler, $firstPartner));
+    resolve(CreateAction::class)->handle(tagTeamData('First Team', $sharedWrestler, $firstPartner), null);
 
     // Act
-    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Second Team', $sharedWrestler, $secondPartner));
+    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Second Team', $sharedWrestler, $secondPartner), null);
 
     // Assert
     expect($create)->toThrow(CannotBeEstablishedException::class)
@@ -63,7 +63,7 @@ test('a wrestler whose previous membership ended can join a new tag team', funct
     $newPartner = Wrestler::factory()->create();
 
     // Act
-    $tagTeam = resolve(CreateAction::class)->handle(tagTeamData('Fresh Start', $formerMember, $newPartner));
+    $tagTeam = resolve(CreateAction::class)->handle(tagTeamData('Fresh Start', $formerMember, $newPartner), null);
 
     // Assert
     expect($tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing([$formerMember->id, $newPartner->id])
@@ -77,7 +77,7 @@ test('a wrestler on a soft-deleted tag team with a current membership is rejecte
     $existingTagTeam->delete();
 
     // Act
-    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Duplicate Team', $sharedWrestler, Wrestler::factory()->create()));
+    $create = fn () => resolve(CreateAction::class)->handle(tagTeamData('Duplicate Team', $sharedWrestler, Wrestler::factory()->create()), null);
 
     // Assert
     expect($create)->toThrow(CannotBeEstablishedException::class, "is already a member of {$existingTagTeam->name} and cannot join another tag team.");
@@ -157,6 +157,7 @@ test('it locks incoming wrestlers in ascending id order after the tag team row i
     // Act
     $statements = recordStatements(fn () => resolve(CreateAction::class)->handle(
         tagTeamData('Lock Order Team', $first, $second),
+        null,
     ));
 
     // Assert

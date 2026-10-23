@@ -22,7 +22,7 @@ test('it creates an unformed stable without a start date', function (): void {
         members: new StableMembershipData,
     );
 
-    $stable = resolve(CreateAction::class)->handle($data);
+    $stable = resolve(CreateAction::class)->handle($data, null);
 
     expect($stable->name)->toBe('The Alliance')
         ->and($stable->status)->toBe(StableStatus::Unformed)
@@ -40,7 +40,7 @@ test('it creates and establishes a stable with founding members', function (): v
         members: new StableMembershipData(wrestlers: $wrestlers),
     );
 
-    $stable = resolve(CreateAction::class)->handle($data);
+    $stable = resolve(CreateAction::class)->handle($data, null);
     $stable->refresh();
 
     expect($stable->status)->toBe(StableStatus::Active)
@@ -67,7 +67,7 @@ test('it rejects an end date instead of creating an ended stable with current me
     );
 
     // Act
-    $create = fn () => resolve(CreateAction::class)->handle($data);
+    $create = fn () => resolve(CreateAction::class)->handle($data, null);
 
     // Assert
     expect($create)->toThrow(CannotBeEstablishedException::class)
@@ -81,7 +81,7 @@ test('it locks the name of a stable without a promotion before inserting it', fu
     $nameKey = resolve(StableNameLock::class)->key('The Alliance');
 
     // Act
-    $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data));
+    $statements = recordStatements(fn () => resolve(CreateAction::class)->handle($data, null));
 
     // Assert
     $lockPosition = statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "stable_name_locks"'));
@@ -108,7 +108,7 @@ test('it rejects a name another active stable without a promotion already uses',
     $data = new StableData(name: ' The Alliance ', start_date: null, members: new StableMembershipData);
 
     // Act
-    $create = fn () => resolve(CreateAction::class)->handle($data);
+    $create = fn () => resolve(CreateAction::class)->handle($data, null);
 
     // Assert
     expect($create)->toThrow(CannotBeCreatedException::class, "an active stable named 'The Alliance' already exists")
@@ -135,7 +135,7 @@ test('it allows a name only a deleted stable or another promotion uses', functio
     $data = new StableData(name: 'The Alliance', start_date: null, members: new StableMembershipData);
 
     // Act
-    $stable = resolve(CreateAction::class)->handle($data);
+    $stable = resolve(CreateAction::class)->handle($data, null);
 
     // Assert
     expect($stable->name)->toBe('The Alliance')

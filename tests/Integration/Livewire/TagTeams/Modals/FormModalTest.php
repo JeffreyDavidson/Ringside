@@ -15,7 +15,6 @@ use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\Date;
 use JMac\Testing\Double;
 
@@ -208,20 +207,19 @@ describe('authorized tag team form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $claimingTagTeam = TagTeam::factory()->create(['name' => 'The Claimers']);
         $failure = CannotBeEstablishedException::wrestlerOnAnotherTagTeam($wrestlers->firstOrFail(), $claimingTagTeam);
-        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class)) extends CreateAction
         {
             public function __construct(
                 private readonly CannotBeEstablishedException $failure,
                 EstablishMembershipAction $establishMembershipAction,
                 EmployAction $employAction,
                 RecordNameLock $nameLock,
-                PromotionContextService $promotionContext,
             ) {
-                parent::__construct($establishMembershipAction, $employAction, $nameLock, $promotionContext);
+                parent::__construct($establishMembershipAction, $employAction, $nameLock);
             }
 
             #[Override]
-            public function handle(TagTeamData $tagTeamData): never
+            public function handle(TagTeamData $tagTeamData, ?int $promotionId): never
             {
                 throw $this->failure;
             }
@@ -625,20 +623,19 @@ describe('tag team name races past the form rule', function () {
     it('shows a signature move taken after validation on the signature move field', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $failure = NameTakenException::signatureMove('Royal Flush');
-        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(PromotionContextService::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class)) extends CreateAction
         {
             public function __construct(
                 private readonly NameTakenException $failure,
                 EstablishMembershipAction $establishMembershipAction,
                 EmployAction $employAction,
                 RecordNameLock $nameLock,
-                PromotionContextService $promotionContext,
             ) {
-                parent::__construct($establishMembershipAction, $employAction, $nameLock, $promotionContext);
+                parent::__construct($establishMembershipAction, $employAction, $nameLock);
             }
 
             #[Override]
-            public function handle(TagTeamData $tagTeamData): never
+            public function handle(TagTeamData $tagTeamData, ?int $promotionId): never
             {
                 throw $this->failure;
             }
