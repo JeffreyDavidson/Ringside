@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
@@ -23,6 +24,7 @@ class UpdateAction
     public function __construct(
         private readonly DebutAction $debut,
         private readonly RecordNameLock $nameLock,
+        private readonly RecordLifecycleTransitionAction $recordTransition,
     ) {}
 
     /**
@@ -80,8 +82,10 @@ class UpdateAction
     /**
      * Debut a title that has no activity history, or move the date of a debut that is only scheduled.
      *
-     * The scheduled period and its pending Debuted transition are updated in place so the title keeps
-     * exactly one period and one Debuted record. Active, pulled, and retired titles are left alone.
+     * The scheduled period moves in place so the title keeps exactly one period. The move is recorded as a new
+     * Debuted transition at the new date that notes the date it moved from, as an employment reschedule is; the
+     * earlier transition stays, because transitions are an immutable trail. Active, pulled, and retired titles
+     * are left alone.
      */
     private function applyDebutDate(Title $title, Carbon $debutDate): void
     {
@@ -103,10 +107,15 @@ class UpdateAction
             return;
         }
 
+        $scheduledFor = $scheduledPeriod->started_at;
+
         $scheduledPeriod->update(['started_at' => $debutDate]);
-        $title->lifecycleTransitions()
-            ->where('dimension', LifecycleDimension::Activity)
-            ->where('transition', LifecycleTransitionType::Debuted)
-            ->update(['effective_at' => $debutDate]);
+        $this->recordTransition->handle(
+            $title,
+            LifecycleDimension::Activity,
+            LifecycleTransitionType::Debuted,
+            $debutDate,
+            ['rescheduled_from' => $scheduledFor->toIso8601String()],
+        );
     }
 }

@@ -5,12 +5,15 @@ declare(strict_types=1);
 use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Naming\GuardedName;
+use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Exceptions\Titles\CannotChangeTypeException;
 use App\Exceptions\Titles\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Titles\TitleStatusResolver;
 use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Models\Titles\Title;
@@ -138,7 +141,7 @@ test('it allows changing the type once the only booking was deleted and no reign
 });
 
 describe('changing a scheduled debut date', function (): void {
-    test('it moves the scheduled debut without adding a second period or transition', function (int $daysFromNow, bool $isActive): void {
+    test('it moves the scheduled debut in its one period and keeps the title status', function (int $daysFromNow, TitleStatus $status): void {
         // Arrange
         $title = Title::factory()->unactivated()->create();
         resolve(DebutAction::class)->handle($title, now()->addDays(10));
@@ -148,18 +151,58 @@ describe('changing a scheduled debut date', function (): void {
         resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $newDebut));
 
         // Assert
-        $transition = $title->lifecycleTransitions()->sole();
         expect($title->activityPeriods()->count())->toBe(1)
             ->and($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
-            ->and($transition->transition)->toBe(LifecycleTransitionType::Debuted)
-            ->and($transition->effective_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
-            ->and($title->currentActivityPeriod()->exists())->toBe($isActive)
+            ->and($title->firstActivityPeriod()->sole()->started_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
+            ->and(TitleStatusResolver::resolveFor($title))->toBe($status)
             ->and($title->lifecycleTransitions()->where('transition', LifecycleTransitionType::Reinstated)->exists())->toBeFalse();
     })->with([
-        'a later future date' => [20, false],
-        'an earlier future date' => [2, false],
-        'a past date' => [-40, true],
+        'a later future date' => [20, TitleStatus::PendingDebut],
+        'an earlier future date' => [2, TitleStatus::PendingDebut],
+        'a past date' => [-40, TitleStatus::Active],
     ]);
+
+    test('it keeps the first Debuted transition and records a new one at the moved date', function (): void {
+        // Arrange
+        $title = Title::factory()->unactivated()->create();
+        $originalDebut = now()->addDays(10);
+        resolve(DebutAction::class)->handle($title, $originalDebut);
+        $original = $title->lifecycleTransitions()->sole();
+        $newDebut = now()->addDays(3);
+
+        // Act
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $newDebut));
+
+        // Assert
+        $transitions = $title->lifecycleTransitions()->reorder('id')->get();
+        expect($transitions)->toHaveCount(2)
+            ->and($transitions->pluck('transition')->all())->toBe([LifecycleTransitionType::Debuted, LifecycleTransitionType::Debuted])
+            ->and($transitions->first()->is($original))->toBeTrue()
+            ->and($transitions->first()->effective_at->toDateTimeString())->toBe($originalDebut->toDateTimeString())
+            ->and($transitions->first()->context)->toBeNull()
+            ->and($transitions->last()->dimension)->toBe(LifecycleDimension::Activity)
+            ->and($transitions->last()->effective_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
+            ->and($transitions->last()->context)->toBe(['rescheduled_from' => $originalDebut->toIso8601String()]);
+    });
+
+    test('it records each move and notes the date it moved from', function (): void {
+        // Arrange
+        $title = Title::factory()->unactivated()->create();
+        resolve(DebutAction::class)->handle($title, now()->addDays(10));
+        $secondDebut = now()->addDays(6);
+        $thirdDebut = now()->addDays(2);
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $secondDebut));
+
+        // Act
+        resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $thirdDebut));
+
+        // Assert
+        $latest = $title->lifecycleTransitions()->reorder('id', 'desc')->first();
+        expect($title->lifecycleTransitions()->count())->toBe(3)
+            ->and($latest->effective_at->toDateTimeString())->toBe($thirdDebut->toDateTimeString())
+            ->and($latest->context)->toBe(['rescheduled_from' => $secondDebut->toIso8601String()])
+            ->and($title->activityPeriods()->sole()->started_at->toDateTimeString())->toBe($thirdDebut->toDateTimeString());
+    });
 
     test('it leaves the scheduled debut alone when the date is unchanged', function (): void {
         $title = Title::factory()->unactivated()->create();

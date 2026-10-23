@@ -131,7 +131,8 @@ describe('authorized title form interactions', function () {
         $modal->assertHasNoErrors();
         expect($title->activityPeriods()->count())->toBe(1)
             ->and($title->activityPeriods()->sole()->started_at->toDateString())->toBe('2026-11-15')
-            ->and($title->lifecycleTransitions()->sole()->effective_at->toDateString())->toBe('2026-11-15');
+            ->and($title->lifecycleTransitions()->count())->toBe(2)
+            ->and($title->lifecycleTransitions()->reorder('id', 'desc')->firstOrFail()->effective_at->toDateString())->toBe('2026-11-15');
     });
 
     it('still refuses a new debut date for a title that is already active', function () {
