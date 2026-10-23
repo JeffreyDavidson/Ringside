@@ -74,7 +74,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'A test event',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Test Event')
@@ -96,7 +96,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'A scheduled event',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Scheduled Event')
@@ -119,7 +119,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'An event that happened',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->status)->not->toBe(EventStatus::Unscheduled)
@@ -136,7 +136,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'Event without venue',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->status)->not->toBe(EventStatus::Unscheduled)
@@ -311,7 +311,7 @@ describe('Event Activation Action Integration', function () {
                 venue: null,
                 preview: 'Draft event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Unscheduled);
 
             // Schedule the event
@@ -372,8 +372,8 @@ describe('Event Activation Action Integration', function () {
                 preview: 'Second event',
             );
 
-            $event1 = resolve(CreateAction::class)->handle($event1Data);
-            $event2 = resolve(CreateAction::class)->handle($event2Data);
+            $event1 = resolve(CreateAction::class)->handle($event1Data, null);
+            $event2 = resolve(CreateAction::class)->handle($event2Data, null);
 
             expect($event1->venue_id)->toBe($venue->id)
                 ->and($event2->venue_id)->toBe($venue->id)
@@ -396,7 +396,7 @@ describe('Event Activation Action Integration', function () {
                 venue: $venue1,
                 preview: 'Initial venue',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->venue_id)->toBe($venue1->id);
 
             // Change to second venue
@@ -441,7 +441,7 @@ describe('Event Activation Action Integration', function () {
                 venue: $venue,
                 preview: 'Future event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Scheduled)->not->toBe(EventStatus::Past);
 
             // Change to past date
@@ -528,7 +528,7 @@ describe('Event Activation Action Integration', function () {
                 preview: null,
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->exists)->toBeTrue()
                 ->and($event->name)->toBe('Minimal Event')
@@ -547,7 +547,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'Date but no venue',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
 
             expect($event->status)->not->toBe(EventStatus::Unscheduled)
                 ->and($event->venue_id)->toBeNull()
@@ -564,7 +564,7 @@ describe('Event Activation Action Integration', function () {
                 preview: 'Consistency test',
             );
 
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             $originalState = [
                 'name' => $event->name,
                 'date' => requiredDate($event->date),
@@ -612,7 +612,7 @@ describe('Event Activation Action Integration', function () {
                 venue: $venue,
                 preview: 'Future event',
             );
-            $event = resolve(CreateAction::class)->handle($eventData);
+            $event = resolve(CreateAction::class)->handle($eventData, null);
             expect($event->status)->toBe(EventStatus::Scheduled);
 
             // Update to past

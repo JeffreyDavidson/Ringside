@@ -104,7 +104,7 @@ class FormModal extends BaseFormModal
 
     protected function createForm(): void
     {
-        $this->createAction->handle($this->form->toData());
+        $this->createAction->handle($this->form->toData(), $this->form->formPromotionId());
     }
 
     public function render(): View
