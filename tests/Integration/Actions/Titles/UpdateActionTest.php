@@ -175,14 +175,16 @@ describe('changing a scheduled debut date', function (): void {
 
         // Assert
         $transitions = $title->lifecycleTransitions()->reorder('id')->get();
+        $first = $transitions->firstOrFail();
+        $last = $transitions->reverse()->firstOrFail();
         expect($transitions)->toHaveCount(2)
             ->and($transitions->pluck('transition')->all())->toBe([LifecycleTransitionType::Debuted, LifecycleTransitionType::Debuted])
-            ->and($transitions->first()->is($original))->toBeTrue()
-            ->and($transitions->first()->effective_at->toDateTimeString())->toBe($originalDebut->toDateTimeString())
-            ->and($transitions->first()->context)->toBeNull()
-            ->and($transitions->last()->dimension)->toBe(LifecycleDimension::Activity)
-            ->and($transitions->last()->effective_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
-            ->and($transitions->last()->context)->toBe(['rescheduled_from' => $originalDebut->toIso8601String()]);
+            ->and($first->is($original))->toBeTrue()
+            ->and($first->effective_at->toDateTimeString())->toBe($originalDebut->toDateTimeString())
+            ->and($first->context)->toBeNull()
+            ->and($last->dimension)->toBe(LifecycleDimension::Activity)
+            ->and($last->effective_at->toDateTimeString())->toBe($newDebut->toDateTimeString())
+            ->and($last->context)->toBe(['rescheduled_from' => $originalDebut->toIso8601String()]);
     });
 
     test('it records each move and notes the date it moved from', function (): void {
@@ -197,7 +199,7 @@ describe('changing a scheduled debut date', function (): void {
         resolve(UpdateAction::class)->handle($title, new TitleData($title->name, $title->type, $thirdDebut));
 
         // Assert
-        $latest = $title->lifecycleTransitions()->reorder('id', 'desc')->first();
+        $latest = $title->lifecycleTransitions()->reorder('id', 'desc')->firstOrFail();
         expect($title->lifecycleTransitions()->count())->toBe(3)
             ->and($latest->effective_at->toDateTimeString())->toBe($thirdDebut->toDateTimeString())
             ->and($latest->context)->toBe(['rescheduled_from' => $secondDebut->toIso8601String()])
