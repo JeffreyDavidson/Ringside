@@ -88,7 +88,7 @@ class SaveSponsorInstructionAction
             }
 
             // The commitment guard above already checked the pack version and card against the locked rows held here.
-            $this->persistPack->handle($event, $pack, $packVersion, $fingerprint, EventPackData::fromValidated($content)->contentOver($pack));
+            $this->persistPack->handle($event, $pack, $packVersion, $fingerprint, EventPackData::fromValidated($content));
             $this->persist->handle($commitment, $data->mode === SponsorInstructionMode::Remove ? 'retract_instruction' : 'review_instruction', $data->reason, $actor);
         }, attempts: 3);
     }

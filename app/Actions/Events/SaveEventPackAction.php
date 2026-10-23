@@ -29,7 +29,7 @@ class SaveEventPackAction
 
             $this->requirements->ensureCanSave($pack, $version, $fingerprint, $card['fingerprint'], $reviewed);
 
-            $this->persist->handle($event, $pack, $version, $fingerprint, $data->contentOver($pack));
+            $this->persist->handle($event, $pack, $version, $fingerprint, $data);
         }, attempts: 3);
     }
 }
