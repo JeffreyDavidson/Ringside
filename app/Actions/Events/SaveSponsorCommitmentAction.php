@@ -24,10 +24,30 @@ class SaveSponsorCommitmentAction
         ?string $reason = null, bool $reviewed = false, bool $refreshSponsorName = false): EventSponsorCommitment
     {
         return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $actor, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
-            $event = Event::query()->withTrashed()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+            $event = Event::query()
+                ->withTrashed()
+                ->whereKey($event->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $this->requirements->ensureEventAvailable($event);
-            $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereKey($data->sponsorId)->lockForUpdate()->firstOrFail();
-            $commitment = $id === null ? null : EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
+
+            $sponsor = Sponsor::query()
+                ->where('promotion_id', $event->promotion_id)
+                ->whereKey($data->sponsorId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $commitment = null;
+
+            if ($id !== null) {
+                $commitment = EventSponsorCommitment::query()
+                    ->forEventId($event->id)
+                    ->whereKey($id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            }
+
             $this->requirements->ensureCurrentSubmission($commitment, $version, $submissionKey,
                 fn (): bool => EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists());
             $this->requirements->ensureCanSelect($event, $sponsor, $commitment);

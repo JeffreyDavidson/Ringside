@@ -86,11 +86,29 @@ class AddMatchForEventAction
 
             if ($tournament instanceof Tournament) {
                 if ($this->tournamentStates->activates($tournament)) {
-                    activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'capacity' => $tournament->capacity, 'entrant_kind' => $tournament->entrant_kind->value, 'repeat_appearances' => $tournament->repeat_appearances, 'entries' => $tournament->entries()->get(['seed', 'competitor_type', 'competitor_id'])->toArray()])->log('tournament.activated');
+                    activity('tournaments')
+                        ->causedBy($actor)
+                        ->withProperties([
+                            'promotion_id' => $tournament->promotion_id,
+                            'tournament_id' => $tournament->id,
+                            'capacity' => $tournament->capacity,
+                            'entrant_kind' => $tournament->entrant_kind->value,
+                            'repeat_appearances' => $tournament->repeat_appearances,
+                            'entries' => $tournament->entries()->get(['seed', 'competitor_type', 'competitor_id'])->toArray(),
+                        ])
+                        ->log('tournament.activated');
                 }
                 (new TournamentMatchLink)->forceFill(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'active_node_id' => $node->id, 'match_id' => $createdMatch->id, 'attempt' => ($node->links()->reorder('attempt', 'desc')->first()->attempt ?? 0) + 1])->save();
-                $tournament->forceFill(['status' => TournamentStatus::Active, 'version' => $tournament->version + 1])->save();
-                activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'match_id' => $createdMatch->id])->log('tournament.booked');
+                $tournament->increment('version', extra: ['status' => TournamentStatus::Active]);
+
+                activity('tournaments')
+                    ->causedBy($actor)
+                    ->withProperties([
+                        'promotion_id' => $tournament->promotion_id,
+                        'tournament_id' => $tournament->id,
+                        'match_id' => $createdMatch->id,
+                    ])
+                    ->log('tournament.booked');
             }
 
             $this->rosterLock->forData($eventMatchData);

@@ -33,13 +33,24 @@ class ResetTournamentBranchAction
             if ($includeCurrent) {
                 $ids[] = $node->id;
             }
-            $links = TournamentMatchLink::query()->whereIn('node_id', $ids)->whereNotNull('active_node_id')->orderBy('id')->lockForUpdate()->with('match')->get();
+            $links = TournamentMatchLink::query()
+                ->whereIn('node_id', $ids)
+                ->whereNotNull('active_node_id')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->with('match')
+                ->get();
+
             if ($links->isEmpty() && ! TournamentNode::query()->whereKey($ids)->whereNotNull('walkover_entry_id')->exists()) {
                 return;
             }
             foreach ($links as $link) {
                 $match = $link->match->refreshForUpdate();
-                $run = EventLiveRun::query()->forEventId($match->event_id)->lockForUpdate()->first();
+                $run = EventLiveRun::query()
+                    ->forEventId($match->event_id)
+                    ->lockForUpdate()
+                    ->first();
+
                 $item = collect($run?->content['items'] ?? [])->firstWhere('key', 'match:'.$match->id);
                 if ($match->match_finish !== null || ($item !== null && $item['state'] !== LiveItemStatus::Pending->value)) {
                     throw TournamentException::playedDependency();
@@ -50,7 +61,18 @@ class ResetTournamentBranchAction
                 $link->forceFill(['active_node_id' => null])->save();
             }
             TournamentNode::query()->whereKey($ids)->update(['walkover_entry_id' => null, 'walkover_reason' => null]);
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_ids' => $ids, 'match_ids' => $links->pluck('match_id')->all(), 'reason' => $reason])->log('tournament.reset');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'node_ids' => $ids,
+                    'match_ids' => $links->pluck('match_id')->all(),
+                    'reason' => $reason,
+                ])
+                ->log('tournament.reset');
+
             $this->outcomes->synchronize($tournament, $actor);
         }, attempts: 3);
     }

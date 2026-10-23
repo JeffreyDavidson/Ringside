@@ -29,7 +29,13 @@ class SaveBudgetLineAction
         $reason = $data->reason;
 
         return $this->mutate->handle($event, $version, $key, BudgetOperation::SaveLine, ['line_id' => $lineId, ...$attributes, 'acknowledge' => $data->acknowledge], function (EventBudget $budget) use ($lineId, $attributes, $reason, $data): ?array {
-            $line = $lineId === null ? new EventBudgetLine : $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
+            $line = $lineId === null
+                ? new EventBudgetLine
+                : $budget->lines()
+                    ->whereKey($lineId)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
             if ($line->archived_at !== null) {
                 throw BudgetException::archived();
             }
@@ -37,7 +43,10 @@ class SaveBudgetLineAction
                 throw BudgetException::lineLimit();
             }
             $before = $line->exists ? $line->attributesToArray() : [];
-            $line->setRelation('movements', $line->movements()->orderBy('id')->lockForUpdate()->get());
+            $line->setRelation('movements', $line->movements()
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get());
             if ($line->exists && ($line->direction !== $attributes['direction']) && $line->movements->isNotEmpty()) {
                 throw BudgetException::directionLocked();
             }

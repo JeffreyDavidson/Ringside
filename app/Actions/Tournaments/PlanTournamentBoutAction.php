@@ -34,8 +34,17 @@ class PlanTournamentBoutAction
                 throw TournamentException::alreadyBooked();
             }
             $node->forceFill(['planned_event_id' => $event?->id])->save();
-            $tournament->forceFill(['version' => $tournament->version + 1])->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'event_id' => $event?->id])->log('tournament.planned');
+            $tournament->increment('version');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'node_id' => $node->id,
+                    'event_id' => $event?->id,
+                ])
+                ->log('tournament.planned');
         }, attempts: 3);
     }
 }

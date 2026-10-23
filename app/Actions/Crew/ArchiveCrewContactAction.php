@@ -14,14 +14,21 @@ class ArchiveCrewContactAction
     public function handle(CrewContact $contact, int $version, User $actor): void
     {
         DB::transaction(function () use ($contact, $version, $actor): void {
-            $contact = CrewContact::query()->whereKey($contact->id)->lockForUpdate()->firstOrFail();
+            $contact->refreshForUpdate();
+
             if ($contact->version !== $version || $contact->archived_at !== null) {
                 throw RecordChangedException::changed();
             }
-            $contact->archived_at = now();
-            $contact->version++;
-            $contact->save();
-            activity('production')->causedBy($actor)->withProperties(['contact_id' => $contact->id, 'version' => $contact->version])->log('contact-archive');
+
+            $contact->increment('version', extra: ['archived_at' => now()]);
+
+            activity('production')
+                ->causedBy($actor)
+                ->withProperties([
+                    'contact_id' => $contact->id,
+                    'version' => $contact->version,
+                ])
+                ->log('contact-archive');
         }, attempts: 3);
     }
 }

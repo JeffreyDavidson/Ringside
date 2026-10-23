@@ -31,7 +31,12 @@ class SaveSponsorInstructionAction
     {
         DB::transaction(function () use ($event, $id, $version, $packVersion, $fingerprint, $data, $actor): void {
             ['event' => $event, 'matches' => $matches, 'pack' => $pack, 'run' => $run] = $this->lock->lock($event->id);
-            $commitment = EventSponsorCommitment::query()->forEventId($event->id)->whereKey($id)->lockForUpdate()->firstOrFail();
+            $commitment = EventSponsorCommitment::query()
+                ->forEventId($event->id)
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $card = $this->card->get($event);
             $preview = $this->instructions->preview($event, $commitment, $data->mode, $data->targetKey?->__toString(), $data->afterMatchId);
             $this->requirements->ensureCanSave($commitment, $pack, $matches, $run, $preview, $card['fingerprint'], $version, $packVersion, $fingerprint, $data);

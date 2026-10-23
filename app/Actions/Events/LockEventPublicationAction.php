@@ -25,12 +25,28 @@ class LockEventPublicationAction
     public function handle(Event $event, int $version, string $fingerprint): array
     {
         $this->locks->lockEventSet($event->id);
-        $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+        $event = Event::query()
+            ->whereKey($event->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
         if ($event->promotion_id === null) {
             throw EventPublicationException::invalid();
         }
-        EventMatch::query()->withTrashed()->forEventId($event->id)->orderBy('id')->lockForUpdate()->get();
-        $publication = EventPublication::query()->forEventId($event->id)->withoutGlobalScope(PromotionContextScope::class)->lockForUpdate()->first();
+
+        EventMatch::query()
+            ->withTrashed()
+            ->forEventId($event->id)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        $publication = EventPublication::query()
+            ->forEventId($event->id)
+            ->withoutGlobalScope(PromotionContextScope::class)
+            ->lockForUpdate()
+            ->first();
+
         $source = $this->source->get($event);
         if (($publication->version ?? 0) !== $version || ! hash_equals($source['fingerprint'], $fingerprint)) {
             throw RecordChangedException::changed();

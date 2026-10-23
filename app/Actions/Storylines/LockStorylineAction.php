@@ -14,10 +14,12 @@ class LockStorylineAction
 
     public function handle(Storyline $storyline, int $version, bool $allowClosed = false): Storyline
     {
-        $locked = Storyline::query()->whereKey($storyline->id)->lockForUpdate()->firstOrFail();
+        $locked = $storyline->refreshForUpdate();
+
         if ($locked->version !== $version) {
             throw RecordChangedException::changed();
         }
+
         if (! $allowClosed) {
             $this->states->ensureOpen($locked);
         }

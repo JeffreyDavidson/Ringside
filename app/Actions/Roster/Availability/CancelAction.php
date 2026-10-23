@@ -15,14 +15,29 @@ class CancelAction
     public function handle(Wrestler|Referee $person, int $entryId, User $actor): void
     {
         DB::transaction(function () use ($person, $entryId, $actor): void {
-            $person = $person->newQuery()->whereKey($person->id)->lockForUpdate()->firstOrFail();
-            $entry = Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
-                ->whereKey($entryId)->lockForUpdate()->firstOrFail();
+            $person = $person->newQuery()
+                ->whereKey($person->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $entry = Unavailability::query()
+                ->whereMorphedTo('person', $person)
+                ->where('promotion_id', $person->promotion_id)
+                ->whereKey($entryId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             if ($entry->cancelled_at !== null) {
                 return;
             }
+
             $entry->forceFill(['cancelled_at' => now(), 'cancelled_by' => $actor->id])->save();
-            activity('availability')->performedOn($person)->causedBy($actor)->withProperties(['entry_id' => $entry->id])->log('cancel');
+
+            activity('availability')
+                ->performedOn($person)
+                ->causedBy($actor)
+                ->withProperties(['entry_id' => $entry->id])
+                ->log('cancel');
         }, attempts: 3);
     }
 }

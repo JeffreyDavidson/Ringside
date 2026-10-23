@@ -38,7 +38,17 @@ class WithdrawTournamentEntryAction
                 }
             }
             $entry->forceFill(['withdrawn' => true])->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'entry_id' => $entry->id, 'reason' => $reason])->log('tournament.withdrawn');
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'entry_id' => $entry->id,
+                    'reason' => $reason,
+                ])
+                ->log('tournament.withdrawn');
+
             $this->outcomes->synchronize($tournament->refresh(), $actor);
         }, attempts: 3);
     }

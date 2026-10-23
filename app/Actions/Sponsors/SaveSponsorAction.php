@@ -22,7 +22,16 @@ class SaveSponsorAction
                 $promotionQuery->lockForUpdate();
             }
             $promotion = $promotionQuery->firstOrFail();
-            $sponsor = $id === null ? null : Sponsor::query()->where('promotion_id', $promotion->id)->whereKey($id)->lockForUpdate()->firstOrFail();
+            $sponsor = null;
+
+            if ($id !== null) {
+                $sponsor = Sponsor::query()
+                    ->where('promotion_id', $promotion->id)
+                    ->whereKey($id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            }
+
             if (! Str::isUuid($submissionKey)) {
                 throw RecordChangedException::changed();
             }
