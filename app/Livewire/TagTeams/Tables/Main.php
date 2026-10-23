@@ -19,32 +19,33 @@ use App\Livewire\Table\Filter;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<TagTeam> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = TagTeam::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.tag-teams.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.tag-team-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'tagTeam';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'tag_teams';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'tag-teams';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'tag teams';
 
     /** @return TagTeamBuilder<TagTeam> */
@@ -57,7 +58,7 @@ class Main extends BaseTable
             ->orderBy('tag_teams.id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(TagTeamBuilder::ROSTER_STATE);
@@ -82,7 +83,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

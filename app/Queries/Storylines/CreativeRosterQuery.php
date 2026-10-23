@@ -9,6 +9,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Support\Search\LikeTerm;
 use Illuminate\Database\Eloquent\Builder;
+use InvalidArgumentException;
 
 class CreativeRosterQuery
 {
@@ -18,7 +19,7 @@ class CreativeRosterQuery
         $query = match ($kind) {
             BookableRosterKind::Wrestlers => Wrestler::query(),
             BookableRosterKind::TagTeams => TagTeam::query(),
-            default => throw new \InvalidArgumentException('Creative participants must be wrestlers or tag teams.'),
+            default => throw new InvalidArgumentException('Creative participants must be wrestlers or tag teams.'),
         };
         $like = LikeTerm::from($term);
 

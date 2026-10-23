@@ -55,11 +55,13 @@ class TalentBookingsViewModel
             if ($booking?->status === TalentBookingStatus::Confirmed && $warnings === []) {
                 $counts['confirmed_clear']++;
             }
+
             $counts[$booking?->status->value ?? 'not_tracked']++;
 
             if ($warnings !== []) {
                 $counts['attention']++;
             }
+
             $rows[] = [...$row, 'warnings' => $warnings];
         }
 
@@ -94,6 +96,7 @@ class TalentBookingsViewModel
                 $rows->put($key, ['key' => $key, 'name' => $booking->person_name, 'role' => $booking->person_role, 'matches' => [], 'warning' => true]);
             }
         }
+
         $result = [];
 
         foreach ([(new Wrestler)->getMorphClass() => Wrestler::class, (new Referee)->getMorphClass() => Referee::class] as $type => $class) {
@@ -112,6 +115,7 @@ class TalentBookingsViewModel
                     'booking' => $booked->get($key)];
             }
         }
+
         usort($result, fn (array $a, array $b): int => [mb_strtolower($a['name']), $a['key']] <=> [mb_strtolower($b['name']), $b['key']]);
 
         return ['rows' => $result, 'card_warning' => in_array(true, array_column($card['rows'], 'warning'), true)];
@@ -156,6 +160,7 @@ class TalentBookingsViewModel
         if ($minor === null) {
             return 'USD '.__('talent-bookings.unknown');
         }
+
         [$whole, $cents] = explode('.', UsdAmount::decimal(abs($minor)));
 
         return sprintf('USD %s%s.%s', $minor < 0 ? '-' : '', number_format((int) $whole), $cents);

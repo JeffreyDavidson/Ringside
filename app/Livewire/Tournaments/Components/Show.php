@@ -145,6 +145,7 @@ class Show extends Component
             $this->nodeId = $node->id;
             $eventId = $node->planned_event_id;
         }
+
         $this->draft->start($tournament, $draft, $eventId);
         $this->draftVersion = $this->version;
         $this->notice = null;
@@ -303,6 +304,7 @@ class Show extends Component
 
             return;
         }
+
         $this->refreshState();
         $this->notice = __('tournaments.saved');
     }

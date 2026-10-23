@@ -22,6 +22,7 @@ class SaveBudgetLineAction
         if (! $data->category->accepts($data->direction)) {
             throw BudgetException::categoryDirection();
         }
+
         $attributes = ['direction' => $data->direction, 'category' => $data->category,
             'description' => $data->description, 'counterparty' => $data->counterparty,
             'planned_cents' => $data->plannedCents, 'confirmed_cents' => $data->confirmedCents,
@@ -43,6 +44,7 @@ class SaveBudgetLineAction
             if ($lineId === null && $budget->lines()->count() >= 500) {
                 throw BudgetException::lineLimit();
             }
+
             $before = $line->exists ? $line->attributesToArray() : [];
             $line->setRelation('movements', $line->movements()
                 ->orderBy('id')
@@ -52,6 +54,7 @@ class SaveBudgetLineAction
             if ($line->exists && ($line->direction !== $attributes['direction']) && $line->movements->isNotEmpty()) {
                 throw BudgetException::directionLocked();
             }
+
             $confirmedChanged = $line->exists && $line->confirmed_cents !== $attributes['confirmed_cents'];
 
             if ($confirmedChanged && $reason === null) {
@@ -61,11 +64,13 @@ class SaveBudgetLineAction
             if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! $data->acknowledge) {
                 throw BudgetException::excess();
             }
+
             $line->fill($attributes);
 
             if ($line->exists && ! $line->isDirty()) {
                 return null;
             }
+
             $line->event_budget_id = $budget->id;
             $line->save();
 

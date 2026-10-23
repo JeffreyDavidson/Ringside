@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @property int $id
@@ -58,7 +59,7 @@ class MatchCompetitor extends MorphPivot
     /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     public $incrementing = true;
 
     /**
@@ -90,7 +91,7 @@ class MatchCompetitor extends MorphPivot
     /**
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

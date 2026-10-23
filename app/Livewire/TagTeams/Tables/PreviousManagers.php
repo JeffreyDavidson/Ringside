@@ -9,11 +9,12 @@ use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousManagersTable<TagTeamManager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'tag_teams_managers';
 
     /**

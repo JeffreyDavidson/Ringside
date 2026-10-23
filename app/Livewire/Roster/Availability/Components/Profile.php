@@ -103,6 +103,7 @@ class Profile extends Component
 
             return;
         }
+
         $this->status = __('availability.saved');
         $this->savedEntryId = $entry->id;
         $this->reviewSignature = null;
@@ -126,6 +127,7 @@ class Profile extends Component
         if ($this->cancelId === null) {
             return;
         }
+
         $cancel->handle($person, $this->cancelId, $this->actor());
         $this->cancelId = null;
         $this->savedEntryId = null;

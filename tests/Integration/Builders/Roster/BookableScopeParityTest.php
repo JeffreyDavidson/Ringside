@@ -72,6 +72,7 @@ test('date-aware tag-team candidates agree with the authority for current and fo
         $replacement = Wrestler::factory()->bookable()->for($promotion)->create();
         $team->wrestlers()->attach($replacement, ['joined_at' => now()]);
     }
+
     $team->refresh();
 
     // Act
@@ -144,6 +145,7 @@ test('the date-aware bookable scope agrees with roster booking eligibility for i
     if ($endedDaysAgo !== null) {
         $employment = $employment->ended(now()->subDays($endedDaysAgo));
     }
+
     $rosterMember = $modelClass::factory()->has($employment, 'employments')->create();
     $eventDate = now()->addDays($eventDaysAhead);
 

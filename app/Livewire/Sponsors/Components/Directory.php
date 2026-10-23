@@ -96,6 +96,7 @@ class Directory extends Component
         if ($this->draftId !== null) {
             Gate::authorize('manageSponsors', Sponsor::query()->where('promotion_id', $promotion->id)->findOrFail($this->draftId));
         }
+
         $data = $this->form->toData();
 
         try {

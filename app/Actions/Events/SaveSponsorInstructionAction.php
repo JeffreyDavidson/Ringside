@@ -56,6 +56,7 @@ class SaveSponsorInstructionAction
                 } else {
                     $content['sponsor_tasks'] = array_values(array_filter($content['sponsor_tasks'] ?? [], fn (array $entry): bool => $entry['id'] !== $uuid));
                 }
+
                 $commitment->pack_key = null;
                 $commitment->pack_instruction_hash = null;
             } else {
@@ -65,6 +66,7 @@ class SaveSponsorInstructionAction
                 if (EventSponsorCommitment::query()->forEventId($event->id)->where('pack_key', $key)->whereKeyNot($commitment->id)->exists()) {
                     throw SponsorCommitmentException::usedTarget();
                 }
+
                 $uuid = $packKey->uuid;
                 $wording = $preview['wording'];
 
@@ -80,9 +82,11 @@ class SaveSponsorInstructionAction
                 if ($data->mode === SponsorInstructionMode::Segment && count($content['segments']) > 50) {
                     throw SponsorCommitmentException::segmentLimit();
                 }
+
                 $commitment->pack_key = $key;
                 $commitment->pack_instruction_hash = $this->instructions->hash($entry);
             }
+
             $this->save->handle($event, $packVersion, $fingerprint, EventPackData::fromValidated($content), false);
             $this->persist->handle($commitment, $data->mode === SponsorInstructionMode::Remove ? 'retract_instruction' : 'review_instruction', $data->reason, $actor);
         }, attempts: 3);

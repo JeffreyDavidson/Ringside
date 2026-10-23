@@ -25,6 +25,7 @@ class WithdrawTournamentEntryAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureActive($tournament);
             $entry = $tournament->entries()->findOrFail($entry->id);
 
@@ -41,6 +42,7 @@ class WithdrawTournamentEntryAction
                     $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);
                 }
             }
+
             $entry->forceFill(['withdrawn' => true])->save();
 
             activity('tournaments')

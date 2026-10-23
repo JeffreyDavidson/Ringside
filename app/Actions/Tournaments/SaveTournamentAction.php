@@ -46,6 +46,7 @@ class SaveTournamentAction
                     return $existing;
                 }
             }
+
             $locked = $tournament instanceof Tournament
                 ? Tournament::query()->lockForUpdate()->findOrFail($tournament->id)
                 : new Tournament;
@@ -57,6 +58,7 @@ class SaveTournamentAction
             if ($locked->exists) {
                 $this->states->ensureStructureEditable($locked);
             }
+
             $competitors = $data->kind->modelClass()::query()
                 ->where('promotion_id', $promotion->id)
                 ->whereKey($data->competitorIds)
@@ -68,6 +70,7 @@ class SaveTournamentAction
             if ($competitors->count() !== count($data->competitorIds) || $competitors->contains(fn (\App\Models\Roster\Wrestlers\Wrestler|\App\Models\Roster\Referees\Referee|TagTeam $competitor): bool => ! $this->eligibility->allows($competitor))) {
                 throw TournamentException::entrantUnavailable();
             }
+
             $locked->fill([
                 'name' => mb_trim($data->name),
                 'description' => $data->description,

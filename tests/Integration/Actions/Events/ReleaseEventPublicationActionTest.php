@@ -74,6 +74,7 @@ test('results reject future events and unannounced or unrecorded matches', funct
         savePublicDraft($event, ['matches' => []]);
         releasePublicPage($event);
     }
+
     $publication = EventPublication::query()->where('event_id', $event->id)->firstOrFail();
     $source = app(PublicEventSourceService::class)->get($event);
 
@@ -120,6 +121,7 @@ test('card release refuses missing schedule assets and removed announced competi
     if ($condition === 'poster') {
         Storage::disk('local')->delete('event-posters/'.publicPosterKey($publication));
     }
+
     $source = app(PublicEventSourceService::class)->get($event);
 
     // Act / Assert

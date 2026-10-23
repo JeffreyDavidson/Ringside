@@ -140,6 +140,7 @@ class SponsorCommitmentForm extends Form
                 return $recorded->utc();
             }
         }
+
         $instant = $timing->wallTime($value, $this->timezone, $offset ?: null);
 
         if (! $instant instanceof Carbon) {

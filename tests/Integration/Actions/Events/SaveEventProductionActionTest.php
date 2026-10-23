@@ -206,6 +206,7 @@ test('stale production previews cannot overwrite a changed source', function (st
         $fixture['match']->save();
         $fingerprint = resolve(EventPackViewModel::class)->data($event)['card']['fingerprint'];
     }
+
     $before = $event->pack()->firstOrFail()->content;
 
     // Act

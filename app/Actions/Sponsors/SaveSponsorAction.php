@@ -22,6 +22,7 @@ class SaveSponsorAction
             if ($id === null) {
                 $promotionQuery->lockForUpdate();
             }
+
             $promotion = $promotionQuery->firstOrFail();
             $sponsor = null;
 
@@ -40,6 +41,7 @@ class SaveSponsorAction
             if (($sponsor->version ?? 0) !== $version || ($sponsor === null && Sponsor::query()->where('promotion_id', $promotion->id)->where('submission_key', $submissionKey)->exists())) {
                 throw RecordChangedException::changed();
             }
+
             $sponsor ??= new Sponsor;
             $sponsor->promotion_id = $promotion->id;
             $sponsor->submission_key = $sponsor->exists ? $sponsor->submission_key : $submissionKey;

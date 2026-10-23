@@ -7,8 +7,9 @@ namespace App\ValueObjects;
 use App\Casts\PhoneNumberCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
+use Stringable;
 
-readonly class PhoneNumber implements \Stringable, Castable
+readonly class PhoneNumber implements Castable, Stringable
 {
     private string $digits;
 

@@ -52,6 +52,7 @@ test('production save races with live preparation or review without changing an 
             resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated($input), false, administrator());
             $version = 2;
         }
+
         $input['cues'][0]['instruction'] = 'Next plan only';
         $save = ['production_save_event_id' => $event->id, 'user_id' => $userId, 'version' => $version,
             'fingerprint' => $data['card']['fingerprint'], 'production_json' => json_encode($input, JSON_THROW_ON_ERROR)];

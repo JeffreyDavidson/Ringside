@@ -80,6 +80,7 @@ class SponsorInstructionService
         if ($commitment->status === SponsorCommitmentStatus::Cancelled) {
             return true;
         }
+
         $target = $this->target($content, $commitment->pack_key);
 
         if ($target === null || $this->hash($target) !== $commitment->pack_instruction_hash || $target['label'] !== $commitment->instruction_label) {

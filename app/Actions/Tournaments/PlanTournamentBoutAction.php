@@ -28,6 +28,7 @@ class PlanTournamentBoutAction
             if ($tournament->version !== $version || ($event !== null && ($event->trashed() || $event->promotion_id !== $tournament->promotion_id))) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureOpen($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
@@ -35,6 +36,7 @@ class PlanTournamentBoutAction
             if ($bout->link instanceof TournamentMatchLink && $bout->link->match->event_id !== $event?->id) {
                 throw TournamentException::alreadyBooked();
             }
+
             $node->forceFill(['planned_event_id' => $event?->id])->save();
             $tournament->increment('version');
 

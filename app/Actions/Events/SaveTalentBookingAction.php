@@ -54,17 +54,20 @@ class SaveTalentBookingAction
             if ($person === null && $booking === null) {
                 throw TalentBookingException::person();
             }
+
             $key = $personType.':'.$personId;
 
             if (($booking->version ?? 0) !== $version || ! hash_equals($this->fingerprints->fingerprint($event, $key), $fingerprint)) {
                 throw RecordChangedException::changed();
             }
+
             $this->states->ensureCanMove($booking, $data->status, $data->reason);
             $this->states->ensureCanConfirm($booking, $data->status, $event->date !== null, $data->attest);
 
             if ($data->feeMinor !== null && $data->feeMinor < 0) {
                 throw TalentBookingException::fee();
             }
+
             $booking ??= new EventTalentBooking;
             $previousTerms = $this->terms($booking);
             $terms = $data->status === TalentBookingStatus::Cancelled || $booking->status === TalentBookingStatus::Cancelled
@@ -94,6 +97,7 @@ class SaveTalentBookingAction
             if ($booking->exists && ! $booking->isDirty()) {
                 return $booking;
             }
+
             $booking->version = $version + 1;
             $booking->save();
             $revision = new EventTalentBookingRevision;

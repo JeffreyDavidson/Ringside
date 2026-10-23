@@ -8,6 +8,7 @@ use App\Livewire\Table\Column;
 use Carbon\Carbon;
 use DateTimeInterface;
 use LogicException;
+use Override;
 
 class DateColumn extends Column
 {
@@ -38,7 +39,7 @@ class DateColumn extends Column
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function resolveValue(mixed $row): string
     {
         $value = data_get($row, $this->getField());

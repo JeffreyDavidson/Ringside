@@ -39,11 +39,13 @@ class StorylineSourceService
         if ($source->eventId === null) {
             return ['context' => [], 'fingerprint' => hash('sha256', (string) $source->targetOn), 'warnings' => []];
         }
+
         $event = $loadedEvent ?? $this->events->get($promotionId, $source->eventId);
 
         if (! $event instanceof Event) {
             return null;
         }
+
         $context = ['event_id' => $event->id, 'event_name' => $event->name, 'event_date' => $event->date?->toIso8601String(),
             'event_deleted' => $event->trashed(), 'event_timezone' => $event->promotion?->timezone];
         $warnings = [];
@@ -55,6 +57,7 @@ class StorylineSourceService
         if ($event->date === null) {
             $warnings[] = StorylineSourceWarning::UndatedSource;
         }
+
         $key = null;
 
         if ($source->matchId !== null) {
@@ -63,6 +66,7 @@ class StorylineSourceService
             if (! $match instanceof EventMatch) {
                 return null;
             }
+
             $context['match_id'] = $match->id;
             $context['match_label'] = __('storylines.match_number', ['number' => $match->match_number]);
             $context['match_result'] = $match->match_finish?->value;
@@ -76,6 +80,7 @@ class StorylineSourceService
             if ($match->trashed()) {
                 $warnings[] = StorylineSourceWarning::DeletedSource;
             }
+
             $key = "match:{$match->id}";
         }
 
@@ -94,6 +99,7 @@ class StorylineSourceService
                 $warnings[] = StorylineSourceWarning::UnplacedSegment;
             }
         }
+
         $item = $key === null ? null : collect($event->liveRun?->content['items'] ?? [])->firstWhere('key', $key);
         $context['live_state'] = $item['state'] ?? null;
         $context['live_label'] = $item['label'] ?? null;

@@ -33,6 +33,7 @@ function tournamentRace(array $specs): array
         $processes[$index]->setInput($inputs[$index]);
         $processes[$index]->start();
     }
+
     $deadline = microtime(true) + 15;
 
     foreach ($processes as $process) {
@@ -44,6 +45,7 @@ function tournamentRace(array $specs): array
             throw new RuntimeException('Tournament worker failed to initialize: '.$process->getErrorOutput());
         }
     }
+
     $start = microtime(true) + 0.2;
 
     foreach ($inputs as $input) {
@@ -56,6 +58,7 @@ function tournamentRace(array $specs): array
             $process->isRunning();
         } usleep(1000);
     }
+
     $outcomes = [];
 
     foreach ($processes as $process) {
@@ -66,11 +69,13 @@ function tournamentRace(array $specs): array
         if (! is_array($outcome) || ! isset($outcome['ok'], $outcome['deadlock']) || ! is_bool($outcome['ok']) || ! is_bool($outcome['deadlock'])) {
             throw new RuntimeException('Tournament worker failed: '.$process->getErrorOutput());
         }
+
         $outcomes[] = ['ok' => $outcome['ok'], 'deadlock' => $outcome['deadlock']];
     }
 
     return $outcomes;
 }
+
 /** @param array{tournament:Tournament,promotion:Promotion,event:Event,referees:Collection<int,Referee>} $world
  * @return array{operation:string,node_id:int,event_id:int,referee_id:int,version:int,match_id:int,side_id:int}
  */
@@ -78,6 +83,7 @@ function tournamentWorkerSpec(array $world): array
 {
     return ['operation' => 'book', 'node_id' => $world['tournament']->nodes()->firstOrFail()->id, 'event_id' => $world['event']->id, 'referee_id' => $world['referees']->sole()->id, 'version' => $world['tournament']->refresh()->version, 'match_id' => 0, 'side_id' => 0];
 }
+
 it('serializes duplicate node bookings without duplicate matches or deadlocks', function (): void {
     withCommittedData(function (): void {
         $world = tournamentFixture();

@@ -134,6 +134,7 @@ it('completes every seeded round of an eight entrant tournament', function (Entr
         $match = bookTournamentNode($world, $node);
         recordTournamentWinner($match, $t);
     }
+
     expect($world['event']->matches()->count())->toBe(7)->and($t->refresh()->status)->toBe(TournamentStatus::Completed)
         ->and(resolve(TournamentBracketService::class)->bouts($t)->last()?->winner?->seed)->toBe(1);
 })->with(EntrantKind::cases());

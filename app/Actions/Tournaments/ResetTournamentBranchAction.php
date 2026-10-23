@@ -29,12 +29,14 @@ class ResetTournamentBranchAction
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
+
             $node = $tournament->nodes()->findOrFail($node->id);
             $ids = $this->bracket->descendantNodeIds($node);
 
             if ($includeCurrent) {
                 $ids[] = $node->id;
             }
+
             $links = TournamentMatchLink::query()
                 ->whereIn('node_id', $ids)
                 ->whereNotNull('active_node_id')
@@ -65,6 +67,7 @@ class ResetTournamentBranchAction
                 $this->deletion->delete($link->match, now());
                 $link->forceFill(['active_node_id' => null])->save();
             }
+
             TournamentNode::query()->whereKey($ids)->update(['walkover_entry_id' => null, 'walkover_reason' => null]);
 
             activity('tournaments')

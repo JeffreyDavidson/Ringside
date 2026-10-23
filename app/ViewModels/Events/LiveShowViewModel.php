@@ -57,6 +57,7 @@ class LiveShowViewModel
                 $source['content'] = $this->withoutProduction($source['content']);
             }
         }
+
         $needsReview = $run !== null && ! $complete && ($source === null || $this->comparison->hasMovedOn($run, $source['pack'], $source['fingerprint']));
         $items = collect($run?->content['items'] ?? []);
         $sourceKeys = array_column($source['content']['items'] ?? [], 'key');
@@ -121,6 +122,7 @@ class LiveShowViewModel
         if ($item['start'] === null) {
             return __('live-show.planned', ['time' => $planned->setTimezone($item['timezone'])->format('M j H:i P')]);
         }
+
         $minutes = (int) round($planned->diffInMinutes(Carbon::parse($item['start']), absolute: false));
 
         return match (true) {

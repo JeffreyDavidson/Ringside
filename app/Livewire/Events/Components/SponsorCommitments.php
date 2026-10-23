@@ -122,6 +122,7 @@ class SponsorCommitments extends Component
 
             return;
         }
+
         $this->form->reset();
         $this->form->timezone = PromotionTimeZoneService::zoneOf($event->loadMissing('promotion')->promotion);
         $this->draftId = null;

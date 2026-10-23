@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * @phpstan-type Terms array{fee_minor: ?int, arrival_at: ?string, arrival_timezone: string, travel_notes: ?string}
@@ -44,7 +45,7 @@ class EventTalentBooking extends Model
     /** @use HasFactory<EventTalentBookingFactory> */
     use HasFactory;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

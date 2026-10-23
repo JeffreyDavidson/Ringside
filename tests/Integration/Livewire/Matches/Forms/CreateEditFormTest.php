@@ -173,6 +173,7 @@ describe('match form validation feedback', function (): void {
         if ($competitors !== []) {
             $modal->set('form.competitors', $competitors);
         }
+
         $modal->call('save');
 
         // Assert
@@ -185,6 +186,7 @@ describe('match form validation feedback', function (): void {
         foreach ($absentErrors as $field) {
             expect($errors->has($field))->toBeFalse();
         }
+
         expect(implode(' ', $errors->all()))->not->toContain('competitors.');
     })->with([
         'tag team with empty sides' => [

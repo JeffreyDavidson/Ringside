@@ -30,6 +30,7 @@ final readonly class StartLiveItem implements LiveItemTransition
         if ($this->source->hasChanged($run->event, $run)) {
             throw LiveShowException::reviewRequired();
         }
+
         $this->showDay->ensureShowDay($run);
 
         return [...$item, 'state' => LiveItemStatus::Running->value, 'start' => now()->utc()->toIso8601String()];

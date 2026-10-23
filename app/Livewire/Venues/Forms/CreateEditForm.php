@@ -11,6 +11,7 @@ use App\Models\Events\Venue;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
+use Override;
 
 /** @extends BaseForm<Venue> */
 class CreateEditForm extends BaseForm
@@ -33,7 +34,7 @@ class CreateEditForm extends BaseForm
      *
      * @param  string|array<int, string>  ...$properties
      */
-    #[\Override]
+    #[Override]
     public function reset(...$properties): void
     {
         parent::reset(...$properties);
@@ -76,7 +77,7 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

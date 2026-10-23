@@ -36,6 +36,7 @@ test('two real booker requests commit exactly one planned or actual development'
                 usleep(10000);
             }
         }
+
         // Act
         $start = microtime(true) + .2;
 
@@ -49,6 +50,7 @@ test('two real booker requests commit exactly one planned or actual development'
                 $process->isRunning();
             } usleep(1000);
         }
+
         $results = [];
 
         foreach ($processes as $process) {
@@ -56,6 +58,7 @@ test('two real booker requests commit exactly one planned or actual development'
             preg_match('/RESULT:(.*)/', $process->getOutput(), $matches);
             $results[] = json_decode($matches[1] ?? '{}', true, flags: JSON_THROW_ON_ERROR);
         }
+
         // Assert
         expect(deadlocksResolvedSince($deadlocksBefore))->toBe(0)
             ->and(collect($results)->where('ok', true))->toHaveCount(1)

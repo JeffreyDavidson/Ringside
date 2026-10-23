@@ -53,11 +53,13 @@ class MutateBudgetAction
                 $budget->version = 0;
                 $budget->save();
             }
+
             $result = $change($budget);
 
             if ($result === null) {
                 return $budget;
             }
+
             $budget->version++;
             $budget->save();
             $revision = new EventBudgetRevision;

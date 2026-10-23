@@ -41,6 +41,7 @@ class SaveEventProductionAction
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
+
             $input = $this->requirements->validatedInput(['notes' => $data->notes, 'assignments' => $data->assignments, 'cues' => $data->cues]);
             $content = $pack->content ?? $this->source->get($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),

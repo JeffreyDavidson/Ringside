@@ -18,32 +18,33 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Title::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.titles.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.title-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'title';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'titles';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'titles';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'titles';
 
     /** @return TitleBuilder<Title> */
@@ -56,7 +57,7 @@ class Main extends BaseTable
             ->orderBy('titles.id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(TitleBuilder::ACTIVITY_STATUS_STATE);
@@ -78,7 +79,7 @@ class Main extends BaseTable
     }
 
     /** @return array<int, Filter> */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

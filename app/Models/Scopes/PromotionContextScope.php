@@ -8,6 +8,7 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Override;
 
 /**
  * Scopes every query to the enforced promotion. When no promotion is enforced, queries are
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Scope;
  */
 final class PromotionContextScope implements Scope
 {
-    #[\Override]
+    #[Override]
     public function apply(Builder $builder, Model $model): void
     {
         $context = app(PromotionContextService::class);

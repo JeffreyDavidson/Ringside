@@ -10,16 +10,17 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Referees\Forms\CreateEditForm;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\View\View;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Referee>
  */
 class FormModal extends BaseFormModal
 {
-    #[\Override]
+    #[Override]
     protected string $modelTitleField = 'full_name';
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.first_name';
 
     public CreateEditForm $form;

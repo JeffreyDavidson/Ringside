@@ -50,6 +50,7 @@ class TalentBookingForm extends Form
             $parts = explode('.', $this->fee);
             $fee = (int) $parts[0] * 100 + (int) str_pad($parts[1] ?? '', 2, '0');
         }
+
         $arrival = $this->arrival === '' ? null : PromotionTimeZoneService::parseLocalTime($event->promotion, $this->arrival);
 
         // Keep the stored instant in the repeated hour, just as the event date form does.

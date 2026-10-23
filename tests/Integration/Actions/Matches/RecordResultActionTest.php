@@ -1279,6 +1279,7 @@ it('records a back-filled defence after the title has moved on', function (Title
     if ($scenario === 'later reign by another champion') {
         reignOn($title, $newChampion(), '2026-09-20 12:00:00');
     }
+
     $before = reignSnapshot($title);
     [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
 
@@ -1319,6 +1320,7 @@ it('still rejects a title change back-dated before a later reign or inside a vac
     if ($laterReignExists) {
         reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
     }
+
     $before = reignSnapshot($title);
     [$match, $winningSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, Wrestler::factory()->bookable()->create());
 
@@ -1344,6 +1346,7 @@ it('corrects a recorded defence into a title change only while no later reign ex
     if ($laterReignExists) {
         reignOn($title, Wrestler::factory()->bookable()->create(), '2026-09-20 12:00:00');
     }
+
     [$match, $championSide] = titleMatchOn(Carbon::parse('2026-09-10 12:00:00'), $title, $champion);
     $challengerSide = $match->sides()->whereKeyNot($championSide->id)->sole();
     resolve(RecordResultAction::class)->handle($match, matchResult(MatchFinish::Pinfall, $championSide), administrator());

@@ -24,6 +24,7 @@ class RetractDevelopmentAction
             if ($development->retracted_at !== null) {
                 throw StorylineConflictException::state();
             }
+
             $before = $development->attributesToArray();
             $development->retracted_at = now();
             $development->version++;
@@ -35,6 +36,7 @@ class RetractDevelopmentAction
                 $step->version++;
                 $step->save();
             }
+
             $this->revision->handle($story, $development, $reopenStep ? StorylineRevisionOperation::DevelopmentRetractedReopen : StorylineRevisionOperation::DevelopmentRetracted, $actor, $before, $reason);
         }, attempts: 3);
     }

@@ -109,6 +109,7 @@ test('the review names affected dated and undated events while excluding unrelat
     foreach ([$dated, $undated, $outside] as $event) {
         EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     }
+
     $component = livewire(Profile::class, ['kind' => 'wrestlers', 'personId' => $person->id]);
 
     // Act

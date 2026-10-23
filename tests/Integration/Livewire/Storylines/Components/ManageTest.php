@@ -243,6 +243,7 @@ test('a manager downgraded while a form is open writes nothing from any form', f
     if ($mode === 'participant') {
         $page->set('form.participantId', Wrestler::factory()->for($promotion)->create()->id);
     }
+
     $promotion->users()->updateExistingPivot($manager->id, ['role' => MembershipRole::Member->value]);
     $context->forgetMemberships();
 

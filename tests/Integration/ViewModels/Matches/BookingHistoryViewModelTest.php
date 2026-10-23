@@ -95,6 +95,7 @@ it('limits each preview independently while calculating totals over the full rec
         $match = EventMatch::factory()->for($event)->withCompetitors([$first, $second])->create(['match_number' => $number]);
         $match->update(['match_finish' => MatchFinish::Pinfall, 'winning_side_id' => $match->sides()->firstOrFail()->id]);
     }
+
     $target = Event::factory()->for($promotion, 'promotion')->scheduled()->create();
 
     // Act
@@ -122,6 +123,7 @@ it('excludes later and deleted source records and keeps the local 90-day boundar
         $match = EventMatch::factory()->for($event)->withCompetitors([$first, $second])->create();
         $match->update(['match_finish' => MatchFinish::NoDecision]);
     }
+
     $deleted = EventMatch::factory()->for($boundary)->withCompetitors([$first, $second])->trashed()->create();
     $deleted->update(['match_finish' => MatchFinish::NoDecision]);
     $deletedEvent = Event::factory()->for($promotion, 'promotion')->past()->trashed()->create();

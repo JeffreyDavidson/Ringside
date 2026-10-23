@@ -59,6 +59,7 @@ $allowCurrentSave = [
         foreach ($content['items'] as &$item) {
             $item['state'] = 'skipped';
         }
+
         unset($item);
         $f['run']->content = $content;
         $f['run']->save();

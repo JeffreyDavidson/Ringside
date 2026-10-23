@@ -116,6 +116,7 @@ class Production extends Component
 
             return;
         }
+
         $data = $this->packs->data($event);
         $this->assignments[] = ['id' => (string) Str::uuid(), 'contact_id' => 0, 'name' => '', 'role' => 'sound',
             'station' => null, 'call_at' => null, 'timezone' => $data['content']['timezone'], 'offset' => null,
@@ -147,6 +148,7 @@ class Production extends Component
 
             return;
         }
+
         $this->cues[] = ['id' => (string) Str::uuid(), 'item_key' => $key, 'subject' => '', 'trigger' => '', 'instruction' => '',
             'role' => null, 'owner_id' => null, 'owner_name' => null, 'owner_station' => null, 'owner_role' => null, 'owner_contact_id' => null, 'pronunciation' => null, 'track' => null, 'url' => null];
         $this->saved = false;
@@ -177,6 +179,7 @@ class Production extends Component
                 $this->cues = [...array_values(array_filter($this->cues, fn (array $entry): bool => $entry['id'] !== $id)), $cue];
             }
         }
+
         $this->saved = false;
     }
 
@@ -189,6 +192,7 @@ class Production extends Component
         if (! is_int($index)) {
             return;
         }
+
         $indices = array_keys(array_filter($this->cues, fn (array $cue): bool => $cue['item_key'] === $this->cues[$index]['item_key']));
         $position = array_search($index, $indices, true);
         $other = $indices[$position + $direction] ?? null;
@@ -196,6 +200,7 @@ class Production extends Component
         if ($other === null) {
             return;
         }
+
         [$this->cues[$index], $this->cues[$other]] = [$this->cues[$other], $this->cues[$index]];
         $this->saved = false;
     }

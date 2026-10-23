@@ -30,6 +30,7 @@ class BookTournamentMatchAction
         if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry) {
             throw TournamentException::unresolved();
         }
+
         $kind = $node->tournament()->firstOrFail()->entrant_kind;
         $first = $bout->first->competitor;
         $second = $bout->second->competitor;

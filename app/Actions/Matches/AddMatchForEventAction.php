@@ -58,6 +58,7 @@ class AddMatchForEventAction
                 if ($tournament->promotion_id !== $event->promotion_id) {
                     throw RecordChangedException::changed();
                 }
+
                 $bout = $this->bracket->bout($node);
 
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null && $this->sameBooking($bout->link->match, $event, $eventMatchData)) {
@@ -67,14 +68,17 @@ class AddMatchForEventAction
                 if ($tournament->version !== $version) {
                     throw RecordChangedException::changed();
                 }
+
                 $this->tournamentStates->ensureCanMove($tournament, TournamentStatus::Active);
                 $this->tournamentRequirements->ensureBookable($tournament, $node, $bout, $event, $eventMatchData);
 
                 if ($bout->link instanceof TournamentMatchLink) {
                     $bout->link->forceFill(['active_node_id' => null])->save();
                 }
+
                 $node->forceFill(['planned_event_id' => $event->id])->save();
             }
+
             $this->schedulingLock->lockEventSet($event->id);
             $lastMatch = $event->matches()
                 ->withTrashed()
@@ -103,6 +107,7 @@ class AddMatchForEventAction
                         ])
                         ->log('tournament.activated');
                 }
+
                 (new TournamentMatchLink)->forceFill(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'node_id' => $node->id, 'active_node_id' => $node->id, 'match_id' => $createdMatch->id, 'attempt' => ($node->links()->reorder('attempt', 'desc')->first()->attempt ?? 0) + 1])->save();
                 $tournament->increment('version', extra: ['status' => TournamentStatus::Active]);
 
@@ -134,6 +139,7 @@ class AddMatchForEventAction
         if ($match->trashed() || $match->event_id !== $event->id || $match->match_type !== $data->matchType || $match->match_stipulation_id !== $data->matchStipulation?->id || $match->preview !== $data->preview) {
             return false;
         }
+
         $requested = $data->sides->sides()->flatMap(fn (array $side, int $position): array => array_map(fn (\App\Models\Roster\Wrestlers\Wrestler|TagTeam $competitor): string => $position.':'.$competitor->getMorphClass().':'.$competitor->id, [...$side['wrestlers'], ...$side['tag_teams']]))->sort()->values()->all();
         $existing = $match->competitors()->with('side')->get()->map(fn (MatchCompetitor $competitor): string => $competitor->side->position.':'.$competitor->competitor_type.':'.$competitor->competitor_id)->sort()->values()->all();
 

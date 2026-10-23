@@ -75,6 +75,7 @@ class EventPackCardService
 
                     continue;
                 }
+
                 $this->addPerson($roster, $competitor, __('event-pack.wrestler'), $match->match_number, $available['wrestler'], $dateBlocked);
             }
 
@@ -83,6 +84,7 @@ class EventPackCardService
                 $warning = $warning || $dateBlocked || ! in_array($referee->id, $available['referee'], true);
                 $this->addPerson($roster, $referee, __('event-pack.referee'), $match->match_number, $available['referee'], $dateBlocked);
             }
+
             $rows[] = [
                 'id' => $match->id, 'number' => $match->match_number,
                 'label' => $sides->map(fn (Collection $side): string => $side->map(fn (Wrestler|TagTeam $person): string => $person->name)->join(' & '))->join(' vs '),
@@ -90,6 +92,7 @@ class EventPackCardService
                 'referees' => implode(', ', $match->referees->map(fn (Referee $referee): string => $referee->full_name)->all()), 'warning' => $warning,
             ];
         }
+
         $zone = PromotionTimeZoneService::zoneOf($event->promotion);
         $roster = array_values($roster);
 

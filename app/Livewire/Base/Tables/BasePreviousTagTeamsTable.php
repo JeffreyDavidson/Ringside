@@ -13,6 +13,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 /**
  * @extends DataTableComponent<TagTeamWrestler>
@@ -22,7 +23,7 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     use ShowTableTrait;
     use UsesRosterRouteResolver;
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'tag teams';
 
     protected string $databaseTableName;

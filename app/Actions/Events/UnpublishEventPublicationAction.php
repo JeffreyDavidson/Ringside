@@ -23,12 +23,14 @@ class UnpublishEventPublicationAction
             if (! $publication->exists) {
                 throw EventPublicationException::invalid();
             }
+
             $publication->results_published_at = null;
 
             if ($section === PublicSection::Card) {
                 $publication->published_at = null;
                 $publication->unpublished_at = now();
             }
+
             $publication->version++;
             $publication->save();
 

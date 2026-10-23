@@ -8,6 +8,7 @@ use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Override;
 
 /**
  * Scopes matches to the enforced promotion through their event. EventMatch registers it under the
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Scope;
  */
 final class EventMatchPromotionContextScope implements Scope
 {
-    #[\Override]
+    #[Override]
     public function apply(Builder $builder, Model $model): void
     {
         $context = app(PromotionContextService::class);

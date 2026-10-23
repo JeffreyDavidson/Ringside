@@ -60,6 +60,7 @@ class Index extends Component
 
             return;
         }
+
         $data = $this->form->data();
 
         try {
@@ -69,6 +70,7 @@ class Index extends Component
 
             return;
         }
+
         $this->redirectRoute('tournaments.show', ['tournament' => $tournament]);
     }
 
@@ -82,6 +84,7 @@ class Index extends Component
         if (! in_array($rosterKind, [BookableRosterKind::Wrestlers, BookableRosterKind::TagTeams], true)) {
             return [];
         }
+
         $promotion = $context->current();
 
         return $promotion instanceof Promotion ? $search->search($rosterKind, $term, $promotion->id) : [];

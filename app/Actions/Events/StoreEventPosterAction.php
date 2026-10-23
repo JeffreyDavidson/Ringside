@@ -23,6 +23,7 @@ class StoreEventPosterAction
         } catch (ImageReencodingException) {
             throw EventPublicationException::poster();
         }
+
         $key = Str::uuid().'.png';
 
         if (! Storage::disk('local')->put('event-posters/'.$key, $encoded)) {

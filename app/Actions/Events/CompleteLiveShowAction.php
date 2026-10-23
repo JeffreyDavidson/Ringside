@@ -34,6 +34,7 @@ class CompleteLiveShowAction
             if ($this->source->hasChanged($run->event, $run)) {
                 throw LiveShowException::reviewRequired();
             }
+
             $before = ['status' => $run->status->value];
             $run->status = LiveShowStatus::Completed;
             $run->completed_at = now();

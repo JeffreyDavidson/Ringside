@@ -41,6 +41,7 @@ class SaveParticipantAction
             if ($data->leftOn === null && $story->participants()->where('participant_type', $data->type)->where('participant_id', $data->id)->whereNull('left_on')->when($participantId !== null, fn (Builder $query) => $query->whereKeyNot($participantId))->exists()) {
                 throw StorylineConflictException::state();
             }
+
             $before = $participant->attributesToArray();
             $participant->promotion_id = $story->promotion_id;
             $participant->storyline_id = $story->id;
@@ -56,6 +57,7 @@ class SaveParticipantAction
             if ($participant->left_on instanceof Carbon && $participant->left_on->lt($participant->joined_on)) {
                 throw StorylineConflictException::state();
             }
+
             $participant->save();
             $this->revision->handle($story, $participant, $participantId === null ? StorylineRevisionOperation::ParticipantJoined : StorylineRevisionOperation::ParticipantLeft, $actor, $before, $data->reason);
 

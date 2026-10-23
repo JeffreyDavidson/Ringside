@@ -30,6 +30,7 @@ test('lines with an obligation or even voided movements cannot be hidden by arch
     if ($case === 'movement') {
         EventBudgetMovement::factory()->for($f['line'], 'line')->create(['voided_at' => now()]);
     }
+
     // Act / Assert
     expect(fn () => resolve(ArchiveBudgetLineAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, 'Hide it', signedInUser()))->toThrow(BudgetException::class);
     expect($f['line']->refresh()->archived_at)->toBeNull()->and($f['budget']->revisions()->count())->toBe(0);

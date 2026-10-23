@@ -56,6 +56,7 @@ class LockEventPublicationAction
         if ($publication !== null && $publication->promotion_id !== $event->promotion_id) {
             throw EventPublicationException::invalid();
         }
+
         $publication ??= new EventPublication;
 
         if (! $publication->exists) {

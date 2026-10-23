@@ -230,6 +230,7 @@ test('the directory refuses invalid contact details without writing', function (
     foreach ($input as $property => $value) {
         $page->set("form.{$property}", $value);
     }
+
     $page->call('save');
 
     // Assert

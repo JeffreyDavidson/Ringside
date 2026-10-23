@@ -38,6 +38,7 @@ class CorrectBudgetMovementAction
             if ($movements->refundsOf($movementId)->unvoided()->isNotEmpty()) {
                 throw BudgetException::dependentRefunds();
             }
+
             $before = $movement->attributesToArray();
             $movement->voided_at = now();
             $movement->voided_by = $actor->id;

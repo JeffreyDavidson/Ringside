@@ -16,32 +16,33 @@ use App\Livewire\Table\Filter;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 /** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
-    #[\Override]
+    #[Override]
     protected bool $showActionColumn = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelClass = Stable::class;
 
-    #[\Override]
+    #[Override]
     protected ?string $indexView = 'livewire.stables.tables.main';
 
-    #[\Override]
+    #[Override]
     protected string $actionsView = 'components.tables.columns.stable-actions';
 
-    #[\Override]
+    #[Override]
     protected string $actionsRowVariable = 'stable';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'stables';
 
-    #[\Override]
+    #[Override]
     protected string $routeBasePath = 'stables';
 
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'stables';
 
     /** @return StableBuilder<Stable> */
@@ -54,7 +55,7 @@ class Main extends BaseTable
             ->orderBy('stables.id');
     }
 
-    #[\Override]
+    #[Override]
     protected function projectRowState(Collection $rows): void
     {
         $rows->loadExists(StableBuilder::ACTIVITY_STATUS_STATE);
@@ -78,7 +79,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
-    #[\Override]
+    #[Override]
     public function filters(): array
     {
         return [

@@ -85,6 +85,7 @@ test('refunds enforce same-line ownership original kind date and remaining cap',
     if ($case === 'cap') {
         EventBudgetMovement::factory()->for($f['line'], 'line')->create(['kind' => 'refund', 'source_id' => $source->id, 'amount_cents' => 15000]);
     }
+
     // Act / Assert
     $count = EventBudgetMovement::query()->count();
     expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class)
@@ -138,6 +139,7 @@ test('an archived line refuses payments and a guessed foreign line changes nothi
         $line->archived_at = now();
         $line->save();
     }
+
     // Act / Assert
     expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 0, budgetKey(), $line->id, budgetMovementData(), signedInUser()))->toThrow($archived ? BudgetException::class : ModelNotFoundException::class);
     expect(EventBudgetMovement::query()->count())->toBe(0);

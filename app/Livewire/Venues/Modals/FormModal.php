@@ -13,16 +13,17 @@ use App\Models\Events\Venue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Venue>
  */
 class FormModal extends BaseFormModal
 {
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.name';
 
-    #[\Override]
+    #[Override]
     protected bool $resetFormAfterSubmission = true;
 
     public CreateEditForm $form;

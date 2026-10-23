@@ -26,6 +26,7 @@ class TransitionStorylineAction
             if ($status === StorylineStatus::Archived) {
                 $story->previous_status = $story->status;
             }
+
             $story->status = $status;
             $story->save();
             $this->revision->handle($story, $story, StorylineRevisionOperation::StoryStatus, $actor, $before, $reason);

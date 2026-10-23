@@ -10,6 +10,7 @@ use App\Livewire\Concerns\FiltersMatchHistory;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Attributes\Locked;
+use Override;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -32,7 +33,7 @@ class PreviousMatches extends BasePreviousMatchesTable
         return Wrestler::query()->findOrFail($this->requireContextId($this->wrestlerId, 'wrestler'));
     }
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

@@ -13,6 +13,7 @@ use App\Models\Users\User;
 use App\Services\Promotions\PendingInvitationSummaryService;
 use App\Support\EmailAddress;
 use Illuminate\View\View;
+use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, User>
@@ -21,13 +22,13 @@ class FormModal extends BaseFormModal
 {
     use DispatchesActionFeedback;
 
-    #[\Override]
+    #[Override]
     protected bool $resetFormAfterSubmission = true;
 
-    #[\Override]
+    #[Override]
     protected string $modelTitleField = 'full_name';
 
-    #[\Override]
+    #[Override]
     protected ?string $businessErrorField = 'form.role';
 
     public CreateEditForm $form;

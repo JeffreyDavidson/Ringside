@@ -60,6 +60,7 @@ class TournamentBracketService
                 $winner = $competitor instanceof MatchCompetitor ? $entries->first(fn (TournamentEntry $entry): bool => $entry->competitor_type === $competitor->competitor_type && $entry->competitor_id === $competitor->competitor_id) : null;
                 $complete = $winner !== null;
             }
+
             $bout = new TournamentBoutData($node, $first, $second, (bool) $resolved, $link, $winner, $complete, $bye);
             $positions->put($node->round.':'.$node->position, $bout);
             $bouts->put($node->id, $bout);

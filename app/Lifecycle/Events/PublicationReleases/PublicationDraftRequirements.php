@@ -29,6 +29,7 @@ final readonly class PublicationDraftRequirements
         if (! $publication->exists) {
             throw EventPublicationException::invalid();
         }
+
         $draft = $publication->draft;
         $announcement = PublicAnnouncement::from($draft['announcement']);
         $selected = array_column($draft['matches'], 'id');

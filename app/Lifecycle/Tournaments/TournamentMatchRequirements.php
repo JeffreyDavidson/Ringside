@@ -33,11 +33,13 @@ final readonly class TournamentMatchRequirements
         if (! $match instanceof EventMatch) {
             return [];
         }
+
         $link = TournamentMatchLink::query()->with('node', 'tournament')->forMatchId($match->id)->first();
 
         if ($link === null || $link->active_node_id === null || ! $link->tournament->repeat_appearances) {
             return [];
         }
+
         $ancestors = $this->bracket->ancestorNodeIds($link->node);
 
         return array_values(TournamentMatchLink::query()->where('tournament_id', $link->tournament_id)->whereIn('node_id', [...$ancestors, $link->node_id])->whereKeyNot($link->id)->with('match')->get()->filter(
@@ -56,12 +58,14 @@ final readonly class TournamentMatchRequirements
                 if ($bout->link === null || $bout->link->match->trashed()) {
                     continue;
                 }
+
                 $priors = $bouts->only($this->bracket->ancestorNodeIds($bout->node))->map(fn (TournamentBoutData $prior): ?TournamentMatchLink => $prior->link)->filter()->merge($bout->node->links->where('attempt', '<', $bout->link->attempt));
 
                 foreach ($priors as $prior) {
                     if ($prior->match->trashed() || $prior->match->match_finish === null) {
                         continue;
                     }
+
                     $before = $prior->match->event;
                     $after = $bout->link->match->event;
 
@@ -72,6 +76,7 @@ final readonly class TournamentMatchRequirements
                     if ($before->id === $after->id && $tournament->repeat_appearances) {
                         continue;
                     }
+
                     $first = $before->id === $event->id ? $date : $before->date;
                     $second = $after->id === $event->id ? $date : $after->date;
 
@@ -91,6 +96,7 @@ final readonly class TournamentMatchRequirements
         if ($link === null) {
             return;
         }
+
         $bout = $this->bracket->bout($link->node);
         $allowed = collect([$bout->first, $bout->second])->filter()->map(fn (TournamentEntry $entry): string => $entry->competitor_type.':'.$entry->competitor_id)->all();
 
@@ -119,6 +125,7 @@ final readonly class TournamentMatchRequirements
         if ($data->tournamentVersion !== $link->tournament->version) {
             throw RecordChangedException::changed();
         }
+
         $this->ensureCompetitors($match, $data->sides->competitors());
         $this->ensureEntrantsMatch($link->tournament->entrant_kind, $this->bracket->bout($link->node), $data);
 
@@ -143,11 +150,13 @@ final readonly class TournamentMatchRequirements
         if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null) {
             throw TournamentException::alreadyBooked();
         }
+
         $this->ensureEntrantsMatch($tournament->entrant_kind, $bout, $data);
 
         if ($data->titles->isNotEmpty() && ! new BracketShape($tournament->capacity)->isFinal($node->round)) {
             throw TournamentException::finalTitlesOnly();
         }
+
         $priorBouts = $this->bracket->bouts($tournament)->only($this->bracket->ancestorNodeIds($node));
 
         if ($bout->link instanceof TournamentMatchLink) {
@@ -158,6 +167,7 @@ final readonly class TournamentMatchRequirements
             if ($prior->link === null) {
                 continue;
             }
+
             $priorEvent = $prior->link->match->event;
 
             if ($priorEvent->id === $event->id && $tournament->repeat_appearances) {

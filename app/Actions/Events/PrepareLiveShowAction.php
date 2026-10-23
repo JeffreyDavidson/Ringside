@@ -28,6 +28,7 @@ class PrepareLiveShowAction
             if ($run !== null || $version !== 0) {
                 throw RecordChangedException::changed();
             }
+
             $source = $this->source->ensureSource($event);
 
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
@@ -37,6 +38,7 @@ class PrepareLiveShowAction
             if (PromotionTimeZoneService::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(PromotionTimeZoneService::toLocalTime($event->promotion, now())->startOfDay())) {
                 throw LiveShowException::oldEvent();
             }
+
             $run = new EventLiveRun;
             $run->event_id = $event->id;
             $run->version = 1;

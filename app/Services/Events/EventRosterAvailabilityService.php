@@ -43,6 +43,7 @@ class EventRosterAvailabilityService
         if ($date === null) {
             return collect();
         }
+
         $people = collect($people);
         $blocked = $this->unavailability->get($event->promotion_id, $date, $people->map(fn (Wrestler|Referee $person): int => $person->id)->values())
             ->map(fn (Unavailability $entry): string => "{$entry->person_type}:{$entry->person_id}")->all();

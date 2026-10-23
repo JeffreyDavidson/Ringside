@@ -51,6 +51,7 @@ class DeleteAction
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $event->date);
             }
+
             $lockedEvent = $event->refreshForUpdate();
 
             $this->tournamentRequirements->ensureEventDeletable($lockedEvent);

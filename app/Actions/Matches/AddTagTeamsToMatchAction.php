@@ -120,6 +120,7 @@ class AddTagTeamsToMatchAction
                 $this->dateAvailability->ensureForEvent($person, $event);
             }
         }
+
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
         $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {

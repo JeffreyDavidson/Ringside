@@ -29,6 +29,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Locked;
 use LogicException;
+use Override;
 
 /** @extends BaseForm<EventMatch> */
 class CreateEditForm extends BaseForm
@@ -172,7 +173,7 @@ class CreateEditForm extends BaseForm
     }
 
     /** A match has no promotion of its own: it books the roster and titles of its event's promotion. */
-    #[\Override]
+    #[Override]
     public function formPromotionId(): ?int
     {
         return $this->eventPromotionId;
@@ -204,7 +205,7 @@ class CreateEditForm extends BaseForm
      * @param  array<string, mixed>  $attributes
      * @return array<string, mixed>
      */
-    #[\Override]
+    #[Override]
     protected function prepareForValidation(mixed $attributes): array
     {
         $attributes['competitors'] = array_map(
@@ -246,7 +247,7 @@ class CreateEditForm extends BaseForm
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         $attributes = [

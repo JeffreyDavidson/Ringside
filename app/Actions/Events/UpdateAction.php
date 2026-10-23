@@ -64,6 +64,7 @@ class UpdateAction
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $eventData->date);
             }
+
             $lockedEvent = $event->refreshForUpdate();
 
             $nameTaken = Event::query()
@@ -101,6 +102,7 @@ class UpdateAction
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 Tournament::query()->whereKey($tournamentIds)->increment('version');
             }
+
             $lockedEvent->update([
                 'name' => $name,
                 'date' => $eventData->date,

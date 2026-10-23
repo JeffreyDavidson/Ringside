@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Images;
 
 use ErrorException;
+use GdImage;
 use ValueError;
 
 final class ImageReencoder
@@ -34,17 +35,20 @@ final class ImageReencoder
             if ($size === false || $size[0] * $size[1] > self::MAX_PIXELS || $this->isAnimated($bytes)) {
                 throw ImageReencodingException::failed();
             }
+
             $image = imagecreatefromstring($bytes) ?: throw ImageReencodingException::failed();
 
             if (str_contains($bytes, "Exif\0\0") && function_exists('exif_read_data')) {
                 $image = $this->orient($image, $this->orientationOf($bytes));
             }
+
             $width = imagesx($image);
             $height = imagesy($image);
 
             if (max($width, $height) > self::MAX_EDGE) {
                 $image = imagescale($image, (int) round($width * self::MAX_EDGE / max($width, $height)), (int) round($height * self::MAX_EDGE / max($width, $height))) ?: throw ImageReencodingException::failed();
             }
+
             imagesavealpha($image, true);
             ob_start();
 
@@ -85,11 +89,12 @@ final class ImageReencoder
     }
 
     /** Turn the pixels upright for an EXIF orientation (2-8 mirror and/or rotate; 1 and unknown values leave them alone). */
-    private function orient(\GdImage $image, int $orientation): \GdImage
+    private function orient(GdImage $image, int $orientation): GdImage
     {
         if (in_array($orientation, [2, 4, 5, 7], true)) {
             imageflip($image, in_array($orientation, [4, 5], true) ? IMG_FLIP_VERTICAL : IMG_FLIP_HORIZONTAL);
         }
+
         $angle = match ($orientation) {
             3 => 180,
             5, 6, 7 => -90,

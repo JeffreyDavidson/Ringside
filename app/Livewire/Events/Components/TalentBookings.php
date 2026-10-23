@@ -166,6 +166,7 @@ class TalentBookings extends Component
         if ($query === null) {
             return [];
         }
+
         $column = $kind === 'referees' ? 'full_name' : 'name';
         $like = LikeTerm::from($term, 100);
 

@@ -723,6 +723,7 @@ test('concurrent live show commands commit once without replacing times or dupli
                 $version = 2;
             }
         }
+
         $auditCount = Activity::query()->where('log_name', 'live-show')->count();
         $spec = ['live_event_id' => $event->id, 'user_id' => $user->id, 'live_operation' => $operation, 'version' => $version,
             'pack_version' => 1, 'fingerprint' => $data['card']['fingerprint'], 'key' => $key, 'clock' => now()->toIso8601String()];
@@ -768,6 +769,7 @@ test('calendar writes serialize with direct team and rescheduled bookings withou
                 EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
                 $spec = ['event_id' => $event->id, 'reschedule_date' => $target->toDateTimeString()];
             }
+
             $availability = ['unavailability_person_id' => $person->id, 'unavailability_day' => $target->toDateString(), 'user_id' => $actor->id];
 
             // Act
@@ -812,6 +814,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
             );
             $version = 1;
         }
+
         $spec = ['talent_event_id' => $event->id, 'user_id' => $user->id, 'person_id' => $person->id, 'version' => $version,
             'fingerprint' => $context->fingerprint($event, "wrestler:{$person->id}"), 'talent_status' => 'confirmed', 'clock' => now()->toIso8601String()];
         $other = $operation === 'reschedule' ? ['event_id' => $event->id, 'reschedule_date' => now()->addDays(2)->toIso8601String()]
@@ -835,6 +838,7 @@ test('concurrent talent changes never duplicate or overwrite agreements', functi
 
             return;
         }
+
         expect(collect($results)->where('ok', true))->toHaveCount(1, workerOutcomes($results))
             ->and(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class], workerOutcomes($results))
             ->and(EventTalentBooking::query()->where('event_id', $event->id)->sole()->version)->toBe($version + 1)

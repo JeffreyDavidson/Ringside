@@ -144,6 +144,7 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
     if ($case !== 'empty') {
         EventMatch::factory()->for($event)->create();
     }
+
     $data = resolve(EventPackViewModel::class)->data($event);
 
     if ($case !== 'missing pack') {
@@ -159,6 +160,7 @@ test('a new live show requires a dated valid reviewed pack', function (string $c
         $data = resolve(EventPackViewModel::class)->data($event);
         resolve(SaveEventPackAction::class)->handle($event, 1, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), true);
     }
+
     $version = $case === 'old' ? 2 : 1;
 
     // Act / Assert

@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use Livewire\Attributes\Locked;
+use Override;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -28,7 +29,7 @@ class PreviousMatches extends BasePreviousMatchesTable
             ->forRefereeId($refereeId);
     }
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

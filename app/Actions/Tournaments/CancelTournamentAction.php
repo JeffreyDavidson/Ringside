@@ -29,6 +29,7 @@ class CancelTournamentAction
             if ($tournament->status === TournamentStatus::Cancelled) {
                 return;
             }
+
             $this->states->ensureCanMove($tournament, TournamentStatus::Cancelled);
 
             foreach ($this->bracket->bouts($tournament) as $bout) {

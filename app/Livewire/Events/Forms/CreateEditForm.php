@@ -18,6 +18,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
+use Override;
 
 /** @extends BaseForm<Event> */
 class CreateEditForm extends BaseForm
@@ -105,7 +106,7 @@ class CreateEditForm extends BaseForm
     }
 
     /** @return array<string, string> */
-    #[\Override]
+    #[Override]
     protected function validationAttributes(): array
     {
         return [

@@ -173,6 +173,7 @@ test('missing wording foreign anchors and unknown destinations refuse pack publi
     if ($wording) {
         $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     }
+
     $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::from($mode), null, $after);
     $fingerprint = app(EventPackViewModel::class)->data($world['event'])['card']['fingerprint'];
 

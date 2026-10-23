@@ -30,6 +30,7 @@ class CreateAction
 
                 return $existing;
             }
+
             $story = new Storyline;
             $story->promotion_id = $promotion->id;
             $story->title = mb_trim($data->title);

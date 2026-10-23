@@ -9,23 +9,24 @@ use App\Livewire\Base\Tables\BasePreviousMembersTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Livewire\Attributes\Locked;
+use Override;
 
 /** @extends BasePreviousMembersTable<TagTeamWrestler> */
 class PreviousWrestlers extends BasePreviousMembersTable
 {
-    #[\Override]
+    #[Override]
     protected string $resourceName = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $databaseTableName = 'tag_teams_wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $memberRelation = 'wrestler';
 
-    #[\Override]
+    #[Override]
     protected string $memberLabelGroup = 'wrestlers';
 
-    #[\Override]
+    #[Override]
     protected string $dateLabelGroup = 'tag-teams';
 
     #[Locked]

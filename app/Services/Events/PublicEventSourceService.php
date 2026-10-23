@@ -57,10 +57,12 @@ class PublicEventSourceService
             if ($match->match_finish?->requiresWinningSide()) {
                 $winner = $match->winning_side_id === null ? '' : $sides->get($match->winning_side_id, '');
             }
+
             $rows[] = ['id' => $match->id, 'label' => $complete ? $sides->join(' vs ') : '', 'type' => $match->match_type->label(),
                 'stipulation' => $match->matchStipulation?->name, 'titles' => $match->titles->map(fn (Title $title): string => $title->name)->join(', '),
                 'finish' => $match->match_finish?->label(), 'winner' => $winner];
         }
+
         // A deleted venue still publishes its name, address and time zone, so a page released before the deletion keeps its card.
         $venue = $event->venue;
         $zone = $venue->timezone ?? $event->promotion->timezone ?? config()->string('app.timezone');

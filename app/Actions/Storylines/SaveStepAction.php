@@ -34,6 +34,7 @@ class SaveStepAction
             if ($stepId === null && $story->steps()->where('submission_id', $data->submissionId)->exists()) {
                 throw RecordChangedException::changed();
             }
+
             $before = $step->attributesToArray();
             $step->promotion_id = $story->promotion_id;
             $step->storyline_id = $story->id;

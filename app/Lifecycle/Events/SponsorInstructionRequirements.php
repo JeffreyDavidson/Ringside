@@ -48,6 +48,7 @@ final class SponsorInstructionRequirements
         if ($pack instanceof EventPack && $pack->card_fingerprint !== $fingerprint) {
             throw SponsorCommitmentException::packReviewRequired();
         }
+
         $targetKey = $data->targetKey instanceof PackKey ? (string) $data->targetKey : null;
 
         if (($data->targetKey instanceof PackKey && ($data->targetKey->kind !== $data->mode || $preview['target'] === null))
@@ -66,6 +67,7 @@ final class SponsorInstructionRequirements
         if ($data->afterMatchId !== null && ! $matches->contains(fn (EventMatch $match): bool => $match->id === $data->afterMatchId && ! $match->trashed())) {
             throw SponsorCommitmentException::invalidTarget();
         }
+
         $protectedKeys = array_filter([$commitment->pack_key, $targetKey]);
 
         foreach ($run->content['items'] ?? [] as $item) {

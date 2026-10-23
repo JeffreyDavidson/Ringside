@@ -113,6 +113,7 @@ test('restoring a future event checks its retained roster while historical resto
 
         resolve(CancelAction::class)->handle($person, $entry->id, $actor);
     }
+
     $restore();
     expect($event->refresh()->trashed())->toBeFalse();
 })->with([true, false]);

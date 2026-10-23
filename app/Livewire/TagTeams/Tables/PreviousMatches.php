@@ -10,6 +10,7 @@ use App\Livewire\Concerns\FiltersMatchHistory;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use Livewire\Attributes\Locked;
+use Override;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -32,7 +33,7 @@ class PreviousMatches extends BasePreviousMatchesTable
         return TagTeam::query()->findOrFail($this->requireContextId($this->tagTeamId, 'tag team'));
     }
 
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

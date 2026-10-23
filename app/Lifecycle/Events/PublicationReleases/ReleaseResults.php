@@ -29,6 +29,7 @@ final readonly class ReleaseResults implements PublicationRelease
             || $publication->card_fingerprint !== $this->cards->cardFingerprint($source, $publication->card_source ?? [])) {
             throw EventPublicationException::invalid();
         }
+
         $results = $this->cards->resultSource($source, $draft['results']);
         $rows = [];
 
@@ -36,8 +37,10 @@ final readonly class ReleaseResults implements PublicationRelease
             if ($match['finish'] === null || $match['winner'] === '') {
                 throw EventPublicationException::invalid();
             }
+
             $rows[] = ['label' => $match['label'], 'details' => '', 'outcome' => $match['winner'] === null ? $match['finish'] : $match['winner'].' — '.$match['finish']];
         }
+
         $publication->results = ['rows' => $rows, 'corrected_at' => $publication->results === null ? null : now()->toIso8601String()];
         $publication->results_source = $draft['results'];
         $publication->results_fingerprint = $this->cards->fingerprint($results);
