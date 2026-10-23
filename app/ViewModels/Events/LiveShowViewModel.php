@@ -12,6 +12,7 @@ use App\Queries\Events\EventVenueQuery;
 use App\Services\Events\LiveRunSourceService;
 use App\Services\Events\LiveShowSourceService;
 use App\Services\Events\LiveShowTimingService;
+use App\Services\Events\ProductionRedactionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
@@ -27,7 +28,7 @@ use Illuminate\Support\Facades\Lang;
  */
 class LiveShowViewModel
 {
-    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison, private readonly EventVenueQuery $venues) {}
+    public function __construct(private readonly LiveShowSourceService $source, private readonly LiveShowTimingService $timing, private readonly LiveRunSourceService $comparison, private readonly EventVenueQuery $venues, private readonly ProductionRedactionService $redaction) {}
 
     /**
      * @param  string  $refreshedAt  when the page last refreshed, as an ISO 8601 instant
@@ -50,11 +51,11 @@ class LiveShowViewModel
         if (Gate::denies('viewProduction', $event)) {
             if ($run !== null) {
                 $run = clone $run;
-                $run->content = $this->withoutProduction($run->content);
+                $run->content = $this->redaction->liveShowWithoutProduction($run->content);
             }
 
             if ($source !== null) {
-                $source['content'] = $this->withoutProduction($source['content']);
+                $source['content'] = $this->redaction->liveShowWithoutProduction($source['content']);
             }
         }
 
@@ -76,22 +77,6 @@ class LiveShowViewModel
             'savedLabel' => $run === null ? null : $this->actual($run->updated_at->toIso8601String(), $zone),
             'removed' => array_values($items->filter(fn (array $item): bool => $item['state'] === LiveItemStatus::Pending->value && ! in_array($item['key'], $sourceKeys, true))->all()),
             'current' => $items->firstWhere('state', LiveItemStatus::Running->value), 'next' => $items->firstWhere('state', LiveItemStatus::Pending->value)];
-    }
-
-    /** @param Content $content
-     * @return Content
-     */
-    private function withoutProduction(array $content): array
-    {
-        unset($content['production']);
-        $content['items'] = array_map(function (array $item): array {
-            unset($item['cues']);
-
-            return $item;
-        }, $content['items']);
-        $content['roster'] = array_values(array_filter($content['roster'], fn (array $person): bool => ! str_starts_with($person['key'], 'crew:')));
-
-        return $content;
     }
 
     private function actual(?string $instant, string $timezone): string
