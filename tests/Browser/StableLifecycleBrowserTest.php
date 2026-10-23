@@ -37,7 +37,8 @@ test('administrator can disband and retire a stable from the detail page', funct
         ->click('button:has-text("Retire")')
         ->assertSee('Stable successfully retired.')
         ->assertScript($statusCell, 'Retired')
-        ->assertMissing('button:has-text("Retire")')
+        ->assertMissing('button:text-is("Retire")')
+        ->assertPresent('button:text-is("Unretire")')
         ->assertNoJavascriptErrors();
 
     expect($stable->refresh()->currentRetirement()->exists())->toBeTrue();
