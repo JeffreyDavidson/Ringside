@@ -19,11 +19,11 @@ readonly class TagTeamMembershipData
     /**
      * Create a new tag team membership data instance.
      *
-     * @param  Collection<int, Wrestler>|null  $wrestlers  The wrestlers in the tag team
-     * @param  Collection<int, Manager>|null  $managers  The managers of the tag team
+     * @param  Collection<int, Wrestler>  $wrestlers  The wrestlers in the tag team
+     * @param  Collection<int, Manager>|null  $managers  The managers of the tag team; null leaves the managers alone
      */
     public function __construct(
-        public ?Collection $wrestlers = null,
+        public Collection $wrestlers = new Collection,
         public ?Collection $managers = null,
     ) {}
 
