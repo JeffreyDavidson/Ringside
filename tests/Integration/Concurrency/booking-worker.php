@@ -138,10 +138,14 @@ while (microtime(true) < $startAt) {
 
 $result = ['ok' => true, 'exception' => null, 'deadlock' => false];
 
+// The promotion the create actions are given: the enforced one, as the forms pass it, or none.
+$createPromotionId = null;
+
 if (isset($spec['promotion_id']) && ! isset($spec['demote_user_id'])) {
     $context = resolve(PromotionContextService::class);
     $context->set(Promotion::query()->findOrFail($spec['promotion_id']));
     $context->enforce();
+    $createPromotionId = $context->required()->id;
 }
 
 try {
@@ -255,6 +259,7 @@ try {
     } elseif (isset($spec['create_stable_name'])) {
         resolve(CreateStableAction::class)->handle(
             new StableData($spec['create_stable_name'], null, new StableMembershipData),
+            $createPromotionId,
         );
     } elseif (isset($spec['restore_stable_id'])) {
         resolve(RestoreStableAction::class)->handle(Stable::withTrashed()->findOrFail($spec['restore_stable_id']));
@@ -268,6 +273,7 @@ try {
 
         resolve(CreateTagTeamAction::class)->handle(
             new TagTeamData($spec['create_tag_team_name'], $spec['signature_move'] ?: null, null, $wrestlers->firstOrFail(), $wrestlers->skip(1)->firstOrFail()),
+            $createPromotionId,
         );
     } elseif (isset($spec['update_tag_team_id'])) {
         $tagTeam = TagTeam::query()->findOrFail($spec['update_tag_team_id']);
@@ -279,10 +285,11 @@ try {
             new TagTeamData($spec['new_name'], $tagTeam->signature_move, null, $partners->firstOrFail(), $partners->skip(1)->firstOrFail()),
         );
     } elseif (isset($spec['create_title_name'])) {
-        resolve(CreateTitleAction::class)->handle(new TitleData($spec['create_title_name'], TitleType::Singles, null));
+        resolve(CreateTitleAction::class)->handle(new TitleData($spec['create_title_name'], TitleType::Singles, null), $createPromotionId);
     } elseif (isset($spec['create_wrestler_name'])) {
         resolve(CreateWrestlerAction::class)->handle(
             new WrestlerData($spec['create_wrestler_name'], 73, 220, 'Concurrent City, Ohio', $spec['signature_move'] ?: null, null),
+            $createPromotionId,
         );
     } elseif (isset($spec['update_wrestler_id'])) {
         $wrestler = Wrestler::query()->findOrFail($spec['update_wrestler_id']);
@@ -292,7 +299,7 @@ try {
             new WrestlerData($spec['new_name'], $wrestler->height, $wrestler->weight, $wrestler->hometown, $wrestler->signature_move, null),
         );
     } elseif (isset($spec['create_event_name'])) {
-        resolve(CreateAction::class)->handle(new EventData($spec['create_event_name'], null, null, null));
+        resolve(CreateAction::class)->handle(new EventData($spec['create_event_name'], null, null, null), $createPromotionId);
     } elseif (isset($spec['create_venue_name'])) {
         resolve(CreateVenueAction::class)->handle(
             new VenueData($spec['create_venue_name'], '1 Concurrent Way', 'Columbus', 'Ohio', '43004'),
@@ -301,6 +308,7 @@ try {
         // A name of its own per worker: two events of one name are refused by the name guard, and this race is about the venue day.
         resolve(CreateAction::class)->handle(
             new EventData('Concurrent Venue Event '.getmypid(), Carbon::parse($spec['date']), Venue::query()->findOrFail($spec['create_event_at_venue_id']), null),
+            $createPromotionId,
         );
     } elseif (isset($spec['demote_user_id'])) {
         resolve(UpdatePromotionMemberRoleAction::class)->handle(

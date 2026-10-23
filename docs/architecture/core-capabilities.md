@@ -271,7 +271,10 @@ accept, remove or change a role or status
 `promotion_user` or `promotion_invitations` must call it.
 When promotion context is enforced, new promotion-owned models receive the
 active promotion during creation without exposing ownership columns to
-mass-assignment.
+mass-assignment. The event, title, wrestler, tag team and stable create Actions do
+not read the context: the form passes the promotion it validated against
+(`BaseForm::formPromotionId()`, null for an administrator without one), and the
+Action uses it for the name lock, the name check and the new record's `promotion_id`.
 Names are unique per promotion: wrestler and tag team `name` and
 `signature_move`, stable, title and event `name` (validated in the create/edit
 forms through `BaseForm::uniqueInPromotion()`, and in the restore eligibility

@@ -8,8 +8,10 @@ use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
-final class RemovePromotionInvitationAction
+final readonly class RemovePromotionInvitationAction
 {
+    public function __construct(private PromotionContextService $context) {}
+
     /**
      * Delete the pending invitation for an email: the owner cancelling it or the invited user declining it.
      * Memberships are never touched. Returns false when there is no pending invitation.
@@ -26,7 +28,7 @@ final class RemovePromotionInvitationAction
                 ->forEmail($email)
                 ->delete();
 
-            app(PromotionContextService::class)->forgetMemberships();
+            $this->context->forgetMemberships();
 
             return $removed > 0;
         });
