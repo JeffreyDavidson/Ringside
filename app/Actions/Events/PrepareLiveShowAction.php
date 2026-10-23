@@ -43,7 +43,15 @@ class PrepareLiveShowAction
             $run->content = $source['content'];
             $run->prepared_at = now();
             $run->save();
-            activity('live-show')->causedBy($actor)->performedOn($event)->withProperties(['operation' => 'prepare', 'version' => 1])->log('prepare');
+
+            activity('live-show')
+                ->causedBy($actor)
+                ->performedOn($event)
+                ->withProperties([
+                    'operation' => 'prepare',
+                    'version' => 1,
+                ])
+                ->log('prepare');
 
             return $run->setRelation('event', $event);
         }, attempts: 3);

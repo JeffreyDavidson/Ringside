@@ -33,8 +33,17 @@ class CancelTournamentAction
                     $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);
                 }
             }
-            $tournament->refresh()->forceFill(['status' => TournamentStatus::Cancelled, 'version' => $tournament->version + 1])->save();
-            activity('tournaments')->causedBy($actor)->withProperties(['promotion_id' => $tournament->promotion_id, 'tournament_id' => $tournament->id, 'reason' => $reason])->log('tournament.cancelled');
+
+            $tournament->refresh()->increment('version', extra: ['status' => TournamentStatus::Cancelled]);
+
+            activity('tournaments')
+                ->causedBy($actor)
+                ->withProperties([
+                    'promotion_id' => $tournament->promotion_id,
+                    'tournament_id' => $tournament->id,
+                    'reason' => $reason,
+                ])
+                ->log('tournament.cancelled');
         }, attempts: 3);
     }
 }

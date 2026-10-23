@@ -22,7 +22,11 @@ class PersistBudgetMovementAction
 
     public function handle(EventBudget $budget, EventBudgetLine $line, BudgetMovementData $data, User $actor, ?int $replaces = null): EventBudgetMovement
     {
-        $line->setRelation('movements', $line->movements()->orderBy('id')->lockForUpdate()->get());
+        $line->setRelation('movements', $line->movements()
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get());
+
         if ($line->archived_at !== null) {
             throw BudgetException::archived();
         }

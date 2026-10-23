@@ -19,9 +19,18 @@ class PersistLiveShowAction
         $before = $change->before;
         $after = $change->after;
         unset($before['cues'], $after['cues']);
-        activity('live-show')->causedBy($actor)->performedOn($run->event)->withProperties([
-            'operation' => $change->operation, 'target' => $change->target, 'version' => $run->version,
-            'before' => $before, 'after' => $after, 'reason' => $change->reason,
-        ])->log($change->operation);
+
+        activity('live-show')
+            ->causedBy($actor)
+            ->performedOn($run->event)
+            ->withProperties([
+                'operation' => $change->operation,
+                'target' => $change->target,
+                'version' => $run->version,
+                'before' => $before,
+                'after' => $after,
+                'reason' => $change->reason,
+            ])
+            ->log($change->operation);
     }
 }

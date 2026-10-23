@@ -29,7 +29,16 @@ class UnpublishEventPublicationAction
             }
             $publication->version++;
             $publication->save();
-            activity('publication')->performedOn($locked['event'])->causedBy($actor)->withProperties(['publication_id' => $publication->id, 'section' => $section->value, 'version' => $publication->version])->log('unpublished');
+
+            activity('publication')
+                ->performedOn($locked['event'])
+                ->causedBy($actor)
+                ->withProperties([
+                    'publication_id' => $publication->id,
+                    'section' => $section->value,
+                    'version' => $publication->version,
+                ])
+                ->log('unpublished');
         }, attempts: 3);
     }
 }

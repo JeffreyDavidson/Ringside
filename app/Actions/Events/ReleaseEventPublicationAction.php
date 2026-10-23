@@ -30,6 +30,15 @@ class ReleaseEventPublicationAction
     {
         $publication->version++;
         $publication->save();
-        activity('publication')->performedOn($event)->causedBy($actor)->withProperties(['publication_id' => $publication->id, 'section' => $section->value, 'version' => $publication->version])->log('published');
+
+        activity('publication')
+            ->performedOn($event)
+            ->causedBy($actor)
+            ->withProperties([
+                'publication_id' => $publication->id,
+                'section' => $section->value,
+                'version' => $publication->version,
+            ])
+            ->log('published');
     }
 }

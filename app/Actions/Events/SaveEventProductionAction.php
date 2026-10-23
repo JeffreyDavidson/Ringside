@@ -39,8 +39,13 @@ class SaveEventProductionAction
             $content = $pack->content ?? $this->source->get($event)['content'];
             $keys = [...array_map(fn (array $row): string => 'match:'.$row['id'], $card['rows']),
                 ...array_map(fn (array $segment): string => 'segment:'.$segment['id'], $content['segments'])];
-            $contacts = CrewContact::query()->where('promotion_id', $event->promotion_id)
-                ->whereKey(data_get($input, 'assignments.*.contact_id', []))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $contacts = CrewContact::query()
+                ->where('promotion_id', $event->promotion_id)
+                ->whereKey(data_get($input, 'assignments.*.contact_id', []))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
             $content['production'] = $this->requirements->ensureProduction($input, $content['production'] ?? null, $keys, $contacts);
             $pack ??= new EventPack;
             $pack->event_id = $event->id;
@@ -48,7 +53,15 @@ class SaveEventProductionAction
             $pack->card_fingerprint = $fingerprint;
             $pack->fill(['content' => $content]);
             $pack->save();
-            activity('production')->causedBy($actor)->performedOn($event)->withProperties(['operation' => 'pack-save', 'version' => $pack->version])->log('pack-save');
+
+            activity('production')
+                ->causedBy($actor)
+                ->performedOn($event)
+                ->withProperties([
+                    'operation' => 'pack-save',
+                    'version' => $pack->version,
+                ])
+                ->log('pack-save');
         }, attempts: 3);
     }
 }
