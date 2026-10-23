@@ -8,7 +8,7 @@ These live in `tests/Feature/Architecture` unless a path is given. Keep them; a 
 
 | Test | Enforces |
 | --- | --- |
-| `ApplicationArchitectureTest` | PHP and security presets, strict types, no debug helpers, `env()` only in config, native enums, every enum in a domain folder (never directly in `App\Enums`), and no `auth()` or `Auth` facade in `app/Actions` |
+| `ApplicationArchitectureTest` | PHP and security presets, strict types, no debug helpers, `env()` only in config, native enums, every enum in a domain folder (never directly in `App\Enums`), and no `auth()`, `Auth` facade or `Illuminate\Contracts\Auth\Guard` in `app/Actions` |
 | `ControllerArchitectureTest` | Resourceful or invokable controllers, singular resource names, named routes authorized at the route, a mirrored Feature test file with an executable test, and no `action([` URLs in controller tests |
 | `NestedResourceControllersTest` | Singular names for nested resource controllers |
 | `DataArchitectureTest` | Data objects are readonly with only a constructor, static named constructors and simple field checks; discovers classes one folder deep under `app/Data` |
@@ -32,6 +32,7 @@ These live in `tests/Feature/Architecture` unless a path is given. Keep them; a 
 ## Actors
 
 - An Action that records who did something takes the actor as a `User $actor` parameter (after the required input, before optional ones) and never reads `auth()` or the `Auth` facade, so a job or command can call it with nobody signed in. Livewire components pass the signed-in user through the `ResolvesActor` concern. The actor never joins a request hash or fingerprint (`MutateBudgetAction`'s `$payload`). Every activity-log entry an Action writes names its causer with `causedBy($actor)` (for example `PersistLiveShowAction`, the tournament Actions and `TournamentOutcomeManager`), so no entry depends on the auth guard.
+- The one known exception is `LifecycleTransitionRecorder` (`app/Lifecycle/Periods`), which writes every `LifecycleTransition` and still reads the signed-in user from the auth `Guard`, so a transition recorded by a job or command has no user. It lives in Lifecycle, outside the Actions rule above. Passing the actor through the roughly 64 Actions that reach it is a separate, later plan.
 
 ## Promotion context (tenancy)
 
@@ -60,11 +61,11 @@ In migrations: MySQL has no partial or expression indexes, so use a STORED gener
 
 - Most Actions are named for the verb inside their entity folder (`Actions/Wrestlers/RetireAction`); see the differences in `AGENTS.md`.
 - Two standing exceptions to "Actions take Data objects and never validate": `SaveEventProductionAction` re-runs `EventProductionRequirements::validatedInput()` inside its save, and `MutateBudgetAction` keeps an `array $payload` because it is the operation fingerprint hashed into `event_budget_revisions.request_hash` for retry identity; retyping it would change stored hashes.
-- Lifecycle periods: lock the owning row inside a transaction before validating and changing a period. Start operations create a period only when none is open and reject an existing open one; end operations require an open period and reject an end date before its start. Record the `LifecycleTransition` audit (domain-specific type and effective date) inside the same owner-locked transaction.
+- Lifecycle periods: lock the owning row inside a transaction before validating and changing a period. Start operations create a period only when none is open and reject an existing open one; end operations require an open period and reject an end date before its start. Record the `LifecycleTransition` audit (domain-specific type and effective date, through `LifecycleTransitionRecorder`) inside the same owner-locked transaction. The period writers and managers (`LifecyclePeriodWriter`, `DeletionStateManager`, `EmploymentPeriodManager`) open no transaction of their own; the calling Action owns it.
 - Administrators: Users `ChangeStatusAction` (to a non-active status) and `UpdateAction` (to a non-administrator role) call `EnsureAnotherActiveAdministratorAction` first, which locks every active administrator in ascending id order, and only then lock the target user; `ChangeStatusAction` then locks the user's owned promotions (ascending id). Never lock a user row before the administrator set.
 - Cascades lock rows in ascending primary key order: order a collection before locking its members, and never lock a member before the parent that owns the cascade.
 - `OpenPeriodEnder::end()` ends open stable, tag team and manager pivot rows: started rows end on the effective date, and rows that start later close on their own start date, so `left_at`/`fired_at` never precedes `joined_at`/`hired_at`. Never write the effective date directly onto every open row.
-- Soft deletion: `deleted_at` is authoritative. Typed Delete and Restore Actions delegate only the state change plus the Deleted/Restored audit to `DeletionStateManager` in one transaction; validation, period closure and relationship cleanup stay in the Actions.
+- Soft deletion: `deleted_at` is authoritative. Typed Delete and Restore Actions delegate only the state change plus the Deleted/Restored audit to `DeletionStateManager`, inside the calling Action's transaction; validation, period closure and relationship cleanup stay in the Actions.
 - `ChampionshipReignManager` is the single write path for opening, closing and reconciling championship reigns. Match and title Actions keep eligibility, locking and orchestration; current-champion reads stay read-only reporting.
 - Event card: Actions that read or write an event's card under its fingerprint (event pack, production, sponsor instructions, live show, storyline sources) take `EventCardLock` inside their transaction. It locks the event, all its matches including deleted ones in ascending id, the pack and the live run, in that order; lock any other row of the event (a sponsor commitment) after it.
 - The concurrency tests in `tests/Integration/Concurrency/` and their workers call Actions directly and run only in CI's MySQL and PostgreSQL jobs (see `AGENTS.md`).
@@ -93,7 +94,7 @@ In migrations: MySQL has no partial or expression indexes, so use a STORED gener
 
 ## Observers
 
-The three observers make audit records immutable: `LifecycleTransitionObserver`, `SponsorCommitmentRevisionObserver` and `TalentBookingRevisionObserver` (which guards `EventTalentBookingRevision`). They live in the model's domain folder under `app/Observers` (`Events`, `Lifecycle`). Each observer is named for the model it guards without the model's domain prefix. There is no `tests/Integration/Observers` folder: the two revision observers are tested from their models' Integration tests (`EventTalentBookingRevisionTest`, `EventSponsorCommitmentRevisionTest`), and `LifecycleTransitionObserver`'s refusal is tested in `tests/Integration/Actions/Lifecycle/RecordLifecycleTransitionActionTest.php`.
+The three observers make audit records immutable: `LifecycleTransitionObserver`, `SponsorCommitmentRevisionObserver` and `TalentBookingRevisionObserver` (which guards `EventTalentBookingRevision`). They live in the model's domain folder under `app/Observers` (`Events`, `Lifecycle`). Each observer is named for the model it guards without the model's domain prefix. There is no `tests/Integration/Observers` folder: the two revision observers are tested from their models' Integration tests (`EventTalentBookingRevisionTest`, `EventSponsorCommitmentRevisionTest`), and `LifecycleTransitionObserver`'s refusal is tested in `tests/Integration/Lifecycle/Periods/LifecycleTransitionRecorderTest.php`.
 
 ## Enums
 

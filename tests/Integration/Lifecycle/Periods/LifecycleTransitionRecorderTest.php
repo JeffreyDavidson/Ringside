@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
@@ -18,7 +18,7 @@ test('it records an attributed lifecycle transition for its subject', function (
 
     actingAs($user);
 
-    $transition = resolve(RecordLifecycleTransitionAction::class)->handle(
+    $transition = resolve(LifecycleTransitionRecorder::class)->record(
         $title,
         LifecycleDimension::Activity,
         LifecycleTransitionType::Debuted,
@@ -40,7 +40,7 @@ test('it records a transition dated outside the unix timestamp range', function 
     $title = Title::factory()->create();
 
     // Act
-    $transition = resolve(RecordLifecycleTransitionAction::class)->handle(
+    $transition = resolve(LifecycleTransitionRecorder::class)->record(
         $title,
         LifecycleDimension::Activity,
         LifecycleTransitionType::Debuted,
@@ -57,7 +57,7 @@ test('it records a transition dated outside the unix timestamp range', function 
 test('it records system transitions without an authenticated user', function () {
     $title = Title::factory()->create();
 
-    $transition = resolve(RecordLifecycleTransitionAction::class)->handle(
+    $transition = resolve(LifecycleTransitionRecorder::class)->record(
         $title,
         LifecycleDimension::Activity,
         LifecycleTransitionType::Debuted,
@@ -69,7 +69,7 @@ test('it records system transitions without an authenticated user', function () 
 });
 
 test('recorded lifecycle transitions are immutable', function (string $operation) {
-    $transition = resolve(RecordLifecycleTransitionAction::class)->handle(
+    $transition = resolve(LifecycleTransitionRecorder::class)->record(
         Title::factory()->create(),
         LifecycleDimension::Activity,
         LifecycleTransitionType::Debuted,
