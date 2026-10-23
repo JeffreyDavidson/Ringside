@@ -23,12 +23,18 @@ test('synchronizing membership dates ended wrestler pivots', function () {
     expect($tagTeam->previousWrestlers()->whereKey($wrestler)->exists())->toBeTrue();
 });
 
-test('synchronizing omitted wrestler memberships leaves them unchanged', function () {
+test('synchronizing omitted wrestler memberships ends the current ones, like an empty list', function () {
+    // Arrange
     $tagTeam = TagTeam::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => today()->subDay()]);
 
-    resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData, now());
+    // Act
+    resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData, today());
 
-    expect($tagTeam->currentWrestlers()->exists())->toBeFalse();
+    // Assert
+    expect($tagTeam->currentWrestlers()->exists())->toBeFalse()
+        ->and($tagTeam->previousWrestlers()->whereKey($wrestler)->exists())->toBeTrue();
 });
 
 test('synchronizing ends not-yet-started wrestler memberships on their own join date', function () {

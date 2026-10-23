@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Queries\Matches;
 
 use App\Builders\Matches\EventMatchBuilder;
-use App\Models\Events\Event;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,8 +26,8 @@ final class BookingHistoryRecentMatchesQuery
         return $subjects->load(['matches' => function (Relation $matches) use ($promotionId, $reference, $excludedMatchId, $limit): void {
             EventMatchBuilder::constrainToPromotionHistory($matches->getQuery(), $promotionId, $reference, $excludedMatchId);
             EventMatchBuilder::addRecordedResultFlag($matches->getQuery());
-            $matches->orderByDesc(Event::query()->select('date')->whereColumn('events.id', 'events_matches.event_id'))
-                ->orderByDesc('events_matches.event_id')->orderBy('events_matches.match_number')->orderBy('events_matches.id')
+            EventMatchBuilder::orderLatestEventFirst($matches->getQuery());
+            $matches->orderBy('events_matches.id')
                 ->with(['event.promotion', 'competitors' => function (Relation $entries): void {
                     $entries->orderBy('events_matches_competitors.id');
                 }, 'competitors.side', 'competitors.competitor'])->limit($limit);

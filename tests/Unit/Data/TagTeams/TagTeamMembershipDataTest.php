@@ -17,6 +17,18 @@ test('creates membership data from two wrestlers and their managers', function (
         new Collection([$manager]),
     );
 
-    expect($members->wrestlers?->all())->toBe([$wrestlerA, $wrestlerB])
+    expect($members->wrestlers->all())->toBe([$wrestlerA, $wrestlerB])
         ->and($members->managers?->all())->toBe([$manager]);
+});
+
+test('has no wrestlers and leaves managers alone by default', function () {
+    // Arrange
+    $members = new TagTeamMembershipData;
+
+    // Act
+    $wrestlers = $members->wrestlers;
+
+    // Assert
+    expect($wrestlers)->toBeEmpty()
+        ->and($members->managers)->toBeNull();
 });

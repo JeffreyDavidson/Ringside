@@ -334,19 +334,25 @@ class EventMatchBuilder extends Builder
 
     public function latestEventFirst(): static
     {
+        self::orderLatestEventFirst($this);
+
+        return $this;
+    }
+
+    /** @param Builder<*> $query */
+    public static function orderLatestEventFirst(Builder $query): void
+    {
         $event = new Event;
 
-        $this->orderByDesc(
+        $query->orderByDesc(
             $event->newQuery()
                 ->select('date')
                 ->whereColumn(
                     $event->qualifyColumn('id'),
-                    $this->getModel()->qualifyColumn('event_id'),
+                    $query->qualifyColumn('event_id'),
                 ),
         )
-            ->orderByDesc($this->qualifyColumn('event_id'))
-            ->orderBy($this->qualifyColumn('match_number'));
-
-        return $this;
+            ->orderByDesc($query->qualifyColumn('event_id'))
+            ->orderBy($query->qualifyColumn('match_number'));
     }
 }

@@ -7,7 +7,6 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\AssignManagersAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Roster\TagTeams\TagTeam;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class EstablishMembershipAction
@@ -19,7 +18,7 @@ class EstablishMembershipAction
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
-        if ($members->wrestlers instanceof Collection && $members->wrestlers->isNotEmpty()) {
+        if ($members->wrestlers->isNotEmpty()) {
             $this->lockIncomingWrestlersAction->handle($tagTeam, $members->wrestlers);
 
             $tagTeam->wrestlers()->attach($members->wrestlers->modelKeys(), [
