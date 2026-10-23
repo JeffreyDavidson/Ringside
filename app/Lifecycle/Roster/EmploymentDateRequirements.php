@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Lifecycle\Roster;
 
 use App\Exceptions\Lifecycle\EmploymentDateException;
-use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionTimeZoneService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
@@ -21,10 +23,8 @@ final readonly class EmploymentDateRequirements
 {
     /**
      * A scheduled employment can move to today or later; an earlier day would start it retroactively.
-     *
-     * @param  Model&Employable<*>  $employable
      */
-    public function movesScheduledIntoThePast(Model&Employable $employable, Carbon $date): bool
+    public function movesScheduledIntoThePast(Manager|Referee|TagTeam|Wrestler $employable, Carbon $date): bool
     {
         $promotion = $this->promotionOf($employable);
 
@@ -35,10 +35,8 @@ final readonly class EmploymentDateRequirements
     /**
      * Whether the date is the day the current employment started, or the day the first one did (the date the tag
      * team form shows). The form holds only the day, so the time of day an employment started does not matter.
-     *
-     * @param  Model&Employable<*>  $employable
      */
-    public function keepsStartDay(Model&Employable $employable, Employment $current, Carbon $date): bool
+    public function keepsStartDay(Manager|Referee|TagTeam|Wrestler $employable, Employment $current, Carbon $date): bool
     {
         $promotion = $this->promotionOf($employable);
         $day = PromotionTimeZoneService::toLocalTime($promotion, $date);
@@ -49,11 +47,9 @@ final readonly class EmploymentDateRequirements
     }
 
     /**
-     * @param  Model&Employable<*>  $employable
-     *
      * @throws EmploymentDateException When the day is before today in the promotion
      */
-    public function ensureScheduledCanMoveTo(Model&Employable $employable, Carbon $date): void
+    public function ensureScheduledCanMoveTo(Manager|Referee|TagTeam|Wrestler $employable, Carbon $date): void
     {
         if ($this->movesScheduledIntoThePast($employable, $date)) {
             throw EmploymentDateException::scheduledInThePast($employable);
@@ -64,11 +60,9 @@ final readonly class EmploymentDateRequirements
      * A started employment keeps its start date: nothing moves it, so an edit that names another day is refused
      * instead of being saved without it. A record that is not currently employed has nothing to protect here.
      *
-     * @param  Model&Employable<*>  $employable
-     *
      * @throws EmploymentDateException When another day than the one employment started is given
      */
-    public function ensureCurrentStartIsUnchanged(Model&Employable $employable, Carbon $date): void
+    public function ensureCurrentStartIsUnchanged(Manager|Referee|TagTeam|Wrestler $employable, Carbon $date): void
     {
         $current = $employable->currentEmployment()->first();
 
@@ -77,7 +71,7 @@ final readonly class EmploymentDateRequirements
         }
     }
 
-    private function promotionOf(Model $employable): ?Promotion
+    private function promotionOf(Manager|Referee|TagTeam|Wrestler $employable): ?Promotion
     {
         $promotion = $employable->getRelationValue('promotion');
 

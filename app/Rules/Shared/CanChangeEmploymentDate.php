@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Rules\Shared;
 
 use App\Lifecycle\Roster\EmploymentDateRequirements;
-use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionTimeZoneService;
 use Closure;
 use DateTimeInterface;
@@ -20,11 +23,8 @@ use Illuminate\Support\Carbon;
  */
 class CanChangeEmploymentDate implements ValidationRule
 {
-    /**
-     * @param  (Model&Employable<*>)|null  $model
-     */
     public function __construct(
-        private readonly (Model&Employable)|null $model,
+        private readonly Manager|Referee|TagTeam|Wrestler|null $model,
         private readonly EmploymentDateRequirements $requirements = new EmploymentDateRequirements,
     ) {}
 
