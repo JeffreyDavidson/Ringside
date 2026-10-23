@@ -27,3 +27,6 @@ Schedule::command('activitylog:clean', ['--force'])->daily();
 
 // Expiry is enforced whenever invitations are read; this only deletes the rows that have expired.
 Schedule::command('model:prune', ['--model' => [PromotionInvitation::class]])->daily();
+
+// Replaced and removed posters stay in storage until no draft or released card names them; this deletes those files.
+Schedule::command('events:prune-posters')->daily();
