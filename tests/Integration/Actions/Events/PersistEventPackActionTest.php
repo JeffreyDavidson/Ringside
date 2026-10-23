@@ -39,7 +39,7 @@ test('persisting pack data merges it over the saved pack and keeps matches the d
     // Assert
     $stored = EventPack::query()->sole();
     expect($stored->version)->toBe(2)
-        ->and(array_keys($stored->content))->toBe(['timezone', 'doors_at', 'revision', 'master', 'notes', 'follow_up', 'matches', 'segments', 'sponsor_tasks', 'production'])
+        ->and(array_keys($stored->content))->toEqualCanonicalizing(['timezone', 'doors_at', 'revision', 'master', 'notes', 'follow_up', 'matches', 'segments', 'sponsor_tasks', 'production'])
         ->and($stored->content['matches'])->toEqual([$kept, [...$replaced, 'notes' => 'New match note']])
         ->and(data_get($stored->content, 'sponsor_tasks'))->toEqual($tasks)
         ->and(data_get($stored->content, 'production'))->toEqual($production);

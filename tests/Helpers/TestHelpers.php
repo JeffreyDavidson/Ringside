@@ -175,6 +175,23 @@ function recordStatements(Closure $callback): array
 }
 
 /**
+ * Each recorded statement as "<verb> <table>" ("lock" for a row-locking read, otherwise the statement's first word), so a
+ * sequence of locks and writes can be asserted the same way on every engine.
+ *
+ * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements
+ * @return list<string>
+ */
+function statementTargets(array $statements): array
+{
+    return array_values(array_map(function (array $statement): string {
+        $table = preg_match('/(?:from|into|update) "([a-z_]+)"/', $statement['sql'], $match) === 1 ? $match[1] : '?';
+        $verb = $statement['locked'] ? 'lock' : explode(' ', $statement['sql'], 2)[0];
+
+        return "{$verb} {$table}";
+    }, $statements));
+}
+
+/**
  * The position of the first recorded statement the callback matches, failing the test when none does.
  *
  * @param  array<int, array{sql: string, bindings: array<int, mixed>, locked: bool}>  $statements

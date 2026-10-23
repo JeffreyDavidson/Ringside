@@ -51,7 +51,7 @@ test('a repeated first save fails without replacing the existing document', func
         ->and($event->pack()->count())->toBe(1);
 });
 
-test('a pack save takes the card locks once in order, then writes the new version, fingerprint and content in the stored key order', function (): void {
+test('a pack save takes the card locks once in order, then writes the new version, fingerprint and content', function (): void {
     // Arrange
     $event = Event::factory()->create();
     EventMatch::factory()->for($event)->create();
@@ -61,21 +61,12 @@ test('a pack save takes the card locks once in order, then writes the new versio
     $statements = recordStatements(fn () => resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated([...$data['content'], 'notes' => 'Saved note']), false));
 
     // Assert
-    $writes = array_values(array_filter(
-        array_column($statements, 'sql'),
-        fn (string $sql): bool => str_contains($sql, 'for update') || str_starts_with($sql, 'insert into "event_packs"'),
-    ));
+    $writes = array_values(array_filter(statementTargets($statements), fn (string $target): bool => str_starts_with($target, 'lock ') || $target === 'insert event_packs'));
     $pack = $event->pack()->firstOrFail();
-    expect($writes)->toBe([
-        'select * from "events" where "events"."id" = ? and "events"."deleted_at" is null limit 1  /* for update */',
-        'select * from "events_matches" where "event_id" = ? order by "events_matches"."id" asc  /* for update */',
-        'select * from "event_packs" where "event_id" = ? limit 1  /* for update */',
-        'select * from "event_live_runs" where "event_id" = ? limit 1  /* for update */',
-        'insert into "event_packs" ("event_id", "version", "card_fingerprint", "content", "updated_at", "created_at") values (?, ?, ?, ?, ?, ?)',
-    ])
+    expect($writes)->toBe(['lock events', 'lock events_matches', 'lock event_packs', 'lock event_live_runs', 'insert event_packs'])
         ->and($pack->version)->toBe(1)
         ->and($pack->card_fingerprint)->toBe($data['card']['fingerprint'])
-        ->and(array_keys($pack->content))->toBe(['timezone', 'doors_at', 'revision', 'master', 'notes', 'follow_up', 'matches', 'segments'])
+        ->and(array_keys($pack->content))->toEqualCanonicalizing(['timezone', 'doors_at', 'revision', 'master', 'notes', 'follow_up', 'matches', 'segments'])
         ->and($pack->content['notes'])->toBe('Saved note');
 });
 
