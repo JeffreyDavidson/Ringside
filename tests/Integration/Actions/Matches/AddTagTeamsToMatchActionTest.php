@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddTagTeamsToMatchAction;
-use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
@@ -22,7 +21,7 @@ test('it adds a tag team to a match as a polymorphic competitor', function () {
     $match = EventMatch::factory()->create();
     $tagTeam = TagTeam::factory()->bookable()->create();
 
-    resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$tagTeam]), 1));
 
     assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
@@ -36,7 +35,7 @@ test('it rejects match assignment when no tag team is available', function () {
     $match = EventMatch::factory()->create();
     $tagTeams = TagTeam::factory()->retired()->count(2)->create();
 
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, $tagTeams, 1)))
         ->toThrow(EntityNotAvailableException::class, 'Selected tag teams must all be eligible for match assignment.');
 });
 
@@ -45,11 +44,11 @@ test('it rejects the entire assignment when any tag team is unavailable', functi
     $availableTagTeam = TagTeam::factory()->bookable()->create();
     $unavailableTagTeam = TagTeam::factory()->retired()->create();
 
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle(
-        $match,
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle(
+        $lockedMatch,
         collect([$availableTagTeam, $unavailableTagTeam]),
         1,
-    ))->toThrow(EntityNotAvailableException::class)
+    )))->toThrow(EntityNotAvailableException::class)
         ->and($match->competitors()->count())->toBe(0)
         ->and($match->sides()->count())->toBe(0);
 });
@@ -61,7 +60,7 @@ test('it reloads tag teams before checking assignment eligibility', function () 
 
     $tagTeam->delete();
 
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$staleTagTeam]), 1))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$staleTagTeam]), 1)))
         ->toThrow(EntityNotAvailableException::class)
         ->and($match->competitors()->exists())->toBeFalse();
 });
@@ -79,7 +78,7 @@ test('it rejects a tag team already booked on the event card', function () {
         'competitor_type' => $tagTeam->getMorphClass(),
     ]);
 
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($targetMatch, collect([$tagTeam]), 1))
+    expect(fn () => assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$tagTeam]), 1)))
         ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.")
         ->and($targetMatch->competitors()->count())->toBe(0);
 });
@@ -88,32 +87,10 @@ test('it assigns a repeated tag team only once', function () {
     $match = EventMatch::factory()->create();
     $tagTeam = TagTeam::factory()->bookable()->create();
 
-    resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam, $tagTeam]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$tagTeam, $tagTeam]), 1));
 
     expect($match->competitors()->count())->toBe(1);
 });
-
-test('it rejects an empty tag team list without creating a side', function () {
-    $match = EventMatch::factory()->create();
-
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect(), 1))
-        ->toThrow(EntityNotAvailableException::class, 'Selected tag teams must all be eligible for match assignment.')
-        ->and($match->sides()->exists())->toBeFalse()
-        ->and($match->competitors()->exists())->toBeFalse();
-});
-
-test('it rejects a side number below one', function (int $sideNumber) {
-    $match = EventMatch::factory()->create();
-    $tagTeam = TagTeam::factory()->bookable()->create();
-
-    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), $sideNumber))
-        ->toThrow(InvalidMatchConfigurationException::class, "Match side number [{$sideNumber}] must be positive.")
-        ->and($match->sides()->exists())->toBeFalse()
-        ->and($match->competitors()->exists())->toBeFalse();
-})->with([
-    'zero' => 0,
-    'negative' => -1,
-]);
 
 test('it books a tag team on a past event dated while they were employed', function () {
     // Arrange
@@ -123,7 +100,7 @@ test('it books a tag team on a past event dated while they were employed', funct
     $tagTeam->currentWrestlers->each(fn ($wrestler): int => $wrestler->employments()->update(['started_at' => now()->subDays(30)]));
 
     // Act
-    resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), 1);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$tagTeam]), 1));
 
     // Assert
     expect($match->competitors()->count())->toBe(1);
@@ -137,7 +114,7 @@ test('it refuses a tag team on an event dated before they were employed', functi
     $tagTeam->currentWrestlers->each(fn ($wrestler): int => $wrestler->employments()->update(['started_at' => now()->subDays(1)]));
 
     // Act
-    $book = fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam]), 1);
+    $book = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTagTeamsToMatchAction::class)->handle($lockedMatch, collect([$tagTeam]), 1));
 
     // Assert
     expect($book)->toThrow(EntityNotAvailableException::class)

@@ -12,6 +12,7 @@ use App\Data\Matches\MatchResultData;
 use App\Data\Tournaments\TournamentBookingData;
 use App\Enums\Matches\MatchFinish;
 use App\Exceptions\BaseBusinessException;
+use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
@@ -65,7 +66,10 @@ try {
     }
 
     if ($spec['operation'] === 'ordinary') {
-        resolve(AddWrestlersToMatchAction::class)->handle(EventMatch::query()->findOrFail($spec['match_id']), collect([Wrestler::query()->findOrFail($spec['side_id'])]), 1);
+        DB::transaction(function () use ($spec): void {
+            $lockedMatch = resolve(MatchSchedulingLock::class)->lockMatchWithEventSet(EventMatch::query()->findOrFail($spec['match_id']));
+            resolve(AddWrestlersToMatchAction::class)->handle($lockedMatch, collect([Wrestler::query()->findOrFail($spec['side_id'])]), 1);
+        }, attempts: 3);
     }
 
     if ($spec['operation'] === 'reschedule') {

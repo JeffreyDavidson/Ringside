@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Matches;
 
 use App\Builders\Matches\MatchCompetitorBuilder;
+use App\Enums\Matches\MatchParticipantKind;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -27,7 +28,7 @@ final class MatchCompetitorAssignmentEligibility
             $wrestlers,
             fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
                 ->forWrestlerIds($competitorIds),
-            'Wrestler',
+            MatchParticipantKind::Wrestler,
             $permittedMatchIds,
         );
 
@@ -46,7 +47,7 @@ final class MatchCompetitorAssignmentEligibility
             $tagTeams,
             fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
                 ->forTagTeamIds($competitorIds),
-            'Tag team',
+            MatchParticipantKind::TagTeam,
             $permittedMatchIds,
         );
 
@@ -81,7 +82,7 @@ final class MatchCompetitorAssignmentEligibility
         $wrestler = $wrestlers->firstWhere('id', $conflictingMembership->wrestler_id);
 
         throw SchedulingConflictException::competitorAlreadyBooked(
-            'Wrestler',
+            MatchParticipantKind::Wrestler,
             $wrestler === null ? "ID: {$conflictingMembership->wrestler_id}" : $wrestler->name,
         );
     }
@@ -111,7 +112,7 @@ final class MatchCompetitorAssignmentEligibility
         }
 
         throw SchedulingConflictException::competitorAlreadyBooked(
-            'Wrestler',
+            MatchParticipantKind::Wrestler,
             Wrestler::query()->findOrFail($conflictingCompetitor->competitor_id)->name,
         );
     }
@@ -126,7 +127,7 @@ final class MatchCompetitorAssignmentEligibility
         Collection $conflictingEventIds,
         Collection $competitors,
         Closure $queryForCompetitors,
-        string $entityType,
+        MatchParticipantKind $kind,
         array $permittedMatchIds,
     ): void {
         $conflictingCompetitor = $queryForCompetitors(
@@ -144,7 +145,7 @@ final class MatchCompetitorAssignmentEligibility
         $competitor = $competitors->firstWhere('id', $conflictingCompetitorId);
 
         throw SchedulingConflictException::competitorAlreadyBooked(
-            $entityType,
+            $kind,
             $competitor === null ? "ID: {$conflictingCompetitorId}" : (string) $competitor->name,
         );
     }

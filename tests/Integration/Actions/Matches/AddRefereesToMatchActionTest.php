@@ -8,13 +8,12 @@ use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Support\Facades\DB;
 
 test('it rejects match assignment when no referee is available', function () {
     $match = EventMatch::factory()->create();
     $referees = Referee::factory()->retired()->count(2)->create();
 
-    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, $referees))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referees)))
         ->toThrow(EntityNotAvailableException::class, 'Selected referees must all be eligible for match assignment.');
 });
 
@@ -23,10 +22,10 @@ test('it rejects the entire assignment when any referee is unavailable', functio
     $availableReferee = Referee::factory()->bookable()->create();
     $unavailableReferee = Referee::factory()->retired()->create();
 
-    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle(
-        $match,
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle(
+        $lockedMatch,
         collect([$availableReferee, $unavailableReferee]),
-    ))->toThrow(EntityNotAvailableException::class)
+    )))->toThrow(EntityNotAvailableException::class)
         ->and($match->referees()->count())->toBe(0);
 });
 
@@ -37,7 +36,7 @@ test('it reloads referees before checking assignment eligibility', function () {
 
     $referee->delete();
 
-    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, collect([$staleReferee])))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect([$staleReferee]))))
         ->toThrow(EntityNotAvailableException::class)
         ->and($match->referees()->exists())->toBeFalse();
 });
@@ -50,7 +49,7 @@ test('it allows a referee to officiate multiple matches on one event card', func
 
     $existingMatch->referees()->attach($referee);
 
-    resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee]));
+    assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referee->newCollection([$referee])));
 
     expect($targetMatch->referees()->whereKey($referee->id)->exists())->toBeTrue();
 });
@@ -66,7 +65,7 @@ test('it rejects a referee assigned to another event at the same time', function
     $existingMatch->referees()->attach($referee);
     $referee->refresh();
 
-    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee])))
+    expect(fn () => assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referee->newCollection([$referee]))))
         ->toThrow(SchedulingConflictException::class, "Referee [{$referee->full_name}] is already assigned to another event at this time.")
         ->and($targetMatch->referees()->count())->toBe(0);
 });
@@ -75,7 +74,7 @@ test('it assigns a repeated referee only once', function () {
     $match = EventMatch::factory()->create();
     $referee = Referee::factory()->bookable()->create();
 
-    resolve(AddRefereesToMatchAction::class)->handle($match, $referee->newCollection([$referee, $referee]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, $referee->newCollection([$referee, $referee])));
 
     expect($match->referees()->count())->toBe(1);
 });
@@ -84,28 +83,19 @@ test('it does not duplicate an existing referee assignment', function () {
     $match = EventMatch::factory()->create();
     $referee = Referee::factory()->bookable()->create();
 
-    resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
-    resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect([$referee])));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect([$referee])));
 
     expect($match->referees()->whereKey($referee)->count())->toBe(1);
 });
 
-test('it rejects an empty referee list without assigning anyone', function (Closure $assign) {
+test('it rejects an empty referee list without assigning anyone', function () {
     $match = EventMatch::factory()->create();
 
-    expect(fn () => $assign(resolve(AddRefereesToMatchAction::class), $match))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect())))
         ->toThrow(EntityNotAvailableException::class, 'Selected referees must all be eligible for match assignment.')
         ->and($match->referees()->exists())->toBeFalse();
-})->with([
-    'through handle' => [
-        fn (AddRefereesToMatchAction $action, EventMatch $match) => $action->handle($match, collect()),
-    ],
-    'within a caller transaction' => [
-        fn (AddRefereesToMatchAction $action, EventMatch $match) => DB::transaction(
-            fn () => $action->handleWithinTransaction($match->refreshForUpdate(), collect()),
-        ),
-    ],
-]);
+});
 
 test('it books a referee on a past event dated while they were employed', function () {
     // Arrange
@@ -114,7 +104,7 @@ test('it books a referee on a past event dated while they were employed', functi
     $referee->employments()->update(['started_at' => now()->subDays(30)]);
 
     // Act
-    resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect([$referee])));
 
     // Assert
     expect($match->referees()->count())->toBe(1);
@@ -127,7 +117,7 @@ test('it refuses a referee on an event dated before they were employed', functio
     $referee->employments()->update(['started_at' => now()->subDays(1)]);
 
     // Act
-    $book = fn () => resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+    $book = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddRefereesToMatchAction::class)->handle($lockedMatch, collect([$referee])));
 
     // Assert
     expect($book)->toThrow(EntityNotAvailableException::class)

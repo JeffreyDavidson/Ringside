@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Scheduling;
 
+use App\Enums\Matches\MatchParticipantKind;
 use App\Exceptions\BaseBusinessException;
 
 final class SchedulingConflictException extends BaseBusinessException
 {
-    public static function competitorAlreadyBooked(string $competitorType, string $competitorName): static
+    public static function competitorAlreadyBooked(MatchParticipantKind $kind, string $competitorName): static
     {
-        return new self(__('matches.errors.scheduling.competitor_already_booked', ['type' => $competitorType, 'name' => $competitorName]));
+        return new self(__('matches.errors.scheduling.competitor_already_booked', ['type' => $kind->label(), 'name' => $competitorName]));
     }
 
     public static function refereeAlreadyAssigned(string $refereeName): static
