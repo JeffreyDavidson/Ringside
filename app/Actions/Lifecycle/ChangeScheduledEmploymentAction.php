@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Lifecycle;
 
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Lifecycle\Periods\EmploymentPeriodManager;
-use App\Models\Contracts\Employable;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Lifecycle\Employment;
 use App\Models\Promotions\Promotion;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionTimeZoneService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -20,13 +24,18 @@ use Illuminate\Support\Facades\DB;
  */
 class ChangeScheduledEmploymentAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly EmploymentDateRequirements $employmentDates,
+    ) {}
 
     /**
-     * @param  Model&Employable<*>  $employable  The record, locked by the caller's transaction
+     * @param  Manager|Referee|TagTeam|Wrestler  $employable  The record, locked by the caller's transaction
      * @return bool Whether the record had a scheduled employment, so the date was handled here
+     *
+     * @throws EmploymentDateException When the date is a day before today
      */
-    public function handle(Model&Employable $employable, ?Carbon $date): bool
+    public function handle(Manager|Referee|TagTeam|Wrestler $employable, ?Carbon $date): bool
     {
         return DB::transaction(function () use ($employable, $date): bool {
             $scheduled = $employable->soleScheduledEmployment();
@@ -49,6 +58,7 @@ class ChangeScheduledEmploymentAction
                 ->isSameDay(PromotionTimeZoneService::toLocalTime($promotion, $date));
 
             if (! $isSameDay) {
+                $this->employmentDates->ensureScheduledCanMoveTo($employable, $date);
                 $this->employmentPeriods->reschedule($employable, $date);
             }
 

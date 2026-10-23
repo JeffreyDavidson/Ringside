@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\UpdateAction;
 use App\Data\Managers\ManagerData;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Models\Roster\Managers\Manager;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -134,4 +135,33 @@ test('it keeps the start date of a manager who has already started when the date
 
     // Assert
     expect($manager->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt);
+});
+
+test('it refuses another start date for a manager who is employed and saves nothing', function () {
+    // Arrange
+    $manager = Manager::factory()->employed()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $startedAt = $manager->employments()->sole()->started_at;
+    $data = new ManagerData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->addDays(3));
+
+    // Act
+    $act = fn () => resolve(UpdateAction::class)->handle($manager, $data);
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, "Manager 'Original Name' is currently employed, so the date employment started cannot be changed.")
+        ->and($manager->refresh()->first_name)->toBe('Original')
+        ->and($manager->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
+});
+
+test('it saves a manager who is employed when the form date is the day employment started', function () {
+    // Arrange
+    $manager = Manager::factory()->employed()->create();
+    $startedAt = $manager->employments()->sole()->started_at;
+    $data = new ManagerData(first_name: 'Renamed', last_name: 'Person', employment_date: $startedAt->copy()->startOfDay());
+
+    // Act
+    resolve(UpdateAction::class)->handle($manager, $data);
+
+    // Assert
+    expect($manager->refresh()->first_name)->toBe('Renamed')
+        ->and($manager->employments()->sole()->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });

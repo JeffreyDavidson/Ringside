@@ -93,19 +93,22 @@ describe('CanChangeEmploymentDate validation rule', function () {
         expect($failed)->toBeTrue();
     });
 
-    test('passes a date inside the current employment period', function () {
+    test('rejects another day inside the current employment period, because the start would still move', function () {
+        // Arrange
         $manager = managerWithEmploymentPeriod(now()->subMonth());
-        $failed = false;
+        $message = null;
 
+        // Act
         new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             now()->subWeek(),
-            validationFailureCallback(function () use (&$failed): void {
-                $failed = true;
+            validationFailureCallback(function (string $failure) use (&$message): void {
+                $message = $failure;
             }),
         );
 
-        expect($failed)->toBeFalse();
+        // Assert
+        expect($message)->toBe('The employment date cannot be changed while Paul Heyman is currently employed.');
     });
 
     test('uses the model name when reporting a blocked date', function () {

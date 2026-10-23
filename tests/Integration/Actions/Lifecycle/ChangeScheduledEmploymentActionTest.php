@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Lifecycle\Periods\EmploymentPeriodManager;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Managers\Manager;
@@ -127,3 +128,17 @@ test('it does nothing when the scheduled employment follows an earlier one', fun
     expect($handled)->toBeFalse()
         ->and($wrestler->futureEmployment()->firstOrFail()->started_at->toDateTimeString())->toBe($scheduledFor);
 });
+
+test('it refuses to move a scheduled employment to a day before today and changes nothing', function (string $type) {
+    // Arrange
+    $record = recordScheduledTenDaysOut($type);
+    $scheduledFor = $record->employments()->sole()->started_at->toDateTimeString();
+
+    // Act
+    $act = fn () => resolve(ChangeScheduledEmploymentAction::class)->handle($record, now()->subDay()->startOfDay());
+
+    // Assert
+    expect($act)->toThrow(EmploymentDateException::class, 'can only move to today or a later day')
+        ->and($record->employments()->sole()->started_at->toDateTimeString())->toBe($scheduledFor)
+        ->and($record->lifecycleTransitions()->count())->toBe(1);
+})->with($types);

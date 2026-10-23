@@ -6,7 +6,10 @@ namespace App\Actions\Managers;
 
 use App\Actions\Lifecycle\ChangeScheduledEmploymentAction;
 use App\Data\Managers\ManagerData;
+use App\Exceptions\Lifecycle\EmploymentDateException;
+use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Roster\Managers\Manager;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -14,6 +17,7 @@ class UpdateAction
     public function __construct(
         private readonly EmployAction $employAction,
         private readonly ChangeScheduledEmploymentAction $changeScheduledEmployment,
+        private readonly EmploymentDateRequirements $employmentDates,
     ) {}
 
     /**
@@ -31,11 +35,18 @@ class UpdateAction
      * @param  Manager  $manager  The manager to update
      * @param  ManagerData  $managerData  The updated manager information
      * @return Manager The updated manager instance
+     *
+     * @throws EmploymentDateException When the date is another day than the one employment started, or a scheduled hire moves to a day before today
      */
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {
         return DB::transaction(function () use ($manager, $managerData): Manager {
             $lockedManager = $manager->refreshForUpdate();
+
+            // A manager who is employed keeps the date employment started; another one is refused, not dropped.
+            if ($managerData->employment_date instanceof Carbon) {
+                $this->employmentDates->ensureCurrentStartIsUnchanged($lockedManager, $managerData->employment_date);
+            }
 
             $lockedManager->update([
                 'first_name' => $managerData->first_name,
