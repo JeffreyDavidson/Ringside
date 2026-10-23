@@ -54,8 +54,8 @@ class MergeModal extends ModalComponent
 
         try {
             $mergeStablesAction->handle($stable, $otherStable, now());
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('stable', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('stable', $exception->getMessage());
 
             return;
         }

@@ -240,8 +240,8 @@ class LiveShow extends Component
             $operation($event);
             $this->draftKey = '';
             $this->reviewing = false;
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('run', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('run', $exception->getMessage());
         }
 
         $this->refreshState();

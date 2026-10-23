@@ -98,8 +98,8 @@ abstract class BaseFormModal extends BaseModal
     {
         try {
             $save();
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError($this->businessErrorField($baseBusinessException), $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError($this->businessErrorField($exception), $this->failureMessageKeepingInput($exception));
 
             return false;
         }

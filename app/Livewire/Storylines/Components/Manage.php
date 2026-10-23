@@ -211,8 +211,8 @@ class Manage extends Component
                 StorylineFormMode::StoryStatus => $transitionStory->handle($story, $this->version, StorylineStatus::tryFrom($this->form->status) ?? $story->status, $this->form->reason, $this->actor()),
                 StorylineFormMode::Retract => $retractDevelopment->handle($story, $this->version, $this->editingId ?? 0, $this->form->reason, $this->form->reopenStep, $this->actor()),
             };
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('storyline', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('storyline', $exception->getMessage());
             $this->needsReload = true;
 
             return;

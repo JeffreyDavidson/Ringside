@@ -218,8 +218,8 @@ class Production extends Component
             $this->reloadSaved();
             $this->saved = true;
             $this->dispatch('production-pack-saved', previousVersion: $previousVersion, version: $this->version, fingerprint: $this->fingerprint);
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('production', $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError('production', $this->failureMessageKeepingInput($exception));
         }
     }
 

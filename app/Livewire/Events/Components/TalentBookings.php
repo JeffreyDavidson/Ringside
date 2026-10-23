@@ -131,8 +131,8 @@ class TalentBookings extends Component
             $this->form->reset();
             $this->message = __('talent-bookings.saved');
             $this->dispatch('talent-editor-closed');
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('booking', $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError('booking', $this->failureMessageKeepingInput($exception));
         }
     }
 

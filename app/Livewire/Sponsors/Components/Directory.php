@@ -103,8 +103,8 @@ class Directory extends Component
             $action->handle($promotion, $this->draftId, $this->draftVersion, $this->submissionKey, $data);
             $this->formShown = false;
             $this->notice = __('sponsors.sponsor_saved');
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('save', $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError('save', $this->failureMessageKeepingInput($exception));
         }
     }
 

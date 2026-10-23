@@ -76,8 +76,8 @@ class Directory extends Component
             $action->handle($contact, $this->version, $this->form->clientId, $data, $this->actor());
             $this->editing = false;
             $this->form->reset('name', 'phone', 'email', 'notes');
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('contact', $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError('contact', $this->failureMessageKeepingInput($exception));
         }
     }
 
@@ -88,8 +88,8 @@ class Directory extends Component
 
         try {
             $action->handle($contact, $version, $this->actor());
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('contact', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('contact', $exception->getMessage());
         }
     }
 

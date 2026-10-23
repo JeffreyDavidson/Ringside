@@ -98,8 +98,8 @@ class Profile extends Component
 
         try {
             $entry = $create->handle($person, $data, $this->actor());
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('form.startsOn', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('form.startsOn', $exception->getMessage());
 
             return;
         }

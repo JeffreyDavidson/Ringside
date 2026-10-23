@@ -39,8 +39,8 @@ class IsAssignable implements ValidationRule
 
         try {
             resolve(ManagerAssignmentEligibility::class)->ensureCanBeAssigned($manager);
-        } catch (CannotBeAssignedException $cannotBeAssignedException) {
-            $fail($cannotBeAssignedException->getMessage());
+        } catch (CannotBeAssignedException $exception) {
+            $fail($exception->getMessage());
         }
     }
 }

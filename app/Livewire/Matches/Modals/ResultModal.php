@@ -58,8 +58,8 @@ class ResultModal extends ModalComponent
                 $this->form->toData($match),
                 $this->actor(),
             );
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('outcome', $baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->addError('outcome', $exception->getMessage());
 
             return;
         } finally {

@@ -299,8 +299,8 @@ class Show extends Component
 
         try {
             $operation();
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->addError('operation', $this->failureMessageKeepingInput($baseBusinessException));
+        } catch (BaseBusinessException $exception) {
+            $this->addError('operation', $this->failureMessageKeepingInput($exception));
 
             return;
         }

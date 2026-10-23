@@ -121,8 +121,8 @@ class Main extends BaseTable
 
         try {
             $changeStatusAction->handle($user, $targetStatus);
-        } catch (BaseBusinessException $baseBusinessException) {
-            $this->dispatchActionFailure($baseBusinessException->getMessage());
+        } catch (BaseBusinessException $exception) {
+            $this->dispatchActionFailure($exception->getMessage());
 
             return;
         }
