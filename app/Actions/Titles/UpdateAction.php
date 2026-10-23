@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Data\Titles\TitleData;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Titles\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Models\Promotions\Promotion;
 use App\Models\Scopes\PromotionContextScope;
@@ -24,7 +24,7 @@ class UpdateAction
     public function __construct(
         private readonly DebutAction $debut,
         private readonly RecordNameLock $nameLock,
-        private readonly RecordLifecycleTransitionAction $recordTransition,
+        private readonly LifecycleTransitionRecorder $transitionRecorder,
     ) {}
 
     /**
@@ -110,7 +110,7 @@ class UpdateAction
         $scheduledFor = $scheduledPeriod->started_at;
 
         $scheduledPeriod->update(['started_at' => $debutDate]);
-        $this->recordTransition->handle(
+        $this->transitionRecorder->record(
             $title,
             LifecycleDimension::Activity,
             LifecycleTransitionType::Debuted,
