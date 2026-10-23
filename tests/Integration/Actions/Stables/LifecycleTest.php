@@ -15,7 +15,6 @@ use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
-use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
@@ -326,8 +325,9 @@ describe('Stable Activation Action Integration', function () {
             stablesLifecycleRetiredStableFixtures();
 
             $stable = Stable::factory()
-                ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
+                ->retired()
                 ->create();
+            $stable->tagTeams()->detach();
 
             expect(resolve(StableRetirementEligibility::class)->canUnretire($stable))->toBeFalse()
                 ->and(fn () => resolve(StableRetirementEligibility::class)->ensureCanUnretire($stable))

@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\RetireAction;
 use App\Lifecycle\Roster\Stables\StableFormerMemberEligibility;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -111,3 +113,76 @@ test('members who left when a future-dated retirement was recorded are available
     expect($returning->wrestlers)->toHaveCount(2)
         ->and($returning->tagTeams)->toHaveCount(1);
 });
+
+test('a stable knows whether it was active when it retired', function (Closure $makeRetiredStable, bool $expected): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = $makeRetiredStable();
+
+    // Act
+    $wasActive = resolve(StableFormerMemberEligibility::class)->wasActiveWhenRetired($stable);
+
+    // Assert
+    expect($wasActive)->toBe($expected);
+})->with([
+    'active, then retired' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(RetireAction::class)->handle($stable, now());
+
+            return $stable;
+        },
+        true,
+    ],
+    'active, then retired in the future' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(RetireAction::class)->handle($stable, now()->addMonth());
+
+            return $stable;
+        },
+        true,
+    ],
+    'disbanded, then retired later' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
+            resolve(RetireAction::class)->handle($stable, now()->subHour());
+
+            return $stable;
+        },
+        false,
+    ],
+    'disbanded, then retired at the same moment' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
+            resolve(RetireAction::class)->handle($stable, now()->subHours(2));
+
+            return $stable;
+        },
+        false,
+    ],
+    'disbanded, then retired in the future' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
+            resolve(RetireAction::class)->handle($stable, now()->addMonth());
+
+            return $stable;
+        },
+        false,
+    ],
+    'retired without ever being active' => [
+        fn (): Stable => Stable::factory()
+            ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
+            ->create(),
+        false,
+    ],
+    'retired without ever being active, dated in the future' => [
+        fn (): Stable => Stable::factory()
+            ->has(Retirement::factory()->started(now()->addDay()), 'retirements')
+            ->create(),
+        false,
+    ],
+]);
