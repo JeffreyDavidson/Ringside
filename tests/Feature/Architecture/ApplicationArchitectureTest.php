@@ -21,6 +21,7 @@ use App\Lifecycle\Titles\TitleDeletionEligibility;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
 
@@ -99,6 +100,10 @@ arch('lifecycle eligibility policies are final')
 arch('actions take the actor as a parameter and never read the signed-in user')
     ->expect('App\\Actions')
     ->not->toUse(Auth::class);
+
+arch('actions do not read the signed-in user through the auth guard')
+    ->expect('App\\Actions')
+    ->not->toUse(Guard::class);
 
 arch('actions do not call the auth helper')
     ->expect('auth')

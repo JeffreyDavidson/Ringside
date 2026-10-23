@@ -56,6 +56,7 @@ pest()
         'Integration/Collections',
         'Integration/Concurrency',
         'Integration/Config',
+        'Integration/Console',
         'Integration/Database',
         'Integration/Enums',
         'Integration/Exceptions',

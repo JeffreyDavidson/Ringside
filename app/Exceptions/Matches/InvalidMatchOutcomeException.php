@@ -84,7 +84,7 @@ final class InvalidMatchOutcomeException extends BaseBusinessException
 
     public static function invalidTitleWinner(TitleType $titleType): self
     {
-        return new self(__('matches.errors.outcome.invalid_title_winner', ['title_type' => $titleType->value]));
+        return new self(__('matches.errors.outcome.invalid_title_winner', ['title_type' => $titleType->label()]));
     }
 
     public static function undatedTitleMatch(): self

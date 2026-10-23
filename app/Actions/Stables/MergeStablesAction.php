@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
@@ -24,7 +24,7 @@ class MergeStablesAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected AddStableMembersAction $addStableMembersAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
-        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected LifecycleTransitionRecorder $transitionRecorder,
         protected StableMembershipService $membershipService,
         protected StableRestructuringEligibility $eligibility,
         protected DeletionStateManager $deletionState,
@@ -70,14 +70,14 @@ class MergeStablesAction
             $this->removeStableMembersAction->handle($lockedSecondaryStable, $members, $date);
             $this->addStableMembersAction->handle($lockedPrimaryStable, $members, $date);
             $this->endActivityPeriodAction->handle($lockedSecondaryStable, $date);
-            $this->recordLifecycleTransitionAction->handle(
+            $this->transitionRecorder->record(
                 $lockedPrimaryStable,
                 LifecycleDimension::Activity,
                 LifecycleTransitionType::Merged,
                 $date,
                 ['merged_stable_id' => $lockedSecondaryStable->getKey(), 'merged_stable_name' => $lockedSecondaryStable->name],
             );
-            $this->recordLifecycleTransitionAction->handle(
+            $this->transitionRecorder->record(
                 $lockedSecondaryStable,
                 LifecycleDimension::Activity,
                 LifecycleTransitionType::Merged,

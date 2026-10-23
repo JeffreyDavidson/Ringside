@@ -302,7 +302,7 @@ Activity period history: `StartActivityPeriodAction` and `EndActivityPeriodActio
 optional `LifecycleTransitionType` (and a context array for notes or the planned end date) and
 record the `Activity` transition in the period's own transaction, as the employment, injury,
 suspension, and retirement period managers do. Stable `Establish`, `Disband`, and `Reunite` and
-title `Debut`, `Pull`, and `Reinstate` no longer call `RecordLifecycleTransitionAction` themselves.
+title `Debut`, `Pull`, and `Reinstate` no longer call the lifecycle transition recorder (then `RecordLifecycleTransitionAction`, now `LifecycleTransitionRecorder`) themselves.
 `MergeStablesAction` and `SplitStableAction` keep their manual calls: each records a pair of related
 `Merged` or `Split` transitions on two stables, and only the secondary stable's activity period is
 touched by a merge, so moving that one record onto the period end would reorder the pair.
