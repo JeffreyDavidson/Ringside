@@ -145,6 +145,27 @@ test('saving production locks the referenced crew contacts after the event, its 
         ->and($contactLock)->toBeLessThan($packWrite);
 });
 
+test('saving production takes every lock once in order, then updates the pack row and logs the save', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $before = $event->pack()->firstOrFail();
+
+    // Act
+    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated([...$fixture['production'], 'notes' => 'Changed note']), false, administrator()));
+
+    // Assert
+    $writes = array_values(array_filter(statementTargets($statements), fn (string $target): bool => str_starts_with($target, 'lock ') || in_array($target, ['update event_packs', 'insert activity_log'], true)));
+    $pack = $event->pack()->firstOrFail();
+    expect($writes)->toBe(['lock events', 'lock events_matches', 'lock event_packs', 'lock event_live_runs', 'lock crew_contacts', 'update event_packs', 'insert activity_log'])
+        ->and($pack->version)->toBe(2)
+        ->and($pack->card_fingerprint)->toBe($data['card']['fingerprint'])
+        ->and(array_keys($pack->content))->toBe(array_keys($before->content))
+        ->and(data_get($pack->content, 'production'))->toEqual([...$fixture['production'], 'notes' => 'Changed note']);
+});
+
 test('explicit name refresh and offset call time change only the latest saved plan', function (): void {
     // Arrange
     require_once __DIR__.'/../../../Fixtures/production.php';

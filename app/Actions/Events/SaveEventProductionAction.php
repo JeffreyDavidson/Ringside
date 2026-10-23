@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\EventProductionData;
-use App\Exceptions\Events\EventPackConflictException;
-use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventCardLock;
+use App\Lifecycle\Events\EventPackVersionRequirements;
 use App\Lifecycle\Events\EventProductionRequirements;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -25,6 +24,8 @@ class SaveEventProductionAction
         private readonly EventPackSourceService $source,
         private readonly EventProductionRequirements $requirements,
         private readonly EventCardLock $lock,
+        private readonly EventPackVersionRequirements $versionRequirements,
+        private readonly PersistEventPackAction $persist,
     ) {}
 
     /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */
@@ -34,13 +35,7 @@ class SaveEventProductionAction
             ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
 
-            if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
-                throw RecordChangedException::changed();
-            }
-
-            if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
-                throw EventPackConflictException::reviewRequired();
-            }
+            $this->versionRequirements->ensureCanSave($pack, $version, $fingerprint, $card['fingerprint'], $reviewed);
 
             $input = $this->requirements->validatedInput(['notes' => $data->notes, 'assignments' => $data->assignments, 'cues' => $data->cues]);
             $content = $pack->content ?? $this->source->get($event)['content'];
@@ -54,12 +49,7 @@ class SaveEventProductionAction
                 ->get()
                 ->keyBy('id');
             $content['production'] = $this->requirements->ensureProduction($input, $content['production'] ?? null, $keys, $contacts);
-            $pack ??= new EventPack;
-            $pack->event_id = $event->id;
-            $pack->version = $version + 1;
-            $pack->card_fingerprint = $fingerprint;
-            $pack->fill(['content' => $content]);
-            $pack->save();
+            $pack = $this->persist->handle($event, $pack, $version, $fingerprint, $content);
 
             activity('production')
                 ->causedBy($actor)

@@ -24,6 +24,7 @@ use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\EventSponsorCommitment;
+use App\Models\Matches\EventMatch;
 use App\Services\Events\SponsorInstructionService;
 use App\ValueObjects\PackKey;
 use App\ViewModels\Events\EventPackViewModel;
@@ -251,6 +252,50 @@ test('instruction adoption locks the event card before the promise and both befo
         ->and($locks[2])->toBeLessThan($locks[3])->and($locks[3])->toBeLessThan($locks[4])
         ->and($locks[4])->toBeLessThan(statementPosition($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'insert into "event_packs"')))
         ->and($statements[$locks[1]]['sql'])->toContain('order by "events_matches"."id" asc');
+});
+
+test('instruction adoption takes each card lock once and reads the card once for its fingerprint', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']), signedInUser());
+    $pack = app(EventPackViewModel::class)->data($world['event']);
+    $preview = app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null);
+
+    // Act
+    $statements = recordStatements(fn () => app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, $preview['hash']), signedInUser()));
+
+    // Assert
+    $locks = array_values(array_filter(statementTargets($statements), fn (string $target): bool => str_starts_with($target, 'lock ')));
+    $cardReads = array_filter(array_column($statements, 'sql'), fn (string $sql): bool => str_starts_with($sql, 'select * from "roster_unavailabilities"'));
+    expect($locks)->toBe(['lock events', 'lock events_matches', 'lock event_packs', 'lock event_live_runs', 'lock event_sponsor_commitments'])
+        ->and($cardReads)->toHaveCount(2);
+});
+
+test('instruction adoption over a saved pack writes the next version, the held fingerprint and the retained sections', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $event = $world['event'];
+    EventMatch::factory()->for($event)->create();
+    $promise = app(SaveSponsorCommitmentAction::class)->handle($event, $world['promise']->id, 1, $world['promise']->submission_key, sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang before doors']), signedInUser());
+    $screen = app(EventPackViewModel::class)->data($event);
+    app(SaveEventPackAction::class)->handle($event, 0, $screen['card']['fingerprint'], EventPackData::fromValidated([...$screen['content'], 'notes' => 'Retained note', 'doors_at' => '18:30']), false);
+    $stored = $event->pack()->firstOrFail();
+    $stored->content = [...$stored->content, 'production' => ['notes' => 'Retained production', 'assignments' => [], 'cues' => []]];
+    $stored->save();
+    $preview = app(SponsorInstructionService::class)->preview($event, $promise, SponsorInstructionMode::Setup, null, null);
+
+    // Act
+    app(SaveSponsorInstructionAction::class)->handle($event, $promise->id, 2, 1, $screen['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, $preview['hash']), signedInUser());
+
+    // Assert
+    $pack = $event->pack()->firstOrFail();
+    expect($pack->version)->toBe(2)
+        ->and($pack->card_fingerprint)->toBe($screen['card']['fingerprint'])
+        ->and(array_keys($pack->content))->toEqualCanonicalizing(['timezone', 'doors_at', 'revision', 'master', 'notes', 'follow_up', 'matches', 'segments', 'sponsor_tasks', 'production'])
+        ->and($pack->content['notes'])->toBe('Retained note')
+        ->and($pack->content['doors_at'])->toBe('18:30')
+        ->and(data_get($pack->content, 'sponsor_tasks.0.label'))->toBe('Banner')
+        ->and(data_get($pack->content, 'production'))->toEqual(['notes' => 'Retained production', 'assignments' => [], 'cues' => []]);
 });
 
 test('sponsor adoption and production edits preserve each others saved pack sections', function (string $mode): void {
