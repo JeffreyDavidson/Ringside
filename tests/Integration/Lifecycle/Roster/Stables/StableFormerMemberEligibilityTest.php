@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\RetireAction;
+use App\Actions\Stables\ReuniteAction;
+use App\Actions\Stables\UnretireAction;
+use App\Data\Stables\StableMembershipData;
 use App\Lifecycle\Roster\Stables\StableFormerMemberEligibility;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
@@ -168,6 +171,30 @@ test('a stable knows whether it was active when it retired', function (Closure $
             $stable = Stable::factory()->active()->create();
             resolve(DisbandAction::class)->handle($stable, now()->subHours(2));
             resolve(RetireAction::class)->handle($stable, now()->addMonth());
+
+            return $stable;
+        },
+        false,
+    ],
+    'disbanded, reunited, then retired' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            $members = new StableMembershipData($stable->currentWrestlers()->get(), $stable->currentTagTeams()->get());
+            resolve(DisbandAction::class)->handle($stable, now()->subHours(3));
+            resolve(ReuniteAction::class)->handle($stable, $members, now()->subHours(2));
+            resolve(RetireAction::class)->handle($stable, now()->subHour());
+
+            return $stable;
+        },
+        true,
+    ],
+    'disbanded, retired, unretired, then retired again' => [
+        function (): Stable {
+            $stable = Stable::factory()->active()->create();
+            resolve(DisbandAction::class)->handle($stable, now()->subHours(4));
+            resolve(RetireAction::class)->handle($stable, now()->subHours(3));
+            resolve(UnretireAction::class)->handle($stable, now()->subHours(2));
+            resolve(RetireAction::class)->handle($stable, now()->subHour());
 
             return $stable;
         },

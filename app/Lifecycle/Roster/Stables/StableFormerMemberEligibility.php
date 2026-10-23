@@ -80,25 +80,24 @@ final class StableFormerMemberEligibility
     /**
      * Whether the stable's operations were running when its current retirement began, so retiring is what ended them.
      *
-     * A stable that was disbanded first, or was never active, retired with no operations to end. Retiring ends the
-     * open activity period on the retirement date without a Disbanded transition, so a period that ended then and
-     * was not a disband means the stable was active. For a retirement dated in the future the operations ended when
-     * it was recorded, so the latest ended period is the one to check.
+     * Read from the order the transitions were recorded in (their ids), never from dates, because the dates of a
+     * closed period can be edited. A stable that has run is active at retirement unless its last activity
+     * transition was a disband; a Reunited or Established after the disband makes it active again. Nothing
+     * activity-related can be recorded while the stable is retired, so the last one is the one before the
+     * retirement. A stable that never ran retired with nothing to end.
      */
     public function wasActiveWhenRetired(Stable $stable): bool
     {
-        $retirement = $stable->currentRetirement()->firstOrFail();
+        if (! $stable->activityPeriods()->exists()) {
+            return false;
+        }
 
-        $operationsEndedAt = $this->isFutureDated($retirement)
-            ? $stable->activityPeriods()->whereNotNull('ended_at')->latest('ended_at')->first()?->ended_at
-            : $retirement->started_at;
+        $lastActivityTransition = $stable->lifecycleTransitions()
+            ->where('dimension', LifecycleDimension::Activity)
+            ->reorder('id', 'desc') // the relation is ordered by effective date; only the recording order counts here
+            ->first();
 
-        return $stable->activityPeriods()->where('ended_at', $operationsEndedAt)->exists()
-            && ! $stable->lifecycleTransitions()
-                ->where('dimension', LifecycleDimension::Activity)
-                ->where('transition', LifecycleTransitionType::Disbanded)
-                ->where('effective_at', $operationsEndedAt)
-                ->exists();
+        return $lastActivityTransition?->transition !== LifecycleTransitionType::Disbanded;
     }
 
     /**

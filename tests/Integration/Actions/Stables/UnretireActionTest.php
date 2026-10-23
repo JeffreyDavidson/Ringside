@@ -6,6 +6,8 @@ use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
+use App\Actions\Stables\UpdateAction;
+use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
@@ -247,6 +249,29 @@ test('it unretires a stable that was disbanded when it retired back to disbanded
         2,
     ],
 ]);
+
+test('it still unretires an active-then-retired stable to active after its closed period end date is edited later', function (): void {
+    // Arrange
+    $this->travelTo(now()->startOfSecond());
+    $stable = Stable::factory()
+        ->active()
+        ->create();
+    resolve(RetireAction::class)->handle($stable, now()->subHour());
+    resolve(UpdateAction::class)->handle($stable, new StableData(
+        name: $stable->name,
+        start_date: requiredDate($stable->activityPeriods()->sole()->started_at),
+        members: new StableMembershipData,
+        end_date: now(),
+    ));
+
+    // Act
+    resolve(UnretireAction::class)->handle($stable);
+
+    // Assert
+    expect($stable->refresh()->status)->toBe(StableStatus::Active)
+        ->and($stable->currentWrestlers()->count())->toBe(2)
+        ->and($stable->currentTagTeams()->count())->toBe(1);
+});
 
 test('it lets a stable unretired back to disbanded reunite', function (): void {
     // Arrange
