@@ -122,6 +122,13 @@ return [
         ],
     ],
 
+    'participant' => [
+        'wrestler' => ['singular' => 'Wrestler', 'plural' => 'wrestlers'],
+        'tag_team' => ['singular' => 'Tag team', 'plural' => 'tag teams'],
+        'referee' => ['singular' => 'Referee', 'plural' => 'referees'],
+        'title' => ['singular' => 'Title', 'plural' => 'titles'],
+    ],
+
     'add_event_match' => 'Add Event Match',
 
     'actions' => [
@@ -169,7 +176,6 @@ return [
             'invalid_side_composition' => 'The [:match_type] match requires a :composition roster-member composition.',
             'invalid_entry_composition' => 'The [:match_type] match requires a :composition competitor-entry composition.',
             'individual_sides_required' => 'Each [:match_type] entrant must compete on an individual side.',
-            'invalid_side_number' => 'Match side number [:side] must be positive.',
             'missing_competitors' => 'A match must have competitors assigned.',
             'missing_referees' => 'A match must have at least one referee assigned.',
             'outside_event_promotion' => 'Selected :entity_type must all belong to the event\'s promotion.',

@@ -36,7 +36,7 @@ final class TagTeamEmploymentEligibility
         }
 
         if ($tagTeam->currentWrestlers->isEmpty()) {
-            throw CannotBeEmployedException::partnersUnavailable($tagTeam, 'No current partners available');
+            throw CannotBeEmployedException::partnersUnavailable($tagTeam, __('tag-team-lifecycle.errors.employ.no_current_partners'));
         }
     }
 

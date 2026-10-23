@@ -122,12 +122,12 @@ class AddMatchForEventAction
             }
 
             $this->rosterLock->forData($eventMatchData);
-            $this->addRefereesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->referees);
+            $this->addRefereesToMatchAction->handle($createdMatch, $eventMatchData->referees);
 
-            $this->addCompetitorsToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->sides);
+            $this->addCompetitorsToMatchAction->handle($createdMatch, $eventMatchData->sides);
 
             if ($eventMatchData->titles->isNotEmpty()) {
-                $this->addTitlesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->titles);
+                $this->addTitlesToMatchAction->handle($createdMatch, $eventMatchData->titles);
             }
 
             return $createdMatch;

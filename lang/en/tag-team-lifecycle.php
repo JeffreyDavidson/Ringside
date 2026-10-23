@@ -9,6 +9,7 @@ return [
             'retired' => ':context is retired and cannot be employed. Unretire it first.',
             'future_employment' => ':context already has employment scheduled to start and cannot be employed again.',
             'partners_unavailable' => ':context cannot be employed because these partners are unavailable: :partners.',
+            'no_current_partners' => 'No current partners available',
         ],
         'reinstate' => [
             'not_suspended' => ':context is not suspended and cannot be reinstated.',

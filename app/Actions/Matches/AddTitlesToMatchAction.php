@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Enums\Matches\MatchParticipantKind;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Matches\MatchAssignmentEligibility;
-use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Lifecycle\Matches\MatchSchedulingLock;
 use App\Lifecycle\Matches\MatchTitleRequirements;
 use App\Lifecycle\Tournaments\TournamentMatchRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AddTitlesToMatchAction
 {
@@ -21,12 +20,15 @@ class AddTitlesToMatchAction
         private readonly MatchSchedulingLock $schedulingLock,
         private readonly MatchAssignmentEligibility $assignmentEligibility,
         private readonly MatchTitleRequirements $requirements,
-        private readonly MatchConfigurationRequirements $configurationRequirements,
         private readonly TournamentMatchRequirements $tournamentRequirements,
     ) {}
 
     /**
      * Add titles to an event match.
+     *
+     * Runs inside the caller's transaction: the caller has locked the match and its event set with
+     * MatchSchedulingLock::lockMatchWithEventSet() and checked that every participant belongs to the event's
+     * promotion (MatchConfigurationRequirements::ensureWithinEventPromotion()).
      *
      * This handles the complete championship stakes assignment workflow:
      * - Validates titles are active and available for championship competition
@@ -50,40 +52,15 @@ class AddTitlesToMatchAction
      * - Affects wrestler rankings and championship contender status
      * - Drives revenue through championship match premium pricing
      *
-     * @param  EventMatch  $eventMatch  The match to add titles to
-     * @param  Collection<int, Title>  $titles  The championships at stake in the match
-     */
-    public function handle(EventMatch $eventMatch, Collection $titles): void
-    {
-        $requestedTitles = $titles->unique('id')->values();
-
-        if ($requestedTitles->isEmpty()) {
-            throw EntityNotAvailableException::forMatchAssignment('titles');
-        }
-
-        DB::transaction(function () use ($eventMatch, $requestedTitles): void {
-            $lockedMatch = $this->schedulingLock->lockMatchWithEventSet($eventMatch);
-            $this->configurationRequirements->ensureParticipantsWithinEventPromotion(
-                $lockedMatch->event()->firstOrFail(),
-                'titles',
-                $requestedTitles->all(),
-            );
-            $this->handleWithinTransaction($lockedMatch, $requestedTitles);
-        }, attempts: 3);
-    }
-
-    /**
-     * Assign titles while the caller owns the match transaction and lock.
-     *
      * @param  Collection<int, Title>  $titles
      */
-    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $titles): void
+    public function handle(EventMatch $lockedMatch, Collection $titles): void
     {
         $this->tournamentRequirements->ensureFinalStakes($lockedMatch);
         $requestedTitles = $titles->unique('id')->values();
 
         if ($requestedTitles->isEmpty()) {
-            throw EntityNotAvailableException::forMatchAssignment('titles');
+            throw EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Title);
         }
 
         $conflictingEventIds = $this->schedulingLock->lockConflictingEventIds($lockedMatch);
@@ -100,7 +77,7 @@ class AddTitlesToMatchAction
             ->count();
 
         if ($lockedTitles->count() !== $requestedTitles->count() || $activeTitleCount !== $lockedTitles->count()) {
-            throw EntityNotAvailableException::forMatchAssignment('titles');
+            throw EntityNotAvailableException::forMatchAssignment(MatchParticipantKind::Title);
         }
 
         $this->assignmentEligibility->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);

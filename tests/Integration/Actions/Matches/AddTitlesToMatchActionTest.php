@@ -16,7 +16,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -34,7 +33,7 @@ test('it adds a single title to a match', function () {
 
     $titles = collect([$title]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles));
 
     // Should create title-match relationship
     assertDatabaseHas('events_matches_titles', [
@@ -60,7 +59,7 @@ test('it adds multiple titles to a match', function () {
 
     $titles = collect([$title1, $title2]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles));
 
     // Should create relationships for both titles
     assertDatabaseHas('events_matches_titles', [
@@ -85,7 +84,7 @@ test('it rejects the entire assignment when any title is inactive', function () 
 
     $titles = collect([$activeTitle, $inactiveTitle]);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles)))
         ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.')
         ->and($match->titles()->count())->toBe(0);
 });
@@ -96,7 +95,7 @@ test('it throws exception when no eligible titles provided', function () {
 
     $titles = collect([$inactiveTitle]);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles)))
         ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 });
 
@@ -107,7 +106,7 @@ test('it reloads titles before checking assignment eligibility', function () {
 
     $title->delete();
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$staleTitle])))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$staleTitle]))))
         ->toThrow(EntityNotAvailableException::class)
         ->and($match->titles()->exists())->toBeFalse();
 });
@@ -116,7 +115,7 @@ test('it handles empty collection', function () {
     $match = EventMatch::factory()->create();
     $titles = Title::query()->whereKey([])->get();
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles)))
         ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 });
 
@@ -133,7 +132,7 @@ test('it creates championship match correctly', function () {
 
     $titles = collect([$wweChampionship, $intercontinentalTitle]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles));
 
     // Match should be associated with both titles
     $matchTitles = $match->refresh()->titles;
@@ -151,7 +150,7 @@ test('it handles transaction consistency', function () {
 
     $titles = collect([$title1, $title2]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, $titles));
 
     // Both titles should be added atomically
     expect($match->refresh()->titles)->toHaveCount(2);
@@ -168,7 +167,7 @@ test('it rejects a title already assigned on the event card', function () {
 
     $existingMatch->titles()->attach($title);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($targetMatch, collect([$title])))
+    expect(fn () => assignWithinLockedMatch($targetMatch, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))
         ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.")
         ->and($targetMatch->titles()->count())->toBe(0);
 });
@@ -177,7 +176,7 @@ test('it assigns a repeated title only once', function () {
     $match = createSinglesMatchWithCompetitors();
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title, $title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title, $title])));
 
     expect($match->titles()->count())->toBe(1);
 });
@@ -194,7 +193,7 @@ test('it requires the current wrestler champion to compete in the title match', 
         'competitor_id' => $challenger->id,
     ]);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The current champion of [{$title->name}] must compete in the title match.",
@@ -213,7 +212,7 @@ test('it accepts a title match containing the current wrestler champion', functi
         'competitor_id' => $champion->id,
     ]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
 });
@@ -229,7 +228,7 @@ test('it accepts a title match containing the current tag team champion', functi
         'competitor_id' => $champion->id,
     ]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
 });
@@ -244,7 +243,7 @@ test('it rejects a singles title assigned to tag team competitors', function () 
         'competitor_id' => $tagTeam->id,
     ]);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The [{$title->name}] cannot be contested by this match's competitor type.",
@@ -262,7 +261,7 @@ test('it rejects a tag team title assigned to wrestler competitors', function ()
         'competitor_id' => $wrestler->id,
     ]);
 
-    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title]))))
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The [{$title->name}] cannot be contested by this match's competitor type.",
@@ -270,22 +269,13 @@ test('it rejects a tag team title assigned to wrestler competitors', function ()
         ->and($match->titles()->exists())->toBeFalse();
 });
 
-test('it rejects an empty title list without attaching anything', function (Closure $assign) {
+test('it rejects an empty title list without attaching anything', function () {
     $match = createSinglesMatchWithCompetitors();
 
-    expect(fn () => $assign(resolve(AddTitlesToMatchAction::class), $match))
+    expect(fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect())))
         ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.')
         ->and($match->titles()->exists())->toBeFalse();
-})->with([
-    'through handle' => [
-        fn (AddTitlesToMatchAction $action, EventMatch $match) => $action->handle($match, collect()),
-    ],
-    'within a caller transaction' => [
-        fn (AddTitlesToMatchAction $action, EventMatch $match) => DB::transaction(
-            fn () => $action->handleWithinTransaction($match->refreshForUpdate(), collect()),
-        ),
-    ],
-]);
+});
 
 /**
  * A singles match on an event held on the given date, contested by the given wrestlers.
@@ -310,7 +300,7 @@ test('it accepts a title that was active on a back-filled show but is inactive n
         ->create(['type' => TitleType::Singles]);
 
     // Act
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
@@ -324,7 +314,7 @@ test('it refuses a title that had not debuted on the show date', function () {
         ->create(['type' => TitleType::Singles]);
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)
@@ -340,7 +330,7 @@ test('it refuses a title that had already ended its activity before the show dat
         ->create(['type' => TitleType::Singles]);
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)->toThrow(EntityNotAvailableException::class);
@@ -368,7 +358,7 @@ test('it requires the champion on the show date to compete even after the title 
         ->create();
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)
@@ -397,7 +387,7 @@ test('it accepts the champion on the show date even when a later champion is not
         ->create();
 
     // Act
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
@@ -417,7 +407,7 @@ test('it does not require a champion who had not won the title yet on the show d
         ->create();
 
     // Act
-    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
@@ -437,7 +427,7 @@ test('it still requires the current champion for a show in the future', function
         ->create();
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)->toThrow(InvalidMatchConfigurationException::class, 'must compete in the title match');
@@ -451,7 +441,7 @@ test('it refuses a title that is inactive now for a show in the future', functio
         ->create(['type' => TitleType::Singles]);
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)->toThrow(EntityNotAvailableException::class);
@@ -465,7 +455,7 @@ test('it keeps the active-now check for an unscheduled event', function () {
         ->create(['type' => TitleType::Singles]);
 
     // Act
-    $attempt = fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+    $attempt = fn () => assignWithinLockedMatch($match, fn (EventMatch $lockedMatch) => resolve(AddTitlesToMatchAction::class)->handle($lockedMatch, collect([$title])));
 
     // Assert
     expect($attempt)->toThrow(EntityNotAvailableException::class);
