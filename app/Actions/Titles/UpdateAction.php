@@ -10,6 +10,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Titles\NameTakenException;
 use App\Lifecycle\Naming\RecordNameLock;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Titles\TitleTypeEligibility;
 use App\Models\Promotions\Promotion;
 use App\Models\Scopes\PromotionContextScope;
@@ -23,6 +24,7 @@ class UpdateAction
     public function __construct(
         private readonly DebutAction $debut,
         private readonly RecordNameLock $nameLock,
+        private readonly LifecycleTransitionRecorder $transitionRecorder,
     ) {}
 
     /**
@@ -80,8 +82,10 @@ class UpdateAction
     /**
      * Debut a title that has no activity history, or move the date of a debut that is only scheduled.
      *
-     * The scheduled period and its pending Debuted transition are updated in place so the title keeps
-     * exactly one period and one Debuted record. Active, pulled, and retired titles are left alone.
+     * The scheduled period moves in place so the title keeps exactly one period. The move is recorded as a new
+     * Debuted transition at the new date that notes the date it moved from, as an employment reschedule is; the
+     * earlier transition stays, because transitions are an immutable trail. Active, pulled, and retired titles
+     * are left alone.
      */
     private function applyDebutDate(Title $title, Carbon $debutDate): void
     {
@@ -103,10 +107,15 @@ class UpdateAction
             return;
         }
 
+        $scheduledFor = $scheduledPeriod->started_at;
+
         $scheduledPeriod->update(['started_at' => $debutDate]);
-        $title->lifecycleTransitions()
-            ->where('dimension', LifecycleDimension::Activity)
-            ->where('transition', LifecycleTransitionType::Debuted)
-            ->update(['effective_at' => $debutDate]);
+        $this->transitionRecorder->record(
+            $title,
+            LifecycleDimension::Activity,
+            LifecycleTransitionType::Debuted,
+            $debutDate,
+            ['rescheduled_from' => $scheduledFor->toIso8601String()],
+        );
     }
 }
