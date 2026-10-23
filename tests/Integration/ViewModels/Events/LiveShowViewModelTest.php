@@ -18,7 +18,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 
 require_once __DIR__.'/../../../Fixtures/live-show.php';
-require_once __DIR__.'/../../../Fixtures/member-actor.php';
 
 test('the screen reports revised planned starts and actual delay without inventing missing times', function (): void {
     // Arrange
@@ -117,7 +116,7 @@ test('a member sees exactly the live show an administrator sees minus production
     assert($administratorScreen['run'] instanceof EventLiveRun && $administratorScreen['source'] !== null);
     $administratorRun = $administratorScreen['run']->content;
     $administratorSource = $administratorScreen['source']['content'];
-    actAsMemberOf($event);
+    actingAsPromotionMember(Promotion::query()->findOrFail($event->promotion_id), MembershipRole::Member);
 
     // Act
     $screen = resolve(LiveShowViewModel::class)->data($event);
@@ -147,7 +146,7 @@ test('a member sees a completed live show without production content', function 
     $data = resolve(EventPackViewModel::class)->data($event);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
     $run->forceFill(['status' => LiveShowStatus::Completed])->save();
-    actAsMemberOf($event);
+    actingAsPromotionMember(Promotion::query()->findOrFail($event->promotion_id), MembershipRole::Member);
 
     // Act
     $screen = resolve(LiveShowViewModel::class)->data($event);
