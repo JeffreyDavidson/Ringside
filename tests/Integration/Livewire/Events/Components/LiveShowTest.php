@@ -322,6 +322,7 @@ test('the correction form opens only for operations that need a reason', functio
 
     // Assert
     $component->assertSet('draftOperation', $opens ? $operation : '');
+
     if (! $opens) {
         $component->assertHasErrors('operation');
     }

@@ -27,22 +27,27 @@ final class ImageReencoder
         set_error_handler(static function (int $severity, string $message, string $filename, int $line): never {
             throw new ErrorException($message, 0, $severity, $filename, $line);
         });
+
         try {
             $size = getimagesizefromstring($bytes);
+
             if ($size === false || $size[0] * $size[1] > self::MAX_PIXELS || $this->isAnimated($bytes)) {
                 throw ImageReencodingException::failed();
             }
             $image = imagecreatefromstring($bytes) ?: throw ImageReencodingException::failed();
+
             if (str_contains($bytes, "Exif\0\0") && function_exists('exif_read_data')) {
                 $image = $this->orient($image, $this->orientationOf($bytes));
             }
             $width = imagesx($image);
             $height = imagesy($image);
+
             if (max($width, $height) > self::MAX_EDGE) {
                 $image = imagescale($image, (int) round($width * self::MAX_EDGE / max($width, $height)), (int) round($height * self::MAX_EDGE / max($width, $height))) ?: throw ImageReencodingException::failed();
             }
             imagesavealpha($image, true);
             ob_start();
+
             try {
                 imagepng($image);
 
@@ -69,6 +74,7 @@ final class ImageReencoder
         $stream = fopen('php://temp', 'r+') ?: throw ImageReencodingException::failed();
         fwrite($stream, $bytes);
         rewind($stream);
+
         try {
             $metadata = exif_read_data($stream);
         } finally {

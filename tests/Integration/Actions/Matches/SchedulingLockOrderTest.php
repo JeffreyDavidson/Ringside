@@ -146,12 +146,12 @@ test('it locks the complete ordered same-date event set before anything else', f
         ->and($firstLock['bindings'])->toContain($event->id)
         ->and(collect($firstLock['bindings'])->contains(
             fn (mixed $binding): bool => $binding instanceof DateTimeInterface
-                && $binding->getTimestamp() === $event->date->getTimestamp()
+                && $binding->getTimestamp() === $event->date->getTimestamp(),
         ))->toBeTrue()
         ->and($writesBeforeFirstLock)->toBeEmpty()
         ->and($lockedStatements->filter(
             fn (array $statement): bool => str_contains($statement['sql'], 'from "events"')
-                && ! str_contains($statement['sql'], 'order by "id" asc')
+                && ! str_contains($statement['sql'], 'order by "id" asc'),
         ))->toBeEmpty()
         ->and($sameDateEvent->id)->toBeGreaterThan($event->id);
 })->with('scheduling lock scenarios');

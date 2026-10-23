@@ -17,7 +17,7 @@ return new class extends Migration
             'sqlite' => $this->createSqliteTriggers(),
             'pgsql', 'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE titles_championships ADD CONSTRAINT titles_championships_dates_ordered '
-                .'CHECK (lost_at IS NULL OR won_at IS NULL OR lost_at >= won_at)'
+                .'CHECK (lost_at IS NULL OR won_at IS NULL OR lost_at >= won_at)',
             ),
             default => throw new LogicException('The database driver does not support date order constraints.'),
         };
@@ -51,7 +51,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce date order: {$conflicts}. "
             .'No changes were made. Correct or delete these reigns (lost_at must not be before won_at), '
-            .'then re-run "php artisan migrate".'
+            .'then re-run "php artisan migrate".',
         );
     }
 
@@ -72,7 +72,7 @@ return new class extends Migration
                 "CREATE TRIGGER titles_championships_dates_ordered_{$suffix} BEFORE {$event} ON titles_championships "
                 .'WHEN NEW.lost_at IS NOT NULL AND NEW.won_at IS NOT NULL '
                 .'AND datetime(NEW.lost_at) < datetime(NEW.won_at) '
-                ."BEGIN SELECT RAISE(ABORT, 'titles_championships: end before start'); END"
+                ."BEGIN SELECT RAISE(ABORT, 'titles_championships: end before start'); END",
             );
         }
     }

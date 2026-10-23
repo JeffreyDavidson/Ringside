@@ -91,6 +91,7 @@ class TournamentOperationForm extends Form
             $rules['reason'] = ['required', 'string', 'max:2000'];
             $rules['confirmed'] = ['accepted'];
         }
+
         if (in_array($operation, [TournamentOperation::Book, TournamentOperation::Plan], true)) {
             $rules['eventId'] = [
                 $operation === TournamentOperation::Book ? 'required' : 'nullable',
@@ -98,6 +99,7 @@ class TournamentOperationForm extends Form
                 Rule::exists('events', 'id')->where('promotion_id', $this->promotionId)->whereNull('deleted_at'),
             ];
         }
+
         if ($operation === TournamentOperation::Book) {
             $rules['refereeIds'] = ['required', 'list', 'min:1'];
             $rules['refereeIds.*'] = [
@@ -108,6 +110,7 @@ class TournamentOperationForm extends Form
             $rules['titleId'] = ['nullable', 'integer', Rule::exists('titles', 'id')->where('promotion_id', $this->promotionId)];
             $rules['stipulationId'] = ['nullable', 'integer', Rule::exists('matches_stipulations', 'id')];
         }
+
         if ($operation === TournamentOperation::Replace) {
             $rules['replacementId'] = [
                 'required',

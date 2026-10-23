@@ -16,7 +16,7 @@ test('a wrestler may have multiple ended tag team memberships', function () {
     $wrestler = Wrestler::factory()->create();
 
     TagTeam::factory()->count(2)->create()->each(
-        fn (TagTeam $tagTeam) => joinTagTeam($tagTeam, $wrestler, now()->subDay())
+        fn (TagTeam $tagTeam) => joinTagTeam($tagTeam, $wrestler, now()->subDay()),
     );
 
     expect(TagTeamWrestler::query()->where('wrestler_id', $wrestler->id)->count())->toBe(2);

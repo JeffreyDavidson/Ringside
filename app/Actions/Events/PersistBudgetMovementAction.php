@@ -30,28 +30,36 @@ class PersistBudgetMovementAction
         if ($line->archived_at !== null) {
             throw BudgetException::archived();
         }
+
         if ($line->movements->count() >= 1000) {
             throw BudgetException::movementLimit();
         }
+
         if ($data->amount <= 0 || $data->amount > UsdAmount::MAX_CENTS) {
             throw BudgetException::positiveAmount();
         }
+
         if (! Carbon::hasFormatWithModifiers($data->date, 'Y-m-d') || ! Carbon::canBeCreatedFromFormat($data->date, 'Y-m-d') || $data->date > now($budget->timezone)->toDateString()) {
             throw BudgetException::paymentDate();
         }
+
         if ($data->kind === BudgetMovementKind::Refund) {
             $source = $line->movements->find($data->sourceId);
+
             if ($source === null || $source->voided_at !== null || $source->kind !== BudgetMovementKind::Payment || $data->date < $source->effective_date->toDateString()) {
                 throw BudgetException::refundSource();
             }
             $refunded = $line->movements->refundsOf($source)->unvoided()->sum(fn (EventBudgetMovement $movement): int => $movement->amount_cents);
+
             if ($data->amount > $source->amount_cents - $refunded) {
                 throw BudgetException::refundCap();
             }
         }
+
         if ($data->kind === BudgetMovementKind::Payment && $data->sourceId !== null) {
             throw BudgetException::refundSource();
         }
+
         if ($data->kind === BudgetMovementKind::Payment && $line->confirmed_cents !== null && $this->settlement->net($line) + $data->amount > $line->confirmed_cents && ! $data->acknowledge) {
             throw BudgetException::excess();
         }

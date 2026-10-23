@@ -21,18 +21,22 @@ class WithdrawTournamentEntryAction
     {
         DB::transaction(function () use ($entry, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($entry->tournament_id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
             $this->states->ensureActive($tournament);
             $entry = $tournament->entries()->findOrFail($entry->id);
+
             if ($entry->withdrawn) {
                 return;
             }
+
             foreach ($this->bracket->bouts($tournament) as $bout) {
                 if ($bout->complete || ($bout->first?->id !== $entry->id && $bout->second?->id !== $entry->id)) {
                     continue;
                 }
+
                 if ($bout->link !== null) {
                     $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);
                 }

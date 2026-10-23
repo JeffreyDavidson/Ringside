@@ -41,6 +41,7 @@ test('a story needs a name and a premise within their limits', function (array $
     actingAs(administrator());
     $promotion = Promotion::factory()->create();
     $page = livewire(Create::class, ['promotionId' => $promotion->id, 'title' => 'The betrayal', 'premise' => 'Partners become rivals.']);
+
     foreach ($fields as $field => $value) {
         $page->set($field, $value);
     }

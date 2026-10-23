@@ -55,14 +55,17 @@ class EventPackCardService
         $calendarUnavailable = $this->calendarUnavailable($event, $matches)->map(EventRosterService::key(...))->all();
         $rows = [];
         $roster = [];
+
         foreach ($matches as $match) {
             $warning = false;
             $sides = $match->competitors->competitorModelsBySidePosition();
+
             foreach ($match->competitors as $assignment) {
                 $competitor = $assignment->competitor;
                 $calendarRelevant = $match->match_finish === null || $event->date >= now();
                 $dateBlocked = $calendarRelevant && in_array(EventRosterService::key($competitor), $calendarUnavailable, true);
                 $warning = $warning || $dateBlocked || ! in_array($competitor->id, $available[$competitor->getMorphClass()], true);
+
                 if ($competitor instanceof TagTeam) {
                     foreach ($competitor->currentWrestlers as $wrestler) {
                         $blocked = $calendarRelevant && in_array(EventRosterService::key($wrestler), $calendarUnavailable, true);
@@ -74,6 +77,7 @@ class EventPackCardService
                 }
                 $this->addPerson($roster, $competitor, __('event-pack.wrestler'), $match->match_number, $available['wrestler'], $dateBlocked);
             }
+
             foreach ($match->referees as $referee) {
                 $dateBlocked = ($match->match_finish === null || $event->date >= now()) && in_array(EventRosterService::key($referee), $calendarUnavailable, true);
                 $warning = $warning || $dateBlocked || ! in_array($referee->id, $available['referee'], true);

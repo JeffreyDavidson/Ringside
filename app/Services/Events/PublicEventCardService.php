@@ -36,8 +36,10 @@ class PublicEventCardService
     {
         $selected = collect($selection)->keyBy('id');
         $rows = [];
+
         foreach ($source['matches'] as $match) {
             $choice = $selected->get($match['id']);
+
             if ($choice === null) {
                 continue;
             }

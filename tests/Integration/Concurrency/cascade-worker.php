@@ -85,7 +85,8 @@ try {
                 MatchFinish::Pinfall,
                 MatchSide::query()->where('match_id', $spec['id'])->where('position', $spec['winning_position'] ?? 1)->firstOrFail(),
                 collect(),
-            ), $defaultActor,
+            ),
+            $defaultActor,
         ),
         default => throw new InvalidArgumentException("Unknown cascade action {$spec['action']}."),
     };

@@ -20,6 +20,7 @@ class PublicDoorsTime implements ValidationRule
             return;
         }
         $local = Carbon::createFromFormat('!Y-m-d\TH:iP', $value.$this->offset);
+
         if (! $local instanceof Carbon || $local->setTimezone($this->timezone)->format('Y-m-d\TH:iP') !== $value.$this->offset) {
             $fail(__('public-events.doors_invalid'));
         }

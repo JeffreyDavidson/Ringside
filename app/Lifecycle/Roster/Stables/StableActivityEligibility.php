@@ -142,6 +142,7 @@ final readonly class StableActivityEligibility
 
         // Only the members who return must be available: an unavailable former member is simply not offered.
         $availableHeadcount = $this->formerMemberEligibility->availableMembersFor($stable)->getTotalMemberCount();
+
         if (! StableMembershipRequirements::hasMinimumHeadcount($availableHeadcount)) {
             throw CannotBeReunitedException::insufficientFormerMembers(
                 $stable,

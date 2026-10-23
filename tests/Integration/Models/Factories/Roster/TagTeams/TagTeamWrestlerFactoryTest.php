@@ -184,6 +184,7 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
 
             // Assert
             expect($tagTeamWrestler->joined_at)->toBeInstanceOf(Carbon::class);
+
             if ($tagTeamWrestler->left_at) {
                 expect($tagTeamWrestler->left_at->isAfter($tagTeamWrestler->joined_at))->toBeTrue();
             }

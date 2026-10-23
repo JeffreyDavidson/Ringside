@@ -39,6 +39,7 @@ class EventRosterAvailabilityService
     public function among(Event $event, iterable $people): Collection
     {
         $date = $this->day($event);
+
         if ($date === null) {
             return collect();
         }

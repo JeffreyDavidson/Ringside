@@ -20,8 +20,12 @@ use Illuminate\Support\Facades\DB;
 /** @phpstan-import-type Production from EventPack */
 class SaveEventProductionAction
 {
-    public function __construct(private readonly EventPackCardService $card, private readonly EventPackSourceService $source,
-        private readonly EventProductionRequirements $requirements, private readonly EventCardLock $lock) {}
+    public function __construct(
+        private readonly EventPackCardService $card,
+        private readonly EventPackSourceService $source,
+        private readonly EventProductionRequirements $requirements,
+        private readonly EventCardLock $lock,
+    ) {}
 
     /** The submitted plan is checked for shape again inside the save, so it is safe from any caller. */
     public function handle(Event $event, int $version, string $fingerprint, EventProductionData $data, bool $reviewed, User $actor): void
@@ -29,9 +33,11 @@ class SaveEventProductionAction
         DB::transaction(function () use ($event, $version, $fingerprint, $data, $reviewed, $actor): void {
             ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
+
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
             }
+
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }

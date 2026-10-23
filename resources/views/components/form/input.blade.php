@@ -31,6 +31,7 @@
 
     if ($appearance === 'ringside') {
         $inputClasses = 'block min-h-14 w-full min-w-0 appearance-none rounded-none border border-outline bg-surface-panel px-4 py-3 text-base leading-normal text-foreground caret-signal placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground aria-invalid:border-error';
+
         if ($type === 'password') {
             $inputClasses .= ' pr-14';
         }

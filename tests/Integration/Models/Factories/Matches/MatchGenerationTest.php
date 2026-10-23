@@ -46,6 +46,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
                 ->and($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
             $competitors = $match->competitors;
+
             foreach ($competitors as $competitor) {
                 expect($competitor->competitor_type)->toBe((new Wrestler)->getMorphClass());
             }
@@ -64,6 +65,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
                 ->and($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($match->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -404,6 +406,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->match_type->value)->toBe('singles');
+
             foreach ($match->competitors as $competitor) {
                 expect($competitor->competitor_type)->toBe((new Wrestler)->getMorphClass());
             }
@@ -418,6 +421,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->match_type->value)->toBe('royal-rumble');
+
             foreach ($match->competitors as $competitor) {
                 expect($competitor->competitor_type)->toBe((new Wrestler)->getMorphClass());
             }
@@ -434,6 +438,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             expect($match->match_type->value)->toBe('tag-team');
 
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
+
             foreach ($match->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }

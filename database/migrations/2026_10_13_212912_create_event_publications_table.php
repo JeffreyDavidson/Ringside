@@ -20,12 +20,15 @@ return new class extends Migration
             $table->string('slug');
             $table->unsignedInteger('version');
             $table->json('draft');
+
             foreach (['card', 'results', 'card_source', 'results_source'] as $column) {
                 $table->json($column)->nullable();
             }
+
             foreach (['schedule_fingerprint', 'card_fingerprint', 'results_fingerprint'] as $column) {
                 $table->string($column, 64)->nullable();
             }
+
             foreach (['published_at', 'results_published_at', 'unpublished_at'] as $column) {
                 $table->dateTime($column)->nullable();
             }

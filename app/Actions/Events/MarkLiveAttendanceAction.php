@@ -24,15 +24,18 @@ class MarkLiveAttendanceAction
             $this->showDay->ensureShowDay($run);
             $content = $run->content;
             $index = array_search($key, array_column($content['roster'], 'key'), true);
+
             if (! is_int($index)) {
                 throw LiveShowException::unknownPerson();
             }
             $before = $content['roster'][$index];
             $person = $before;
+
             if (($before[$mark->value] !== null) === $value || ($mark === LiveAttendanceMark::Briefed && $value && $before['arrived'] === null)) {
                 throw LiveShowException::attendanceInvalid();
             }
             $person[$mark->value] = $value ? now()->utc()->toIso8601String() : null;
+
             if ($mark === LiveAttendanceMark::Arrived && ! $value) {
                 $person['briefed'] = null;
             }
@@ -41,6 +44,7 @@ class MarkLiveAttendanceAction
             $run->content = $content;
             $auditBefore = $before;
             $auditAfter = $person;
+
             if (str_starts_with($key, 'crew:')) {
                 $auditBefore = Arr::only($before, ['arrived', 'briefed', 'updated_by']);
                 $auditAfter = Arr::only($person, ['arrived', 'briefed', 'updated_by']);

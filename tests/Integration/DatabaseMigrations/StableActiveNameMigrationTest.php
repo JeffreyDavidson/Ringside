@@ -16,6 +16,6 @@ test('the migration identifies existing duplicate active names', function () {
     expect(fn () => $up->invoke($migration))
         ->toThrow(
             RuntimeException::class,
-            'Cannot enforce unique active stable names. Resolve duplicate active names first: The Four Horsemen'
+            'Cannot enforce unique active stable names. Resolve duplicate active names first: The Four Horsemen',
         );
 });

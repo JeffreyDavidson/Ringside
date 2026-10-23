@@ -104,7 +104,7 @@ class AddTagTeamsToMatchAction
             ->get();
 
         if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
-            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam, $event->date)
+            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam, $event->date),
         )) {
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
@@ -114,6 +114,7 @@ class AddTagTeamsToMatchAction
             $lockedTagTeams,
             $lockedMatch,
         );
+
         foreach ($lockedTagTeams as $person) {
             if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
                 $this->dateAvailability->ensureForEvent($person, $event);

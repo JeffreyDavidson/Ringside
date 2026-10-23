@@ -26,8 +26,10 @@ class IsBookable implements ValidationRule
 
             return;
         }
+
         if ($this->event instanceof Event) {
             $dates = resolve(RosterDateAvailability::class);
+
             if (! $dates->retained($wrestler, $this->event, $this->match) && ! $dates->allowsForEvent($wrestler, $this->event)) {
                 $fail(__('availability.unavailable', ['name' => $wrestler->name, 'date' => $this->event->local_date?->toDateString()]));
             }

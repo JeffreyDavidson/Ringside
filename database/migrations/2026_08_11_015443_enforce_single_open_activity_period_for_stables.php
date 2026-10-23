@@ -21,7 +21,7 @@ return new class extends Migration
     {
         $connection->statement(
             'CREATE UNIQUE INDEX stables_activations_one_open_period_unique '
-            .'ON stables_activations (stable_id) WHERE ended_at IS NULL'
+            .'ON stables_activations (stable_id) WHERE ended_at IS NULL',
         );
     }
 
@@ -31,7 +31,7 @@ return new class extends Migration
             'ALTER TABLE stables_activations '
             .'ADD COLUMN open_stable_id BIGINT UNSIGNED '
             .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN stable_id ELSE NULL END) STORED, '
-            .'ADD UNIQUE INDEX stables_activations_one_open_period_unique (open_stable_id)'
+            .'ADD UNIQUE INDEX stables_activations_one_open_period_unique (open_stable_id)',
         );
     }
 };

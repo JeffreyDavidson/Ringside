@@ -14,6 +14,7 @@ use Illuminate\Database\Query\Builder;
 function noticePairsSelection(Wrestler $first, Wrestler ...$others): CompetitorSelection
 {
     $selection = [['type' => $first->getMorphClass(), 'id' => $first->id, 'side' => 0]];
+
     foreach (array_values($others) as $index => $other) {
         $selection[] = ['type' => $other->getMorphClass(), 'id' => $other->id, 'side' => $index + 1];
     }
@@ -81,6 +82,7 @@ test('keeps only pairs that met since the cut-off before the reference and not t
     $recent = Event::factory()
         ->for($promotion, 'promotion')
         ->create(['date' => now()->subDays(5)]);
+
     foreach ([$tooOld, $later] as $event) {
         EventMatch::factory()
             ->for($event)

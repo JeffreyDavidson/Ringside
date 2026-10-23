@@ -185,6 +185,7 @@ describe('roster combobox search box', function (): void {
 describe('roster combobox loading state', function (): void {
     test('Enter before the results arrive does not book a stale option', function (): void {
         $event = Event::factory()->scheduled()->withVenue()->create();
+
         foreach (range(1, 21) as $number) {
             Wrestler::factory()->bookable()->create(['name' => sprintf('Abe Filler %02d', $number)]);
         }

@@ -18,6 +18,7 @@ final readonly class SkipLiveItem implements LiveItemTransition
     public function apply(EventLiveRun $run, int $index, ?Carbon $start, ?Carbon $finish): array
     {
         $item = $run->content['items'][$index];
+
         if (LiveItemStatus::from($item['state']) !== LiveItemStatus::Pending) {
             throw LiveShowException::transitionInvalid();
         }

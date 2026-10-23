@@ -48,7 +48,7 @@ class ArrayColumn extends Column
                 }
 
                 return static::linkHtml($linkTitle, $linkLocation);
-            }
+            },
         );
     }
 

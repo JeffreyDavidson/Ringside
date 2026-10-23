@@ -68,37 +68,48 @@ test('invalid production input leaves the saved pack unchanged', function (strin
     $data = resolve(EventPackViewModel::class)->data($event);
     $input = $fixture['production'];
     $before = $event->pack()->firstOrFail()->content;
+
     if ($case === 'foreign contact') {
         $input['assignments'][0]['contact_id'] = CrewContact::factory()->create()->id;
     }
+
     if ($case === 'unknown owner') {
         $input['cues'][0]['owner_id'] = '4e833c54-5f60-48b8-91c5-dbf85ca51111';
     }
+
     if ($case === 'foreign item') {
         $input['cues'][0]['item_key'] = 'match:'.EventMatch::factory()->create()->id;
     }
+
     if ($case === 'duplicate assignment') {
         $input['assignments'][] = $input['assignments'][0];
     }
+
     if ($case === 'duplicate cue') {
         $input['cues'][] = $input['cues'][0];
     }
+
     if ($case === 'unsafe url') {
         $input['cues'][0]['url'] = 'javascript:alert(1)';
     }
+
     if ($case === 'missing role') {
         unset($input['assignments'][0]['role']);
     }
+
     if ($case === 'credential url') {
         $input['cues'][0]['url'] = 'https://secret:password@example.com/track';
     }
+
     if ($case === 'other description') {
         $input['assignments'][0]['role'] = 'other';
     }
+
     if ($case === 'gap' || $case === 'repeated') {
         $input['assignments'][0]['timezone'] = 'America/New_York';
         $input['assignments'][0]['call_at'] = $case === 'gap' ? '2026-03-08T02:30' : '2026-11-01T01:30';
     }
+
     if ($case === 'cue count') {
         $input['cues'] = array_map(fn (int $i): array => [...$input['cues'][0], 'id' => sprintf('eed36a82-90cb-4a79-b2cc-%012d', $i)], range(1, 21));
     }
@@ -189,6 +200,7 @@ test('stale production previews cannot overwrite a changed source', function (st
     $data = resolve(EventPackViewModel::class)->data($event);
     $version = $case === 'version' ? 0 : 1;
     $fingerprint = $case === 'fingerprint' ? str_repeat('0', 64) : $data['card']['fingerprint'];
+
     if ($case === 'review') {
         $fixture['match']->match_number = 25;
         $fixture['match']->save();

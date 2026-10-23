@@ -28,6 +28,7 @@ final readonly class EventRosterSchedulingEligibility
         if (! $date instanceof Carbon) {
             return;
         }
+
         if ($lock) {
             $entries = $this->roster->forEvent($event)['entries'];
             $this->rosterLock->lock(
@@ -38,6 +39,7 @@ final readonly class EventRosterSchedulingEligibility
         }
         $proposed = clone $event;
         $proposed->date = $date;
+
         foreach ($this->roster->forEvent($event)['people'] as $person) {
             $this->availability->ensureForEvent($person, $proposed);
         }

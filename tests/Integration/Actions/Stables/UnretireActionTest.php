@@ -73,7 +73,7 @@ test('it reports the weighted headcount when a tag team alone is too few', funct
     // Arrange
     $stable = Stable::factory()->retired()->create();
     $stable->previousWrestlers()->get()->each(
-        fn (Wrestler $wrestler) => $wrestler->suspensions()->create(['started_at' => now()->subHour()])
+        fn (Wrestler $wrestler) => $wrestler->suspensions()->create(['started_at' => now()->subHour()]),
     );
 
     // Act

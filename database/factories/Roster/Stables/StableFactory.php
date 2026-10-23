@@ -57,7 +57,7 @@ class StableFactory extends Factory
         return $this->has(ActivityPeriod::factory()->started($activationDate), 'activityPeriods')
             ->hasAttached(
                 Wrestler::factory()->count(2)->has(Employment::factory()->started($activationDate), 'employments'),
-                ['joined_at' => $activationDate]
+                ['joined_at' => $activationDate],
             )
             ->hasAttached(
                 TagTeam::factory()
@@ -69,7 +69,7 @@ class StableFactory extends Factory
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $activationDate]);
                     }),
-                ['joined_at' => $activationDate]
+                ['joined_at' => $activationDate],
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -91,7 +91,7 @@ class StableFactory extends Factory
         return $this->has(ActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
             ->hasAttached(
                 Wrestler::factory()->count(2)->has(Employment::factory()->started($start), 'employments'),
-                ['joined_at' => $start, 'left_at' => $end]
+                ['joined_at' => $start, 'left_at' => $end],
             )
             ->hasAttached(
                 TagTeam::factory()
@@ -103,7 +103,7 @@ class StableFactory extends Factory
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
                     }),
-                ['joined_at' => $start, 'left_at' => $end]
+                ['joined_at' => $start, 'left_at' => $end],
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -130,7 +130,7 @@ class StableFactory extends Factory
             ->hasAttached(
                 Wrestler::factory()->count(2)
                     ->has(Employment::factory()->started($start), 'employments'),
-                ['joined_at' => $start, 'left_at' => $end]
+                ['joined_at' => $start, 'left_at' => $end],
             )
             ->hasAttached(
                 TagTeam::factory()
@@ -141,7 +141,7 @@ class StableFactory extends Factory
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
                     }),
-                ['joined_at' => $start, 'left_at' => $end]
+                ['joined_at' => $start, 'left_at' => $end],
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->save();
@@ -161,7 +161,7 @@ class StableFactory extends Factory
             ->hasAttached(
                 Wrestler::factory()->count(2)
                     ->has(Employment::factory()->started(Carbon::yesterday()), 'employments'),
-                ['joined_at' => now()]
+                ['joined_at' => now()],
             )
             ->hasAttached(
                 TagTeam::factory()
@@ -173,7 +173,7 @@ class StableFactory extends Factory
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => Carbon::yesterday()]);
                     }),
-                ['joined_at' => now()]
+                ['joined_at' => now()],
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->save();

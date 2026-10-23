@@ -205,6 +205,7 @@ describe('assignment history tables', function (): void {
     ): void {
         // Arrange
         $parent = $createParent();
+
         foreach (['Historic Manager', 'Former Advisor'] as $offset => $name) {
             recordAssignment(
                 $pivot,

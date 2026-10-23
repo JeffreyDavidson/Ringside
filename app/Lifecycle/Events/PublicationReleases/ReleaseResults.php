@@ -22,6 +22,7 @@ final readonly class ReleaseResults implements PublicationRelease
     {
         $this->draft->ensureDraftReleasable($publication, $event, $source);
         $draft = $publication->draft;
+
         if ($publication->published_at === null || $publication->card === null || $event->date === null || $event->date->isFuture()
             || $draft['results'] === [] || array_diff($draft['results'], array_column($publication->card_source ?? [], 'id')) !== []
             || $publication->schedule_fingerprint !== $source['schedule']
@@ -30,6 +31,7 @@ final readonly class ReleaseResults implements PublicationRelease
         }
         $results = $this->cards->resultSource($source, $draft['results']);
         $rows = [];
+
         foreach ($results as $match) {
             if ($match['finish'] === null || $match['winner'] === '') {
                 throw EventPublicationException::invalid();

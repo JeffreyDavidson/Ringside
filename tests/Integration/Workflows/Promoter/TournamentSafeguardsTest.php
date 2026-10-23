@@ -236,6 +236,7 @@ it('keeps final title stakes when an ordinary match edit is valid', function ():
 it('rechecks chronology when editing the name of a same-card event', function (): void {
     $world = tournamentFixture();
     $t = $world['tournament'];
+
     foreach ($t->nodes()->get() as $node) {
         $match = bookTournamentNode($world, $node);
         recordTournamentWinner($match, $t);
@@ -253,24 +254,30 @@ it('rejects forged low-level tournament booking contexts atomically', function (
     $first = Wrestler::query()->findOrFail($entries->sole('seed', 1)->competitor_id);
     $second = Wrestler::query()->findOrFail($entries->sole('seed', 4)->competitor_id);
     $titles = new Collection;
+
     if ($case === 'unresolved') {
         $node = $t->nodes()->where('round', 2)->firstOrFail();
     }
+
     if ($case === 'withdrawn') {
         $entries->sole('seed', 1)->forceFill(['withdrawn' => true])->save();
     }
+
     if ($case === 'other entrants') {
         $second = Wrestler::factory()->employed()->for($world['promotion'])->create();
     }
+
     if ($case === 'nonfinal title') {
         $titles->push(Title::factory()->active()->for($world['promotion'])->create());
     }
+
     if ($case === 'foreign tournament') {
         $event = Event::factory()->for(Promotion::factory()->create())->create(['date' => now()->subHour()]);
         $first = Wrestler::factory()->employed()->for($event->promotion()->firstOrFail())->create();
         $second = Wrestler::factory()->employed()->for($event->promotion()->firstOrFail())->create();
         $world['referees'] = Referee::factory()->employed()->for($event->promotion()->firstOrFail())->count(1)->create();
     }
+
     if ($case === 'conflicting retry') {
         bookTournamentNode($world, $node);
         $event = Event::factory()->for($world['promotion'])->create(['date' => now()->addWeek()]);
@@ -301,6 +308,7 @@ it('keeps chronology intact while a multi-event eight-slot bracket is renamed', 
     $second = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(55)]);
     $semis = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(30)]);
     $final = Event::factory()->for($world['promotion'])->create(['date' => now()->subMinutes(15)]);
+
     foreach ($t->nodes()->get() as $node) {
         $event = match ($node->round) {
             1 => $node->position <= 2 ? $world['event'] : $second,2 => $semis,3 => $final,default => throw new RuntimeException('Unexpected round')

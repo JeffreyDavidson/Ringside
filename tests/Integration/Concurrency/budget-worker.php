@@ -23,6 +23,7 @@ $app->make(Kernel::class)->bootstrap();
 
 $arguments = $_SERVER['argv'] ?? [];
 $payload = is_array($arguments) ? ($arguments[1] ?? null) : null;
+
 if (! is_string($payload)) {
     throw new InvalidArgumentException('Missing budget spec.');
 }
@@ -34,9 +35,11 @@ Carbon::setTestNow($spec['clock']);
 DB::select('select 1');
 fwrite(STDOUT, "READY\n");
 $start = (float) fgets(STDIN);
+
 while (microtime(true) < $start) {
     usleep(1000);
 }
+
 try {
     $event = Event::query()->findOrFail($spec['event_id']);
     match ($spec['operation']) {

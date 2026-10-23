@@ -44,7 +44,7 @@ class MergeStablesAction
     public function handle(
         Stable $primaryStable,
         Stable $secondaryStable,
-        Carbon $date
+        Carbon $date,
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
             [$firstStable, $secondStable] = $primaryStable->getKey() < $secondaryStable->getKey()

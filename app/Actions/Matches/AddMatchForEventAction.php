@@ -49,22 +49,27 @@ class AddMatchForEventAction
 
         return DB::transaction(function () use ($event, $eventMatchData, $actor, $node, $version): EventMatch {
             $tournament = null;
+
             if ($node instanceof TournamentNode) {
                 $tournament = $this->tournamentLocks->lock($node->tournament_id, [$event->id]);
                 $event = Event::query()->withTrashed()->findOrFail($event->id);
                 $node = $tournament->nodes()->findOrFail($node->id);
+
                 if ($tournament->promotion_id !== $event->promotion_id) {
                     throw RecordChangedException::changed();
                 }
                 $bout = $this->bracket->bout($node);
+
                 if ($bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null && $this->sameBooking($bout->link->match, $event, $eventMatchData)) {
                     return $bout->link->match;
                 }
+
                 if ($tournament->version !== $version) {
                     throw RecordChangedException::changed();
                 }
                 $this->tournamentStates->ensureCanMove($tournament, TournamentStatus::Active);
                 $this->tournamentRequirements->ensureBookable($tournament, $node, $bout, $event, $eventMatchData);
+
                 if ($bout->link instanceof TournamentMatchLink) {
                     $bout->link->forceFill(['active_node_id' => null])->save();
                 }

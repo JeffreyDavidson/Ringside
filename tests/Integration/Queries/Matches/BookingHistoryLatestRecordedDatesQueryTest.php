@@ -28,6 +28,7 @@ test('reads the latest recorded earlier date of each selected competitor and ski
     $unrecordedEvent = Event::factory()
         ->for($promotion, 'promotion')
         ->create(['date' => now()->subDay()]);
+
     foreach ([$recentEvent, $oldEvent] as $event) {
         $match = EventMatch::factory()
             ->for($event)
@@ -69,6 +70,7 @@ test('leaves out later events, the excluded match and other promotions, and retu
     $later = Event::factory()
         ->for($promotion, 'promotion')
         ->create(['date' => now()->addDays(4)]);
+
     foreach ([$past, $later] as $event) {
         $match = EventMatch::factory()
             ->for($event)

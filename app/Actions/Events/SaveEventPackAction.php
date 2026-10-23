@@ -23,9 +23,11 @@ class SaveEventPackAction
             // Card assignment actions also lock the owning event before changing its matches.
             ['event' => $event, 'pack' => $pack] = $this->lock->lock($event->id);
             $card = $this->card->get($event);
+
             if (($pack->version ?? 0) !== $version || ! hash_equals($card['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
             }
+
             if ($pack !== null && $pack->card_fingerprint !== $fingerprint && ! $reviewed) {
                 throw EventPackConflictException::reviewRequired();
             }
@@ -42,9 +44,11 @@ class SaveEventPackAction
                 'segments' => $data->segments,
             ];
             $sponsorTasks = $data->sponsorTasks ?? $pack->content['sponsor_tasks'] ?? null;
+
             if ($sponsorTasks !== null) {
                 $content['sponsor_tasks'] = $sponsorTasks;
             }
+
             if (isset($pack?->content['production'])) {
                 $content['production'] = $pack->content['production'];
             }

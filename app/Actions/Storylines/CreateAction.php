@@ -22,6 +22,7 @@ class CreateAction
             $promotion->refreshForUpdate();
 
             $existing = Storyline::query()->where('submission_id', $data->submissionId)->first();
+
             if ($existing !== null) {
                 if ($existing->promotion_id !== $promotion->id) {
                     throw RecordChangedException::changed();

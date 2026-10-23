@@ -20,6 +20,7 @@ class EventPackViewModel
 
         if (Gate::denies('viewProduction', $event)) {
             unset($data['content']['production']);
+
             if ($data['pack'] !== null) {
                 $data['pack'] = clone $data['pack'];
                 $data['pack']->content = $data['content'];

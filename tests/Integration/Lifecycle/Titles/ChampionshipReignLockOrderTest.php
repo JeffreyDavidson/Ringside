@@ -17,12 +17,12 @@ test('it locks the current reigns of a champion in ascending id order', function
             ->for($title)
             ->for($champion, 'champion')
             ->current()
-            ->create()
+            ->create(),
     );
 
     // Act
     $statements = recordStatements(fn () => DB::transaction(
-        fn () => resolve(ChampionshipReignManager::class)->endCurrentReignsForChampion($champion, now())
+        fn () => resolve(ChampionshipReignManager::class)->endCurrentReignsForChampion($champion, now()),
     ));
 
     // Assert

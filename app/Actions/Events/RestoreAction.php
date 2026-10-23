@@ -52,6 +52,7 @@ class RestoreAction
             $this->slotLock->lock($event->date);
 
             $tournamentIds = $this->tournamentLocks->forEvent($event->id);
+
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $event->date);
             }
@@ -73,6 +74,7 @@ class RestoreAction
             $this->tournamentRequirements->ensureEventChronology($lockedEvent, $lockedEvent->date);
             $this->assignmentEligibility->ensureEventCanBeRescheduled($lockedEvent, $lockedEvent->date);
             Tournament::query()->whereKey($tournamentIds)->increment('version');
+
             if ($lockedEvent->date?->isFuture()) {
                 $this->rosterAvailability->ensureAvailableAt($lockedEvent, $lockedEvent->date, lock: true);
             }

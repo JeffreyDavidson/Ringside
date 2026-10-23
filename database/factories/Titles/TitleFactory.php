@@ -76,7 +76,7 @@ class TitleFactory extends Factory
     {
         return $this->has(
             TitleChampionship::factory()->for($champion, 'champion'),
-            'championships'
+            'championships',
         );
     }
 

@@ -168,6 +168,7 @@ test('it creates partnerships with correct timestamps', function () {
 
     // Check partnerships have current timestamp
     $partnerships = $tagTeam->wrestlers()->get();
+
     foreach ($partnerships as $wrestler) {
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($tagTeam, 'tagTeam')

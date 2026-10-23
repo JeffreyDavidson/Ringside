@@ -43,6 +43,7 @@ test('result and card source edits race safely with publication without releasin
 
         expect($results->where('deadlock', true))->toBeEmpty()->and(deadlocksResolvedSince($deadlocks))->toBe(0)
             ->and($results->where('ok', false)->pluck('exception')->all())->each->toBeIn([EventPublicationException::class, RecordChangedException::class]);
+
         if ($other === 'result') {
             expect(EventMatch::query()->findOrFail($world['match']->id)->match_finish)->toBe(MatchFinish::Submission)
                 ->and(freshModel($publication)->results['rows'][0]['outcome'] ?? 'not released')->not->toContain('Submission');

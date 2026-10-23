@@ -35,6 +35,7 @@ class EventProductionViewModel
         $data = $this->pack->get($event);
         $run = EventLiveRun::query()->forEventId($event->id)->first();
         $source ??= $run === null ? 'plan' : 'live';
+
         if ($source === 'live') {
             $run ??= EventLiveRun::query()->forEventId($event->id)->firstOrFail();
             $assignments = $run->content['production']['assignments'] ?? [];
@@ -64,6 +65,7 @@ class EventProductionViewModel
         $allAssignments = $assignments;
         $activeIds = array_column($assignments, 'id');
         $assignments = array_values(array_filter($assignments, fn (array $entry): bool => ($person === null || $entry['contact_id'] === $person) && ($role === null || $entry['role'] === $role)));
+
         foreach ($rows as &$row) {
             $row['cues'] = array_values(array_filter($row['cues'], fn (array $cue): bool => $cue['owner_id'] === null || ! in_array($cue['owner_id'], $activeIds, true)
                 || (($person === null || $cue['owner_contact_id'] === $person) && ($role === null || ($cue['role'] ?? $cue['owner_role']) === $role))));

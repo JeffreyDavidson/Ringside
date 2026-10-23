@@ -16,6 +16,6 @@ readonly class EventData
         public string $name,
         public ?Carbon $date,
         public ?Venue $venue,
-        public ?string $preview
+        public ?string $preview,
     ) {}
 }

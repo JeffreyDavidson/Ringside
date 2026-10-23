@@ -48,12 +48,14 @@ describe('planning form source', function (): void {
     it('rejects source fields chosen in an invalid combination', function (array $fields, string $field): void {
         // Arrange
         $form = new Planning(Double::for(Component::class), 'form');
+
         foreach ($fields as $property => $value) {
             $form->{$property} = $value;
         }
 
         // Act
         $errors = null;
+
         try {
             $form->source(null);
         } catch (ValidationException $exception) {

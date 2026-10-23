@@ -29,6 +29,7 @@ function liveShowFixture(bool $segment = false, ?string $date = null, ?int $venu
     $match = EventMatch::factory()->for($event)->withCompetitors($wrestlers->all())->withReferees()->create();
     $data = resolve(EventPackViewModel::class)->data($event);
     $content = $data['content'];
+
     if ($segment) {
         $content['segments'] = [['id' => '1f64fc86-5bbf-4a41-952d-b85800358f00', 'label' => 'Closing promo', 'after_match_id' => $match->id,
             'planned_at' => null, 'revised_at' => null, 'minutes' => 10, 'notes' => null]];
@@ -47,6 +48,7 @@ function liveShowFixture(bool $segment = false, ?string $date = null, ?int $venu
 function withLiveItems(EventLiveRun $run, array $items): EventLiveRun
 {
     $content = $run->content;
+
     foreach ($items as $position => $fields) {
         $content['items'][$position] = [...$content['items'][$position], ...$fields];
     }

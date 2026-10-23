@@ -22,10 +22,15 @@ use Illuminate\Support\Str;
 
 class SaveSponsorInstructionAction
 {
-    public function __construct(private readonly SponsorInstructionService $instructions, private readonly EventPackCardService $card,
-        private readonly EventPackSourceService $source, private readonly SaveEventPackAction $save,
-        private readonly PersistSponsorCommitmentAction $persist, private readonly EventCardLock $lock,
-        private readonly SponsorInstructionRequirements $requirements) {}
+    public function __construct(
+        private readonly SponsorInstructionService $instructions,
+        private readonly EventPackCardService $card,
+        private readonly EventPackSourceService $source,
+        private readonly SaveEventPackAction $save,
+        private readonly PersistSponsorCommitmentAction $persist,
+        private readonly EventCardLock $lock,
+        private readonly SponsorInstructionRequirements $requirements,
+    ) {}
 
     public function handle(Event $event, int $id, int $version, int $packVersion, string $fingerprint, SponsorInstructionData $data, User $actor): void
     {
@@ -41,9 +46,11 @@ class SaveSponsorInstructionAction
             $preview = $this->instructions->preview($event, $commitment, $data->mode, $data->targetKey?->__toString(), $data->afterMatchId);
             $this->requirements->ensureCanSave($commitment, $pack, $matches, $run, $preview, $card['fingerprint'], $version, $packVersion, $fingerprint, $data);
             $content = $pack->content ?? $this->source->get($event)['content'];
+
             if ($data->mode === SponsorInstructionMode::Remove) {
                 $packKey = PackKey::fromString($commitment->pack_key ?? throw SponsorCommitmentException::reasonRequired());
                 $uuid = $packKey->uuid;
+
                 if ($packKey->kind === SponsorInstructionMode::Segment) {
                     $content['segments'] = array_values(array_filter($content['segments'], fn (array $entry): bool => $entry['id'] !== $uuid));
                 } else {
@@ -54,11 +61,13 @@ class SaveSponsorInstructionAction
             } else {
                 $packKey = $data->targetKey ?? new PackKey($data->mode, (string) Str::uuid());
                 $key = (string) $packKey;
+
                 if (EventSponsorCommitment::query()->forEventId($event->id)->where('pack_key', $key)->whereKeyNot($commitment->id)->exists()) {
                     throw SponsorCommitmentException::usedTarget();
                 }
                 $uuid = $packKey->uuid;
                 $wording = $preview['wording'];
+
                 if ($data->mode === SponsorInstructionMode::Segment) {
                     $entry = ['id' => $uuid, 'label' => $wording['label'], 'notes' => $this->instructions->notes($commitment), 'after_match_id' => $data->afterMatchId,
                         'planned_at' => $preview['target']['planned_at'] ?? null, 'revised_at' => $preview['target']['revised_at'] ?? null, 'minutes' => $preview['target']['minutes'] ?? null];
@@ -67,6 +76,7 @@ class SaveSponsorInstructionAction
                     $entry = ['id' => $uuid, ...$wording];
                     $content['sponsor_tasks'] = array_values(collect($content['sponsor_tasks'] ?? [])->keyBy('id')->put($uuid, $entry)->all());
                 }
+
                 if ($data->mode === SponsorInstructionMode::Segment && count($content['segments']) > 50) {
                     throw SponsorCommitmentException::segmentLimit();
                 }

@@ -33,10 +33,12 @@ final readonly class PublicationDraftRequirements
         $announcement = PublicAnnouncement::from($draft['announcement']);
         $selected = array_column($draft['matches'], 'id');
         $available = array_column($source['matches'], 'id');
+
         if (array_diff($selected, $available) !== [] || ($event->date === null && ! $announcement->isNotice())
             || ($announcement->isNotice() && ($event->date?->isPast() || ! $draft['notice']))) {
             throw EventPublicationException::invalid();
         }
+
         if ($draft['poster'] !== null && ! Storage::disk('local')->exists('event-posters/'.$draft['poster']['key'])) {
             throw EventPublicationException::invalid();
         }

@@ -18,7 +18,7 @@ return new class extends Migration
         // compare emails case-insensitively through the column collation already.
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql' => $connection->statement(
-                'CREATE UNIQUE INDEX users_email_lower_unique ON users (lower(email))'
+                'CREATE UNIQUE INDEX users_email_lower_unique ON users (lower(email))',
             ),
             'mysql', 'mariadb' => null,
             default => throw new LogicException('The database driver does not support case-insensitive unique user emails.'),
@@ -51,7 +51,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce case-insensitive unique user emails: {$conflicts}. "
             .'No changes were made. Change or delete the duplicate users so each email is unique '
-            .'ignoring case, then re-run "php artisan migrate".'
+            .'ignoring case, then re-run "php artisan migrate".',
         );
     }
 };

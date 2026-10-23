@@ -53,6 +53,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             foreach ($events as $event) {
                 expect($event->name)->toBeString()->not->toBeEmpty()
                     ->and($event->date)->toBeInstanceOf(Carbon::class);
+
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
                     expect($event->venue_id)->toBeInt();

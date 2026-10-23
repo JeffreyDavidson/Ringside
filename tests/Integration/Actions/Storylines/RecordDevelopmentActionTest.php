@@ -67,6 +67,7 @@ test('a development refuses an unknown or not-yet-involved cast member', functio
     actingAs(administrator());
     $story = Storyline::factory()->create();
     $id = 99999;
+
     if ($kind !== 'unknown') {
         $wrestler = Wrestler::factory()->for(requiredModel($story->promotion))->create();
         $person = resolve(SaveParticipantAction::class)->handle($story, 1, new ParticipantData('wrestler', $wrestler->id, null, today()->addDay()->toDateString()), signedInUser());
@@ -143,11 +144,14 @@ test('source context comparison retains strict scalar types and ordered lists', 
     $source = new SourceData(eventId: $fixture['event']->id, matchId: $fixture['match']->id);
     $step = plannedStorylineStep($story, $source);
     $context = $step->source_context;
+
     if ($change === 'scalar type') {
         $context['event_deleted'] = 0;
     }
+
     if ($change === 'list order') {
         $competitors = $context['competitors'];
+
         if (! is_array($competitors)) {
             throw new LogicException('The linked match fixture must contain a competitor list.');
         }

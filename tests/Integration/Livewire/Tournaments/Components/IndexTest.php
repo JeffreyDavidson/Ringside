@@ -94,6 +94,7 @@ it('refuses invalid tournament fields before anything is created', function (arr
         ->set('form.name', 'Second Cup')
         ->set('form.capacity', 4)
         ->set('form.entrants', $ids);
+
     foreach ($changes as $field => $value) {
         $page->set($field, $value);
     }

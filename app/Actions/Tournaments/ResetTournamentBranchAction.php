@@ -25,11 +25,13 @@ class ResetTournamentBranchAction
     {
         DB::transaction(function () use ($node, $version, $reason, $actor, $includeCurrent): void {
             $tournament = $this->locks->lock($node->tournament_id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
             $node = $tournament->nodes()->findOrFail($node->id);
             $ids = $this->bracket->descendantNodeIds($node);
+
             if ($includeCurrent) {
                 $ids[] = $node->id;
             }
@@ -44,6 +46,7 @@ class ResetTournamentBranchAction
             if ($links->isEmpty() && ! TournamentNode::query()->whereKey($ids)->whereNotNull('walkover_entry_id')->exists()) {
                 return;
             }
+
             foreach ($links as $link) {
                 $match = $link->match->refreshForUpdate();
                 $run = EventLiveRun::query()
@@ -52,10 +55,12 @@ class ResetTournamentBranchAction
                     ->first();
 
                 $item = collect($run?->content['items'] ?? [])->firstWhere('key', 'match:'.$match->id);
+
                 if ($match->match_finish !== null || ($item !== null && $item['state'] !== LiveItemStatus::Pending->value)) {
                     throw TournamentException::playedDependency();
                 }
             }
+
             foreach ($links as $link) {
                 $this->deletion->delete($link->match, now());
                 $link->forceFill(['active_node_id' => null])->save();

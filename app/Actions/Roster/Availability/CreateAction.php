@@ -28,6 +28,7 @@ class CreateAction
                 throw UnavailabilityException::unowned();
             }
             $reason = $data->reason === null || mb_trim($data->reason) === '' ? null : mb_trim($data->reason);
+
             if (Unavailability::query()->whereMorphedTo('person', $person)->where('promotion_id', $person->promotion_id)
                 ->active()->where('starts_on', $startsOn)->where('ends_on', $endsOn)->where('reason', $reason)->exists()) {
                 throw UnavailabilityException::duplicate();

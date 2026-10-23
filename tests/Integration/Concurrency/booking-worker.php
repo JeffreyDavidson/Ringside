@@ -149,6 +149,7 @@ try {
         $actor = User::query()->findOrFail($spec['user_id']);
         auth()->login($actor);
         $production = json_decode($spec['production_json'], true, flags: JSON_THROW_ON_ERROR);
+
         if (! is_array($production)) {
             throw new InvalidArgumentException('Production worker input must be a JSON object.');
         }
@@ -164,6 +165,7 @@ try {
         auth()->login($actor);
         Carbon::setTestNow($spec['public_clock']);
         $event = Event::query()->findOrFail($spec['public_event_id']);
+
         if ($spec['public_operation'] === 'result') {
             $match = EventMatch::query()->findOrFail($spec['public_match_id']);
             resolve(RecordResultAction::class)->handle($match, new MatchResultData(MatchFinish::Submission, $match->sides()->firstOrFail(), collect()), $actor);
@@ -178,20 +180,31 @@ try {
         resolve(CreateUnavailabilityAction::class)->handle(Wrestler::query()->findOrFail($spec['unavailability_person_id']), new UnavailabilityData($spec['unavailability_day'], $spec['unavailability_day'], null), User::query()->findOrFail($spec['user_id']));
     } elseif (isset($spec['team_id'])) {
         resolve(AddMatchForEventAction::class)->handle(Event::query()->findOrFail($spec['event_id']), new EventMatchData(
-            MatchType::TagTeam, Referee::query()->whereKey($spec['referee_id'])->get(), Title::query()->whereKey([])->get(),
-            new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])), null,
+            MatchType::TagTeam,
+            Referee::query()->whereKey($spec['referee_id'])->get(),
+            Title::query()->whereKey([])->get(),
+            new MatchSides(collect([1 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['team_id'])]], 2 => ['tag_teams' => [TagTeam::query()->findOrFail($spec['opponent_team_id'])]]])),
+            null,
         ), $defaultActor);
     } elseif (isset($spec['talent_event_id'])) {
         $actor = User::query()->findOrFail($spec['user_id']);
         auth()->login($actor);
         Carbon::setTestNow($spec['clock']);
-        resolve(SaveTalentBookingAction::class)->handle(Event::query()->findOrFail($spec['talent_event_id']), 'wrestler', $spec['person_id'],
-            $spec['version'], $spec['fingerprint'], new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'), $actor);
+        resolve(SaveTalentBookingAction::class)->handle(
+            Event::query()->findOrFail($spec['talent_event_id']),
+            'wrestler',
+            $spec['person_id'],
+            $spec['version'],
+            $spec['fingerprint'],
+            new TalentBookingData(TalentBookingStatus::from($spec['talent_status']), null, null, 'UTC', null, true, 'Concurrent change'),
+            $actor,
+        );
     } elseif (isset($spec['sponsor_event_id'])) {
         $actor = User::query()->findOrFail($spec['user_id']);
         auth()->login($actor);
         Carbon::setTestNow($spec['clock']);
         $event = Event::query()->withTrashed()->findOrFail($spec['sponsor_event_id']);
+
         if ($spec['sponsor_operation'] === 'archive') {
             $sponsor = Sponsor::query()->findOrFail($spec['sponsor_id']);
             resolve(SaveSponsorAction::class)->handle(Promotion::query()->findOrFail($sponsor->promotion_id), $sponsor->id, $spec['version'], $sponsor->submission_key, new SponsorData($sponsor->name, archived: true));
@@ -210,9 +223,15 @@ try {
                 'cancel' => SponsorCommitmentStatus::Cancelled,
                 default => SponsorCommitmentStatus::Pending,
             };
-            resolve(SaveSponsorCommitmentAction::class)->handle($event, $spec['sponsor_operation'] === 'create' ? null : $spec['promise_id'], $spec['version'], $spec['submission_key'],
+            resolve(SaveSponsorCommitmentAction::class)->handle(
+                $event,
+                $spec['sponsor_operation'] === 'create' ? null : $spec['promise_id'],
+                $spec['version'],
+                $spec['submission_key'],
                 new SponsorCommitmentData($spec['sponsor_id'], SponsorCommitmentType::Banner, 'Concurrent banner', status: $status, evidence: $status === SponsorCommitmentStatus::Completed ? 'Checked at doors' : null),
-                $actor, 'Concurrent correction');
+                $actor,
+                'Concurrent correction',
+            );
         }
     } elseif (isset($spec['live_event_id'])) {
         $actor = User::query()->findOrFail($spec['user_id']);
@@ -315,7 +334,8 @@ try {
                     2 => ['wrestlers' => [Wrestler::query()->findOrFail($spec['second_wrestler_id'])]],
                 ])),
                 null,
-            ), $defaultActor,
+            ),
+            $defaultActor,
         );
     }
 } catch (BaseBusinessException|ValidationException $exception) {

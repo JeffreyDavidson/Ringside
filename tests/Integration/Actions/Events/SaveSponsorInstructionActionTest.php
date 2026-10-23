@@ -56,8 +56,10 @@ test('repeated announcements each enter the existing order once and require expl
     $event = $world['event'];
     $promise = $world['promise'];
     $save = app(SaveSponsorCommitmentAction::class);
-    $promise = $save->handle($event, $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise,
-        ['type' => SponsorCommitmentType::Announcement, 'instructionLabel' => 'Opening sponsor thanks', 'instruction' => 'Thank Harbor Hardware', 'instructionOwner' => 'Announcer']), signedInUser());
+    $promise = $save->handle($event, $promise->id, 1, $promise->submission_key, sponsorPromiseData(
+        $promise,
+        ['type' => SponsorCommitmentType::Announcement, 'instructionLabel' => 'Opening sponsor thanks', 'instruction' => 'Thank Harbor Hardware', 'instructionOwner' => 'Announcer'],
+    ), signedInUser());
     $screen = app(EventPackViewModel::class);
     $query = app(SponsorInstructionService::class);
     $publisher = app(SaveSponsorInstructionAction::class);
@@ -114,8 +116,14 @@ test('pack edits invalidate previews without losing setup instructions on an ord
     // Arrange
     $world = sponsorFixture();
     $event = $world['event'];
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($event, $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
+    $promise = app(SaveSponsorCommitmentAction::class)->handle(
+        $event,
+        $world['promise']->id,
+        1,
+        $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']),
+        signedInUser(),
+    );
     $query = app(SponsorInstructionService::class);
     $screen = app(EventPackViewModel::class);
     $publisher = app(SaveSponsorInstructionAction::class);
@@ -161,6 +169,7 @@ test('missing wording foreign anchors and unknown destinations refuse pack publi
     // Arrange
     $world = sponsorFixture();
     $promise = $world['promise'];
+
     if ($wording) {
         $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key, sponsorPromiseData($promise, ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
     }

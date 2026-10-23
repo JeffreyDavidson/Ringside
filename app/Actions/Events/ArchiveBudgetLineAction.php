@@ -18,6 +18,7 @@ class ArchiveBudgetLineAction
     {
         return $this->mutate->handle($event, $version, $key, BudgetOperation::ArchiveLine, ['line_id' => $lineId], function (EventBudget $budget) use ($lineId): array {
             $line = $budget->lines()->whereKey($lineId)->lockForUpdate()->firstOrFail();
+
             if ($line->archived_at !== null || ($line->confirmed_cents !== null && $line->confirmed_cents !== 0) || $line->movements()->exists()) {
                 throw BudgetException::cannotArchive();
             }

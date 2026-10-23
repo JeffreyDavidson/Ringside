@@ -28,6 +28,7 @@ it('keeps the rounds readable on phones and contains bracket scrolling', functio
 it('keeps sixteen long tag-team names readable and the bracket contained on phones', function (): void {
     $world = tournamentFixture(capacity: 16, kind: EntrantKind::TagTeam);
     $t = $world['tournament'];
+
     foreach ($t->entries()->get() as $entry) {
         $entry->competitor()->firstOrFail()->update(['name' => 'The North Atlantic Championship Alliance '.$entry->seed]);
     }

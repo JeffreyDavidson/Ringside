@@ -57,7 +57,7 @@ test('the migration lists the users that share an email ignoring case before cha
     expect(fn () => $up->invoke($migration))
         ->toThrow(
             RuntimeException::class,
-            "Cannot enforce case-insensitive unique user emails: email foo@example.com is used by user ids {$ids}. No changes were made."
+            "Cannot enforce case-insensitive unique user emails: email foo@example.com is used by user ids {$ids}. No changes were made.",
         )
         ->and(collect(Schema::getIndexes('users'))->contains('name', 'users_email_lower_unique'))->toBeFalse()
         ->and(DB::table('users')->pluck('email')->all())->toEqualCanonicalizing(['Foo@Example.com', 'foo@example.com']);

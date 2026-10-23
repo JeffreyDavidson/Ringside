@@ -1,5 +1,6 @@
 @php
     $notificationMessage = session('error') ?? session('status');
+
     if ($notificationMessage !== null && ! is_string($notificationMessage)) {
         throw new \UnexpectedValueException('Flash notifications must contain a string message.');
     }

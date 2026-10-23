@@ -28,11 +28,13 @@ class DateCanBeChanged implements ValidationRule
         }
 
         $date = $value === null ? null : PromotionTimeZoneService::parseEventLocalDate($this->event, $value);
+
         try {
             EventSchedulingEligibility::ensureDateCanChange(
                 $this->event,
                 $date,
             );
+
             if (EventSchedulingEligibility::isDateChanging($this->event, $date)) {
                 resolve(EventRosterSchedulingEligibility::class)->ensureAvailableAt($this->event, $date);
             }

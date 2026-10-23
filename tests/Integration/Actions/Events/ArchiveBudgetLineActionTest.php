@@ -26,6 +26,7 @@ test('plan-only lines archive with history and leave active totals', function ()
 test('lines with an obligation or even voided movements cannot be hidden by archiving', function (string $case): void {
     // Arrange
     $f = budgetFixture(['confirmed_cents' => $case === 'obligation' ? 1 : 0]);
+
     if ($case === 'movement') {
         EventBudgetMovement::factory()->for($f['line'], 'line')->create(['voided_at' => now()]);
     }

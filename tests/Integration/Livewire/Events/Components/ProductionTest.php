@@ -114,9 +114,11 @@ test('the editor refuses malformed production input and saves nothing', function
     if ($case === 'duplicate assignment') {
         $assignments[] = $assignments[0];
     }
+
     if ($case === 'duplicate cue') {
         $cues[] = $cues[0];
     }
+
     if ($case === 'unsafe url') {
         $cues[0]['url'] = 'javascript:alert(1)';
     }

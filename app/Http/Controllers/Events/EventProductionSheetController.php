@@ -14,8 +14,12 @@ class EventProductionSheetController
     public function show(Event $event, EventProductionSheetRequest $request, EventProductionViewModel $viewModel): View
     {
         return view($request->boolean('print') ? 'events.production-print' : 'events.production', [
-            'sheet' => $viewModel->data($event, $request->filled('source') ? $request->string('source')->toString() : null,
-                $request->filled('person') ? $request->integer('person') : null, $request->filled('role') ? $request->string('role')->toString() : null),
+            'sheet' => $viewModel->data(
+                $event,
+                $request->filled('source') ? $request->string('source')->toString() : null,
+                $request->filled('person') ? $request->integer('person') : null,
+                $request->filled('role') ? $request->string('role')->toString() : null,
+            ),
         ]);
     }
 }

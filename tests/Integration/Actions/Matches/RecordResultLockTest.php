@@ -22,7 +22,8 @@ function recordResultStatements(EventMatch $match, MatchSide $winningSide): arra
 {
     return recordStatements(fn () => resolve(RecordResultAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, collect()), administrator(),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, collect()),
+        administrator(),
     ));
 }
 
@@ -56,6 +57,7 @@ describe('result recording locks', function (): void {
             ->sequence(['position' => 1], ['position' => 2])
             ->create()
             ->all();
+
         foreach ([$winningSide, $losingSide] as $side) {
             MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for(Wrestler::factory(), 'competitor')->create();
         }
@@ -82,6 +84,7 @@ describe('result recording locks', function (): void {
             ->sequence(['position' => 1], ['position' => 2])
             ->create()
             ->all();
+
         foreach ([$secondSide, $firstSide] as $side) {
             MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for(Wrestler::factory(), 'competitor')->create();
         }
@@ -137,6 +140,7 @@ describe('result recording locks', function (): void {
         $losingSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
         [$first, $second] = Wrestler::factory()->bookable()->count(2)->create()->all();
         $loser = Wrestler::factory()->bookable()->create();
+
         foreach ([$second, $first] as $wrestler) {
             MatchCompetitor::factory()->for($match, 'eventMatch')->for($winningSide, 'side')->for($wrestler, 'competitor')->create();
         }

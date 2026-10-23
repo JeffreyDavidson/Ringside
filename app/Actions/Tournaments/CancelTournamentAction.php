@@ -21,13 +21,16 @@ class CancelTournamentAction
     {
         DB::transaction(function () use ($tournament, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($tournament->id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
+
             if ($tournament->status === TournamentStatus::Cancelled) {
                 return;
             }
             $this->states->ensureCanMove($tournament, TournamentStatus::Cancelled);
+
             foreach ($this->bracket->bouts($tournament) as $bout) {
                 if ($bout->link !== null && $bout->link->match->match_finish === null && ! $bout->link->match->trashed() && $bout->link->refresh()->active_node_id !== null) {
                     $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);

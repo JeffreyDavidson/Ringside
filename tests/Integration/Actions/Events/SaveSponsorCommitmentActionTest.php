@@ -32,8 +32,14 @@ test('an event promise records its own version and private history', function ()
     actingAs($user);
 
     // Act
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($event, null, 0, (string) Str::uuid(),
-        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Hang the entrance banner'), signedInUser());
+    $promise = app(SaveSponsorCommitmentAction::class)->handle(
+        $event,
+        null,
+        0,
+        (string) Str::uuid(),
+        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Hang the entrance banner'),
+        signedInUser(),
+    );
 
     // Assert
     expect($promise->description)->toBe('Hang the entrance banner')
@@ -350,8 +356,14 @@ test('a new promise records the actor passed in on its revision', function (): v
     $actor = administrator();
 
     // Act
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($event, null, 0, (string) Str::uuid(),
-        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Hang the entrance banner'), $actor);
+    $promise = app(SaveSponsorCommitmentAction::class)->handle(
+        $event,
+        null,
+        0,
+        (string) Str::uuid(),
+        new SponsorCommitmentData($sponsor->id, SponsorCommitmentType::Banner, 'Hang the entrance banner'),
+        $actor,
+    );
 
     // Assert
     $revision = $promise->revisions()->sole();

@@ -67,6 +67,7 @@ function releasedPublicationWorld(bool $withResults = false): array
     $world = publicEventFixture();
     savePublicDraft($world['event']);
     $publication = releasePublicPage($world['event']);
+
     if ($withResults) {
         $publication = releasePublicPage($world['event'], 'results');
     }

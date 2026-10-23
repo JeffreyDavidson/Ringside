@@ -17,12 +17,24 @@ use Illuminate\Support\Facades\DB;
 
 class SaveSponsorCommitmentAction
 {
-    public function __construct(private readonly SponsorCommitmentContextService $context, private readonly PersistSponsorCommitmentAction $persist,
-        private readonly SponsorCommitmentRequirements $requirements, private readonly SponsorCommitmentStateMachine $machine) {}
+    public function __construct(
+        private readonly SponsorCommitmentContextService $context,
+        private readonly PersistSponsorCommitmentAction $persist,
+        private readonly SponsorCommitmentRequirements $requirements,
+        private readonly SponsorCommitmentStateMachine $machine,
+    ) {}
 
-    public function handle(Event $event, ?int $id, int $version, string $submissionKey, SponsorCommitmentData $data, User $actor,
-        ?string $reason = null, bool $reviewed = false, bool $refreshSponsorName = false): EventSponsorCommitment
-    {
+    public function handle(
+        Event $event,
+        ?int $id,
+        int $version,
+        string $submissionKey,
+        SponsorCommitmentData $data,
+        User $actor,
+        ?string $reason = null,
+        bool $reviewed = false,
+        bool $refreshSponsorName = false,
+    ): EventSponsorCommitment {
         return DB::transaction(function () use ($event, $id, $version, $submissionKey, $data, $actor, $reason, $reviewed, $refreshSponsorName): EventSponsorCommitment {
             $event = Event::query()
                 ->withTrashed()
@@ -48,8 +60,12 @@ class SaveSponsorCommitmentAction
                     ->firstOrFail();
             }
 
-            $this->requirements->ensureCurrentSubmission($commitment, $version, $submissionKey,
-                fn (): bool => EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists());
+            $this->requirements->ensureCurrentSubmission(
+                $commitment,
+                $version,
+                $submissionKey,
+                fn (): bool => EventSponsorCommitment::query()->forEventId($event->id)->where('submission_key', $submissionKey)->exists(),
+            );
             $this->requirements->ensureCanSelect($event, $sponsor, $commitment);
             $this->machine->ensureCanMove($commitment, $data->status, $reason);
             $this->machine->ensureCanComplete($data->status, $data->evidence, $data->completedAt);
@@ -58,6 +74,7 @@ class SaveSponsorCommitmentAction
             $commitment->version = $version;
             $commitment->promotion_id = $sponsor->promotion_id;
             $commitment->event_id = $event->id;
+
             if ($isNew || $commitment->sponsor_id !== $sponsor->id || $refreshSponsorName) {
                 $commitment->sponsor_name = $sponsor->name;
             }
@@ -79,6 +96,7 @@ class SaveSponsorCommitmentAction
             ]);
             $commitment->status = $data->status;
             $commitment->completed_at = $data->status === SponsorCommitmentStatus::Completed ? ($data->completedAt ?? $commitment->completed_at ?? now()) : null;
+
             if ($isNew || $reviewed) {
                 $commitment->event_context = $this->context->get($event);
             }

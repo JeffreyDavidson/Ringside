@@ -259,6 +259,7 @@ describe('User Role Integration Tests', function () {
 
             // Verify all are now administrators
             $updatedUsers = User::whereIn('id', $users->pluck('id'))->get();
+
             foreach ($updatedUsers as $user) {
                 expect($user->role->isAdministrator())->toBeTrue()
                     ->and(Gate::forUser($user)->allows('create', User::class))->toBeTrue();

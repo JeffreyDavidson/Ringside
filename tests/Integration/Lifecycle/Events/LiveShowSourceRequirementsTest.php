@@ -79,10 +79,12 @@ describe('live show source requirements', function (): void {
     it('reports a run as changed after a newer pack version or a changed card', function (string $change): void {
         // Arrange
         $fixture = liveShowFixture();
+
         if ($change === 'pack') {
             $pack = $fixture['event']->pack()->firstOrFail();
             resolve(SaveEventPackAction::class)->handle($fixture['event'], 1, $pack->card_fingerprint, EventPackData::fromValidated([...$pack->content, 'notes' => 'Revised']), false);
         }
+
         if ($change === 'card') {
             EventMatch::query()->where('event_id', $fixture['event']->id)->firstOrFail()->delete();
         }

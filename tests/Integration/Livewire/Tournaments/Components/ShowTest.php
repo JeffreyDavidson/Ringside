@@ -112,10 +112,12 @@ it('performs reviewed entry administration through the protected screen', functi
     $node = $t->nodes()->where('round', 1)->where('position', 1)->firstOrFail();
     $entry = $t->entries()->firstOrFail();
     $replacement = Wrestler::factory()->employed()->for($world['promotion'])->create();
+
     if ($operation === 'walkover') {
         resolve(WithdrawTournamentEntryAction::class)->handle($entry, $t->refresh()->version, 'Unavailable', signedInUser());
     }
     $page = livewire(Show::class, ['tournamentId' => $t->id])->call('begin', $operation, in_array($operation, ['replace', 'withdraw'], true) ? $entry->id : $node->id)->set('draft.reason', 'Reviewed tournament change')->set('draft.confirmed', true);
+
     if ($operation === 'replace') {
         $page->set('draft.replacementId', $replacement->id);
     }
@@ -208,6 +210,7 @@ it('refuses invalid tournament fields when saving an existing tournament', funct
     $tournament = $world['tournament'];
     $name = $tournament->name;
     $page = livewire(Show::class, ['tournamentId' => $tournament->id]);
+
     foreach ($changes as $field => $value) {
         $page->set($field, $value);
     }

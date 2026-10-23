@@ -20,6 +20,7 @@ class RetractDevelopmentAction
         DB::transaction(function () use ($storyline, $version, $developmentId, $reason, $reopenStep, $actor): void {
             $story = $this->lock->handle($storyline, $version);
             $development = $story->developments()->findOrFail($developmentId);
+
             if ($development->retracted_at !== null) {
                 throw StorylineConflictException::state();
             }
@@ -27,6 +28,7 @@ class RetractDevelopmentAction
             $development->retracted_at = now();
             $development->version++;
             $development->save();
+
             if ($development->storyline_step_id !== null) {
                 $step = $story->steps()->findOrFail($development->storyline_step_id);
                 $step->status = $reopenStep ? StepStatus::Planned : StepStatus::Cancelled;

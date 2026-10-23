@@ -130,7 +130,7 @@ class Event extends Model implements SoftDeletable
         return Attribute::make(
             get: fn (): ?Carbon => $this->date instanceof Carbon
                 ? PromotionTimeZoneService::toLocalTime($this->promotion, $this->date)
-                : null
+                : null,
         );
     }
 
@@ -142,7 +142,7 @@ class Event extends Model implements SoftDeletable
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn (): EventStatus => EventStatus::fromDate($this->date)
+            get: fn (): EventStatus => EventStatus::fromDate($this->date),
         );
     }
 }

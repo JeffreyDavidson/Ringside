@@ -38,6 +38,7 @@ class SaveTournamentAction
 
                 if ($existing !== null) {
                     $acceptedIds = array_values($existing->entries()->get()->map(fn (TournamentEntry $entry): int => $entry->competitor_id)->all());
+
                     if ($existing->name !== mb_trim($data->name) || $existing->description !== $data->description || $existing->entrant_kind !== $data->kind || $existing->capacity !== $data->capacity || $existing->repeat_appearances !== $data->repeatAppearances || $acceptedIds !== $data->competitorIds) {
                         throw RecordChangedException::changed();
                     }
@@ -52,6 +53,7 @@ class SaveTournamentAction
             if ($locked->exists && ($locked->promotion_id !== $promotion->id || $locked->version !== $version)) {
                 throw RecordChangedException::changed();
             }
+
             if ($locked->exists) {
                 $this->states->ensureStructureEditable($locked);
             }
@@ -80,10 +82,12 @@ class SaveTournamentAction
             $locked->save();
             $locked->nodes()->delete();
             $locked->entries()->delete();
+
             foreach ($data->competitorIds as $offset => $id) {
                 $competitor = $competitors->sole('id', $id);
                 (new TournamentEntry)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'seed' => $offset + 1, 'competitor_type' => $competitor->getMorphClass(), 'competitor_id' => $id])->save();
             }
+
             foreach (new BracketShape($data->capacity)->slots() as [$round, $position, $firstSeed, $secondSeed]) {
                 (new TournamentNode)->forceFill(['promotion_id' => $promotion->id, 'tournament_id' => $locked->id, 'round' => $round, 'position' => $position, 'first_seed' => $firstSeed, 'second_seed' => $secondSeed])->save();
             }
