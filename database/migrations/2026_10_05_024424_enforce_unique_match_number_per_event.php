@@ -46,7 +46,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce unique match numbers per event: {$conflicts}. "
             .'No changes were made. Renumber the repeated matches (deleted matches count too), '
-            .'then re-run "php artisan migrate".'
+            .'then re-run "php artisan migrate".',
         );
     }
 };

@@ -27,6 +27,7 @@ function productionFixture(): array
     ]), false, signedInUser());
 
     $content = $event->pack()->firstOrFail()->content;
+
     if (! isset($content['production'])) {
         throw new RuntimeException('Production fixture was not saved.');
     }

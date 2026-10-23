@@ -82,7 +82,7 @@ test('it restores wrestler without automatically restoring relationships', funct
     $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()]);
     $wrestler->managers()->wherePivot('fired_at', null)->updateExistingPivot(
         $wrestler->managers->first()->id ?? 1,
-        ['fired_at' => now()->subDays(5)]
+        ['fired_at' => now()->subDays(5)],
     );
 
     $wrestler->delete(); // Soft delete

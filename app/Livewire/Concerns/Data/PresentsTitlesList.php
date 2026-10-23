@@ -29,7 +29,7 @@ trait PresentsTitlesList
             ->offeredForPromotion($this->titlesPromotionId(), $this->selectedTitleIds())
             ->pluck('name', 'id')
             ->mapWithKeys(
-                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null],
             )
             ->all();
     }

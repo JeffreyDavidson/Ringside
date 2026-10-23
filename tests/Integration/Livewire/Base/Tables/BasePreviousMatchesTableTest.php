@@ -87,6 +87,7 @@ describe('previous matches tables', function (): void {
     ): void {
         // Arrange
         $owner = $createOwner();
+
         foreach (['Historic Owner Event', 'Former Owner Event'] as $name) {
             $bookMatch(
                 EventMatch::factory()->for(Event::factory()->create(['promotion_id' => $owner->getAttribute('promotion_id'),

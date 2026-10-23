@@ -69,6 +69,7 @@ it('masks passwords before JavaScript loads', function (string $routeName, int $
     Assert::assertNotNull($form);
     $inputs = $form->querySelectorAll('input[name="password"], input[name="password_confirmation"]');
     expect($inputs)->toHaveCount($count);
+
     foreach ($inputs as $input) {
         expect($input->getAttribute('type'))->toBe('password');
     }

@@ -177,9 +177,11 @@ describe('match form validation feedback', function (): void {
 
         // Assert
         $errors = $modal->instance()->getErrorBag();
+
         foreach ($expectedMessages as $field => $message) {
             expect($errors->first($field))->toBe($message);
         }
+
         foreach ($absentErrors as $field) {
             expect($errors->has($field))->toBeFalse();
         }

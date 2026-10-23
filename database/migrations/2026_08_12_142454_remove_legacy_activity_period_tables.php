@@ -15,7 +15,7 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX activity_periods_one_open_period_unique '
-                .'ON activity_periods (activeable_type, activeable_id) WHERE ended_at IS NULL'
+                .'ON activity_periods (activeable_type, activeable_id) WHERE ended_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE activity_periods '
@@ -24,7 +24,7 @@ return new class extends Migration
                 .'ADD COLUMN current_activeable_type VARCHAR(255) '
                 .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN activeable_type ELSE NULL END) STORED, '
                 .'ADD UNIQUE INDEX activity_periods_one_open_period_unique '
-                .'(current_activeable_type, current_activeable_id)'
+                .'(current_activeable_type, current_activeable_id)',
             ),
             default => throw new LogicException('The database driver does not support open activity-period constraints.'),
         };

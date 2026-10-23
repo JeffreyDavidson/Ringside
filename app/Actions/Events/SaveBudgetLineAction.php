@@ -39,6 +39,7 @@ class SaveBudgetLineAction
             if ($line->archived_at !== null) {
                 throw BudgetException::archived();
             }
+
             if ($lineId === null && $budget->lines()->count() >= 500) {
                 throw BudgetException::lineLimit();
             }
@@ -47,17 +48,21 @@ class SaveBudgetLineAction
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get());
+
             if ($line->exists && ($line->direction !== $attributes['direction']) && $line->movements->isNotEmpty()) {
                 throw BudgetException::directionLocked();
             }
             $confirmedChanged = $line->exists && $line->confirmed_cents !== $attributes['confirmed_cents'];
+
             if ($confirmedChanged && $reason === null) {
                 throw BudgetException::reasonRequired();
             }
+
             if (($confirmedChanged || ! $line->exists) && $attributes['confirmed_cents'] !== null && $this->settlement->net($line) > $attributes['confirmed_cents'] && ! $data->acknowledge) {
                 throw BudgetException::excess();
             }
             $line->fill($attributes);
+
             if ($line->exists && ! $line->isDirty()) {
                 return null;
             }

@@ -19,7 +19,7 @@ return new class extends Migration
         if ($duplicateNames->isNotEmpty()) {
             throw new RuntimeException(
                 'Cannot enforce unique active stable names. Resolve duplicate active names first: '
-                .$duplicateNames->join(', ')
+                .$duplicateNames->join(', '),
             );
         }
 
@@ -35,7 +35,7 @@ return new class extends Migration
     private function createFilteredUniqueIndex(Connection $connection): void
     {
         $connection->statement(
-            'CREATE UNIQUE INDEX stables_active_name_unique ON stables (name) WHERE deleted_at IS NULL'
+            'CREATE UNIQUE INDEX stables_active_name_unique ON stables (name) WHERE deleted_at IS NULL',
         );
     }
 
@@ -45,7 +45,7 @@ return new class extends Migration
             'ALTER TABLE stables '
             .'ADD COLUMN active_name VARCHAR(255) '
             .'GENERATED ALWAYS AS (CASE WHEN deleted_at IS NULL THEN name ELSE NULL END) STORED, '
-            .'ADD UNIQUE INDEX stables_active_name_unique (active_name)'
+            .'ADD UNIQUE INDEX stables_active_name_unique (active_name)',
         );
     }
 };

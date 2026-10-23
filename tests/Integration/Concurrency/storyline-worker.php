@@ -17,6 +17,7 @@ $app = require dirname(__DIR__, 3).'/bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 $arguments = $_SERVER['argv'] ?? [];
 $payload = is_array($arguments) ? ($arguments[1] ?? null) : null;
+
 if (! is_string($payload)) {
     throw new InvalidArgumentException('Missing test-worker specification.');
 }
@@ -28,11 +29,14 @@ Carbon::setTestNow($spec['clock']);
 $story = Storyline::query()->findOrFail($spec['story']);
 fwrite(STDOUT, "READY\n");
 $start = (float) fgets(STDIN);
+
 while (microtime(true) < $start) {
     usleep(1000);
 }
+
 try {
     $source = new SourceData($spec['event']);
+
     if ($spec['operation'] === 'development') {
         resolve(RecordDevelopmentAction::class)->handle($story, $spec['version'], new DevelopmentData('Concurrent outcome', 'The argument happened.', today()->toDateString(), 1, [], $source, $spec['submission']), $actor);
     } else {

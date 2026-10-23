@@ -1,6 +1,16 @@
 {
     "preset": "laravel",
     "rules": {
-        "Pint/laravel_blade": true
+        "Pint/laravel_blade": true,
+        "method_argument_space": {
+            "on_multiline": "ensure_fully_multiline"
+        },
+        "trailing_comma_in_multiline": {
+            "elements": ["arrays", "arguments", "parameters"]
+        },
+        "blank_line_before_statement": {
+            "statements": ["return", "throw", "if", "try", "foreach", "for", "while", "do", "switch"]
+        },
+        "method_chaining_indentation": true
     }
 }

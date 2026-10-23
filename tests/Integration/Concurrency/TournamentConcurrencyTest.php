@@ -25,6 +25,7 @@ function tournamentRace(array $specs): array
 {
     $processes = [];
     $inputs = [];
+
     foreach ($specs as $index => $spec) {
         $inputs[$index] = new InputStream;
         $processes[$index] = new Process([PHP_BINARY, __DIR__.'/tournament-worker.php', json_encode($spec, JSON_THROW_ON_ERROR)]);
@@ -33,29 +34,35 @@ function tournamentRace(array $specs): array
         $processes[$index]->start();
     }
     $deadline = microtime(true) + 15;
+
     foreach ($processes as $process) {
         while (! str_contains($process->getOutput(), 'READY') && $process->isRunning() && microtime(true) < $deadline) {
             usleep(10000);
         }
+
         if (! str_contains($process->getOutput(), 'READY')) {
             throw new RuntimeException('Tournament worker failed to initialize: '.$process->getErrorOutput());
         }
     }
     $start = microtime(true) + 0.2;
+
     foreach ($inputs as $input) {
         $input->write($start."\n");
         $input->close();
     }
+
     while (microtime(true) < $start) {
         foreach ($processes as $process) {
             $process->isRunning();
         } usleep(1000);
     }
     $outcomes = [];
+
     foreach ($processes as $process) {
         $process->wait();
         preg_match('/RESULT:(.*)/', $process->getOutput(), $matches);
         $outcome = json_decode($matches[1] ?? '', true);
+
         if (! is_array($outcome) || ! isset($outcome['ok'], $outcome['deadlock']) || ! is_bool($outcome['ok']) || ! is_bool($outcome['deadlock'])) {
             throw new RuntimeException('Tournament worker failed: '.$process->getErrorOutput());
         }
@@ -126,6 +133,7 @@ it('serializes a qualifier correction against a dependent booking', function ():
         $results = tournamentRace([[...$base, 'node_id' => $final->id], [...$base, 'operation' => 'result', 'match_id' => $first->id, 'side_id' => $first->sides()->where('position', 2)->firstOrFail()->id]]);
         expect(collect($results)->where('ok', true)->count())->toBe(1)->and(deadlocksResolvedSince($before))->toBe(0);
         $bout = resolve(TournamentBracketService::class)->bout($final);
+
         if ($bout->link !== null) {
             expect($bout->link->match->wrestlers()->pluck('wrestlers.id')->all())->toEqualCanonicalizing([$bout->first?->competitor_id, $bout->second?->competitor_id]);
         }

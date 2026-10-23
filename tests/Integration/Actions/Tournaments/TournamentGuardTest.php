@@ -81,6 +81,7 @@ it('preserves a played entrant and rejects duplicate replacements', function (bo
     $t = $world['tournament'];
     $entry = $t->entries()->firstOrFail();
     $match = bookTournamentNode($world, $t->nodes()->firstOrFail());
+
     if ($played) {
         recordTournamentWinner($match, $t);
     }
@@ -111,9 +112,11 @@ it('refuses an unavailable opponent or two withdrawn entrants as a walkover', fu
     $first = $bout->first ?? throw new RuntimeException('Expected entrant');
     $second = $bout->second ?? throw new RuntimeException('Expected entrant');
     resolve(WithdrawTournamentEntryAction::class)->handle($first, $t->refresh()->version, 'Cannot compete', administrator());
+
     if ($both) {
         resolve(WithdrawTournamentEntryAction::class)->handle($second, $t->refresh()->version, 'Cannot compete', administrator());
     }
+
     if (! $both) {
         $second->competitor()->firstOrFail()->delete();
     }
@@ -145,10 +148,12 @@ it('refuses a review if event membership or dates changed while obtaining its un
     $pending = true;
     DB::listen(function (QueryExecuted $query) use (&$pending, $event, $other, $node, $dateChanged): void {
         $sql = normalizedSql($query->sql);
+
         if (! $pending || ! str_contains($sql, 'select "id" from "events"') || ! str_contains($sql, 'order by "id" asc')) {
             return;
         }
         $pending = false;
+
         if ($dateChanged) {
             $event->update(['date' => now()->addWeek()]);
 

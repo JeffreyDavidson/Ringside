@@ -248,6 +248,7 @@ function freshModel(?Model $model): Model
     }
 
     $freshModel = $model->fresh();
+
     if ($freshModel === null) {
         throw new RuntimeException('Expected the model to exist when reloading it.');
     }

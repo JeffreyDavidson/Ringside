@@ -89,11 +89,13 @@ class Profile extends Component
         $person = $this->person();
         Gate::authorize('update', $person);
         $data = $this->form->toData();
+
         if ($this->reviewSignature !== $this->form->signature()) {
             $this->addError('form.startsOn', __('availability.review_first'));
 
             return;
         }
+
         try {
             $entry = $create->handle($person, $data, $this->actor());
         } catch (BaseBusinessException $exception) {
@@ -120,6 +122,7 @@ class Profile extends Component
     {
         $person = $this->person();
         Gate::authorize('update', $person);
+
         if ($this->cancelId === null) {
             return;
         }
@@ -134,6 +137,7 @@ class Profile extends Component
     {
         $startsOn = $this->form->startsOn;
         $endsOn = $this->form->endsOn;
+
         if ($this->savedEntryId !== null) {
             $entry = $person->unavailabilities()->where('promotion_id', $person->promotion_id)->findOrFail($this->savedEntryId);
             $startsOn = $entry->starts_on;

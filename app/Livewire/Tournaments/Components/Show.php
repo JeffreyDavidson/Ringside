@@ -135,9 +135,11 @@ class Show extends Component
         $this->nodeId = null;
         $this->entryId = null;
         $eventId = null;
+
         if ($draft->target() === TournamentOperationTarget::Entry) {
             $this->entryId = $tournament->entries()->findOrFail($id)->id;
         }
+
         if ($draft->target() === TournamentOperationTarget::Node) {
             $node = $tournament->nodes()->findOrFail($id);
             $this->nodeId = $node->id;
@@ -252,15 +254,18 @@ class Show extends Component
         if (in_array($operation, [TournamentOperation::Reset, TournamentOperation::Unbook], true) && $this->nodeId !== null) {
             $node = $this->node($tournament);
             $ids = $bracket->descendantNodeIds($node);
+
             if ($operation === TournamentOperation::Unbook) {
                 $ids[] = $node->id;
             }
 
             return $bouts->only($ids);
         }
+
         if ($operation?->target() === TournamentOperationTarget::Entry && $this->entryId !== null) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->first?->id === $this->entryId || $bout->second?->id === $this->entryId);
         }
+
         if ($operation === TournamentOperation::Cancel) {
             return $bouts->filter(fn (TournamentBoutData $bout): bool => $bout->link instanceof TournamentMatchLink && $bout->link->match->match_finish === null);
         }
@@ -290,6 +295,7 @@ class Show extends Component
     private function perform(Closure $operation): void
     {
         Gate::authorize('update', $this->tournament());
+
         try {
             $operation();
         } catch (BaseBusinessException $exception) {

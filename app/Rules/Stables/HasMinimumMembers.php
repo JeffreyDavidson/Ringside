@@ -20,7 +20,7 @@ class HasMinimumMembers implements ValidationRule
      */
     public function __construct(
         private readonly Collection $wrestlers,
-        private readonly Collection $tagTeams
+        private readonly Collection $tagTeams,
     ) {}
 
     /**

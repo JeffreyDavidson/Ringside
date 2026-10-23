@@ -99,7 +99,7 @@ class AddWrestlersToMatchAction
             ->get();
 
         if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
-            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler, $event->date)
+            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler, $event->date),
         )) {
             throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
@@ -109,6 +109,7 @@ class AddWrestlersToMatchAction
             $lockedWrestlers,
             $lockedMatch,
         );
+
         foreach ($lockedWrestlers as $person) {
             if (! in_array(RosterDateAvailability::key($person), $retainedKeys, true)) {
                 $this->dateAvailability->ensureForEvent($person, $event);

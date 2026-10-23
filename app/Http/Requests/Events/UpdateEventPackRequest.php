@@ -76,6 +76,7 @@ class UpdateEventPackRequest extends FormRequest
 
         $content['matches'] = array_values($content['matches'] ?? []);
         $content['segments'] = array_values($content['segments'] ?? []);
+
         foreach ($content['matches'] as $index => $entry) {
             $entry += ['planned_at' => null, 'revised_at' => null, 'minutes' => null, 'notes' => null];
             $entry['match_id'] = (int) $entry['match_id'];

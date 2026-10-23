@@ -71,6 +71,7 @@ class Directory extends Component
         $contact = $this->contactId === null ? null : CrewContact::query()->findOrFail($this->contactId);
         Gate::authorize($contact === null ? 'create' : 'update', $contact ?? CrewContact::class);
         $data = $this->form->toData();
+
         try {
             $action->handle($contact, $this->version, $this->form->clientId, $data, $this->actor());
             $this->editing = false;
@@ -84,6 +85,7 @@ class Directory extends Component
     {
         $contact = CrewContact::query()->findOrFail($id);
         Gate::authorize('archive', $contact);
+
         try {
             $action->handle($contact, $version, $this->actor());
         } catch (BaseBusinessException $exception) {

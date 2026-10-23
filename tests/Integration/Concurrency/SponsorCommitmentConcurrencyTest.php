@@ -41,8 +41,14 @@ function sponsorWorkerSpec(array $world, string $operation): array
 function publishSponsorFixture(array $world): void
 {
     $promise = $world['promise'];
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $promise->id, 1, $promise->submission_key,
-        sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']), signedInUser());
+    $promise = app(SaveSponsorCommitmentAction::class)->handle(
+        $world['event'],
+        $promise->id,
+        1,
+        $promise->submission_key,
+        sponsorPromiseData($promise, ['instructionLabel' => 'Sponsor thanks', 'instruction' => 'Thank Harbor Hardware']),
+        signedInUser(),
+    );
     $pack = app(EventPackViewModel::class)->data($world['event']);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Segment, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Segment, null, null)['hash']), signedInUser());
 }
@@ -120,6 +126,7 @@ test('sponsor concurrency never mixes a published instruction into an unreviewed
             ->and($world['event']->pack()->firstOrFail()->version)->toBe(2)
             ->and(deadlocksResolvedSince($deadlocks))->toBe(0);
         $live = $world['event']->liveRun()->first();
+
         if ($live !== null) {
             expect($live->pack_version)->toBe(1)->and($live->content['items'])->toHaveCount(1);
         }

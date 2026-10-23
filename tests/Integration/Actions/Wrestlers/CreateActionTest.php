@@ -24,7 +24,7 @@ test('it creates a wrestler with basic information', function () {
         weight: 251,
         hometown: 'West Newbury, Massachusetts',
         signature_move: 'Attitude Adjustment',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -59,7 +59,7 @@ test('it creates a wrestler with employment when employment date is provided', f
         weight: 260,
         hometown: 'Miami, Florida',
         signature_move: 'Rock Bottom',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -91,7 +91,7 @@ test('it creates wrestler with all optional fields', function () {
         weight: 252,
         hometown: 'Austin, Texas',
         signature_move: 'Stone Cold Stunner',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(CreateAction::class)->handle($data);
@@ -127,7 +127,7 @@ test('it handles height conversion correctly', function () {
         weight: 200,
         hometown: 'Test City',
         signature_move: 'Test Move',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(CreateAction::class)->handle($data);

@@ -24,13 +24,16 @@ class PrepareLiveShowAction
     {
         return DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $actor): EventLiveRun {
             ['event' => $event, 'run' => $run] = $this->card->lock($event->id);
+
             if ($run !== null || $version !== 0) {
                 throw RecordChangedException::changed();
             }
             $source = $this->source->ensureSource($event);
+
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)) {
                 throw RecordChangedException::changed();
             }
+
             if (PromotionTimeZoneService::toLocalTime($event->promotion, Carbon::parse($source['content']['event_date']))->startOfDay()->lt(PromotionTimeZoneService::toLocalTime($event->promotion, now())->startOfDay())) {
                 throw LiveShowException::oldEvent();
             }

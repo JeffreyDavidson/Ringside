@@ -92,6 +92,7 @@ class Budget extends Component
         $this->open(BudgetOperation::SaveLine, $lineId);
         $this->lineForm->direction = $direction;
         $this->lineForm->category = $direction === 'income' ? 'tickets' : 'talent';
+
         if ($lineId !== null) {
             $line = $this->line($lineId);
             $this->draftLabel = $line->description;
@@ -113,6 +114,7 @@ class Budget extends Component
         $this->draftLabel = $line->description.' · '.$line->counterparty;
         $this->movementForm->kind = $kind;
         $this->movementForm->effective_date = now($line->budget->timezone)->toDateString();
+
         if ($movementId !== null) {
             $movement = $line->movements()->whereKey($movementId)->firstOrFail();
             $this->movementForm->fill(['kind' => $movement->kind->value, 'amount' => UsdAmount::decimal($movement->amount_cents),
@@ -124,6 +126,7 @@ class Budget extends Component
     public function updatedMovementFormKind(string $kind): void
     {
         Gate::authorize('updateBudget', $this->event());
+
         if ($kind === 'payment') {
             $this->movementForm->source_id = null;
         }
@@ -158,6 +161,7 @@ class Budget extends Component
     public function showHistory(?int $lineId = null): void
     {
         Gate::authorize('viewBudget', $this->event());
+
         if ($lineId !== null) {
             $this->line($lineId);
         }
@@ -180,6 +184,7 @@ class Budget extends Component
     ): void {
         $event = $this->event();
         Gate::authorize('updateBudget', $event);
+
         if (! $this->operation instanceof BudgetOperation) {
             $this->addError('budget', __('event-budget.draft_required'));
 
@@ -189,9 +194,11 @@ class Budget extends Component
         $movementInput = $this->operation->needsMovementInput($this->replaceMovement)
             ? $this->movementForm->validate()
             : [];
+
         if ($this->operation->requiresReason()) {
             Validator::make(['reason' => $this->reason], ['reason' => ['required', 'string', 'max:1000']])->validate();
         }
+
         try {
             match ($this->operation) {
                 BudgetOperation::SaveLine => $saveLine->handle($event, $this->draftVersion, $this->requestKey, $this->lineId, BudgetLineData::fromValidated($lineInput), $this->actor()),
@@ -216,6 +223,7 @@ class Budget extends Component
         $direction = BudgetDirection::tryFrom($this->lineForm->direction);
         $categories = array_filter(BudgetCategory::cases(), fn (BudgetCategory $category): bool => $direction !== null && $category->accepts($direction));
         $history = null;
+
         if ($this->historyOpen && $data['budget'] !== null) {
             $history = $historyQuery->get($data['budget'], $this->historyLineId)->paginate(20, pageName: 'history');
         }

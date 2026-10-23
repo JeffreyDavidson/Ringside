@@ -16,8 +16,11 @@ use Illuminate\Support\Facades\DB;
 
 class TransitionLiveItemAction
 {
-    public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist,
-        private readonly LiveItemTransitionResolver $transitions) {}
+    public function __construct(
+        private readonly LockLiveShowAction $lock,
+        private readonly PersistLiveShowAction $persist,
+        private readonly LiveItemTransitionResolver $transitions,
+    ) {}
 
     public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, User $actor, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
     {
@@ -25,14 +28,17 @@ class TransitionLiveItemAction
             $run = $this->lock->handle($event, $version);
             $content = $run->content;
             $index = array_search($key, array_column($content['items'], 'key'), true);
+
             if (! is_int($index)) {
                 throw LiveShowException::unknownItem();
             }
             $before = $content['items'][$index];
+
             if ($operation->requiresReason() && ($reason === null || mb_trim($reason) === '' || mb_strlen($reason) > 2000)) {
                 throw LiveShowException::reasonRequired();
             }
             $updated = $this->transitions->resolve($operation)->apply($run, $index, $start, $finish);
+
             if ($operation === LiveItemOperation::Start) {
                 $run->status = LiveShowStatus::Running;
             }

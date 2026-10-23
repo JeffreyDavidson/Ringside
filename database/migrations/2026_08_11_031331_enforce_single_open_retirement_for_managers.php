@@ -14,13 +14,13 @@ return new class extends Migration
         match ($connection->getDriverName()) {
             'sqlite', 'pgsql', 'sqlsrv' => $connection->statement(
                 'CREATE UNIQUE INDEX managers_retirements_one_open_period_unique '
-                .'ON managers_retirements (manager_id) WHERE ended_at IS NULL'
+                .'ON managers_retirements (manager_id) WHERE ended_at IS NULL',
             ),
             'mysql', 'mariadb' => $connection->statement(
                 'ALTER TABLE managers_retirements '
                 .'ADD COLUMN currently_retired_manager_id BIGINT UNSIGNED '
                 .'GENERATED ALWAYS AS (CASE WHEN ended_at IS NULL THEN manager_id ELSE NULL END) STORED, '
-                .'ADD UNIQUE INDEX managers_retirements_one_open_period_unique (currently_retired_manager_id)'
+                .'ADD UNIQUE INDEX managers_retirements_one_open_period_unique (currently_retired_manager_id)',
             ),
             default => throw new LogicException('The database driver does not support open retirement period constraints.'),
         };

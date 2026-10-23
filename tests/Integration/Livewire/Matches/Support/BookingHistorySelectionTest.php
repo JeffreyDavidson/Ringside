@@ -123,6 +123,7 @@ describe('booking history selection', function (): void {
 
         // Act
         $errors = null;
+
         try {
             resolve(BookingHistorySelection::class)->validate($event, MatchType::Singles, [['wrestlers' => [$first->id, $second->id]], ['wrestlers' => []]]);
         } catch (ValidationException $exception) {
@@ -139,6 +140,7 @@ describe('booking history selection', function (): void {
 
         // Act
         $errors = null;
+
         try {
             resolve(BookingHistorySelection::class)->validate($event, $type, $selection);
         } catch (ValidationException $exception) {

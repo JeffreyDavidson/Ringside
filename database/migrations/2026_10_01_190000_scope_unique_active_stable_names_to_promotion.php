@@ -36,11 +36,11 @@ return new class extends Migration
     {
         $connection->statement('DROP INDEX stables_active_name_unique');
         $connection->statement(
-            'CREATE UNIQUE INDEX stables_active_name_unique ON stables (promotion_id, name) WHERE deleted_at IS NULL'
+            'CREATE UNIQUE INDEX stables_active_name_unique ON stables (promotion_id, name) WHERE deleted_at IS NULL',
         );
         $connection->statement(
             'CREATE UNIQUE INDEX stables_active_unowned_name_unique ON stables (name) '
-            .'WHERE deleted_at IS NULL AND promotion_id IS NULL'
+            .'WHERE deleted_at IS NULL AND promotion_id IS NULL',
         );
     }
 
@@ -48,7 +48,7 @@ return new class extends Migration
     {
         $connection->statement(
             'ALTER TABLE stables DROP INDEX stables_active_name_unique, '
-            .'ADD UNIQUE INDEX stables_active_name_unique (promotion_id, active_name)'
+            .'ADD UNIQUE INDEX stables_active_name_unique (promotion_id, active_name)',
         );
     }
 
@@ -85,7 +85,7 @@ return new class extends Migration
 
         throw new RuntimeException(
             "Cannot enforce unique active stable names per promotion: {$conflicts}. "
-            .'No changes were made. Rename or delete the duplicate stables, then re-run "php artisan migrate".'
+            .'No changes were made. Rename or delete the duplicate stables, then re-run "php artisan migrate".',
         );
     }
 };

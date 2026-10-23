@@ -90,6 +90,7 @@ it('limits each preview independently while calculating totals over the full rec
     $promotion = Promotion::factory()->create();
     [$first, $second] = Wrestler::factory()->count(2)->for($promotion, 'promotion')->create()->all();
     $event = Event::factory()->for($promotion, 'promotion')->past()->create();
+
     foreach (range(1, 8) as $number) {
         $match = EventMatch::factory()->for($event)->withCompetitors([$first, $second])->create(['match_number' => $number]);
         $match->update(['match_finish' => MatchFinish::Pinfall, 'winning_side_id' => $match->sides()->firstOrFail()->id]);
@@ -116,6 +117,7 @@ it('excludes later and deleted source records and keeps the local 90-day boundar
     $target = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-04-01 16:00:00']);
     $boundary = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-01-01 17:00:00']);
     $older = Event::factory()->for($promotion, 'promotion')->create(['date' => '2026-01-01 16:59:59']);
+
     foreach ([$boundary, $older, $target] as $event) {
         $match = EventMatch::factory()->for($event)->withCompetitors([$first, $second])->create();
         $match->update(['match_finish' => MatchFinish::NoDecision]);
@@ -237,6 +239,7 @@ it('uses a bounded number of relation queries as history grows', function (): vo
     $target->load('promotion');
     $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
     $one = recordStatements(fn (): array => resolve(BookingHistoryViewModel::class)->snapshot($target, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection)));
+
     foreach (range(1, 25) as $number) {
         EventMatch::factory()->for($past)->withCompetitors([$first, $second])->create();
     }
@@ -312,7 +315,9 @@ it('reflects a corrected result on the next check without copying historical rec
     $selection = [['wrestlers' => [$first->id]], ['wrestlers' => [$second->id]]];
     $before = resolve(BookingHistoryViewModel::class)->snapshot($event, MatchType::Singles, CompetitorSelection::fromSides(MatchType::Singles, $selection));
     resolve(RecordResultAction::class)->handle($match, new MatchResultData(
-        MatchFinish::TimeLimitDraw, null, collect(),
+        MatchFinish::TimeLimitDraw,
+        null,
+        collect(),
     ), administrator());
 
     // Act

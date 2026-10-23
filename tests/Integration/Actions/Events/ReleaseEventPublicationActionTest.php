@@ -59,14 +59,17 @@ test('results reject future events and unannounced or unrecorded matches', funct
     $event = $world['event'];
     savePublicDraft($event);
     releasePublicPage($event);
+
     if ($condition === 'future') {
         $event->update(['date' => now()->addWeek()]);
         savePublicDraft($event);
         releasePublicPage($event);
     }
+
     if ($condition === 'unrecorded') {
         $world['match']->update(['match_finish' => null]);
     }
+
     if ($condition === 'unannounced') {
         savePublicDraft($event, ['matches' => []]);
         releasePublicPage($event);
@@ -96,19 +99,24 @@ test('card release refuses missing schedule assets and removed announced competi
     $world = publicEventFixture();
     $event = $world['event'];
     $publication = savePublicDraft($event, $condition === 'poster' ? ['poster' => UploadedFile::fake()->image('poster.png'), 'poster_alt' => 'Event poster'] : []);
+
     if ($condition === 'date') {
         $event->update(['date' => null]);
     }
+
     if ($condition === 'match') {
         $world['match']->delete();
     }
+
     if ($condition === 'competitor') {
         $world['left']->delete();
     }
+
     if ($condition === 'past notice') {
         savePublicDraft($event, ['announcement' => 'cancelled', 'notice' => 'Cancelled event']);
         $publication->refresh();
     }
+
     if ($condition === 'poster') {
         Storage::disk('local')->delete('event-posters/'.publicPosterKey($publication));
     }

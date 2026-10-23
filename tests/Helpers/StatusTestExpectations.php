@@ -64,6 +64,7 @@ function expectTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, array $ex
 function expectCurrentRelationshipsActive(Wrestler $wrestler): void
 {
     $currentManagers = $wrestler->currentManagers()->get();
+
     foreach ($currentManagers as $manager) {
         $management = WrestlerManager::query()
             ->whereBelongsTo($wrestler)
@@ -75,6 +76,7 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
     }
 
     $currentTagTeam = $wrestler->currentTagTeam;
+
     if ($currentTagTeam) {
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($wrestler)
@@ -92,6 +94,7 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
 function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
 {
     $previousManagers = $wrestler->previousManagers()->get();
+
     foreach ($previousManagers as $manager) {
         $management = WrestlerManager::query()
             ->whereBelongsTo($wrestler)
@@ -103,6 +106,7 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
     }
 
     $previousTagTeams = $wrestler->previousTagTeams()->get();
+
     foreach ($previousTagTeams as $tagTeam) {
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($wrestler)

@@ -16,6 +16,7 @@ test('a failed owning transaction rolls back the promise version and its private
     $operation = fn () => DB::transaction(function () use ($promise): void {
         $promise->description = 'Changed banner';
         app(PersistSponsorCommitmentAction::class)->handle($promise, 'save', 'Correct position', signedInUser());
+
         throw new RuntimeException('Reject the complete operation');
     });
 

@@ -33,9 +33,11 @@ class SaveParticipantAction
                 ->lockForUpdate()
                 ->firstOrFail();
             $participant = $participantId === null ? new StorylineParticipant : $story->participants()->findOrFail($participantId);
+
             if ($participantId !== null && ($participant->participant_id !== $data->id || $participant->participant_type !== $data->type || $participant->left_on !== null)) {
                 throw StorylineConflictException::state();
             }
+
             if ($data->leftOn === null && $story->participants()->where('participant_type', $data->type)->where('participant_id', $data->id)->whereNull('left_on')->when($participantId !== null, fn (Builder $query) => $query->whereKeyNot($participantId))->exists()) {
                 throw StorylineConflictException::state();
             }
@@ -50,6 +52,7 @@ class SaveParticipantAction
                 'joined_on' => $participantId === null ? Carbon::parse($data->joinedOn) : $participant->joined_on,
                 'left_on' => $data->leftOn === null ? null : Carbon::parse($data->leftOn),
             ]);
+
             if ($participant->left_on instanceof Carbon && $participant->left_on->lt($participant->joined_on)) {
                 throw StorylineConflictException::state();
             }

@@ -86,6 +86,7 @@ final readonly class StableActivityPeriodRequirements
             && ! $this->isSamePromotionDay($stable, $period->ended_at, $endedAt);
 
         $startsTooLate = false;
+
         if ($startMoves) {
             $firstLocalMoment = $local($startDate)->startOfDay()->utc();
             $startsTooLate = $stable->wrestlers()->wherePivot('joined_at', '<', $firstLocalMoment)->exists()
@@ -93,6 +94,7 @@ final readonly class StableActivityPeriodRequirements
         }
 
         $endsTooEarly = false;
+
         if ($endMoves) {
             $lastLocalMoment = $local($endedAt)->endOfDay()->utc();
             $endsTooEarly = $stable->wrestlers()->wherePivot('left_at', '>', $lastLocalMoment)->exists()

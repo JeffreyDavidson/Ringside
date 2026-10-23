@@ -46,12 +46,14 @@ class PublicEventSourceService
         $people = $this->names($event, Wrestler::class, $assignments->where('competitor_type', 'wrestler'))
             ->merge($this->names($event, TagTeam::class, $assignments->where('competitor_type', 'tag_team')));
         $rows = [];
+
         foreach ($matches as $match) {
             $sides = $match->sides->mapWithKeys(fn (MatchSide $side): array => [$side->id => $side->competitors->sortBy('id')
                 ->map(fn (MatchCompetitor $assignment): string => $people->get($assignment->competitor_type.':'.$assignment->competitor_id, ''))->join(' & ')]);
             $complete = $match->sides->count() >= 2 && ! $match->sides->contains(fn (MatchSide $side): bool => $side->competitors->isEmpty()
                 || $side->competitors->contains(fn (MatchCompetitor $assignment): bool => ! $people->has($assignment->competitor_type.':'.$assignment->competitor_id)));
             $winner = null;
+
             if ($match->match_finish?->requiresWinningSide()) {
                 $winner = $match->winning_side_id === null ? '' : $sides->get($match->winning_side_id, '');
             }

@@ -32,6 +32,7 @@ class LiveShowSourceService
     public function get(Event $event, ?array $packSource = null): ?array
     {
         $data = $packSource ?? $this->pack->get($event);
+
         if ($event->date === null || $data['pack'] === null || $data['needsReview'] || $data['unplaced'] !== [] || $data['running'] === []) {
             return null;
         }

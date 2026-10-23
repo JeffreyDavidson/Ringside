@@ -86,7 +86,7 @@ test('exception folders are a domain folder of the app or a named shared folder'
 
 test('application code does not directly construct generic exceptions', function () {
     $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(app_path(), FilesystemIterator::SKIP_DOTS)
+        new RecursiveDirectoryIterator(app_path(), FilesystemIterator::SKIP_DOTS),
     );
 
     $violations = [];
@@ -119,7 +119,7 @@ test('application and test code construct business exceptions through factories'
 
     foreach ([app_path(), base_path('tests')] as $directory) {
         $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
         );
 
         foreach ($files as $file) {
@@ -190,7 +190,7 @@ test('application and test code do not catch generic exception types', function 
 
     foreach ([app_path(), base_path('tests')] as $directory) {
         $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
         );
 
         foreach ($files as $file) {
@@ -217,7 +217,7 @@ test('every concrete exception factory has an enforced caller', function () {
     $calledFactories = collect([app_path(), base_path('tests')])
         ->flatMap(function (string $directory): array {
             $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+                new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
             );
 
             return iterator_to_array($files);
@@ -247,7 +247,7 @@ test('every concrete exception factory has an enforced caller', function () {
         ->unique();
 
     $exceptionFiles = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(app_path('Exceptions'), FilesystemIterator::SKIP_DOTS)
+        new RecursiveDirectoryIterator(app_path('Exceptions'), FilesystemIterator::SKIP_DOTS),
     );
     $exceptionClasses = [];
 

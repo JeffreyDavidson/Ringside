@@ -48,8 +48,12 @@ final class BookingHistoryNoticePairsQuery
                     });
                 }
             })
-            ->select('first_entry.competitor_type as first_type', 'first_entry.competitor_id as first_id',
-                'second_entry.competitor_type as second_type', 'second_entry.competitor_id as second_id')
+            ->select(
+                'first_entry.competitor_type as first_type',
+                'first_entry.competitor_id as first_id',
+                'second_entry.competitor_type as second_type',
+                'second_entry.competitor_id as second_id',
+            )
             ->selectRaw('MAX(history.history_date) AS latest_date')
             ->selectSub($latestPairMatch, 'latest_match_id')
             ->selectRaw('COUNT(CASE WHEN history.history_recorded = 1 THEN 1 END) AS recorded')

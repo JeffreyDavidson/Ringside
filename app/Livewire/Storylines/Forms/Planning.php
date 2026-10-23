@@ -96,25 +96,30 @@ class Planning extends Form
             $this->description = $story->premise;
             $this->payoff = $story->payoff;
         }
+
         if ($mode === StorylineFormMode::Step && $id !== null) {
             $this->fillEntry($story, $story->steps()->findOrFail($id));
         }
+
         if ($recordStep && $id !== null) {
             $step = $story->steps()->findOrFail($id);
             $this->fillEntry($story, $step);
             $stepId = $id;
             $existing = $story->developments()->where('storyline_step_id', $id)->first();
             $editingId = $existing?->id;
+
             if ($existing !== null) {
                 $this->fillEntry($story, $existing);
             }
             $this->occurredOn = $step->event_id === null ? $this->occurredOn : Event::query()->withTrashed()->findOrFail($step->event_id)->local_date?->toDateString() ?? $this->occurredOn;
         }
+
         if ($mode === StorylineFormMode::Development && ! $recordStep && $id !== null) {
             $development = $story->developments()->findOrFail($id);
             $stepId = $development->storyline_step_id;
             $this->fillEntry($story, $development);
         }
+
         if ($mode === StorylineFormMode::ParticipantEnd) {
             $person = $story->participants()->findOrFail($id);
             $this->participantId = $person->participant_id;
@@ -155,12 +160,14 @@ class Planning extends Form
         $this->eventId = $entry->event_id;
         $this->matchId = $entry->match_id;
         $this->segmentId = $entry->segment_id;
+
         if ($entry instanceof StorylineStep) {
             $this->targetOn = $entry->target_on?->toDateString();
 
             return;
         }
         $this->occurredOn = $entry->occurred_on->toDateString();
+
         if ($entry->cast === []) {
             $this->participantIds = [];
 

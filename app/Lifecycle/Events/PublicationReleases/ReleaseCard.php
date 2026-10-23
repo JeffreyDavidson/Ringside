@@ -21,9 +21,11 @@ final readonly class ReleaseCard implements PublicationRelease
         $announcement = $this->draft->ensureDraftReleasable($publication, $event, $source);
         $draft = $publication->draft;
         $rows = $this->cards->rows($source, $draft['matches']);
+
         if (collect($rows)->contains(fn (array $row): bool => $row['label'] === '')) {
             throw EventPublicationException::invalid();
         }
+
         if ($publication->card === null) {
             $publication->slug = Str::limit(Str::slug($source['title']), 120, '') ?: 'event';
         }
@@ -34,6 +36,7 @@ final readonly class ReleaseCard implements PublicationRelease
         $publication->published_at = now();
         $publication->published_by = $actor->id;
         $publication->unpublished_at = null;
+
         if ($announcement->isNotice()) {
             $publication->results_published_at = null;
         }

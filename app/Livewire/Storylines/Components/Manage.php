@@ -192,12 +192,14 @@ class Manage extends Component
     ): void {
         $story = $this->story();
         Gate::authorize('update', $story);
+
         if ($this->needsReload) {
             return;
         }
         $mode = $this->mode ?? abort(404);
         $rules = ['form.status' => ['string'], 'form.type' => ['in:wrestler,tag_team'], 'form.participantId' => ['nullable', 'integer'], ...$this->modeRules($mode, $story)];
         $this->validate($rules, attributes: $this->attributeNames($rules));
+
         try {
             match ($mode) {
                 StorylineFormMode::Story => $updateStory->handle($story, $this->version, $this->form->storyData($this->submissionId), $this->form->reason, $this->actor()),
@@ -276,6 +278,7 @@ class Manage extends Component
         $like = LikeTerm::from($this->eventSearch);
         $events = Event::query()->where('promotion_id', $story->promotion_id)->when(! $like->isEmpty(), fn (Builder $query) => $query->whereLike('name', $like->contains()))->orderByDesc('date')->orderByDesc('id')->limit(20)->get();
         $selected = $this->form->eventId === null ? null : Event::query()->withTrashed()->where('promotion_id', $story->promotion_id)->with(['matches', 'pack', 'promotion'])->findOrFail($this->form->eventId);
+
         if ($selected !== null && ! $events->contains('id', $selected->id)) {
             $events->push($selected);
         }
@@ -283,6 +286,7 @@ class Manage extends Component
 
         $steps = $story->steps()->with(['event.promotion', 'event.pack', 'event.liveRun', 'event.matches', 'match.competitors', 'match.titles'])->orderBy('sequence')->orderBy('id')->paginate(15, pageName: 'stepsPage');
         $sourceStates = [];
+
         foreach ($steps as $step) {
             $sourceStates[$step->id] = $this->sources->get(new SourceData($step->event_id, $step->match_id, $step->segment_id, $step->target_on?->toDateString()), $story->promotion_id, $step->event, $step->match) ?? abort(404);
         }

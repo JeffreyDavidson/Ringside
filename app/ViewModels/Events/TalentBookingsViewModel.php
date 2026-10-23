@@ -47,13 +47,16 @@ class TalentBookingsViewModel
         $context = $this->context->get($event);
         $rows = [];
         $counts = ['not_tracked' => 0, 'proposed' => 0, 'contacted' => 0, 'confirmed' => 0, 'cancelled' => 0, 'attention' => 0, 'confirmed_clear' => 0];
+
         foreach ($data['rows'] as $row) {
             $booking = $row['booking'];
             $warnings = $this->warnings($row, $context);
+
             if ($booking?->status === TalentBookingStatus::Confirmed && $warnings === []) {
                 $counts['confirmed_clear']++;
             }
             $counts[$booking?->status->value ?? 'not_tracked']++;
+
             if ($warnings !== []) {
                 $counts['attention']++;
             }
@@ -61,6 +64,7 @@ class TalentBookingsViewModel
         }
 
         $historyFees = [];
+
         foreach ($history as $revision) {
             $fee = $revision->snapshot['fee_minor'] ?? null;
             $historyFees[$revision->id] = $this->fee(is_int($fee) ? $fee : null);
@@ -84,17 +88,20 @@ class TalentBookingsViewModel
         $onCard = $rows->all();
         // The first booking wins if a person were ever listed twice, as the lookup this replaces took the first match.
         $booked = $bookings->unique($this->bookingKey(...))->keyBy($this->bookingKey(...));
+
         foreach ($booked as $key => $booking) {
             if (! $rows->has($key)) {
                 $rows->put($key, ['key' => $key, 'name' => $booking->person_name, 'role' => $booking->person_role, 'matches' => [], 'warning' => true]);
             }
         }
         $result = [];
+
         foreach ([(new Wrestler)->getMorphClass() => Wrestler::class, (new Referee)->getMorphClass() => Referee::class] as $type => $class) {
             $typed = $rows->filter(fn (array $row): bool => str_starts_with($row['key'], $type.':'));
             $ids = $typed->map(fn (array $row): int => (int) explode(':', $row['key'])[1])->all();
             $people = $this->people->get($class, $event->promotion_id, $ids);
             $available = $this->bookable->get($class, $ids);
+
             foreach ($typed as $key => $row) {
                 $id = (int) explode(':', $key)[1];
                 $person = $people->get($id);

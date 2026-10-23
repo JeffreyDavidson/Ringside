@@ -13,9 +13,11 @@ test('missing promotion ownership cannot release even a fresh version', function
     $world = publicEventFixture();
     $event = $world['event'];
     $publication = savePublicDraft($event);
+
     if ($condition === 'unowned') {
         $event->forceFill(['promotion_id' => null])->save();
     }
+
     if ($condition === 'mismatched') {
         $publication->forceFill(['promotion_id' => Promotion::factory()->create()->id])->save();
     }

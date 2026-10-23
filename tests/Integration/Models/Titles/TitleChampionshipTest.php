@@ -263,6 +263,7 @@ describe('TitleChampionship Model', function () {
             $titles = Title::factory()->count(3)->active()->create();
 
             $championships = [];
+
             foreach ($titles as $titleIndex => $title) {
                 foreach ($wrestlers as $wrestlerIndex => $wrestler) {
                     $championships[] = TitleChampionship::factory()

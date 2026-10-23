@@ -131,6 +131,7 @@ describe('ActivityPeriodFactory Integration Tests', function () {
 
             // Assert
             expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
+
             if ($activityPeriod->ended_at) {
                 expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
             }

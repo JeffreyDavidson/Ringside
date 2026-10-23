@@ -14,6 +14,7 @@ class PublicTicketUrl implements ValidationRule
         $url = is_string($value) ? parse_url($value) : false;
         $host = is_array($url) ? ($url['host'] ?? '') : '';
         $ip = trim($host, '[]');
+
         if (! is_array($url) || strtolower($url['scheme'] ?? '') !== 'https' || $host === '' || isset($url['user']) || isset($url['pass'])
             || preg_match('/[\x00-\x20\x7f]/', (string) $value) === 1 || ! str_contains($host, '.')
             || preg_match('/(?:^|\.)(localhost|local|test|internal)$/i', $host) === 1

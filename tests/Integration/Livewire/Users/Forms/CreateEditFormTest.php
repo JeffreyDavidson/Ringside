@@ -89,6 +89,7 @@ describe('user form email uniqueness', function (): void {
 
         // Act
         $errorKeys = [];
+
         try {
             $form->validate();
         } catch (ValidationException $exception) {

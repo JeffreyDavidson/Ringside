@@ -284,7 +284,12 @@ class FormModal extends BaseFormModal
 
         return array_values(collect($selection)
             ->flatMap(fn (Collection $ids, string $kind): Collection => $this->sameDayBookingsQuery->get(
-                BookableRosterKind::from($kind), $ids, $from, $from->copy()->addDay()->startOfDay(), $event->id, $event->promotion_id,
+                BookableRosterKind::from($kind),
+                $ids,
+                $from,
+                $from->copy()->addDay()->startOfDay(),
+                $event->id,
+                $event->promotion_id,
             ))
             ->unique()
             ->all());

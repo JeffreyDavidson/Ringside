@@ -23,7 +23,9 @@ test('reads the requested wrestlers of the promotion, deleted ones included, wit
 
     // Act
     $subjects = resolve(BookingHistorySubjectsQuery::class)->get(
-        new Wrestler, [$kept->id, $deleted->id, $foreign->id], $promotion->id,
+        new Wrestler,
+        [$kept->id, $deleted->id, $foreign->id],
+        $promotion->id,
     );
 
     // Assert
@@ -60,7 +62,9 @@ test('runs one query for the subjects and one eager load for their promotion', f
 
     // Act
     $statements = recordStatements(fn (): mixed => resolve(BookingHistorySubjectsQuery::class)->get(
-        new Wrestler, $wrestlers->modelKeys(), $promotion->id,
+        new Wrestler,
+        $wrestlers->modelKeys(),
+        $promotion->id,
     ));
 
     // Assert

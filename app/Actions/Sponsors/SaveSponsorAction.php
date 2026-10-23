@@ -18,6 +18,7 @@ class SaveSponsorAction
     {
         return DB::transaction(function () use ($promotion, $id, $version, $submissionKey, $data): Sponsor {
             $promotionQuery = Promotion::query()->whereKey($promotion->id);
+
             if ($id === null) {
                 $promotionQuery->lockForUpdate();
             }
@@ -35,6 +36,7 @@ class SaveSponsorAction
             if (! Str::isUuid($submissionKey)) {
                 throw RecordChangedException::changed();
             }
+
             if (($sponsor->version ?? 0) !== $version || ($sponsor === null && Sponsor::query()->where('promotion_id', $promotion->id)->where('submission_key', $submissionKey)->exists())) {
                 throw RecordChangedException::changed();
             }

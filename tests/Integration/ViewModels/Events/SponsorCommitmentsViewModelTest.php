@@ -100,8 +100,14 @@ test('event listings filter terminal promises and use deterministic deadline ord
 test('a cancelled promise stays visible for review while its approved instruction remains in the pack', function (): void {
     // Arrange
     $world = sponsorFixture();
-    $promise = app(SaveSponsorCommitmentAction::class)->handle($world['event'], $world['promise']->id, 1, $world['promise']->submission_key,
-        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']), signedInUser());
+    $promise = app(SaveSponsorCommitmentAction::class)->handle(
+        $world['event'],
+        $world['promise']->id,
+        1,
+        $world['promise']->submission_key,
+        sponsorPromiseData($world['promise'], ['instructionLabel' => 'Banner', 'instruction' => 'Hang at entrance']),
+        signedInUser(),
+    );
     $pack = app(EventPackViewModel::class)->data($world['event']);
     app(SaveSponsorInstructionAction::class)->handle($world['event'], $promise->id, 2, 0, $pack['card']['fingerprint'], new SponsorInstructionData(SponsorInstructionMode::Setup, null, null, app(SponsorInstructionService::class)->preview($world['event'], $promise, SponsorInstructionMode::Setup, null, null)['hash']), signedInUser());
     $promise->refresh();

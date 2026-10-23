@@ -105,6 +105,7 @@ test('the review names affected dated and undated events while excluding unrelat
     $dated = Event::factory()->for($promotion)->create(['name' => 'Affected Saturday', 'date' => '2026-10-17 18:00:00']);
     $undated = Event::factory()->for($promotion)->create(['name' => 'Date Still Needed', 'date' => null]);
     $outside = Event::factory()->for($promotion)->create(['name' => 'Different Sunday', 'date' => '2026-10-18 18:00:00']);
+
     foreach ([$dated, $undated, $outside] as $event) {
         EventMatch::factory()->forEvent($event)->withCompetitors([$person])->create();
     }

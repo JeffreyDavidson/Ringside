@@ -18,7 +18,7 @@ test('it updates referee basic information', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Name',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -43,7 +43,7 @@ test('it updates referee and employs them when employment date provided', functi
     $updateData = new RefereeData(
         first_name: 'Earl',
         last_name: 'Hebner',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -73,7 +73,7 @@ test('it updates using the current persisted referee state', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Referee',
-        employment_date: null
+        employment_date: null,
     );
 
     $updatedReferee = resolve(UpdateAction::class)->handle($staleReferee, $updateData);
@@ -93,7 +93,7 @@ test('it updates referee without employing when no employment date', function ()
     $updateData = new RefereeData(
         first_name: 'Mike',
         last_name: 'Chioda',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -118,7 +118,7 @@ test('it does not re-employ already employed referee', function () {
     $updateData = new RefereeData(
         first_name: 'Updated',
         last_name: 'Name',
-        employment_date: now()
+        employment_date: now(),
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -139,7 +139,7 @@ test('it uses the provided employment date', function () {
     $updateData = new RefereeData(
         first_name: 'Charles',
         last_name: 'Robinson',
-        employment_date: now()->subDays(10) // Past date
+        employment_date: now()->subDays(10), // Past date
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -161,7 +161,7 @@ test('it maintains transaction boundaries', function () {
     $updateData = new RefereeData(
         first_name: 'Transaction',
         last_name: 'Test',
-        employment_date: now()
+        employment_date: now(),
     );
 
     // Simulate transaction - all changes should be atomic
@@ -188,7 +188,7 @@ test('it returns updated referee instance', function () {
     $updateData = new RefereeData(
         first_name: 'Return',
         last_name: 'Test',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -207,7 +207,7 @@ test('it preserves referee id and timestamps', function () {
     $updateData = new RefereeData(
         first_name: 'Preserve',
         last_name: 'Test',
-        employment_date: null
+        employment_date: null,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
@@ -224,7 +224,7 @@ test('it validates referee can be updated', function () {
     $updateData = new RefereeData(
         first_name: 'Valid',
         last_name: 'Update',
-        employment_date: null
+        employment_date: null,
     );
 
     // Should succeed without throwing validation exception
@@ -242,7 +242,7 @@ test('it uses EmployAction for consistent employment handling', function () {
     $updateData = new RefereeData(
         first_name: 'EmployAction',
         last_name: 'Test',
-        employment_date: $employmentDate
+        employment_date: $employmentDate,
     );
 
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);

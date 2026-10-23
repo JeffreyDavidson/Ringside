@@ -27,12 +27,14 @@ class AwardTournamentWalkoverAction
     {
         DB::transaction(function () use ($node, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($node->tournament_id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
             $this->states->ensureActive($tournament);
             $node = $tournament->nodes()->findOrFail($node->id);
             $bout = $this->bracket->bout($node);
+
             if (! $bout->inputsResolved || ! $bout->first instanceof TournamentEntry || ! $bout->second instanceof TournamentEntry || $bout->complete || $bout->link instanceof TournamentMatchLink || $bout->first->withdrawn === $bout->second->withdrawn) {
                 throw TournamentException::walkoverInvalid();
             }

@@ -52,7 +52,7 @@ return new class extends Migration
         throw new RuntimeException(
             "Cannot enforce unique {$column} per match: {$conflicts}. "
             .'No changes were made. Delete the duplicate rows so each is listed once per match, '
-            .'then re-run "php artisan migrate".'
+            .'then re-run "php artisan migrate".',
         );
     }
 };

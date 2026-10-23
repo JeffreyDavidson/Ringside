@@ -24,26 +24,28 @@ class UsersTableSeeder extends Seeder
             throw new RuntimeException('Demo seeders create accounts with a known password and must not run in production.');
         }
 
-        User::factory()->administrator()->count(2)->sequence(fn (Sequence $sequence) => [
-            'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Administrator->value),
-            'last_name' => 'User',
-            'email' => Role::Administrator->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
-            'password' => 'password',
-            'status' => UserStatus::Active,
-            'avatar_path' => '300-3.png',
-            'phone_number' => fake()->unique()->numerify('##########'),
-        ]
+        User::factory()->administrator()->count(2)->sequence(
+            fn (Sequence $sequence) => [
+                'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Administrator->value),
+                'last_name' => 'User',
+                'email' => Role::Administrator->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
+                'password' => 'password',
+                'status' => UserStatus::Active,
+                'avatar_path' => '300-3.png',
+                'phone_number' => fake()->unique()->numerify('##########'),
+            ],
         )->create();
 
-        User::factory()->basicUser()->count(10)->sequence(fn (Sequence $sequence) => [
-            'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Basic->value),
-            'last_name' => 'User',
-            'email' => Role::Basic->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
-            'password' => 'password',
-            'status' => UserStatus::Active,
-            'avatar_path' => '300-3.png',
-            'phone_number' => fake()->unique()->numerify('##########'),
-        ]
+        User::factory()->basicUser()->count(10)->sequence(
+            fn (Sequence $sequence) => [
+                'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Basic->value),
+                'last_name' => 'User',
+                'email' => Role::Basic->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
+                'password' => 'password',
+                'status' => UserStatus::Active,
+                'avatar_path' => '300-3.png',
+                'phone_number' => fake()->unique()->numerify('##########'),
+            ],
         )->create();
     }
 }

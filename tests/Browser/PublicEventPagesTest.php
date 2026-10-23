@@ -39,6 +39,7 @@ test('an approved poster stays readable on phones and the public page works at z
     $world = publicEventFixture();
     $event = $world['event'];
     $file = storage_path('framework/testing/public-event-demo-poster.png');
+
     if (! is_dir(dirname($file))) {
         mkdir(dirname($file), 0755, true);
     }

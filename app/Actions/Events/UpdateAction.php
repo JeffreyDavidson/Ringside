@@ -60,6 +60,7 @@ class UpdateAction
             }
 
             $tournamentIds = $this->tournamentLocks->forEvent($event->id);
+
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $eventData->date);
             }

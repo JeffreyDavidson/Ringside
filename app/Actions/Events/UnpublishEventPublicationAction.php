@@ -19,10 +19,12 @@ class UnpublishEventPublicationAction
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
             $locked = $this->lock->handle($event, $version, $fingerprint);
             $publication = $locked['publication'];
+
             if (! $publication->exists) {
                 throw EventPublicationException::invalid();
             }
             $publication->results_published_at = null;
+
             if ($section === PublicSection::Card) {
                 $publication->published_at = null;
                 $publication->unpublished_at = now();

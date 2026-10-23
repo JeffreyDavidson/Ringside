@@ -97,7 +97,7 @@ class TitleChampionship extends Model
     protected function localWonAt(): Attribute
     {
         return Attribute::make(
-            get: fn (): Carbon => PromotionTimeZoneService::toLocalTime($this->title?->promotion, $this->won_at)
+            get: fn (): Carbon => PromotionTimeZoneService::toLocalTime($this->title?->promotion, $this->won_at),
         );
     }
 
@@ -111,7 +111,7 @@ class TitleChampionship extends Model
         return Attribute::make(
             get: fn (): ?Carbon => $this->lost_at instanceof Carbon
                 ? PromotionTimeZoneService::toLocalTime($this->title?->promotion, $this->lost_at)
-                : null
+                : null,
         );
     }
 

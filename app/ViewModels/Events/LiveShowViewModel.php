@@ -41,15 +41,18 @@ class LiveShowViewModel
         $source = null;
         $sourceError = null;
         $complete = $run?->status === LiveShowStatus::Completed;
+
         if (! $complete) {
             $source = $this->source->get($event);
             $sourceError = $source === null ? Lang::string('live-show.prepare_required') : null;
         }
+
         if (Gate::denies('viewProduction', $event)) {
             if ($run !== null) {
                 $run = clone $run;
                 $run->content = $this->withoutProduction($run->content);
             }
+
             if ($source !== null) {
                 $source['content'] = $this->withoutProduction($source['content']);
             }
@@ -110,9 +113,11 @@ class LiveShowViewModel
     private function comparison(array $item): string
     {
         $planned = $this->timing->wallTime($item['timing']['revised_at'] ?? $item['timing']['planned_at'] ?? null, $item['timezone']);
+
         if (! $planned instanceof Carbon) {
             return __('live-show.no_plan');
         }
+
         if ($item['start'] === null) {
             return __('live-show.planned', ['time' => $planned->setTimezone($item['timezone'])->format('M j H:i P')]);
         }

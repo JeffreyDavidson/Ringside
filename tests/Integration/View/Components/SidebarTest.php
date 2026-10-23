@@ -18,6 +18,7 @@ use function Pest\Laravel\actingAs;
 function appShellDocument(TestResponse $response): HTMLDocument
 {
     $html = $response->assertOk()->getContent();
+
     if (! is_string($html)) {
         throw new RuntimeException('Expected the page to contain HTML.');
     }

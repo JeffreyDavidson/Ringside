@@ -25,17 +25,20 @@ class ReplaceTournamentEntryAction
     {
         DB::transaction(function () use ($entry, $competitorId, $version, $reason, $actor): void {
             $tournament = $this->locks->lock($entry->tournament_id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }
             $this->states->ensureActive($tournament);
             $entry = $tournament->entries()->findOrFail($entry->id);
+
             foreach ($this->bracket->bouts($tournament) as $bout) {
                 if (($bout->first?->id === $entry->id || $bout->second?->id === $entry->id) && ($bout->link?->match->match_finish !== null || $bout->node->walkover_entry_id !== null)) {
                     throw TournamentException::entryPlayed();
                 }
             }
             $competitor = $tournament->entrant_kind->modelClass()::query()->where('promotion_id', $tournament->promotion_id)->whereKey($competitorId)->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))->first();
+
             if ($competitor === null || $tournament->entries()->where('competitor_id', $competitorId)->whereKeyNot($entry->id)->exists()) {
                 throw TournamentException::entrantUnavailable();
             }

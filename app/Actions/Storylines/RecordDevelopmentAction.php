@@ -31,6 +31,7 @@ class RecordDevelopmentAction
             $step = $data->stepId === null ? null : $story->steps()->findOrFail($data->stepId);
             $this->requirements->ensureStepCanBeConfirmed($step, $developmentId);
             $this->requirements->ensureSourceExplained($step, $source, $data->reason);
+
             if ($data->source->eventId !== null) {
                 $event = Event::query()->withTrashed()->where('promotion_id', $story->promotion_id)->findOrFail($data->source->eventId);
                 $this->requirements->ensureEventHeldOn($event, $data->occurredOn, $zone);
@@ -39,6 +40,7 @@ class RecordDevelopmentAction
             $participants = $story->participants()->with('participant')->whereIn('id', $data->participantIds)->orderBy('id')->get();
             $cast = $this->requirements->castFor($participants, $data->participantIds, $data->occurredOn, $development->cast);
             $this->requirements->ensureStepUnchanged($development, $developmentId, $data->stepId);
+
             if ($developmentId === null && $story->developments()->where('submission_id', $data->submissionId)->exists()) {
                 throw RecordChangedException::changed();
             }
@@ -62,6 +64,7 @@ class RecordDevelopmentAction
             $development->version = $developmentId === null ? 1 : $development->version + 1;
             $development->retracted_at = null;
             $development->save();
+
             if ($step !== null) {
                 $step->status = StepStatus::Happened;
                 $step->version++;

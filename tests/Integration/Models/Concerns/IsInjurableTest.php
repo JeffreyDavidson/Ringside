@@ -48,9 +48,9 @@ describe('IsInjurable', function () {
         $previousWheres = $model->previousInjuries()->getQuery()->getQuery()->wheres;
 
         expect(collect($currentWheres)->contains(
-            fn (array $where): bool => $where['type'] === 'Null' && $where['column'] === 'ended_at'
+            fn (array $where): bool => $where['type'] === 'Null' && $where['column'] === 'ended_at',
         ))->toBeTrue()->and(collect($previousWheres)->contains(
-            fn (array $where): bool => $where['type'] === 'NotNull' && $where['column'] === 'ended_at'
+            fn (array $where): bool => $where['type'] === 'NotNull' && $where['column'] === 'ended_at',
         ))->toBeTrue();
     });
 });

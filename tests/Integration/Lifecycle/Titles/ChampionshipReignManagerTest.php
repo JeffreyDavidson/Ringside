@@ -39,7 +39,7 @@ test('it locks the current reign before ending it', function () {
 
     // Act
     $statements = recordStatements(fn () => DB::transaction(
-        fn () => resolve(ChampionshipReignManager::class)->endCurrentReign($title, now())
+        fn () => resolve(ChampionshipReignManager::class)->endCurrentReign($title, now()),
     ));
 
     // Assert

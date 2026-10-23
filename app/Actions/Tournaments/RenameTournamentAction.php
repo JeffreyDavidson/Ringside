@@ -18,6 +18,7 @@ class RenameTournamentAction
     {
         DB::transaction(function () use ($tournament, $version, $name, $description, $actor): void {
             $tournament = $this->locks->lock($tournament->id);
+
             if ($tournament->version !== $version) {
                 throw RecordChangedException::changed();
             }

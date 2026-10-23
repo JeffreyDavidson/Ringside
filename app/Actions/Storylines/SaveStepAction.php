@@ -26,9 +26,11 @@ class SaveStepAction
             $source = $this->source->handle($data->source, $storyline->promotion_id);
             $story = $this->lock->handle($storyline, $version);
             $step = $stepId === null ? new StorylineStep : $story->steps()->findOrFail($stepId);
+
             if ($stepId !== null && $step->status === StepStatus::Happened) {
                 throw StorylineConflictException::state();
             }
+
             if ($stepId === null && $story->steps()->where('submission_id', $data->submissionId)->exists()) {
                 throw RecordChangedException::changed();
             }

@@ -36,7 +36,7 @@ readonly class TagTeamMembershipData
     {
         return new self(
             wrestlers: new Collection([$wrestlerA, $wrestlerB]),
-            managers: $managers
+            managers: $managers,
         );
     }
 }

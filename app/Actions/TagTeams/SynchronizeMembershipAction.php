@@ -42,6 +42,7 @@ class SynchronizeMembershipAction
             }
 
             $newWrestlers = $members->wrestlers->diff($currentWrestlers);
+
             if ($newWrestlers->isNotEmpty()) {
                 $this->lockIncomingWrestlersAction->handle($tagTeam, $newWrestlers);
 

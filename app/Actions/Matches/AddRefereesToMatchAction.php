@@ -95,7 +95,7 @@ class AddRefereesToMatchAction
             ->get();
 
         if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
-            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee, $event->date)
+            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee, $event->date),
         )) {
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }

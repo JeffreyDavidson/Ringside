@@ -300,6 +300,7 @@ class MatchFactory extends Factory
 
         // Generate remaining competitors
         $allowedTypes = $matchType->getAllowedCompetitorTypes();
+
         for ($i = 0; $i < $competitorCount; $i++) {
             $competitor = $this->createRandomCompetitor($allowedTypes);
             $competitors[] = $this->createCompetitorData($competitor, $sideNumber++);
@@ -522,6 +523,7 @@ class MatchFactory extends Factory
 
                 if ($championship) {
                     $championModel = $championship->champion_type::find($championship->champion_id);
+
                     if ($championModel) {
                         $champions[] = $championModel;
                     }

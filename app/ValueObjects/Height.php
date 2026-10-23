@@ -26,7 +26,7 @@ readonly class Height implements \Stringable, Castable
      */
     public function __construct(
         public int $feet,
-        public int $inches
+        public int $inches,
     ) {
         if ($feet < 0) {
             throw new InvalidArgumentException('Height feet cannot be negative.');

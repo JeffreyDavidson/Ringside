@@ -212,7 +212,7 @@ describe('PreviousManagers query count', function (): void {
                 fn (Manager $manager) => $wrestler->managers()->attach($manager, [
                     'hired_at' => Date::now()->subMonths(18),
                     'fired_at' => Date::now()->subMonths(15),
-                ])
+                ]),
             );
         };
         $countQueries = function () use ($stable): int {

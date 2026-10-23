@@ -52,7 +52,7 @@ class SplitStableAction
         Stable $originalStable,
         string $newStableName,
         StableMembershipData $membersForNewStable,
-        Carbon $date
+        Carbon $date,
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
             if ($originalStable->promotion_id === null) {
@@ -68,7 +68,7 @@ class SplitStableAction
             $stableData = new StableData(
                 name: mb_trim($newStableName),
                 start_date: $date,
-                members: $membersForNewStable
+                members: $membersForNewStable,
             );
 
             $this->eligibility->ensureSplitNameAvailable($lockedStable, mb_trim($stableData->name));

@@ -28,6 +28,7 @@ it('adopts a newly qualified final through pack and live review while preserving
     resolve(SaveEventPackAction::class)->handle($event, 0, $data['card']['fingerprint'], EventPackData::fromValidated($data['content']), false);
     $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], signedInUser());
     resolve(MarkLiveAttendanceAction::class)->handle($event, $run->version, $run->content['roster'][0]['key'], LiveAttendanceMark::Arrived, true, signedInUser());
+
     foreach ([$first, $second] as $match) {
         resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Start, signedInUser());
         resolve(TransitionLiveItemAction::class)->handle($event, $run->refresh()->version, 'match:'.$match->id, LiveItemOperation::Finish, signedInUser());

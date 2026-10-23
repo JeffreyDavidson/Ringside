@@ -20,6 +20,7 @@ final class RosterDateAvailability
         if ($date === null) {
             return true;
         }
+
         if ($person instanceof TagTeam) {
             $person->loadMissing('currentWrestlers');
 
@@ -40,6 +41,7 @@ final class RosterDateAvailability
     {
         $event->loadMissing('promotion');
         $date = $event->local_date;
+
         if ($date !== null && ! $this->allowsOn($person, $date->toDateString())) {
             throw EntityNotAvailableException::onDate($person instanceof Referee ? $person->full_name : $person->name, $date->toDateString());
         }
@@ -57,6 +59,7 @@ final class RosterDateAvailability
         if (! $match instanceof EventMatch || $match->event_id !== $event->id) {
             return false;
         }
+
         if ($person instanceof Referee) {
             return $match->referees()->whereKey($person->id)->exists();
         }

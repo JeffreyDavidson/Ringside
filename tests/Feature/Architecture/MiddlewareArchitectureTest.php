@@ -63,12 +63,14 @@ function declaresExecutableMiddlewareTest(string $source): bool
         }
 
         $callback = $call->args[1]->value ?? null;
+
         if (! $callback instanceof ArrowFunction
             && (! $callback instanceof Closure || $callback->stmts === [])) {
             continue;
         }
 
         $skipped = false;
+
         for ($parent = $call->getAttribute('parent'); $parent instanceof Node; $parent = $parent->getAttribute('parent')) {
             if ($parent instanceof MethodCall
                 && $parent->name instanceof Identifier
@@ -107,6 +109,7 @@ function middlewareTestProblems(array $middlewareClasses, string $testDirectory)
 
         $relative = str_replace('\\', '/', Str::after($middleware, 'App\\Http\\Middleware\\')).'Test.php';
         $path = $testDirectory.'/'.$relative;
+
         if (! is_file($path)) {
             $problems[] = "{$relative}: missing matching file";
 

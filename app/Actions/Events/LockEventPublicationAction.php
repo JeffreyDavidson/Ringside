@@ -48,13 +48,16 @@ class LockEventPublicationAction
             ->first();
 
         $source = $this->source->get($event);
+
         if (($publication->version ?? 0) !== $version || ! hash_equals($source['fingerprint'], $fingerprint)) {
             throw RecordChangedException::changed();
         }
+
         if ($publication !== null && $publication->promotion_id !== $event->promotion_id) {
             throw EventPublicationException::invalid();
         }
         $publication ??= new EventPublication;
+
         if (! $publication->exists) {
             $publication->event_id = $event->id;
             $publication->promotion_id = $event->promotion_id;

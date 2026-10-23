@@ -8,6 +8,7 @@ use function Pest\Laravel\travel;
 test('guest account endpoints stop responding after six requests a minute', function (string $routeName): void {
     // Arrange
     $url = route($routeName);
+
     foreach (range(1, 6) as $attempt) {
         post($url, []);
     }

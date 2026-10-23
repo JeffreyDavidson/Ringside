@@ -65,6 +65,7 @@ function budgetBusinessFingerprint(): array
     $fingerprints = [];
     // Cache, sessions and worker queues are operational state rather than business records.
     $skip = ['cache', 'cache_locks', 'sessions', 'jobs', 'job_batches', 'failed_jobs', 'sqlite_sequence'];
+
     foreach (Schema::getTableListing(schemaQualified: false) as $table) {
         if (in_array($table, $skip, true)) {
             continue;
@@ -84,6 +85,7 @@ function budgetBusinessFingerprint(): array
 function budgetSharedSurfaces(Event $event): array
 {
     $surfaces = [];
+
     foreach (['event' => 'events.show', 'pack' => 'events.pack.show', 'live' => 'events.live-show.show'] as $name => $routeName) {
         $surfaces[$name] = (string) \Pest\Laravel\get(route($routeName, $event))->assertOk()->getContent();
     }

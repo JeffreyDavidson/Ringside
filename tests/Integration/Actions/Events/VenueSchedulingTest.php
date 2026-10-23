@@ -160,6 +160,7 @@ describe('venue booking across promotions', function () {
             SchedulingConflictException::class,
             sprintf('Venue [%s] is already booked on %s (venue time).', $venue->name, $day->copy()->setTime(9, 0)->format('M j, Y')),
         );
+
         try {
             $attempt();
         } catch (SchedulingConflictException $exception) {

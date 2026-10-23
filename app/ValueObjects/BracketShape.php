@@ -40,6 +40,7 @@ final readonly class BracketShape
     public function seeds(): array
     {
         $seeds = [1, 2];
+
         for ($size = 4; $size <= $this->capacity; $size *= 2) {
             $seeds = array_merge(...array_map(fn (int $seed): array => [$seed, $size + 1 - $seed], $seeds));
         }
@@ -57,6 +58,7 @@ final readonly class BracketShape
     {
         $seeds = $this->seeds();
         $slots = [];
+
         for ($round = 1; $round <= $this->rounds(); $round++) {
             for ($position = 1; $position <= $this->capacity / 2 ** $round; $position++) {
                 $slots[] = [
@@ -94,8 +96,10 @@ final readonly class BracketShape
     {
         $ancestors = [];
         $positions = [$position];
+
         for ($below = $round - 1; $below >= 1; $below--) {
             $positions = array_merge(...array_map(fn (int $above): array => [$above * 2 - 1, $above * 2], $positions));
+
             foreach ($positions as $ancestor) {
                 $ancestors[] = [$below, $ancestor];
             }
@@ -112,6 +116,7 @@ final readonly class BracketShape
     public function descendants(int $round, int $position): array
     {
         $descendants = [];
+
         for ($next = $round + 1; $next <= $this->rounds(); $next++) {
             $position = (int) ceil($position / 2);
             $descendants[] = [$next, $position];

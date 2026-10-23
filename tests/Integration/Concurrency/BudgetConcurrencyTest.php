@@ -22,6 +22,7 @@ function runBudgetWorkers(array $specs): array
 {
     $processes = [];
     $inputs = [];
+
     foreach ($specs as $i => $spec) {
         $inputs[$i] = new InputStream;
         $processes[$i] = new Process([PHP_BINARY, __DIR__.'/budget-worker.php', json_encode($spec, JSON_THROW_ON_ERROR)]);
@@ -29,34 +30,41 @@ function runBudgetWorkers(array $specs): array
         $processes[$i]->setInput($inputs[$i]);
         $processes[$i]->start();
     }
+
     try {
         foreach ($processes as $process) {
             $deadline = microtime(true) + 15;
+
             while (! str_contains($process->getOutput(), "READY\n") && $process->isRunning()) {
                 if (microtime(true) > $deadline) {
                     throw new RuntimeException('Budget worker did not reach the release barrier.');
                 }
                 usleep(10000);
             }
+
             if (! str_contains($process->getOutput(), "READY\n")) {
                 throw new RuntimeException($process->getErrorOutput());
             }
         }
         $start = microtime(true) + 0.2;
+
         foreach ($inputs as $input) {
             $input->write("{$start}\n");
             $input->close();
         }
+
         while (microtime(true) < $start) {
             foreach ($processes as $process) {
                 $process->isRunning();
             } usleep(10000);
         }
         $results = [];
+
         foreach ($processes as $process) {
             $process->wait();
             expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
             $result = json_decode(trim(substr($process->getOutput(), strpos($process->getOutput(), 'RESULT ') + 7)), true, flags: JSON_THROW_ON_ERROR);
+
             if (! is_array($result) || ! is_bool($result['ok'] ?? null)) {
                 throw new UnexpectedValueException('The budget worker returned an invalid result.');
             }
@@ -87,6 +95,7 @@ test('concurrent first saves keep one budget and exact retries keep one line', f
             ->and(EventBudget::query()->where('event_id', $event->id)->count())->toBe(1)
             ->and(EventBudgetLine::query()->count())->toBe(1)
             ->and(EventBudget::query()->firstOrFail()->revisions()->count())->toBe(1);
+
         if (! $sameKey) {
             expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
@@ -100,6 +109,7 @@ test('native payment and refund races keep one financial write per version or re
         $user = User::query()->findOrFail(auth()->id());
         $input = budgetPayment();
         $key = budgetKey();
+
         if ($case === 'refund') {
             $source = EventBudgetMovement::factory()->for($f['line'], 'line')->create();
             $input = budgetPayment(['kind' => 'refund', 'source_id' => $source->id, 'amount' => '150.00']);
@@ -111,9 +121,11 @@ test('native payment and refund races keep one financial write per version or re
         expect(collect($results)->where('ok', true)->count())->toBe($case === 'retry' ? 2 : 1)
             ->and($f['line']->movements()->count())->toBe($case === 'refund' ? 2 : 1)
             ->and($f['budget']->revisions()->count())->toBe(1);
+
         if ($case !== 'retry') {
             expect(collect($results)->where('ok', false)->pluck('exception')->all())->toBe([RecordChangedException::class]);
         }
+
         if ($case === 'refund') {
             expect(fn () => resolve(RecordBudgetMovementAction::class)->handle($f['event'], 1, budgetKey(), $f['line']->id, BudgetMovementData::fromValidated($input), signedInUser()))->toThrow(BudgetException::class);
         }
@@ -129,6 +141,7 @@ test('a payment racing an obligation change archive or deletion never writes aft
         $opposite = [...$spec, 'key' => budgetKey(), 'operation' => $case, 'input' => budgetLineInput(['confirmed' => '50.00', 'reason' => 'Agreed reduction', 'acknowledge' => true])];
         // Act
         $results = runBudgetWorkers([$spec, $opposite]);
+
         // Assert
         if ($case === 'delete') {
             expect(Event::query()->withTrashed()->findOrFail($f['event']->id)->trashed())->toBeTrue()
@@ -137,6 +150,7 @@ test('a payment racing an obligation change archive or deletion never writes aft
             return;
         }
         expect(collect($results)->where('ok', true)->count())->toBe(1)->and($f['budget']->revisions()->count())->toBe(1);
+
         if ($case === 'archive' && $f['line']->refresh()->archived_at !== null) {
             expect($f['line']->movements()->count())->toBe(0);
         }

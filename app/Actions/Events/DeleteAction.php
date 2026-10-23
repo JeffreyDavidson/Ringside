@@ -47,6 +47,7 @@ class DeleteAction
     {
         DB::transaction(function () use ($event, $deletionDate): void {
             $tournamentIds = $this->tournamentLocks->forEvent($event->id);
+
             if ($tournamentIds !== []) {
                 $this->tournamentLocks->lockMany($tournamentIds, [$event->id], $event->date);
             }

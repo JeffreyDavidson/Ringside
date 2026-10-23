@@ -12,6 +12,6 @@ readonly class TitleData
     public function __construct(
         public string $name,
         public TitleType $type,
-        public ?Carbon $debut_date
+        public ?Carbon $debut_date,
     ) {}
 }
