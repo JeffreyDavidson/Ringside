@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\TransitionLiveItemAction;
 use App\Enums\Events\LiveItemOperation;
+use App\Enums\Events\LiveShowStatus;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
 use App\Models\Events\Event;
+use App\Models\Events\EventLiveRun;
 use App\Models\Promotions\Promotion;
 use App\ViewModels\Events\EventPackViewModel;
 use App\ViewModels\Events\LiveShowViewModel;
@@ -16,6 +18,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\travelTo;
 
 require_once __DIR__.'/../../../Fixtures/live-show.php';
+require_once __DIR__.'/../../../Fixtures/member-actor.php';
 
 test('the screen reports revised planned starts and actual delay without inventing missing times', function (): void {
     // Arrange
@@ -101,4 +104,57 @@ test('the live screen data a member receives leaves out crew production content'
         ->and(data_get($screen, 'run.content'))->not->toHaveKey('production')
         ->and($screen['current'])->toBeNull()
         ->and($screen['next'])->not->toHaveKey('cues');
+});
+
+test('a member sees exactly the live show an administrator sees minus production, cues and crew rows', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
+    $administratorScreen = resolve(LiveShowViewModel::class)->data($event);
+    assert($administratorScreen['run'] instanceof EventLiveRun && $administratorScreen['source'] !== null);
+    $administratorRun = $administratorScreen['run']->content;
+    $administratorSource = $administratorScreen['source']['content'];
+    actAsMemberOf($event);
+
+    // Act
+    $screen = resolve(LiveShowViewModel::class)->data($event);
+
+    // Assert
+    assert($screen['run'] instanceof EventLiveRun && $screen['source'] !== null);
+    $run = $screen['run']->content;
+    $source = $screen['source']['content'];
+    $withoutCrew = fn (array $roster): array => array_values(array_filter($roster, fn (array $person): bool => ! str_starts_with($person['key'], 'crew:')));
+    $withoutCues = fn (array $items): array => array_map(fn (array $item): array => array_diff_key($item, ['cues' => true]), $items);
+
+    expect($administratorRun)->toHaveKey('production')
+        ->and($administratorRun['items'][0])->toHaveKey('cues')
+        ->and(array_column($administratorRun['roster'], 'key'))->toContain('crew:'.$fixture['contact']->id)
+        ->and(array_keys($run))->toBe(array_values(array_diff(array_keys($administratorRun), ['production'])))
+        ->and($run['items'])->toEqual($withoutCues($administratorRun['items']))
+        ->and($run['roster'])->toBe($withoutCrew($administratorRun['roster']))
+        ->and($source)->not->toHaveKey('production')
+        ->and($source['items'])->toEqual($withoutCues($administratorSource['items']))
+        ->and($source['roster'])->toBe($withoutCrew($administratorSource['roster']));
+});
+
+test('a member sees a completed live show without production content', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $event = productionFixture()['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $run = resolve(PrepareLiveShowAction::class)->handle($event, 0, 1, $data['card']['fingerprint'], administrator());
+    $run->forceFill(['status' => LiveShowStatus::Completed])->save();
+    actAsMemberOf($event);
+
+    // Act
+    $screen = resolve(LiveShowViewModel::class)->data($event);
+
+    // Assert
+    expect($screen['source'])->toBeNull()
+        ->and($screen['complete'])->toBeTrue()
+        ->and(data_get($screen, 'run.content'))->not->toHaveKey('production')
+        ->and(json_encode(data_get($screen, 'run.content')))->not->toContain('PRIVATE-CREW-7Q', 'PRIVATE-CUE-7Q');
 });
