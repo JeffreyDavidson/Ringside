@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Periods;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
@@ -13,11 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
+/**
+ * Every write here runs inside the calling Action's transaction and opens none of its own.
+ */
 final readonly class LifecyclePeriodWriter
 {
-    public function __construct(private RecordLifecycleTransitionAction $recordLifecycleTransition) {}
+    public function __construct(private LifecycleTransitionRecorder $transitionRecorder) {}
 
     /**
      * @param  MorphMany<*, *>  $periods
@@ -29,14 +30,12 @@ final readonly class LifecyclePeriodWriter
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
     ): void {
-        DB::transaction(function () use ($subject, $periods, $dimension, $date, $transition): void {
-            $periods->create([
-                'started_at' => $date,
-                'ended_at' => null,
-            ]);
+        $periods->create([
+            'started_at' => $date,
+            'ended_at' => null,
+        ]);
 
-            $this->recordTransition($subject, $dimension, $transition, $date);
-        });
+        $this->recordTransition($subject, $dimension, $transition, $date);
     }
 
     /**
@@ -59,24 +58,22 @@ final readonly class LifecyclePeriodWriter
         ?LifecycleTransitionType $transition = null,
         bool $clampToStart = false,
     ): void {
-        DB::transaction(function () use ($subject, $currentPeriod, $dimension, $date, $transition, $clampToStart): void {
-            $startedAt = $currentPeriod->value('started_at');
-            $endedAt = $date;
+        $startedAt = $currentPeriod->value('started_at');
+        $endedAt = $date;
 
-            if ($startedAt instanceof Carbon && $date->lt($startedAt)) {
-                if (! $clampToStart) {
-                    throw InvalidDateRangeException::endBeforeStart($startedAt, $date, DateRangeContext::forPeriod($dimension));
-                }
-
-                $endedAt = $startedAt;
+        if ($startedAt instanceof Carbon && $date->lt($startedAt)) {
+            if (! $clampToStart) {
+                throw InvalidDateRangeException::endBeforeStart($startedAt, $date, DateRangeContext::forPeriod($dimension));
             }
 
-            $currentPeriod->update([
-                'ended_at' => $endedAt,
-            ]);
+            $endedAt = $startedAt;
+        }
 
-            $this->recordTransition($subject, $dimension, $transition, $endedAt);
-        });
+        $currentPeriod->update([
+            'ended_at' => $endedAt,
+        ]);
+
+        $this->recordTransition($subject, $dimension, $transition, $endedAt);
     }
 
     private function recordTransition(
@@ -89,6 +86,6 @@ final readonly class LifecyclePeriodWriter
             return;
         }
 
-        $this->recordLifecycleTransition->handle($subject, $dimension, $transition, $date);
+        $this->transitionRecorder->record($subject, $dimension, $transition, $date);
     }
 }

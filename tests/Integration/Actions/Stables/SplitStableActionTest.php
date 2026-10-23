@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\RemoveStableMembersAction;
 use App\Actions\Stables\SplitStableAction;
@@ -11,6 +10,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Lifecycle\Roster\Stables\StableMembershipRequirements;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
@@ -664,7 +664,7 @@ describe('SplitStableAction Integration Tests', function () {
                 resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
                 resolve(StableNameLock::class),
-                resolve(RecordLifecycleTransitionAction::class),
+                resolve(LifecycleTransitionRecorder::class),
             );
 
             expect(fn () => $action->handle(

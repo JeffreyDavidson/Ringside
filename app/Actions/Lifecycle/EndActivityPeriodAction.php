@@ -8,6 +8,7 @@ use App\Enums\Lifecycle\DateRangeContext;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
+use App\Lifecycle\Periods\LifecycleTransitionRecorder;
 use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Roster\Stables\Stable;
 use App\Support\ModelKey;
@@ -18,7 +19,7 @@ use LogicException;
 
 class EndActivityPeriodAction
 {
-    public function __construct(private readonly RecordLifecycleTransitionAction $recordLifecycleTransition) {}
+    public function __construct(private readonly LifecycleTransitionRecorder $transitionRecorder) {}
 
     /**
      * Close the current activity period, recording the given transition (when any) in the same transaction.
@@ -71,7 +72,7 @@ class EndActivityPeriodAction
             $currentActivityPeriod->update(['ended_at' => $endedAt]);
 
             if ($transition instanceof LifecycleTransitionType) {
-                $this->recordLifecycleTransition->handle($lockedActiveable, LifecycleDimension::Activity, $transition, $endedAt, $context);
+                $this->transitionRecorder->record($lockedActiveable, LifecycleDimension::Activity, $transition, $endedAt, $context);
             }
         });
     }
