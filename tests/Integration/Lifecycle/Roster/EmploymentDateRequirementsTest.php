@@ -148,6 +148,21 @@ describe('a current employment', function () use ($types): void {
         expect($act)->not->toThrow(EmploymentDateException::class);
     });
 
+    it('refuses the first employment day for a re-employed :type, whose form shows the current start', function (string $type): void {
+        // Arrange
+        Date::setTestNow('2026-10-12 12:00:00');
+        $record = employableWithEmployments($type, Promotion::factory()->create(), [
+            Employment::factory()->make(['started_at' => Date::parse('2026-01-05'), 'ended_at' => Date::parse('2026-03-01')]),
+            Employment::factory()->make(['started_at' => Date::parse('2026-09-01'), 'ended_at' => null]),
+        ]);
+
+        // Act
+        $act = fn () => resolve(EmploymentDateRequirements::class)->ensureCurrentStartIsUnchanged($record, Date::parse('2026-01-05'));
+
+        // Assert
+        expect($act)->toThrow(EmploymentDateException::class);
+    })->with(['wrestler', 'manager', 'referee']);
+
     it('has nothing to protect when no employment is current', function (): void {
         // Arrange
         Date::setTestNow('2026-10-12 12:00:00');

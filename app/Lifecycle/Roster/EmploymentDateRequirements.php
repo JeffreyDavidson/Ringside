@@ -33,17 +33,25 @@ final readonly class EmploymentDateRequirements
     }
 
     /**
-     * Whether the date is the day the current employment started, or the day the first one did (the date the tag
-     * team form shows). The form holds only the day, so the time of day an employment started does not matter.
+     * Whether the date is the day the current employment started, or, for a tag team only, the day its first one
+     * did (the date the tag team form shows). The form holds only the day, so the time of day does not matter.
      */
     public function keepsStartDay(Manager|Referee|TagTeam|Wrestler $employable, Employment $current, Carbon $date): bool
     {
         $promotion = $this->promotionOf($employable);
         $day = PromotionTimeZoneService::toLocalTime($promotion, $date);
+
+        if (PromotionTimeZoneService::toLocalTime($promotion, $current->started_at)->isSameDay($day)) {
+            return true;
+        }
+
+        if (! $employable instanceof TagTeam) {
+            return false;
+        }
+
         $first = $employable->employments()->oldest('started_at')->first();
 
-        return PromotionTimeZoneService::toLocalTime($promotion, $current->started_at)->isSameDay($day)
-            || ($first instanceof Employment && PromotionTimeZoneService::toLocalTime($promotion, $first->started_at)->isSameDay($day));
+        return $first instanceof Employment && PromotionTimeZoneService::toLocalTime($promotion, $first->started_at)->isSameDay($day);
     }
 
     /**
