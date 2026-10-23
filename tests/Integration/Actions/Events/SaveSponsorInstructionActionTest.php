@@ -304,7 +304,7 @@ test('instruction adoption over a saved pack writes the next version, the held f
         ->and($pack->content['notes'])->toBe('Retained note')
         ->and($pack->content['doors_at'])->toBe('18:30')
         ->and(data_get($pack->content, 'sponsor_tasks.0.label'))->toBe('Banner')
-        ->and($pack->content['production'])->toEqual(['notes' => 'Retained production', 'assignments' => [], 'cues' => []]);
+        ->and(data_get($pack->content, 'production'))->toEqual(['notes' => 'Retained production', 'assignments' => [], 'cues' => []]);
 });
 
 test('sponsor adoption and production edits preserve each others saved pack sections', function (string $mode): void {

@@ -174,7 +174,7 @@ test('saving production takes every lock once in order, then updates the pack ro
         ->and($pack->version)->toBe(2)
         ->and($pack->card_fingerprint)->toBe($data['card']['fingerprint'])
         ->and(array_keys($pack->content))->toBe(array_keys($before->content))
-        ->and($pack->content['production'])->toEqual([...$fixture['production'], 'notes' => 'Changed note']);
+        ->and(data_get($pack->content, 'production'))->toEqual([...$fixture['production'], 'notes' => 'Changed note']);
 });
 
 test('explicit name refresh and offset call time change only the latest saved plan', function (): void {

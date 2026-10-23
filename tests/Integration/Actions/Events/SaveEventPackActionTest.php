@@ -97,7 +97,7 @@ test('a second pack save keeps the saved production plan and sponsor tasks and r
     expect($pack->version)->toBe(2)
         ->and($pack->content['notes'])->toBe('Second')
         ->and(data_get($pack->content, 'sponsor_tasks.0.label'))->toBe('Banner')
-        ->and($pack->content['production'])->toEqual(['notes' => 'Kept', 'assignments' => [], 'cues' => []]);
+        ->and(data_get($pack->content, 'production'))->toEqual(['notes' => 'Kept', 'assignments' => [], 'cues' => []]);
 });
 
 test('a pack saved against a changed card is refused until the changes are reviewed', function (): void {
