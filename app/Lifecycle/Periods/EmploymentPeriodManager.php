@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Periods;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use LogicException;
 
+/**
+ * Every write here runs inside the calling Action's transaction and opens none of its own.
+ */
 final readonly class EmploymentPeriodManager
 {
     public function __construct(
         private LifecyclePeriodWriter $periodWriter,
-        private RecordLifecycleTransitionAction $recordTransition,
+        private LifecycleTransitionRecorder $transitionRecorder,
     ) {}
 
     /**
@@ -67,21 +68,19 @@ final readonly class EmploymentPeriodManager
      */
     public function reschedule(Model&Employable $employable, Carbon $date): void
     {
-        DB::transaction(function () use ($employable, $date): void {
-            $employment = $this->lockScheduled($employable);
-            $scheduledFor = $employment->started_at;
+        $employment = $this->lockScheduled($employable);
+        $scheduledFor = $employment->started_at;
 
-            $employment->update(['started_at' => $date]);
+        $employment->update(['started_at' => $date]);
 
-            // Transitions are an immutable trail, so the move is recorded as a new one, as a title's reschedule is.
-            $this->recordTransition->handle(
-                $employable,
-                LifecycleDimension::Employment,
-                LifecycleTransitionType::Employed,
-                $date,
-                ['rescheduled_from' => $scheduledFor->toIso8601String()],
-            );
-        });
+        // Transitions are an immutable trail, so the move is recorded as a new one, as a title's reschedule is.
+        $this->transitionRecorder->record(
+            $employable,
+            LifecycleDimension::Employment,
+            LifecycleTransitionType::Employed,
+            $date,
+            ['rescheduled_from' => $scheduledFor->toIso8601String()],
+        );
     }
 
     /**
@@ -94,20 +93,18 @@ final readonly class EmploymentPeriodManager
      */
     public function cancel(Model&Employable $employable): void
     {
-        DB::transaction(function () use ($employable): void {
-            $employment = $this->lockScheduled($employable);
+        $employment = $this->lockScheduled($employable);
 
-            $scheduledFor = $employment->started_at;
+        $scheduledFor = $employment->started_at;
 
-            $employment->delete();
-            $this->recordTransition->handle(
-                $employable,
-                LifecycleDimension::Employment,
-                LifecycleTransitionType::EmploymentCancelled,
-                now(),
-                ['scheduled_for' => $scheduledFor->toIso8601String()],
-            );
-        });
+        $employment->delete();
+        $this->transitionRecorder->record(
+            $employable,
+            LifecycleDimension::Employment,
+            LifecycleTransitionType::EmploymentCancelled,
+            now(),
+            ['scheduled_for' => $scheduledFor->toIso8601String()],
+        );
     }
 
     /**
