@@ -26,7 +26,7 @@ class SaveSponsorInstructionAction
         private readonly SponsorInstructionService $instructions,
         private readonly EventPackCardService $card,
         private readonly EventPackSourceService $source,
-        private readonly SaveEventPackAction $save,
+        private readonly PersistEventPackAction $persistPack,
         private readonly PersistSponsorCommitmentAction $persist,
         private readonly EventCardLock $lock,
         private readonly SponsorInstructionRequirements $requirements,
@@ -87,7 +87,8 @@ class SaveSponsorInstructionAction
                 $commitment->pack_instruction_hash = $this->instructions->hash($entry);
             }
 
-            $this->save->handle($event, $packVersion, $fingerprint, EventPackData::fromValidated($content), false);
+            // The commitment guard above already checked the pack version and card against the locked rows held here.
+            $this->persistPack->handle($event, $pack, $packVersion, $fingerprint, EventPackData::fromValidated($content)->contentOver($pack));
             $this->persist->handle($commitment, $data->mode === SponsorInstructionMode::Remove ? 'retract_instruction' : 'review_instruction', $data->reason, $actor);
         }, attempts: 3);
     }

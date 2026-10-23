@@ -145,6 +145,38 @@ test('saving production locks the referenced crew contacts after the event, its 
         ->and($contactLock)->toBeLessThan($packWrite);
 });
 
+test('saving production takes every lock once in order, then updates the pack row and logs the save', function (): void {
+    // Arrange
+    require_once __DIR__.'/../../../Fixtures/production.php';
+    $fixture = productionFixture();
+    $event = $fixture['event'];
+    $data = resolve(EventPackViewModel::class)->data($event);
+    $before = $event->pack()->firstOrFail();
+
+    // Act
+    $statements = recordStatements(fn () => resolve(SaveEventProductionAction::class)->handle($event, 1, $data['card']['fingerprint'], EventProductionData::fromValidated([...$fixture['production'], 'notes' => 'Changed note']), false, administrator()));
+
+    // Assert
+    $writes = array_values(array_filter(
+        array_column($statements, 'sql'),
+        fn (string $sql): bool => str_contains($sql, 'for update') || str_starts_with($sql, 'update "event_packs"') || str_starts_with($sql, 'insert into "activity_log"'),
+    ));
+    $pack = $event->pack()->firstOrFail();
+    expect($writes)->toBe([
+        'select * from "events" where "events"."id" = ? and "events"."deleted_at" is null limit 1  /* for update */',
+        'select * from "events_matches" where "event_id" = ? order by "events_matches"."id" asc  /* for update */',
+        'select * from "event_packs" where "event_id" = ? limit 1  /* for update */',
+        'select * from "event_live_runs" where "event_id" = ? limit 1  /* for update */',
+        'select * from "crew_contacts" where "promotion_id" = ? and "crew_contacts"."id" in (1) order by "id" asc  /* for update */',
+        'update "event_packs" set "version" = ?, "content" = ?, "updated_at" = ? where "id" = ?',
+        'insert into "activity_log" ("log_name", "attribute_changes", "properties", "causer_id", "causer_type", "subject_id", "subject_type", "description", "updated_at", "created_at") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    ])
+        ->and($pack->version)->toBe(2)
+        ->and($pack->card_fingerprint)->toBe($data['card']['fingerprint'])
+        ->and(array_keys($pack->content))->toBe(array_keys($before->content))
+        ->and($pack->content['production'])->toEqual([...$fixture['production'], 'notes' => 'Changed note']);
+});
+
 test('explicit name refresh and offset call time change only the latest saved plan', function (): void {
     // Arrange
     require_once __DIR__.'/../../../Fixtures/production.php';
