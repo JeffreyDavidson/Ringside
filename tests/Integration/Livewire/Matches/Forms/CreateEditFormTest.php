@@ -107,6 +107,52 @@ describe('match form side order', function (): void {
     });
 });
 
+describe('match form individual entrants', function (): void {
+    it('keeps the picked entrant order, one entrant per side', function (): void {
+        // Arrange
+        [$first, $second, $third] = Wrestler::factory()->count(3)->create()->all();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->matchType = MatchType::BattleRoyal;
+        $form->competitors = [['wrestlers' => [$third->id, $first->id, $second->id], 'tag_teams' => []]];
+        $form->referees = [Referee::factory()->create()->id];
+
+        // Act
+        $data = $form->toData();
+
+        // Assert
+        $sideWrestlerIds = $data->sides
+            ->sides()
+            ->map(fn (array $side): array => array_map(fn (Wrestler $wrestler): int => $wrestler->id, $side['wrestlers']))
+            ->all();
+
+        expect($sideWrestlerIds)->toBe([
+            1 => [$third->id],
+            2 => [$first->id],
+            3 => [$second->id],
+        ]);
+    });
+
+    it('loads all entrants with one wrestlers query however many there are', function (): void {
+        // Arrange
+        $wrestlers = Wrestler::factory()->count(4)->create();
+        $form = new CreateEditForm(Double::for(Component::class), 'form');
+        $form->matchType = MatchType::BattleRoyal;
+        $form->competitors = [['wrestlers' => $wrestlers->modelKeys(), 'tag_teams' => []]];
+        $form->referees = [Referee::factory()->create()->id];
+
+        // Act
+        $statements = recordStatements(fn (): EventMatchData => $form->toData());
+
+        // Assert
+        $wrestlerQueries = array_filter(
+            $statements,
+            fn (array $statement): bool => str_contains($statement['sql'], 'from "wrestlers"'),
+        );
+
+        expect($wrestlerQueries)->toHaveCount(1);
+    });
+});
+
 describe('match form side labels', function (): void {
     it('names a :dataset side for the form and its validation messages', function (?MatchType $matchType, string $expectedLabel): void {
         // Arrange

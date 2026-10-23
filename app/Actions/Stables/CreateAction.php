@@ -10,7 +10,6 @@ use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Lifecycle\Roster\Stables\StableNameLock;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Scopes\PromotionContextScope;
-use App\Services\Promotions\PromotionContextService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +23,6 @@ class CreateAction
         protected EstablishAction $establishAction,
         protected AddStableMembersAction $addStableMembersAction,
         protected StableNameLock $nameLock,
-        protected PromotionContextService $promotionContext,
     ) {}
 
     /**
@@ -42,16 +40,15 @@ class CreateAction
      * - Makes the stable available for storylines and championship opportunities
      *
      * @param  StableData  $stableData  The data transfer object containing stable information
-     * @param  int|null  $promotionId  The promotion of the stable this one is split from; null leaves it to the promotion context, as for a stable created through the form
+     * @param  int|null  $promotionId  The promotion the stable belongs to: the enforced promotion for a member, the split stable's promotion for a split, null for an administrator without one
      * @return Stable The newly created stable with all members
      *
      * @throws CannotBeCreatedException When another active stable of the promotion already has the name
      */
-    public function handle(StableData $stableData, ?int $promotionId = null): Stable
+    public function handle(StableData $stableData, ?int $promotionId): Stable
     {
         return DB::transaction(function () use ($stableData, $promotionId): Stable {
             $name = mb_trim($stableData->name);
-            $promotionId ??= $this->promotionContext->isEnforced() ? $this->promotionContext->current()?->id : null;
 
             if ($promotionId === null) {
                 $this->nameLock->lock($name);

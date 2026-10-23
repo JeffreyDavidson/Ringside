@@ -11,8 +11,10 @@ use App\Models\Users\User;
 use App\Services\Promotions\PromotionContextService;
 use Illuminate\Support\Facades\DB;
 
-final class AcceptPromotionInvitationAction
+final readonly class AcceptPromotionInvitationAction
 {
+    public function __construct(private PromotionContextService $context) {}
+
     /**
      * Turn the invitation for the user's own email into an active membership with the role the owner chose
      * and delete the invitation. The invitation is found through the user's email, never through an id from
@@ -42,7 +44,7 @@ final class AcceptPromotionInvitationAction
             if ($lockedPromotion->memberships()->forUser($user)->exists()) {
                 $invitation->delete();
 
-                app(PromotionContextService::class)->forgetMemberships();
+                $this->context->forgetMemberships();
 
                 return null;
             }
@@ -54,7 +56,7 @@ final class AcceptPromotionInvitationAction
 
             $invitation->delete();
 
-            app(PromotionContextService::class)->forgetMemberships();
+            $this->context->forgetMemberships();
 
             return $invitation->role;
         });

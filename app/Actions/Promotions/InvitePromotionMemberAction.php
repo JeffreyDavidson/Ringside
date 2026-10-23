@@ -17,8 +17,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
-final class InvitePromotionMemberAction
+final readonly class InvitePromotionMemberAction
 {
+    public function __construct(private PromotionContextService $context) {}
+
     /**
      * Save a pending invitation for the email with the role the owner chose. It grants nothing until whoever
      * signs in with that email accepts it (AcceptPromotionInvitationAction). Whether the email belongs to an
@@ -55,7 +57,7 @@ final class InvitePromotionMemberAction
             $invitation->role = $role;
             $invitation->save();
 
-            app(PromotionContextService::class)->forgetMemberships();
+            $this->context->forgetMemberships();
 
             return $invitation;
         });
