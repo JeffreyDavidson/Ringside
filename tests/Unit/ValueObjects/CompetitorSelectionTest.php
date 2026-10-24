@@ -197,3 +197,34 @@ describe('refusing an invalid entry', function (): void {
         'null side' => ['side', null],
     ]);
 });
+
+describe('building from unvalidated form input', function (): void {
+    it('numbers array sides in order, skips malformed lists and counts a non-id entry as id 0', function (): void {
+        // Arrange
+        $wrestler = Relation::getMorphAlias(Wrestler::class);
+        $team = Relation::getMorphAlias(TagTeam::class);
+        $input = ['not-a-side', ['wrestlers' => 'x'], ['wrestlers' => ['4', null], 'tag_teams' => [9]], ['wrestlers' => [6]]];
+
+        // Act
+        $selection = CompetitorSelection::fromInput($input);
+
+        // Assert
+        expect($selection->entries())->toBe([
+            ['type' => $wrestler, 'id' => 4, 'side' => 1],
+            ['type' => $wrestler, 'id' => 0, 'side' => 1],
+            ['type' => $team, 'id' => 9, 'side' => 1],
+            ['type' => $wrestler, 'id' => 6, 'side' => 2],
+        ]);
+    });
+
+    it('reads input that is not a list of sides as no competitors', function (): void {
+        // Arrange
+        $input = 'wrestlers';
+
+        // Act
+        $selection = CompetitorSelection::fromInput($input);
+
+        // Assert
+        expect($selection->entries())->toBeEmpty();
+    });
+});

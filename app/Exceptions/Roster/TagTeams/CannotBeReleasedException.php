@@ -12,8 +12,6 @@ final class CannotBeReleasedException extends BaseBusinessException
 {
     public static function notEmployed(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::Unemployed, __('tag-team-lifecycle.errors.release.unemployed', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.release.unemployed', $tagTeam, reason: BusinessRuleReason::Unemployed);
     }
 }

@@ -6,6 +6,7 @@ namespace App\Lifecycle\Roster\Individuals;
 
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Lifecycle\Roster\UpcomingBookings;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
@@ -13,6 +14,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 final readonly class IndividualDeletionEligibility
 {
+    use AnswersEligibility;
+
     public function __construct(private UpcomingBookings $upcomingBookings) {}
 
     public function ensureCanDelete(Wrestler|Manager|Referee $individual): void
@@ -28,13 +31,7 @@ final readonly class IndividualDeletionEligibility
 
     public function canRestore(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanRestore($individual);
-
-            return true;
-        } catch (CannotBeRestoredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanRestore($individual), CannotBeRestoredException::class);
     }
 
     public function ensureCanRestore(Wrestler|Manager|Referee $individual): void

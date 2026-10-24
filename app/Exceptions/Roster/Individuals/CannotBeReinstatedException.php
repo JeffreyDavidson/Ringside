@@ -14,16 +14,13 @@ final class CannotBeReinstatedException extends BaseBusinessException
 {
     public static function injured(Wrestler|Manager|Referee $entity, ?string $injuryDetails = null): static
     {
-        $context = self::formatModelContext($entity);
         $details = $injuryDetails ? " ({$injuryDetails})" : '';
 
-        return self::forReason(BusinessRuleReason::Injured, __('individuals.errors.reinstate.injured', ['context' => $context, 'details' => $details]));
+        return self::forModel('individuals.errors.reinstate.injured', $entity, ['details' => $details], reason: BusinessRuleReason::Injured);
     }
 
     public static function available(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return self::forReason(BusinessRuleReason::NotSuspended, __('individuals.errors.reinstate.not_suspended', ['context' => $context]));
+        return self::forModel('individuals.errors.reinstate.not_suspended', $entity, reason: BusinessRuleReason::NotSuspended);
     }
 }

@@ -121,7 +121,7 @@ trait HasActivityPeriods
         /** @var MorphOne<ActivityPeriod, TModel> $relation */
         $relation = $this->morphOne(ActivityPeriod::class, 'activeable');
         LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
-        $relation->latest('ended_at');
+        $relation->ofMany('ended_at', 'max');
 
         return $relation;
     }

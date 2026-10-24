@@ -14,15 +14,11 @@ final class CannotBeUnretiredException extends BaseBusinessException
 {
     public static function deleted(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return new self(__('individuals.errors.unretire.deleted', ['context' => $context]));
+        return self::forModel('individuals.errors.unretire.deleted', $entity);
     }
 
     public static function notRetired(Wrestler|Manager|Referee $entity): static
     {
-        $context = self::formatModelContext($entity);
-
-        return self::forReason(BusinessRuleReason::NotRetired, __('individuals.errors.unretire.not_retired', ['context' => $context]));
+        return self::forModel('individuals.errors.unretire.not_retired', $entity, reason: BusinessRuleReason::NotRetired);
     }
 }

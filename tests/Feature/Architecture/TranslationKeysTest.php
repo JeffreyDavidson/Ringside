@@ -18,7 +18,7 @@ use Symfony\Component\Finder\Finder;
 
 test('literal translation keys used by the application resolve to translations', function (): void {
     // Arrange
-    $pattern = '/(?:(?<![\w$>:])(?:__|trans|trans_choice)|@lang)\(\s*([\'"])((?:[\w-]+::)?[\w-]+(?:\.[\w-]+)+)\1/';
+    $pattern = '/(?:(?<![\w$>:])(?:__|trans|trans_choice)|@lang|(?<=::)forModel)\(\s*([\'"])((?:[\w-]+::)?[\w-]+(?:\.[\w-]+)+)\1/';
     $missingKeys = [];
 
     // Act
@@ -108,10 +108,24 @@ test('every business exception translates a fixed key, never one passed in by th
         $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($file->getContents()) ?? [];
         $relativePath = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
 
-        $translations = array_filter(
+        // BaseBusinessException::forModel() translates the key its callers pass, so the callers are checked instead.
+        $translations = $file->getFilename() === 'BaseBusinessException.php' ? [] : array_filter(
             (new NodeFinder)->findInstanceOf($statements, FuncCall::class),
             fn (FuncCall $call): bool => $call->name instanceof Name && in_array($call->name->toString(), ['__', 'trans_choice'], true),
         );
+
+        $modelFactories = array_filter(
+            (new NodeFinder)->findInstanceOf($statements, StaticCall::class),
+            fn (StaticCall $call): bool => $call->name instanceof Identifier && $call->name->toString() === 'forModel',
+        );
+
+        foreach ($modelFactories as $call) {
+            $key = ($call->args[0] ?? null) instanceof Arg ? $call->args[0]->value : null;
+
+            if (! $key instanceof String_) {
+                $dynamicKeys[] = "{$relativePath}:{$call->getStartLine()}";
+            }
+        }
 
         foreach ($translations as $call) {
             $key = ($call->args[0] ?? null) instanceof Arg ? $call->args[0]->value : null;

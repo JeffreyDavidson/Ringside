@@ -74,6 +74,46 @@ final readonly class CompetitorSelection
     }
 
     /**
+     * Read the competitors from submitted form input that has not been validated yet, so a validation rule can ask
+     * the same questions as the booking history. Anything that is not a side holding `wrestlers` or `tag_teams`
+     * lists is skipped, sides are numbered in the order they appear, and an entry that is not an int or string id
+     * still counts as a competitor, with id 0, because no competitor has that id.
+     */
+    public static function fromInput(mixed $sides): self
+    {
+        if (! is_array($sides)) {
+            return new self([]);
+        }
+
+        $entries = [];
+        $side = 0;
+
+        foreach ($sides as $chosen) {
+            if (! is_array($chosen)) {
+                continue;
+            }
+
+            foreach (['wrestlers' => Wrestler::class, 'tag_teams' => TagTeam::class] as $kind => $model) {
+                if (! is_array($chosen[$kind] ?? null)) {
+                    continue;
+                }
+
+                foreach ($chosen[$kind] as $id) {
+                    $entries[] = [
+                        'type' => Relation::getMorphAlias($model),
+                        'id' => is_int($id) || is_string($id) ? (int) $id : 0,
+                        'side' => $side,
+                    ];
+                }
+            }
+
+            $side++;
+        }
+
+        return new self($entries);
+    }
+
+    /**
      * Every selected competitor, in the order they were chosen.
      *
      * @return list<array{type: string, id: int, side: int}>

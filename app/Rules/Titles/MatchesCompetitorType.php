@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Titles;
 
 use App\Models\Titles\Title;
+use App\ValueObjects\CompetitorSelection;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -38,11 +39,11 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
             return;
         }
 
-        $expectedCompetitorKey = $title->type->competitorInputKey();
-        $unexpectedCompetitorKey = $title->type->opposingCompetitorInputKey();
+        $selection = CompetitorSelection::fromInput($this->data['competitors'] ?? null);
 
-        if ($this->hasCompetitors($expectedCompetitorKey) && ! $this->hasCompetitors($unexpectedCompetitorKey)) {
-            if ($this->hasSideWithMultipleCompetitors()) {
+        // The selection only lists types that have a competitor, so the title's type must be the only one.
+        if (array_keys($selection->idsByType()) === [$title->type->championMorphClass()]) {
+            if ($this->hasSideWithMultipleCompetitors($selection)) {
                 $fail(__('titles.validation.one_competitor_per_side', ['title' => $title->name]));
             }
 
@@ -52,44 +53,8 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
         $fail(__('titles.validation.competitor_type', ['title' => $title->name, 'competitors' => $title->type->competitorLabel()]));
     }
 
-    private function hasSideWithMultipleCompetitors(): bool
+    private function hasSideWithMultipleCompetitors(CompetitorSelection $selection): bool
     {
-        // Only called once hasCompetitors() has confirmed `competitors` is an array.
-        foreach ((array) $this->data['competitors'] as $competitorSide) {
-            if (! is_array($competitorSide)) {
-                continue;
-            }
-
-            $count = count((array) ($competitorSide['wrestlers'] ?? [])) + count((array) ($competitorSide['tag_teams'] ?? []));
-
-            if ($count > 1) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function hasCompetitors(string $competitorKey): bool
-    {
-        $competitorSides = $this->data['competitors'] ?? null;
-
-        if (! is_array($competitorSides)) {
-            return false;
-        }
-
-        foreach ($competitorSides as $competitorSide) {
-            if (! is_array($competitorSide)) {
-                continue;
-            }
-
-            $competitors = $competitorSide[$competitorKey] ?? null;
-
-            if (is_array($competitors) && $competitors !== []) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($selection->sides(), fn (int $side): bool => count($selection->onSide($side)->entries()) > 1);
     }
 }
