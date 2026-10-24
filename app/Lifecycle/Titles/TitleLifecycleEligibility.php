@@ -11,19 +11,16 @@ use App\Exceptions\Titles\CannotBePulledException;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Titles\Title;
 
 final class TitleLifecycleEligibility
 {
+    use AnswersEligibility;
+
     public function allows(Title $title, TitleLifecycleTransition $transition): bool
     {
-        try {
-            $this->ensureAllowed($title, $transition);
-
-            return true;
-        } catch (BaseBusinessException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureAllowed($title, $transition), BaseBusinessException::class);
     }
 
     public function ensureAllowed(Title $title, TitleLifecycleTransition $transition): void

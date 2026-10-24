@@ -7,21 +7,18 @@ namespace App\Lifecycle\Roster\Individuals;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualSuspensionEligibility
 {
+    use AnswersEligibility;
+
     public function canSuspend(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanSuspend($individual);
-
-            return true;
-        } catch (CannotBeSuspendedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanSuspend($individual), CannotBeSuspendedException::class);
     }
 
     public function ensureCanSuspend(Wrestler|Manager|Referee $individual): void
@@ -53,13 +50,7 @@ final class IndividualSuspensionEligibility
 
     public function canReinstate(Wrestler|Manager|Referee $individual): bool
     {
-        try {
-            $this->ensureCanReinstate($individual);
-
-            return true;
-        } catch (CannotBeReinstatedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanReinstate($individual), CannotBeReinstatedException::class);
     }
 
     public function ensureCanReinstate(Wrestler|Manager|Referee $individual): void

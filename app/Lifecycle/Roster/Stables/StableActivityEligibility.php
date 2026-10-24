@@ -10,6 +10,7 @@ use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -17,6 +18,8 @@ use App\Services\Roster\Stables\StableMembershipService;
 
 final readonly class StableActivityEligibility
 {
+    use AnswersEligibility;
+
     public function __construct(
         private StableFormerMemberEligibility $formerMemberEligibility,
         private StableMembershipService $membershipService,
@@ -24,13 +27,7 @@ final readonly class StableActivityEligibility
 
     public function allows(Stable $stable, StableActivityTransition $transition): bool
     {
-        try {
-            $this->ensureAllowed($stable, $transition);
-
-            return true;
-        } catch (BaseBusinessException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureAllowed($stable, $transition), BaseBusinessException::class);
     }
 
     /**
