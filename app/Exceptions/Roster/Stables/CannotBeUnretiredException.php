@@ -11,22 +11,16 @@ final class CannotBeUnretiredException extends BaseBusinessException
 {
     public static function deleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.unretired.deleted', ['context' => $context]));
+        return self::forModel('stables.errors.unretired.deleted', $stable);
     }
 
     public static function notRetired(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.unretired.not_retired', ['context' => $context]));
+        return self::forModel('stables.errors.unretired.not_retired', $stable);
     }
 
     public static function insufficientFormerMembers(Stable $stable, int $availableCount, int $minimumRequired): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.unretired.insufficient_former_members', ['context' => $context, 'available_count' => $availableCount, 'minimum_required' => $minimumRequired]));
+        return self::forModel('stables.errors.unretired.insufficient_former_members', $stable, ['available_count' => $availableCount, 'minimum_required' => $minimumRequired]);
     }
 }
