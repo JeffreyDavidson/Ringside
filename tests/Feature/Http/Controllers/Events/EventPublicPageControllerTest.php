@@ -42,7 +42,7 @@ describe('edit', function (): void {
             ->assertOk()
             ->assertViewIs('events.publication')
             ->assertViewHas('event', $event)
-            ->assertViewHas('publication', null)
+            ->assertViewHas('publication', fn (mixed $publication): bool => $publication === null)
             ->assertViewHas('needsReview', false)
             ->assertViewHas('draft', fn (array $draft): bool => $draft['announcement'] === 'scheduled' && $draft['matches'] === [])
             ->assertViewHas('source', fn (array $source): bool => $source['title'] === 'Harbor Night');
