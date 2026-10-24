@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Lifecycle\Roster\Managers;
 
 use App\Exceptions\Roster\Managers\CannotBeAssignedException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Managers\Manager;
 
 /**
@@ -14,15 +15,11 @@ use App\Models\Roster\Managers\Manager;
  */
 final class ManagerAssignmentEligibility
 {
+    use AnswersEligibility;
+
     public function canBeAssigned(Manager $manager): bool
     {
-        try {
-            $this->ensureCanBeAssigned($manager);
-
-            return true;
-        } catch (CannotBeAssignedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanBeAssigned($manager), CannotBeAssignedException::class);
     }
 
     /** @throws CannotBeAssignedException */

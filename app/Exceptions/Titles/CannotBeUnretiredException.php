@@ -11,15 +11,11 @@ final class CannotBeUnretiredException extends BaseBusinessException
 {
     public static function deleted(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.unretired.deleted', ['context' => $context]));
+        return self::forModel('titles.errors.unretired.deleted', $title);
     }
 
     public static function notRetired(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.unretired.not_retired', ['context' => $context]));
+        return self::forModel('titles.errors.unretired.not_retired', $title);
     }
 }

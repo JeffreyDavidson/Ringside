@@ -12,52 +12,38 @@ final class CannotBeUnretiredException extends BaseBusinessException
 {
     public static function notRetired(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::NotRetired, __('tag-team-lifecycle.errors.unretire.not_retired', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.unretire.not_retired', $tagTeam, reason: BusinessRuleReason::NotRetired);
     }
 
     public static function nameConflict(TagTeam $tagTeam, string $conflictingTeamName): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.unretire.name_conflict', ['context' => $context, 'name' => $conflictingTeamName]));
+        return self::forModel('tag-team-lifecycle.errors.unretire.name_conflict', $tagTeam, ['name' => $conflictingTeamName]);
     }
 
     public static function noAvailablePartners(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.unretire.no_available_partners', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.unretire.no_available_partners', $tagTeam);
     }
 
     public static function insufficientPartners(TagTeam $tagTeam, int $availableCount, int $minimumRequired): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(trans_choice('tag-team-lifecycle.errors.unretire.insufficient_partners', $availableCount, ['context' => $context, 'required' => $minimumRequired]));
+        return self::forModel('tag-team-lifecycle.errors.unretire.insufficient_partners', $tagTeam, ['required' => $minimumRequired], count: $availableCount);
     }
 
     public static function keyPartnersUnavailable(TagTeam $tagTeam, string $unavailablePartners): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.unretire.key_partners_unavailable', ['context' => $context, 'partners' => $unavailablePartners]));
+        return self::forModel('tag-team-lifecycle.errors.unretire.key_partners_unavailable', $tagTeam, ['partners' => $unavailablePartners]);
     }
 
     public static function partnerDeleted(TagTeam $tagTeam, string $partnerName): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::PartnerDeleted, __('tag-team-lifecycle.errors.unretire.partner_deleted', ['context' => $context, 'wrestler' => $partnerName]))
+        return self::forModel('tag-team-lifecycle.errors.unretire.partner_deleted', $tagTeam, ['wrestler' => $partnerName], reason: BusinessRuleReason::PartnerDeleted)
             ->withTranslationReplacements(['wrestler' => $partnerName]);
     }
 
     public static function partnerOnAnotherTagTeam(TagTeam $tagTeam, string $partnerName, string $otherTagTeamName): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::PartnerOnAnotherTagTeam, __('tag-team-lifecycle.errors.unretire.partner_on_another_tag_team', ['context' => $context, 'wrestler' => $partnerName, 'tag_team' => $otherTagTeamName]))
+        return self::forModel('tag-team-lifecycle.errors.unretire.partner_on_another_tag_team', $tagTeam, ['wrestler' => $partnerName, 'tag_team' => $otherTagTeamName], reason: BusinessRuleReason::PartnerOnAnotherTagTeam)
             ->withTranslationReplacements(['wrestler' => $partnerName, 'tag_team' => $otherTagTeamName]);
     }
 }

@@ -12,29 +12,21 @@ final class CannotBeEmployedException extends BaseBusinessException
 {
     public static function alreadyEmployed(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::AlreadyEmployed, __('tag-team-lifecycle.errors.employ.already_employed', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.employ.already_employed', $tagTeam, reason: BusinessRuleReason::AlreadyEmployed);
     }
 
     public static function retired(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::Retired, __('tag-team-lifecycle.errors.employ.retired', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.employ.retired', $tagTeam, reason: BusinessRuleReason::Retired);
     }
 
     public static function hasFutureEmployment(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.employ.future_employment', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.employ.future_employment', $tagTeam);
     }
 
     public static function partnersUnavailable(TagTeam $tagTeam, string $unavailablePartners): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.employ.partners_unavailable', ['context' => $context, 'partners' => $unavailablePartners]));
+        return self::forModel('tag-team-lifecycle.errors.employ.partners_unavailable', $tagTeam, ['partners' => $unavailablePartners]);
     }
 }

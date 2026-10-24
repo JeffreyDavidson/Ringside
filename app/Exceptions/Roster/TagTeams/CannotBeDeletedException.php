@@ -12,32 +12,21 @@ final class CannotBeDeletedException extends BaseBusinessException
 {
     public static function alreadyDeleted(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('core.delete_rejections.already_deleted', ['context' => $context]));
+        return self::forModel('core.delete_rejections.already_deleted', $tagTeam);
     }
 
     public static function stillRetired(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('core.delete_rejections.tag_team_retired', ['context' => $context]));
+        return self::forModel('core.delete_rejections.tag_team_retired', $tagTeam);
     }
 
     public static function stillEmployed(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('core.delete_rejections.tag_team_employed', ['context' => $context]));
+        return self::forModel('core.delete_rejections.tag_team_employed', $tagTeam);
     }
 
     public static function bookedInUpcomingMatch(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(
-            BusinessRuleReason::BookedInMatch,
-            __('core.delete_rejections.booked_in_match', ['context' => $context]),
-        );
+        return self::forModel('core.delete_rejections.booked_in_match', $tagTeam, reason: BusinessRuleReason::BookedInMatch);
     }
 }

@@ -12,8 +12,6 @@ final class CannotBeReinstatedException extends BaseBusinessException
 {
     public static function notSuspended(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::NotSuspended, __('tag-team-lifecycle.errors.reinstate.not_suspended', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.reinstate.not_suspended', $tagTeam, reason: BusinessRuleReason::NotSuspended);
     }
 }

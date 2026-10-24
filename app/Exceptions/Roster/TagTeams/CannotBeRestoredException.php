@@ -12,15 +12,11 @@ final class CannotBeRestoredException extends BaseBusinessException
 {
     public static function notDeleted(TagTeam $tagTeam): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return self::forReason(BusinessRuleReason::NotDeleted, __('tag-team-lifecycle.errors.restore.not_deleted', ['context' => $context]));
+        return self::forModel('tag-team-lifecycle.errors.restore.not_deleted', $tagTeam, reason: BusinessRuleReason::NotDeleted);
     }
 
     public static function nameConflict(TagTeam $tagTeam, string $conflictingName): static
     {
-        $context = self::formatModelContext($tagTeam);
-
-        return new self(__('tag-team-lifecycle.errors.restore.name_conflict', ['context' => $context, 'name' => $conflictingName]));
+        return self::forModel('tag-team-lifecycle.errors.restore.name_conflict', $tagTeam, ['name' => $conflictingName]);
     }
 }

@@ -49,6 +49,8 @@ abstract class BaseForm extends Form
 
 ## Domain forms
 
+Managers and referees share `BasePersonForm` (first name, last name, employment date), so their forms only build their own data object and name their translation file. The employment-date field (history flag, the `CanChangeEmploymentDate` rule, local-day parsing) is the `HasEmploymentDateField` concern, which the wrestler form uses too.
+
 Each domain form extends `BaseForm` and normally contains:
 
 1. typed public properties matching the editable fields;

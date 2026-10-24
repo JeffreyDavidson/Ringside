@@ -11,10 +11,9 @@ final class CannotBeUpdatedException extends BaseBusinessException
 {
     public static function timezoneDoubleBooks(Venue $venue, string $timezone, string $venueLocalDate): static
     {
-        return new self(__('venues.errors.updated.timezone_double_books', [
-            'context' => self::formatModelContext($venue),
+        return self::forModel('venues.errors.updated.timezone_double_books', $venue, [
             'timezone' => $timezone,
             'date' => $venueLocalDate,
-        ]));
+        ]);
     }
 }

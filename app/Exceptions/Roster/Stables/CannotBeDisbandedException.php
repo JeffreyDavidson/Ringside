@@ -11,29 +11,21 @@ final class CannotBeDisbandedException extends BaseBusinessException
 {
     public static function deleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.disbanded.deleted', ['context' => $context]));
+        return self::forModel('stables.errors.disbanded.deleted', $stable);
     }
 
     public static function unactivated(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.disbanded.unactivated', ['context' => $context]));
+        return self::forModel('stables.errors.disbanded.unactivated', $stable);
     }
 
     public static function disbanded(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.disbanded.disbanded', ['context' => $context]));
+        return self::forModel('stables.errors.disbanded.disbanded', $stable);
     }
 
     public static function hasFutureActivation(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.disbanded.has_future_activation', ['context' => $context]));
+        return self::forModel('stables.errors.disbanded.has_future_activation', $stable);
     }
 }

@@ -11,23 +11,17 @@ final class CannotBeSplitException extends BaseBusinessException
 {
     public static function retired(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.split.retired', ['context' => $context]));
+        return self::forModel('stables.errors.split.retired', $stable);
     }
 
     public static function notActive(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.split.not_active', ['context' => $context]));
+        return self::forModel('stables.errors.split.not_active', $stable);
     }
 
     public static function insufficientMembers(Stable $stable, int $currentMembers, int $minimumRequired): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.split.insufficient_members', ['context' => $context, 'current_members' => $currentMembers, 'minimum_required' => $minimumRequired]));
+        return self::forModel('stables.errors.split.insufficient_members', $stable, ['current_members' => $currentMembers, 'minimum_required' => $minimumRequired]);
     }
 
     public static function noMembersToMove(): static

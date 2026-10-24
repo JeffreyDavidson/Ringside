@@ -6,20 +6,21 @@ namespace App\Livewire\Wrestlers\Forms;
 
 use App\Data\Wrestlers\WrestlerData;
 use App\Livewire\Base\BaseForm;
+use App\Livewire\Concerns\HasEmploymentDateField;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Managers\IsAssignable;
-use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use Livewire\Attributes\Locked;
 use Override;
 
 /** @extends BaseForm<Wrestler> */
 class CreateEditForm extends BaseForm
 {
+    use HasEmploymentDateField;
+
     public string $name = '';
 
     public string $hometown = '';
@@ -37,19 +38,9 @@ class CreateEditForm extends BaseForm
 
     public Carbon|string|null $employment_date = '';
 
-    /**
-     * Set when editing someone whose employment history is kept, so the date field is not offered. The one
-     * exception is an only employment that has not started yet: its date is offered and can be moved or cleared.
-     */
-    #[Locked]
-    public bool $hasEmploymentHistory = false;
-
     protected function loadModelData(Model $model): void
     {
-        $scheduledEmployment = $model->soleScheduledEmployment();
-
-        $this->hasEmploymentHistory = $scheduledEmployment === null && $model->employments()->exists();
-        $this->employment_date = $this->localDateString($scheduledEmployment?->started_at) ?? '';
+        $this->employment_date = $this->loadEmploymentDate($model) ?? '';
 
         $height = $model->height;
         $this->height_feet = (int) floor($height->toInches() / 12);
@@ -68,7 +59,7 @@ class CreateEditForm extends BaseForm
             weight: $this->weight,
             hometown: $this->hometown,
             signature_move: $this->signature_move ?: null,
-            employment_date: $this->employment_date ? $this->parseLocalDate((string) $this->employment_date) : null,
+            employment_date: $this->employmentDateInstant($this->employment_date === null ? null : (string) $this->employment_date),
             managers: Manager::query()->whereKey($this->managers)->get(),
         );
     }
@@ -89,7 +80,7 @@ class CreateEditForm extends BaseForm
             'height_inches' => ['required', 'integer', 'min:0', 'max:11', Rule::when($this->height_feet === 0, ['min:1'])],
             'weight' => ['required', 'integer', 'digits:3'],
             'signature_move' => ['nullable', 'string', 'max:255', $this->uniqueInPromotion('wrestlers', 'signature_move')],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($wrestler)],
+            'employment_date' => $this->employmentDateRules($wrestler),
             'managers' => ['array'],
             'managers.*' => ['bail', 'integer', $this->existsInPromotion('managers'), new IsAssignable($this->currentManagerIds($wrestler))],
         ];

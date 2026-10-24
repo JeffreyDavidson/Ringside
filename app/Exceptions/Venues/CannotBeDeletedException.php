@@ -11,6 +11,6 @@ final class CannotBeDeletedException extends BaseBusinessException
 {
     public static function hasUpcomingEvents(Venue $venue, int $eventCount): static
     {
-        return new self(trans_choice('venues.errors.deleted.has_upcoming_events', $eventCount, ['context' => self::formatModelContext($venue)]));
+        return self::forModel('venues.errors.deleted.has_upcoming_events', $venue, count: $eventCount);
     }
 }

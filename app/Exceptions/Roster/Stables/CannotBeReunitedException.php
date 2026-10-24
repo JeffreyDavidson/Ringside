@@ -11,51 +11,37 @@ final class CannotBeReunitedException extends BaseBusinessException
 {
     public static function deleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.deleted', ['context' => $context]));
+        return self::forModel('stables.errors.reunited.deleted', $stable);
     }
 
     public static function neverActive(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.never_active', ['context' => $context]));
+        return self::forModel('stables.errors.reunited.never_active', $stable);
     }
 
     public static function currentlyActive(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.currently_active', ['context' => $context]));
+        return self::forModel('stables.errors.reunited.currently_active', $stable);
     }
 
     public static function retired(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.retired', ['context' => $context]));
+        return self::forModel('stables.errors.reunited.retired', $stable);
     }
 
     public static function insufficientFormerMembers(Stable $stable, int $availableCount, int $minimumRequired): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.insufficient_former_members', ['context' => $context, 'available_count' => $availableCount, 'minimum_required' => $minimumRequired]));
+        return self::forModel('stables.errors.reunited.insufficient_former_members', $stable, ['available_count' => $availableCount, 'minimum_required' => $minimumRequired]);
     }
 
     /** @param array<int, string> $memberNames */
     public static function membersNotAvailable(Stable $stable, array $memberNames): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.members_not_available', ['context' => $context, 'members' => implode(', ', $memberNames)]));
+        return self::forModel('stables.errors.reunited.members_not_available', $stable, ['members' => implode(', ', $memberNames)]);
     }
 
     public static function belowMinimum(Stable $stable, int $memberCount, int $minimumRequired): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.reunited.below_minimum', ['context' => $context, 'member_count' => $memberCount, 'minimum_required' => $minimumRequired]));
+        return self::forModel('stables.errors.reunited.below_minimum', $stable, ['member_count' => $memberCount, 'minimum_required' => $minimumRequired]);
     }
 }

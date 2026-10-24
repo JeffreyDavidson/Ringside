@@ -11,29 +11,21 @@ final class CannotBeEstablishedException extends BaseBusinessException
 {
     public static function deleted(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.established.deleted', ['context' => $context]));
+        return self::forModel('stables.errors.established.deleted', $stable);
     }
 
     public static function established(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.established.established', ['context' => $context]));
+        return self::forModel('stables.errors.established.established', $stable);
     }
 
     public static function insufficientMembers(Stable $stable, int $currentMembers, int $minimumMembers): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.established.insufficient_members', ['context' => $context, 'current_members' => $currentMembers, 'minimum_members' => $minimumMembers]));
+        return self::forModel('stables.errors.established.insufficient_members', $stable, ['current_members' => $currentMembers, 'minimum_members' => $minimumMembers]);
     }
 
     public static function withEndDate(Stable $stable): static
     {
-        $context = self::formatModelContext($stable);
-
-        return new self(__('stables.errors.established.with_end_date', ['context' => $context]));
+        return self::forModel('stables.errors.established.with_end_date', $stable);
     }
 }

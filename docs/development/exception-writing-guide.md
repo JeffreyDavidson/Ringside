@@ -30,9 +30,7 @@ final class CannotBeRetiredException extends BaseBusinessException
 {
     public static function alreadyRetired(Title $title): static
     {
-        $context = self::formatModelContext($title);
-
-        return new self(__('titles.errors.retired.already_retired', ['context' => $context]));
+        return self::forModel('titles.errors.retired.already_retired', $title);
     }
 }
 ```
