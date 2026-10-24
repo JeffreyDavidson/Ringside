@@ -8,6 +8,7 @@ use App\Data\Events\VenueData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Venues\CannotBeUpdatedException;
 use App\Exceptions\Venues\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Models\Events\Venue;
@@ -18,6 +19,7 @@ class UpdateAction
     public function __construct(
         private readonly RecordNameLock $nameLock,
         private readonly VenueDeletionEligibility $eligibility,
+        private readonly GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -48,15 +50,13 @@ class UpdateAction
 
             $lockedVenue = $venue->refreshForUpdate();
 
-            $nameTaken = Venue::query()
-                ->withTrashed()
-                ->whereName($name)
-                ->whereKeyNot($lockedVenue->getKey())
-                ->exists();
-
-            if ($nameTaken) {
-                throw NameTakenException::name($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Venue::query()->withTrashed(),
+                'name',
+                $name,
+                fn (): NameTakenException => NameTakenException::name($name),
+                except: $lockedVenue,
+            );
 
             if ($lockedVenue->timezone !== $venueData->timezone) {
                 $this->eligibility->ensureTimezoneKeepsEventsApart($lockedVenue, $venueData->timezone);

@@ -8,6 +8,7 @@ use App\Actions\Managers\AssignManagersAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Roster\Wrestlers\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
@@ -20,6 +21,7 @@ class CreateAction
         protected EmployAction $employAction,
         protected AssignManagersAction $assignManagersAction,
         protected RecordNameLock $nameLock,
+        protected GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -77,14 +79,18 @@ class CreateAction
     {
         $wrestlers = Wrestler::query()
             ->withoutGlobalScope(PromotionContextScope::class)
-            ->withTrashed();
+            ->withTrashed()
+            ->where('promotion_id', $promotionId);
 
-        if ((clone $wrestlers)->whereNameInPromotion($name, $promotionId)->exists()) {
-            throw NameTakenException::name($name);
-        }
+        $this->nameRequirements->ensureAvailable($wrestlers, 'name', $name, fn (): NameTakenException => NameTakenException::name($name));
 
-        if ($signatureMove !== null && $wrestlers->where('signature_move', $signatureMove)->where('promotion_id', $promotionId)->exists()) {
-            throw NameTakenException::signatureMove($signatureMove);
+        if ($signatureMove !== null) {
+            $this->nameRequirements->ensureAvailable(
+                $wrestlers,
+                'signature_move',
+                $signatureMove,
+                fn (): NameTakenException => NameTakenException::signatureMove($signatureMove),
+            );
         }
     }
 }

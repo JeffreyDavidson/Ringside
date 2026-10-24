@@ -10,6 +10,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Managers\CannotBeAssignedException;
 use App\Exceptions\Roster\TagTeams\CannotBeEstablishedException;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
@@ -207,15 +208,16 @@ describe('authorized tag team form interactions', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $claimingTagTeam = TagTeam::factory()->create(['name' => 'The Claimers']);
         $failure = CannotBeEstablishedException::wrestlerOnAnotherTagTeam($wrestlers->firstOrFail(), $claimingTagTeam);
-        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(GuardedNameRequirements::class)) extends CreateAction
         {
             public function __construct(
                 private readonly CannotBeEstablishedException $failure,
                 EstablishMembershipAction $establishMembershipAction,
                 EmployAction $employAction,
                 RecordNameLock $nameLock,
+                GuardedNameRequirements $nameRequirements,
             ) {
-                parent::__construct($establishMembershipAction, $employAction, $nameLock);
+                parent::__construct($establishMembershipAction, $employAction, $nameLock, $nameRequirements);
             }
 
             #[Override]
@@ -623,15 +625,16 @@ describe('tag team name races past the form rule', function () {
     it('shows a signature move taken after validation on the signature move field', function () {
         $wrestlers = Wrestler::factory()->count(2)->create();
         $failure = NameTakenException::signatureMove('Royal Flush');
-        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class)) extends CreateAction
+        app()->instance(CreateAction::class, new class($failure, resolve(EstablishMembershipAction::class), resolve(EmployAction::class), resolve(RecordNameLock::class), resolve(GuardedNameRequirements::class)) extends CreateAction
         {
             public function __construct(
                 private readonly NameTakenException $failure,
                 EstablishMembershipAction $establishMembershipAction,
                 EmployAction $employAction,
                 RecordNameLock $nameLock,
+                GuardedNameRequirements $nameRequirements,
             ) {
-                parent::__construct($establishMembershipAction, $employAction, $nameLock);
+                parent::__construct($establishMembershipAction, $employAction, $nameLock, $nameRequirements);
             }
 
             #[Override]

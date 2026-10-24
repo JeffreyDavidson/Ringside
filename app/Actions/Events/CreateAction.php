@@ -8,6 +8,7 @@ use App\Data\Events\EventData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Events\NameTakenException;
 use App\Exceptions\Events\VenueDeletedException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
@@ -17,7 +18,10 @@ use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    public function __construct(private readonly RecordNameLock $nameLock) {}
+    public function __construct(
+        private readonly RecordNameLock $nameLock,
+        private readonly GuardedNameRequirements $nameRequirements,
+    ) {}
 
     /**
      * Create an event.
@@ -38,15 +42,15 @@ class CreateAction
 
             $this->nameLock->lock(GuardedName::EventName, $promotionId, $name);
 
-            $nameTaken = Event::query()
-                ->withoutGlobalScope(PromotionContextScope::class)
-                ->withTrashed()
-                ->whereNameInPromotion($name, $promotionId)
-                ->exists();
-
-            if ($nameTaken) {
-                throw NameTakenException::name($name);
-            }
+            $this->nameRequirements->ensureAvailable(
+                Event::query()
+                    ->withoutGlobalScope(PromotionContextScope::class)
+                    ->withTrashed()
+                    ->where('promotion_id', $promotionId),
+                'name',
+                $name,
+                fn (): NameTakenException => NameTakenException::name($name),
+            );
 
             $venue = $eventData->venue?->refreshForUpdate();
 

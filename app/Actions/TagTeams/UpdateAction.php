@@ -11,6 +11,7 @@ use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Naming\GuardedName;
 use App\Exceptions\Lifecycle\EmploymentDateException;
 use App\Exceptions\Roster\TagTeams\NameTakenException;
+use App\Lifecycle\Naming\GuardedNameRequirements;
 use App\Lifecycle\Naming\RecordNameLock;
 use App\Lifecycle\Roster\EmploymentDateRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -31,6 +32,7 @@ class UpdateAction
         protected RecordNameLock $nameLock,
         protected ChangeScheduledEmploymentAction $changeScheduledEmployment,
         protected EmploymentDateRequirements $employmentDates,
+        protected GuardedNameRequirements $nameRequirements,
     ) {}
 
     /**
@@ -101,18 +103,21 @@ class UpdateAction
 
     private function ensureNameIsAvailable(TagTeam $tagTeam, string $name, ?string $signatureMove): void
     {
-        $others = TagTeam::query()
+        $tagTeams = TagTeam::query()
             ->withoutGlobalScope(PromotionContextScope::class)
             ->withTrashed()
-            ->where('promotion_id', $tagTeam->promotion_id)
-            ->whereKeyNot($tagTeam->getKey());
+            ->where('promotion_id', $tagTeam->promotion_id);
 
-        if ((clone $others)->whereName($name)->exists()) {
-            throw NameTakenException::name($name);
-        }
+        $this->nameRequirements->ensureAvailable($tagTeams, 'name', $name, fn (): NameTakenException => NameTakenException::name($name), except: $tagTeam);
 
-        if ($signatureMove !== null && $others->where('signature_move', $signatureMove)->exists()) {
-            throw NameTakenException::signatureMove($signatureMove);
+        if ($signatureMove !== null) {
+            $this->nameRequirements->ensureAvailable(
+                $tagTeams,
+                'signature_move',
+                $signatureMove,
+                fn (): NameTakenException => NameTakenException::signatureMove($signatureMove),
+                except: $tagTeam,
+            );
         }
     }
 }
