@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\TagTeams;
+namespace App\Lifecycle\Roster\TagTeams;
 
-use App\Lifecycle\Roster\TagTeams\TagTeamMembershipEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
-class LockIncomingWrestlersAction
+class IncomingWrestlersLock
 {
     public function __construct(
         private readonly TagTeamMembershipEligibility $eligibility,
@@ -22,7 +21,7 @@ class LockIncomingWrestlersAction
      *
      * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function handle(TagTeam $tagTeam, Collection $wrestlers): void
+    public function lock(TagTeam $tagTeam, Collection $wrestlers): void
     {
         $lockedWrestlers = Wrestler::query()
             ->whereKey($wrestlers->modelKeys())

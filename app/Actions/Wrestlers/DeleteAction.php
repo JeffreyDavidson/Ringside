@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\Periods\DeletionPeriodCloser;
 use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\CurrentTagTeamsLock;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
@@ -18,7 +19,7 @@ class DeleteAction
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
+        private readonly CurrentTagTeamsLock $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -46,7 +47,7 @@ class DeleteAction
         $effectiveDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
-            $this->lockCurrentTagTeams->handle($wrestler);
+            $this->lockCurrentTagTeams->lock($wrestler);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedWrestler);

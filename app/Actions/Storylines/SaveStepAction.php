@@ -9,6 +9,8 @@ use App\Enums\Storylines\StepStatus;
 use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Storylines\StorylineConflictException;
+use App\Lifecycle\Storylines\StorylineLock;
+use App\Lifecycle\Storylines\StorylineSourceLock;
 use App\Models\Promotions\Promotion;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineStep;
@@ -18,13 +20,13 @@ use Illuminate\Support\Facades\DB;
 
 class SaveStepAction
 {
-    public function __construct(private readonly LockSourceAction $source, private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision) {}
+    public function __construct(private readonly StorylineSourceLock $source, private readonly StorylineLock $lock, private readonly RecordRevisionAction $revision) {}
 
     public function handle(Storyline $storyline, int $version, StepData $data, User $actor, ?int $stepId = null): StorylineStep
     {
         return DB::transaction(function () use ($storyline, $version, $data, $stepId, $actor): StorylineStep {
-            $source = $this->source->handle($data->source, $storyline->promotion_id);
-            $story = $this->lock->handle($storyline, $version);
+            $source = $this->source->lock($data->source, $storyline->promotion_id);
+            $story = $this->lock->lock($storyline, $version);
             $step = $stepId === null ? new StorylineStep : $story->steps()->findOrFail($stepId);
 
             if ($stepId !== null && $step->status === StepStatus::Happened) {

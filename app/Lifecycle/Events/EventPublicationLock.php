@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Events;
+namespace App\Lifecycle\Events;
 
 use App\Exceptions\Events\EventPublicationException;
 use App\Exceptions\RecordChangedException;
@@ -15,14 +15,14 @@ use App\Services\Events\PublicEventSourceService;
 use Illuminate\Support\Str;
 
 /** @phpstan-import-type Source from PublicEventSourceService */
-class LockEventPublicationAction
+class EventPublicationLock
 {
     public function __construct(private readonly MatchSchedulingLock $locks, private readonly PublicEventSourceService $source) {}
 
     /** Must run inside the caller's transaction; the event lock also serializes first-draft creation.
      * @return array{event: Event, publication: EventPublication, source: Source}
      */
-    public function handle(Event $event, int $version, string $fingerprint): array
+    public function lock(Event $event, int $version, string $fingerprint): array
     {
         $this->locks->lockEventSet($event->id);
         $event = Event::query()

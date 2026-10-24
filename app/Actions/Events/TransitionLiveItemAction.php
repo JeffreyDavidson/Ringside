@@ -9,6 +9,7 @@ use App\Enums\Events\LiveItemOperation;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveItemTransitions\LiveItemTransitionResolver;
+use App\Lifecycle\Events\LiveShowLock;
 use App\Models\Events\Event;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class TransitionLiveItemAction
 {
     public function __construct(
-        private readonly LockLiveShowAction $lock,
+        private readonly LiveShowLock $lock,
         private readonly PersistLiveShowAction $persist,
         private readonly LiveItemTransitionResolver $transitions,
     ) {}
@@ -25,7 +26,7 @@ class TransitionLiveItemAction
     public function handle(Event $event, int $version, string $key, LiveItemOperation $operation, User $actor, ?string $reason = null, ?Carbon $start = null, ?Carbon $finish = null): void
     {
         DB::transaction(function () use ($event, $version, $key, $operation, $actor, $reason, $start, $finish): void {
-            $run = $this->lock->handle($event, $version);
+            $run = $this->lock->lock($event, $version);
             $content = $run->content;
             $index = array_search($key, array_column($content['items'], 'key'), true);
 

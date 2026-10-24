@@ -7,6 +7,7 @@ namespace App\Actions\Storylines;
 use App\Data\Storylines\ParticipantData;
 use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\Storylines\StorylineConflictException;
+use App\Lifecycle\Storylines\StorylineLock;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Storylines\Storyline;
@@ -20,12 +21,12 @@ use Illuminate\Support\Facades\DB;
 
 class SaveParticipantAction
 {
-    public function __construct(private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision) {}
+    public function __construct(private readonly StorylineLock $lock, private readonly RecordRevisionAction $revision) {}
 
     public function handle(Storyline $storyline, int $version, ParticipantData $data, User $actor, ?int $participantId = null): StorylineParticipant
     {
         return DB::transaction(function () use ($storyline, $version, $data, $participantId, $actor): StorylineParticipant {
-            $story = $this->lock->handle($storyline, $version);
+            $story = $this->lock->lock($storyline, $version);
             $person = $this->participantModel($data->type)::query()
                 ->where('promotion_id', $story->promotion_id)
                 ->whereKey($data->id)

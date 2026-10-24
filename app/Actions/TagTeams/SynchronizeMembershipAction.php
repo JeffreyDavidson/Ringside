@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Lifecycle\Periods\OpenPeriodEnder;
+use App\Lifecycle\Roster\TagTeams\IncomingWrestlersLock;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
@@ -15,7 +16,7 @@ class SynchronizeMembershipAction
 {
     public function __construct(
         protected SynchronizeManagerAssignmentsAction $synchronizeManagerAssignmentsAction,
-        protected LockIncomingWrestlersAction $lockIncomingWrestlersAction,
+        protected IncomingWrestlersLock $lockIncomingWrestlers,
         protected ChampionshipReignManager $championshipReigns,
     ) {}
 
@@ -42,7 +43,7 @@ class SynchronizeMembershipAction
         $newWrestlers = $members->wrestlers->diff($currentWrestlers);
 
         if ($newWrestlers->isNotEmpty()) {
-            $this->lockIncomingWrestlersAction->handle($tagTeam, $newWrestlers);
+            $this->lockIncomingWrestlers->lock($tagTeam, $newWrestlers);
 
             $tagTeam->wrestlers()->attach($newWrestlers->modelKeys(), [
                 'joined_at' => $date,

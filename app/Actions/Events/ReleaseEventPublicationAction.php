@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Enums\Events\PublicSection;
+use App\Lifecycle\Events\EventPublicationLock;
 use App\Lifecycle\Events\PublicationReleases\PublicationReleaseResolver;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
@@ -13,12 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 class ReleaseEventPublicationAction
 {
-    public function __construct(private readonly LockEventPublicationAction $lock, private readonly PublicationReleaseResolver $releases) {}
+    public function __construct(private readonly EventPublicationLock $lock, private readonly PublicationReleaseResolver $releases) {}
 
     public function handle(Event $event, User $actor, int $version, string $fingerprint, PublicSection $section): void
     {
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
-            $locked = $this->lock->handle($event, $version, $fingerprint);
+            $locked = $this->lock->lock($event, $version, $fingerprint);
             $publication = $locked['publication'];
             $event = $locked['event'];
             $this->releases->resolve($section)->apply($publication, $event, $actor, $locked['source']);

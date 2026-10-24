@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Lifecycle\Roster\TagTeams\IncomingWrestlersLock;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,7 +13,7 @@ use Illuminate\Support\Carbon;
 class RejoinMembersAction
 {
     public function __construct(
-        private readonly LockIncomingWrestlersAction $lockIncomingWrestlers,
+        private readonly IncomingWrestlersLock $lockIncomingWrestlers,
     ) {}
 
     /**
@@ -31,7 +32,7 @@ class RejoinMembersAction
             return;
         }
 
-        $this->lockIncomingWrestlers->handle($tagTeam, $leavers);
+        $this->lockIncomingWrestlers->lock($tagTeam, $leavers);
 
         $tagTeam->wrestlers()->attach($leavers->modelKeys(), ['joined_at' => $date, 'left_at' => null]);
     }

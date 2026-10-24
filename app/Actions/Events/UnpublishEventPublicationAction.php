@@ -6,18 +6,19 @@ namespace App\Actions\Events;
 
 use App\Enums\Events\PublicSection;
 use App\Exceptions\Events\EventPublicationException;
+use App\Lifecycle\Events\EventPublicationLock;
 use App\Models\Events\Event;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 class UnpublishEventPublicationAction
 {
-    public function __construct(private readonly LockEventPublicationAction $lock) {}
+    public function __construct(private readonly EventPublicationLock $lock) {}
 
     public function handle(Event $event, User $actor, int $version, string $fingerprint, PublicSection $section): void
     {
         DB::transaction(function () use ($event, $actor, $version, $fingerprint, $section): void {
-            $locked = $this->lock->handle($event, $version, $fingerprint);
+            $locked = $this->lock->lock($event, $version, $fingerprint);
             $publication = $locked['publication'];
 
             if (! $publication->exists) {

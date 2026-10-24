@@ -14,7 +14,7 @@ use App\Models\Events\EventLiveRun;
  * be completed.
  *
  * It reads the run and refuses with LiveShowException; it never locks or writes. The Actions lock the run
- * (LockLiveShowAction) and set the status themselves: PrepareLiveShowAction creates the run as Prepared, starting an
+ * (LiveShowLock) and set the status themselves: PrepareLiveShowAction creates the run as Prepared, starting an
  * item sets Running, and CompleteLiveShowAction sets Completed. There is no moves table: the lock already refuses
  * a completed show, so no other move can be refused.
  */

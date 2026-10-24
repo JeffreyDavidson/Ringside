@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Events;
+namespace App\Lifecycle\Events;
 
 use App\Exceptions\RecordChangedException;
-use App\Lifecycle\Events\LiveShowStateMachine;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
 
 /** Re-read the owned event and run inside the caller's transaction before any live mutation. */
-class LockLiveShowAction
+class LiveShowLock
 {
     public function __construct(private readonly LiveShowStateMachine $states) {}
 
-    public function handle(Event $event, int $version): EventLiveRun
+    public function lock(Event $event, int $version): EventLiveRun
     {
         $event = Event::query()
             ->whereKey($event->id)

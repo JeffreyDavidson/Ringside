@@ -1,17 +1,17 @@
 <?php
 
 declare(strict_types=1);
-use App\Actions\Storylines\LockSourceAction;
 use App\Data\Storylines\SourceData;
 use App\Exceptions\Storylines\StorylineConflictException;
+use App\Lifecycle\Storylines\StorylineSourceLock;
 
 require_once __DIR__.'/../../../Fixtures/storylines.php';
 test('new plans cannot select deleted sources while explicitly explained history can retain them', function () {
     $f = storylineSourceFixture();
     $f['event']->delete();
     $source = new SourceData($f['event']->id);
-    expect(fn () => resolve(LockSourceAction::class)->handle($source, $f['story']->promotion_id))->toThrow(StorylineConflictException::class);
-    $evidence = resolve(LockSourceAction::class)->handle($source, $f['story']->promotion_id, true);
+    expect(fn () => resolve(StorylineSourceLock::class)->lock($source, $f['story']->promotion_id))->toThrow(StorylineConflictException::class);
+    $evidence = resolve(StorylineSourceLock::class)->lock($source, $f['story']->promotion_id, true);
     expect($evidence['context']['event_deleted'])->toBeTrue();
 });
 test('source rows lock before the story mutation in the established event order', function () {
@@ -77,7 +77,7 @@ test('a current save is refused for a source whose warning needs explaining', fu
     $source = $prepare($f);
 
     // Act
-    $attempt = fn () => resolve(LockSourceAction::class)->handle($source, $f['story']->promotion_id);
+    $attempt = fn () => resolve(StorylineSourceLock::class)->lock($source, $f['story']->promotion_id);
 
     // Assert
     expect($attempt)->toThrow(StorylineConflictException::class, __('storylines.source_changed'));
@@ -89,7 +89,7 @@ test('a current save is allowed for a source whose warning does not block it', f
     $source = $prepare($f);
 
     // Act
-    $result = resolve(LockSourceAction::class)->handle($source, $f['story']->promotion_id);
+    $result = resolve(StorylineSourceLock::class)->lock($source, $f['story']->promotion_id);
 
     // Assert
     expect($result['warnings'])->toHaveCount(1);
@@ -101,7 +101,7 @@ test('a historical save is allowed for every warning', function (Closure $prepar
     $source = $prepare($f);
 
     // Act
-    $result = resolve(LockSourceAction::class)->handle($source, $f['story']->promotion_id, historical: true);
+    $result = resolve(StorylineSourceLock::class)->lock($source, $f['story']->promotion_id, historical: true);
 
     // Assert
     expect($result['warnings'])->not->toBeEmpty();

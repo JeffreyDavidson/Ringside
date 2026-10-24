@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\AssignManagersAction;
 use App\Data\TagTeams\TagTeamMembershipData;
+use App\Lifecycle\Roster\TagTeams\IncomingWrestlersLock;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 
@@ -13,13 +14,13 @@ class EstablishMembershipAction
 {
     public function __construct(
         protected AssignManagersAction $assignManagersAction,
-        protected LockIncomingWrestlersAction $lockIncomingWrestlersAction,
+        protected IncomingWrestlersLock $lockIncomingWrestlers,
     ) {}
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
         if ($members->wrestlers->isNotEmpty()) {
-            $this->lockIncomingWrestlersAction->handle($tagTeam, $members->wrestlers);
+            $this->lockIncomingWrestlers->lock($tagTeam, $members->wrestlers);
 
             $tagTeam->wrestlers()->attach($members->wrestlers->modelKeys(), [
                 'joined_at' => $date,

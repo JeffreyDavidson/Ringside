@@ -10,6 +10,7 @@ use App\Enums\Events\LiveItemStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Events\EventCardLock;
+use App\Lifecycle\Events\LiveShowLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Models\Events\Event;
 use App\Models\Users\User;
@@ -19,7 +20,7 @@ class ReviewLiveShowAction
 {
     public function __construct(
         private readonly LiveShowSourceRequirements $source,
-        private readonly LockLiveShowAction $lock,
+        private readonly LiveShowLock $lock,
         private readonly PersistLiveShowAction $persist,
         private readonly EventCardLock $card,
     ) {}
@@ -28,7 +29,7 @@ class ReviewLiveShowAction
     {
         DB::transaction(function () use ($event, $version, $packVersion, $fingerprint, $review, $actor): void {
             $event = $this->card->lock($event->id)['event'];
-            $run = $this->lock->handle($event, $version);
+            $run = $this->lock->lock($event, $version);
             $source = $this->source->ensureSource($run->event);
 
             if ($source['pack']->version !== $packVersion || ! hash_equals($source['fingerprint'], $fingerprint)

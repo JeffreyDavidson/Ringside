@@ -7,6 +7,7 @@ namespace App\Actions\Wrestlers;
 use App\Actions\Managers\EndManagerAssignmentsAction;
 use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Lifecycle\Periods\OpenPeriodEnder;
+use App\Lifecycle\Roster\Individuals\CurrentTagTeamsLock;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -20,7 +21,7 @@ class EndCurrentRelationshipsAction
     public function __construct(
         private readonly ChampionshipReignManager $championshipReigns,
         private readonly EndManagerAssignmentsAction $endManagerAssignmentsAction,
-        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
+        private readonly CurrentTagTeamsLock $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class EndCurrentRelationshipsAction
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             // A team that loses a member vacates its titles on the day the member leaves.
-            $this->lockCurrentTagTeams->handle($lockedWrestler, $retainedTagTeam)
+            $this->lockCurrentTagTeams->lock($lockedWrestler, $retainedTagTeam)
                 ->each(fn (TagTeam $tagTeam) => $this->championshipReigns->endCurrentReignsForChampion($tagTeam, $effectiveDate));
 
             OpenPeriodEnder::end(
