@@ -110,7 +110,7 @@
                         class="min-h-11"
                         wire:model="form.type"
                         :label="__('sponsors.type')"
-                        :options="collect(\App\Enums\Events\SponsorCommitmentType::cases())->mapWithKeys(fn (\App\Enums\Events\SponsorCommitmentType $type): array => [$type->value => $type->label()])->all()"
+                        :options="\App\Enums\Events\SponsorCommitmentType::options()"
                         :selected="$form->type"
                     />
                 </div>
@@ -135,7 +135,7 @@
                     class="min-h-11"
                     wire:model.live="form.status"
                     :label="__('sponsors.state')"
-                    :options="collect(\App\Enums\Events\SponsorCommitmentStatus::cases())->mapWithKeys(fn (\App\Enums\Events\SponsorCommitmentStatus $status): array => [$status->value => $status->label()])->all()"
+                    :options="\App\Enums\Events\SponsorCommitmentStatus::options()"
                     :selected="$form->status"
                 />
                 @if ($form->status === 'completed')

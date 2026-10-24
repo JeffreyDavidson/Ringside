@@ -85,14 +85,7 @@ class Main extends BaseTable
         return [
             $this->statusFilter(
                 StableStatus::class,
-                [
-                    '' => 'All',
-                    StableStatus::Unformed->value => StableStatus::Unformed->label(),
-                    StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
-                    StableStatus::Active->value => StableStatus::Active->label(),
-                    StableStatus::Inactive->value => StableStatus::Inactive->label(),
-                    StableStatus::Retired->value => StableStatus::Retired->label(),
-                ],
+                StableStatus::filterOptions(),
                 function (Builder $builder, StableStatus $status): void {
                     /** @var StableBuilder<Stable> $builder */
                     $builder->whereStatus($status);

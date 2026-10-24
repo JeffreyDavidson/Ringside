@@ -92,11 +92,7 @@ class Main extends BaseTable
                 },
             ),
             SelectFilter::make(__('core.type'), 'type')
-                ->options([
-                    '' => 'All',
-                    TitleType::Singles->value => TitleType::Singles->label(),
-                    TitleType::TagTeam->value => TitleType::TagTeam->label(),
-                ])
+                ->options(TitleType::filterOptions())
                 ->filter(function (TitleBuilder $builder, string $value): void {
                     $type = TitleType::tryFrom($value);
 
