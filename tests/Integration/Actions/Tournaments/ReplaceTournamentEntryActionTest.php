@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use App\Actions\Tournaments\ReplaceTournamentEntryAction;
+use App\Enums\Tournaments\TournamentStatus;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Tournaments\TournamentNode;
 
@@ -44,5 +45,7 @@ test('replacing an entry names the actor passed in as the causer of every entry 
     resolve(ReplaceTournamentEntryAction::class)->handle($entry, $replacement->id, $version, 'Original entrant unavailable', $actor);
 
     // Assert
-    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.reset|'.causerTag($actor), 'tournament.progressed|'.causerTag($actor), 'tournament.replaced|'.causerTag($actor)]);
+    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.reset|'.causerTag($actor), 'tournament.replaced|'.causerTag($actor)])
+        ->and($world['tournament']->refresh()->status)->toBe(TournamentStatus::Active)
+        ->and($world['tournament']->version)->toBe($version + 1);
 });

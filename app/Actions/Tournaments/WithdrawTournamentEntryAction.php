@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tournaments;
 
 use App\Exceptions\RecordChangedException;
+use App\Lifecycle\Tournaments\TournamentBranchReset;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentOutcomeManager;
 use App\Lifecycle\Tournaments\TournamentStateMachine;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class WithdrawTournamentEntryAction
 {
-    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly ResetTournamentBranchAction $reset, private readonly TournamentOutcomeManager $outcomes, private readonly TournamentStateMachine $states) {}
+    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentBranchReset $reset, private readonly TournamentOutcomeManager $outcomes, private readonly TournamentStateMachine $states) {}
 
     public function handle(TournamentEntry $entry, int $version, string $reason, User $actor): void
     {
@@ -39,7 +40,7 @@ class WithdrawTournamentEntryAction
                 }
 
                 if ($bout->link !== null) {
-                    $this->reset->handle($bout->node, $tournament->refresh()->version, $reason, $actor, true);
+                    $this->reset->reset($tournament, $bout->node, $reason, $actor, true);
                 }
             }
 
