@@ -9,7 +9,7 @@
 >
     <div class="flex">
         @env('local')
-            @empty($this->modelForm->formModel)
+            @if ($this->form->isCreating())
                 <x-button
                     variant="secondary"
                     class="!border-border !text-muted-foreground hover:!bg-surface hover:!text-foreground !h-9 !rounded-none !border !bg-transparent"
@@ -19,7 +19,7 @@
                 >
                     {{ __('core.form.auto_fill') }}
                 </x-button>
-            @endempty
+            @endif
         @endenv
     </div>
     <div class="flex justify-end gap-2">

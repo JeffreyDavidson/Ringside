@@ -38,7 +38,5 @@ class RestoreAction
             $this->eligibility->ensureCanRestore($lockedTagTeam);
             $this->deletionState->restore($lockedTagTeam, $effectiveDate);
         });
-
-        $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), null);
     }
 }
