@@ -262,7 +262,7 @@ describe('Event Activation Action Integration', function () {
 
             resolve(DeleteAction::class)->handle($event);
 
-            expect(Event::find($event->id))->toBeNull()
+            expect(Event::query()->find($event->id))->toBeNull()
                 ->and(Event::onlyTrashed()->find($event->id))->not()
                 ->toBeNull()
                 ->and(freshModel($event)->deleted_at)->not()
@@ -274,11 +274,11 @@ describe('Event Activation Action Integration', function () {
             ['event' => $event] = eventsLifecycleEventFixtures2();
 
             resolve(DeleteAction::class)->handle($event);
-            expect(Event::find($event->id))->toBeNull();
+            expect(Event::query()->find($event->id))->toBeNull();
 
             resolve(RestoreAction::class)->handle($event);
 
-            $restoredEvent = Event::findOrFail($event->id);
+            $restoredEvent = Event::query()->findOrFail($event->id);
             expect($restoredEvent->name)->toBe('Deletable Event')
                 ->and($restoredEvent->deleted_at)->toBeNull();
         });
@@ -293,7 +293,7 @@ describe('Event Activation Action Integration', function () {
             resolve(DeleteAction::class)->handle($event);
             resolve(RestoreAction::class)->handle($event);
 
-            $restoredEvent = Event::findOrFail($event->id);
+            $restoredEvent = Event::query()->findOrFail($event->id);
             expect(requiredDate($restoredEvent->date)->format('Y-m-d H:i:s'))->toBe(requiredDate($originalDate)->format('Y-m-d H:i:s'))
                 ->and($restoredEvent->venue_id)->toBe($originalVenueId)
                 ->and($restoredEvent->status)->not->toBe(EventStatus::Unscheduled);
@@ -344,7 +344,7 @@ describe('Event Activation Action Integration', function () {
 
             // Delete and restore
             resolve(DeleteAction::class)->handle($event);
-            expect(Event::find($event->id))->toBeNull();
+            expect(Event::query()->find($event->id))->toBeNull();
 
             resolve(RestoreAction::class)->handle($event);
             $restoredEvent = Event::query()->whereKey($event->getKey())->firstOrFail();

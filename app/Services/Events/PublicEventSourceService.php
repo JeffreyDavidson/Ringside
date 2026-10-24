@@ -50,7 +50,7 @@ class PublicEventSourceService
         foreach ($matches as $match) {
             $sides = $match->sides->mapWithKeys(fn (MatchSide $side): array => [$side->id => $side->competitors->sortBy('id')
                 ->map(fn (MatchCompetitor $assignment): string => $people->get($assignment->competitor_type.':'.$assignment->competitor_id, ''))->join(' & ')]);
-            $complete = $match->sides->count() >= 2 && ! $match->sides->contains(fn (MatchSide $side): bool => $side->competitors->isEmpty()
+            $complete = $match->sides->count() >= 2 && $match->sides->doesntContain(fn (MatchSide $side): bool => $side->competitors->isEmpty()
                 || $side->competitors->contains(fn (MatchCompetitor $assignment): bool => ! $people->has($assignment->competitor_type.':'.$assignment->competitor_id)));
             $winner = null;
 

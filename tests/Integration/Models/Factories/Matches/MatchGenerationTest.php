@@ -209,7 +209,7 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             expect($match->competitors)->toHaveCount(2);
 
             // Should create wrestlers with specified names
-            $wrestlerNames = Wrestler::whereIn('id', $match->competitors->pluck('competitor_id'))
+            $wrestlerNames = Wrestler::query()->whereIn('id', $match->competitors->pluck('competitor_id'))
                 ->pluck('name');
             expect($wrestlerNames)->toContain('John Cena')
                 ->toContain('The Rock');

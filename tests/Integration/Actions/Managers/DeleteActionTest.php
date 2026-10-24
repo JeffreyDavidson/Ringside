@@ -22,7 +22,7 @@ test('it soft deletes an unemployed manager', function () {
     assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Fresh without trashed should return null
-    expect(Manager::find($manager->id))->toBeNull();
+    expect(Manager::query()->find($manager->id))->toBeNull();
 
     // Can still find with trashed
     $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
@@ -38,7 +38,7 @@ test('it deletes using the current persisted manager state', function () {
 
     resolve(DeleteAction::class)->handle($staleManager);
 
-    expect(Manager::find($manager->id))->toBeNull()
+    expect(Manager::query()->find($manager->id))->toBeNull()
         ->and(Manager::withTrashed()->findOrFail($manager->id)->trashed())->toBeTrue();
 });
 

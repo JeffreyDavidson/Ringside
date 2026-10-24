@@ -34,7 +34,7 @@ describe('StablesTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'StablesTableSeeder']);
 
             // Assert - Should create multiple stables
-            expect(Stable::count())->toBeGreaterThan(0);
+            expect(Stable::query()->count())->toBeGreaterThan(0);
         });
     });
 
@@ -45,7 +45,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
         test('stables have required attributes', function () {
             // Arrange
-            $stables = Stable::take(10)->get();
+            $stables = Stable::query()->take(10)->get();
 
             // Assert
             foreach ($stables as $stable) {
@@ -56,7 +56,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
         test('stables have realistic names', function () {
             // Arrange
-            $stables = Stable::take(5)->get();
+            $stables = Stable::query()->take(5)->get();
 
             // Assert
             foreach ($stables as $stable) {
@@ -81,7 +81,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
         test('stables have valid status', function () {
             // Arrange
-            $stables = Stable::take(10)->get();
+            $stables = Stable::query()->take(10)->get();
 
             // Assert
             foreach ($stables as $stable) {
@@ -90,7 +90,7 @@ describe('StablesTableSeeder Integration Tests', function () {
         });
 
         test('seeder creates the expected number of stables', function () {
-            expect(Stable::count())->toBe(27);
+            expect(Stable::query()->count())->toBe(27);
         });
     });
 });

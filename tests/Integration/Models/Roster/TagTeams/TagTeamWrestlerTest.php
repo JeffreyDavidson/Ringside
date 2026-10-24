@@ -213,7 +213,7 @@ describe('TagTeamWrestler Pivot Model', function () {
                 ->and($wrestler->previousTagTeams()->count())->toBe(0);
 
             // Verify pivot record is deleted
-            expect(TagTeamWrestler::where('wrestler_id', $wrestler->id)
+            expect(TagTeamWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('tag_team_id', $tagTeam->id)
                 ->exists())->toBeFalse();
         });
@@ -322,7 +322,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             createTagTeamMembership($wrestler, $tagTeam);
 
-            $pivotRecord = TagTeamWrestler::where('wrestler_id', $wrestler->id)
+            $pivotRecord = TagTeamWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('tag_team_id', $tagTeam->id)
                 ->firstOrFail();
 
@@ -337,7 +337,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             createTagTeamMembership($wrestler, $tagTeam);
 
-            $pivotRecord = TagTeamWrestler::where('wrestler_id', $wrestler->id)
+            $pivotRecord = TagTeamWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('tag_team_id', $tagTeam->id)
                 ->firstOrFail();
 
@@ -357,7 +357,7 @@ describe('TagTeamWrestler Pivot Model', function () {
                 'left_at' => $leftDate,
             ]);
 
-            $pivotRecord = TagTeamWrestler::where('wrestler_id', $wrestler->id)
+            $pivotRecord = TagTeamWrestler::query()->where('wrestler_id', $wrestler->id)
                 ->where('tag_team_id', $tagTeam->id)
                 ->firstOrFail();
 

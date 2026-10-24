@@ -38,12 +38,12 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
     test('seeding again keeps the existing tag teams', function () {
         // Arrange
         Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
-        $initialCount = TagTeam::count();
+        $initialCount = TagTeam::query()->count();
 
         // Act
         Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
 
         // Assert
-        expect(TagTeam::count())->toBeGreaterThanOrEqual($initialCount);
+        expect(TagTeam::query()->count())->toBeGreaterThanOrEqual($initialCount);
     });
 });

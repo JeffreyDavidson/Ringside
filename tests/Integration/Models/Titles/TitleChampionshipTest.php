@@ -276,7 +276,7 @@ describe('TitleChampionship Model', function () {
                 }
             }
 
-            expect(TitleChampionship::count())->toBe(15); // 3 titles * 5 wrestlers
+            expect(TitleChampionship::query()->count())->toBe(15); // 3 titles * 5 wrestlers
         });
 
         test('eager loading relationships works correctly', function () {
@@ -318,16 +318,16 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Filter current championships
-            $currentChampionships = TitleChampionship::whereNull('lost_at')->get();
+            $currentChampionships = TitleChampionship::query()->whereNull('lost_at')->get();
             expect($currentChampionships)->toHaveCount(1)
                 ->and($currentChampionships->firstOrFail()->champion_type)->toBe('tag_team');
 
             // Filter by champion type
-            $wrestlerChampionships = TitleChampionship::where('champion_type', 'wrestler')->get();
+            $wrestlerChampionships = TitleChampionship::query()->where('champion_type', 'wrestler')->get();
             expect($wrestlerChampionships)->toHaveCount(1);
 
             // Filter by date range
-            $recentChampionships = TitleChampionship::where('won_at', '>=', Carbon::now()->subMonths(4))->get();
+            $recentChampionships = TitleChampionship::query()->where('won_at', '>=', Carbon::now()->subMonths(4))->get();
             expect($recentChampionships)->toHaveCount(1);
         });
     });
@@ -455,7 +455,7 @@ describe('TitleChampionship Model', function () {
                 ->create();
 
             // Count without loading
-            expect(TitleChampionship::count())->toBe(2);
+            expect(TitleChampionship::query()->count())->toBe(2);
             expect($title->championships()->count())->toBe(1)
                 ->and($wrestler->titleChampionships()->count())->toBe(1);
 

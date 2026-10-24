@@ -34,7 +34,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'TitlesTableSeeder']);
 
             // Assert - Should create multiple titles
-            expect(Title::count())->toBeGreaterThan(0);
+            expect(Title::query()->count())->toBeGreaterThan(0);
         });
     });
 
@@ -45,7 +45,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
         test('titles have required attributes', function () {
             // Arrange
-            $titles = Title::take(10)->get();
+            $titles = Title::query()->take(10)->get();
 
             // Assert
             foreach ($titles as $title) {
@@ -56,7 +56,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
         test('titles have realistic names', function () {
             // Arrange
-            $titles = Title::take(5)->get();
+            $titles = Title::query()->take(5)->get();
 
             // Assert
             foreach ($titles as $title) {
@@ -88,7 +88,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
         test('titles have valid status', function () {
             // Arrange
-            $titles = Title::take(10)->get();
+            $titles = Title::query()->take(10)->get();
 
             // Assert
             foreach ($titles as $title) {
@@ -98,13 +98,13 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
         test('seeder creates consistent data', function () {
             // Arrange
-            $initialCount = Title::count();
+            $initialCount = Title::query()->count();
 
             // Act
             Artisan::call('db:seed', ['--class' => 'TitlesTableSeeder']);
 
             // Assert - Should maintain or increase count
-            expect(Title::count())->toBeGreaterThanOrEqual($initialCount);
+            expect(Title::query()->count())->toBeGreaterThanOrEqual($initialCount);
         });
     });
 });

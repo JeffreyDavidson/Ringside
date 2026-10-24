@@ -143,7 +143,7 @@ describe('stables table', function (): void {
 
         // Assert
         $component->assertHasNoErrors();
-        expect(Stable::find($stable->id))->toBeNull()
+        expect(Stable::query()->find($stable->id))->toBeNull()
             ->and(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
     });
 

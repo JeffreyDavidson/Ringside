@@ -36,7 +36,7 @@ test('it deletes using the current persisted wrestler state', function () {
 
     resolve(DeleteAction::class)->handle($staleWrestler);
 
-    expect(Wrestler::find($wrestler->id))->toBeNull()
+    expect(Wrestler::query()->find($wrestler->id))->toBeNull()
         ->and(Wrestler::withTrashed()->findOrFail($wrestler->id)->trashed())->toBeTrue();
 });
 

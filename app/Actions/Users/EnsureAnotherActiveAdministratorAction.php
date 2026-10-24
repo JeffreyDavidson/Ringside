@@ -25,7 +25,7 @@ final class EnsureAnotherActiveAdministratorAction
             ->lockForUpdate()
             ->pluck('id');
 
-        if (! $activeAdministratorIds->contains($user->getKey())) {
+        if ($activeAdministratorIds->doesntContain($user->getKey())) {
             return;
         }
 

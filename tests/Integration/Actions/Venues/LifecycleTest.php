@@ -148,7 +148,7 @@ describe('Venue Action Integration Tests', function () {
 
             resolve(UpdateAction::class)->handle($venue, $venueData);
 
-            $retrievedVenue = Venue::findOrFail($venue->id);
+            $retrievedVenue = Venue::query()->findOrFail($venue->id);
             expect($retrievedVenue->name)->toBe('Database Updated')
                 ->and($retrievedVenue->state)->toBe('Utah');
         });
@@ -224,7 +224,7 @@ describe('Venue Action Integration Tests', function () {
 
             resolve(DeleteAction::class)->handle($venue);
 
-            expect(Venue::find($venue->id))->toBeNull()
+            expect(Venue::query()->find($venue->id))->toBeNull()
                 ->and(Venue::onlyTrashed()->find($venue->id))->not()
                 ->toBeNull();
         });
@@ -246,7 +246,7 @@ describe('Venue Action Integration Tests', function () {
 
             resolve(DeleteAction::class)->handle($venue);
 
-            expect(Venue::find($venue->id))->toBeNull()
+            expect(Venue::query()->find($venue->id))->toBeNull()
                 ->and(freshModel($event1)->venue_id)->toBe($venue->id)
                 ->and(freshModel($event2)->venue_id)->toBe($venue->id);
         });
@@ -256,7 +256,7 @@ describe('Venue Action Integration Tests', function () {
 
             resolve(DeleteAction::class)->handle($venue);
 
-            expect(Venue::find($venue->id))->toBeNull()
+            expect(Venue::query()->find($venue->id))->toBeNull()
                 ->and(Venue::onlyTrashed()->find($venue->id))->not()
                 ->toBeNull();
         });
@@ -268,12 +268,12 @@ describe('Venue Action Integration Tests', function () {
             $venueId = $venue->id;
 
             $venue->delete();
-            expect(Venue::find($venueId))->toBeNull();
+            expect(Venue::query()->find($venueId))->toBeNull();
 
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venueId);
             resolve(RestoreAction::class)->handle($deletedVenue);
 
-            $restoredVenue = Venue::findOrFail($venueId);
+            $restoredVenue = Venue::query()->findOrFail($venueId);
             expect($restoredVenue->name)->toBe('Restoration Test Arena');
         });
 
@@ -296,7 +296,7 @@ describe('Venue Action Integration Tests', function () {
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venue->id);
             resolve(RestoreAction::class)->handle($deletedVenue);
 
-            $restoredVenue = Venue::findOrFail($venue->id);
+            $restoredVenue = Venue::query()->findOrFail($venue->id);
             expect($restoredVenue->events->pluck('id'))->toContain($event->id)
                 ->and(freshModel($event)->venue)->not()
                 ->toBeNull();
@@ -371,7 +371,7 @@ describe('Venue Action Integration Tests', function () {
 
             resolve(DeleteAction::class)->handle($venue);
 
-            expect(Event::find($event->id))->not()->toBeNull()
+            expect(Event::query()->find($event->id))->not()->toBeNull()
                 ->and(freshModel($event)->venue_id)->toBe($venue->id);
         });
     });

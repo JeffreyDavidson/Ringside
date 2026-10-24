@@ -64,7 +64,7 @@ final class SponsorInstructionRequirements
             throw SponsorCommitmentException::instructionRequired();
         }
 
-        if ($data->afterMatchId !== null && ! $matches->contains(fn (EventMatch $match): bool => $match->id === $data->afterMatchId && ! $match->trashed())) {
+        if ($data->afterMatchId !== null && $matches->doesntContain(fn (EventMatch $match): bool => $match->id === $data->afterMatchId && ! $match->trashed())) {
             throw SponsorCommitmentException::invalidTarget();
         }
 
