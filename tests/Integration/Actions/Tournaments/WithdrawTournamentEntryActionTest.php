@@ -8,6 +8,7 @@ use App\Actions\Tournaments\WithdrawTournamentEntryAction;
 use App\Data\Tournaments\TournamentBookingData;
 use App\Data\Tournaments\TournamentData;
 use App\Enums\Tournaments\EntrantKind;
+use App\Enums\Tournaments\TournamentStatus;
 use App\Models\Events\Event;
 use App\Models\Promotions\Promotion;
 use App\Models\Roster\Referees\Referee;
@@ -54,5 +55,7 @@ test('withdrawing an entry names the actor passed in as the causer of every entr
     resolve(WithdrawTournamentEntryAction::class)->handle($entry, $version, 'Unable to compete', $actor);
 
     // Assert
-    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.reset|'.causerTag($actor), 'tournament.progressed|'.causerTag($actor), 'tournament.withdrawn|'.causerTag($actor), 'tournament.progressed|'.causerTag($actor)]);
+    expect(activityEntriesAfter($since, 'tournaments'))->toBe(['tournament.reset|'.causerTag($actor), 'tournament.withdrawn|'.causerTag($actor), 'tournament.progressed|'.causerTag($actor)])
+        ->and($world['tournament']->refresh()->status)->toBe(TournamentStatus::Active)
+        ->and($world['tournament']->version)->toBe($version + 1);
 });

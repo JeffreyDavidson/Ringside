@@ -8,6 +8,7 @@ use App\Enums\Tournaments\EntrantKind;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Tournaments\TournamentException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
+use App\Lifecycle\Tournaments\TournamentBranchReset;
 use App\Lifecycle\Tournaments\TournamentLocks;
 use App\Lifecycle\Tournaments\TournamentStateMachine;
 use App\Models\Tournaments\Tournament;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReplaceTournamentEntryAction
 {
-    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly ResetTournamentBranchAction $reset, private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
+    public function __construct(private readonly TournamentLocks $locks, private readonly TournamentBracketService $bracket, private readonly TournamentBranchReset $reset, private readonly RosterBookingEligibility $eligibility, private readonly TournamentStateMachine $states) {}
 
     public function handle(TournamentEntry $entry, int $competitorId, int $version, string $reason, User $actor): void
     {
@@ -47,7 +48,7 @@ class ReplaceTournamentEntryAction
 
             $node = $tournament->nodes()->where('round', 1)->where(fn (Builder $query) => $query->where('first_seed', $entry->seed)->orWhere('second_seed', $entry->seed))->firstOrFail();
             $oldId = $entry->competitor_id;
-            $this->reset->handle($node, $tournament->version, $reason, $actor, true);
+            $this->reset->reset($tournament, $node, $reason, $actor, true);
             $competitor = $tournament->entrant_kind->modelClass()::query()
                 ->whereKey($competitorId)
                 ->when($tournament->entrant_kind === EntrantKind::TagTeam, fn (Builder $query) => $query->with('currentWrestlers'))
