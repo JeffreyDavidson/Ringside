@@ -6,7 +6,7 @@ namespace App\Livewire\Events\Components;
 
 use App\Actions\Events\SaveTalentBookingAction;
 use App\Exceptions\BaseBusinessException;
-use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\TalentBookingForm;
 use App\Models\Events\Event;
@@ -19,14 +19,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read Event $event
+ */
 class TalentBookings extends Component
 {
-    use ExplainsKeptInput;
+    use ReportsBusinessErrors;
     use ResolvesActor;
     use WithPagination;
 
@@ -71,17 +75,17 @@ class TalentBookings extends Component
     public function mount(int $eventId): void
     {
         $this->eventId = $eventId;
-        Gate::authorize('update', $this->event());
+        Gate::authorize('update', $this->event);
     }
 
     public function refreshState(): void
     {
-        Gate::authorize('update', $this->event());
+        Gate::authorize('update', $this->event);
     }
 
     public function edit(string $type, int $id): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $booking = $event->talentBookings()->where('person_type', $type)->where('person_id', $id)->first();
         $person = match ($type) {
@@ -105,40 +109,39 @@ class TalentBookings extends Component
 
     public function updatedSearchKind(): void
     {
-        Gate::authorize('update', $this->event());
+        Gate::authorize('update', $this->event);
         $this->selectedPerson = null;
         $this->searchKind = in_array($this->searchKind, ['wrestlers', 'referees'], true) ? $this->searchKind : 'wrestlers';
     }
 
     public function addPerson(): void
     {
-        Gate::authorize('update', $this->event());
+        Gate::authorize('update', $this->event);
         $this->edit($this->searchKind === 'referees' ? (new Referee)->getMorphClass() : (new Wrestler)->getMorphClass(), $this->selectedPerson ?? 0);
     }
 
     public function save(SaveTalentBookingAction $action, bool $attest = false): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         abort_if($this->personId === 0, 404);
         $booking = $event->talentBookings()->where('person_type', $this->personType)->where('person_id', $this->personId)->first();
         $data = $this->form->toData($event, $booking, $attest);
         $this->resetErrorBag();
 
-        try {
+        $this->reportBusinessErrors(function () use ($action, $event, $data): void {
             $action->handle($event, $this->personType, $this->personId, $this->version, $this->fingerprint, $data, $this->actor());
+            unset($this->event);
             $this->personId = 0;
             $this->form->reset();
             $this->message = __('talent-bookings.saved');
             $this->dispatch('talent-editor-closed');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('booking', $this->failureMessageKeepingInput($exception));
-        }
+        });
     }
 
     public function closeEditor(): void
     {
-        Gate::authorize('update', $this->event());
+        Gate::authorize('update', $this->event);
         $this->personId = 0;
         $this->dispatch('talent-editor-closed');
         $this->resetErrorBag();
@@ -155,7 +158,7 @@ class TalentBookings extends Component
     #[Renderless]
     public function searchRoster(string $kind, string $term): array
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $query = match ($kind) {
             'wrestlers' => Wrestler::query(),
@@ -181,7 +184,7 @@ class TalentBookings extends Component
 
     public function render(TalentBookingsViewModel $bookings): View
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $booking = $event->talentBookings()->where('person_type', $this->personType)->where('person_id', $this->personId)->first();
         $history = $this->historyOpen && $booking !== null ? $booking->revisions()->orderByDesc('version')->paginate(10, pageName: 'historyPage') : null;
@@ -192,7 +195,13 @@ class TalentBookings extends Component
         return view('livewire.events.components.talent-bookings', [...$data, 'rows' => $rows, 'event' => $event, 'booking' => $booking, 'history' => $history]);
     }
 
-    private function event(): Event
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return 'booking';
+    }
+
+    #[Computed]
+    public function event(): Event
     {
         return Event::query()->with('promotion')->findOrFail($this->eventId);
     }

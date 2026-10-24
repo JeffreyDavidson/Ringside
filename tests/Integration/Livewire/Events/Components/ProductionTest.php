@@ -8,6 +8,7 @@ use App\Data\Events\EventPackData;
 use App\Data\Events\EventProductionData;
 use App\Enums\Promotions\MembershipRole;
 use App\Enums\Promotions\MembershipStatus;
+use App\Exceptions\RecordChangedException;
 use App\Livewire\Events\Components\Production;
 use App\Models\Crew\CrewContact;
 use App\Models\Events\Event;
@@ -15,6 +16,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Promotions\Promotion;
 use App\Services\Promotions\PromotionContextService;
 use App\ViewModels\Events\EventPackViewModel;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -194,4 +196,53 @@ test('a downgraded editor cannot save the production plan', function (): void {
     // Assert
     $component->assertForbidden();
     expect($event->pack()->firstOrFail()->getAttributes())->toBe($before);
+});
+
+test('a save loads the event once for the whole request', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->for(Promotion::factory())->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $contact = CrewContact::factory()->create(['promotion_id' => $event->promotion_id, 'name' => 'Alex Operator']);
+    $page = livewire(Production::class, ['eventId' => $event->id]);
+    $page->call('addAssignment')
+        ->set('assignments.0.contact_id', $contact->id)
+        ->set('assignments.0.role', 'sound')
+        ->call('addCue', 'match:'.$match->id)
+        ->set('cues.0.subject', 'Harbor Hero')
+        ->set('cues.0.trigger', 'Caller signal')
+        ->set('cues.0.instruction', 'Play entrance');
+
+    // Act
+    $statements = recordStatements(fn () => $page->call('save'));
+
+    // Assert
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(1);
+});
+
+test('a refused save names the production field and says the input is still there', function (): void {
+    // Arrange
+    actingAs(administrator());
+    $event = Event::factory()->for(Promotion::factory())->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $contact = CrewContact::factory()->create(['promotion_id' => $event->promotion_id, 'name' => 'Alex Operator']);
+    $page = livewire(Production::class, ['eventId' => $event->id]);
+    $page->call('addAssignment')
+        ->set('assignments.0.contact_id', $contact->id)
+        ->call('addCue', 'match:'.$match->id)
+        ->set('cues.0.subject', 'Harbor Hero')
+        ->set('cues.0.trigger', 'Caller signal')
+        ->set('cues.0.instruction', 'Play entrance');
+    $action = Double::for(SaveEventProductionAction::class);
+    $action->expects('handle')->throws(RecordChangedException::changed());
+    app()->instance(SaveEventProductionAction::class, $action);
+
+    // Act
+    $page->call('save');
+
+    // Assert
+    $page->assertHasErrors(['production' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+        ->assertSet('cues.0.subject', 'Harbor Hero');
+    $action->verify();
 });

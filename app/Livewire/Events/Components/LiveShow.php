@@ -14,6 +14,7 @@ use App\Enums\Events\LiveAttendanceMark;
 use App\Enums\Events\LiveItemOperation;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Events\LiveShowException;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use App\Livewire\Concerns\ResolvesActor;
 use App\Models\Events\Event;
 use App\Models\Events\EventLiveRun;
@@ -26,11 +27,16 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+/**
+ * @property-read Event $event
+ */
 class LiveShow extends Component
 {
+    use ReportsBusinessErrors;
     use ResolvesActor;
 
     #[Locked]
@@ -102,7 +108,7 @@ class LiveShow extends Component
 
     public function refreshState(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('view', $event);
         $this->refreshedAt = now()->utc()->toIso8601String();
     }
@@ -114,19 +120,19 @@ class LiveShow extends Component
 
     public function attendance(MarkLiveAttendanceAction $action, string $key, string $mark, bool $value): void
     {
-        Validator::make(['mark' => $mark], ['mark' => [Rule::enum(LiveAttendanceMark::class)]])->validate();
-        $this->perform(fn (Event $event) => $action->handle($event, $this->version, $key, LiveAttendanceMark::from($mark), $value, $this->actor()));
+        $validated = Validator::make(['mark' => $mark], ['mark' => [Rule::enum(LiveAttendanceMark::class)]])->validate();
+        $this->perform(fn (Event $event) => $action->handle($event, $this->version, $key, LiveAttendanceMark::from($validated['mark']), $value, $this->actor()));
     }
 
     public function item(string $key, string $operation): void
     {
-        Validator::make(['operation' => $operation], ['operation' => [Rule::in(['start', 'finish'])]])->validate();
-        $this->perform(fn (Event $event) => $this->transitionItem->handle($event, $this->version, $key, LiveItemOperation::from($operation), $this->actor()));
+        $validated = Validator::make(['operation' => $operation], ['operation' => [Rule::enum(LiveItemOperation::class)->only([LiveItemOperation::Start, LiveItemOperation::Finish])]])->validate();
+        $this->perform(fn (Event $event) => $this->transitionItem->handle($event, $this->version, $key, LiveItemOperation::from($validated['operation']), $this->actor()));
     }
 
     public function beginCorrection(string $key, string $operation): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         Validator::make(['operation' => $operation], ['operation' => [$this->correctionOperationRule()]])->validate();
         $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
@@ -157,7 +163,7 @@ class LiveShow extends Component
 
     public function saveCorrection(LiveShowTimingService $timing): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $rules = ['reason' => ['required', 'string', 'max:2000'], 'draftOperation' => [$this->correctionOperationRule()]];
 
@@ -168,12 +174,13 @@ class LiveShow extends Component
 
         Validator::make(['draftOperation' => $this->draftOperation, 'reason' => $this->reason, 'actualStart' => $this->actualStart, 'actualFinish' => $this->actualFinish,
             'startOffset' => $this->startOffset, 'finishOffset' => $this->finishOffset], $rules)->validate();
-        $this->perform(function (Event $event) use ($timing): void {
+        $operation = LiveItemOperation::from($this->draftOperation);
+        $this->perform(function (Event $event) use ($timing, $operation): void {
             $run = EventLiveRun::query()->forEventId($event->id)->firstOrFail();
-            $start = $this->draftOperation === 'correct' ? $timing->wallTime($this->actualStart, $run->content['timezone'], $this->startOffset) : null;
+            $start = $operation === LiveItemOperation::Correct ? $timing->wallTime($this->actualStart, $run->content['timezone'], $this->startOffset) : null;
             $finish = $this->actualFinish === '' ? null : $timing->wallTime($this->actualFinish, $run->content['timezone'], $this->finishOffset);
 
-            if ($this->draftOperation === 'correct' && (! $start instanceof Carbon || ($this->actualFinish !== '' && ! $finish instanceof Carbon))) {
+            if ($operation === LiveItemOperation::Correct && (! $start instanceof Carbon || ($this->actualFinish !== '' && ! $finish instanceof Carbon))) {
                 throw LiveShowException::invalidTimes();
             }
 
@@ -181,7 +188,7 @@ class LiveShow extends Component
                 $event,
                 $this->draftVersion,
                 $this->draftKey,
-                LiveItemOperation::from($this->draftOperation),
+                $operation,
                 $this->actor(),
                 $this->reason,
                 $start,
@@ -192,7 +199,7 @@ class LiveShow extends Component
 
     public function beginReview(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $data = $this->viewModel->data($event);
         $this->reviewPackVersion = $data['source']['pack']->version ?? 0;
@@ -218,7 +225,7 @@ class LiveShow extends Component
 
     public function cancelDraft(): void
     {
-        Gate::authorize('view', $this->event());
+        Gate::authorize('view', $this->event);
         $this->draftKey = '';
         $this->reviewing = false;
         $this->resetErrorBag();
@@ -232,24 +239,24 @@ class LiveShow extends Component
     /** @param Closure(Event): mixed $operation */
     private function perform(Closure $operation): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('update', $event);
         $this->resetErrorBag();
 
-        try {
+        $this->reportBusinessErrors(function () use ($operation, $event): void {
             $operation($event);
             $this->draftKey = '';
             $this->reviewing = false;
-        } catch (BaseBusinessException $exception) {
-            $this->addError('run', $exception->getMessage());
-        }
+        });
 
+        // The operation may have changed what the screen reads from the event, so load it again.
+        unset($this->event);
         $this->refreshState();
     }
 
     public function render(): View
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('view', $event);
         $data = $this->viewModel->data($event, $this->refreshedAt);
         $this->version = $data['run']->version ?? 0;
@@ -259,7 +266,13 @@ class LiveShow extends Component
         return view('livewire.events.components.live-show', $data);
     }
 
-    private function event(): Event
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return 'run';
+    }
+
+    #[Computed]
+    public function event(): Event
     {
         return Event::query()->findOrFail($this->eventId);
     }

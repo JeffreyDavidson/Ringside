@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../../../../Fixtures/live-show.php';
 
+use App\Actions\Events\CompleteLiveShowAction;
 use App\Actions\Events\PrepareLiveShowAction;
 use App\Actions\Events\SaveEventPackAction;
 use App\Data\Events\EventPackData;
@@ -19,6 +20,7 @@ use App\Models\Promotions\Promotion;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Promotions\PromotionContextService;
 use App\ViewModels\Events\EventPackViewModel;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -334,3 +336,60 @@ test('the correction form opens only for operations that need a reason', functio
     'start' => ['start', false],
     'finish' => ['finish', false],
 ]);
+
+test('a correction refused because the run changed keeps the draft and says the input is still there', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+    $component->call('beginCorrection', $fixture['key'], 'skip');
+    $component->set('reason', 'Keep my draft');
+    livewire(LiveShow::class, ['eventId' => $fixture['event']->id])->call('item', $fixture['key'], 'start');
+
+    // Act
+    $component->call('saveCorrection');
+
+    // Assert
+    $component->assertHasErrors(['run' => 'This was changed by someone else. Reload to see the latest version, review it, then try again. Your changes are still here.'])
+        ->assertSet('reason', 'Keep my draft');
+});
+
+test('a refused live action that is not a record change shows the plain message', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('complete');
+
+    // Assert
+    $component->assertHasErrors('run')->assertDontSee('Your changes are still here.');
+});
+
+test('an operation loads the event once before and once after the write', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $statements = recordStatements(fn () => $component->call('item', $fixture['key'], 'start'));
+
+    // Assert
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(2);
+});
+
+test('the screen shows the event as the operation left it', function (): void {
+    // Arrange
+    $fixture = liveShowFixture();
+    $complete = Double::for(CompleteLiveShowAction::class);
+    $complete->expects('handle')->resolves(fn () => Event::query()->whereKey($fixture['event']->id)->update(['name' => 'Renamed During Save']));
+    app()->instance(CompleteLiveShowAction::class, $complete);
+    $component = livewire(LiveShow::class, ['eventId' => $fixture['event']->id]);
+
+    // Act
+    $component->call('complete');
+
+    // Assert
+    $component->assertSee('Renamed During Save');
+    $complete->verify();
+});

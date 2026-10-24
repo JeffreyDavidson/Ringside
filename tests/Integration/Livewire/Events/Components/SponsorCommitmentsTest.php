@@ -343,3 +343,61 @@ test('a malformed target key is refused on save and nothing is written', functio
     expect($world['event']->pack()->exists())->toBeFalse()
         ->and($promise->refresh()->pack_key)->toBeNull();
 });
+
+test('a saved promise loads the event once before the write and once after it', function (): void {
+    // Arrange
+    $event = Event::factory()->for(Promotion::factory())->create();
+    $sponsor = Sponsor::factory()->create(['promotion_id' => $event->promotion_id]);
+    actingAs(administrator());
+    $component = livewire(SponsorCommitments::class, ['eventId' => $event->id]);
+    $component->call('newCommitment')
+        ->set('form.sponsorId', $sponsor->id)
+        ->set('form.type', 'banner')
+        ->set('form.description', 'Hang the entrance banner');
+
+    // Act
+    $statements = recordStatements(fn () => $component->call('save'));
+
+    // Assert
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(2);
+});
+
+test('the screen shows the event as the saved promise left it', function (): void {
+    // Arrange
+    $event = Event::factory()->for(Promotion::factory())->create(['name' => 'Harbor Showcase']);
+    $sponsor = Sponsor::factory()->create(['promotion_id' => $event->promotion_id]);
+    actingAs(administrator());
+    $component = livewire(SponsorCommitments::class, ['eventId' => $event->id]);
+    $component->call('newCommitment')
+        ->set('form.sponsorId', $sponsor->id)
+        ->set('form.type', 'banner')
+        ->set('form.description', 'Hang the entrance banner');
+    $save = Double::for(SaveSponsorCommitmentAction::class);
+    $save->expects('handle')->resolves(function () use ($event): EventSponsorCommitment {
+        Event::query()->whereKey($event->id)->update(['name' => 'Renamed During Save']);
+
+        return new EventSponsorCommitment;
+    });
+    app()->instance(SaveSponsorCommitmentAction::class, $save);
+
+    // Act
+    $component->call('save');
+
+    // Assert
+    $component->assertSee('Renamed During Save');
+    $save->verify();
+});
+
+test('opening a promise for editing loads the event once for the whole request', function (): void {
+    // Arrange
+    $world = sponsorFixture();
+    $component = livewire(SponsorCommitments::class, ['eventId' => $world['event']->id]);
+
+    // Act
+    $statements = recordStatements(fn () => $component->call('edit', $world['promise']->id));
+
+    // Assert
+    $eventReads = array_filter($statements, fn (array $statement): bool => str_starts_with($statement['sql'], 'select * from "events" where "events"."id" = ?') && str_ends_with($statement['sql'], 'limit 1'));
+    expect($eventReads)->toHaveCount(1);
+});

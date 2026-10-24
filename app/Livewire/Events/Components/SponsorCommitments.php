@@ -11,7 +11,7 @@ use App\Enums\Events\SponsorInstructionMode;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\RecordChangedException;
 use App\Exceptions\Sponsors\SponsorCommitmentException;
-use App\Livewire\Concerns\ExplainsKeptInput;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use App\Livewire\Concerns\ResolvesActor;
 use App\Livewire\Events\Forms\SponsorCommitmentForm;
 use App\Models\Events\Event;
@@ -29,13 +29,17 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @property-read Event $event
+ */
 class SponsorCommitments extends Component
 {
-    use ExplainsKeptInput;
+    use ReportsBusinessErrors;
     use ResolvesActor;
     use WithPagination;
 
@@ -109,12 +113,12 @@ class SponsorCommitments extends Component
     public function mount(int $eventId): void
     {
         $this->eventId = $eventId;
-        Gate::authorize('manageSponsors', $this->event());
+        Gate::authorize('manageSponsors', $this->event);
     }
 
     public function newCommitment(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
 
         if ($event->trashed() || $event->promotion_id === null) {
@@ -136,7 +140,7 @@ class SponsorCommitments extends Component
 
     public function edit(int $id): void
     {
-        Gate::authorize('manageSponsors', $this->event());
+        Gate::authorize('manageSponsors', $this->event);
         $commitment = $this->commitment($id);
         $this->form->reset();
         $this->form->load($commitment);
@@ -150,7 +154,7 @@ class SponsorCommitments extends Component
 
     public function chooseSponsor(int $id): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
         $sponsor = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereNull('archived_at')->findOrFail($id);
         $this->form->sponsorId = $sponsor->id;
@@ -159,24 +163,23 @@ class SponsorCommitments extends Component
 
     public function save(SaveSponsorCommitmentAction $action, LiveShowTimingService $timing): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
         $data = $this->form->toData($timing);
         Validator::make(['sponsorId' => $data->sponsorId], ['sponsorId' => [Rule::exists('sponsors', 'id')->where('promotion_id', $event->promotion_id)]])->validate();
 
-        try {
+        $this->reportBusinessErrors(function () use ($action, $event, $data): void {
             $action->handle($event, $this->draftId, $this->draftVersion, $this->submissionKey, $data, $this->actor(), $this->form->reason ?: null, $this->form->reviewed, $this->form->refreshSponsorName);
+            unset($this->event);
             $this->formShown = false;
             $this->notice = __('sponsors.promise_saved');
             $this->resetPage('commitmentsPage');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('save', $this->failureMessageKeepingInput($exception));
-        }
+        });
     }
 
     public function cancelDraft(): void
     {
-        Gate::authorize('manageSponsors', $this->event());
+        Gate::authorize('manageSponsors', $this->event);
         $this->formShown = false;
         $this->instructionId = null;
         $this->previewHash = '';
@@ -185,7 +188,7 @@ class SponsorCommitments extends Component
 
     public function showHistory(int $id): void
     {
-        Gate::authorize('manageSponsors', $this->event());
+        Gate::authorize('manageSponsors', $this->event);
         $this->commitment($id);
         $this->historyId = $id;
         $this->resetPage('historyPage');
@@ -193,12 +196,12 @@ class SponsorCommitments extends Component
 
     public function beginInstruction(int $id): void
     {
-        Gate::authorize('manageSponsors', $this->event());
+        Gate::authorize('manageSponsors', $this->event);
         $commitment = $this->commitment($id);
         $this->instructionId = $id;
         $this->mode = $commitment->pack_key === null ? ($commitment->type->value === 'announcement' ? 'segment' : 'setup') : PackKey::fromString($commitment->pack_key)->kind->value;
         $this->targetKey = $commitment->pack_key ?? '';
-        $pack = $this->event()->pack()->first()->content ?? [];
+        $pack = $this->event->pack()->first()->content ?? [];
         $target = $this->instructions->target($pack, $commitment->pack_key);
         $this->afterMatchId = isset($target['after_match_id']) ? (string) $target['after_match_id'] : '';
         $this->previewHash = '';
@@ -209,31 +212,32 @@ class SponsorCommitments extends Component
 
     public function previewInstruction(): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
-        Validator::make(
+        $validated = Validator::make(
             ['mode' => $this->mode, 'targetKey' => $this->targetKey, 'afterMatchId' => $this->afterMatchId, 'instructionReason' => $this->instructionReason],
             ['mode' => [Rule::enum(SponsorInstructionMode::class)], 'targetKey' => ['nullable', 'string', 'max:80'],
                 'afterMatchId' => ['nullable', 'integer'], 'instructionReason' => ['nullable', 'string', 'max:2000']],
         )->validate();
+        $mode = SponsorInstructionMode::from($validated['mode']);
         $commitment = $this->commitment($this->instructionId ?? 0);
         $data = $this->packs->data($event);
         $this->instructionVersion = $commitment->version;
         $this->previewPackVersion = $data['pack']->version ?? 0;
         $this->previewFingerprint = $data['card']['fingerprint'];
-        $this->previewMode = $this->mode;
-        $this->previewTarget = $this->mode === SponsorInstructionMode::Remove->value ? null : ($this->targetKey ?: null);
-        $this->previewAfter = $this->mode === SponsorInstructionMode::Segment->value && $this->afterMatchId !== '' ? (int) $this->afterMatchId : null;
-        $this->previewHash = $this->instructions->preview($event, $commitment, SponsorInstructionMode::from($this->previewMode), $this->previewTarget, $this->previewAfter)['hash'];
+        $this->previewMode = $mode->value;
+        $this->previewTarget = $mode === SponsorInstructionMode::Remove ? null : ($this->targetKey ?: null);
+        $this->previewAfter = $mode === SponsorInstructionMode::Segment && $this->afterMatchId !== '' ? (int) $this->afterMatchId : null;
+        $this->previewHash = $this->instructions->preview($event, $commitment, $mode, $this->previewTarget, $this->previewAfter)['hash'];
     }
 
     public function saveInstruction(SaveSponsorInstructionAction $action): void
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
         Validator::make(['reason' => $this->instructionReason], ['reason' => ['nullable', 'string', 'max:2000']])->validate();
 
-        try {
+        $this->reportBusinessErrors(function () use ($action, $event): void {
             $action->handle(
                 $event,
                 $this->instructionId ?? 0,
@@ -243,12 +247,11 @@ class SponsorCommitments extends Component
                 new SponsorInstructionData(SponsorInstructionMode::tryFrom($this->previewMode) ?? throw RecordChangedException::changed(), $this->previewPackKey(), $this->previewAfter, $this->previewHash, $this->instructionReason ?: null),
                 $this->actor(),
             );
+            unset($this->event);
             $this->instructionId = null;
             $this->previewHash = '';
             $this->notice = __('sponsors.instruction_saved');
-        } catch (BaseBusinessException $exception) {
-            $this->addError('save', $this->failureMessageKeepingInput($exception));
-        }
+        });
     }
 
     /** @throws SponsorCommitmentException when the previewed target is not a pack key */
@@ -278,7 +281,7 @@ class SponsorCommitments extends Component
 
     public function render(SponsorCommitmentsViewModel $commitments): View
     {
-        $event = $this->event();
+        $event = $this->event;
         Gate::authorize('manageSponsors', $event);
         $filter = in_array($this->filter, ['pending', 'completed', 'cancelled', 'all'], true) ? $this->filter : 'pending';
         $sponsors = Sponsor::query()->where('promotion_id', $event->promotion_id)->whereNull('archived_at')
@@ -294,7 +297,13 @@ class SponsorCommitments extends Component
             'preview' => $preview, 'packData' => $instruction instanceof EventSponsorCommitment ? $this->packs->data($event) : null]);
     }
 
-    private function event(): Event
+    protected function businessErrorField(BaseBusinessException $exception): string
+    {
+        return 'save';
+    }
+
+    #[Computed]
+    public function event(): Event
     {
         return Event::query()->withTrashed()->findOrFail($this->eventId);
     }

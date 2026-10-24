@@ -128,7 +128,8 @@ A form modal's Cancel button closes through the modal host with `wire:click="$di
 header's close button. The modal components have no open state of their own: the modal package mounts a fresh
 component each time a dialog opens, and `submitForm()` dispatches the package's `closeModal` event.
 
-`BaseFormModal::storeForm()` validates and runs `createForm()` / `updateForm()` inside `reportBusinessErrors()`,
+`BaseFormModal::storeForm()` validates and runs `createForm()` / `updateForm()` inside `reportBusinessErrors()`
+(from the `ReportsBusinessErrors` concern, which the event workspace components share),
 which turns a `BaseBusinessException` from the Action into an error on the field named by the modal's
 `$businessErrorField` (for example `form.venue_id` for events, `form.first_name` for managers and referees) and
 keeps the modal open. A modal that does not set the property lets the exception propagate (promotions and venues

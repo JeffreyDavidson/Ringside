@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use App\Exceptions\BaseBusinessException;
-use App\Livewire\Concerns\ExplainsKeptInput;
 use App\Livewire\Concerns\GeneratesDummyData;
-use Closure;
+use App\Livewire\Concerns\ReportsBusinessErrors;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
@@ -22,17 +20,14 @@ use LogicException;
  */
 abstract class BaseFormModal extends BaseModal
 {
-    use ExplainsKeptInput;
     use GeneratesDummyData;
+    use ReportsBusinessErrors;
 
     protected ?string $createdEventName = null;
 
     protected ?string $updatedEventName = null;
 
     protected bool $resetFormAfterSubmission = false;
-
-    /** The form field that shows a business rule failure from the Action; null lets the exception propagate. */
-    protected ?string $businessErrorField = null;
 
     public function save(): void
     {
@@ -87,30 +82,6 @@ abstract class BaseFormModal extends BaseModal
 
             $this->createForm();
         });
-    }
-
-    /**
-     * Run a save callback and turn a business rule failure into a form error.
-     *
-     * @param  Closure(): void  $save
-     */
-    protected function reportBusinessErrors(Closure $save): bool
-    {
-        try {
-            $save();
-        } catch (BaseBusinessException $exception) {
-            $this->addError($this->businessErrorField($exception), $this->failureMessageKeepingInput($exception));
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /** The field that shows the failure; override to choose it from the exception. */
-    protected function businessErrorField(BaseBusinessException $exception): string
-    {
-        return $this->businessErrorField ?? throw $exception;
     }
 
     /** Must be overridden unless the modal overrides storeForm() without calling parent::storeForm(). */
