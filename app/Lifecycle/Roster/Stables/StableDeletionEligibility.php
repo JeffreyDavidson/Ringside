@@ -6,22 +6,19 @@ namespace App\Lifecycle\Roster\Stables;
 
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
+use App\Lifecycle\Concerns\AnswersEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
 
 final readonly class StableDeletionEligibility
 {
+    use AnswersEligibility;
+
     public function __construct(private StableMembershipService $membershipService) {}
 
     public function canDelete(Stable $stable): bool
     {
-        try {
-            $this->ensureCanDelete($stable);
-
-            return true;
-        } catch (CannotBeDeletedException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanDelete($stable), CannotBeDeletedException::class);
     }
 
     public function ensureCanDelete(Stable $stable): void
@@ -50,13 +47,7 @@ final readonly class StableDeletionEligibility
 
     public function canRestore(Stable $stable): bool
     {
-        try {
-            $this->ensureCanRestore($stable);
-
-            return true;
-        } catch (CannotBeRestoredException) {
-            return false;
-        }
+        return $this->passes(fn () => $this->ensureCanRestore($stable), CannotBeRestoredException::class);
     }
 
     public function ensureCanRestore(Stable $stable): void
