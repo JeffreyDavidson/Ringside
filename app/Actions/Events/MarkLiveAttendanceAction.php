@@ -8,6 +8,7 @@ use App\Data\Events\LiveShowChangeData;
 use App\Enums\Events\LiveAttendanceMark;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
+use App\Lifecycle\Events\LiveShowLock;
 use App\Models\Events\Event;
 use App\Models\Users\User;
 use Illuminate\Support\Arr;
@@ -15,12 +16,12 @@ use Illuminate\Support\Facades\DB;
 
 class MarkLiveAttendanceAction
 {
-    public function __construct(private readonly LockLiveShowAction $lock, private readonly PersistLiveShowAction $persist, private readonly LiveShowDayRequirements $showDay) {}
+    public function __construct(private readonly LiveShowLock $lock, private readonly PersistLiveShowAction $persist, private readonly LiveShowDayRequirements $showDay) {}
 
     public function handle(Event $event, int $version, string $key, LiveAttendanceMark $mark, bool $value, User $actor): void
     {
         DB::transaction(function () use ($event, $version, $key, $mark, $value, $actor): void {
-            $run = $this->lock->handle($event, $version);
+            $run = $this->lock->lock($event, $version);
             $this->showDay->ensureShowDay($run);
             $content = $run->content;
             $index = array_search($key, array_column($content['roster'], 'key'), true);

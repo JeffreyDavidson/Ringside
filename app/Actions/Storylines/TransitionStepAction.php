@@ -6,6 +6,7 @@ namespace App\Actions\Storylines;
 
 use App\Enums\Storylines\StepStatus;
 use App\Enums\Storylines\StorylineRevisionOperation;
+use App\Lifecycle\Storylines\StorylineLock;
 use App\Lifecycle\Storylines\StorylineStepStateMachine;
 use App\Models\Storylines\Storyline;
 use App\Models\Users\User;
@@ -13,12 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 class TransitionStepAction
 {
-    public function __construct(private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision, private readonly StorylineStepStateMachine $states) {}
+    public function __construct(private readonly StorylineLock $lock, private readonly RecordRevisionAction $revision, private readonly StorylineStepStateMachine $states) {}
 
     public function handle(Storyline $storyline, int $version, int $stepId, StepStatus $status, string $reason, User $actor): void
     {
         DB::transaction(function () use ($storyline, $version, $stepId, $status, $reason, $actor): void {
-            $story = $this->lock->handle($storyline, $version);
+            $story = $this->lock->lock($storyline, $version);
             $step = $story->steps()->findOrFail($stepId);
             $this->states->ensureCanMove($step, $status);
             $before = $step->attributesToArray();

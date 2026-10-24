@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Storylines;
+namespace App\Lifecycle\Storylines;
 
 use App\Exceptions\RecordChangedException;
-use App\Lifecycle\Storylines\StorylineStateMachine;
 use App\Models\Storylines\Storyline;
 
-class LockStorylineAction
+class StorylineLock
 {
     public function __construct(private readonly StorylineStateMachine $states) {}
 
-    public function handle(Storyline $storyline, int $version, bool $allowClosed = false): Storyline
+    public function lock(Storyline $storyline, int $version, bool $allowClosed = false): Storyline
     {
         $locked = $storyline->refreshForUpdate();
 

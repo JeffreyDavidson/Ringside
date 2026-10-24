@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\Periods\CareerPeriodCloser;
+use App\Lifecycle\Roster\Individuals\CurrentTagTeamsLock;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
@@ -16,7 +17,7 @@ class ReleaseAction
         private readonly CareerPeriodCloser $careerPeriods,
         private readonly IndividualEmploymentEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
+        private readonly CurrentTagTeamsLock $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -27,7 +28,7 @@ class ReleaseAction
         $effectiveDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
-            $this->lockCurrentTagTeams->handle($wrestler);
+            $this->lockCurrentTagTeams->lock($wrestler);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedWrestler);

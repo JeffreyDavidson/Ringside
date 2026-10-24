@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Wrestlers;
+namespace App\Lifecycle\Roster\Individuals;
 
 use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -11,7 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Scopes\PromotionContextScope;
 use Illuminate\Support\Collection;
 
-class LockCurrentTagTeamsAction
+class CurrentTagTeamsLock
 {
     /**
      * Lock the tag teams the wrestler is currently a member of, one row at a time in ascending id order.
@@ -22,7 +22,7 @@ class LockCurrentTagTeamsAction
      * @param  TagTeam|null  $retainedTagTeam  A tag team whose membership stays open and that the caller already holds.
      * @return Collection<int, TagTeam>
      */
-    public function handle(Wrestler $wrestler, ?TagTeam $retainedTagTeam = null): Collection
+    public function lock(Wrestler $wrestler, ?TagTeam $retainedTagTeam = null): Collection
     {
         $memberships = TagTeamWrestler::query()
             ->forWrestlerId($wrestler->id)

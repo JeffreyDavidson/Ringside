@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\EventPublicationDraftData;
+use App\Lifecycle\Events\EventPublicationLock;
 use App\Models\Events\Event;
 use App\Models\Events\EventPublication;
 use Illuminate\Support\Facades\DB;
 
 class SaveEventPublicationAction
 {
-    public function __construct(private readonly LockEventPublicationAction $lock) {}
+    public function __construct(private readonly EventPublicationLock $lock) {}
 
     public function handle(Event $event, int $version, string $fingerprint, EventPublicationDraftData $draft): EventPublication
     {
         return DB::transaction(function () use ($event, $version, $fingerprint, $draft): EventPublication {
-            $locked = $this->lock->handle($event, $version, $fingerprint);
+            $locked = $this->lock->lock($event, $version, $fingerprint);
             $publication = $locked['publication'];
             $publication->fill(['draft' => [
                 'announcement' => $draft->announcement,

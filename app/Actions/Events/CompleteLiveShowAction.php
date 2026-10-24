@@ -8,6 +8,7 @@ use App\Data\Events\LiveShowChangeData;
 use App\Enums\Events\LiveShowStatus;
 use App\Exceptions\Events\LiveShowException;
 use App\Lifecycle\Events\LiveShowDayRequirements;
+use App\Lifecycle\Events\LiveShowLock;
 use App\Lifecycle\Events\LiveShowSourceRequirements;
 use App\Lifecycle\Events\LiveShowStateMachine;
 use App\Models\Events\Event;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 class CompleteLiveShowAction
 {
     public function __construct(
-        private readonly LockLiveShowAction $lock,
+        private readonly LiveShowLock $lock,
         private readonly PersistLiveShowAction $persist,
         private readonly LiveShowSourceRequirements $source,
         private readonly LiveShowDayRequirements $showDay,
@@ -27,7 +28,7 @@ class CompleteLiveShowAction
     public function handle(Event $event, int $version, User $actor): void
     {
         DB::transaction(function () use ($event, $version, $actor): void {
-            $run = $this->lock->handle($event, $version);
+            $run = $this->lock->lock($event, $version);
             $this->showDay->ensureShowDay($run);
             $this->states->ensureCanComplete($run);
 

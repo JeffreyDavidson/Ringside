@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Storylines;
+namespace App\Lifecycle\Storylines;
 
 use App\Data\Storylines\SourceData;
 use App\Enums\Storylines\StorylineSourceWarning;
@@ -11,12 +11,12 @@ use App\Lifecycle\Events\EventCardLock;
 use App\Services\Storylines\StorylineSourceService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class LockSourceAction
+class StorylineSourceLock
 {
     public function __construct(private readonly StorylineSourceService $sources, private readonly EventCardLock $card) {}
 
     /** @return array{context: array<string, mixed>, fingerprint: string, warnings: list<StorylineSourceWarning>} */
-    public function handle(SourceData $source, int $promotionId, bool $historical = false): array
+    public function lock(SourceData $source, int $promotionId, bool $historical = false): array
     {
         if ($source->eventId !== null) {
             $this->card->lockIncludingDeleted($source->eventId, $promotionId);

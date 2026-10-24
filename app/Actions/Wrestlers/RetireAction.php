@@ -8,6 +8,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Lifecycle\Periods\CareerPeriodCloser;
 use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\CurrentTagTeamsLock;
 use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -21,7 +22,7 @@ class RetireAction
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly IndividualRetirementEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly LockCurrentTagTeamsAction $lockCurrentTagTeams,
+        private readonly CurrentTagTeamsLock $lockCurrentTagTeams,
     ) {}
 
     /**
@@ -46,7 +47,7 @@ class RetireAction
         $effectiveDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $effectiveDate, $retainedTagTeam): void {
-            $this->lockCurrentTagTeams->handle($wrestler, $retainedTagTeam);
+            $this->lockCurrentTagTeams->lock($wrestler, $retainedTagTeam);
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedWrestler);

@@ -9,6 +9,8 @@ use App\Enums\Storylines\StepStatus;
 use App\Enums\Storylines\StorylineRevisionOperation;
 use App\Exceptions\RecordChangedException;
 use App\Lifecycle\Storylines\StorylineDevelopmentRequirements;
+use App\Lifecycle\Storylines\StorylineLock;
+use App\Lifecycle\Storylines\StorylineSourceLock;
 use App\Models\Events\Event;
 use App\Models\Storylines\Storyline;
 use App\Models\Storylines\StorylineDevelopment;
@@ -19,15 +21,15 @@ use Illuminate\Support\Facades\DB;
 
 class RecordDevelopmentAction
 {
-    public function __construct(private readonly LockSourceAction $source, private readonly LockStorylineAction $lock, private readonly RecordRevisionAction $revision, private readonly StorylineDevelopmentRequirements $requirements, private readonly StorylineTimezoneService $timezones) {}
+    public function __construct(private readonly StorylineSourceLock $source, private readonly StorylineLock $lock, private readonly RecordRevisionAction $revision, private readonly StorylineDevelopmentRequirements $requirements, private readonly StorylineTimezoneService $timezones) {}
 
     public function handle(Storyline $storyline, int $version, DevelopmentData $data, User $actor, ?int $developmentId = null): StorylineDevelopment
     {
         $zone = $this->timezones->forDevelopment($storyline, $developmentId);
 
         return DB::transaction(function () use ($storyline, $version, $data, $developmentId, $zone, $actor): StorylineDevelopment {
-            $source = $this->source->handle($data->source, $storyline->promotion_id, historical: $data->reason !== null && mb_trim($data->reason) !== '');
-            $story = $this->lock->handle($storyline, $version);
+            $source = $this->source->lock($data->source, $storyline->promotion_id, historical: $data->reason !== null && mb_trim($data->reason) !== '');
+            $story = $this->lock->lock($storyline, $version);
             $step = $data->stepId === null ? null : $story->steps()->findOrFail($data->stepId);
             $this->requirements->ensureStepCanBeConfirmed($step, $developmentId);
             $this->requirements->ensureSourceExplained($step, $source, $data->reason);
