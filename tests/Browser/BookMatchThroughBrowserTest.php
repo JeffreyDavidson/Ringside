@@ -154,7 +154,7 @@ test('match form layouts adapt to narrow screens and keep multiple selections us
 });
 
 test('administrator can create and edit an event with a showtime', function (): void {
-    $venue = Venue::factory()->create();
+    $venue = Venue::factory()->create(['name' => 'Riverside Hall']);
     actingAs(administrator());
     $eventDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
 
@@ -167,7 +167,8 @@ test('administrator can create and edit an event with a showtime', function (): 
         ->assertAttribute('input[name="form.date"]', 'type', 'datetime-local')
         ->fill('input[name="form.name"]', 'Night of Champions')
         ->fill('input[name="form.date"]', $eventDate->format('Y-m-d\\TH:i'))
-        ->select('select[name="form.venue_id"]', (string) $venue->id)
+        ->click('input[data-field="form.venue_id"]')
+        ->click('[data-roster-combobox="form.venue_id"] [role="option"]:has-text("Riverside Hall")')
         ->press('Save')
         ->assertSee('Night of Champions')
         ->assertNoJavascriptErrors();
@@ -193,7 +194,7 @@ test('administrator can create and edit an event with a showtime', function (): 
 });
 
 test('administrator can recover from a venue scheduling conflict in the event form', function (): void {
-    $venue = Venue::factory()->create();
+    $venue = Venue::factory()->create(['name' => 'Riverside Hall']);
     $conflictingDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
     Event::factory()->for($venue)->create(['date' => $conflictingDate]);
 
@@ -206,10 +207,11 @@ test('administrator can recover from a venue scheduling conflict in the event fo
         ->assertSeeIn('#modal-title', 'Add Event')
         ->fill('input[name="form.name"]', 'Second Night at the Venue')
         ->fill('input[name="form.date"]', $conflictingDate->format('Y-m-d\\TH:i'))
-        ->select('select[name="form.venue_id"]', (string) $venue->id)
+        ->click('input[data-field="form.venue_id"]')
+        ->click('[data-roster-combobox="form.venue_id"] [role="option"]:has-text("Riverside Hall")')
         ->press('Save')
         ->assertSee("Venue [{$venue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
-        ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
+        ->assertAttribute('input[data-field="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Add Event');
 
     expect(Event::query()->count())->toBe(1);
@@ -228,8 +230,8 @@ test('administrator can recover from a venue scheduling conflict in the event fo
 });
 
 test('administrator can recover from a venue scheduling conflict while editing an event', function (): void {
-    $originalVenue = Venue::factory()->create();
-    $conflictingVenue = Venue::factory()->create();
+    $originalVenue = Venue::factory()->create(['name' => 'Original Hall']);
+    $conflictingVenue = Venue::factory()->create(['name' => 'Conflict Hall']);
     $conflictingDate = now()->addDays(30)->setTime(19, 45)->startOfMinute();
     $event = Event::factory()->for($originalVenue)->create([
         'name' => 'Original Browser Event',
@@ -246,10 +248,12 @@ test('administrator can recover from a venue scheduling conflict while editing a
         ->click('tr:has-text("Original Browser Event") [data-row-actions-panel] button:has-text("Edit")')
         ->assertSeeIn('#modal-title', 'Edit Original Browser Event')
         ->fill('input[name="form.name"]', 'Rescheduled Browser Event')
-        ->select('select[name="form.venue_id"]', (string) $conflictingVenue->id)
+        ->assertValue('input[data-field="form.venue_id"]', 'Original Hall')
+        ->click('input[data-field="form.venue_id"]')
+        ->click('[data-roster-combobox="form.venue_id"] [role="option"]:has-text("Conflict Hall")')
         ->press('Save')
         ->assertSee("Venue [{$conflictingVenue->name}] is already booked on {$conflictingDate->format('M j, Y')} (venue time).")
-        ->assertAttribute('select[name="form.venue_id"]', 'aria-invalid', 'true')
+        ->assertAttribute('input[data-field="form.venue_id"]', 'aria-invalid', 'true')
         ->assertSeeIn('#modal-title', 'Edit Original Browser Event');
 
     expect($event->refresh()->name)->toBe('Original Browser Event')

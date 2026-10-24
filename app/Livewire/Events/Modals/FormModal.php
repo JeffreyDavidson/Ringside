@@ -6,28 +6,24 @@ namespace App\Livewire\Events\Modals;
 
 use App\Actions\Events\CreateAction;
 use App\Actions\Events\UpdateAction;
-use App\Builders\Events\VenueBuilder;
 use App\Enums\Shared\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Builder;
+use App\Queries\Events\VenueSearchQuery;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Renderless;
 use Override;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Event>
- *
- * @property-read array<int|string,string|null> $getVenues
  */
 class FormModal extends BaseFormModal
 {
-    use PresentsVenuesList;
-
     #[Override]
     protected ?string $businessErrorField = 'form.venue_id';
 
@@ -72,21 +68,35 @@ class FormModal extends BaseFormModal
     }
 
     /**
-     * The edited event's own venue is listed even if it has since been deleted, so the select shows where the event is.
+     * Venues whose name contains the term, for the venue search box. The edited event's own venue stays findable even
+     * if it has since been deleted, so the form shows where the event is. Saving still validates the chosen venue.
      *
-     * @return VenueBuilder<Venue>
+     * @return array<int, array{id: int, name: string}>
      */
-    protected function venuesQuery(): VenueBuilder
+    #[Renderless]
+    public function searchVenues(VenueSearchQuery $venues, string $term): array
     {
-        $storedVenueId = isset($this->form) ? $this->form->storedVenueId() : null;
+        $this->authorizeFormAccess();
 
-        if ($storedVenueId === null) {
-            return Venue::query();
-        }
+        return $venues->get($term, $this->form->storedVenueId())
+            ->map(fn (Venue $venue): array => ['id' => $venue->id, 'name' => $venue->name])
+            ->all();
+    }
 
-        return Venue::query()->withTrashed()->where(
-            fn (Builder $query): Builder => $query->whereNull('deleted_at')->orWhere('id', $storedVenueId),
-        );
+    /**
+     * The name of the chosen venue, so the search box shows it when the form opens (even a deleted one).
+     *
+     * @return array<int, array{id: int, name: string}>
+     */
+    #[Computed]
+    public function selectedVenueLabels(): array
+    {
+        return Venue::query()
+            ->withTrashed()
+            ->whereKey($this->form->venue_id)
+            ->get()
+            ->map(fn (Venue $venue): array => ['id' => $venue->id, 'name' => $venue->name])
+            ->all();
     }
 
     protected function updateForm(): void

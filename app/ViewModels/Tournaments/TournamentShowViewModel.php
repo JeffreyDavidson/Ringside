@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Tournaments;
 
-use App\Models\Events\Event;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -15,12 +14,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Builds what the tournament screen lists besides the bracket: the entries, which of their competitors can
- * still be booked, and the events, titles and stipulations a bout can be booked with.
+ * still be booked, and the titles and stipulations a bout can be booked with.
  *
  * @phpstan-type TournamentShowData array{
  *     entries: Collection<int, TournamentEntry>,
  *     availableIds: array<int, int>,
- *     events: Collection<int, Event>,
  *     titles: Collection<int, Title>,
  *     stipulations: Collection<int, MatchStipulation>
  * }
@@ -42,11 +40,6 @@ class TournamentShowViewModel
                 ->get(['id'])
                 ->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id)
                 ->all(),
-            'events' => Event::query()
-                ->where('promotion_id', $tournament->promotion_id)
-                ->orderByDesc('date')
-                ->orderBy('id')
-                ->get(),
             'titles' => Title::query()
                 ->where('promotion_id', $tournament->promotion_id)
                 ->orderBy('name')

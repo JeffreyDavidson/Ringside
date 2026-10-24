@@ -75,12 +75,14 @@
                     {{ \App\Enums\Tournaments\TournamentOperation::tryFrom($draft->operation)?->label() ?? $draft->operation }}
                 </h2>
                 @if (in_array($draft->operation, ['book', 'plan'], true))
-                    <x-form.inputs.select
+                    <x-form.inputs.roster-combobox
                         wire:model="draft.eventId"
+                        search-method="searchEvents"
+                        nullable
                         :label="__('tournaments.event')"
-                        :options="$events->mapWithKeys(fn ($event) => [$event->id => $event->name.' · '.(($event->date === null ? null : \App\Services\Promotions\PromotionTimeZoneService::toLocalTime($tournament->promotion, $event->date)->format('Y-m-d H:i T')) ?? __('tournaments.unscheduled'))])->all()"
+                        :labels="$eventLabels"
                         :placeholder="__('tournaments.choose_event')"
-                        class="min-h-11"
+                        :empty-message="__('tournaments.no_event_matches')"
                     />
                 @endif
                 @if ($draft->operation === 'book')

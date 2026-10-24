@@ -25,10 +25,13 @@ use App\Livewire\Matches\Support\BookableRosterSearch;
 use App\Livewire\Tournaments\Forms\CreateEdit;
 use App\Livewire\Tournaments\Forms\TournamentOperationForm;
 use App\Models\Events\Event;
+use App\Models\Promotions\Promotion;
 use App\Models\Tournaments\Tournament;
 use App\Models\Tournaments\TournamentEntry;
 use App\Models\Tournaments\TournamentMatchLink;
 use App\Models\Tournaments\TournamentNode;
+use App\Queries\Events\EventSearchQuery;
+use App\Services\Promotions\PromotionTimeZoneService;
 use App\Services\Tournaments\TournamentBracketService;
 use App\ViewModels\Tournaments\TournamentShowViewModel;
 use Closure;
@@ -214,6 +217,24 @@ class Show extends Component
         return $rosterKind === null ? [] : $search->search($rosterKind, $term, $tournament->promotion_id);
     }
 
+    /**
+     * Events of the tournament's promotion whose name contains the term, for the event search box. The booking
+     * validation still decides which event may be chosen.
+     *
+     * @return array<int, array{id: int, name: string}>
+     */
+    #[Renderless]
+    public function searchEvents(EventSearchQuery $events, string $term): array
+    {
+        $tournament = $this->tournament();
+        Gate::authorize('update', $tournament);
+        $promotion = $tournament->promotion()->firstOrFail();
+
+        return $events->get($term, $promotion->id)
+            ->map(fn (Event $event): array => $this->eventOption($promotion, $event))
+            ->all();
+    }
+
     public function render(TournamentBracketService $bracket, TournamentShowViewModel $page, BookableRosterSearch $search): View
     {
         $tournament = $this->tournament();
@@ -231,7 +252,7 @@ class Show extends Component
             'kind' => $kind,
             'labels' => $search->labels($kind, $this->form->entrants),
             'entries' => $reads['entries'],
-            'events' => $reads['events'],
+            'eventLabels' => $this->eventLabels($tournament),
             'titles' => $reads['titles'],
             'stipulations' => $reads['stipulations'],
             'refereeLabels' => $search->labels(BookableRosterKind::Referees, $this->draft->refereeIds),
@@ -240,6 +261,41 @@ class Show extends Component
             'selected' => $this->nodeId === null ? null : $bouts->get($this->nodeId),
             'view' => $this->viewMode === 'bracket' ? 'bracket' : 'rounds',
         ]);
+    }
+
+    /**
+     * The chosen event's name, so the search box shows it when the booking panel opens.
+     *
+     * @return array<int, array{id: int, name: string}>
+     */
+    private function eventLabels(Tournament $tournament): array
+    {
+        if ($this->draft->eventId === null) {
+            return [];
+        }
+
+        $promotion = $tournament->promotion()->firstOrFail();
+
+        return Event::query()
+            ->where('promotion_id', $promotion->id)
+            ->whereKey($this->draft->eventId)
+            ->get()
+            ->map(fn (Event $event): array => $this->eventOption($promotion, $event))
+            ->all();
+    }
+
+    /**
+     * An event as the search box lists it: its name and its date in the promotion's time zone.
+     *
+     * @return array{id: int, name: string}
+     */
+    private function eventOption(Promotion $promotion, Event $event): array
+    {
+        $when = $event->date === null
+            ? __('tournaments.unscheduled')
+            : PromotionTimeZoneService::toLocalTime($promotion, $event->date)->format('Y-m-d H:i T');
+
+        return ['id' => $event->id, 'name' => "{$event->name} · {$when}"];
     }
 
     /**
