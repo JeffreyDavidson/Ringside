@@ -14,7 +14,14 @@
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.select :label="__('events.venue')" wire:model="form.venue_id" :options="$this->getVenues" />
+            <x-form.inputs.roster-combobox
+                :label="__('events.venue')"
+                wire:model="form.venue_id"
+                search-method="searchVenues"
+                nullable
+                :empty-message="__('events.no_venue_matches')"
+                :labels="$this->selectedVenueLabels"
+            />
         </x-form-modal.modal-input>
     </div>
 

@@ -16,7 +16,7 @@ describe('authorized event form interactions', function () {
         actingAs(administrator());
     });
 
-    it('renders the event form fields and venue choices', function () {
+    it('renders the event form fields and a venue search instead of a venue list', function () {
         Venue::factory()->create(['name' => 'Madison Square Garden']);
 
         $modal = livewire(FormModal::class);
@@ -26,9 +26,9 @@ describe('authorized event form interactions', function () {
         $modal
             ->assertPropertyWired('form.name')
             ->assertPropertyWired('form.date')
-            ->assertPropertyWired('form.venue_id')
             ->assertPropertyWired('form.preview')
-            ->assertSee('Madison Square Garden');
+            ->assertSeeHtml('data-roster-combobox="form.venue_id"')
+            ->assertDontSee('Madison Square Garden');
     });
 
     it('opens an empty form for creating an event', function () {
@@ -344,18 +344,32 @@ describe('events at deleted venues', function () {
         expect($event->refresh())->name->toBe('Renamed Show')->venue_id->toBe($venue->id);
     });
 
-    it('offers the deleted venue of the edited event as an option', function () {
+    it('finds the deleted venue of the edited event in the search but no other deleted venue', function () {
         // Arrange
         $venue = Venue::factory()->create(['name' => 'Old Arena']);
         $event = Event::factory()->for($venue)->create(['date' => now()->subMonth()]);
         $venue->delete();
         Venue::factory()->trashed()->create(['name' => 'Unrelated Deleted Arena']);
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+
+        // Act
+        $modal->call('searchVenues', 'arena');
+
+        // Assert
+        $modal->assertReturned([['id' => $venue->id, 'name' => 'Old Arena']]);
+    });
+
+    it('shows the name of the deleted venue the edited event is stored at when the form opens', function () {
+        // Arrange
+        $venue = Venue::factory()->create(['name' => 'Old Arena']);
+        $event = Event::factory()->for($venue)->create(['date' => now()->subMonth()]);
+        $venue->delete();
 
         // Act
         $modal = livewire(FormModal::class, ['modelId' => $event->id]);
 
         // Assert
-        $modal->assertSee('Old Arena')->assertDontSee('Unrelated Deleted Arena');
+        $modal->assertSee('Old Arena');
     });
 
     it('refuses to create an event at a deleted venue', function () {
@@ -386,5 +400,53 @@ describe('events at deleted venues', function () {
         // Assert
         $modal->assertHasErrors(['form.venue_id']);
         expect($event->refresh()->venue_id)->toBe($venue->id);
+    });
+});
+
+describe('searching venues from the event form', function () {
+    it('returns the matching venues A to Z as id and name options', function () {
+        // Arrange
+        actingAs(administrator());
+        $zulu = Venue::factory()->create(['name' => 'Zulu Hall']);
+        $alpha = Venue::factory()->create(['name' => 'Alpha Hall']);
+        Venue::factory()->create(['name' => 'Corner Gym']);
+        Venue::factory()->trashed()->create(['name' => 'Deleted Hall']);
+        $modal = livewire(FormModal::class);
+
+        // Act
+        $modal->call('searchVenues', 'hall');
+
+        // Assert
+        $modal->assertReturned([
+            ['id' => $alpha->id, 'name' => 'Alpha Hall'],
+            ['id' => $zulu->id, 'name' => 'Zulu Hall'],
+        ]);
+    });
+
+    it('refuses the search to a user who cannot create events', function () {
+        // Arrange
+        actingAs(administrator());
+        $modal = livewire(FormModal::class);
+        actingAs(basicUser());
+
+        // Act
+        $modal->call('searchVenues', '');
+
+        // Assert
+        $modal->assertForbidden();
+    });
+
+    it('shows the name of the venue the edited event is at when the form opens', function () {
+        // Arrange
+        actingAs(administrator());
+        $venue = Venue::factory()->create(['name' => 'Riverside Hall']);
+        $event = Event::factory()->for($venue)->create();
+
+        // Act
+        $modal = livewire(FormModal::class, ['modelId' => $event->id]);
+
+        // Assert
+        $modal->assertSet('form.venue_id', $venue->id)
+            ->assertSee('Riverside Hall');
     });
 });

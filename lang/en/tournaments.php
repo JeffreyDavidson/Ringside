@@ -21,7 +21,7 @@ return [
     'empty' => 'No tournaments yet. Create a draft to choose entrants and preview the bracket.',
     'choose_promotion' => 'Choose a promotion in the navigation before creating its tournament.',
     'back' => 'All tournaments', 'refresh' => 'Refresh', 'saved' => 'Tournament updated.', 'winner' => 'Tournament winner', 'walkover' => 'Walkover',
-    'edit_name' => 'Edit name and description', 'event' => 'Event', 'unscheduled' => 'Unscheduled', 'choose_event' => 'Choose an event',
+    'edit_name' => 'Edit name and description', 'event' => 'Event', 'unscheduled' => 'Unscheduled', 'choose_event' => 'Choose an event', 'no_event_matches' => 'No events match',
     'versus' => 'vs', 'referees' => 'Referees', 'stipulation' => 'Stipulation', 'none' => 'None', 'final_title' => 'Final championship stakes (optional)',
     'booking_hint' => 'Booking creates a real match. Review any changed event pack and live show before using the new bout.',
     'replacement' => 'Replacement entrant', 'review_hint' => 'Unplayed bookings listed here will be removed. Recorded outcomes remain in history. Review the changes before confirming.',

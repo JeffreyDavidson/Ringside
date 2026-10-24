@@ -43,7 +43,7 @@ Withdrawals mark an entry without erasing its played results. An unplayed linked
 
 The Livewire screen retains entered review values after a business refusal. Reset, removal, withdrawal, replacement, walkover and cancellation require an accepted preview and reason. Audit records use the `tournaments` activity log with promotion/tournament ids, actor supplied by Activitylog, relevant records and the reason.
 
-The tournament list reads through `TournamentIndexQuery` (one query with entry and recorded result counts; the Livewire component paginates it, 20 per page) and the tournament screen through `TournamentShowViewModel` (entries, bookable competitor ids, and the promotion's events, titles and stipulations) next to `TournamentBracketService`. The components receive these, the Actions and `BookableRosterSearch` by method injection and keep only locked ids as state.
+The tournament list reads through `TournamentIndexQuery` (one query with entry and recorded result counts; the Livewire component paginates it, 20 per page) and the tournament screen through `TournamentShowViewModel` (entries, bookable competitor ids, and the promotion's titles and stipulations; the event for a bout is chosen through a type-to-search box backed by `EventSearchQuery`, which lists at most 20 events of the tournament's promotion, newest first) next to `TournamentBracketService`. The components receive these, the Actions and `BookableRosterSearch` by method injection and keep only locked ids as state.
 
 ## Transactions and locking
 
