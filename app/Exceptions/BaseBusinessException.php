@@ -67,9 +67,11 @@ abstract class BaseBusinessException extends Exception
     ): static {
         $replacements = ['context' => self::formatModelContext($model), ...$replacements];
 
-        return self::forReason($reason, $count === null
+        $message = $count === null
             ? __($key, $replacements)
-            : trans_choice($key, $count, $replacements));
+            : trans_choice($key, $count, $replacements);
+
+        return self::forReason($reason, $message);
     }
 
     protected static function formatModelContext(Model $model): string
