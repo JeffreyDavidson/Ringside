@@ -1138,6 +1138,8 @@ it('removes the reign a match created when it is corrected to a winner who left 
 
 it('returns the titles left unchanged because the winner left before the show', function (): void {
     // Arrange
+    // Midday, so "an hour before the show" falls on the show's day whatever time the suite runs.
+    travelTo(Carbon::parse('2026-06-15 12:00:00'));
     $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $winner = Wrestler::factory()->bookable()->create();
     [$match, $winningSide] = titleMatchOn(now()->subDays(5), $title, $winner);
